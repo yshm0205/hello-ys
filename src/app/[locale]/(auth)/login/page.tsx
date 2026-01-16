@@ -35,7 +35,18 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
-    await loginWithGoogle();
+    setMessage(null);
+    try {
+      const result = await loginWithGoogle();
+      if (result?.error) {
+        setMessage({ type: 'error', text: result.error });
+        setIsGoogleLoading(false);
+      }
+      // If successful, redirect happens server-side, loading stays true
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Google 로그인에 실패했습니다. 다시 시도해주세요.' });
+      setIsGoogleLoading(false);
+    }
   };
 
   const handleMagicLink = async (e: React.FormEvent) => {
