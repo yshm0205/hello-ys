@@ -48,8 +48,8 @@ const ARCHETYPE_NAMES: Record<string, string> = {
 };
 
 interface GeneratedScript {
-    hook: string;
-    script: string;
+    hook_preview: string;
+    full_script: string;
     archetype: string;
 }
 
@@ -118,7 +118,7 @@ export function ScriptGeneratorContent() {
             if (data.scripts) {
                 const initial: Record<number, string> = {};
                 data.scripts.forEach((s: GeneratedScript, i: number) => {
-                    initial[i] = s.script;
+                    initial[i] = s.full_script;
                 });
                 setEditedScripts(initial);
             }
@@ -320,7 +320,7 @@ export function ScriptGeneratorContent() {
                                                     {/* 스크립트 정보 */}
                                                     <Group justify="space-between">
                                                         <Text size="sm" c="gray.6">
-                                                            📊 스크립트 길이: {(editedScripts[index] || script.script).length}자
+                                                            📊 스크립트 길이: {(editedScripts[index] || script.full_script).length}자
                                                         </Text>
                                                         <Badge variant="outline" color="gray">
                                                             🏷️ 스타일: {getArchetypeName(script.archetype)}
@@ -336,8 +336,8 @@ export function ScriptGeneratorContent() {
                                                         radius="lg"
                                                     >
                                                         <Group justify="space-between" align="flex-start">
-                                                            <Text style={{ flex: 1 }}>{script.hook}</Text>
-                                                            <CopyButton value={script.hook}>
+                                                            <Text style={{ flex: 1 }}>{script.hook_preview}</Text>
+                                                            <CopyButton value={script.hook_preview}>
                                                                 {({ copied, copy }) => (
                                                                     <Tooltip label={copied ? '복사됨!' : '복사'}>
                                                                         <ActionIcon
@@ -356,7 +356,7 @@ export function ScriptGeneratorContent() {
                                                     {/* 전체 스크립트 (수정 가능) */}
                                                     <Textarea
                                                         label="전체 스크립트 (수정 후 아래 '저장' 버튼을 누르세요)"
-                                                        value={editedScripts[index] || script.script}
+                                                        value={editedScripts[index] || script.full_script}
                                                         onChange={(e) =>
                                                             setEditedScripts((prev) => ({
                                                                 ...prev,
@@ -383,7 +383,7 @@ export function ScriptGeneratorContent() {
                                                         >
                                                             💾 수정 내용 저장 (옵션 {index + 1})
                                                         </Button>
-                                                        <CopyButton value={editedScripts[index] || script.script}>
+                                                        <CopyButton value={editedScripts[index] || script.full_script}>
                                                             {({ copied, copy }) => (
                                                                 <Button
                                                                     leftSection={copied ? <Check size={18} /> : <Copy size={18} />}
