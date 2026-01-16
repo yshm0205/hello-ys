@@ -8,6 +8,11 @@ import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import type { Metadata } from "next";
 import "../globals.css";
 
+// Mantine imports
+import '@mantine/core/styles.css';
+import { MantineProvider, ColorSchemeScript } from '@mantine/core';
+import { tossTheme } from '@/theme';
+
 import { ClientWidgets } from "@/components/shared/ClientWidgets";
 
 const geistSans = Geist({
@@ -24,15 +29,25 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
   return {
     title: {
-      template: "%s | SaaS Starter Kit",
+      template: "%s | FlowSpot",
       default: t("title"),
     },
     description: t("description"),
     metadataBase: new URL(
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     ),
-    authors: [{ name: "FreAiner", url: "mailto:contact@fre-ainer.com" }],
-    creator: "FreAiner",
+    authors: [{ name: "FlowSpot", url: "https://flowspot.app" }],
+    creator: "FlowSpot",
+    openGraph: {
+      title: "FlowSpot - AI Script Agent",
+      description: "조회수가 터지는 스크립트의 비밀. AI가 자동으로 쇼츠 스크립트를 생성합니다.",
+      images: ["/images/og-image.png"],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: ["/images/og-image.png"],
+    },
   };
 }
 
@@ -78,22 +93,25 @@ export default async function LocaleLayout({
             }),
           }}
         />
+        <ColorSchemeScript />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster />
-            <ClientWidgets />
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <MantineProvider theme={tossTheme}>
+          <NextIntlClientProvider messages={messages}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster />
+              <ClientWidgets />
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </MantineProvider>
       </body>
     </html>
   );

@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // Mantine tree-shaking optimization
+  experimental: {
+    optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
+  },
 };
 
 export default withNextIntl(nextConfig);
