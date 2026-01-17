@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
 // Render API URL
-const RENDER_API_URL = process.env.SCRIPT_GENERATOR_API_URL || "https://script-generator-api.onrender.com";
+const RENDER_API_URL = process.env.SCRIPT_GENERATOR_API_URL || "https://script-generator-api-civ5.onrender.com";
 
 export async function POST(request: Request) {
     try {
