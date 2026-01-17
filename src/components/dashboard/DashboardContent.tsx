@@ -83,7 +83,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                 <Group justify="space-between" align="flex-start">
                     <Box>
                         <Title order={2} style={{ color: '#111827' }}>
-                            👋 안녕하세요, {user?.email?.split('@')[0] || 'User'}님!
+                            안녕하세요, {user?.email?.split('@')[0] || 'User'}님!
                         </Title>
                         <Text c="gray.6" mt={4}>
                             나만의 매직 스크립트 대시보드입니다
@@ -112,7 +112,8 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                 >
                                     {credits}
                                 </Text>
-                                <Coins size={24} color="#fbbf24" />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src="/images/icons/icon-coin.png" alt="" width={28} height={28} style={{ objectFit: 'contain' }} />
                             </Group>
                         </Stack>
                     </Card>
@@ -138,7 +139,8 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         }}
                     >
                         <Stack gap="sm">
-                            <Text style={{ fontSize: 32 }}>✨</Text>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src="/images/icons/icon-magic.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
                             <Title order={4} c="white">새 프로젝트 만들기</Title>
                             <Text size="sm" c="white" opacity={0.8}>
                                 아이디어만 있으면 3가지 버전의 스크립트가 뚝딱!
@@ -176,7 +178,8 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         }}
                     >
                         <Stack gap="sm">
-                            <Text style={{ fontSize: 32 }}>🧪</Text>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src="/images/icons/icon-search.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
                             <Title order={4}>성공 요인 분석</Title>
                             <Text size="sm" c="gray.6">
                                 내 채널의 데이터와 스크립트를 분석하여 승리 패턴을 찾습니다
@@ -257,7 +260,11 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                 {/* 최근 프로젝트 - Streamlit 스타일 */}
                 <Box>
                     <Group justify="space-between" mb="md">
-                        <Title order={4}>🗂️ 최근 프로젝트</Title>
+                        <Group gap="sm">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src="/images/icons/icon-document.png" alt="" width={28} height={28} style={{ objectFit: 'contain' }} />
+                            <Title order={4}>최근 프로젝트</Title>
+                        </Group>
                         <Button
                             component={Link}
                             href="/dashboard/archive"
@@ -342,7 +349,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         </ThemeIcon>
                         <Box>
                             <Text fw={600} style={{ color: '#92400E' }}>
-                                💡 Pro 팁
+                                Pro 팁
                             </Text>
                             <Text size="sm" style={{ color: '#B45309' }}>
                                 참고 스크립트를 최대한 자세히 입력하면 더 좋은 결과를 얻을 수 있어요!
@@ -351,6 +358,6 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     </Group>
                 </Card>
             </Stack>
-        </Container>
+        </Container >
     );
 }
