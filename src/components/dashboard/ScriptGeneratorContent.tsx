@@ -81,12 +81,31 @@ const AGENT_TEAM = [
     },
 ];
 
+// 1단계: 훅 옵션
+interface HookOption {
+    index: number;
+    hook_text: string;
+    archetype: string;
+    template_id: string;
+}
+
+// 1단계 API 응답
+interface HooksResult {
+    success: boolean;
+    hooks: HookOption[];
+    topic: string;
+    key_facts: string[];
+    error?: string;
+}
+
+// 2단계: 생성된 스크립트
 interface GeneratedScript {
     hook_preview: string;
     full_script: string;
     archetype: string;
 }
 
+// 전체 결과 (호환용)
 interface GenerationResult {
     success: boolean;
     scripts: GeneratedScript[];
@@ -97,7 +116,7 @@ interface GenerationResult {
     error?: string;
 }
 
-type GenerationPhase = 'idle' | 'analyzing' | 'generating' | 'reviewing' | 'hooks_ready' | 'script_ready';
+type GenerationPhase = 'idle' | 'analyzing' | 'generating' | 'reviewing' | 'hooks_ready' | 'generating_script' | 'script_ready';
 
 // ============ 로봇 진행 표시 컴포넌트 ============
 function AgentProgressIndicator({ phase }: { phase: GenerationPhase }) {
@@ -388,6 +407,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
     const [inputScript, setInputScript] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [result, setResult] = useState<GenerationResult | null>(null);
+    const [hooksResult, setHooksResult] = useState<HooksResult | null>(null);  // 1단계 결과
     const [error, setError] = useState<string | null>(null);
     const [phase, setPhase] = useState<GenerationPhase>('idle');
     const [selectedHookIndex, setSelectedHookIndex] = useState<number | null>(null);
@@ -445,6 +465,9 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
     }, [selectedHookIndex]);
 
 
+    const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
+
+    // 1단계: 훅 3개 생성 (빠름)
     const handleGenerate = async () => {
         if (!inputScript.trim() || inputScript.length < 50) {
             setError('참고 스크립트를 50자 이상 입력해주세요.');
@@ -454,30 +477,36 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
         setIsGenerating(true);
         setError(null);
         setResult(null);
+        setHooksResult(null);
         setSelectedHookIndex(null);
         setEditedScript('');
 
         try {
-            // Vercel 10초 타임아웃 우회: 클라이언트에서 직접 Render API 호출
-            const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
-
-            const response = await fetch(`${RENDER_API_URL}/api/generate-script`, {
+            const response = await fetch(`${RENDER_API_URL}/api/generate-hooks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     reference_script: inputScript,
                     user_id: user?.email || 'guest',
-                    num_scripts: 3,
                 }),
             });
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(data.error || '스크립트 생성에 실패했습니다.');
+                throw new Error(data.error || '훅 생성에 실패했습니다.');
             }
 
-            setResult(data);
+            setHooksResult(data);
+            // 훅을 GeneratedScript 형식으로 변환 (full_script는 아직 없음)
+            setResult({
+                success: true,
+                scripts: data.hooks.map((hook: HookOption) => ({
+                    hook_preview: hook.hook_text.length > 100 ? hook.hook_text.slice(0, 97) + '...' : hook.hook_text,
+                    full_script: '',  // 아직 생성 안됨
+                    archetype: hook.archetype,
+                })),
+            });
             setPhase('hooks_ready');
         } catch (err) {
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
@@ -487,11 +516,50 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
         }
     };
 
-    const handleHookSelect = (index: number) => {
+    // 2단계: 선택한 훅으로 전체 스크립트 생성
+    const handleHookSelect = async (index: number) => {
+        if (!hooksResult || !hooksResult.hooks[index]) return;
+
         setSelectedHookIndex(index);
-        if (result?.scripts?.[index]) {
-            setEditedScript(result.scripts[index].full_script);
+        setPhase('generating_script');
+        setError(null);
+
+        try {
+            const selectedHook = hooksResult.hooks[index];
+
+            const response = await fetch(`${RENDER_API_URL}/api/generate-full-script`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    selected_hook: selectedHook.hook_text,
+                    topic: hooksResult.topic,
+                    reference_script: inputScript,
+                    archetype: selectedHook.archetype,
+                    user_id: user?.email || 'guest',
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || '스크립트 생성에 실패했습니다.');
+            }
+
+            // 결과 업데이트
+            if (data.script) {
+                setEditedScript(data.script.full_script);
+                // result 업데이트
+                setResult(prev => {
+                    if (!prev) return prev;
+                    const newScripts = [...prev.scripts];
+                    newScripts[index] = data.script;
+                    return { ...prev, scripts: newScripts };
+                });
+            }
             setPhase('script_ready');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '스크립트 생성에 실패했습니다.');
+            setPhase('hooks_ready');  // 훅 선택 화면으로 돌아가기
         }
     };
 
