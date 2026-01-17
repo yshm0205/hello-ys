@@ -59,6 +59,7 @@ const AGENT_TEAM = [
         color: '#8b5cf6',
         desc: '200개 바이럴 영상의 훅 패턴을 분석합니다',
         icon: Search,
+        icon3D: '/images/icons/icon-search.png',
     },
     {
         name: '스크립트 작가',
@@ -67,6 +68,7 @@ const AGENT_TEAM = [
         color: '#ec4899',
         desc: '분석된 패턴으로 3개의 훅을 생성합니다',
         icon: Pen,
+        icon3D: '/images/icons/icon-pen.png',
     },
     {
         name: '품질 검수자',
@@ -75,6 +77,7 @@ const AGENT_TEAM = [
         color: '#22c55e',
         desc: '알고리즘 최적화 및 품질을 검증합니다',
         icon: ShieldCheck,
+        icon3D: '/images/icons/icon-shield.png',
     },
 ];
 
@@ -140,7 +143,6 @@ function AgentProgressIndicator({ phase }: { phase: GenerationPhase }) {
                 <Group justify="center" align="flex-start" gap="xl">
                     {AGENT_TEAM.map((agent, index) => {
                         const status = getAgentStatus(index);
-                        const IconComponent = agent.icon;
 
                         return (
                             <Box key={agent.role} style={{ position: 'relative' }}>
@@ -203,7 +205,14 @@ function AgentProgressIndicator({ phase }: { phase: GenerationPhase }) {
                                     {/* 에이전트 정보 */}
                                     <Stack align="center" gap={4}>
                                         <Group gap={6}>
-                                            <IconComponent size={14} color={status === 'active' ? agent.color : '#9ca3af'} />
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={agent.icon3D}
+                                                alt=""
+                                                width={20}
+                                                height={20}
+                                                style={{ objectFit: 'contain' }}
+                                            />
                                             <Text
                                                 fw={600}
                                                 size="sm"

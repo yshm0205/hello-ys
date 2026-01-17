@@ -2,10 +2,10 @@
 
 /**
  * 보관함 페이지 콘텐츠
- * Streamlit 스타일: 내 스크립트 + 영상 연결 Tabs
+ * DB 연동: Supabase에서 스크립트 히스토리 조회
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Container,
     Title,
@@ -38,6 +38,7 @@ import {
     Youtube,
     Check,
     AlertCircle,
+    Loader2,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -48,7 +49,23 @@ const ARCHETYPE_NAMES: Record<string, string> = {
     'TOOL_FORCE': '도구 위력형',
     'PHENOMENON_SITE': '현상 현장형',
     'HIDDEN_SCENE_DAILY': '숨겨진 장면형',
+    'UNKNOWN': '기타',
 };
+
+// 스크립트 타입 정의
+interface ScriptItem {
+    id: string;
+    title: string;
+    inputText: string;
+    scripts: Array<{
+        hook_preview: string;
+        full_script: string;
+        archetype: string;
+    }>;
+    createdAt: string;
+    archetype: string;
+    versions: number;
+}
 
 // 목 데이터: 스크립트 히스토리
 const mockScripts = [
@@ -91,6 +108,11 @@ const mockLinkedVideos = [
 ];
 
 export function ArchiveContent() {
+    // 스크립트 데이터 상태
+    const [scripts, setScripts] = useState<ScriptItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [filterArchetype, setFilterArchetype] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<string | null>('scripts');
@@ -98,8 +120,9 @@ export function ArchiveContent() {
     // 모달 상태
     const [viewModalOpened, { open: openViewModal, close: closeViewModal }] = useDisclosure(false);
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
-    const [selectedScriptData, setSelectedScriptData] = useState<typeof mockScripts[0] | null>(null);
+    const [selectedScriptData, setSelectedScriptData] = useState<ScriptItem | null>(null);
     const [editContent, setEditContent] = useState('');
+    const [selectedScriptIndex, setSelectedScriptIndex] = useState(0);
 
     // 영상 연결 폼 상태
     const [videoTitle, setVideoTitle] = useState('');
@@ -108,7 +131,29 @@ export function ArchiveContent() {
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [linkSuccess, setLinkSuccess] = useState(false);
 
-    const filteredScripts = mockScripts.filter((item) => {
+    // DB에서 스크립트 불러오기
+    useEffect(() => {
+        async function fetchScripts() {
+            try {
+                setIsLoading(true);
+                const response = await fetch('/api/scripts/history');
+                const data = await response.json();
+
+                if (data.success) {
+                    setScripts(data.scripts);
+                } else {
+                    setLoadError(data.error || '스크립트를 불러올 수 없습니다.');
+                }
+            } catch (err) {
+                setLoadError('서버 연결에 실패했습니다.');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchScripts();
+    }, []);
+
+    const filteredScripts = scripts.filter((item) => {
         const matchesSearch =
             searchQuery === '' ||
             item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -120,24 +165,79 @@ export function ArchiveContent() {
         return matchesSearch && matchesArchetype;
     });
 
-    const handleOpenScript = (script: typeof mockScripts[0]) => {
+    const handleOpenScript = (script: ScriptItem) => {
         setSelectedScriptData(script);
+        setSelectedScriptIndex(0);
         openViewModal();
     };
 
-    const handleEditScript = (script: typeof mockScripts[0]) => {
+    const handleEditScript = (script: ScriptItem, index: number = 0) => {
         setSelectedScriptData(script);
-        setEditContent(script.inputText);
+        setSelectedScriptIndex(index);
+        setEditContent(script.scripts?.[index]?.full_script || script.inputText);
         openEditModal();
     };
 
-    const handleSaveEdit = () => {
-        alert(`저장 완료! (데모): ${editContent.slice(0, 30)}...`);
-        closeEditModal();
+    const handleSaveEdit = async () => {
+        if (!selectedScriptData) return;
+
+        try {
+            // 스크립트 배열 업데이트
+            const updatedScripts = [...(selectedScriptData.scripts || [])];
+            if (updatedScripts[selectedScriptIndex]) {
+                updatedScripts[selectedScriptIndex] = {
+                    ...updatedScripts[selectedScriptIndex],
+                    full_script: editContent,
+                };
+            }
+
+            const response = await fetch('/api/scripts/history', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: selectedScriptData.id,
+                    scripts: updatedScripts,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // 로컬 상태 업데이트
+                setScripts(prev => prev.map(s =>
+                    s.id === selectedScriptData.id
+                        ? { ...s, scripts: updatedScripts }
+                        : s
+                ));
+                closeEditModal();
+                alert('저장되었습니다!');
+            } else {
+                alert('저장 실패: ' + data.error);
+            }
+        } catch {
+            alert('서버 오류가 발생했습니다.');
+        }
     };
 
-    const handleDeleteScript = (id: string) => {
-        alert(`삭제: ${id} (데모)`);
+    const handleDeleteScript = async (id: string) => {
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+
+        try {
+            const response = await fetch('/api/scripts/history', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setScripts(prev => prev.filter(s => s.id !== id));
+                alert('삭제되었습니다.');
+            } else {
+                alert('삭제 실패: ' + data.error);
+            }
+        } catch {
+            alert('서버 오류가 발생했습니다.');
+        }
     };
 
     const handleDeleteVideo = (id: string) => {
@@ -225,81 +325,105 @@ export function ArchiveContent() {
                             </Group>
                         </Card>
 
+                        {/* 로딩 상태 */}
+                        {isLoading && (
+                            <Card padding="xl" radius="lg" withBorder>
+                                <Group justify="center" py="xl">
+                                    <Loader2 size={24} className="animate-spin" />
+                                    <Text c="gray.6">스크립트를 불러오는 중...</Text>
+                                </Group>
+                            </Card>
+                        )}
+
+                        {/* 에러 상태 */}
+                        {loadError && (
+                            <Alert
+                                icon={<AlertCircle size={18} />}
+                                title="오류"
+                                color="red"
+                                radius="lg"
+                            >
+                                {loadError}
+                            </Alert>
+                        )}
+
                         {/* 스크립트 테이블 */}
-                        <Card padding={0} radius="lg" withBorder>
-                            {filteredScripts.length > 0 ? (
-                                <Table highlightOnHover>
-                                    <Table.Thead>
-                                        <Table.Tr>
-                                            <Table.Th>제목</Table.Th>
-                                            <Table.Th>원문 미리보기</Table.Th>
-                                            <Table.Th>생성일</Table.Th>
-                                            <Table.Th>스타일</Table.Th>
-                                            <Table.Th style={{ width: 120 }}>액션</Table.Th>
-                                        </Table.Tr>
-                                    </Table.Thead>
-                                    <Table.Tbody>
-                                        {filteredScripts.map((item) => (
-                                            <Table.Tr key={item.id}>
-                                                <Table.Td>
-                                                    <Text fw={500}>{item.title}</Text>
-                                                </Table.Td>
-                                                <Table.Td>
-                                                    <Text size="sm" c="gray.6" lineClamp={1} maw={200}>
-                                                        {item.inputText}
-                                                    </Text>
-                                                </Table.Td>
-                                                <Table.Td>
-                                                    <Text size="sm" c="gray.6">{item.createdAt}</Text>
-                                                </Table.Td>
-                                                <Table.Td>
-                                                    <Badge variant="outline" color="violet">
-                                                        {ARCHETYPE_NAMES[item.archetype] || item.archetype}
-                                                    </Badge>
-                                                </Table.Td>
-                                                <Table.Td>
-                                                    <Group gap="xs">
-                                                        <Tooltip label="열기">
-                                                            <ActionIcon
-                                                                variant="light"
-                                                                color="blue"
-                                                                onClick={() => handleOpenScript(item)}
-                                                            >
-                                                                <FolderOpen size={16} />
-                                                            </ActionIcon>
-                                                        </Tooltip>
-                                                        <Tooltip label="수정">
-                                                            <ActionIcon
-                                                                variant="subtle"
-                                                                color="gray"
-                                                                onClick={() => handleEditScript(item)}
-                                                            >
-                                                                <Pencil size={16} />
-                                                            </ActionIcon>
-                                                        </Tooltip>
-                                                        <Tooltip label="삭제">
-                                                            <ActionIcon
-                                                                variant="subtle"
-                                                                color="red"
-                                                                onClick={() => handleDeleteScript(item.id)}
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </ActionIcon>
-                                                        </Tooltip>
-                                                    </Group>
-                                                </Table.Td>
+                        {!isLoading && !loadError && (
+                            <Card padding={0} radius="lg" withBorder>
+                                {filteredScripts.length > 0 ? (
+                                    <Table highlightOnHover>
+                                        <Table.Thead>
+                                            <Table.Tr>
+                                                <Table.Th>제목</Table.Th>
+                                                <Table.Th>원문 미리보기</Table.Th>
+                                                <Table.Th>생성일</Table.Th>
+                                                <Table.Th>스타일</Table.Th>
+                                                <Table.Th style={{ width: 120 }}>액션</Table.Th>
                                             </Table.Tr>
-                                        ))}
-                                    </Table.Tbody>
-                                </Table>
-                            ) : (
-                                <Box p="xl" ta="center">
-                                    <Text c="gray.5" size="lg">
-                                        📭 검색 결과가 없습니다
-                                    </Text>
-                                </Box>
-                            )}
-                        </Card>
+                                        </Table.Thead>
+                                        <Table.Tbody>
+                                            {filteredScripts.map((item) => (
+                                                <Table.Tr key={item.id}>
+                                                    <Table.Td>
+                                                        <Text fw={500}>{item.title}</Text>
+                                                    </Table.Td>
+                                                    <Table.Td>
+                                                        <Text size="sm" c="gray.6" lineClamp={1} maw={200}>
+                                                            {item.inputText}
+                                                        </Text>
+                                                    </Table.Td>
+                                                    <Table.Td>
+                                                        <Text size="sm" c="gray.6">{item.createdAt}</Text>
+                                                    </Table.Td>
+                                                    <Table.Td>
+                                                        <Badge variant="outline" color="violet">
+                                                            {ARCHETYPE_NAMES[item.archetype] || item.archetype}
+                                                        </Badge>
+                                                    </Table.Td>
+                                                    <Table.Td>
+                                                        <Group gap="xs">
+                                                            <Tooltip label="열기">
+                                                                <ActionIcon
+                                                                    variant="light"
+                                                                    color="blue"
+                                                                    onClick={() => handleOpenScript(item)}
+                                                                >
+                                                                    <FolderOpen size={16} />
+                                                                </ActionIcon>
+                                                            </Tooltip>
+                                                            <Tooltip label="수정">
+                                                                <ActionIcon
+                                                                    variant="subtle"
+                                                                    color="gray"
+                                                                    onClick={() => handleEditScript(item)}
+                                                                >
+                                                                    <Pencil size={16} />
+                                                                </ActionIcon>
+                                                            </Tooltip>
+                                                            <Tooltip label="삭제">
+                                                                <ActionIcon
+                                                                    variant="subtle"
+                                                                    color="red"
+                                                                    onClick={() => handleDeleteScript(item.id)}
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </ActionIcon>
+                                                            </Tooltip>
+                                                        </Group>
+                                                    </Table.Td>
+                                                </Table.Tr>
+                                            ))}
+                                        </Table.Tbody>
+                                    </Table>
+                                ) : (
+                                    <Box p="xl" ta="center">
+                                        <Text c="gray.5" size="lg">
+                                            📭 검색 결과가 없습니다
+                                        </Text>
+                                    </Box>
+                                )}
+                            </Card>
+                        )}
 
                         <Group justify="center" mt="lg">
                             <Badge variant="light" color="gray" size="lg">
@@ -466,30 +590,83 @@ export function ArchiveContent() {
                                 <Text size="sm" c="gray.6">
                                     생성일: {selectedScriptData.createdAt}
                                 </Text>
+                                <Badge variant="light" color="blue">
+                                    {selectedScriptData.scripts?.length || 0}개 버전
+                                </Badge>
                             </Group>
-                            <Text
-                                style={{
-                                    background: '#f8f9fa',
-                                    padding: 16,
-                                    borderRadius: 8,
-                                    lineHeight: 1.8,
-                                    whiteSpace: 'pre-wrap',
-                                }}
-                            >
-                                {selectedScriptData.inputText}
-                            </Text>
+
+                            {/* 스크립트 버전 탭 */}
+                            {selectedScriptData.scripts && selectedScriptData.scripts.length > 0 ? (
+                                <Tabs defaultValue="0" variant="pills" radius="lg">
+                                    <Tabs.List mb="md">
+                                        {selectedScriptData.scripts.map((script, index) => (
+                                            <Tabs.Tab key={index} value={String(index)}>
+                                                옵션 {index + 1}: {ARCHETYPE_NAMES[script.archetype] || script.archetype}
+                                            </Tabs.Tab>
+                                        ))}
+                                    </Tabs.List>
+
+                                    {selectedScriptData.scripts.map((script, index) => (
+                                        <Tabs.Panel key={index} value={String(index)}>
+                                            <Stack gap="sm">
+                                                {/* 훅 미리보기 */}
+                                                <Alert
+                                                    title="🎯 훅 (첫 문장)"
+                                                    color="violet"
+                                                    variant="light"
+                                                    radius="lg"
+                                                >
+                                                    {script.hook_preview}
+                                                </Alert>
+
+                                                {/* 전체 스크립트 */}
+                                                <Text
+                                                    style={{
+                                                        background: '#f8f9fa',
+                                                        padding: 16,
+                                                        borderRadius: 8,
+                                                        lineHeight: 1.8,
+                                                        whiteSpace: 'pre-wrap',
+                                                        maxHeight: 300,
+                                                        overflowY: 'auto',
+                                                    }}
+                                                >
+                                                    {script.full_script}
+                                                </Text>
+
+                                                <Group justify="flex-end">
+                                                    <Button
+                                                        variant="light"
+                                                        leftSection={<Pencil size={16} />}
+                                                        onClick={() => {
+                                                            closeViewModal();
+                                                            handleEditScript(selectedScriptData, index);
+                                                        }}
+                                                    >
+                                                        이 버전 수정하기
+                                                    </Button>
+                                                </Group>
+                                            </Stack>
+                                        </Tabs.Panel>
+                                    ))}
+                                </Tabs>
+                            ) : (
+                                <Text
+                                    style={{
+                                        background: '#f8f9fa',
+                                        padding: 16,
+                                        borderRadius: 8,
+                                        lineHeight: 1.8,
+                                        whiteSpace: 'pre-wrap',
+                                    }}
+                                >
+                                    {selectedScriptData.inputText}
+                                </Text>
+                            )}
+
                             <Group justify="flex-end">
                                 <Button variant="light" onClick={closeViewModal}>
                                     닫기
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        closeViewModal();
-                                        handleEditScript(selectedScriptData);
-                                    }}
-                                    leftSection={<Pencil size={16} />}
-                                >
-                                    수정하기
                                 </Button>
                             </Group>
                         </Stack>
