@@ -575,6 +575,17 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                             ]}
                         />
 
+                        {/* 로봇 진행 표시 - 버튼 위에 표시 */}
+                        {(isGenerating || phase === 'hooks_ready' || phase === 'script_ready') && (
+                            <Transition mounted transition="fade" duration={400}>
+                                {(styles) => (
+                                    <div ref={progressRef} style={styles}>
+                                        <AgentProgressIndicator phase={phase} />
+                                    </div>
+                                )}
+                            </Transition>
+                        )}
+
                         <Group justify="space-between" align="center">
                             <Group gap="md">
                                 <Badge variant="light" color="gray">
@@ -616,17 +627,6 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                     >
                         {error}
                     </Alert>
-                )}
-
-                {/* 로봇 진행 표시 */}
-                {(isGenerating || phase === 'hooks_ready' || phase === 'script_ready') && (
-                    <Transition mounted transition="fade" duration={400}>
-                        {(styles) => (
-                            <div ref={progressRef} style={styles}>
-                                <AgentProgressIndicator phase={phase} />
-                            </div>
-                        )}
-                    </Transition>
                 )}
 
                 {/* 훅 선택 */}
