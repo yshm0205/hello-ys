@@ -61,45 +61,60 @@ export async function POST(request: Request) {
             );
         }
 
-        // 4. Render Python API 호출
-        const response = await fetch(`${RENDER_API_URL}/api/generate-script`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                reference_script,
-                user_id: user.id,
-                num_scripts,
-            }),
-        });
+        // 4. Render Python API 호출 (타임아웃 120초 - Render cold start 대비)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 120초
 
-        if (!response.ok) {
-            const error = await response.text();
-            console.error("[Script API] Render error:", error);
+        try {
+            const response = await fetch(`${RENDER_API_URL}/api/generate-script`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    reference_script,
+                    user_id: user.id,
+                    num_scripts,
+                }),
+                signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const error = await response.text();
+                console.error("[Script API] Render error:", error);
+                return NextResponse.json(
+                    { error: "스크립트 생성에 실패했습니다." },
+                    { status: 500 }
+                );
+            }
+
+            const result = await response.json();
+
+            // 5. 생성 기록 저장 (선택적) - 게스트는 스킵
+            if (!isGuest && result.success && result.scripts?.length > 0) {
+                try {
+                    await supabase.from("script_generations").insert({
+                        user_id: user.id,
+                        input_text: reference_script.substring(0, 500),
+                        scripts: result.scripts,
+                        token_usage: result.token_usage,
+                    });
+                } catch {
+                    // DB 저장 실패해도 결과는 반환
+                }
+            }
+
+            return NextResponse.json(result);
+
+        } catch (fetchError) {
+            clearTimeout(timeoutId);
+            console.error("[Script API] Fetch error:", fetchError);
             return NextResponse.json(
-                { error: "스크립트 생성에 실패했습니다." },
+                { error: "스크립트 생성 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요." },
                 { status: 500 }
             );
         }
-
-        const result = await response.json();
-
-        // 5. 생성 기록 저장 (선택적) - 게스트는 스킵
-        if (!isGuest && result.success && result.scripts?.length > 0) {
-            try {
-                await supabase.from("script_generations").insert({
-                    user_id: user.id,
-                    input_text: reference_script.substring(0, 500),
-                    scripts: result.scripts,
-                    token_usage: result.token_usage,
-                });
-            } catch {
-                // DB 저장 실패해도 결과는 반환
-            }
-        }
-
-        return NextResponse.json(result);
 
     } catch (error) {
         console.error("[Script API] Error:", error);
@@ -109,4 +124,3 @@ export async function POST(request: Request) {
         );
     }
 }
-
