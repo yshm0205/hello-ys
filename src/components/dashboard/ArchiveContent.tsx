@@ -24,7 +24,9 @@ import {
     Tabs,
     Textarea,
     Alert,
+    Modal,
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import {
     FolderOpen,
     Pencil,
@@ -93,6 +95,12 @@ export function ArchiveContent() {
     const [filterArchetype, setFilterArchetype] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<string | null>('scripts');
 
+    // 모달 상태
+    const [viewModalOpened, { open: openViewModal, close: closeViewModal }] = useDisclosure(false);
+    const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
+    const [selectedScriptData, setSelectedScriptData] = useState<typeof mockScripts[0] | null>(null);
+    const [editContent, setEditContent] = useState('');
+
     // 영상 연결 폼 상태
     const [videoTitle, setVideoTitle] = useState('');
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -111,6 +119,22 @@ export function ArchiveContent() {
 
         return matchesSearch && matchesArchetype;
     });
+
+    const handleOpenScript = (script: typeof mockScripts[0]) => {
+        setSelectedScriptData(script);
+        openViewModal();
+    };
+
+    const handleEditScript = (script: typeof mockScripts[0]) => {
+        setSelectedScriptData(script);
+        setEditContent(script.inputText);
+        openEditModal();
+    };
+
+    const handleSaveEdit = () => {
+        alert(`저장 완료! (데모): ${editContent.slice(0, 30)}...`);
+        closeEditModal();
+    };
 
     const handleDeleteScript = (id: string) => {
         alert(`삭제: ${id} (데모)`);
@@ -236,12 +260,20 @@ export function ArchiveContent() {
                                                 <Table.Td>
                                                     <Group gap="xs">
                                                         <Tooltip label="열기">
-                                                            <ActionIcon variant="light" color="blue">
+                                                            <ActionIcon
+                                                                variant="light"
+                                                                color="blue"
+                                                                onClick={() => handleOpenScript(item)}
+                                                            >
                                                                 <FolderOpen size={16} />
                                                             </ActionIcon>
                                                         </Tooltip>
                                                         <Tooltip label="수정">
-                                                            <ActionIcon variant="subtle" color="gray">
+                                                            <ActionIcon
+                                                                variant="subtle"
+                                                                color="gray"
+                                                                onClick={() => handleEditScript(item)}
+                                                            >
                                                                 <Pencil size={16} />
                                                             </ActionIcon>
                                                         </Tooltip>
@@ -416,6 +448,89 @@ export function ArchiveContent() {
                         </Card>
                     </Tabs.Panel>
                 </Tabs>
+
+                {/* 스크립트 열기 모달 */}
+                <Modal
+                    opened={viewModalOpened}
+                    onClose={closeViewModal}
+                    title={selectedScriptData?.title || '스크립트 상세'}
+                    size="lg"
+                    radius="lg"
+                >
+                    {selectedScriptData && (
+                        <Stack gap="md">
+                            <Group>
+                                <Badge variant="outline" color="violet">
+                                    {ARCHETYPE_NAMES[selectedScriptData.archetype] || selectedScriptData.archetype}
+                                </Badge>
+                                <Text size="sm" c="gray.6">
+                                    생성일: {selectedScriptData.createdAt}
+                                </Text>
+                            </Group>
+                            <Text
+                                style={{
+                                    background: '#f8f9fa',
+                                    padding: 16,
+                                    borderRadius: 8,
+                                    lineHeight: 1.8,
+                                    whiteSpace: 'pre-wrap',
+                                }}
+                            >
+                                {selectedScriptData.inputText}
+                            </Text>
+                            <Group justify="flex-end">
+                                <Button variant="light" onClick={closeViewModal}>
+                                    닫기
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        closeViewModal();
+                                        handleEditScript(selectedScriptData);
+                                    }}
+                                    leftSection={<Pencil size={16} />}
+                                >
+                                    수정하기
+                                </Button>
+                            </Group>
+                        </Stack>
+                    )}
+                </Modal>
+
+                {/* 스크립트 수정 모달 */}
+                <Modal
+                    opened={editModalOpened}
+                    onClose={closeEditModal}
+                    title={`수정: ${selectedScriptData?.title || ''}`}
+                    size="lg"
+                    radius="lg"
+                >
+                    <Stack gap="md">
+                        <Textarea
+                            label="스크립트 내용"
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.currentTarget.value)}
+                            minRows={10}
+                            maxRows={20}
+                            autosize
+                            styles={{
+                                input: { lineHeight: 1.8 },
+                            }}
+                        />
+                        <Group justify="flex-end">
+                            <Button variant="light" onClick={closeEditModal}>
+                                취소
+                            </Button>
+                            <Button
+                                onClick={handleSaveEdit}
+                                style={{
+                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                }}
+                            >
+                                💾 저장하기
+                            </Button>
+                        </Group>
+                    </Stack>
+                </Modal>
             </Stack>
         </Container>
     );
