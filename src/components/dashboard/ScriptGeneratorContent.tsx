@@ -458,18 +458,22 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
         setEditedScript('');
 
         try {
-            const response = await fetch('/api/scripts', {
+            // Vercel 10초 타임아웃 우회: 클라이언트에서 직접 Render API 호출
+            const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
+
+            const response = await fetch(`${RENDER_API_URL}/api/generate-script`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     reference_script: inputScript,
+                    user_id: user?.email || 'guest',
                     num_scripts: 3,
                 }),
             });
 
             const data = await response.json();
 
-            if (!response.ok) {
+            if (!response.ok || !data.success) {
                 throw new Error(data.error || '스크립트 생성에 실패했습니다.');
             }
 
