@@ -6,7 +6,7 @@
  * 로봇 에이전트 진행 표시
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Container,
     Title,
@@ -394,6 +394,11 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
     const [editedScript, setEditedScript] = useState('');
     const [selectedStyle, setSelectedStyle] = useState<string | null>('default');
 
+    // 자동 스크롤을 위한 ref
+    const progressRef = useRef<HTMLDivElement>(null);
+    const hookSelectionRef = useRef<HTMLDivElement>(null);
+    const scriptResultRef = useRef<HTMLDivElement>(null);
+
     // 관리자 체크 - 무제한 크레딧
     const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
     const credits = isAdmin ? 9999 : 47;
@@ -415,6 +420,30 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
 
         return () => timers.forEach(clearTimeout);
     }, [isGenerating]);
+
+    // 자동 스크롤 효과
+    useEffect(() => {
+        if (isGenerating && progressRef.current) {
+            progressRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [isGenerating]);
+
+    useEffect(() => {
+        if (phase === 'hooks_ready' && hookSelectionRef.current) {
+            setTimeout(() => {
+                hookSelectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
+        }
+    }, [phase]);
+
+    useEffect(() => {
+        if (selectedHookIndex !== null && scriptResultRef.current) {
+            setTimeout(() => {
+                scriptResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 500);
+        }
+    }, [selectedHookIndex]);
+
 
     const handleGenerate = async () => {
         if (!inputScript.trim() || inputScript.length < 50) {
@@ -593,7 +622,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 {(isGenerating || phase === 'hooks_ready' || phase === 'script_ready') && (
                     <Transition mounted transition="fade" duration={400}>
                         {(styles) => (
-                            <div style={styles}>
+                            <div ref={progressRef} style={styles}>
                                 <AgentProgressIndicator phase={phase} />
                             </div>
                         )}
@@ -604,7 +633,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 {phase === 'hooks_ready' && result?.scripts && (
                     <Transition mounted transition="slide-up" duration={400}>
                         {(styles) => (
-                            <div style={styles}>
+                            <div ref={hookSelectionRef} style={styles}>
                                 <HookSelectionCards
                                     scripts={result.scripts}
                                     selectedIndex={selectedHookIndex}
@@ -619,7 +648,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 {phase === 'script_ready' && result?.scripts && selectedHookIndex !== null && (
                     <Transition mounted transition="slide-up" duration={400}>
                         {(styles) => (
-                            <div style={styles}>
+                            <div ref={scriptResultRef} style={styles}>
                                 <Card padding="xl" radius="lg" withBorder>
                                     <Stack gap="lg">
                                         <Group justify="space-between">
