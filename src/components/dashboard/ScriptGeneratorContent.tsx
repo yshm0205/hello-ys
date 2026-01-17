@@ -373,8 +373,18 @@ function HookSelectionCards({
     );
 }
 
+// ============ 관리자 이메일 리스트 ============
+const ADMIN_EMAILS = [
+    'hmys0205hmys@gmail.com',
+    'admin@flowspot.kr',
+];
+
+interface ScriptGeneratorContentProps {
+    user?: { email?: string };
+}
+
 // ============ 메인 컴포넌트 ============
-export function ScriptGeneratorContent() {
+export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
     const [inputScript, setInputScript] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [result, setResult] = useState<GenerationResult | null>(null);
@@ -384,8 +394,9 @@ export function ScriptGeneratorContent() {
     const [editedScript, setEditedScript] = useState('');
     const [selectedStyle, setSelectedStyle] = useState<string | null>('default');
 
-    // 크레딧 (목 데이터)
-    const credits = 47;
+    // 관리자 체크 - 무제한 크레딧
+    const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
+    const credits = isAdmin ? 9999 : 47;
 
     // 진행 단계 시뮬레이션
     useEffect(() => {
