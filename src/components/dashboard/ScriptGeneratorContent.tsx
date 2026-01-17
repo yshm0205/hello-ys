@@ -244,10 +244,10 @@ function AgentProgressIndicator({ phase }: { phase: GenerationPhase }) {
 
                 {/* 단계 설명 */}
                 <Text ta="center" size="sm" c="gray.5">
-                    {phase === 'analyzing' && '🔍 참고 스크립트에서 바이럴 패턴을 분석하는 중...'}
-                    {phase === 'generating' && '✍️ 훅 3개를 생성하는 중...'}
-                    {phase === 'reviewing' && '✅ 품질 검증 및 최적화 중...'}
-                    {(phase === 'hooks_ready' || phase === 'script_ready') && '🎉 완료! 아래에서 결과를 확인하세요'}
+                    {phase === 'analyzing' && '참고 스크립트에서 바이럴 패턴을 분석하는 중...'}
+                    {phase === 'generating' && '훅 3개를 생성하는 중...'}
+                    {phase === 'reviewing' && '품질 검증 및 최적화 중...'}
+                    {(phase === 'hooks_ready' || phase === 'script_ready') && '완료! 아래에서 결과를 확인하세요'}
                 </Text>
             </Stack>
 
@@ -276,7 +276,7 @@ function HookSelectionCards({
         <Stack gap="lg">
             <Group justify="space-between" align="center">
                 <Title order={4} style={{ color: '#374151' }}>
-                    🎯 훅 선택하기
+                    훅 선택하기
                 </Title>
                 <Text size="sm" c="gray.5">
                     마음에 드는 훅을 선택하면 전체 스크립트를 확인할 수 있어요
@@ -467,7 +467,7 @@ export function ScriptGeneratorContent() {
                         <Group gap="sm" mb="xs">
                             <Brain size={28} color="#8b5cf6" />
                             <Title order={2} style={{ color: '#111827' }}>
-                                🎬 스크립트 에디터
+                                스크립트 에디터
                             </Title>
                         </Group>
                         <Text c="gray.6">
@@ -494,7 +494,7 @@ export function ScriptGeneratorContent() {
                 {/* 입력 섹션 */}
                 <Card padding="xl" radius="lg" withBorder>
                     <Stack gap="lg">
-                        <Title order={4} style={{ color: '#374151' }}>1️⃣ 참고 스크립트 입력</Title>
+                        <Title order={4} style={{ color: '#374151' }}>참고 스크립트 입력</Title>
 
                         <Textarea
                             placeholder="예: 일본에서는 공사 인부가 일을 끝내도 바로 돈을 못 받는다고 합니다. 작업이 제대로 됐는지 검사에서 통과해야만 돈을 받을 수 있다고 하는데요..."
@@ -515,7 +515,7 @@ export function ScriptGeneratorContent() {
 
                         {/* 스타일 선택 */}
                         <Select
-                            label="🎨 스타일 설정"
+                            label="스타일 설정"
                             placeholder="스타일 선택"
                             value={selectedStyle}
                             onChange={setSelectedStyle}
@@ -551,7 +551,7 @@ export function ScriptGeneratorContent() {
                                         : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                                 }}
                             >
-                                {isGenerating ? 'AI가 작업 중...' : '✨ 스크립트 생성 (1코인)'}
+                                {isGenerating ? 'AI가 작업 중...' : '스크립트 생성 (1코인)'}
                             </Button>
                         </Group>
                     </Stack>
@@ -604,7 +604,7 @@ export function ScriptGeneratorContent() {
                                     <Stack gap="lg">
                                         <Group justify="space-between">
                                             <Title order={4} style={{ color: '#374151' }}>
-                                                ✍️ 전체 스크립트
+                                                전체 스크립트
                                             </Title>
                                             <Badge variant="light" color="violet">
                                                 {getArchetypeName(result.scripts[selectedHookIndex].archetype)}
@@ -614,7 +614,7 @@ export function ScriptGeneratorContent() {
                                         {/* 훅 강조 */}
                                         <Alert
                                             icon={<Sparkles size={18} />}
-                                            title="🎯 훅 (첫 문장)"
+                                            title="훅 (첫 문장)"
                                             color="violet"
                                             variant="light"
                                             radius="lg"
@@ -669,7 +669,7 @@ export function ScriptGeneratorContent() {
                                                     background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                                                 }}
                                             >
-                                                💾 저장하기
+                                                저장하기
                                             </Button>
                                             <CopyButton value={editedScript}>
                                                 {({ copied, copy }) => (
