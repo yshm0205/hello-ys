@@ -24,6 +24,7 @@ import {
     Tooltip,
     Select,
     Transition,
+    Loader,
 } from '@mantine/core';
 import {
     Brain,
@@ -702,7 +703,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 )}
 
                 {/* 훅 선택 */}
-                {phase === 'hooks_ready' && result?.scripts && (
+                {(phase === 'hooks_ready' || phase === 'generating_script' || phase === 'script_ready') && result?.scripts && (
                     <Transition mounted transition="slide-up" duration={400}>
                         {(styles) => (
                             <div ref={hookSelectionRef} style={styles}>
@@ -714,6 +715,44 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                             </div>
                         )}
                     </Transition>
+                )}
+
+                {/* 스크립트 생성 중 로딩 */}
+                {phase === 'generating_script' && (
+                    <Card padding="xl" radius="lg" withBorder>
+                        <Stack gap="lg" align="center">
+                            <Group gap="sm">
+                                <Loader size="sm" color="violet" />
+                                <Text fw={600} style={{ color: '#374151' }}>
+                                    스크립트 작가가 작업 중입니다...
+                                </Text>
+                            </Group>
+                            <Text size="sm" c="gray.5" ta="center">
+                                선택한 훅(방향)을 바탕으로 전체 스크립트를 생성하고 품질 검수를 진행합니다
+                            </Text>
+                            <Group justify="center" gap="xl" mt="md">
+                                {AGENT_TEAM.slice(1).map((agent, index) => (
+                                    <Stack key={agent.role} align="center" gap="xs">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={agent.image}
+                                            alt={agent.name}
+                                            width={60}
+                                            height={60}
+                                            style={{
+                                                borderRadius: '50%',
+                                                border: index === 0 ? `3px solid ${agent.color}` : '3px solid #e5e7eb',
+                                                animation: index === 0 ? 'pulse 2s infinite' : 'none',
+                                            }}
+                                        />
+                                        <Text size="xs" c={index === 0 ? 'violet' : 'gray.5'}>
+                                            {agent.name}
+                                        </Text>
+                                    </Stack>
+                                ))}
+                            </Group>
+                        </Stack>
+                    </Card>
                 )}
 
                 {/* 선택된 스크립트 */}
