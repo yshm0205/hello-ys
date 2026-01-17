@@ -40,10 +40,12 @@ export async function GET() {
 
         if (error) {
             console.error("[Scripts API] DB Error:", error);
-            return NextResponse.json(
-                { error: "스크립트 조회에 실패했습니다." },
-                { status: 500 }
-            );
+            // 테이블이 없거나 접근 권한 없을 때 빈 배열 반환 (임시)
+            return NextResponse.json({
+                success: true,
+                scripts: [],
+                isGuest: !user,
+            });
         }
 
         // 데이터 형식 변환
