@@ -117,7 +117,15 @@ interface GenerationResult {
     error?: string;
 }
 
-type GenerationPhase = 'idle' | 'analyzing' | 'generating' | 'reviewing' | 'hooks_ready' | 'generating_script' | 'script_ready';
+// 리서치 결과
+interface ResearchResult {
+    success: boolean;
+    research_text: string;
+    sources: string[];
+    error?: string;
+}
+
+type GenerationPhase = 'idle' | 'researching' | 'research_ready' | 'analyzing' | 'generating' | 'reviewing' | 'hooks_ready' | 'generating_script' | 'script_ready';
 
 // ============ 로봇 진행 표시 컴포넌트 ============
 function AgentProgressIndicator({ phase }: { phase: GenerationPhase }) {
@@ -407,6 +415,8 @@ interface ScriptGeneratorContentProps {
 export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
     const [inputScript, setInputScript] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isResearching, setIsResearching] = useState(false);  // 리서치 중
+    const [researchResult, setResearchResult] = useState<ResearchResult | null>(null);  // 리서치 결과
     const [result, setResult] = useState<GenerationResult | null>(null);
     const [hooksResult, setHooksResult] = useState<HooksResult | null>(null);  // 1단계 결과
     const [error, setError] = useState<string | null>(null);
@@ -468,10 +478,51 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
 
     const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
 
-    // 1단계: 훅 3개 생성 (빠름)
+    // 0단계: 리서치 수행
+    const handleResearch = async () => {
+        if (!inputScript.trim() || inputScript.length < 10) {
+            setError('주제를 10자 이상 입력해주세요.');
+            return;
+        }
+
+        setIsResearching(true);
+        setError(null);
+        setPhase('researching');
+        setResearchResult(null);
+        setHooksResult(null);
+        setResult(null);
+        setSelectedHookIndex(null);
+
+        try {
+            const response = await fetch(`${RENDER_API_URL}/api/research`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: inputScript,
+                    user_id: user?.email || 'guest',
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || '리서치에 실패했습니다.');
+            }
+
+            setResearchResult(data);
+            setPhase('research_ready');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '리서치에 실패했습니다.');
+            setPhase('idle');
+        } finally {
+            setIsResearching(false);
+        }
+    };
+
+    // 1단계: 훅 3개 생성 (리서치 결과 포함)
     const handleGenerate = async () => {
-        if (!inputScript.trim() || inputScript.length < 50) {
-            setError('참고 스크립트를 50자 이상 입력해주세요.');
+        if (!inputScript.trim() || inputScript.length < 10) {
+            setError('주제를 10자 이상 입력해주세요.');
             return;
         }
 
@@ -489,6 +540,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 body: JSON.stringify({
                     reference_script: inputScript,
                     user_id: user?.email || 'guest',
+                    research_result: researchResult?.research_text || null,  // 리서치 결과 포함
                 }),
             });
 
@@ -571,6 +623,8 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
 
     const handleReset = () => {
         setResult(null);
+        setResearchResult(null);  // 리서치 결과도 초기화
+        setHooksResult(null);
         setPhase('idle');
         setSelectedHookIndex(null);
         setEditedScript('');
@@ -616,17 +670,19 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 {/* 입력 섹션 */}
                 <Card padding="xl" radius="lg" withBorder>
                     <Stack gap="lg">
-                        <Title order={4} style={{ color: '#374151' }}>참고 스크립트 입력</Title>
+                        <Title order={4} style={{ color: '#374151' }}>
+                            주제 또는 참고 스크립트 입력
+                        </Title>
 
                         <Textarea
-                            placeholder="예: 일본에서는 공사 인부가 일을 끝내도 바로 돈을 못 받는다고 합니다. 작업이 제대로 됐는지 검사에서 통과해야만 돈을 받을 수 있다고 하는데요..."
-                            description="잘 된 영상의 스크립트나 원하는 주제 (최소 50자)"
-                            minRows={6}
-                            maxRows={10}
+                            placeholder="예: 자율주행차가 출퇴근과 도시 계획을 어떻게 변화시킬지 이야기해 주세요. 더 많은 자유 시간이 우리를 어떻게 더 행복하게 만들지 다뤄주세요."
+                            description="만들고 싶은 영상의 주제를 입력하세요 (최소 10자)"
+                            minRows={4}
+                            maxRows={8}
                             autosize
                             value={inputScript}
                             onChange={(e) => setInputScript(e.currentTarget.value)}
-                            disabled={isGenerating}
+                            disabled={isResearching || isGenerating}
                             styles={{
                                 input: {
                                     fontSize: '15px',
@@ -648,7 +704,50 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                             ]}
                         />
 
-                        {/* 로봇 진행 표시 - 버튼 위에 표시 */}
+                        {/* 리서치 결과 표시 */}
+                        {researchResult && phase === 'research_ready' && (
+                            <Card
+                                padding="md"
+                                radius="md"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                                    border: '1px solid rgba(34, 197, 94, 0.2)',
+                                }}
+                            >
+                                <Stack gap="sm">
+                                    <Group gap="xs">
+                                        <Check size={18} color="#22c55e" />
+                                        <Text fw={600} size="sm" style={{ color: '#22c55e' }}>
+                                            리서치 완료
+                                        </Text>
+                                    </Group>
+                                    <Text size="sm" c="gray.7" style={{ whiteSpace: 'pre-wrap', maxHeight: 200, overflow: 'auto' }}>
+                                        {researchResult.research_text.slice(0, 500)}
+                                        {researchResult.research_text.length > 500 && '...'}
+                                    </Text>
+                                    {researchResult.sources.length > 0 && (
+                                        <Group gap="xs">
+                                            <Text size="xs" c="gray.5">출처:</Text>
+                                            {researchResult.sources.slice(0, 3).map((s, i) => (
+                                                <Badge key={i} size="xs" variant="light" color="gray">{s}</Badge>
+                                            ))}
+                                        </Group>
+                                    )}
+                                </Stack>
+                            </Card>
+                        )}
+
+                        {/* 리서치 로딩 */}
+                        {isResearching && (
+                            <Card padding="md" radius="md" style={{ border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                                <Group gap="sm" justify="center">
+                                    <Loader size="sm" color="violet" />
+                                    <Text size="sm" c="gray.6">AI가 주제를 리서치하는 중...</Text>
+                                </Group>
+                            </Card>
+                        )}
+
+                        {/* 로봇 진행 표시 - 훅 생성 중 */}
                         {(isGenerating || phase === 'hooks_ready' || phase === 'script_ready') && (
                             <Transition mounted transition="fade" duration={400}>
                                 {(styles) => (
@@ -664,28 +763,54 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                 <Badge variant="light" color="gray">
                                     {inputScript.length}자
                                 </Badge>
-                                {inputScript.length >= 50 && (
+                                {inputScript.length >= 10 && (
                                     <Badge variant="light" color="green" leftSection={<Check size={12} />}>
                                         입력 완료
                                     </Badge>
                                 )}
+                                {researchResult && (
+                                    <Badge variant="light" color="violet" leftSection={<Search size={12} />}>
+                                        리서치 완료
+                                    </Badge>
+                                )}
                             </Group>
 
-                            <Button
-                                size="lg"
-                                radius="lg"
-                                onClick={handleGenerate}
-                                disabled={isGenerating || inputScript.length < 50 || credits <= 0}
-                                loading={isGenerating}
-                                leftSection={isGenerating ? undefined : <Sparkles size={20} />}
-                                style={{
-                                    background: isGenerating
-                                        ? undefined
-                                        : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                }}
-                            >
-                                {isGenerating ? 'AI가 작업 중...' : '스크립트 생성 (1코인)'}
-                            </Button>
+                            <Group gap="sm">
+                                {/* 리서치 버튼 (첫 단계) */}
+                                {!researchResult && phase === 'idle' && (
+                                    <Button
+                                        size="lg"
+                                        radius="lg"
+                                        onClick={handleResearch}
+                                        disabled={isResearching || inputScript.length < 10}
+                                        loading={isResearching}
+                                        leftSection={isResearching ? undefined : <Search size={20} />}
+                                        variant="gradient"
+                                        gradient={{ from: '#8b5cf6', to: '#a78bfa' }}
+                                    >
+                                        {isResearching ? '리서치 중...' : '리서치 시작'}
+                                    </Button>
+                                )}
+
+                                {/* 훅 생성 버튼 (리서치 후) */}
+                                {(researchResult || phase !== 'idle') && (
+                                    <Button
+                                        size="lg"
+                                        radius="lg"
+                                        onClick={handleGenerate}
+                                        disabled={isGenerating || inputScript.length < 10 || credits <= 0}
+                                        loading={isGenerating}
+                                        leftSection={isGenerating ? undefined : <Sparkles size={20} />}
+                                        style={{
+                                            background: isGenerating
+                                                ? undefined
+                                                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                        }}
+                                    >
+                                        {isGenerating ? 'AI가 작업 중...' : '훅 생성 (1코인)'}
+                                    </Button>
+                                )}
+                            </Group>
                         </Group>
                     </Stack>
                 </Card>
