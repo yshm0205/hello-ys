@@ -117,17 +117,11 @@ interface GenerationResult {
     error?: string;
 }
 
-// 리서치 결과 (분석 포함)
+// 리서치 결과
 interface ResearchResult {
     success: boolean;
     research_text: string;
     sources: string[];
-    // 분석 결과
-    topic?: string;
-    hook_cores?: any[];
-    main_archetype?: string;
-    secondary_archetype?: string;
-    subject_type?: string;
     error?: string;
 }
 
@@ -546,13 +540,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 body: JSON.stringify({
                     reference_script: inputScript,
                     user_id: user?.email || 'guest',
-                    research_result: researchResult?.research_text || null,
-                    // 분석 결과 전달 (리서치 단계에서 받은 것)
-                    topic: (researchResult as any)?.topic || null,
-                    hook_cores: (researchResult as any)?.hook_cores || null,
-                    main_archetype: (researchResult as any)?.main_archetype || null,
-                    secondary_archetype: (researchResult as any)?.secondary_archetype || null,
-                    subject_type: (researchResult as any)?.subject_type || null,
+                    research_result: researchResult?.research_text || null,  // 리서치 결과만 전달
                 }),
             });
 
@@ -601,6 +589,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                     reference_script: inputScript,
                     archetype: selectedHook.archetype,
                     user_id: user?.email || 'guest',
+                    research_result: researchResult?.research_text || null,  // 리서치 결과 추가
                 }),
             });
 
