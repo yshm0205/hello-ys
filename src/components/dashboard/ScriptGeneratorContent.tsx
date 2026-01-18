@@ -422,6 +422,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
     const [error, setError] = useState<string | null>(null);
     const [phase, setPhase] = useState<GenerationPhase>('idle');
     const [selectedHookIndex, setSelectedHookIndex] = useState<number | null>(null);
+    const [selectedHookText, setSelectedHookText] = useState<string>('');  // 원래 선택한 훅 텍스트 저장
     const [editedScript, setEditedScript] = useState('');
     const [selectedStyle, setSelectedStyle] = useState<string | null>('default');
 
@@ -579,6 +580,9 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
 
         try {
             const selectedHook = hooksResult.hooks[index];
+
+            // 원래 선택한 훅 텍스트 저장 (나중에 화면에 표시용)
+            setSelectedHookText(selectedHook.hook_text);
 
             const response = await fetch(`${RENDER_API_URL}/api/generate-full-script`, {
                 method: 'POST',
@@ -897,19 +901,19 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                             </Badge>
                                         </Group>
 
-                                        {/* 훅 강조 */}
+                                        {/* 훅 강조 - 원래 선택한 훅 표시 */}
                                         <Alert
                                             icon={<Sparkles size={18} />}
-                                            title="훅 (첫 문장)"
+                                            title="선택한 훅 (첫 문장)"
                                             color="violet"
                                             variant="light"
                                             radius="lg"
                                         >
                                             <Group justify="space-between" align="flex-start">
                                                 <Text style={{ flex: 1 }}>
-                                                    {result.scripts[selectedHookIndex].hook_preview}
+                                                    {selectedHookText || result.scripts[selectedHookIndex].hook_preview}
                                                 </Text>
-                                                <CopyButton value={result.scripts[selectedHookIndex].hook_preview}>
+                                                <CopyButton value={selectedHookText || result.scripts[selectedHookIndex].hook_preview}>
                                                     {({ copied, copy }) => (
                                                         <Tooltip label={copied ? '복사됨!' : '복사'}>
                                                             <ActionIcon
