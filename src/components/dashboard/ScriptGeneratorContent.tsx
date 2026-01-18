@@ -783,18 +783,32 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                             <Group gap="sm">
                                 {/* 리서치 버튼 (첫 단계) */}
                                 {!researchResult && (phase === 'idle' || phase === 'research_ready') && (
-                                    <Button
-                                        size="lg"
-                                        radius="lg"
-                                        onClick={handleResearch}
-                                        disabled={isResearching || inputScript.length < 10}
-                                        loading={isResearching}
-                                        leftSection={isResearching ? undefined : <Search size={20} />}
-                                        variant="gradient"
-                                        gradient={{ from: '#8b5cf6', to: '#a78bfa' }}
-                                    >
-                                        {isResearching ? '리서치 중...' : '리서치 시작'}
-                                    </Button>
+                                    <>
+                                        <Button
+                                            size="lg"
+                                            radius="lg"
+                                            onClick={handleResearch}
+                                            disabled={isResearching || inputScript.length < 10}
+                                            loading={isResearching}
+                                            leftSection={isResearching ? undefined : <Search size={20} />}
+                                            variant="gradient"
+                                            gradient={{ from: '#8b5cf6', to: '#a78bfa' }}
+                                        >
+                                            {isResearching ? '리서치 중...' : '리서치 시작'}
+                                        </Button>
+                                        <Button
+                                            size="lg"
+                                            radius="lg"
+                                            onClick={handleGenerate}
+                                            disabled={isGenerating || inputScript.length < 10 || credits <= 0}
+                                            loading={isGenerating}
+                                            leftSection={isGenerating ? undefined : <Sparkles size={20} />}
+                                            variant="light"
+                                            color="gray"
+                                        >
+                                            {isGenerating ? '훅 생성 중...' : '리서치 건너뛰기'}
+                                        </Button>
+                                    </>
                                 )}
 
                                 {/* 훅 생성 버튼 (리서치 후) */}
