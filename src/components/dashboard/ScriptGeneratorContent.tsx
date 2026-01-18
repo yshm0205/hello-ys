@@ -117,11 +117,17 @@ interface GenerationResult {
     error?: string;
 }
 
-// 리서치 결과
+// 리서치 결과 (분석 포함)
 interface ResearchResult {
     success: boolean;
     research_text: string;
     sources: string[];
+    // 분석 결과
+    topic?: string;
+    hook_cores?: any[];
+    main_archetype?: string;
+    secondary_archetype?: string;
+    subject_type?: string;
     error?: string;
 }
 
@@ -540,7 +546,13 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                 body: JSON.stringify({
                     reference_script: inputScript,
                     user_id: user?.email || 'guest',
-                    research_result: researchResult?.research_text || null,  // 리서치 결과 포함
+                    research_result: researchResult?.research_text || null,
+                    // 분석 결과 전달 (리서치 단계에서 받은 것)
+                    topic: (researchResult as any)?.topic || null,
+                    hook_cores: (researchResult as any)?.hook_cores || null,
+                    main_archetype: (researchResult as any)?.main_archetype || null,
+                    secondary_archetype: (researchResult as any)?.secondary_archetype || null,
+                    subject_type: (researchResult as any)?.subject_type || null,
                 }),
             });
 
@@ -776,22 +788,40 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                             </Group>
 
                             <Group gap="sm">
-                                {/* 생성 시작 버튼 (전체 파이프라인 한 번에) */}
-                                <Button
-                                    size="lg"
-                                    radius="lg"
-                                    onClick={handleGenerate}
-                                    disabled={isGenerating || isResearching || inputScript.length < 10 || credits <= 0}
-                                    loading={isGenerating || isResearching}
-                                    leftSection={isGenerating || isResearching ? undefined : <Sparkles size={20} />}
-                                    style={{
-                                        background: (isGenerating || isResearching)
-                                            ? undefined
-                                            : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                    }}
-                                >
-                                    {isResearching ? '리서치 중...' : isGenerating ? '훅 생성 중...' : '생성 시작 (1코인)'}
-                                </Button>
+                                {/* 리서치 버튼 (첫 단계) */}
+                                {!researchResult && (phase === 'idle' || phase === 'research_ready') && (
+                                    <Button
+                                        size="lg"
+                                        radius="lg"
+                                        onClick={handleResearch}
+                                        disabled={isResearching || inputScript.length < 10}
+                                        loading={isResearching}
+                                        leftSection={isResearching ? undefined : <Search size={20} />}
+                                        variant="gradient"
+                                        gradient={{ from: '#8b5cf6', to: '#a78bfa' }}
+                                    >
+                                        {isResearching ? '리서치 중...' : '리서치 시작'}
+                                    </Button>
+                                )}
+
+                                {/* 훅 생성 버튼 (리서치 후) */}
+                                {researchResult && (
+                                    <Button
+                                        size="lg"
+                                        radius="lg"
+                                        onClick={handleGenerate}
+                                        disabled={isGenerating || inputScript.length < 10 || credits <= 0}
+                                        loading={isGenerating}
+                                        leftSection={isGenerating ? undefined : <Sparkles size={20} />}
+                                        style={{
+                                            background: isGenerating
+                                                ? undefined
+                                                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                        }}
+                                    >
+                                        {isGenerating ? '훅 생성 중...' : '훅 생성 (1코인)'}
+                                    </Button>
+                                )}
                             </Group>
                         </Group>
                     </Stack>
