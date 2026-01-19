@@ -710,7 +710,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                         />
 
                         {/* 리서치 결과 표시 */}
-                        {researchResult && phase === 'research_ready' && (
+                        {researchResult && (
                             <Card
                                 padding="md"
                                 radius="md"
@@ -726,9 +726,8 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                             리서치 완료
                                         </Text>
                                     </Group>
-                                    <Text size="sm" c="gray.7" style={{ whiteSpace: 'pre-wrap', maxHeight: 200, overflow: 'auto' }}>
-                                        {researchResult.research_text.slice(0, 500)}
-                                        {researchResult.research_text.length > 500 && '...'}
+                                    <Text size="sm" c="gray.7" style={{ whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}>
+                                        {researchResult.research_text}
                                     </Text>
                                     {researchResult.sources.length > 0 && (
                                         <Group gap="xs">
