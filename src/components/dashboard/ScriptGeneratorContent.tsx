@@ -729,37 +729,42 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                     <Text size="sm" c="gray.7" style={{ whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}>
                                         {researchResult.research_text}
                                     </Text>
+                                    {/* 출처 표시 - URL이 있으면 클릭 가능 배지, 없으면 웹 검색 안내 */}
                                     {researchResult.sources.length > 0 && (
                                         <Stack gap="xs" mt="sm">
-                                            <Text size="xs" c="gray.5" fw={500}>📚 출처:</Text>
-                                            <Group gap="xs" wrap="wrap">
-                                                {researchResult.sources.slice(0, 5).map((source, i) => {
-                                                    // "title|url" 형식 파싱
-                                                    const parts = source.split('|');
-                                                    const title = parts[0];
-                                                    const url = parts[1];
-
-                                                    if (url) {
-                                                        return (
-                                                            <Badge
-                                                                key={i}
-                                                                size="sm"
-                                                                variant="light"
-                                                                color="blue"
-                                                                style={{ cursor: 'pointer' }}
-                                                                onClick={() => window.open(url, '_blank')}
-                                                            >
-                                                                🔗 {title}
-                                                            </Badge>
-                                                        );
-                                                    }
-                                                    return (
-                                                        <Badge key={i} size="sm" variant="light" color="gray">
-                                                            {title}
-                                                        </Badge>
-                                                    );
-                                                })}
-                                            </Group>
+                                            {researchResult.sources.some(s => s.includes('|')) ? (
+                                                // URL이 있는 경우 - 클릭 가능한 출처 배지
+                                                <>
+                                                    <Text size="xs" c="gray.5" fw={500}>📚 출처:</Text>
+                                                    <Group gap="xs" wrap="wrap">
+                                                        {researchResult.sources.slice(0, 5).map((source, i) => {
+                                                            const parts = source.split('|');
+                                                            const title = parts[0];
+                                                            const url = parts[1];
+                                                            if (url) {
+                                                                return (
+                                                                    <Badge
+                                                                        key={i}
+                                                                        size="sm"
+                                                                        variant="light"
+                                                                        color="blue"
+                                                                        style={{ cursor: 'pointer' }}
+                                                                        onClick={() => window.open(url, '_blank')}
+                                                                    >
+                                                                        🔗 {title}
+                                                                    </Badge>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })}
+                                                    </Group>
+                                                </>
+                                            ) : (
+                                                // URL이 없는 경우 - 웹 검색 기반 안내
+                                                <Text size="xs" c="gray.5" fw={500}>
+                                                    🌐 웹 검색 기반 리서치
+                                                </Text>
+                                            )}
                                         </Stack>
                                     )}
                                 </Stack>
