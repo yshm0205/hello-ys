@@ -730,12 +730,37 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                         {researchResult.research_text}
                                     </Text>
                                     {researchResult.sources.length > 0 && (
-                                        <Group gap="xs">
-                                            <Text size="xs" c="gray.5">출처:</Text>
-                                            {researchResult.sources.slice(0, 3).map((s, i) => (
-                                                <Badge key={i} size="xs" variant="light" color="gray">{s}</Badge>
-                                            ))}
-                                        </Group>
+                                        <Stack gap="xs" mt="sm">
+                                            <Text size="xs" c="gray.5" fw={500}>📚 출처:</Text>
+                                            <Group gap="xs" wrap="wrap">
+                                                {researchResult.sources.slice(0, 5).map((source, i) => {
+                                                    // "title|url" 형식 파싱
+                                                    const parts = source.split('|');
+                                                    const title = parts[0];
+                                                    const url = parts[1];
+
+                                                    if (url) {
+                                                        return (
+                                                            <Badge
+                                                                key={i}
+                                                                size="sm"
+                                                                variant="light"
+                                                                color="blue"
+                                                                style={{ cursor: 'pointer' }}
+                                                                onClick={() => window.open(url, '_blank')}
+                                                            >
+                                                                🔗 {title}
+                                                            </Badge>
+                                                        );
+                                                    }
+                                                    return (
+                                                        <Badge key={i} size="sm" variant="light" color="gray">
+                                                            {title}
+                                                        </Badge>
+                                                    );
+                                                })}
+                                            </Group>
+                                        </Stack>
                                     )}
                                 </Stack>
                             </Card>
