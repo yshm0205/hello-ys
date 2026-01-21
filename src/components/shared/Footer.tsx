@@ -7,17 +7,14 @@ export function Footer() {
   return (
     <footer className="footer footer-center p-10 bg-base-200 text-base-content rounded">
       <nav className="grid grid-flow-col gap-4">
-        <Link href="/about" className="link link-hover">
-          About us
+        <Link href="/privacy" className="link link-hover">
+          개인정보처리방침
+        </Link>
+        <Link href="/terms" className="link link-hover">
+          이용약관
         </Link>
         <Link href="/support" className="link link-hover">
-          Support
-        </Link>
-        <Link href="/jobs" className="link link-hover">
-          Jobs
-        </Link>
-        <Link href="/press" className="link link-hover">
-          Press kit
+          고객지원
         </Link>
       </nav>
       <nav>
@@ -59,8 +56,7 @@ export function Footer() {
       </nav>
       <aside>
         <p>
-          Copyright © {new Date().getFullYear()} - All right reserved by ACME
-          Industries Ltd
+          Copyright © {new Date().getFullYear()} FlowSpot. All rights reserved.
         </p>
       </aside>
     </footer>
