@@ -1094,6 +1094,17 @@ function Footer() {
           <Text size="sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
             AI-Powered Script Generation
           </Text>
+          <Group gap="lg" mt="sm">
+            <Link href="/privacy" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', textDecoration: 'none' }}>
+              개인정보처리방침
+            </Link>
+            <Link href="/terms" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', textDecoration: 'none' }}>
+              이용약관
+            </Link>
+            <Link href="/support" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', textDecoration: 'none' }}>
+              고객지원
+            </Link>
+          </Group>
           <Divider w={60} color="gray.8" my="sm" />
           <Text size="sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
             © 2026 FlowSpot. All rights reserved.
