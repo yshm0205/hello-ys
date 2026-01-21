@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
+// 프로덕션 URL (Vercel에서는 origin 감지 안 됨)
+const PRODUCTION_REDIRECT_URI = 'https://flowspot-kr.vercel.app/api/youtube/callback';
+
 // YouTube OAuth 시작 - 사용자를 Google 로그인 페이지로 리다이렉트
 export async function GET(request: NextRequest) {
     if (!GOOGLE_CLIENT_ID) {
         return NextResponse.json({ error: 'GOOGLE_CLIENT_ID not configured' }, { status: 500 });
     }
 
-    // 요청 origin에서 redirect URI 생성
-    const origin = request.headers.get('origin') || request.headers.get('host') || '';
-    const protocol = origin.includes('localhost') ? 'http' : 'https';
-    const host = origin.replace(/^https?:\/\//, '');
-    const redirectUri = process.env.YOUTUBE_REDIRECT_URI || `${protocol}://${host}/api/youtube/callback`;
+    // 환경변수 우선, 없으면 프로덕션 하드코딩
+    const redirectUri = process.env.YOUTUBE_REDIRECT_URI || PRODUCTION_REDIRECT_URI;
 
     // YouTube Data API + Analytics API 스코프
     const scopes = [
@@ -33,4 +33,3 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(authUrl.toString());
 }
-
