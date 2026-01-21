@@ -167,9 +167,32 @@ const calculateStylePerformance = () => {
 
 export function AnalyticsContent() {
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<string | null>('analysis');
+    const [activeTab, setActiveTab] = useState<string | null>('youtube');
 
-    const channelAvgViews = 30000;
+    // YouTube 연동 상태
+    const [youtubeStats, setYoutubeStats] = useState<YouTubeStats | null>(null);
+    const [youtubeLoading, setYoutubeLoading] = useState(true);
+
+    // YouTube 데이터 가져오기
+    useEffect(() => {
+        const fetchYoutubeStats = async () => {
+            try {
+                const res = await fetch('/api/youtube/stats');
+                const data = await res.json();
+                setYoutubeStats(data);
+            } catch (error) {
+                console.error('Failed to fetch YouTube stats:', error);
+                setYoutubeStats({ connected: false, channel: null, videos: [] });
+            } finally {
+                setYoutubeLoading(false);
+            }
+        };
+        fetchYoutubeStats();
+    }, []);
+
+    const channelAvgViews = youtubeStats?.channel?.viewCount
+        ? Math.round(youtubeStats.channel.viewCount / (youtubeStats.channel.videoCount || 1))
+        : 30000;
     const linkedAvgViews = mockVideoAnalytics.reduce((a, b) => a + b.views, 0) / mockVideoAnalytics.length;
     const linkedAvgRetention = mockVideoAnalytics.reduce((a, b) => a + b.avgViewPct, 0) / mockVideoAnalytics.length;
 
@@ -179,9 +202,19 @@ export function AnalyticsContent() {
     const aboveAvgVideos = mockVideoAnalytics.filter((v) => v.isAboveAvg);
     const belowAvgVideos = mockVideoAnalytics.filter((v) => !v.isAboveAvg);
 
-    const handleRefresh = () => {
+    const handleRefresh = async () => {
         setIsLoading(true);
-        setTimeout(() => setIsLoading(false), 2000);
+        setYoutubeLoading(true);
+        try {
+            const res = await fetch('/api/youtube/stats');
+            const data = await res.json();
+            setYoutubeStats(data);
+        } catch (error) {
+            console.error('Refresh failed:', error);
+        } finally {
+            setIsLoading(false);
+            setYoutubeLoading(false);
+        }
     };
 
     return (
@@ -230,7 +263,7 @@ export function AnalyticsContent() {
                             </ThemeIcon>
                             <Box>
                                 <Text size="xs" c="gray.5">채널명</Text>
-                                <Text fw={600}>{mockChannel.title}</Text>
+                                <Text fw={600}>{youtubeStats?.channel?.title || mockChannel.title}</Text>
                             </Box>
                         </Group>
                     </Card>
@@ -241,7 +274,7 @@ export function AnalyticsContent() {
                             </ThemeIcon>
                             <Box>
                                 <Text size="xs" c="gray.5">구독자</Text>
-                                <Text fw={600}>{mockChannel.subscriberCount.toLocaleString()}</Text>
+                                <Text fw={600}>{(youtubeStats?.channel?.subscriberCount || mockChannel.subscriberCount).toLocaleString()}</Text>
                             </Box>
                         </Group>
                     </Card>
@@ -252,7 +285,7 @@ export function AnalyticsContent() {
                             </ThemeIcon>
                             <Box>
                                 <Text size="xs" c="gray.5">영상 수</Text>
-                                <Text fw={600}>{mockChannel.videoCount}</Text>
+                                <Text fw={600}>{youtubeStats?.channel?.videoCount || mockChannel.videoCount}</Text>
                             </Box>
                         </Group>
                     </Card>
@@ -263,7 +296,7 @@ export function AnalyticsContent() {
                             </ThemeIcon>
                             <Box>
                                 <Text size="xs" c="gray.5">총 조회수</Text>
-                                <Text fw={600}>{mockChannel.viewCount.toLocaleString()}</Text>
+                                <Text fw={600}>{(youtubeStats?.channel?.viewCount || mockChannel.viewCount).toLocaleString()}</Text>
                             </Box>
                         </Group>
                     </Card>
@@ -272,6 +305,9 @@ export function AnalyticsContent() {
                 {/* Tabs */}
                 <Tabs value={activeTab} onChange={setActiveTab} variant="pills" radius="lg">
                     <Tabs.List>
+                        <Tabs.Tab value="youtube" leftSection={<Youtube size={18} />}>
+                            📺 YouTube 연동
+                        </Tabs.Tab>
                         <Tabs.Tab value="analysis" leftSection={<TestTube size={18} />}>
                             🧪 심층 분석
                         </Tabs.Tab>
@@ -279,6 +315,98 @@ export function AnalyticsContent() {
                             📈 기본 통계
                         </Tabs.Tab>
                     </Tabs.List>
+
+                    {/* YouTube 연동 탭 */}
+                    <Tabs.Panel value="youtube" pt="xl">
+                        <Stack gap="xl">
+                            {youtubeLoading ? (
+                                <Center py="xl">
+                                    <Loader size="lg" />
+                                </Center>
+                            ) : !youtubeStats?.connected ? (
+                                <Card padding="xl" radius="xl" withBorder>
+                                    <Stack gap="lg" align="center">
+                                        <ThemeIcon size={80} radius="xl" color="red" variant="light">
+                                            <Youtube size={40} />
+                                        </ThemeIcon>
+                                        <Title order={3}>YouTube 채널을 연결하세요</Title>
+                                        <Text c="gray.6" ta="center">
+                                            YouTube 채널을 연결하면 실제 영상 통계를 확인할 수 있습니다.
+                                            <br />
+                                            구독자 수, 조회수, 좋아요, 시청 시간 등을 한눈에!
+                                        </Text>
+                                        <Button
+                                            component="a"
+                                            href="/api/youtube/auth"
+                                            size="lg"
+                                            radius="lg"
+                                            style={{ background: '#FF0000', border: 'none' }}
+                                        >
+                                            🔗 YouTube 채널 연결하기
+                                        </Button>
+                                    </Stack>
+                                </Card>
+                            ) : (
+                                <Stack gap="lg">
+                                    <Alert color="green" radius="lg" icon={<Youtube size={18} />}>
+                                        ✅ YouTube 채널 <strong>{youtubeStats.channel?.title}</strong>이(가) 연결되었습니다!
+                                    </Alert>
+
+                                    {/* 최근 영상 목록 */}
+                                    <Box>
+                                        <Title order={4} mb="lg">📺 최근 영상 (최대 10개)</Title>
+                                        <Card padding={0} radius="lg" withBorder>
+                                            <Table>
+                                                <Table.Thead>
+                                                    <Table.Tr>
+                                                        <Table.Th>제목</Table.Th>
+                                                        <Table.Th>조회수</Table.Th>
+                                                        <Table.Th>좋아요</Table.Th>
+                                                        <Table.Th>댓글</Table.Th>
+                                                        <Table.Th>업로드</Table.Th>
+                                                    </Table.Tr>
+                                                </Table.Thead>
+                                                <Table.Tbody>
+                                                    {youtubeStats.videos.map((video) => (
+                                                        <Table.Tr key={video.id}>
+                                                            <Table.Td>
+                                                                <Text fw={500} lineClamp={1} maw={300}>
+                                                                    {video.title}
+                                                                </Text>
+                                                            </Table.Td>
+                                                            <Table.Td>
+                                                                <Group gap="xs">
+                                                                    <Eye size={14} />
+                                                                    <Text>{video.viewCount.toLocaleString()}</Text>
+                                                                </Group>
+                                                            </Table.Td>
+                                                            <Table.Td>
+                                                                <Group gap="xs">
+                                                                    <ThumbsUp size={14} />
+                                                                    <Text>{video.likeCount.toLocaleString()}</Text>
+                                                                </Group>
+                                                            </Table.Td>
+                                                            <Table.Td>
+                                                                <Group gap="xs">
+                                                                    <MessageCircle size={14} />
+                                                                    <Text>{video.commentCount.toLocaleString()}</Text>
+                                                                </Group>
+                                                            </Table.Td>
+                                                            <Table.Td>
+                                                                <Text size="sm" c="gray.6">
+                                                                    {new Date(video.publishedAt).toLocaleDateString('ko-KR')}
+                                                                </Text>
+                                                            </Table.Td>
+                                                        </Table.Tr>
+                                                    ))}
+                                                </Table.Tbody>
+                                            </Table>
+                                        </Card>
+                                    </Box>
+                                </Stack>
+                            )}
+                        </Stack>
+                    </Tabs.Panel>
 
                     {/* 심층 분석 탭 */}
                     <Tabs.Panel value="analysis" pt="xl">
