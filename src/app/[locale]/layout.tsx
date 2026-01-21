@@ -48,6 +48,9 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       images: ["/images/og-image.png"],
     },
+    verification: {
+      google: "e5C7S90edMuZe9SuGv0y-ffw_EAHBrGrV8iGF07fUbU",
+    },
   };
 }
 
@@ -76,7 +79,7 @@ export default async function LocaleLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              name: "Global SaaS Starter Kit",
+              name: "FlowSpot",
               url: process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com",
             }),
           }}
@@ -87,7 +90,7 @@ export default async function LocaleLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "Global SaaS Starter Kit",
+              name: "FlowSpot",
               url: process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com",
               logo: `${process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com"}/og-image.png`,
             }),
