@@ -621,9 +621,46 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
         }
     };
 
-    const handleSave = () => {
-        // TODO: DB에 저장
-        alert('스크립트가 저장되었습니다! (데모)');
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    const handleSave = async () => {
+        if (!editedScript || !result?.scripts) return;
+
+        setIsSaving(true);
+        setSaveMessage(null);
+
+        try {
+            const selectedScript = selectedHookIndex !== null ? result.scripts[selectedHookIndex] : null;
+
+            const response = await fetch('/api/scripts/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    input_text: inputScript,
+                    selected_script: selectedScript ? {
+                        ...selectedScript,
+                        full_script: editedScript,
+                    } : null,
+                    scripts: result.scripts,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || '저장에 실패했습니다.');
+            }
+
+            setSaveMessage({ type: 'success', text: '스크립트가 저장되었습니다!' });
+        } catch (err) {
+            setSaveMessage({
+                type: 'error',
+                text: err instanceof Error ? err.message : '저장에 실패했습니다.'
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleReset = () => {
@@ -992,17 +1029,31 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                             📊 스크립트 길이: {editedScript.length}자
                                         </Text>
 
+                                        {/* 저장 메시지 */}
+                                        {saveMessage && (
+                                            <Alert
+                                                color={saveMessage.type === 'success' ? 'green' : 'red'}
+                                                radius="md"
+                                                withCloseButton
+                                                onClose={() => setSaveMessage(null)}
+                                            >
+                                                {saveMessage.text}
+                                            </Alert>
+                                        )}
+
                                         {/* 액션 버튼들 */}
                                         <Group>
                                             <Button
-                                                leftSection={<Save size={18} />}
+                                                leftSection={isSaving ? undefined : <Save size={18} />}
                                                 onClick={handleSave}
+                                                loading={isSaving}
+                                                disabled={isSaving}
                                                 variant="filled"
                                                 style={{
-                                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                                    background: isSaving ? undefined : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                                                 }}
                                             >
-                                                저장하기
+                                                {isSaving ? '저장 중...' : '저장하기'}
                                             </Button>
                                             <CopyButton value={editedScript}>
                                                 {({ copied, copy }) => (

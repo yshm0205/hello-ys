@@ -5,7 +5,7 @@
  * Streamlit 기능 반영: 채널 통계, 스타일별 성과, 인사이트
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Container,
     Title,
@@ -22,6 +22,8 @@ import {
     Progress,
     ThemeIcon,
     Tabs,
+    Loader,
+    Center,
 } from '@mantine/core';
 import {
     TestTube,
@@ -36,8 +38,38 @@ import {
     BarChart3,
     Target,
     Zap,
+    Link2,
+    ThumbsUp,
+    MessageCircle,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+
+// YouTube 채널 및 영상 타입
+interface YouTubeChannel {
+    id: string;
+    title: string;
+    thumbnail: string;
+    subscriberCount: number;
+    videoCount: number;
+    viewCount: number;
+}
+
+interface YouTubeVideo {
+    id: string;
+    title: string;
+    thumbnail: string;
+    publishedAt: string;
+    viewCount: number;
+    likeCount: number;
+    commentCount: number;
+}
+
+interface YouTubeStats {
+    connected: boolean;
+    channel: YouTubeChannel | null;
+    videos: YouTubeVideo[];
+    error?: string;
+}
 
 // 아키타입 한글 이름
 const ARCHETYPE_NAMES: Record<string, string> = {

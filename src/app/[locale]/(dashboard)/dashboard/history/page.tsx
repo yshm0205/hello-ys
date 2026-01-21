@@ -1,16 +1,18 @@
-// import { createClient } from '@/utils/supabase/server';
-// import { redirect } from 'next/navigation';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { HistoryContent } from '@/components/dashboard/HistoryContent';
 
 export default async function HistoryPage() {
-    // Supabase 임시 비활성화 - 테스트용
-    const mockUser = {
-        email: 'demo@flowspot.app',
-    };
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
 
     return (
-        <DashboardLayout user={mockUser}>
+        <DashboardLayout user={user}>
             <HistoryContent />
         </DashboardLayout>
     );

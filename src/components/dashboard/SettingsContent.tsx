@@ -193,7 +193,62 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                     </Stack>
                 </Card>
 
+                {/* YouTube 연결 카드 */}
+                <Card padding="xl" radius="xl" withBorder>
+                    <Stack gap="lg">
+                        <Group gap="sm">
+                            <Box
+                                style={{
+                                    width: 24,
+                                    height: 24,
+                                    borderRadius: 4,
+                                    background: '#FF0000',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="white">
+                                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                                </svg>
+                            </Box>
+                            <Title order={4}>YouTube 채널 연결</Title>
+                        </Group>
+
+                        <Text size="sm" c="gray.6">
+                            YouTube 채널을 연결하면 영상별 조회수, 좋아요, 평균 시청률 등의 통계를 확인할 수 있습니다.
+                        </Text>
+
+                        <Box
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.05) 0%, rgba(255, 100, 100, 0.05) 100%)',
+                                borderRadius: 16,
+                                padding: 20,
+                            }}
+                        >
+                            <Group justify="space-between" align="center">
+                                <Box>
+                                    <Text size="sm" c="gray.6">연결 상태</Text>
+                                    <Text fw={500}>연결되지 않음</Text>
+                                </Box>
+                                <Button
+                                    component="a"
+                                    href="/api/youtube/auth"
+                                    radius="lg"
+                                    style={{
+                                        background: '#FF0000',
+                                        border: 'none',
+                                    }}
+                                >
+                                    🔗 YouTube 연결하기
+                                </Button>
+                            </Group>
+                        </Box>
+                    </Stack>
+                </Card>
+
                 {/* 보안 카드 */}
+
                 <Card padding="xl" radius="xl" withBorder>
                     <Stack gap="lg">
                         <Group gap="sm">

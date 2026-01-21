@@ -2,9 +2,10 @@
 
 /**
  * 대시보드 메인 콘텐츠
- * Streamlit 기능 반영: 크레딧, 프로젝트 카드, 최근 프로젝트 목록
+ * DB 연동: Supabase에서 최근 프로젝트 조회
  */
 
+import { useState, useEffect } from 'react';
 import {
     Container,
     Title,
@@ -21,6 +22,7 @@ import {
     Table,
     ActionIcon,
     Tooltip,
+    Loader,
 } from '@mantine/core';
 import {
     Sparkles,
@@ -33,6 +35,7 @@ import {
     Pencil,
     Trash2,
     Coins,
+    Loader2,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -45,34 +48,53 @@ interface DashboardContentProps {
     } | null;
 }
 
-// 목 데이터: 최근 프로젝트
-const mockProjects = [
-    {
-        id: '1',
-        title: '일본 건설 현장의 비밀...',
-        createdAt: '2026-01-15 21:30',
-        versions: 3,
-        archetype: '겉보기 vs 실제',
-    },
-    {
-        id: '2',
-        title: '사막에서 차에 엔진 오일을...',
-        createdAt: '2026-01-14 15:22',
-        versions: 3,
-        archetype: '현상 현장형',
-    },
-    {
-        id: '3',
-        title: '소금 호수가 분홍색인 이유...',
-        createdAt: '2026-01-13 10:15',
-        versions: 3,
-        archetype: '극단 수치형',
-    },
-];
+// 프로젝트 타입 정의
+interface ProjectItem {
+    id: string;
+    title: string;
+    createdAt: string;
+    versions: number;
+    archetype: string;
+}
+
+// 아키타입 한글 이름
+const ARCHETYPE_NAMES: Record<string, string> = {
+    'APPEARANCE_VS_REALITY': '겉보기 vs 실제',
+    'EXTREME_METRIC_VARIANT': '극단 수치형',
+    'TOOL_FORCE': '도구 위력형',
+    'PHENOMENON_SITE': '현상 현장형',
+    'HIDDEN_SCENE_DAILY': '숨겨진 장면형',
+    'UNKNOWN': '기타',
+};
 
 export function DashboardContent({ user, subscription }: DashboardContentProps) {
+    // 프로젝트 데이터 상태
+    const [projects, setProjects] = useState<ProjectItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // DB에서 최근 프로젝트 불러오기
+    useEffect(() => {
+        async function fetchProjects() {
+            try {
+                setIsLoading(true);
+                const response = await fetch('/api/scripts/history');
+                const data = await response.json();
+
+                if (data.success) {
+                    // 최근 5개만 표시
+                    setProjects(data.scripts.slice(0, 5));
+                }
+            } catch {
+                // 에러 시 빈 배열
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchProjects();
+    }, []);
+
     const credits = 47; // 목 데이터: 크레딧 잔액
-    const usedCredits = 3;
+    const usedCredits = projects.length;
     const totalCredits = subscription?.plan_name === 'Free Plan' ? 50 : 500;
     const usagePercent = (usedCredits / totalCredits) * 100;
 
@@ -228,13 +250,13 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     <Card padding="lg" radius="xl" withBorder>
                         <Stack gap="md">
                             <Group justify="space-between">
-                                <Text size="sm" c="gray.6">총 생성 스크립트</Text>
+                                <Text size="sm" c="gray.6">총 프로젝트</Text>
                                 <ThemeIcon size="lg" radius="lg" color="violet" variant="light">
                                     <Sparkles size={20} />
                                 </ThemeIcon>
                             </Group>
                             <Title order={3} style={{ color: '#111827' }}>
-                                {mockProjects.length * 3}개
+                                {projects.length}개
                             </Title>
                         </Stack>
                     </Card>
@@ -276,62 +298,87 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     </Group>
 
                     <Card padding={0} radius="lg" withBorder>
-                        <Table highlightOnHover>
-                            <Table.Thead>
-                                <Table.Tr>
-                                    <Table.Th>제목</Table.Th>
-                                    <Table.Th>생성일</Table.Th>
-                                    <Table.Th>버전</Table.Th>
-                                    <Table.Th>스타일</Table.Th>
-                                    <Table.Th style={{ width: 100 }}>액션</Table.Th>
-                                </Table.Tr>
-                            </Table.Thead>
-                            <Table.Tbody>
-                                {mockProjects.map((project) => (
-                                    <Table.Tr key={project.id}>
-                                        <Table.Td>
-                                            <Text fw={500}>{project.title}</Text>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Text size="sm" c="gray.6">{project.createdAt}</Text>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Badge variant="light" color="violet">
-                                                {project.versions}개 버전
-                                            </Badge>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Badge variant="outline" color="gray">
-                                                {project.archetype}
-                                            </Badge>
-                                        </Table.Td>
-                                        <Table.Td>
-                                            <Group gap="xs">
-                                                <Tooltip label="수정">
-                                                    <ActionIcon variant="subtle" color="blue">
-                                                        <Pencil size={16} />
-                                                    </ActionIcon>
-                                                </Tooltip>
-                                                <Tooltip label="삭제">
-                                                    <ActionIcon variant="subtle" color="red">
-                                                        <Trash2 size={16} />
-                                                    </ActionIcon>
-                                                </Tooltip>
-                                            </Group>
-                                        </Table.Td>
+                        {isLoading ? (
+                            <Box p="xl" ta="center">
+                                <Group justify="center" gap="sm">
+                                    <Loader size="sm" color="violet" />
+                                    <Text c="gray.6">불러오는 중...</Text>
+                                </Group>
+                            </Box>
+                        ) : projects.length > 0 ? (
+                            <Table highlightOnHover>
+                                <Table.Thead>
+                                    <Table.Tr>
+                                        <Table.Th>제목</Table.Th>
+                                        <Table.Th>생성일</Table.Th>
+                                        <Table.Th>버전</Table.Th>
+                                        <Table.Th>스타일</Table.Th>
+                                        <Table.Th style={{ width: 100 }}>액션</Table.Th>
                                     </Table.Tr>
-                                ))}
-                            </Table.Tbody>
-                        </Table>
+                                </Table.Thead>
+                                <Table.Tbody>
+                                    {projects.map((project) => (
+                                        <Table.Tr key={project.id}>
+                                            <Table.Td>
+                                                <Text fw={500}>{project.title}</Text>
+                                            </Table.Td>
+                                            <Table.Td>
+                                                <Text size="sm" c="gray.6">{project.createdAt}</Text>
+                                            </Table.Td>
+                                            <Table.Td>
+                                                <Badge variant="light" color="violet">
+                                                    {project.versions}개 버전
+                                                </Badge>
+                                            </Table.Td>
+                                            <Table.Td>
+                                                <Badge variant="outline" color="gray">
+                                                    {ARCHETYPE_NAMES[project.archetype] || project.archetype}
+                                                </Badge>
+                                            </Table.Td>
+                                            <Table.Td>
+                                                <Group gap="xs">
+                                                    <Tooltip label="수정">
+                                                        <ActionIcon
+                                                            variant="subtle"
+                                                            color="blue"
+                                                            component={Link}
+                                                            href={`/dashboard/archive?id=${project.id}`}
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </ActionIcon>
+                                                    </Tooltip>
+                                                    <Tooltip label="삭제">
+                                                        <ActionIcon
+                                                            variant="subtle"
+                                                            color="red"
+                                                            onClick={() => alert('삭제 기능은 현재 준비 중입니다.')}
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </ActionIcon>
+                                                    </Tooltip>
+                                                </Group>
+                                            </Table.Td>
+                                        </Table.Tr>
+                                    ))}
+                                </Table.Tbody>
+                            </Table>
+                        ) : (
+                            <Box p="xl" ta="center">
+                                <Text c="gray.5">
+                                    아직 생성된 프로젝트가 없습니다. 새 프로젝트를 시작해보세요!
+                                </Text>
+                                <Button
+                                    component={Link}
+                                    href="/dashboard/scripts"
+                                    variant="light"
+                                    color="violet"
+                                    mt="md"
+                                >
+                                    ✨ 새 스크립트 만들기
+                                </Button>
+                            </Box>
+                        )}
                     </Card>
-
-                    {mockProjects.length === 0 && (
-                        <Card padding="xl" radius="lg" withBorder ta="center">
-                            <Text c="gray.5">
-                                아직 생성된 프로젝트가 없습니다. 위 버튼을 눌러 시작해보세요!
-                            </Text>
-                        </Card>
-                    )}
                 </Box>
 
                 {/* Pro 팁 */}
