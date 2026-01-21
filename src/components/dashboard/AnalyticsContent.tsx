@@ -173,6 +173,15 @@ export function AnalyticsContent() {
     const [youtubeStats, setYoutubeStats] = useState<YouTubeStats | null>(null);
     const [youtubeLoading, setYoutubeLoading] = useState(true);
 
+    // 동기화 상태
+    const [syncLoading, setSyncLoading] = useState(false);
+    const [syncResult, setSyncResult] = useState<string | null>(null);
+    const [syncedVideos, setSyncedVideos] = useState<any[]>([]);
+
+    // 유지율 조회 상태
+    const [retentionLoading, setRetentionLoading] = useState(false);
+    const [retentionData, setRetentionData] = useState<any>(null);
+
     // YouTube 데이터 가져오기
     useEffect(() => {
         const fetchYoutubeStats = async () => {
@@ -188,7 +197,65 @@ export function AnalyticsContent() {
             }
         };
         fetchYoutubeStats();
+
+        // 저장된 영상 데이터 가져오기
+        const fetchSyncedData = async () => {
+            try {
+                const res = await fetch('/api/youtube/sync');
+                const data = await res.json();
+                if (data.videos) {
+                    setSyncedVideos(data.videos);
+                }
+            } catch (error) {
+                console.error('Failed to fetch synced data:', error);
+            }
+        };
+        fetchSyncedData();
     }, []);
+
+    // 영상 동기화 핸들러
+    const handleSync = async (maxVideos: number) => {
+        setSyncLoading(true);
+        setSyncResult(null);
+        try {
+            const res = await fetch('/api/youtube/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maxVideos }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setSyncResult(data.message);
+                // 다시 가져오기
+                const refreshRes = await fetch('/api/youtube/sync');
+                const refreshData = await refreshRes.json();
+                if (refreshData.videos) {
+                    setSyncedVideos(refreshData.videos);
+                }
+            } else {
+                setSyncResult(`오류: ${data.error}`);
+            }
+        } catch (error) {
+            console.error('Sync failed:', error);
+            setSyncResult('동기화 실패');
+        } finally {
+            setSyncLoading(false);
+        }
+    };
+
+    // 유지율 곡선 조회 핸들러
+    const handleViewRetention = async (videoId: string) => {
+        setRetentionLoading(true);
+        try {
+            const res = await fetch(`/api/youtube/retention?videoId=${videoId}`);
+            const data = await res.json();
+            setRetentionData(data);
+        } catch (error) {
+            console.error('Failed to fetch retention:', error);
+        } finally {
+            setRetentionLoading(false);
+        }
+    };
 
     const channelAvgViews = youtubeStats?.channel?.viewCount
         ? Math.round(youtubeStats.channel.viewCount / (youtubeStats.channel.videoCount || 1))
@@ -352,9 +419,37 @@ export function AnalyticsContent() {
                                         ✅ YouTube 채널 <strong>{youtubeStats.channel?.title}</strong>이(가) 연결되었습니다!
                                     </Alert>
 
-                                    {/* 최근 영상 목록 */}
+                                    {/* 동기화 버튼 */}
+                                    <Group gap="md">
+                                        <Button
+                                            leftSection={<RefreshCw size={18} />}
+                                            variant="light"
+                                            loading={syncLoading}
+                                            onClick={() => handleSync(50)}
+                                        >
+                                            🔄 빠른 새로고침 (50개)
+                                        </Button>
+                                        <Button
+                                            leftSection={<BarChart3 size={18} />}
+                                            variant="filled"
+                                            loading={syncLoading}
+                                            onClick={() => handleSync(500)}
+                                            color="violet"
+                                        >
+                                            📥 전체 영상 동기화 (500개)
+                                        </Button>
+                                        {syncResult && (
+                                            <Badge color="green" size="lg">
+                                                {syncResult}
+                                            </Badge>
+                                        )}
+                                    </Group>
+
+                                    {/* 동기화된 영상 목록 */}
                                     <Box>
-                                        <Title order={4} mb="lg">📺 최근 영상 (최대 10개)</Title>
+                                        <Title order={4} mb="lg">
+                                            📺 동기화된 영상 ({syncedVideos.length}개)
+                                        </Title>
                                         <Card padding={0} radius="lg" withBorder>
                                             <Table>
                                                 <Table.Thead>
@@ -362,40 +457,52 @@ export function AnalyticsContent() {
                                                         <Table.Th>제목</Table.Th>
                                                         <Table.Th>조회수</Table.Th>
                                                         <Table.Th>좋아요</Table.Th>
-                                                        <Table.Th>댓글</Table.Th>
+                                                        <Table.Th>시청률</Table.Th>
                                                         <Table.Th>업로드</Table.Th>
+                                                        <Table.Th>분석</Table.Th>
                                                     </Table.Tr>
                                                 </Table.Thead>
                                                 <Table.Tbody>
-                                                    {youtubeStats.videos.map((video) => (
-                                                        <Table.Tr key={video.id}>
+                                                    {(syncedVideos.length > 0 ? syncedVideos : youtubeStats.videos).slice(0, 20).map((video: any) => (
+                                                        <Table.Tr key={video.id || video.video_id}>
                                                             <Table.Td>
-                                                                <Text fw={500} lineClamp={1} maw={300}>
+                                                                <Text fw={500} lineClamp={1} maw={250}>
                                                                     {video.title}
                                                                 </Text>
                                                             </Table.Td>
                                                             <Table.Td>
                                                                 <Group gap="xs">
                                                                     <Eye size={14} />
-                                                                    <Text>{video.viewCount.toLocaleString()}</Text>
+                                                                    <Text>{(video.viewCount || video.view_count || 0).toLocaleString()}</Text>
                                                                 </Group>
                                                             </Table.Td>
                                                             <Table.Td>
                                                                 <Group gap="xs">
                                                                     <ThumbsUp size={14} />
-                                                                    <Text>{video.likeCount.toLocaleString()}</Text>
+                                                                    <Text>{(video.likeCount || video.like_count || 0).toLocaleString()}</Text>
                                                                 </Group>
                                                             </Table.Td>
                                                             <Table.Td>
-                                                                <Group gap="xs">
-                                                                    <MessageCircle size={14} />
-                                                                    <Text>{video.commentCount.toLocaleString()}</Text>
-                                                                </Group>
+                                                                {video.avg_view_percentage ? (
+                                                                    <Badge color="violet">{video.avg_view_percentage.toFixed(1)}%</Badge>
+                                                                ) : (
+                                                                    <Text c="gray.5">-</Text>
+                                                                )}
                                                             </Table.Td>
                                                             <Table.Td>
                                                                 <Text size="sm" c="gray.6">
-                                                                    {new Date(video.publishedAt).toLocaleDateString('ko-KR')}
+                                                                    {new Date(video.publishedAt || video.published_at).toLocaleDateString('ko-KR')}
                                                                 </Text>
+                                                            </Table.Td>
+                                                            <Table.Td>
+                                                                <Button
+                                                                    size="xs"
+                                                                    variant="light"
+                                                                    onClick={() => handleViewRetention(video.id || video.video_id)}
+                                                                    disabled={retentionLoading}
+                                                                >
+                                                                    📈 유지율
+                                                                </Button>
                                                             </Table.Td>
                                                         </Table.Tr>
                                                     ))}
@@ -403,6 +510,52 @@ export function AnalyticsContent() {
                                             </Table>
                                         </Card>
                                     </Box>
+
+                                    {/* 유지율 곡선 모달/섹션 */}
+                                    {retentionData && (
+                                        <Card padding="lg" radius="lg" withBorder style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' }}>
+                                            <Stack gap="md">
+                                                <Group justify="space-between">
+                                                    <Title order={4} style={{ color: 'white' }}>📈 시청자 유지율 곡선</Title>
+                                                    <Button size="xs" variant="subtle" onClick={() => setRetentionData(null)}>✕ 닫기</Button>
+                                                </Group>
+                                                <SimpleGrid cols={3}>
+                                                    <Box>
+                                                        <Text size="sm" c="gray.4">평균 유지율</Text>
+                                                        <Title order={3} style={{ color: '#a78bfa' }}>
+                                                            {(retentionData.avgRetention * 100).toFixed(1)}%
+                                                        </Title>
+                                                    </Box>
+                                                    <Box>
+                                                        <Text size="sm" c="gray.4">급락 지점</Text>
+                                                        <Title order={3} style={{ color: '#f87171' }}>
+                                                            {retentionData.dropOffPoints?.length || 0}개
+                                                        </Title>
+                                                    </Box>
+                                                    <Box>
+                                                        <Text size="sm" c="gray.4">스파이크</Text>
+                                                        <Title order={3} style={{ color: '#34d399' }}>
+                                                            {retentionData.spikePoints?.length || 0}개
+                                                        </Title>
+                                                    </Box>
+                                                </SimpleGrid>
+                                                {retentionData.dataPoints?.length > 0 && (
+                                                    <Box>
+                                                        <Text size="sm" c="gray.4" mb="xs">유지율 곡선 (100개 포인트)</Text>
+                                                        <Progress.Root size="xl">
+                                                            {retentionData.dataPoints.slice(0, 20).map((point: any, idx: number) => (
+                                                                <Progress.Section
+                                                                    key={idx}
+                                                                    value={5}
+                                                                    color={point.retention > 0.5 ? 'green' : point.retention > 0.3 ? 'yellow' : 'red'}
+                                                                />
+                                                            ))}
+                                                        </Progress.Root>
+                                                    </Box>
+                                                )}
+                                            </Stack>
+                                        </Card>
+                                    )}
                                 </Stack>
                             )}
                         </Stack>
