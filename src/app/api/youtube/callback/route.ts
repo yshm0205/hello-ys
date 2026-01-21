@@ -11,17 +11,21 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get('error');
     const state = searchParams.get('state');
 
+    // 기본 리다이렉트 경로 (locale 포함)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://flowspot-kr.vercel.app';
+    const settingsUrl = `${baseUrl}/ko/dashboard/settings`;
+
     if (error) {
         console.error('YouTube OAuth error:', error);
-        return NextResponse.redirect(new URL('/dashboard/settings?youtube_error=' + error, request.url));
+        return NextResponse.redirect(`${settingsUrl}?youtube_error=${error}`);
     }
 
     if (!code) {
-        return NextResponse.redirect(new URL('/dashboard/settings?youtube_error=no_code', request.url));
+        return NextResponse.redirect(`${settingsUrl}?youtube_error=no_code`);
     }
 
     if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-        return NextResponse.redirect(new URL('/dashboard/settings?youtube_error=not_configured', request.url));
+        return NextResponse.redirect(`${settingsUrl}?youtube_error=not_configured`);
     }
 
     // state에서 redirect URI 복원 (auth에서 저장한 값)
@@ -52,7 +56,7 @@ export async function GET(request: NextRequest) {
 
         if (tokens.error) {
             console.error('Token exchange error:', tokens);
-            return NextResponse.redirect(new URL('/dashboard/settings?youtube_error=token_error', request.url));
+            return NextResponse.redirect(`${settingsUrl}?youtube_error=token_error`);
         }
 
         // 쿠키에 토큰 저장 (HttpOnly, Secure)
@@ -77,10 +81,11 @@ export async function GET(request: NextRequest) {
         }
 
         // 성공 시 설정 페이지로 리다이렉트
-        return NextResponse.redirect(new URL('/dashboard/settings?youtube_connected=true', request.url));
+        return NextResponse.redirect(`${settingsUrl}?youtube_connected=true`);
 
     } catch (error) {
         console.error('YouTube OAuth callback error:', error);
-        return NextResponse.redirect(new URL('/dashboard/settings?youtube_error=unknown', request.url));
+        return NextResponse.redirect(`${settingsUrl}?youtube_error=unknown`);
     }
 }
+
