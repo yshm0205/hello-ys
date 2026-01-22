@@ -34,11 +34,29 @@ export async function GET(request: NextRequest) {
         const offset = parseInt(searchParams.get('offset') || '0');
         const sortBy = searchParams.get('sort') || 'score';
 
-        // 먼저 hot_list_daily만 조회 (join 없이)
+        // 필터 파라미터
+        const minSubs = parseInt(searchParams.get('min_subs') || '0');
+        const maxSubs = parseInt(searchParams.get('max_subs') || '0');
+        const minPerf = parseInt(searchParams.get('min_perf') || '0');
+
+        // 먼저 hot_list_daily만 조회
         let query = supabase
             .from('hot_list_daily')
             .select('*')
             .eq('date', date);
+
+        // 성과 필터
+        if (minPerf > 0) {
+            query = query.gte('performance_rate', minPerf);
+        }
+
+        // 구독자 필터
+        if (minSubs > 0) {
+            query = query.gte('subscriber_count', minSubs);
+        }
+        if (maxSubs > 0) {
+            query = query.lte('subscriber_count', maxSubs);
+        }
 
         // 정렬
         if (sortBy === 'velocity') {
