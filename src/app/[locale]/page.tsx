@@ -18,6 +18,8 @@ import {
   Box,
   Divider,
   Code,
+  Badge,
+  Avatar,
 } from '@mantine/core';
 import {
   Sparkles,
@@ -239,173 +241,191 @@ function HeroSection() {
             </Box>
           </motion.div>
 
-          {/* 로봇 캐릭터 이미지 */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            style={{ position: 'relative' }}
-          >
-            {/* 로봇 뒤 글로우 효과 */}
-            <Box style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '300px',
-              height: '300px',
-              background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%)',
-              filter: 'blur(40px)',
-              zIndex: 0,
-            }} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/robot-hero.png?v=2"
-              alt="FlowSpot AI Robot"
-              width={320}
-              height={380}
-              style={{
-                position: 'relative',
-                zIndex: 1,
-                filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.3))',
-              }}
-            />
-          </motion.div>
+          {/* Product-First Hero Layout */}
+          <Group align="center" justify="space-between" style={{ width: '100%', gap: '4rem', alignItems: 'center' }}>
 
-          {/* 메인 타이틀 - 에이전트 스타일 */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <Title
-              order={1}
-              ta="center"
-              style={{
-                fontSize: 'clamp(36px, 6vw, 64px)',
-                fontWeight: 800,
-                lineHeight: 1.15,
-                color: '#FFFFFF',
-              }}
-            >
-              이제 AI가 대신
-              <br />
-              <span style={{
-                background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #fb7185 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}>스크립트를 써드립니다</span>
-            </Title>
-          </motion.div>
-
-          {/* 서브 헤드라인 - 가치 제안 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <Text
-              size="xl"
-              ta="center"
-              maw={700}
-              style={{ lineHeight: 1.8, color: 'rgba(255,255,255,0.7)', fontSize: '20px' }}
-            >
-              조회수가 터지는 영상에는 <span style={{ color: '#a78bfa', fontWeight: 600 }}>공통된 패턴</span>이 있습니다.
-              <br />
-              FlowSpot AI가 <span style={{ color: '#4ade80', fontWeight: 600 }}>200개의 바이럴 영상</span>을 분석해서
-              <br />
-              당신만의 스크립트를 자동으로 생성합니다.
-            </Text>
-          </motion.div>
-
-          {/* 에이전트 워크플로우 설명 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            <Box
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '16px',
-                padding: '24px 32px',
-                maxWidth: '600px',
-              }}
-            >
-              <Stack gap="sm">
-                <Group gap="sm">
-                  <Bot size={20} color="#a78bfa" />
-                  <Text fw={600} style={{ color: '#FFFFFF' }}>Script Agent가 하는 일</Text>
-                </Group>
-                <Stack gap={8} style={{ paddingLeft: '28px' }}>
-                  <Text size="sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    → 참고 스크립트의 <span style={{ color: '#a78bfa' }}>훅 패턴</span> 분석
-                  </Text>
-                  <Text size="sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    → 조회수 터지는 <span style={{ color: '#a78bfa' }}>첫 문장 3개</span> 자동 생성
-                  </Text>
-                  <Text size="sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    → 알고리즘 최적화된 <span style={{ color: '#22c55e' }}>완성 스크립트</span> 제공
-                  </Text>
-                </Stack>
-              </Stack>
-            </Box>
-          </motion.div>
-
-          {/* CTA 버튼 - 레인보우 보더 애니메이션 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <Group gap="xl">
-              <Box
-                style={{
-                  background: 'linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b, #22c55e, #3b82f6, #8b5cf6)',
-                  backgroundSize: '200% 100%',
-                  animation: 'rainbow 3s linear infinite',
-                  padding: '3px',
-                  borderRadius: '50px',
-                }}
+            {/* Left: Copy & CTA */}
+            <Stack style={{ flex: 1, maxWidth: '600px' }} gap="xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
               >
-                <Button
-                  component={Link}
-                  href="/dashboard"
-                  size="xl"
-                  radius="xl"
-                  leftSection={<Sparkles size={22} />}
+                <Group gap="sm">
+                  <Badge
+                    size="lg"
+                    variant="gradient"
+                    gradient={{ from: 'indigo', to: 'cyan' }}
+                    style={{ fontSize: '14px', padding: '12px 16px' }}
+                  >
+                    🎉 베타 오픈 기념 : 스크립트 3개 무료
+                  </Badge>
+                </Group>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Title
+                  order={1}
                   style={{
-                    padding: '20px 48px',
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    background: '#0a0a14',
-                    border: 'none',
+                    fontSize: 'clamp(40px, 5vw, 64px)',
+                    fontWeight: 800,
+                    lineHeight: 1.1,
                     color: '#FFFFFF',
+                    textAlign: 'left',
                   }}
                 >
-                  무료로 시작하기
-                </Button>
-              </Box>
-              <Button
-                component={Link}
-                href="#how-it-works"
-                size="xl"
-                radius="xl"
-                variant="outline"
-                rightSection={<ArrowRight size={20} />}
-                style={{
-                  padding: '20px 40px',
-                  fontSize: '18px',
-                  fontWeight: 600,
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  color: '#FFFFFF',
-                }}
+                  잘 터지는 유튜브 대본,
+                  <br />
+                  <span style={{
+                    background: 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}>AI가 3분 만에.</span>
+                </Title>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
               >
-                작동 원리 보기
-              </Button>
-            </Group>
-          </motion.div>
+                <Text
+                  size="xl"
+                  style={{
+                    lineHeight: 1.6,
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '20px',
+                    textAlign: 'left'
+                  }}
+                >
+                  레퍼런스 영상만 복사해서 붙여넣으세요.
+                  <br />
+                  구조 분석부터 후킹 포인트까지, AI가 알아서 대본을 완성해줍니다.
+                </Text>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Group gap="md" style={{ marginTop: '1rem' }}>
+                  <Button
+                    component={Link}
+                    href="/dashboard"
+                    size="xl"
+                    radius="md"
+                    rightSection={<Sparkles size={20} />}
+                    style={{
+                      padding: '0 32px',
+                      height: '60px',
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      background: '#a78bfa',
+                      color: '#ffffff',
+                      transition: 'transform 0.2s',
+                    }}
+                  >
+                    무료로 대본 3개 받기
+                  </Button>
+                  <Text size="sm" c="dimmed">
+                    *카드 등록 없이 바로 시작하세요
+                  </Text>
+                </Group>
+              </motion.div>
+
+              {/* Social Proof Text */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <Group gap="xs" style={{ marginTop: '1rem' }}>
+                  <Avatar.Group spacing="sm">
+                    <Avatar src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png" radius="xl" size="sm" />
+                    <Avatar src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png" radius="xl" size="sm" />
+                    <Avatar src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-3.png" radius="xl" size="sm" />
+                    <Avatar radius="xl" size="sm">+50</Avatar>
+                  </Avatar.Group>
+                  <Text size="sm" c="dimmed" style={{ marginLeft: '8px' }}>
+                    이미 <span style={{ color: '#fff', fontWeight: 600 }}>1,200명</span>의 크리에이터가 사용 중입니다
+                  </Text>
+                </Group>
+              </motion.div>
+            </Stack>
+
+            {/* Right: Product Screenshot Placeholder */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              style={{ flex: 1, display: 'flex', justifyContent: 'center', width: '100%' }}
+            >
+              <Box style={{ position: 'relative', width: '100%', maxWidth: '600px', aspectRatio: '16/10' }}>
+                <Box
+                  className="animate-float"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(20, 20, 40, 0.6)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '24px',
+                    boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.5)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    zIndex: 2,
+                  }}
+                >
+                  {/* Mockup UI Header */}
+                  <Box style={{
+                    height: '40px',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0 20px',
+                    gap: '8px',
+                    background: 'rgba(255,255,255,0.05)'
+                  }}>
+                    <Box style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f57' }} />
+                    <Box style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#febc2e' }} />
+                    <Box style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#28c840' }} />
+                  </Box>
+
+                  {/* Mockup Content Placeholder */}
+                  <Box style={{ padding: '30px', height: 'calc(100% - 40px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <Text size="xl" fw={700} c="dimmed" ta="center" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      SCRIPTSHOP DASHBOARD
+                    </Text>
+                    <Text size="sm" c="dimmed" ta="center" mt="sm">
+                      (실제 툴 구동 화면으로 교체 예정)
+                    </Text>
+                    <Button variant="outline" color="gray" mt="xl" radius="xl" size="sm" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.5)' }}>
+                      &lt; 대본 생성 결과 화면 &gt;
+                    </Button>
+                  </Box>
+                </Box>
+
+                {/* Decorative Gradient Blob */}
+                <Box
+                  style={{
+                    position: 'absolute',
+                    top: '-20%',
+                    right: '-20%',
+                    width: '140%',
+                    height: '140%',
+                    background: 'radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, transparent 60%)',
+                    zIndex: 1,
+                    pointerEvents: 'none'
+                  }}
+                />
+              </Box>
+            </motion.div>
+          </Group>
 
           {/* 신뢰 지표 */}
           <motion.div
@@ -488,52 +508,161 @@ function StatsSection() {
   );
 }
 
-// ============ 문제 제기 섹션 ============
+// ============ 핵심 가치 제안 (Benefit) 섹션 ============
 function ProblemSection() {
-  const problems = [
-    '스크립트 작성에 2시간 넘게 걸린다',
-    '첫 문장(훅)을 어떻게 시작해야 할지 모르겠다',
-    '매번 비슷한 패턴으로 작성하게 된다',
-    '조회수가 왜 안 나오는지 모르겠다',
-  ];
-
   return (
-    <Box py={100} style={{ background: '#111827' }}>
+    <Box py={80} style={{ background: '#0a0a14', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
       <Container size="md">
         <Stack align="center" gap="xl">
-          <Text
-            size="sm"
-            fw={600}
+          <Badge
+            variant="outline"
+            color="gray"
+            size="lg"
             style={{
-              color: '#a78bfa',
-              letterSpacing: '2px',
               textTransform: 'uppercase',
+              letterSpacing: '1px',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: 'rgba(255,255,255,0.6)'
             }}
           >
-            이런 고민 있으신가요?
-          </Text>
-          <Title order={2} ta="center" style={{ color: '#FFFFFF' }}>
-            쇼츠 스크립트 작성,
+            Why FlowSpot?
+          </Badge>
+
+          <Title order={2} ta="center" style={{ color: '#FFFFFF', fontSize: '32px' }}>
+            <span style={{ color: '#a78bfa' }}>성과 없는 유튜브</span>는 이제 그만.
             <br />
-            어렵고 시간이 오래 걸리죠?
+            검증된 데이터로 확실하게 시작하세요.
           </Title>
 
-          <Stack gap="md" mt="lg">
-            {problems.map((problem, i) => (
-              <Group key={i} gap="md" style={{ opacity: 0.9 }}>
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg" mt="md" style={{ width: '100%' }}>
+            {[
+              { title: "시간 90% 단축", desc: "고민하는 시간 3시간 → 클릭 3분으로 단축", icon: "⚡" },
+              { title: "검증된 구조", desc: "뇌피셜이 아닌, 실제 터진 영상 패턴 분석", icon: "📊" },
+              { title: "무한 아이디어", desc: "마르지 않는 소재와 후킹 문장 제공", icon: "💡" },
+            ].map((item, i) => (
+              <Box key={i} style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '16px',
+                padding: '24px',
+                textAlign: 'center'
+              }}>
+                <Text style={{ fontSize: '32px', marginBottom: '12px' }}>{item.icon}</Text>
+                <Text fw={700} style={{ color: '#fff', fontSize: '18px', marginBottom: '8px' }}>{item.title}</Text>
+                <Text size="sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{item.desc}</Text>
+              </Box>
+            ))}
+          </SimpleGrid>
+        </Stack>
+      </Container>
+    </Box>
+  );
+}
+
+// ============ 본인 스토리 섹션 (기획서 3번) ============
+function PersonalStorySection() {
+  return (
+    <Box py={100} style={{ background: '#0d0d1a' }}>
+      <Container size="md">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <Stack align="center" gap="xl">
+            <Text
+              size="sm"
+              fw={600}
+              style={{
+                color: '#a78bfa',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+              }}
+            >
+              왜 AI 팀을 만들었을까요?
+            </Text>
+
+            {/* 메인 스토리 */}
+            <Box
+              style={{
+                background: 'rgba(139, 92, 246, 0.08)',
+                border: '1px solid rgba(139, 92, 246, 0.2)',
+                borderRadius: '20px',
+                padding: '40px',
+                maxWidth: '700px',
+              }}
+            >
+              <Stack gap="lg">
+                <Text
+                  size="lg"
+                  style={{
+                    color: '#FFFFFF',
+                    lineHeight: 1.8,
+                    fontSize: '18px',
+                  }}
+                >
+                  &quot;제 수강생 중 <span style={{ color: '#22c55e', fontWeight: 600 }}>월 1000만원, 500만원</span> 버시는 분들이 있습니다.&quot;
+                </Text>
+
+                <Text
+                  style={{
+                    color: 'rgba(255,255,255,0.7)',
+                    lineHeight: 1.8,
+                  }}
+                >
+                  근데 모든 분이 그러진 못했어요.
+                  <br /><br />
+                  지식을 정확히 안다고 해서 <span style={{ color: '#a78bfa' }}>실행력과 센스</span>까지 같을 순 없더라고요.
+                </Text>
+
                 <Box
                   style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: '#ef4444',
+                    borderLeft: '3px solid #ec4899',
+                    paddingLeft: '20px',
+                    marginTop: '12px',
                   }}
-                />
-                <Text size="lg" style={{ color: 'rgba(255,255,255,0.7)' }}>{problem}</Text>
-              </Group>
-            ))}
+                >
+                  <Text
+                    style={{
+                      color: '#ec4899',
+                      fontWeight: 600,
+                      fontSize: '17px',
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    특히 &quot;후킹 문장&quot;, &quot;스크립트 작성&quot;이 가장 어렵다고 하셨어요.
+                  </Text>
+                </Box>
+
+                <Text
+                  style={{
+                    color: '#00D9FF',
+                    fontWeight: 700,
+                    fontSize: '20px',
+                    textAlign: 'center',
+                    marginTop: '16px',
+                  }}
+                >
+                  그래서 이 부분을 자동화하는 AI 팀을 만들었습니다.
+                </Text>
+              </Stack>
+            </Box>
+
+            {/* 핵심 메시지 */}
+            <Box
+              style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15))',
+                borderRadius: '100px',
+                padding: '16px 32px',
+              }}
+            >
+              <Text fw={600} style={{ color: '#FFFFFF', fontSize: '16px' }}>
+                💡 &quot;배운 건 강의로, 실행은 AI로&quot;
+              </Text>
+            </Box>
           </Stack>
-        </Stack>
+        </motion.div>
       </Container>
     </Box>
   );
@@ -644,254 +773,492 @@ function SolutionSection() {
   );
 }
 
-// ============ 프로세스 여정 섹션 (3 로봇 팀 레이아웃) ============
+// ============ 프로세스 여정 섹션 (3-Step Flow) ============
 function HowItWorksSection() {
-  // 3 로봇 에이전트 팀 데이터
-  const agentTeam = [
-    {
-      name: '패턴 분석가',
-      role: 'Pattern Analyzer',
-      image: '/images/robot-analyzer.png?v=2',
-      color: '#8b5cf6',
-      desc: '200개 바이럴 영상의 훅 패턴을 분석합니다',
-      emoji: '🔍',
-    },
-    {
-      name: '스크립트 작가',
-      role: 'Script Writer',
-      image: '/images/robot-hero.png?v=2',
-      color: '#ec4899',
-      desc: '분석된 패턴으로 3개의 스크립트를 생성합니다',
-      emoji: '✍️',
-    },
-    {
-      name: '품질 검수자',
-      role: 'Quality Checker',
-      image: '/images/robot-working.png?v=2',
-      color: '#22c55e',
-      desc: '알고리즘 최적화 및 품질을 검증합니다',
-      emoji: '✅',
-    },
-  ];
-
   return (
-    <Box id="how-it-works" py={120} style={{ background: 'linear-gradient(180deg, #1a1a3e 0%, #0f0f2a 100%)', position: 'relative', overflow: 'hidden' }}>
-      {/* 배경 블루프린트 그리드 */}
+    <Box id="how-it-works" py={100} style={{ background: '#0a0a14', position: 'relative', overflow: 'hidden' }}>
+      {/* Background Grid */}
       <Box
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `
-            linear-gradient(rgba(100, 120, 200, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(100, 120, 200, 0.08) 1px, transparent 1px)
-          `,
-          backgroundSize: '30px 30px',
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
+          maskImage: 'linear-gradient(to bottom, transparent, black, transparent)',
         }}
       />
 
       <Container size="xl" style={{ position: 'relative', zIndex: 1 }}>
-        {/* 섹션 타이틀 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <Stack align="center" gap="md" mb={60}>
-            <Text
-              fw={600}
-              style={{
-                color: '#a78bfa',
-                fontSize: '13px',
-                letterSpacing: '3px',
-                textTransform: 'uppercase',
-              }}
-            >
-              Agent Team
-            </Text>
-            <Title order={2} ta="center" style={{ color: '#FFFFFF', fontSize: '36px' }}>
-              3명의 AI 에이전트가 <span style={{
-                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.3), transparent)',
-                padding: '4px 12px',
-                borderRadius: '4px',
-              }}>함께</span> 일합니다
-            </Title>
-            <Text ta="center" style={{ color: 'rgba(255,255,255,0.6)', maxWidth: '600px' }}>
-              각자의 전문 분야에서 협력하여 최고의 스크립트를 만들어냅니다
-            </Text>
-          </Stack>
-        </motion.div>
+        <Stack align="center" gap="xl" mb={80}>
+          <Badge variant="dot" color="yellow" size="lg" style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24' }}>
+            HOW IT WORKS
+          </Badge>
+          <Title order={2} ta="center" style={{ color: '#FFFFFF', fontSize: '36px' }}>
+            복잡한 과정은 잊으세요.
+            <br />
+            <span style={{ color: '#fbbf24' }}>단 3단계</span>로 끝납니다.
+          </Title>
+        </Stack>
 
-        {/* 3 로봇 팀 - 나란히 배치 */}
+        <SimpleGrid cols={{ base: 1, md: 3 }} spacing={40} style={{ position: 'relative' }}>
+
+          {/* Step 1: Input */}
+          <Stack align="center" gap="md">
+            <Box style={{ position: 'relative', width: '100%', aspectRatio: '4/3' }}>
+              <Box style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '16px',
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Stack align="center" gap="xs">
+                  <Box style={{ p: 2, border: '1px dashed rgba(255,255,255,0.3)', borderRadius: '8px', padding: '8px 16px' }}>
+                    <Text size="xs" c="dimmed">youtube.com/watch?v=...</Text>
+                  </Box>
+                  <Text size="sm" c="dimmed">링크 복사/붙여넣기</Text>
+                </Stack>
+              </Box>
+              <Badge
+                size="xl"
+                circle
+                style={{ position: 'absolute', top: -15, left: 20, width: 40, height: 40, background: '#1f2937', border: '1px solid rgba(255,255,255,0.2)' }}
+              >
+                1
+              </Badge>
+            </Box>
+            <Title order={3} style={{ color: '#fff', fontSize: '20px' }}>레퍼런스 입력</Title>
+            <Text ta="center" c="dimmed" size="sm">벤치마킹하고 싶은<br />영상 링크만 넣으세요.</Text>
+          </Stack>
+
+          {/* Step 2: Process */}
+          <Stack align="center" gap="md">
+            <Box style={{ position: 'relative', width: '100%', aspectRatio: '4/3' }}>
+              <Box style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(139, 92, 246, 0.05)',
+                border: '1px solid rgba(139, 92, 246, 0.2)',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Brain size={64} color="#a78bfa" className="animate-pulse" />
+              </Box>
+              <Badge
+                size="xl"
+                circle
+                style={{ position: 'absolute', top: -15, left: 20, width: 40, height: 40, background: '#1f2937', border: '1px solid rgba(255,255,255,0.2)' }}
+              >
+                2
+              </Badge>
+            </Box>
+            <Title order={3} style={{ color: '#fff', fontSize: '20px' }}>AI 분석 & 생성</Title>
+            <Text ta="center" c="dimmed" size="sm">영상 구조와 후킹 포인트를<br />AI가 1분 만에 분석합니다.</Text>
+          </Stack>
+
+          {/* Step 3: Output */}
+          <Stack align="center" gap="md">
+            <Box style={{ position: 'relative', width: '100%', aspectRatio: '4/3' }}>
+              <Box style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05))',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                borderRadius: '16px',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <Stack gap="xs">
+                  <Box style={{ width: '60%', height: '8px', background: 'rgba(34, 197, 94, 0.3)', borderRadius: '4px' }} />
+                  <Box style={{ width: '80%', height: '8px', background: 'rgba(34, 197, 94, 0.2)', borderRadius: '4px' }} />
+                  <Box style={{ width: '50%', height: '8px', background: 'rgba(34, 197, 94, 0.2)', borderRadius: '4px' }} />
+                </Stack>
+                <Badge variant="light" color="green" mt="md" style={{ width: 'fit-content' }}>완성</Badge>
+              </Box>
+              <Badge
+                size="xl"
+                circle
+                style={{ position: 'absolute', top: -15, left: 20, width: 40, height: 40, background: '#1f2937', border: '1px solid rgba(255,255,255,0.2)' }}
+              >
+                3
+              </Badge>
+            </Box>
+            <Title order={3} style={{ color: '#fff', fontSize: '20px' }}>대본 완성</Title>
+            <Text ta="center" c="dimmed" size="sm">나만의 스타일로 재해석된<br />완벽한 대본을 받으세요.</Text>
+          </Stack>
+
+        </SimpleGrid>
+      </Container>
+    </Box>
+  );
+}
+
+// ============ 강의 + AI 매핑 섹션 (기획서 6번 - 완전 신규) ============
+function LectureAIMappingSection() {
+  const mappings = [
+    { lecture: '기획 원리', agent: '분석 에이전트', emoji: '🔍' },
+    { lecture: '후킹 기법', agent: '후킹 에이전트', emoji: '🎯' },
+    { lecture: '대본 작성법', agent: '대본 에이전트', emoji: '✍️' },
+  ];
+
+  return (
+    <Box py={100} style={{ background: '#0d0d1a' }}>
+      <Container size="md">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          {/* 연결선 - 로봇들 사이 */}
-          <Box style={{ position: 'relative' }}>
-            {/* 수평 연결선 (로봇들 위에) */}
-            <Box style={{
-              position: 'absolute',
-              top: '180px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '70%',
-              height: '3px',
-              background: 'linear-gradient(90deg, #8b5cf6, #ec4899, #22c55e)',
-              borderRadius: '2px',
-              boxShadow: '0 0 20px rgba(139, 92, 246, 0.5)',
-              zIndex: 0,
-            }} />
+          <Stack align="center" gap="xl">
+            <Text
+              size="sm"
+              fw={600}
+              style={{
+                color: '#a78bfa',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+              }}
+            >
+              강의 + AI 도구
+            </Text>
 
-            {/* 화살표 애니메이션 표시 */}
-            <Box style={{
-              position: 'absolute',
-              top: '170px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 1,
-            }}>
-              <Text style={{ fontSize: '20px', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))' }}>⚡</Text>
+            <Title order={2} ta="center" style={{ color: '#FFFFFF' }}>
+              강의 28강으로 원리를 배우고
+              <br />
+              <span style={{ color: '#a78bfa' }}>AI 팀으로</span> 바로 실행하세요
+            </Title>
+
+            {/* 매핑 테이블 */}
+            <Box
+              style={{
+                background: 'rgba(139, 92, 246, 0.08)',
+                border: '1px solid rgba(139, 92, 246, 0.2)',
+                borderRadius: '20px',
+                padding: '32px',
+                width: '100%',
+                maxWidth: '500px',
+              }}
+            >
+              <Stack gap="lg">
+                {/* 헤더 */}
+                <SimpleGrid cols={2}>
+                  <Text fw={600} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>
+                    📚 강의 28강
+                  </Text>
+                  <Text fw={600} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>
+                    🤖 AI 실습
+                  </Text>
+                </SimpleGrid>
+
+                <Divider color="rgba(139, 92, 246, 0.3)" />
+
+                {/* 매핑 행들 */}
+                {mappings.map((item, i) => (
+                  <SimpleGrid cols={2} key={i}>
+                    <Text style={{ color: '#FFFFFF' }}>{item.lecture}</Text>
+                    <Group gap="xs">
+                      <Text style={{ color: '#a78bfa' }}>→</Text>
+                      <Text style={{ color: '#a78bfa' }}>{item.emoji} {item.agent}</Text>
+                    </Group>
+                  </SimpleGrid>
+                ))}
+              </Stack>
             </Box>
 
-            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={40} style={{ position: 'relative', zIndex: 2 }}>
-              {agentTeam.map((agent, index) => (
-                <motion.div
-                  key={agent.role}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
-                >
-                  <Stack align="center" gap="lg">
-                    {/* 순서 번호 */}
-                    <Box style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      background: `linear-gradient(135deg, ${agent.color}, ${agent.color}99)`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: `0 0 20px ${agent.color}60`,
-                    }}>
-                      <Text fw={700} style={{ color: '#fff', fontSize: '16px' }}>{index + 1}</Text>
-                    </Box>
-
-                    {/* 로봇 이미지 */}
-                    <Box style={{ position: 'relative' }}>
-                      {/* 글로우 효과 */}
-                      <Box style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '200px',
-                        height: '200px',
-                        background: `radial-gradient(circle, ${agent.color}40 0%, transparent 70%)`,
-                        filter: 'blur(30px)',
-                      }} />
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={agent.image}
-                        alt={agent.name}
-                        width={200}
-                        height={240}
-                        style={{
-                          position: 'relative',
-                          filter: `drop-shadow(0 0 15px ${agent.color}50)`,
-                        }}
-                      />
-                    </Box>
-
-                    {/* 에이전트 정보 카드 */}
-                    <Box style={{
-                      padding: '20px 24px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      borderRadius: '16px',
-                      border: `2px solid ${agent.color}50`,
-                      textAlign: 'center',
-                      width: '100%',
-                      maxWidth: '280px',
-                    }}>
-                      <Group gap="xs" justify="center" mb="xs">
-                        <Text style={{ fontSize: '20px' }}>{agent.emoji}</Text>
-                        <Text fw={700} style={{ color: agent.color, fontSize: '18px' }}>
-                          {agent.name}
-                        </Text>
-                      </Group>
-                      <Text size="xs" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '8px' }}>
-                        {agent.role}
-                      </Text>
-                      <Text size="sm" style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
-                        {agent.desc}
-                      </Text>
-                    </Box>
-                  </Stack>
-                </motion.div>
-              ))}
-            </SimpleGrid>
-          </Box>
-        </motion.div>
-
-        {/* 워크플로우 화살표 - 팀 아래 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <Stack align="center" gap="md" mt={50}>
-            {/* 화살표 */}
-            <Box style={{
-              width: '3px',
-              height: '40px',
-              background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(251, 146, 60, 0.8))',
-            }} />
-
-            {/* 최종 결과물 */}
-            <Box style={{
-              padding: '20px 48px',
-              background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%)',
-              borderRadius: '16px',
-              border: '2px solid rgba(251, 146, 60, 0.6)',
-              boxShadow: '0 0 50px rgba(251, 146, 60, 0.3)',
-            }}>
-              <Group gap="md">
-                <Text style={{ fontSize: '28px' }}>🎯</Text>
-                <Stack gap={4}>
-                  <Text fw={800} style={{ color: '#fb923c', fontSize: '22px' }}>
-                    완성 스크립트 3개
-                  </Text>
-                  <Text size="sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                    평균 30초 만에 자동 생성
-                  </Text>
-                </Stack>
-              </Group>
+            {/* 핵심 메시지 배지 */}
+            <Box
+              style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))',
+                borderRadius: '100px',
+                padding: '16px 32px',
+                marginTop: '16px',
+              }}
+            >
+              <Text fw={700} style={{ color: '#FFFFFF', fontSize: '18px' }}>
+                💡 &quot;배운 건 강의로, 실행은 AI로&quot;
+              </Text>
             </Box>
           </Stack>
         </motion.div>
+      </Container>
+    </Box>
+  );
+}
 
-        {/* 완료 표시 */}
+// ============ 팔로워 피드백 섹션 (기획서 5번) ============
+function TestimonialsSection() {
+  const testimonials = [
+    {
+      name: '숏폼 크리에이터 A님',
+      role: '구독자 3만명',
+      content: '매번 스크립트 쓰는데 2시간씩 걸렸는데, 이제 10분이면 끝나요. 진짜 혁신적이에요.',
+      rating: 5,
+    },
+    {
+      name: '지식 채널 운영자 B님',
+      role: '구독자 8만명',
+      content: '훅 문장이 항상 고민이었는데, AI가 제안해주는 옵션 중에 골라쓰니까 조회수가 확 올랐어요.',
+      rating: 5,
+    },
+    {
+      name: '부업 유튜버 C님',
+      role: '구독자 1.2만명',
+      content: '퇴근 후 영상 만들기 힘들었는데, 스크립트 자동화 덕분에 주 3개씩 올릴 수 있게 됐어요.',
+      rating: 5,
+    },
+  ];
+
+  return (
+    <Box py={100} style={{ background: '#111827' }}>
+      <Container size="lg">
+        <Stack align="center" gap="xl" mb={48}>
+          <Text
+            size="sm"
+            fw={600}
+            style={{
+              color: '#a78bfa',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+            }}
+          >
+            사용자 후기
+          </Text>
+          <Title order={2} ta="center" style={{ color: '#FFFFFF' }}>
+            이미 많은 분들이 사용하고 있어요
+          </Title>
+        </Stack>
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <Stack align="center" gap="md" mt={40}>
+          <SimpleGrid cols={{ base: 1, md: 3 }} spacing={24}>
+            {testimonials.map((t, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <Card
+                  padding="xl"
+                  radius="xl"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    height: '100%',
+                  }}
+                >
+                  <Stack gap="md">
+                    {/* 별점 */}
+                    <Group gap={4}>
+                      {[...Array(t.rating)].map((_, j) => (
+                        <Text key={j} style={{ color: '#fbbf24' }}>★</Text>
+                      ))}
+                    </Group>
+
+                    {/* 후기 내용 */}
+                    <Text style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, fontSize: '15px' }}>
+                      &quot;{t.content}&quot;
+                    </Text>
+
+                    {/* 작성자 정보 */}
+                    <Group gap="sm" mt="auto">
+                      <Box
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text fw={600} style={{ color: '#fff' }}>{t.name[0]}</Text>
+                      </Box>
+                      <Stack gap={2}>
+                        <Text fw={600} size="sm" style={{ color: '#FFFFFF' }}>{t.name}</Text>
+                        <Text size="xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{t.role}</Text>
+                      </Stack>
+                    </Group>
+                  </Stack>
+                </Card>
+              </motion.div>
+            ))}
+          </SimpleGrid>
+        </motion.div>
+      </Container>
+    </Box>
+  );
+}
+
+// ============ 강의+도구 결합 섹션 (기획서 6번) ============
+function PackageSection() {
+  const competitors = [
+    { name: '크리투스', price: '99만원', ai: false, lectures: true },
+    { name: '부업부부', price: '160만원', ai: false, lectures: true },
+    { name: 'FlowSpot', price: '50만원', ai: true, lectures: true, highlight: true },
+  ];
+
+  return (
+    <Box py={100} style={{ background: '#0a0a14' }}>
+      <Container size="lg">
+        <Stack align="center" gap="xl" mb={48}>
+          <Text
+            size="sm"
+            fw={600}
+            style={{
+              color: '#a78bfa',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+            }}
+          >
+            왜 FlowSpot인가요?
+          </Text>
+          <Title order={2} ta="center" style={{ color: '#FFFFFF' }}>
+            강의만 파는 게 아닙니다.
+            <br />
+            <span style={{ color: '#00D9FF' }}>진짜 도구</span>를 드립니다.
+          </Title>
+        </Stack>
+
+        {/* 비교표 */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={24}>
+            {competitors.map((comp, i) => (
+              <Box
+                key={i}
+                style={{
+                  background: comp.highlight
+                    ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(0, 217, 255, 0.1))'
+                    : 'rgba(255, 255, 255, 0.03)',
+                  border: comp.highlight
+                    ? '2px solid rgba(0, 217, 255, 0.5)'
+                    : '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '20px',
+                  padding: '32px',
+                  position: 'relative',
+                  boxShadow: comp.highlight ? '0 0 40px rgba(0, 217, 255, 0.2)' : 'none',
+                }}
+              >
+                {comp.highlight && (
+                  <Box
+                    style={{
+                      position: 'absolute',
+                      top: '-12px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: 'linear-gradient(135deg, #8b5cf6, #00D9FF)',
+                      borderRadius: '100px',
+                      padding: '6px 16px',
+                    }}
+                  >
+                    <Text fw={600} size="xs" style={{ color: '#fff' }}>✨ 추천</Text>
+                  </Box>
+                )}
+
+                <Stack align="center" gap="lg">
+                  <Text fw={700} style={{ color: comp.highlight ? '#00D9FF' : '#FFFFFF', fontSize: '20px' }}>
+                    {comp.name}
+                  </Text>
+
+                  <Text
+                    style={{
+                      fontSize: comp.highlight ? '36px' : '28px',
+                      fontWeight: 800,
+                      color: comp.highlight ? '#FFFFFF' : 'rgba(255,255,255,0.7)',
+                    }}
+                  >
+                    {comp.price}
+                  </Text>
+
+                  <Divider w="100%" color="gray.8" />
+
+                  <Stack gap="sm" w="100%">
+                    <Group gap="sm">
+                      {comp.lectures ? (
+                        <Check size={18} color="#22c55e" />
+                      ) : (
+                        <Text style={{ color: '#ef4444' }}>✕</Text>
+                      )}
+                      <Text size="sm" style={{ color: 'rgba(255,255,255,0.7)' }}>강의 제공</Text>
+                    </Group>
+                    <Group gap="sm">
+                      {comp.ai ? (
+                        <Check size={18} color="#22c55e" />
+                      ) : (
+                        <Text style={{ color: '#ef4444' }}>✕</Text>
+                      )}
+                      <Text size="sm" style={{ color: comp.ai ? '#22c55e' : 'rgba(255,255,255,0.5)' }}>
+                        AI 스크립트 도구
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Stack>
+              </Box>
+            ))}
+          </SimpleGrid>
+        </motion.div>
+
+        {/* 가격 강조 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Stack align="center" mt={60}>
             <Box
               style={{
-                padding: '12px 24px',
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                borderRadius: '16px',
+                padding: '24px 48px',
+                textAlign: 'center',
+              }}
+            >
+              <Text size="sm" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '8px' }}>
+                12개월 분할 시
+              </Text>
+              <Text
+                style={{
+                  fontSize: '42px',
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #a78bfa, #f472b6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                월 ₩41,666
+              </Text>
+              <Text size="sm" style={{ color: 'rgba(255,255,255,0.5)', marginTop: '8px' }}>
+                <span style={{ textDecoration: 'line-through' }}>정가 ₩700,000</span> → ₩500,000
+              </Text>
+            </Box>
+
+            <Box
+              style={{
                 background: 'rgba(34, 197, 94, 0.1)',
                 border: '1px solid rgba(34, 197, 94, 0.3)',
                 borderRadius: '100px',
+                padding: '12px 24px',
+                marginTop: '16px',
               }}
             >
               <Text fw={600} style={{ color: '#22c55e', fontSize: '14px' }}>
-                ✓ 3명의 전문가가 당신을 위해 일합니다
+                🔥 1기 100명 한정 얼리버드
               </Text>
             </Box>
           </Stack>
@@ -1007,74 +1374,42 @@ function FAQSection() {
   );
 }
 
-// ============ CTA 섹션 ============
+// ============ CTA 섹션 (Clean) ============
 function CTASection() {
   return (
-    <Box
-      py={100}
-      style={{
-        background: 'linear-gradient(135deg, #0a0a14 0%, #1e1b4b 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <Box
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '600px',
-          height: '300px',
-          background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.2) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-      />
-
-      <Container size="md" style={{ position: 'relative', zIndex: 1 }}>
+    <Box py={120} style={{ background: '#0a0a14', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+      <Container size="md">
         <Stack align="center" gap="xl">
-          <Box className="animate-float">
-            <Image
-              src="/images/robot-cta-dark.png"
-              alt="FlowSpot AI"
-              width={180}
-              height={180}
-              style={{ borderRadius: '24px' }}
-            />
-          </Box>
-          <Title order={2} ta="center" style={{ color: '#FFFFFF', fontSize: '40px' }}>
-            지금 바로 시작하세요
+          <Title order={2} ta="center" style={{ color: '#FFFFFF', fontSize: '48px', fontWeight: 800 }}>
+            <span style={{ color: '#a78bfa' }}>3분</span>이면 충분합니다.
+            <br />
+            직접 경험해보세요.
           </Title>
-          <Text size="lg" ta="center" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            첫 3회 스크립트 생성은 완전 무료
+          <Text size="xl" c="dimmed" ta="center">
+            복잡한 설치나 카드 등록 없이, 지금 바로 스크립트를 생성할 수 있습니다.
           </Text>
-
-          <Stack gap="xs" align="center">
-            {['카드 등록 필요 없음', '바로 사용 가능', '언제든 취소 가능'].map((text, i) => (
-              <Group key={i} gap="sm">
-                <Check size={18} color="#22c55e" />
-                <Text size="sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{text}</Text>
-              </Group>
-            ))}
-          </Stack>
 
           <Button
             component={Link}
             href="/dashboard"
             size="xl"
-            radius="xl"
-            rightSection={<ArrowRight size={20} />}
+            radius="md"
+            rightSection={<Sparkles size={20} />}
             style={{
-              marginTop: 16,
-              padding: '18px 48px',
-              fontSize: '18px',
-              fontWeight: 600,
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-              border: 'none',
+              padding: '0 48px',
+              height: '64px',
+              fontSize: '20px',
+              fontWeight: 700,
+              background: '#a78bfa',
+              color: '#ffffff',
+              marginTop: '24px'
             }}
           >
-            무료로 시작하기
+            무료로 대본 3개 만들기
           </Button>
+          <Text size="sm" c="dimmed">
+            *매주 3개 무료 제공
+          </Text>
         </Stack>
       </Container>
     </Box>
@@ -1120,12 +1455,27 @@ export default function LandingPage() {
   return (
     <main>
       <LandingHeader />
+      {/* 1. 히어로 */}
       <HeroSection />
+      {/* 통계 */}
       <StatsSection />
+      {/* 2. 페인포인트 */}
       <ProblemSection />
+      {/* 3. 본인 스토리 (새로 추가) */}
+      <PersonalStorySection />
+      {/* 4. 솔루션 */}
       <SolutionSection />
+      {/* 5. AI 팀 3명 */}
       <HowItWorksSection />
+      {/* 6. 강의 + AI 매핑 (기획서 섹션 6 - 신규) */}
+      <LectureAIMappingSection />
+      {/* 7. 팔로워 피드백 */}
+      <TestimonialsSection />
+      {/* 8. 강의+도구 결합 + 가격 비교 */}
+      <PackageSection />
+      {/* FAQ */}
       <FAQSection />
+      {/* 8. 최종 CTA */}
       <CTASection />
       <Footer />
     </main>

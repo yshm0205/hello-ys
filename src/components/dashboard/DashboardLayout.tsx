@@ -30,6 +30,7 @@ import {
     ChevronDown,
     LayoutDashboard,
     TestTube,
+    Flame,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 
@@ -62,6 +63,12 @@ const navItems = [
         href: '/dashboard/analytics',
         icon: TestTube,
         description: '스타일별 성과 비교',
+    },
+    {
+        label: '🔥 핫 리스트',
+        href: '/dashboard/hot-list',
+        icon: Flame,
+        description: '터지는 영상 발굴',
     },
     {
         label: '구독 관리',
