@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Container,
     Title,
     Text,
-    Card,
     Group,
     Stack,
     Badge,
@@ -16,10 +15,8 @@ import {
     Loader,
     Paper,
     SimpleGrid,
-    Progress,
     ActionIcon,
     Tooltip,
-    Anchor,
 } from '@mantine/core';
 import {
     Flame,
@@ -114,7 +111,7 @@ export function HotListContent() {
     const [page, setPage] = useState(0);
     const limit = 20;
 
-    const fetchHotList = async () => {
+    const fetchHotList = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams({
@@ -130,11 +127,11 @@ export function HotListContent() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [sortBy, page, limit]);
 
     useEffect(() => {
         fetchHotList();
-    }, [sortBy, page]);
+    }, [fetchHotList]);
 
     if (loading && !data) {
         return (
