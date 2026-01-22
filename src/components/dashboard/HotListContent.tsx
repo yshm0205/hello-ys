@@ -121,9 +121,20 @@ export function HotListContent() {
             });
             const res = await fetch(`/api/hot-list?${params}`);
             const json = await res.json();
+            // stats가 없으면 기본값 설정
+            if (!json.stats) {
+                json.stats = { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' };
+            }
             setData(json);
         } catch (error) {
             console.error('Failed to fetch hot list:', error);
+            // 에러 시 기본 빈 데이터 설정
+            setData({
+                date: new Date().toISOString().split('T')[0],
+                total: 0,
+                items: [],
+                stats: { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' }
+            });
         } finally {
             setLoading(false);
         }

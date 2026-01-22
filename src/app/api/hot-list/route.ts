@@ -6,12 +6,24 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { HotListResponse, KR_VIDEO_CATEGORIES } from '@/lib/youtube/hot-types';
+import { KR_VIDEO_CATEGORIES } from '@/lib/youtube/hot-types';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export async function GET(request: NextRequest) {
+    // 환경변수 체크
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.error('Missing Supabase env vars');
+        return NextResponse.json({
+            date: new Date().toISOString().split('T')[0],
+            total: 0,
+            items: [],
+            stats: { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' },
+            error: 'Database not configured'
+        });
+    }
+
     try {
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
         const searchParams = request.nextUrl.searchParams;
@@ -20,30 +32,13 @@ export async function GET(request: NextRequest) {
         const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
         const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 200);
         const offset = parseInt(searchParams.get('offset') || '0');
-        const category = searchParams.get('category');
-        const sortBy = searchParams.get('sort') || 'score'; // score, velocity, performance
+        const sortBy = searchParams.get('sort') || 'score';
 
-        // 핫 리스트 조회 (영상 + 채널 정보 조인)
+        // 먼저 hot_list_daily만 조회 (join 없이)
         let query = supabase
             .from('hot_list_daily')
-            .select(`
-        *,
-        video:hot_videos!inner(
-          video_id,
-          title,
-          published_at,
-          duration_seconds,
-          category_id,
-          thumbnail_url,
-          channel_id
-        )
-      `)
+            .select('*')
             .eq('date', date);
-
-        // 카테고리 필터
-        if (category) {
-            query = query.eq('video.category_id', category);
-        }
 
         // 정렬
         if (sortBy === 'velocity') {
@@ -63,27 +58,57 @@ export async function GET(request: NextRequest) {
 
         if (error) {
             console.error('Hot list query error:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // 채널 정보 추가 로드
-        const channelIds = [...new Set((items || []).map(item => item.video?.channel_id).filter(Boolean))];
+        // 데이터가 없으면 빈 응답
+        if (!items || items.length === 0) {
+            return NextResponse.json({
+                date,
+                total: 0,
+                items: [],
+                stats: {
+                    avg_views: 0,
+                    avg_performance: 0,
+                    max_performance: 0,
+                    top_category: '아직 데이터 없음',
+                },
+            });
+        }
 
-        const { data: channels } = await supabase
-            .from('hot_channels')
+        // 영상 정보 조회
+        const videoIds = items.map(item => item.video_id);
+        const { data: videos } = await supabase
+            .from('hot_videos')
             .select('*')
-            .in('channel_id', channelIds);
+            .in('video_id', videoIds);
+
+        const videoMap = new Map(
+            (videos || []).map(v => [v.video_id, v])
+        );
+
+        // 채널 정보 조회
+        const channelIds = [...new Set((videos || []).map(v => v.channel_id).filter(Boolean))];
+        const { data: channels } = channelIds.length > 0
+            ? await supabase.from('hot_channels').select('*').in('channel_id', channelIds)
+            : { data: [] };
 
         const channelMap = new Map(
             (channels || []).map(ch => [ch.channel_id, ch])
         );
 
         // 응답 데이터 구성
-        const enrichedItems = (items || []).map(item => ({
-            ...item,
-            channel: channelMap.get(item.video?.channel_id) || null,
-            category_name: KR_VIDEO_CATEGORIES[item.video?.category_id as keyof typeof KR_VIDEO_CATEGORIES] || '기타',
-        }));
+        const enrichedItems = items.map(item => {
+            const video = videoMap.get(item.video_id);
+            const channel = video ? channelMap.get(video.channel_id) : null;
+            return {
+                ...item,
+                video: video || null,
+                channel: channel || null,
+                category_name: video?.category_id
+                    ? (KR_VIDEO_CATEGORIES[video.category_id as keyof typeof KR_VIDEO_CATEGORIES] || '기타')
+                    : '기타',
+            };
+        });
 
         // 전체 개수 조회
         const { count } = await supabase
@@ -94,31 +119,33 @@ export async function GET(request: NextRequest) {
         // 통계 계산
         const stats = {
             avg_views: enrichedItems.length > 0
-                ? Math.round(enrichedItems.reduce((sum, i) => sum + i.view_count, 0) / enrichedItems.length)
+                ? Math.round(enrichedItems.reduce((sum, i) => sum + (i.view_count || 0), 0) / enrichedItems.length)
                 : 0,
             avg_performance: enrichedItems.length > 0
-                ? enrichedItems.reduce((sum, i) => sum + i.performance_rate, 0) / enrichedItems.length
+                ? enrichedItems.reduce((sum, i) => sum + (i.performance_rate || 0), 0) / enrichedItems.length
                 : 0,
             max_performance: enrichedItems.length > 0
-                ? Math.max(...enrichedItems.map(i => i.performance_rate))
+                ? Math.max(...enrichedItems.map(i => i.performance_rate || 0))
                 : 0,
-            top_category: '엔터테인먼트', // TODO: 실제 계산
+            top_category: '엔터테인먼트',
         };
 
-        const response: HotListResponse = {
+        return NextResponse.json({
             date,
             total: count || 0,
             items: enrichedItems,
             stats,
-        };
-
-        return NextResponse.json(response);
+        });
 
     } catch (error) {
         console.error('Hot list API error:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch hot list' },
-            { status: 500 }
-        );
+        return NextResponse.json({
+            date: new Date().toISOString().split('T')[0],
+            total: 0,
+            items: [],
+            stats: { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' },
+            error: 'Server error'
+        });
     }
 }
+
