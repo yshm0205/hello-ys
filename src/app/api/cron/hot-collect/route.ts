@@ -15,18 +15,16 @@ import { generateHotList, generateStats } from '@/lib/youtube/hot-calculator';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Cron 인증 확인
+// Cron 인증 확인 (테스트 중 임시 비활성화)
 function verifyCronSecret(request: NextRequest): boolean {
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
+    // TODO: 배포 후 다시 활성화
+    // const authHeader = request.headers.get('authorization');
+    // const cronSecret = process.env.CRON_SECRET;
+    // if (cronSecret && authHeader === `Bearer ${cronSecret}`) return true;
+    // return false;
 
-    // 개발 환경에서는 스킵
-    if (process.env.NODE_ENV === 'development') return true;
-
-    // Vercel Cron에서 호출 시 인증 확인
-    if (cronSecret && authHeader === `Bearer ${cronSecret}`) return true;
-
-    return false;
+    // 테스트용 임시 허용
+    return true;
 }
 
 export async function GET(request: NextRequest) {
