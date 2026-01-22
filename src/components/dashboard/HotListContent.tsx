@@ -276,10 +276,10 @@ export function HotListContent() {
                                 {/* 썸네일 영역 */}
                                 <Box pos="relative" style={{ aspectRatio: '16/9' }}>
                                     <Image
-                                        src={item.video?.thumbnail_url.replace('default', 'mqdefault')}
+                                        src={`https://i.ytimg.com/vi/${item.video_id}/mqdefault.jpg`}
                                         alt={item.video?.title}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        fallbackSrc="https://placehold.co/600x400?text=No+Preview"
+                                        fallbackSrc="https://placehold.co/320x180/1a1a1a/666?text=No+Preview"
                                     />
                                     {/* 썸네일 위 뱃지들 */}
                                     <Badge
