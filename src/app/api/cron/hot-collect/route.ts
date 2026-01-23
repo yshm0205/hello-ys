@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { collectHotVideos } from '@/lib/youtube/hot-collector';
 import { generateHotList, generateStats } from '@/lib/youtube/hot-calculator';
+import { saveVideoSnapshots, cleanupOldSnapshots } from '@/lib/youtube/video-snapshot';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -124,6 +125,13 @@ export async function GET(request: NextRequest) {
                 console.error('[Cron] Stats upsert error:', statsError);
             }
         }
+
+        // 5.5. 스냅샷 저장 (activeRate 계산용)
+        const snapshotCount = await saveVideoSnapshots(stats);
+        console.log(`[Cron] Saved ${snapshotCount} video snapshots`);
+
+        // 5.6. 오래된 스냅샷 정리 (90일 이상)
+        await cleanupOldSnapshots();
 
         // 6. 핫 리스트 생성
         const hotList = generateHotList(videos, stats, channels, previousListIds);

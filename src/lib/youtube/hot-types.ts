@@ -35,6 +35,17 @@ export interface HotVideoDailyStats {
     velocity: number;
 }
 
+// 영상 스냅샷 (activeRate 계산용)
+export interface VideoSnapshot {
+    id?: string;
+    video_id: string;
+    date: string;
+    view_count: number;
+    like_count: number;
+    comment_count: number;
+    created_at?: string;
+}
+
 // 핫 리스트 아이템
 export interface HotListItem {
     id?: string;
