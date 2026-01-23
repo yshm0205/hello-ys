@@ -136,6 +136,28 @@ export async function getVideoDetails(
                 continue;
             }
 
+            // ============ 스튜디오 콘텐츠 필터링 ============
+            const categoryId = snippet.categoryId || '';
+            const title = snippet.title || '';
+            const channelTitle = snippet.channelTitle || '';
+
+            // 1) 카테고리 제외: 음악(10)만 제외 (영화/애니는 리뷰 콘텐츠 있어서 유지)
+            if (categoryId === '10') {
+                continue;
+            }
+
+            // 2) 제목 패턴 제외: MV, 뮤직비디오, Trailer, 예고편, EP, Episode 등
+            const studioTitlePattern = /\b(Official\s*M\/?V|Music\s*Video|뮤직비디오|MV|Trailer|예고편|티저|Teaser|OST|O\.S\.T|본편|하이라이트|Highlight|EP\s*\d|Episode\s*\d|\d+화|시즌\s*\d|Season\s*\d)\b/i;
+            if (studioTitlePattern.test(title)) {
+                continue;
+            }
+
+            // 3) 채널명 패턴 제외: VEVO, Topic, Official, 공식
+            const studioChannelPattern = /\b(VEVO|Topic|Official|공식|Studios|Pictures|Entertainment|Records|Music)\b/i;
+            if (studioChannelPattern.test(channelTitle)) {
+                continue;
+            }
+
             const publishedAt = snippet.publishedAt || new Date().toISOString();
             const ageHours = getAgeHours(publishedAt);
             const viewCount = parseInt(statistics.viewCount || '0');
@@ -143,10 +165,10 @@ export async function getVideoDetails(
             videos.push({
                 video_id: item.id,
                 channel_id: snippet.channelId || '',
-                title: snippet.title || '',
+                title: title,
                 published_at: publishedAt,
                 duration_seconds: parseDuration(contentDetails.duration || 'PT0S'),
-                category_id: snippet.categoryId || '',
+                category_id: categoryId,
                 thumbnail_url: snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url || '',
             });
 
