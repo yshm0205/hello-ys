@@ -165,6 +165,11 @@ export function generateHotList(
 
         if (!stats || !channel) continue;
 
+        // Topic 채널 필터 (YouTube 자동 생성 음악 채널)
+        if (channel.title.includes('- Topic') || channel.title.includes(' Topic')) {
+            continue;
+        }
+
         // 쿨다운 체크
         if (previousListIds.has(video.video_id)) continue;
 

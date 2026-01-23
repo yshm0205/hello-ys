@@ -138,6 +138,21 @@ export async function GET(request: NextRequest) {
                     ? (KR_VIDEO_CATEGORIES[video.category_id as keyof typeof KR_VIDEO_CATEGORIES] || '기타')
                     : '기타',
             };
+        }).filter(item => {
+            // Topic 채널 필터 (YouTube 자동 생성 음악 채널)
+            const channelTitle = item.channel?.title || '';
+            if (channelTitle.includes('- Topic') || channelTitle.includes(' Topic')) {
+                return false;
+            }
+
+            // 스튜디오 제목 패턴 필터 (Trailer, Official, Teaser 등)
+            const videoTitle = item.video?.title || '';
+            const studioTitlePattern = /\b(Official|Trailer|예고편|티저|Teaser|MV|M\/V|Music Video|뮤직비디오|OST)\b/i;
+            if (studioTitlePattern.test(videoTitle)) {
+                return false;
+            }
+
+            return true;
         });
 
         // 전체 개수 조회

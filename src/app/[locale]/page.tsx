@@ -564,87 +564,18 @@ function AIRevealSection() {
             </Text>
           </Stack>
 
-          {/* 실제 유튜브 스튜디오 캡처 이미지 */}
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" w="100%">
-
-            {/* 채널 분석 이미지 */}
-            <Card
-              padding={0}
-              radius="xl"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 0, 0, 0.02))',
-                border: '2px solid rgba(255, 0, 0, 0.3)',
-                overflow: 'hidden',
-              }}
-            >
-              <Box p="md" style={{ background: 'rgba(255,0,0,0.1)' }}>
-                <Group>
-                  <Box w={32} h={32} style={{ borderRadius: '50%', background: '#ff0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Play size={16} color="#fff" fill="#fff" />
-                  </Box>
-                  <Text fw={700} c="white">채널 분석 (28일)</Text>
-                </Group>
-              </Box>
-              <Box style={{ position: 'relative', aspectRatio: '16/9' }}>
-                <Image
-                  src="/images/uploaded_image_0_1769173331637.png"
-                  alt="YouTube 채널 분석 - 7613만 조회수, 1356만원 수익"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </Box>
-              <Box p="md">
-                <Group justify="space-between">
-                  <Text size="sm" c="dimmed">조회수</Text>
-                  <Text fw={700} style={{ color: '#22c55e' }}>7,613만</Text>
-                </Group>
-                <Group justify="space-between" mt="xs">
-                  <Text size="sm" c="dimmed">예상 수익</Text>
-                  <Text fw={700} style={{ color: '#22c55e' }}>₩1,356만</Text>
-                </Group>
-              </Box>
-            </Card>
-
-            {/* 실시간 조회수 이미지 */}
-            <Card
-              padding={0}
-              radius="xl"
-              style={{
-                background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(0, 217, 255, 0.02))',
-                border: '2px solid rgba(0, 217, 255, 0.3)',
-                overflow: 'hidden',
-              }}
-            >
-              <Box p="md" style={{ background: 'rgba(0,217,255,0.1)' }}>
-                <Group>
-                  <Box w={32} h={32} style={{ borderRadius: '50%', background: '#00D9FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Zap size={16} color="#000" />
-                  </Box>
-                  <Text fw={700} c="white">실시간 조회수 (48시간)</Text>
-                </Group>
-              </Box>
-              <Box style={{ position: 'relative', aspectRatio: '9/16', maxHeight: '300px' }}>
-                <Image
-                  src="/images/uploaded_image_1_1769173331637.png"
-                  alt="실시간 조회수 - 48시간 1,212만 뷰"
-                  fill
-                  style={{ objectFit: 'cover', objectPosition: 'top' }}
-                />
-              </Box>
-              <Box p="md">
-                <Group justify="center">
-                  <Badge size="lg" color="cyan" variant="filled">
-                    🔥 48시간 동안 1,212만 뷰
-                  </Badge>
-                </Group>
-              </Box>
-            </Card>
-          </SimpleGrid>
-
-          {/* 캡션 */}
-          <Text size="sm" c="dimmed" ta="center" mt="md">
-            ⚠️ 위 스크린샷은 실제 본인 채널 유튜브 스튜디오 캡처입니다
-          </Text>
+          {/* 성과 요약 배지 */}
+          <Group justify="center" gap="xl" wrap="wrap">
+            <Badge size="xl" variant="gradient" gradient={{ from: 'red', to: 'pink' }} radius="lg" style={{ padding: '16px 24px' }}>
+              🔥 YouTube 500만뷰+
+            </Badge>
+            <Badge size="xl" variant="gradient" gradient={{ from: 'green', to: 'teal' }} radius="lg" style={{ padding: '16px 24px' }}>
+              ⚡ 48시간 1,200만뷰
+            </Badge>
+            <Badge size="xl" variant="gradient" gradient={{ from: 'cyan', to: 'blue' }} radius="lg" style={{ padding: '16px 24px' }}>
+              � 월 1,356만원 수익
+            </Badge>
+          </Group>
 
         </Stack>
       </Container>
