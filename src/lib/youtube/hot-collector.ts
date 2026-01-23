@@ -152,8 +152,12 @@ export async function getVideoDetails(
                 continue;
             }
 
-            // 3) 채널명 패턴 제외: VEVO, Topic, Official, 공식
-            const studioChannelPattern = /\b(VEVO|Topic|Official|공식|Studios|Pictures|Entertainment|Records|Music)\b/i;
+            // 3) 채널명 패턴 제외: VEVO, Topic (유튜브 자동 생성), Official, 공식 등
+            // "- Topic"은 YouTube가 자동 생성하는 아티스트 채널 (무조건 음악)
+            if (channelTitle.includes('- Topic') || channelTitle.includes(' Topic')) {
+                continue;
+            }
+            const studioChannelPattern = /\b(VEVO|Official|공식|Studios|Pictures|Entertainment|Records|Music)\b/i;
             if (studioChannelPattern.test(channelTitle)) {
                 continue;
             }

@@ -69,14 +69,17 @@ const itemVariants = {
   },
 };
 
-// ============ 1. HERO 섹션 (수정된 선언형 카피) ============
+// ============ 1. HERO 섹션 (크리투스 스타일 - 숫자 거대하게) ============
 function HeroSection() {
+  // 카운트다운 상태 (실제로는 useState/useEffect 사용)
+  const deadline = { days: 3, hours: 15, mins: 42, secs: 18 };
+
   return (
     <Box
       style={{
-        background: 'linear-gradient(180deg, #0a0a14 0%, #0d0d1a 50%, #111827 100%)',
+        background: 'linear-gradient(180deg, #0a0a14 0%, #0f0f1a 50%, #111827 100%)',
         paddingTop: '120px',
-        paddingBottom: '80px',
+        paddingBottom: '100px',
         position: 'relative',
         overflow: 'hidden',
         minHeight: '100vh',
@@ -88,250 +91,401 @@ function HeroSection() {
           position: 'absolute',
           inset: 0,
           backgroundImage: `
-            linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px)
+            linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px)
           `,
-          backgroundSize: '50px 50px',
+          backgroundSize: '60px 60px',
         }}
       />
 
-      {/* 메인 글로우 효과 */}
+      {/* 글로우 오브 */}
       <Box
         style={{
           position: 'absolute',
-          top: '20%',
+          top: '10%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '900px',
-          height: '700px',
-          background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.2) 0%, rgba(236, 72, 153, 0.1) 30%, transparent 70%)',
-          filter: 'blur(80px)',
+          width: '1000px',
+          height: '800px',
+          background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.08) 40%, transparent 70%)',
+          filter: 'blur(100px)',
+          pointerEvents: 'none',
         }}
       />
 
-      <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
-        <Stack align="center" gap={40}>
+      <Container size="xl" style={{ position: 'relative', zIndex: 1 }}>
+        <Group align="flex-start" justify="space-between" gap={60} wrap="wrap">
 
-          {/* Badge: 하나만 크게 강조 (크리투스 스타일) */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Badge
-              variant="gradient"
-              gradient={{ from: '#a78bfa', to: '#ec4899' }}
-              size="xl"
-              radius="xl"
-              style={{
-                fontSize: '16px',
-                padding: '16px 24px',
-                textTransform: 'none',
-                boxShadow: '0 0 30px rgba(167, 139, 250, 0.4)'
-              }}
+          {/* 왼쪽: 카피 영역 */}
+          <Stack style={{ flex: 1, minWidth: '400px', maxWidth: '600px' }} gap="xl">
+
+            {/* 숫자 임팩트 (크리투스 스타일) */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, type: 'spring' }}
             >
-              🏆 4채널 누적 조회수 1.8억+ 뷰 달성
-            </Badge>
-          </motion.div>
+              <Box style={{ position: 'relative' }}>
+                <Text
+                  style={{
+                    fontSize: 'clamp(80px, 12vw, 140px)',
+                    fontWeight: 900,
+                    lineHeight: 0.9,
+                    background: 'linear-gradient(135deg, #a78bfa 0%, #ec4899 50%, #22d3ee 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    letterSpacing: '-4px',
+                  }}
+                >
+                  1.8억
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 'clamp(28px, 4vw, 48px)',
+                    fontWeight: 700,
+                    color: 'rgba(255,255,255,0.9)',
+                    marginTop: '-10px',
+                  }}
+                >
+                  누적 조회수 돌파
+                </Text>
+              </Box>
+            </motion.div>
 
-          {/* Main Copy: 선언형 (부업부부 스타일) */}
-          <Stack gap="xl" align="center" style={{ maxWidth: '900px' }}>
+            {/* 메인 카피 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
               <Title
                 order={1}
                 style={{
-                  fontSize: 'clamp(40px, 6vw, 72px)',
-                  fontWeight: 800,
-                  lineHeight: 1.1,
+                  fontSize: 'clamp(28px, 4vw, 42px)',
+                  fontWeight: 700,
+                  lineHeight: 1.3,
                   color: '#FFFFFF',
-                  textAlign: 'center',
                 }}
               >
-                전자책 수강생 월 700만원.
+                전자책 수강생 <span style={{ color: '#22c55e' }}>월 700만원</span>.
                 <br />
-                비결은 <span style={{
-                  background: 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}>'시스템'</span>이었습니다.
+                비결은 '시스템'이었습니다.
               </Title>
             </motion.div>
 
+            {/* 서브 카피 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <Text
-                size="xl"
-                style={{
-                  lineHeight: 1.6,
-                  color: 'rgba(255,255,255,0.8)',
-                  fontSize: '22px',
-                  textAlign: 'center',
-                  maxWidth: '700px'
-                }}
-              >
+              <Text size="lg" style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>
                 강의로 원리를 배우고, AI로 바로 실행하세요.
                 <br />
-                레퍼런스 URL만 넣으면, <span style={{ color: '#fff', fontWeight: 700 }}>AI가 3분 만에</span> 터지는 대본을 복사해줍니다.
+                레퍼런스 URL만 넣으면, <b style={{ color: '#fff' }}>AI가 3분 만에</b> 터지는 대본을 복사해줍니다.
               </Text>
+            </motion.div>
+
+            {/* 가격 + CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <Stack gap="md">
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '12px',
+                    padding: '16px 24px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    display: 'inline-block',
+                  }}
+                >
+                  <Text size="sm" c="dimmed">유튜브 수익화 마스터플랜</Text>
+                  <Group gap="sm" mt={4}>
+                    <Text size="sm" style={{ textDecoration: 'line-through', color: '#6b7280' }}>₩700,000</Text>
+                    <Text size="xl" fw={800} style={{ color: '#fff' }}>₩500,000</Text>
+                    <Badge color="red" size="sm">30% OFF</Badge>
+                  </Group>
+                </Box>
+
+                <Button
+                  component={Link}
+                  href="/dashboard"
+                  size="xl"
+                  radius="xl"
+                  rightSection={<ArrowRight size={24} />}
+                  style={{
+                    padding: '0 48px',
+                    height: '72px',
+                    fontSize: '22px',
+                    fontWeight: 800,
+                    background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+                    boxShadow: '0 0 40px rgba(236, 72, 153, 0.5), 0 0 80px rgba(139, 92, 246, 0.3)',
+                    border: 'none',
+                    animation: 'ctaPulse 2s infinite',
+                  }}
+                >
+                  🔥 1기 30명 한정 시작하기
+                </Button>
+
+                {/* 카운트다운 타이머 */}
+                <Box
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '12px',
+                    padding: '12px 20px',
+                  }}
+                >
+                  <Group gap="lg" justify="center">
+                    <Text size="sm" fw={600} style={{ color: '#ef4444' }}>⏰ 얼리버드 마감까지</Text>
+                    <Group gap="xs">
+                      {[
+                        { value: deadline.days, label: '일' },
+                        { value: deadline.hours, label: '시' },
+                        { value: deadline.mins, label: '분' },
+                        { value: deadline.secs, label: '초' },
+                      ].map((t, i) => (
+                        <Group key={i} gap={4}>
+                          <Box style={{ background: '#1f2937', padding: '6px 10px', borderRadius: '6px', minWidth: '40px', textAlign: 'center' }}>
+                            <Text fw={700} style={{ color: '#fff', fontSize: '18px' }}>{t.value}</Text>
+                          </Box>
+                          <Text size="xs" c="dimmed">{t.label}</Text>
+                        </Group>
+                      ))}
+                    </Group>
+                  </Group>
+                </Box>
+              </Stack>
+            </motion.div>
+
+            {/* 하단 증거 */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
+              <Group gap="lg" wrap="wrap">
+                <Group gap={6}>
+                  <Check size={16} color="#22c55e" />
+                  <Text size="sm" c="dimmed">본인 수익 7,400만원+</Text>
+                </Group>
+                <Group gap={6}>
+                  <Check size={16} color="#22c55e" />
+                  <Text size="sm" c="dimmed">전자책 후기 77개</Text>
+                </Group>
+                <Group gap={6}>
+                  <Check size={16} color="#22c55e" />
+                  <Text size="sm" c="dimmed">7일 100% 환불</Text>
+                </Group>
+              </Group>
             </motion.div>
           </Stack>
 
-          {/* Product Info & CTA */}
+          {/* 오른쪽: 제품 목업 플레이스홀더 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            style={{ flex: 1, minWidth: '350px', maxWidth: '500px' }}
           >
-            <Stack align="center" gap="md">
+            <Box
+              style={{
+                position: 'relative',
+                aspectRatio: '4/3',
+              }}
+            >
+              {/* 글로우 배경 */}
               <Box
                 style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: '16px',
-                  padding: '16px 32px',
-                  border: '1px solid rgba(255,255,255,0.1)'
+                  position: 'absolute',
+                  inset: '-20%',
+                  background: 'radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%)',
+                  filter: 'blur(40px)',
+                  zIndex: 0,
                 }}
-              >
-                <Text fw={700} style={{ color: '#fff', fontSize: '18px' }}>
-                  유튜브 수익화 마스터플랜 : 강의 59강 + AI 스크립트 1년
-                </Text>
-                <Text ta="center" size="sm" style={{ color: '#a78bfa', marginTop: '4px' }}>
-                  ₩500,000 (= 월 4만원 대, 커피 10잔 값)
-                </Text>
-              </Box>
+              />
 
-              <Button
-                component={Link}
-                href="/dashboard"
-                size="xl"
-                radius="xl"
-                rightSection={<ArrowRight size={24} />}
+              {/* 목업 프레임 */}
+              <Box
                 style={{
-                  padding: '0 48px',
-                  height: '70px',
-                  fontSize: '24px',
-                  fontWeight: 700,
-                  background: '#ec4899',
-                  boxShadow: '0 0 30px rgba(236, 72, 153, 0.4)',
-                  transition: 'transform 0.2s',
-                  animation: 'pulse 2s infinite'
+                  position: 'relative',
+                  zIndex: 1,
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, rgba(30, 30, 50, 0.9), rgba(20, 20, 40, 0.95))',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05)',
+                  overflow: 'hidden',
                 }}
               >
-                🔥 1기 30명 한정 참여하기
-              </Button>
-            </Stack>
+                {/* 브라우저 헤더 */}
+                <Box style={{ height: '40px', background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: '8px' }}>
+                  <Box style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f57' }} />
+                  <Box style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#febc2e' }} />
+                  <Box style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#28c840' }} />
+                </Box>
+
+                {/* 플레이스홀더 콘텐츠 */}
+                <Stack align="center" justify="center" style={{ height: 'calc(100% - 40px)', padding: '24px' }}>
+                  <Bot size={48} color="#a78bfa" />
+                  <Text fw={700} size="lg" style={{ color: 'rgba(255,255,255,0.4)' }}>AI 스크립트 생성 화면</Text>
+                  <Text size="sm" c="dimmed">(실제 제품 스크린샷으로 교체 예정)</Text>
+                  <Badge variant="light" color="violet" mt="md">LIVE DEMO</Badge>
+                </Stack>
+              </Box>
+            </Box>
           </motion.div>
 
-          {/* 하단 증거띠: Hero 분산 */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            <Group gap="xl" wrap="wrap" justify="center">
-              <Group gap={8}>
-                <Check size={18} color="#22c55e" />
-                <Text size="sm" style={{ color: 'rgba(255,255,255,0.8)' }}>본인 수익 7,400만원+</Text>
-              </Group>
-              <Text size="sm" style={{ color: 'rgba(255,255,255,0.2)' }}>|</Text>
-              <Group gap={8}>
-                <Check size={18} color="#22c55e" />
-                <Text size="sm" style={{ color: 'rgba(255,255,255,0.8)' }}>전자책 후기 77개</Text>
-              </Group>
-              <Text size="sm" style={{ color: 'rgba(255,255,255,0.2)' }}>|</Text>
-              <Group gap={8}>
-                <Check size={18} color="#22c55e" />
-                <Text size="sm" style={{ color: 'rgba(255,255,255,0.8)' }}>7일 100% 환불 보장</Text>
-              </Group>
-            </Group>
-          </motion.div>
-
-        </Stack>
+        </Group>
       </Container>
 
       <style>{`
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
-          70% { box-shadow: 0 0 0 15px rgba(236, 72, 153, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        @keyframes ctaPulse {
+          0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7), 0 0 40px rgba(236, 72, 153, 0.5); }
+          70% { box-shadow: 0 0 0 20px rgba(236, 72, 153, 0), 0 0 40px rgba(236, 72, 153, 0.5); }
+          100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0), 0 0 40px rgba(236, 72, 153, 0.5); }
         }
       `}</style>
     </Box>
   );
 }
 
+
 // ============ 2. SOCIAL PROOF (전자책 수강생) ============
 function SocialProofSection() {
+  // 실제 후기 데이터 (reviews_summary.md 기반)
+  const results = [
+    {
+      title: "월 700만원+",
+      subtitle: "직장인 퇴근 후 2시간",
+      icon: "💰",
+      color: "#22c55e",
+      review: "실제 카톡 인증",
+      quote: "원초적인사이트님 덕분에 쇼츠로 월 700 이상씩 꾸준히 벌고 있습니다."
+    },
+    {
+      title: "48시간 10만뷰",
+      subtitle: "9개월 정체기 탈출",
+      icon: "🚀",
+      color: "#3b82f6",
+      review: "유튜브 스튜디오 캡처",
+      quote: "48시간 만에 거의 10만 뷰 증가, 좋아요 2천 개 돌파"
+    },
+    {
+      title: "300만뷰",
+      subtitle: "6천뷰 → 한 달 만에",
+      icon: "📈",
+      color: "#f59e0b",
+      review: "통계 인증",
+      quote: "처음 6천 뷰에서 시작해 100만, 300만 뷰까지 성장"
+    },
+    {
+      title: "ROI 430%",
+      subtitle: "10만원 → 43만원",
+      icon: "💵",
+      color: "#ec4899",
+      review: "수익 화면 인증",
+      quote: "유튜브로 수익 창출돼서, 저 수익금으로 TV 샀어요 ㅎㅎ"
+    },
+  ];
+
+  // 실제 리뷰 (customer_needs_analysis.md + reviews_summary.md 기반)
+  const reviews = [
+    "3달간 혼자 헤딩하며 얻지 못한 명확한 방향을 찾았습니다",
+    "900만원 강의비 날린 저도 이건 달랐습니다. 진짜입니다.",
+    "9개월간 구독자 2700명 정체... 이젠 왜 안됐는지 이해됩니다",
+    "컴퓨터 켜는 것도 어려운 왕초보인데 그대로 따라해서 수익 냈어요",
+    "몇 년치 시행착오를 줄인 것 같은 느낌이 들었습니다",
+    "웬만한 강의보다 훨씬 실질적이고 도움이 될 것 같습니다",
+    "전자책 만으로도 가성비가 좋은데 프로그램까지? 감동...",
+    "무료 영상에서 보지 못한 소중한 정보들을 발견하고 다시 용기",
+  ];
+
+
   return (
     <Box py={100} style={{ background: '#111827' }}>
       <Container size="lg">
         <Stack align="center" gap="xl" mb={60}>
-          <Text
-            size="sm" fw={600}
-            style={{ color: '#a78bfa', letterSpacing: '2px', textTransform: 'uppercase' }}
-          >
-            Proven Results
-          </Text>
-          <Title order={2} ta="center" style={{ color: '#FFFFFF' }}>
+          <Badge size="lg" variant="light" color="green" radius="xl">
+            ✅ 전자책 수강생 77명 실제 성과
+          </Badge>
+          <Title order={2} ta="center" style={{ color: '#FFFFFF', fontSize: '36px' }}>
             강의만으로 이미 <span style={{ color: '#22c55e' }}>결과를 낸 분들</span>
-            <br />
-            <span style={{ fontSize: '0.7em', fontWeight: 400, color: 'rgba(255,255,255,0.6)' }}>(전자책/프로그램 수강생 실제 성과)</span>
           </Title>
         </Stack>
 
+        {/* 성과 카드 그리드 */}
         <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg">
-          {[
-            { title: "월 700만원 수익", subtitle: "직장인 퇴근 후 2시간", icon: "💰", review: "후기 #1" },
-            { title: "48시간 10만 뷰", subtitle: "9개월 정체기 탈출", icon: "🚀", review: "후기 #5" },
-            { title: "한 달 300만 뷰", subtitle: "6천 뷰 → 떡상", icon: "📈", review: "후기 #10" },
-            { title: "ROI 430%", subtitle: "10만원 투자 → 43만원", icon: "💵", review: "후기 #14" },
-          ].map((item, i) => (
-            <Paper
+          {results.map((item, i) => (
+            <motion.div
               key={i}
-              p="xl"
-              radius="lg"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 300 }}
             >
-              <Text size="xl">{item.icon}</Text>
-              <Text fw={700} size="lg" mt="md" style={{ color: '#fff' }}>{item.title}</Text>
-              <Text size="sm" c="dimmed">{item.subtitle}</Text>
-              <Badge variant="outline" color="gray" mt="lg" size="sm">{item.review}</Badge>
-            </Paper>
+              <Paper
+                p="xl"
+                radius="xl"
+                style={{
+                  background: `linear-gradient(135deg, ${item.color}15, ${item.color}05)`,
+                  border: `1px solid ${item.color}40`,
+                  cursor: 'pointer',
+                  height: '100%',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* 글로우 효과 */}
+                <Box
+                  style={{
+                    position: 'absolute',
+                    top: '-50%',
+                    right: '-50%',
+                    width: '100%',
+                    height: '100%',
+                    background: `radial-gradient(circle, ${item.color}20 0%, transparent 70%)`,
+                    pointerEvents: 'none',
+                  }}
+                />
+                <Text style={{ fontSize: '40px', marginBottom: '12px' }}>{item.icon}</Text>
+                <Text fw={800} style={{ color: item.color, fontSize: '28px' }}>{item.title}</Text>
+                <Text size="sm" c="dimmed" mt="xs">{item.subtitle}</Text>
+                <Badge variant="outline" color="gray" mt="lg" size="sm">{item.review}</Badge>
+              </Paper>
+            </motion.div>
           ))}
         </SimpleGrid>
 
         {/* 텍스트 후기 캐러셀 */}
         <Box mt={60} style={{ position: 'relative', overflow: 'hidden' }}>
-          <Box style={{ display: 'flex', gap: '24px', animation: 'scroll 30s linear infinite' }}>
-            {[
-              "3달간 혼자 헤딩하며 얻지 못한 방향을 1주일 만에 찾았습니다.",
-              "900만원 강의비 날린 저도 이건 달랐습니다. 진짜입니다.",
-              "10개월 정체... 1주차 만에 기존 쇼츠가 민망해졌습니다.",
-              "컴퓨터 켜는 것도 어려웠는데 그대로 따라해서 수익 냈어요.",
-              "대본 쓰는 게 제일 막막했는데 이제 제일 쉬워졌어요.",
-            ].map((text, i) => (
-              <Paper key={i} p="lg" radius="md" style={{ background: '#1f2937', minWidth: '350px' }}>
-                <Group>
-                  <Quote size={20} color="#a78bfa" />
-                  <Text size="sm" style={{ color: '#d1d5db' }}>{text}</Text>
+          <Box style={{ display: 'flex', gap: '24px', animation: 'marquee 40s linear infinite' }}>
+            {[...reviews, ...reviews].map((text, i) => (
+              <Paper
+                key={i}
+                p="lg"
+                radius="lg"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  minWidth: '400px',
+                  flexShrink: 0,
+                }}
+              >
+                <Group gap="sm" align="flex-start">
+                  <Quote size={20} color="#a78bfa" style={{ flexShrink: 0 }} />
+                  <Text size="sm" style={{ color: '#d1d5db', lineHeight: 1.6 }}>{text}</Text>
                 </Group>
               </Paper>
             ))}
           </Box>
         </Box>
         <style>{`
-          @keyframes scroll {
+          @keyframes marquee {
             0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
+            100% { transform: translateX(-50%); }
           }
         `}</style>
       </Container>
@@ -339,72 +493,166 @@ function SocialProofSection() {
   );
 }
 
+
 // ============ 3. BRIDGE & AI REVEAL (본인 성과) ============
 function AIRevealSection() {
+  const youtubeResults = [
+    { views: "500만", hot: true },
+    { views: "330만", hot: false },
+    { views: "300만", hot: false },
+    { views: "170만", hot: false },
+  ];
+
+  const naverResults = [
+    { views: "55만", hot: true },
+    { views: "52만", hot: false },
+    { views: "48만", hot: false },
+    { views: "41만", hot: false },
+  ];
+
   return (
-    <Box py={100} style={{ background: '#0a0a14' }}>
-      <Container size="md">
-        <Stack gap="xl" align="center">
-          {/* Bridge */}
-          <Box
-            p="xl"
-            style={{
-              borderLeft: '4px solid #f59e0b',
-              background: 'rgba(245, 158, 11, 0.1)',
-              width: '100%'
-            }}
+    <Box py={100} style={{ background: 'linear-gradient(180deg, #0a0a14 0%, #111827 100%)' }}>
+      <Container size="lg">
+        <Stack gap={60} align="center">
+
+          {/* Bridge - 질문 던지기 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
           >
-            <Text size="lg" fw={600} style={{ color: '#fbbf24' }}>
-              "근데... 대본 쓰는 건 여전히 어려워요 ㅠㅠ"
-            </Text>
-            <Text mt="sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              수강생 분들이 가장 많이 하소연하신 게 바로 <b>'글쓰기'</b>였습니다.<br />
-              원리를 알아도, 막상 빈 화면을 보면 막막하다는 거였죠.
-            </Text>
+            <Box
+              p="xl"
+              style={{
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                maxWidth: '700px',
+              }}
+            >
+              <Group gap="md" align="flex-start">
+                <Text style={{ fontSize: '32px' }}>💬</Text>
+                <Stack gap="sm">
+                  <Text size="xl" fw={700} style={{ color: '#fbbf24' }}>
+                    "근데... 대본 쓰는 건 여전히 어려워요 ㅠㅠ"
+                  </Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>
+                    수강생 분들이 가장 많이 하소연하신 게 바로 <b style={{ color: '#fff' }}>'글쓰기'</b>였습니다.
+                    <br />원리를 알아도, 막상 빈 화면을 보면 막막하다는 거였죠.
+                  </Text>
+                </Stack>
+              </Group>
+            </Box>
+          </motion.div>
+
+          {/* 화살표 */}
+          <Box style={{ position: 'relative' }}>
+            <Box style={{ width: '2px', height: '60px', background: 'linear-gradient(180deg, #f59e0b, #00D9FF)' }} />
+            <ArrowRight size={24} color="#00D9FF" style={{ position: 'absolute', bottom: '-12px', left: '-11px', transform: 'rotate(90deg)' }} />
           </Box>
 
-          <ArrowRight size={40} color="#6b7280" style={{ transform: 'rotate(90deg)', margin: '20px 0' }} />
+          {/* AI Reveal 헤더 */}
+          <Stack align="center" gap="md">
+            <Badge size="lg" variant="gradient" gradient={{ from: '#00D9FF', to: '#a78bfa' }} radius="xl">
+              🤖 AI 도구 최초 공개
+            </Badge>
+            <Title order={2} ta="center" style={{ color: '#fff', fontSize: '36px' }}>
+              그래서 제가 직접 쓰는 <span style={{ color: '#00D9FF' }}>AI 도구</span>를 공개합니다
+            </Title>
+            <Text ta="center" c="dimmed" size="lg">
+              ⚠️ 수강생 성과가 아닙니다. <b style={{ color: '#fff' }}>제가 직접 이 AI로 만든 영상</b>들입니다.
+            </Text>
+          </Stack>
 
-          {/* AI Reveal */}
-          <Title order={2} ta="center" style={{ color: '#fff' }}>
-            그래서, 제가 직접 쓰는 <span style={{ color: '#00D9FF' }}>AI 도구</span>를 공개합니다.
-          </Title>
-          <Text ta="center" c="dimmed">
-            수강생 성과가 아닙니다. <b>제가 직접 이 AI로 만든 영상</b>들입니다.
-          </Text>
+          {/* 성과 카드 그리드 */}
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" w="100%">
 
-          {/* 본인 성과 그리드 (유튜브/네이버) */}
-          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl" w="100%" mt="lg">
-            <Card padding="lg" radius="lg" style={{ background: '#1f2937', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <Group mb="md">
-                <Box w={10} h={10} bg="red" style={{ borderRadius: '50%' }} />
-                <Text fw={700} c="white">YouTube 성과</Text>
+            {/* YouTube 성과 */}
+            <Card
+              padding="xl"
+              radius="xl"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 0, 0, 0.02))',
+                border: '1px solid rgba(255, 0, 0, 0.2)',
+              }}
+            >
+              <Group mb="lg">
+                <Box w={40} h={40} style={{ borderRadius: '50%', background: '#ff0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Play size={20} color="#fff" fill="#fff" />
+                </Box>
+                <Text fw={700} size="lg" c="white">YouTube 조회수</Text>
               </Group>
-              <Stack gap="xs">
-                <Text size="xl" fw={800} style={{ color: '#fff' }}>500만 뷰 🔥</Text>
-                <Text size="lg" fw={700} style={{ color: '#d1d5db' }}>330만 뷰</Text>
-                <Text size="md" style={{ color: '#9ca3af' }}>300만 뷰 / 170만 뷰</Text>
-              </Stack>
+
+              <SimpleGrid cols={2} spacing="sm">
+                {youtubeResults.map((item, i) => (
+                  <Box
+                    key={i}
+                    p="md"
+                    style={{
+                      background: item.hot ? 'linear-gradient(135deg, rgba(255,0,0,0.2), rgba(255,0,0,0.1))' : 'rgba(0,0,0,0.2)',
+                      borderRadius: '12px',
+                      border: item.hot ? '1px solid rgba(255,0,0,0.4)' : '1px solid rgba(255,255,255,0.05)',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <Text fw={800} style={{ color: item.hot ? '#ff6b6b' : '#fff', fontSize: item.hot ? '28px' : '20px' }}>
+                      {item.views}뷰
+                    </Text>
+                    {item.hot && <Badge color="red" size="xs" mt="xs">🔥 TOP</Badge>}
+                  </Box>
+                ))}
+              </SimpleGrid>
             </Card>
 
-            <Card padding="lg" radius="lg" style={{ background: '#1f2937', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <Group mb="md">
-                <Box w={10} h={10} bg="green" style={{ borderRadius: '50%' }} />
-                <Text fw={700} c="white">Naver Clip 성과</Text>
+            {/* Naver Clip 성과 */}
+            <Card
+              padding="xl"
+              radius="xl"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(0, 200, 83, 0.02))',
+                border: '1px solid rgba(0, 200, 83, 0.2)',
+              }}
+            >
+              <Group mb="lg">
+                <Box w={40} h={40} style={{ borderRadius: '50%', background: '#00c853', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text fw={800} size="sm" c="white">N</Text>
+                </Box>
+                <Text fw={700} size="lg" c="white">Naver Clip 조회수</Text>
               </Group>
-              <Stack gap="xs">
-                <Text size="xl" fw={800} style={{ color: '#fff' }}>55만 뷰 ⚡</Text>
-                <Text size="lg" fw={700} style={{ color: '#d1d5db' }}>52만 뷰</Text>
-                <Text size="md" style={{ color: '#9ca3af' }}>48만 뷰 / 41만 뷰</Text>
-              </Stack>
+
+              <SimpleGrid cols={2} spacing="sm">
+                {naverResults.map((item, i) => (
+                  <Box
+                    key={i}
+                    p="md"
+                    style={{
+                      background: item.hot ? 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,200,83,0.1))' : 'rgba(0,0,0,0.2)',
+                      borderRadius: '12px',
+                      border: item.hot ? '1px solid rgba(0,200,83,0.4)' : '1px solid rgba(255,255,255,0.05)',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <Text fw={800} style={{ color: item.hot ? '#69f0ae' : '#fff', fontSize: item.hot ? '28px' : '20px' }}>
+                      {item.views}뷰
+                    </Text>
+                    {item.hot && <Badge color="green" size="xs" mt="xs">⚡ TOP</Badge>}
+                  </Box>
+                ))}
+              </SimpleGrid>
             </Card>
           </SimpleGrid>
+
+          {/* 플레이스홀더 안내 */}
+          <Text size="sm" c="dimmed" ta="center" mt="md">
+            (실제 유튜브 스튜디오 캡처 이미지로 교체 예정)
+          </Text>
 
         </Stack>
       </Container>
     </Box>
   );
 }
+
 
 // ============ 4. PAIN POINT (Review Based + Solution) ============
 function PainPointSection() {
@@ -550,47 +798,154 @@ export default function LandingPage() {
 
 function PackageSection() {
   const competitors = [
-    { name: '크리투스', price: '99만원', ai: false, lectures: true, period: '100일' },
-    { name: '부업부부', price: '160만원', ai: false, lectures: true, period: '기수제' },
-    { name: 'FlowSpot', price: '50만원', ai: true, lectures: true, highlight: true, period: '강의 평생' },
+    { name: '크리투스', price: '99만원', ai: false, lectures: true, period: '100일', highlight: false },
+    { name: '부업부부', price: '160만원', ai: false, lectures: true, period: '기수제', highlight: false },
+    { name: '마스터플랜', price: '50만원', ai: true, lectures: true, period: '강의 평생', highlight: true },
   ];
 
   return (
-    <Box py={100} style={{ background: '#0a0a14' }}>
+    <Box py={100} style={{ background: 'linear-gradient(180deg, #0a0a14 0%, #111827 100%)' }}>
       <Container size="lg">
-        <Title order={2} ta="center" c="white" mb="xl">
-          강의만 파는 곳과 <span style={{ color: '#00D9FF' }}>다릅니다</span>
-        </Title>
+        <Stack align="center" gap="xl" mb={60}>
+          <Badge size="lg" variant="light" color="cyan" radius="xl">
+            💰 가격 비교
+          </Badge>
+          <Title order={2} ta="center" c="white" style={{ fontSize: '36px' }}>
+            강의만 파는 곳과 <span style={{ color: '#00D9FF' }}>다릅니다</span>
+          </Title>
+        </Stack>
+
         <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={24}>
           {competitors.map((comp, i) => (
-            <Paper key={i} p="xl" radius="lg" style={{
-              background: comp.highlight ? 'rgba(0, 217, 255, 0.05)' : 'rgba(255,255,255,0.02)',
-              border: comp.highlight ? '2px solid #00D9FF' : '1px solid rgba(255,255,255,0.1)'
-            }}>
-              <Text ta="center" size="lg" fw={700} c={comp.highlight ? '#00D9FF' : 'white'}>{comp.name}</Text>
-              <Text ta="center" size="32px" fw={800} c="white" my="md">{comp.price}</Text>
-              <Divider my="md" />
-              <Stack>
-                <Group><Check size={16} color={comp.lectures ? "#22c55e" : "gray"} /><Text c="dimmed">강의 제공</Text></Group>
-                <Group>
-                  {comp.ai ? <Check size={16} color="#22c55e" /> : <X size={16} color="red" />}
-                  <Text c={comp.ai ? "white" : "dimmed"} fw={comp.ai ? 700 : 400}>AI 스크립트 도구</Text>
-                </Group>
-                <Group><Clock size={16} color="gray" /><Text c="dimmed">{comp.period}</Text></Group>
-              </Stack>
-            </Paper>
+            <motion.div
+              key={i}
+              whileHover={{ y: comp.highlight ? -12 : -4, scale: comp.highlight ? 1.02 : 1.01 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+            >
+              <Paper
+                p="xl"
+                radius="xl"
+                style={{
+                  background: comp.highlight
+                    ? 'linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(139, 92, 246, 0.08))'
+                    : 'rgba(255,255,255,0.02)',
+                  border: comp.highlight
+                    ? '2px solid #00D9FF'
+                    : '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: comp.highlight
+                    ? '0 0 60px rgba(0, 217, 255, 0.2), 0 25px 50px rgba(0, 0, 0, 0.3)'
+                    : 'none',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                {comp.highlight && (
+                  <Badge
+                    style={{
+                      position: 'absolute',
+                      top: '-1px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: 'linear-gradient(135deg, #00D9FF, #a78bfa)',
+                    }}
+                  >
+                    ⭐ 추천
+                  </Badge>
+                )}
+
+                <Stack align="center" gap="md" mt={comp.highlight ? 'md' : 0}>
+                  <Text ta="center" size="lg" fw={700} style={{ color: comp.highlight ? '#00D9FF' : 'rgba(255,255,255,0.7)' }}>
+                    {comp.name}
+                  </Text>
+
+                  <Text
+                    ta="center"
+                    fw={800}
+                    style={{
+                      fontSize: comp.highlight ? '48px' : '32px',
+                      color: comp.highlight ? '#fff' : 'rgba(255,255,255,0.8)',
+                    }}
+                  >
+                    {comp.price}
+                  </Text>
+
+                  <Divider w="100%" color={comp.highlight ? 'cyan' : 'gray.8'} />
+
+                  <Stack gap="sm" w="100%">
+                    <Group gap="sm">
+                      <Check size={18} color={comp.lectures ? '#22c55e' : '#6b7280'} />
+                      <Text size="sm" c="dimmed">강의 제공</Text>
+                    </Group>
+                    <Group gap="sm">
+                      {comp.ai ? (
+                        <Check size={18} color="#22c55e" />
+                      ) : (
+                        <X size={18} color="#ef4444" />
+                      )}
+                      <Text size="sm" style={{ color: comp.ai ? '#22c55e' : '#6b7280', fontWeight: comp.ai ? 700 : 400 }}>
+                        AI 스크립트 도구
+                      </Text>
+                    </Group>
+                    <Group gap="sm">
+                      <Clock size={18} color="#6b7280" />
+                      <Text size="sm" c="dimmed">{comp.period}</Text>
+                    </Group>
+                  </Stack>
+
+                  {comp.highlight && (
+                    <Button
+                      component={Link}
+                      href="/dashboard"
+                      fullWidth
+                      size="lg"
+                      radius="xl"
+                      mt="md"
+                      style={{
+                        background: 'linear-gradient(135deg, #00D9FF, #a78bfa)',
+                        fontWeight: 700,
+                      }}
+                    >
+                      지금 시작하기
+                    </Button>
+                  )}
+                </Stack>
+              </Paper>
+            </motion.div>
           ))}
         </SimpleGrid>
 
-        {/* 직원 비유 */}
-        <Box mt={60} p="xl" radius="xl" style={{ border: '1px dashed rgba(255,255,255,0.2)', textAlign: 'center' }}>
-          <Text c="white" size="lg" fw={600}>
-            "작가 1명 월급 = 200만원 / AI 스크립트 1년 = 50만원"
-          </Text>
-          <Text c="dimmed" mt="sm">
-            월 4만원대(커피 10잔 값)로 평생 일하는 직원을 고용하세요.
-          </Text>
-        </Box>
+        {/* 직원 비유 - 더 임팩트 있게 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <Box
+            mt={60}
+            p="xl"
+            style={{
+              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(139, 92, 246, 0.1))',
+              border: '1px solid rgba(236, 72, 153, 0.3)',
+              borderRadius: '20px',
+              textAlign: 'center',
+            }}
+          >
+            <Group justify="center" gap="xl" wrap="wrap">
+              <Stack gap={4} align="center">
+                <Text size="sm" c="dimmed">스크립트 작가 1명</Text>
+                <Text size="xl" fw={800} c="white">월 200만원</Text>
+              </Stack>
+              <Text size="xl" c="dimmed">vs</Text>
+              <Stack gap={4} align="center">
+                <Text size="sm" c="dimmed">AI 스크립트 1년</Text>
+                <Text size="xl" fw={800} style={{ color: '#ec4899' }}>50만원</Text>
+              </Stack>
+            </Group>
+            <Text c="dimmed" mt="lg">
+              = <b style={{ color: '#fff' }}>월 4만원</b> = 커피 10잔 값으로 <b style={{ color: '#a78bfa' }}>평생 일하는 직원</b>을 고용하세요
+            </Text>
+          </Box>
+        </motion.div>
       </Container>
     </Box>
   );
