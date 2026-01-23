@@ -17,6 +17,7 @@ import {
 
 /**
  * 지표 계산
+ * 쇼츠는 조회수에 가중치(0.35x) 적용 → 롱폼과 동일 기준으로 경쟁
  */
 export function calculateMetrics(
     video: HotVideo,
@@ -29,25 +30,33 @@ export function calculateMetrics(
     engagementRate: number;
     score: number;
     reasonFlags: string[];
+    isShorts: boolean;
 } {
     const { view_count, like_count, comment_count, age_hours } = stats;
     const { subscriber_count, avg_view_count } = channel;
 
-    // 뷰트랩 패턴 지표
+    // 쇼츠 판별 (60초 이하)
+    const isShorts = video.duration_seconds > 0 && video.duration_seconds <= 60;
+
+    // 쇼츠 가중치: 쇼츠는 조회수를 0.35배로 환산 (롱폼과 동일 기준)
+    const SHORTS_WEIGHT = 0.35;
+    const effectiveViewCount = isShorts ? view_count * SHORTS_WEIGHT : view_count;
+
+    // 뷰트랩 패턴 지표 (가중치 적용된 조회수 사용)
     // contributionRate = (viewCount / avgViewCount) * 9.09
     const contributionRate = avg_view_count > 0
-        ? (view_count / avg_view_count) * METRICS_CONSTANTS.CONTRIBUTION_MULTIPLIER
+        ? (effectiveViewCount / avg_view_count) * METRICS_CONSTANTS.CONTRIBUTION_MULTIPLIER
         : 0;
 
     // performanceRate = (viewCount / subscriberCount) * 14.285
     const performanceRate = subscriber_count > 0
-        ? (view_count / subscriber_count) * METRICS_CONSTANTS.PERFORMANCE_MULTIPLIER
+        ? (effectiveViewCount / subscriber_count) * METRICS_CONSTANTS.PERFORMANCE_MULTIPLIER
         : 0;
 
-    // viewVelocity = viewCount / (ageHours + 2)
+    // viewVelocity = viewCount / (ageHours + 2) (원본 조회수 사용)
     const viewVelocity = view_count / (age_hours + METRICS_CONSTANTS.VELOCITY_OFFSET);
 
-    // engagement = (likes + 4*comments) / viewCount
+    // engagement = (likes + 4*comments) / viewCount (원본 조회수 사용)
     const engagementRate = view_count > 0
         ? (like_count + METRICS_CONSTANTS.COMMENT_WEIGHT * comment_count) / view_count
         : 0;
@@ -62,6 +71,9 @@ export function calculateMetrics(
 
     // 선정 이유 플래그
     const reasonFlags: string[] = [];
+    if (isShorts) {
+        reasonFlags.push('SHORTS');
+    }
     if (contributionRate >= DEFAULT_FILTERS.minContribution) {
         reasonFlags.push('HIGH_CONTRIBUTION');
     }
@@ -82,6 +94,7 @@ export function calculateMetrics(
         engagementRate,
         score,
         reasonFlags,
+        isShorts,
     };
 }
 
