@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
 
         // 파라미터 파싱
-        const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+        let date = searchParams.get('date') || new Date().toISOString().split('T')[0];
         const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 200);
         const offset = parseInt(searchParams.get('offset') || '0');
         const sortBy = searchParams.get('sort') || 'score';
@@ -39,7 +39,19 @@ export async function GET(request: NextRequest) {
         const maxSubs = parseInt(searchParams.get('max_subs') || '0');
         const minPerf = parseInt(searchParams.get('min_perf') || '0');
 
-        // 먼저 hot_list_daily만 조회
+        // 오늘 데이터 없으면 어제 날짜로 fallback
+        const { count: todayCount } = await supabase
+            .from('hot_list_daily')
+            .select('*', { count: 'exact', head: true })
+            .eq('date', date);
+
+        if (!todayCount || todayCount === 0) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            date = yesterday.toISOString().split('T')[0];
+        }
+
+        // hot_list_daily 조회
         let query = supabase
             .from('hot_list_daily')
             .select('*')
