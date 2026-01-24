@@ -10,6 +10,7 @@ import "../globals.css";
 
 // Mantine imports
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { tossTheme } from '@/theme';
 
