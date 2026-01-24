@@ -14,15 +14,12 @@ import {
     Loader,
     Paper,
     SimpleGrid,
-    ActionIcon,
-    Tooltip,
     Box,
     Card,
     ThemeIcon,
-    Menu,
-    Divider,
-    Center,
+    Popover,
 } from '@mantine/core';
+import { DatePicker } from '@mantine/dates';
 import {
     Flame,
     TrendingUp,
@@ -30,10 +27,13 @@ import {
     Clock,
     RefreshCw,
     Zap,
-    Calendar,
-    ChevronDown,
+    Calendar as CalendarIcon,
     Loader2,
 } from 'lucide-react';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
+
+dayjs.locale('ko');
 
 interface HotListItem {
     video_id: string;
@@ -106,12 +106,7 @@ function getRelativeTime(dateStr: string): string {
 }
 
 function formatDateKR(dateStr: string): string {
-    const date = new Date(dateStr);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-    const weekday = weekdays[date.getDay()];
-    return `${month}월 ${day}일 (${weekday})`;
+    return dayjs(dateStr).format('M월 D일 (ddd)');
 }
 
 // 구독자 필터 옵션
@@ -140,8 +135,9 @@ export function HotListContent() {
 
     // 날짜 관련 상태
     const [availableDates, setAvailableDates] = useState<DateInfo[]>([]);
-    const [selectedDate, setSelectedDate] = useState<string>('');
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [datesLoading, setDatesLoading] = useState(true);
+    const [calendarOpened, setCalendarOpened] = useState(false);
 
     // 필터 상태
     const [sortBy, setSortBy] = useState<string>('score');
@@ -152,6 +148,9 @@ export function HotListContent() {
     const offsetRef = useRef(0);
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loadMoreRef = useRef<HTMLDivElement>(null);
+
+    // 수집된 날짜 Set (빠른 조회용)
+    const availableDateSet = new Set(availableDates.map(d => d.date));
 
     // 날짜 목록 로드
     const fetchDates = useCallback(async () => {
@@ -175,6 +174,8 @@ export function HotListContent() {
 
     // 핫 리스트 로드
     const fetchHotList = useCallback(async (reset: boolean = false) => {
+        if (!selectedDate) return;
+
         if (reset) {
             setLoading(true);
             offsetRef.current = 0;
@@ -194,11 +195,8 @@ export function HotListContent() {
                 min_subs: String(selectedSubs.min),
                 max_subs: String(selectedSubs.max),
                 min_perf: perfFilter,
+                date: selectedDate,
             });
-
-            if (selectedDate) {
-                params.set('date', selectedDate);
-            }
 
             const res = await fetch(`/api/hot-list?${params}`);
             const json = await res.json();
@@ -225,7 +223,7 @@ export function HotListContent() {
             console.error('Failed to fetch hot list:', error);
             if (reset) {
                 setData({
-                    date: selectedDate || new Date().toISOString().split('T')[0],
+                    date: selectedDate,
                     total: 0,
                     items: [],
                     stats: { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' }
@@ -280,12 +278,26 @@ export function HotListContent() {
         setter(value);
     };
 
-    if (loading && allItems.length === 0) {
+    // 달력에서 날짜 선택
+    const handleDateChange = (value: string | null) => {
+        if (value && availableDateSet.has(value)) {
+            setSelectedDate(value);
+            setCalendarOpened(false);
+        }
+    };
+
+    // 수집된 날짜의 아이템 수 가져오기
+    const getDateCount = (dateStr: string): number => {
+        const found = availableDates.find(d => d.date === dateStr);
+        return found?.count || 0;
+    };
+
+    if (loading && allItems.length === 0 && !datesLoading) {
         return (
             <Container size="xl" py={50}>
                 <Stack align="center" gap="xl">
                     <Loader size="xl" type="bars" />
-                    <Text size="lg" fw={500}>오늘의 떡상 영상을 찾고 있어요...</Text>
+                    <Text size="lg" fw={500}>핫 영상을 불러오는 중...</Text>
                 </Stack>
             </Container>
         );
@@ -309,45 +321,57 @@ export function HotListContent() {
                             </div>
                         </Group>
 
-                        {/* 날짜 선택 드롭다운 */}
+                        {/* 달력 선택 */}
                         <Group gap="sm">
-                            <Menu shadow="md" width={250} position="bottom-end">
-                                <Menu.Target>
+                            <Popover
+                                opened={calendarOpened}
+                                onChange={setCalendarOpened}
+                                position="bottom-end"
+                                shadow="md"
+                            >
+                                <Popover.Target>
                                     <Button
                                         variant="light"
-                                        leftSection={<Calendar size={16} />}
-                                        rightSection={<ChevronDown size={14} />}
+                                        leftSection={<CalendarIcon size={16} />}
+                                        onClick={() => setCalendarOpened((o) => !o)}
                                         loading={datesLoading}
                                     >
                                         {selectedDate ? formatDateKR(selectedDate) : '날짜 선택'}
                                     </Button>
-                                </Menu.Target>
-                                <Menu.Dropdown>
-                                    <Menu.Label>수집된 날짜</Menu.Label>
-                                    {availableDates.length === 0 ? (
-                                        <Menu.Item disabled>아직 수집된 데이터가 없어요</Menu.Item>
-                                    ) : (
-                                        availableDates.map((dateInfo) => (
-                                            <Menu.Item
-                                                key={dateInfo.date}
-                                                onClick={() => setSelectedDate(dateInfo.date)}
-                                                style={{
-                                                    backgroundColor: selectedDate === dateInfo.date
-                                                        ? 'var(--mantine-color-blue-light)'
-                                                        : undefined,
-                                                }}
-                                            >
-                                                <Group justify="space-between" w="100%">
-                                                    <Text size="sm">{formatDateKR(dateInfo.date)}</Text>
-                                                    <Badge size="sm" variant="light" color="gray">
-                                                        {dateInfo.count}개
-                                                    </Badge>
-                                                </Group>
-                                            </Menu.Item>
-                                        ))
-                                    )}
-                                </Menu.Dropdown>
-                            </Menu>
+                                </Popover.Target>
+                                <Popover.Dropdown p="xs">
+                                    <Stack gap="xs">
+                                        <Text size="sm" fw={500} c="dimmed" ta="center">
+                                            🔥 수집된 날짜만 선택 가능
+                                        </Text>
+                                        <DatePicker
+                                            value={selectedDate}
+                                            onChange={handleDateChange}
+                                            locale="ko"
+                                            maxDate={new Date()}
+                                            getDayProps={(date) => {
+                                                const dateStr = dayjs(date).format('YYYY-MM-DD');
+                                                const isAvailable = availableDateSet.has(dateStr);
+                                                const count = getDateCount(dateStr);
+
+                                                return {
+                                                    disabled: !isAvailable,
+                                                    style: {
+                                                        backgroundColor: isAvailable ? 'var(--mantine-color-red-light)' : undefined,
+                                                        fontWeight: isAvailable ? 700 : 400,
+                                                    },
+                                                    title: isAvailable ? `${count}개 영상` : '데이터 없음',
+                                                };
+                                            }}
+                                        />
+                                        {availableDates.length > 0 && (
+                                            <Text size="xs" c="dimmed" ta="center">
+                                                🔴 빨간 배경 = 데이터 있음
+                                            </Text>
+                                        )}
+                                    </Stack>
+                                </Popover.Dropdown>
+                            </Popover>
 
                             <Button
                                 variant="subtle"
@@ -405,7 +429,7 @@ export function HotListContent() {
                 </Stack>
 
                 {/* 메인 콘텐츠: 카드 그리드 (스크롤) */}
-                {allItems.length === 0 ? (
+                {allItems.length === 0 && !loading ? (
                     <Paper p={50} radius="md" withBorder style={{ textAlign: 'center' }}>
                         <Text c="dimmed" size="lg">조건에 맞는 영상이 없어요 😢</Text>
                         <Text c="dimmed" size="sm" mt="sm">필터 조건을 조금 완화해보세요!</Text>
