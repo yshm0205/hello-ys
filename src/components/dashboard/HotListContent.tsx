@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
     Container,
     Title,
@@ -16,26 +16,23 @@ import {
     SimpleGrid,
     ActionIcon,
     Tooltip,
-    SegmentedControl,
     Box,
     Card,
     ThemeIcon,
-    Overlay,
+    Menu,
+    Divider,
+    Center,
 } from '@mantine/core';
 import {
     Flame,
     TrendingUp,
-    Users,
     Eye,
     Clock,
     RefreshCw,
-    ExternalLink,
-    ChevronLeft,
-    ChevronRight,
     Zap,
-    Award,
-    Filter,
-    Youtube
+    Calendar,
+    ChevronDown,
+    Loader2,
 } from 'lucide-react';
 
 interface HotListItem {
@@ -76,6 +73,11 @@ interface HotListData {
     };
 }
 
+interface DateInfo {
+    date: string;
+    count: number;
+}
+
 // 포맷팅 함수들
 function formatNumber(num: number): string {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -103,6 +105,15 @@ function getRelativeTime(dateStr: string): string {
     return `${weeks}주 전`;
 }
 
+function formatDateKR(dateStr: string): string {
+    const date = new Date(dateStr);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+    const weekday = weekdays[date.getDay()];
+    return `${month}월 ${day}일 (${weekday})`;
+}
+
 // 구독자 필터 옵션
 const SUBS_FILTERS = [
     { label: '전체 채널', value: 'all', min: 0, max: 0 },
@@ -122,28 +133,72 @@ const PERF_FILTERS = [
 
 export function HotListContent() {
     const [data, setData] = useState<HotListData | null>(null);
+    const [allItems, setAllItems] = useState<HotListItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+
+    // 날짜 관련 상태
+    const [availableDates, setAvailableDates] = useState<DateInfo[]>([]);
+    const [selectedDate, setSelectedDate] = useState<string>('');
+    const [datesLoading, setDatesLoading] = useState(true);
 
     // 필터 상태
     const [sortBy, setSortBy] = useState<string>('score');
     const [subsFilter, setSubsFilter] = useState<string>('all');
     const [perfFilter, setPerfFilter] = useState<string>('0');
-    const [page, setPage] = useState(0);
-    const limit = 20;
 
-    const fetchHotList = useCallback(async () => {
-        setLoading(true);
+    const limit = 20;
+    const offsetRef = useRef(0);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const loadMoreRef = useRef<HTMLDivElement>(null);
+
+    // 날짜 목록 로드
+    const fetchDates = useCallback(async () => {
+        setDatesLoading(true);
+        try {
+            const res = await fetch('/api/hot-list/dates');
+            const json = await res.json();
+            if (json.dates && json.dates.length > 0) {
+                setAvailableDates(json.dates);
+                // 첫 번째 날짜를 기본값으로 설정
+                if (!selectedDate) {
+                    setSelectedDate(json.dates[0].date);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch dates:', error);
+        } finally {
+            setDatesLoading(false);
+        }
+    }, [selectedDate]);
+
+    // 핫 리스트 로드
+    const fetchHotList = useCallback(async (reset: boolean = false) => {
+        if (reset) {
+            setLoading(true);
+            offsetRef.current = 0;
+            setAllItems([]);
+            setHasMore(true);
+        } else {
+            setLoadingMore(true);
+        }
+
         try {
             const selectedSubs = SUBS_FILTERS.find(f => f.value === subsFilter)!;
 
             const params = new URLSearchParams({
                 sort: sortBy,
                 limit: String(limit),
-                offset: String(page * limit),
+                offset: String(offsetRef.current),
                 min_subs: String(selectedSubs.min),
                 max_subs: String(selectedSubs.max),
                 min_perf: perfFilter,
             });
+
+            if (selectedDate) {
+                params.set('date', selectedDate);
+            }
 
             const res = await fetch(`/api/hot-list?${params}`);
             const json = await res.json();
@@ -151,31 +206,81 @@ export function HotListContent() {
             if (!json.stats) {
                 json.stats = { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' };
             }
-            setData(json);
+
+            if (reset) {
+                setData(json);
+                setAllItems(json.items || []);
+            } else {
+                setAllItems(prev => [...prev, ...(json.items || [])]);
+            }
+
+            // 더 가져올 데이터 있는지 확인
+            if (!json.items || json.items.length < limit) {
+                setHasMore(false);
+            }
+
+            offsetRef.current += limit;
+
         } catch (error) {
             console.error('Failed to fetch hot list:', error);
-            setData({
-                date: new Date().toISOString().split('T')[0],
-                total: 0,
-                items: [],
-                stats: { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' }
-            });
+            if (reset) {
+                setData({
+                    date: selectedDate || new Date().toISOString().split('T')[0],
+                    total: 0,
+                    items: [],
+                    stats: { avg_views: 0, avg_performance: 0, max_performance: 0, top_category: '-' }
+                });
+            }
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
-    }, [sortBy, page, limit, subsFilter, perfFilter]);
+    }, [sortBy, subsFilter, perfFilter, selectedDate, limit]);
 
+    // 초기 로드
     useEffect(() => {
-        fetchHotList();
-    }, [fetchHotList]);
+        fetchDates();
+    }, []);
 
-    // 필터 변경 시 페이지 리셋
+    // 날짜 선택 또는 필터 변경 시 리셋
+    useEffect(() => {
+        if (selectedDate) {
+            fetchHotList(true);
+        }
+    }, [selectedDate, sortBy, subsFilter, perfFilter]);
+
+    // 무한 스크롤 설정
+    useEffect(() => {
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+        }
+
+        observerRef.current = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+                    fetchHotList(false);
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (loadMoreRef.current) {
+            observerRef.current.observe(loadMoreRef.current);
+        }
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, [hasMore, loading, loadingMore, fetchHotList]);
+
+    // 필터 변경 핸들러
     const handleFilterChange = (setter: any, value: any) => {
         setter(value);
-        setPage(0);
     };
 
-    if (loading && !data) {
+    if (loading && allItems.length === 0) {
         return (
             <Container size="xl" py={50}>
                 <Stack align="center" gap="xl">
@@ -189,27 +294,67 @@ export function HotListContent() {
     return (
         <Container size="xl" py="lg">
             <Stack gap="xl">
-                {/* 헤더 & 필터 영역 */}
+                {/* 헤더 & 날짜 선택 영역 */}
                 <Stack gap="md">
-                    <Group justify="space-between" align="flex-end">
+                    <Group justify="space-between" align="flex-start">
                         <Group gap="sm" align="center">
                             <ThemeIcon size={36} radius="md" color="red" variant="light">
                                 <Flame size={22} />
                             </ThemeIcon>
                             <div>
-                                <Title order={2}>오늘의 핫 리스트</Title>
+                                <Title order={2}>핫 리스트</Title>
                                 <Text c="dimmed" size="sm">
-                                    {data?.date} 기준 • 총 {data?.total || 0}개 발견
+                                    총 {data?.total || allItems.length}개 발견
                                 </Text>
                             </div>
                         </Group>
-                        <Group>
+
+                        {/* 날짜 선택 드롭다운 */}
+                        <Group gap="sm">
+                            <Menu shadow="md" width={250} position="bottom-end">
+                                <Menu.Target>
+                                    <Button
+                                        variant="light"
+                                        leftSection={<Calendar size={16} />}
+                                        rightSection={<ChevronDown size={14} />}
+                                        loading={datesLoading}
+                                    >
+                                        {selectedDate ? formatDateKR(selectedDate) : '날짜 선택'}
+                                    </Button>
+                                </Menu.Target>
+                                <Menu.Dropdown>
+                                    <Menu.Label>수집된 날짜</Menu.Label>
+                                    {availableDates.length === 0 ? (
+                                        <Menu.Item disabled>아직 수집된 데이터가 없어요</Menu.Item>
+                                    ) : (
+                                        availableDates.map((dateInfo) => (
+                                            <Menu.Item
+                                                key={dateInfo.date}
+                                                onClick={() => setSelectedDate(dateInfo.date)}
+                                                style={{
+                                                    backgroundColor: selectedDate === dateInfo.date
+                                                        ? 'var(--mantine-color-blue-light)'
+                                                        : undefined,
+                                                }}
+                                            >
+                                                <Group justify="space-between" w="100%">
+                                                    <Text size="sm">{formatDateKR(dateInfo.date)}</Text>
+                                                    <Badge size="sm" variant="light" color="gray">
+                                                        {dateInfo.count}개
+                                                    </Badge>
+                                                </Group>
+                                            </Menu.Item>
+                                        ))
+                                    )}
+                                </Menu.Dropdown>
+                            </Menu>
+
                             <Button
                                 variant="subtle"
                                 color="gray"
                                 size="sm"
                                 leftSection={<RefreshCw size={14} />}
-                                onClick={() => fetchHotList()}
+                                onClick={() => fetchHotList(true)}
                                 loading={loading}
                             >
                                 새로고침
@@ -259,8 +404,8 @@ export function HotListContent() {
                     </Paper>
                 </Stack>
 
-                {/* 메인 콘텐츠: 카드 그리드 */}
-                {data?.items.length === 0 ? (
+                {/* 메인 콘텐츠: 카드 그리드 (스크롤) */}
+                {allItems.length === 0 ? (
                     <Paper p={50} radius="md" withBorder style={{ textAlign: 'center' }}>
                         <Text c="dimmed" size="lg">조건에 맞는 영상이 없어요 😢</Text>
                         <Text c="dimmed" size="sm" mt="sm">필터 조건을 조금 완화해보세요!</Text>
@@ -270,131 +415,121 @@ export function HotListContent() {
                         }}>필터 초기화</Button>
                     </Paper>
                 ) : (
-                    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
-                        {data?.items.map((item) => (
-                            <Card key={item.video_id} radius="md" withBorder p={0} style={{ overflow: 'hidden', height: '100%' }}>
-                                {/* 썸네일 영역 */}
-                                <Box pos="relative" style={{ aspectRatio: '16/9' }}>
-                                    <Image
-                                        src={`https://i.ytimg.com/vi/${item.video_id}/mqdefault.jpg`}
-                                        alt={item.video?.title}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        fallbackSrc="https://placehold.co/320x180/1a1a1a/666?text=No+Preview"
-                                    />
-                                    {/* 썸네일 위 뱃지들 */}
-                                    <Badge
-                                        pos="absolute"
-                                        top={8}
-                                        left={8}
-                                        size="lg"
-                                        variant="filled"
-                                        color="dark"
-                                        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
-                                    >
-                                        #{item.rank}
-                                    </Badge>
-                                    <Badge
-                                        pos="absolute"
-                                        bottom={8}
-                                        right={8}
-                                        size="sm"
-                                        variant="filled"
-                                        color="dark"
-                                        style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
-                                    >
-                                        {formatDuration(item.video?.duration_seconds || 0)}
-                                    </Badge>
-                                </Box>
-
-                                {/* 콘텐츠 영역 */}
-                                <Stack p="md" gap="sm" justify="space-between" style={{ flex: 1 }}>
-                                    <Stack gap="xs">
-                                        {/* 성과 배지 */}
-                                        <Group gap="xs">
-                                            <Badge variant="light" color="red" leftSection={<TrendingUp size={12} />}>
-                                                구독 대비 {(item.performance_rate).toFixed(0)}%
-                                            </Badge>
-                                            {item.view_velocity > 1000 && (
-                                                <Badge variant="light" color="blue" leftSection={<Zap size={12} />}>
-                                                    +{formatNumber(item.view_velocity)}/h
-                                                </Badge>
-                                            )}
-                                        </Group>
-
-                                        {/* 제목 (링크) */}
-                                        <Text
-                                            fw={600}
-                                            lineClamp={2}
-                                            component="a"
-                                            href={`https://www.youtube.com/watch?v=${item.video_id}`}
-                                            target="_blank"
-                                            style={{ cursor: 'pointer', lineHeight: 1.4, minHeight: '2.8em' }}
-                                            c="dark"
+                    <>
+                        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
+                            {allItems.map((item, index) => (
+                                <Card key={`${item.video_id}-${index}`} radius="md" withBorder p={0} style={{ overflow: 'hidden', height: '100%' }}>
+                                    {/* 썸네일 영역 */}
+                                    <Box pos="relative" style={{ aspectRatio: '16/9' }}>
+                                        <Image
+                                            src={`https://i.ytimg.com/vi/${item.video_id}/mqdefault.jpg`}
+                                            alt={item.video?.title}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            fallbackSrc="https://placehold.co/320x180/1a1a1a/666?text=No+Preview"
+                                        />
+                                        {/* 썸네일 위 뱃지들 */}
+                                        <Badge
+                                            pos="absolute"
+                                            top={8}
+                                            left={8}
+                                            size="lg"
+                                            variant="filled"
+                                            color="dark"
+                                            style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
                                         >
-                                            {item.video?.title}
-                                        </Text>
+                                            #{item.rank}
+                                        </Badge>
+                                        <Badge
+                                            pos="absolute"
+                                            bottom={8}
+                                            right={8}
+                                            size="sm"
+                                            variant="filled"
+                                            color="dark"
+                                            style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+                                        >
+                                            {formatDuration(item.video?.duration_seconds || 0)}
+                                        </Badge>
+                                    </Box>
 
-                                        {/* 채널 정보 */}
-                                        <Group gap="xs">
-                                            <Image
-                                                src={item.channel?.thumbnail_url}
-                                                w={24} h={24}
-                                                radius="xl"
-                                                alt=""
-                                            />
-                                            <Text size="sm" c="dimmed" lineClamp={1} style={{ flex: 1 }}>
-                                                {item.channel?.title}
+                                    {/* 콘텐츠 영역 */}
+                                    <Stack p="md" gap="sm" justify="space-between" style={{ flex: 1 }}>
+                                        <Stack gap="xs">
+                                            {/* 성과 배지 */}
+                                            <Group gap="xs">
+                                                <Badge variant="light" color="red" leftSection={<TrendingUp size={12} />}>
+                                                    구독 대비 {(item.performance_rate).toFixed(0)}%
+                                                </Badge>
+                                                {item.view_velocity > 1000 && (
+                                                    <Badge variant="light" color="blue" leftSection={<Zap size={12} />}>
+                                                        +{formatNumber(item.view_velocity)}/h
+                                                    </Badge>
+                                                )}
+                                            </Group>
+
+                                            {/* 제목 (링크) */}
+                                            <Text
+                                                fw={600}
+                                                lineClamp={2}
+                                                component="a"
+                                                href={`https://www.youtube.com/watch?v=${item.video_id}`}
+                                                target="_blank"
+                                                style={{ cursor: 'pointer', lineHeight: 1.4, minHeight: '2.8em' }}
+                                                c="dark"
+                                            >
+                                                {item.video?.title}
                                             </Text>
-                                            <Text size="xs" c="dimmed">
-                                                구독 {formatSubscriberCount(item.subscriber_count)}
-                                            </Text>
+
+                                            {/* 채널 정보 */}
+                                            <Group gap="xs">
+                                                <Image
+                                                    src={item.channel?.thumbnail_url}
+                                                    w={24} h={24}
+                                                    radius="xl"
+                                                    alt=""
+                                                />
+                                                <Text size="sm" c="dimmed" lineClamp={1} style={{ flex: 1 }}>
+                                                    {item.channel?.title}
+                                                </Text>
+                                                <Text size="xs" c="dimmed">
+                                                    구독 {formatSubscriberCount(item.subscriber_count)}
+                                                </Text>
+                                            </Group>
+                                        </Stack>
+
+                                        {/* 하단 지표 */}
+                                        <Group justify="space-between" pt="xs" style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
+                                            <Group gap={4}>
+                                                <Eye size={14} color="gray" />
+                                                <Text size="sm" fw={500}>
+                                                    {formatNumber(item.view_count)}
+                                                </Text>
+                                            </Group>
+                                            <Group gap={4}>
+                                                <Clock size={14} color="gray" />
+                                                <Text size="xs" c="dimmed">
+                                                    {getRelativeTime(item.video?.published_at || '')}
+                                                </Text>
+                                            </Group>
                                         </Group>
                                     </Stack>
+                                </Card>
+                            ))}
+                        </SimpleGrid>
 
-                                    {/* 하단 지표 */}
-                                    <Group justify="space-between" pt="xs" style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
-                                        <Group gap={4}>
-                                            <Eye size={14} color="gray" />
-                                            <Text size="sm" fw={500}>
-                                                {formatNumber(item.view_count)}
-                                            </Text>
-                                        </Group>
-                                        <Group gap={4}>
-                                            <Clock size={14} color="gray" />
-                                            <Text size="xs" c="dimmed">
-                                                {getRelativeTime(item.video?.published_at || '')}
-                                            </Text>
-                                        </Group>
-                                    </Group>
-                                </Stack>
-                            </Card>
-                        ))}
-                    </SimpleGrid>
-                )}
-
-                {/* 페이지네이션 */}
-                {data?.total && data.total > limit && (
-                    <Group justify="center" pt="md">
-                        <Button
-                            variant="default"
-                            leftSection={<ChevronLeft size={16} />}
-                            disabled={page === 0}
-                            onClick={() => setPage(p => p - 1)}
-                        >
-                            이전
-                        </Button>
-                        <Text size="sm" c="dimmed">
-                            {page + 1} / {Math.ceil(data.total / limit)}
-                        </Text>
-                        <Button
-                            variant="default"
-                            rightSection={<ChevronRight size={16} />}
-                            disabled={(page + 1) * limit >= data.total}
-                            onClick={() => setPage(p => p + 1)}
-                        >
-                            다음
-                        </Button>
-                    </Group>
+                        {/* 무한 스크롤 로딩 트리거 */}
+                        <div ref={loadMoreRef} style={{ height: 60, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            {loadingMore && (
+                                <Group gap="sm">
+                                    <Loader2 size={20} className="animate-spin" />
+                                    <Text size="sm" c="dimmed">더 불러오는 중...</Text>
+                                </Group>
+                            )}
+                            {!hasMore && allItems.length > 0 && (
+                                <Text size="sm" c="dimmed">모든 영상을 불러왔어요 🎉</Text>
+                            )}
+                        </div>
+                    </>
                 )}
             </Stack>
         </Container>
