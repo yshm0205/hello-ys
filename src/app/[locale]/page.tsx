@@ -124,8 +124,8 @@ function HeroSection() {
     <Box
       style={{
         background: 'linear-gradient(180deg, #130a26 0%, #1e1b4b 60%, #111827 100%)', // 딥 퍼플 그라데이션
-        paddingTop: '120px',
-        paddingBottom: '100px',
+        paddingTop: 'clamp(80px, 15vh, 120px)',
+        paddingBottom: 'clamp(60px, 10vh, 100px)',
         position: 'relative',
         overflow: 'hidden',
         minHeight: '100vh',
@@ -144,22 +144,23 @@ function HeroSection() {
         }}
       />
 
-      {/* 글로우 오브 (보라색 강화) */}
+      {/* 글로우 오브 (보라색 강화) - 모바일 대응 */}
       <Box
         style={{
           position: 'absolute',
           top: '0%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '1200px',
-          height: '1000px',
+          width: '100%',
+          maxWidth: '1200px',
+          height: '80vh',
           background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.4) 0%, rgba(124, 58, 237, 0.15) 40%, transparent 70%)',
           filter: 'blur(120px)',
           pointerEvents: 'none',
         }}
       />
 
-      <Container size="md" style={{ position: 'relative', zIndex: 1 }}>
+      <Container size="md" style={{ position: 'relative', zIndex: 1, padding: '0 16px' }}>
         <Stack align="center" gap="xl">
 
           {/* 상단 권위 배지 (NEW) */}
@@ -228,9 +229,9 @@ function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Stack align="center" gap="xl" mt="xl">
-              <Box p="lg" style={{ background: 'rgba(17, 24, 39, 0.6)', borderRadius: '20px', backdropFilter: 'blur(10px)', border: '1px solid rgba(139, 92, 246, 0.3)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
-                <Text size="xl" ta="center" style={{ color: '#f3f4f6', fontSize: '24px', maxWidth: '800px', lineHeight: 1.6, fontWeight: 500 }}>
-                  문제는 '의지'가 아니라 <span style={{ color: '#fff', fontWeight: 800, fontSize: '26px' }}>'실행'</span>입니다. 혼자 하긴 벅차니까요.<br />
+              <Box p="md" style={{ background: 'rgba(17, 24, 39, 0.6)', borderRadius: '20px', backdropFilter: 'blur(10px)', border: '1px solid rgba(139, 92, 246, 0.3)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)', width: '100%' }}>
+                <Text size="xl" ta="center" style={{ color: '#f3f4f6', fontSize: 'clamp(16px, 4vw, 24px)', maxWidth: '800px', lineHeight: 1.6, fontWeight: 500, margin: '0 auto' }}>
+                  문제는 '의지'가 아니라 <span style={{ color: '#fff', fontWeight: 800 }}>'실행'</span>입니다. 혼자 하긴 벅차니까요.<br />
                   그래서 <span style={{ color: '#a78bfa', fontWeight: 800 }}>검증된 노하우</span>에 <span style={{ color: '#a78bfa', fontWeight: 800 }}>AI 직원들</span>을 더했습니다.
                 </Text>
               </Box>
@@ -246,12 +247,12 @@ function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Group gap="md" justify="center" mt="lg">
-              <Badge size="xl" variant="filled" color="dark" radius="xl" style={{ padding: '20px 28px', height: 'auto', border: '1px solid rgba(139, 92, 246, 0.4)', fontSize: '18px', background: 'rgba(17, 24, 39, 0.8)' }}>
+            <Group gap="sm" justify="center" mt="lg" wrap="wrap">
+              <Badge size="lg" variant="filled" color="dark" radius="xl" style={{ padding: 'clamp(12px, 3vw, 20px) clamp(16px, 4vw, 28px)', height: 'auto', border: '1px solid rgba(139, 92, 246, 0.4)', fontSize: 'clamp(14px, 3.5vw, 18px)', background: 'rgba(17, 24, 39, 0.8)' }}>
                 🧠 59강 영상 강의
               </Badge>
               <Text size="xl" fw={900} style={{ color: '#a78bfa' }}>+</Text>
-              <Badge size="xl" variant="gradient" gradient={{ from: 'violet', to: 'indigo' }} radius="xl" style={{ padding: '20px 28px', height: 'auto', border: '1px solid rgba(255,255,255,0.2)', fontSize: '18px', boxShadow: '0 0 25px rgba(139, 92, 246, 0.5)' }}>
+              <Badge size="lg" variant="gradient" gradient={{ from: 'violet', to: 'indigo' }} radius="xl" style={{ padding: 'clamp(12px, 3vw, 20px) clamp(16px, 4vw, 28px)', height: 'auto', border: '1px solid rgba(255,255,255,0.2)', fontSize: 'clamp(14px, 3.5vw, 18px)', boxShadow: '0 0 25px rgba(139, 92, 246, 0.5)' }}>
                 🤖 AI 직원 3인방
               </Badge>
             </Group>
@@ -331,119 +332,6 @@ function HeroSection() {
               </Box>
             </Box>
           </motion.div>
-
-          {/* 가격 + CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.45 }}
-          >
-            <Stack align="center" gap="lg">
-              {/* 실시간 남은 자리 */}
-              <Badge
-                size="xl"
-                color="red"
-                variant="filled"
-                radius="xl"
-                style={{ animation: 'pulse 2s infinite', padding: '16px 24px', fontSize: '16px' }}
-              >
-                🔥 1기 30명 중 23명 마감 — 7자리 남음
-              </Badge>
-
-              <Box
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: '20px',
-                  padding: '24px 40px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  textAlign: 'center',
-                }}
-              >
-                <Text size="md" style={{ color: '#9ca3af', marginBottom: '8px' }}>유튜브 수익화 마스터플랜</Text>
-                <Group gap="md" mt={4} justify="center" align="baseline">
-                  <Text size="lg" style={{ textDecoration: 'line-through', color: '#6b7280' }}>₩700,000</Text>
-                  <Text fw={800} style={{ color: '#fff', fontSize: '32px' }}>₩500,000</Text>
-                  <Badge color="red" size="lg">30% OFF</Badge>
-                </Group>
-                {/* 가격 인상 예고 */}
-                <Text size="sm" mt="sm" style={{ color: '#f59e0b', fontWeight: 600 }}>
-                  ⚠️ 2/1 이후 ₩600,000으로 인상 예정
-                </Text>
-              </Box>
-
-              <Button
-                component={Link}
-                href="/dashboard"
-                size="xl"
-                radius="xl"
-                rightSection={<ArrowRight size={28} />}
-                style={{
-                  padding: '0 64px',
-                  height: '80px',
-                  fontSize: '24px',
-                  fontWeight: 800,
-                  background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
-                  boxShadow: '0 0 40px rgba(236, 72, 153, 0.5), 0 0 80px rgba(139, 92, 246, 0.3)',
-                  border: 'none',
-                  animation: 'ctaPulse 2s infinite',
-                }}
-              >
-                🚀 월 4만원으로 AI 팀 고용하기
-              </Button>
-
-              {/* 카운트다운 타이머 */}
-              <Box
-                style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: '16px',
-                  padding: '16px 32px',
-                }}
-              >
-                <Group gap="xl" justify="center">
-                  <Text size="md" fw={600} style={{ color: '#ef4444' }}>⏰ 얼리버드 마감까지</Text>
-                  <Group gap="sm">
-                    {[
-                      { value: deadline.days, label: '일' },
-                      { value: deadline.hours, label: '시' },
-                      { value: deadline.mins, label: '분' },
-                      { value: deadline.secs, label: '초' },
-                    ].map((t, i) => (
-                      <Group key={i} gap={6}>
-                        <Box style={{ background: '#1f2937', padding: '8px 12px', borderRadius: '8px', minWidth: '48px', textAlign: 'center' }}>
-                          <Text fw={700} style={{ color: '#fff', fontSize: '20px' }}>{t.value}</Text>
-                        </Box>
-                        <Text size="sm" style={{ color: '#d1d5db' }}>{t.label}</Text>
-                      </Group>
-                    ))}
-                  </Group>
-                </Group>
-              </Box>
-            </Stack>
-          </motion.div>
-
-          {/* 하단 증거 */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <Group gap="xl" wrap="wrap" justify="center">
-              <Group gap={8}>
-                <Check size={20} color="#22c55e" />
-                <Text size="md" style={{ color: '#d1d5db' }}>본인 월 1,000만원</Text>
-              </Group>
-              <Group gap={8}>
-                <Check size={20} color="#22c55e" />
-                <Text size="md" style={{ color: '#d1d5db' }}>수강생 월 1,000만원</Text>
-              </Group>
-              <Group gap={8}>
-                <Check size={20} color="#22c55e" />
-                <Text size="md" style={{ color: '#d1d5db' }}>전자책 500명 검증</Text>
-              </Group>
-            </Group>
-          </motion.div>
-
         </Stack>
       </Container>
 
@@ -522,11 +410,11 @@ function PainPoint1Section() {
                     }}
                   >
                     <Stack align="center" gap="md">
-                      <Text style={{ fontSize: '48px' }}>{pain.icon}</Text>
+                      <Text style={{ fontSize: 'clamp(32px, 10vw, 48px)' }}>{pain.icon}</Text>
                       <Text
                         fw={700}
                         style={{
-                          fontSize: '22px',
+                          fontSize: 'clamp(16px, 4.5vw, 22px)',
                           color: '#FF4D4D',
                         }}
                       >
@@ -535,7 +423,7 @@ function PainPoint1Section() {
                       <Text
                         style={{
                           color: '#9ca3af',
-                          fontSize: '16px',
+                          fontSize: 'clamp(14px, 3.5vw, 16px)',
                           fontStyle: 'italic',
                         }}
                       >
@@ -546,34 +434,6 @@ function PainPoint1Section() {
                 </motion.div>
               ))}
             </SimpleGrid>
-
-            {/* 전환 문구 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Stack align="center" gap="md" mt={40}>
-                <Box
-                  style={{
-                    width: '2px',
-                    height: '40px',
-                    background: 'linear-gradient(180deg, rgba(239,68,68,0.5) 0%, rgba(34,197,94,0.5) 100%)',
-                  }}
-                />
-                <Text
-                  ta="center"
-                  style={{
-                    fontSize: 'clamp(24px, 3vw, 32px)',
-                    fontWeight: 700,
-                    color: '#22c55e',
-                  }}
-                >
-                  💡 그래서 처음엔 전자책으로 원리를 전달했습니다
-                </Text>
-              </Stack>
-            </motion.div>
           </Stack>
         </motion.div>
       </Container>
@@ -673,8 +533,9 @@ function SocialProofSection() {
             src={selectedImage}
             alt="확대 이미지"
             style={{
-              maxWidth: '90%',
-              maxHeight: '90%',
+              width: '100%',
+              maxWidth: '900px',
+              maxHeight: '85vh',
               objectFit: 'contain',
               borderRadius: '16px',
               boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
@@ -696,134 +557,6 @@ function SocialProofSection() {
       )}
       <Box py={100} style={{ background: '#111827' }}>
         <Container size="lg">
-
-          {/* 🔥 임팩트 숫자 풀스크린 */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <Box
-              py={80}
-              style={{
-                textAlign: 'center',
-                position: 'relative',
-              }}
-            >
-              {/* 배경 글로우 효과 */}
-              <Box
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '600px',
-                  height: '400px',
-                  background: 'radial-gradient(ellipse, rgba(34,197,94,0.15) 0%, transparent 70%)',
-                  pointerEvents: 'none',
-                }}
-              />
-
-              {/* 메인 숫자 - 강사 권위 */}
-              <Text
-                style={{
-                  fontSize: 'clamp(20px, 3vw, 26px)',
-                  color: '#6b7280',
-                  fontWeight: 500,
-                  marginBottom: '12px',
-                }}
-              >
-                조회수 10회에서 시작해
-              </Text>
-              <Box
-                style={{
-                  fontSize: 'clamp(80px, 15vw, 140px)',
-                  fontWeight: 900,
-                  color: '#a78bfa',
-                  lineHeight: 1,
-                  textShadow: '0 0 60px rgba(139,92,246,0.4)',
-                  position: 'relative',
-                }}
-              >
-                <CountUp end={18000} suffix="만뷰" duration={2500} />
-              </Box>
-              <Text
-                mt="md"
-                style={{
-                  fontSize: 'clamp(22px, 3.5vw, 32px)',
-                  color: '#e5e7eb',
-                  fontWeight: 700,
-                }}
-              >
-                달성한 사람이 정리한 원리입니다
-              </Text>
-
-              {/* 서브 지표들 - 콘텐츠 검증 */}
-              <Group justify="center" gap={80} mt={60} wrap="wrap">
-                <Stack align="center" gap={4}>
-                  <Text
-                    style={{
-                      fontSize: 'clamp(36px, 6vw, 56px)',
-                      fontWeight: 800,
-                      color: '#3b82f6',
-                      lineHeight: 1,
-                    }}
-                  >
-                    4년차
-                  </Text>
-                  <Text size="sm" c="dimmed">유튜브 채널 운영</Text>
-                </Stack>
-                <Stack align="center" gap={4}>
-                  <Text
-                    style={{
-                      fontSize: 'clamp(36px, 6vw, 56px)',
-                      fontWeight: 800,
-                      color: '#22c55e',
-                      lineHeight: 1,
-                    }}
-                  >
-                    500명+
-                  </Text>
-                  <Text size="sm" c="dimmed">전자책 구매자</Text>
-                </Stack>
-              </Group>
-
-              {/* 유튜브 스튜디오 인증 스크린샷 (4개) */}
-              <Box mt={80}>
-                <Text ta="center" size="sm" c="dimmed" mb="lg">
-                  📊 실제 유튜브 스튜디오 화면
-                </Text>
-                <Group justify="center" gap="md" wrap="wrap">
-                  {[1, 2, 3, 4].map((num) => (
-                    <Box
-                      key={num}
-                      style={{
-                        width: 'clamp(140px, 22vw, 200px)',
-                        height: 'clamp(200px, 30vw, 280px)',
-                        borderRadius: '16px',
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px dashed rgba(255,255,255,0.2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                        gap: '8px',
-                        transition: 'all 0.3s ease',
-                      }}
-                    >
-                      <Text style={{ fontSize: '32px' }}>📱</Text>
-                      <Text size="xs" c="dimmed">스크린샷 {num}</Text>
-                      <Text size="xs" c="dimmed">(이미지 예정)</Text>
-                    </Box>
-                  ))}
-                </Group>
-              </Box>
-            </Box>
-          </motion.div>
-
-          {/* 구분선 */}
-          <Box my={60} style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent)' }} />
 
           {/* 헤더 */}
           <Stack align="center" gap="xl" mb={60}>
@@ -1335,33 +1068,27 @@ function PainPointSection() {
   );
 }
 
-// ============ 5. STORY SECTION (Deep Narrative) ============
+// ============ 5. STORY SECTION (권위 - 앞으로 이동됨) ============
 function StorySection() {
   return (
     <Box py={120} style={{ background: '#0a0a14', color: '#fff' }}>
       <Container size="lg">
 
-        {/* Transition: 왜냐하면... */}
+        {/* 도입: 공감 */}
         <Stack align="center" gap="xl" mb={100}>
-          <Text
-            style={{
-              fontSize: '24px',
-              color: '#d1d5db',
-              fontStyle: 'italic',
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)',
-              padding: '10px 40px',
-              borderRadius: '100px'
-            }}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            "왜 이렇게까지 준비했을까요?"
-          </Text>
-          <Title order={2} ta="center" style={{ fontSize: '48px', lineHeight: 1.2 }}>
-            <span style={{ color: '#a78bfa' }}>왜냐하면,</span> 저도 그 지옥을<br />
-            똑같이 겪었기 때문입니다.
-          </Title>
+            <Title order={2} ta="center" style={{ fontSize: '48px', lineHeight: 1.3 }}>
+              사실, <span style={{ color: '#a78bfa' }}>저도 시작은 똑같았습니다.</span>
+            </Title>
+          </motion.div>
         </Stack>
 
-        {/* Story Part 1: The Struggle (Left Image, Right Text) */}
+        {/* Before: 힘들었던 시절 */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={60} mb={100} style={{ alignItems: 'center' }}>
           {/* Image Placeholder */}
           <Box
@@ -1371,48 +1098,41 @@ function StorySection() {
           >
             <Stack align="center" gap="sm">
               <Text style={{ fontSize: '40px' }}>📉</Text>
-              <Text c="dimmed">조회수 10회 처참한 그래프</Text>
+              <Text c="dimmed">조회수 10회 스크린샷</Text>
               <Text size="xs" c="dimmed">(이미지 들어갈 자리)</Text>
             </Stack>
           </Box>
 
           <Stack gap="lg">
-            <Badge variant="dot" color="red" size="lg">4년 전</Badge>
-            <Title order={3} style={{ fontSize: '32px' }}>
-              "재능이 없나 봐..."<br />
-              매일 밤 포기하고 싶었습니다.
+            <Title order={3} style={{ fontSize: '32px', lineHeight: 1.4 }}>
+              저도 조회수 10회에서 시작했습니다.
             </Title>
-            <Text style={{ fontSize: '18px', color: '#d1d5db', lineHeight: 1.7 }}>
-              퇴근 후 새벽 2시까지 대본을 썼지만,<br />
-              결과는 늘 <b>조회수 10회, 20회...</b>
+            <Text style={{ fontSize: '18px', color: '#d1d5db', lineHeight: 1.8 }}>
+              7일 걸려서 만든 영상.<br />
+              다음 날 확인한 조회수는 <b>23회</b>.<br />
+              댓글 0개. 좋아요 1개.
             </Text>
-            <Text style={{ fontSize: '18px', color: '#d1d5db', lineHeight: 1.7 }}>
-              영상 하나 만드는 데 7일이 걸리는데<br />
-              아무도 봐주지 않을 때의 그 비참함.<br />
-              아마 겪어보지 않은 분들은 모를 겁니다.
+            <Text style={{ fontSize: '18px', color: '#9ca3af', lineHeight: 1.7, fontStyle: 'italic' }}>
+              그 막막함, 겪어보신 분은 아실 겁니다.
             </Text>
           </Stack>
         </SimpleGrid>
 
 
-        {/* Story Part 2: The Obsession (Right Image, Left Text) */}
-        <SimpleGrid cols={{ base: 1, md: 2 }} spacing={60} mb={120} style={{ alignItems: 'center' }}>
+        {/* 전환점: 분석 시작 */}
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing={60} mb={100} style={{ alignItems: 'center' }}>
           <Stack gap="lg">
-            <Badge variant="dot" color="indigo" size="lg">집착의 시작</Badge>
-            <Title order={3} style={{ fontSize: '32px' }}>
-              오기로 3,000개 영상을<br />
-              프레임 단위로 뜯어봤습니다.
+            <Badge variant="dot" color="indigo" size="lg">전환점</Badge>
+            <Title order={3} style={{ fontSize: '32px', lineHeight: 1.4 }}>
+              그래서 분석을 시작했습니다.
             </Title>
-            <Text style={{ fontSize: '18px', color: '#d1d5db', lineHeight: 1.7 }}>
-              "분명히 이유가 있을 거야."
+            <Text style={{ fontSize: '18px', color: '#d1d5db', lineHeight: 1.8 }}>
+              조회수 100만 넘는 영상들,<br />
+              도대체 뭐가 다른 건지.
             </Text>
-            <Text style={{ fontSize: '18px', color: '#d1d5db', lineHeight: 1.7 }}>
-              감으로 하지 않았습니다.<br />
-              잘 터지는 영상들의 초반 3초, 중간 호흡, 결말 처리를<br />
-              <b>엑셀에 초 단위로 기록하며 분석</b>했습니다.
-            </Text>
-            <Text style={{ fontSize: '18px', color: '#fff', fontWeight: 600 }}>
-              그러자 거짓말처럼 '공통된 패턴'이 보이기 시작했습니다.
+            <Text style={{ fontSize: '18px', color: '#d1d5db', lineHeight: 1.8 }}>
+              초 단위로, 프레임 단위로.<br />
+              <b>3,000개 영상</b>을 뜯어봤습니다.
             </Text>
           </Stack>
 
@@ -1420,58 +1140,194 @@ function StorySection() {
           <Box
             h={400}
             bg="#1f2937"
-
             style={{ borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #4b5563' }}
           >
             <Stack align="center" gap="sm">
               <Text style={{ fontSize: '40px' }}>🧐</Text>
-              <Text c="dimmed">빼곡한 분석 노트/엑셀</Text>
+              <Text c="dimmed">분석 노트/엑셀</Text>
               <Text size="xs" c="dimmed">(이미지 들어갈 자리)</Text>
             </Stack>
           </Box>
         </SimpleGrid>
 
 
-        {/* Story Part 3: The Solution (Center) */}
-        <Stack align="center" gap="xl" mt={100} style={{ textAlign: 'center', position: 'relative' }}>
-          {/* Background Glow */}
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '600px', height: '400px', background: 'radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, transparent 70%)', zIndex: 0 }} />
+        {/* 성장 과정 */}
+        <Stack align="center" gap="xl" mb={80}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <Text ta="center" style={{ fontSize: '24px', color: '#d1d5db', lineHeight: 1.8 }}>
+              그러다 <span style={{ color: '#a78bfa', fontWeight: 600 }}>패턴이 보이기 시작했습니다.</span><br />
+              조금씩 성과가 나오기 시작했고...
+            </Text>
+          </motion.div>
 
-          <Badge variant="outline" color="cyan" size="xl" radius="xl">Final Solution</Badge>
-          <Title order={2} style={{ fontSize: '42px', color: '#fff', zIndex: 1 }}>
-            그 공식을 <span style={{ color: '#00D9FF' }}>AI에게 학습</span>시켰습니다.
-          </Title>
-          <Text style={{ fontSize: '20px', color: '#d1d5db', maxWidth: '700px', zIndex: 1, lineHeight: 1.6 }}>
-            1.8억 뷰를 만든 공식은 이제 제 머릿속에만 있지 않습니다.<br />
-            <b>매번 대본 쓰는 고통?</b> 이제 저도 하지 않습니다.<br />
-            AI가 3분 만에, 제가 찾은 그 '공식'대로 써주니까요.
-          </Text>
+          {/* 드라마틱 전환 - 여백으로 스크롤 유도 */}
+        </Stack>
 
-          {/* Stat Box */}
+        {/* 🎯 스크롤 유도 디자인 - 미니멀 */}
+        <Stack align="center" gap={0} py={100}>
+          {/* 그라데이션 세로선 */}
           <Box
-            p={40}
-            mt={40}
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              borderRadius: '24px',
-              border: '1px solid rgba(0, 217, 255, 0.2)',
-              zIndex: 1,
-              width: '100%',
-              maxWidth: '600px'
+              width: '5px',
+              height: '250px',
+              background: 'linear-gradient(180deg, rgba(167, 139, 250, 0.8) 0%, rgba(167, 139, 250, 0.3) 70%, rgba(167, 139, 250, 0.6) 100%)',
+              borderRadius: '100px',
+            }}
+          />
+
+          {/* 큰 글로우 포인트 */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <Box
+              mt="lg"
+              style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: 'rgba(167, 139, 250, 0.8)',
+                boxShadow: '0 0 40px rgba(167, 139, 250, 1), 0 0 80px rgba(167, 139, 250, 0.6), 0 0 120px rgba(167, 139, 250, 0.4)',
+              }}
+            />
+          </motion.div>
+        </Stack>
+
+
+        {/* 🔥 대형 숫자 - 권위 임팩트 */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <Box
+            py={60}
+            mb={60}
+            style={{
+              textAlign: 'center',
+              position: 'relative',
             }}
           >
-            <Group justify="space-around">
-              <Stack gap={0}>
-                <Text size="sm" c="dimmed">누적 조회수</Text>
-                <Text size="xl" fw={700} c="white">10회 → 1.8억 회</Text>
+            {/* 배경 글로우 효과 */}
+            <Box
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '600px',
+                height: '400px',
+                background: 'radial-gradient(ellipse, rgba(167, 139, 250, 0.15) 0%, transparent 70%)',
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* 메인 숫자 */}
+            <Box
+              style={{
+                fontSize: 'clamp(80px, 15vw, 140px)',
+                fontWeight: 900,
+                color: '#a78bfa',
+                lineHeight: 1,
+                textShadow: '0 0 60px rgba(139,92,246,0.4)',
+                position: 'relative',
+              }}
+            >
+              <CountUp end={18000} suffix="만뷰" duration={2500} />
+            </Box>
+
+            {/* 서브 지표들 */}
+            <Group justify="center" gap={60} mt={40} wrap="wrap">
+              <Stack align="center" gap={4}>
+                <Text
+                  style={{
+                    fontSize: 'clamp(32px, 5vw, 48px)',
+                    fontWeight: 800,
+                    color: '#3b82f6',
+                    lineHeight: 1,
+                  }}
+                >
+                  4개 채널
+                </Text>
+                <Text size="sm" c="dimmed">운영 중</Text>
               </Stack>
-              <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.1)' }} />
-              <Stack gap={0}>
-                <Text size="sm" c="dimmed">작업 시간</Text>
-                <Text size="xl" fw={700} c="white">7일 → 30분</Text>
+              <Stack align="center" gap={4}>
+                <Text
+                  style={{
+                    fontSize: 'clamp(32px, 5vw, 48px)',
+                    fontWeight: 800,
+                    color: '#22c55e',
+                    lineHeight: 1,
+                  }}
+                >
+                  7만명
+                </Text>
+                <Text size="sm" c="dimmed">구독자</Text>
               </Stack>
             </Group>
           </Box>
+        </motion.div>
+
+
+        {/* 결과: 스크린샷 + 숫자 */}
+        <Stack align="center" gap="xl" mb={80}>
+          {/* 스크린샷 3장 플레이스홀더 */}
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg" style={{ width: '100%', maxWidth: '900px' }}>
+            {['채널 1', '채널 2', '채널 3'].map((channel, i) => (
+              <Box
+                key={i}
+                h={200}
+                bg="#1f2937"
+                style={{ borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #4b5563' }}
+              >
+                <Stack align="center" gap="xs">
+                  <Text style={{ fontSize: '32px' }}>📊</Text>
+                  <Text c="dimmed" size="sm">{channel} 스크린샷</Text>
+                </Stack>
+              </Box>
+            ))}
+          </SimpleGrid>
+        </Stack>
+
+
+        {/* 핵심 메시지: 차이는 원리 */}
+        <Stack align="center" gap="xl" mt={60}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <Box
+              p={60}
+              style={{
+                background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(0, 217, 255, 0.1) 100%)',
+                borderRadius: '32px',
+                border: '1px solid rgba(167, 139, 250, 0.3)',
+                textAlign: 'center',
+                maxWidth: '800px'
+              }}
+            >
+              <Title order={2} style={{ fontSize: '36px', lineHeight: 1.5, color: '#fff' }}>
+                저와 여러분의 차이는 <span style={{ color: '#a78bfa' }}>딱 하나</span>입니다.
+              </Title>
+              <Text mt="xl" style={{ fontSize: '24px', color: '#d1d5db', lineHeight: 1.6 }}>
+                <b style={{ color: '#fff' }}>이 원리를 알고 있느냐, 모르고 있느냐.</b><br />
+                그게 전부입니다.
+              </Text>
+              <Text mt="xl" style={{ fontSize: '20px', color: '#a78bfa' }}>
+                그래서 이 원리를 정리했습니다.
+              </Text>
+            </Box>
+          </motion.div>
         </Stack>
 
       </Container>
@@ -1518,6 +1374,247 @@ function HowItWorksSection() {
 // ============ 7. CURRICULUM & PRICING (Final) ============
 // (FAQ, Pricing, Guarantee 등 나머지 섹션은 기존 코드 유지 및 보완)
 
+// ============ Floating CTA (오른쪽 고정 결제 박스) ============
+function FloatingCTA() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 600);
+    };
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize(); // 초기값
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // 카운트다운 타이머
+  useEffect(() => {
+    const targetDate = new Date('2026-02-01T00:00:00');
+    const updateTimer = () => {
+      const now = new Date();
+      const diff = targetDate.getTime() - now.getTime();
+      if (diff > 0) {
+        setTimeLeft({
+          days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((diff % (1000 * 60)) / 1000),
+        });
+      }
+    };
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!isVisible) return null;
+
+  // 📱 모바일 버전 - 펼치기 가능한 하단 고정 바 (클래스101 스타일)
+  if (isMobile) {
+    return (
+      <Box
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          background: '#0f0f19',
+          borderTop: '1px solid rgba(167, 139, 250, 0.4)',
+          borderRadius: isExpanded ? '20px 20px 0 0' : '0',
+          transition: 'all 0.3s ease',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          overflow: 'hidden',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* 펼치기/접기 토글 버튼 */}
+        <Box
+          onClick={() => setIsExpanded(!isExpanded)}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '8px',
+            cursor: 'pointer',
+          }}
+        >
+          <Box
+            style={{
+              width: '40px',
+              height: '4px',
+              background: 'rgba(167, 139, 250, 0.5)',
+              borderRadius: '2px',
+            }}
+          />
+        </Box>
+
+        {/* 펼쳐진 상태: 상세 정보 */}
+        {isExpanded && (
+          <Box style={{ padding: '0 20px 16px' }}>
+            <Stack gap="md" align="center">
+              <Badge color="red" size="sm" variant="filled">
+                🔥 1기 30명 중 23명 마감 — 7자리 남음
+              </Badge>
+              <Text ta="center" style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
+                유튜브 수익화 마스터플랜
+              </Text>
+              <Text ta="center" style={{ fontSize: '12px', color: '#f59e0b' }}>
+                ⚠️ 2/1 이후 ₩600,000으로 인상 예정
+              </Text>
+              {/* 카운트다운 */}
+              <Group gap="sm" justify="center">
+                {[
+                  { value: timeLeft.days, label: '일' },
+                  { value: timeLeft.hours, label: '시' },
+                  { value: timeLeft.minutes, label: '분' },
+                  { value: timeLeft.seconds, label: '초' },
+                ].map((t, i) => (
+                  <Stack key={i} gap={0} align="center">
+                    <Text style={{ fontSize: '18px', fontWeight: 700, color: '#ef4444' }}>{t.value}</Text>
+                    <Text size="xs" c="dimmed">{t.label}</Text>
+                  </Stack>
+                ))}
+              </Group>
+            </Stack>
+          </Box>
+        )}
+
+        {/* 기본 바 영역 */}
+        <Box style={{ padding: '12px 16px', width: '100%', boxSizing: 'border-box' }}>
+          <Group justify="space-between" align="center" wrap="nowrap" gap="sm" style={{ width: '100%' }}>
+            <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+              <Group gap={4} align="baseline" wrap="nowrap">
+                <Text style={{ fontSize: '12px', color: '#6b7280', textDecoration: 'line-through', whiteSpace: 'nowrap' }}>₩700,000</Text>
+                <Text style={{ fontSize: '18px', fontWeight: 800, color: '#a78bfa', whiteSpace: 'nowrap' }}>₩500,000</Text>
+              </Group>
+            </Stack>
+            <Button
+              component={Link}
+              href="/pricing"
+              size="sm"
+              radius="xl"
+              style={{
+                background: 'linear-gradient(135deg, #a78bfa 0%, #6366f1 100%)',
+                fontWeight: 700,
+                fontSize: '14px',
+                padding: '8px 16px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              신청하기
+            </Button>
+          </Group>
+        </Box>
+      </Box>
+    );
+  }
+
+  // 🖥️ 데스크톱 버전 - 오른쪽 사이드바
+  return (
+    <Box
+      style={{
+        position: 'fixed',
+        top: '50%',
+        right: '20px',
+        transform: 'translateY(-50%)',
+        zIndex: 1000,
+        width: '300px',
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Paper
+          p="lg"
+          radius="lg"
+          style={{
+            background: 'rgba(15, 15, 25, 0.98)',
+            border: '1px solid rgba(167, 139, 250, 0.4)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <Stack gap="md">
+            <Badge color="red" variant="filled" size="sm">
+              🔥 1기 30명 중 23명 마감 — 7자리 남음
+            </Badge>
+            <Text style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
+              유튜브 수익화 마스터플랜
+            </Text>
+            <Stack gap={4}>
+              <Group gap="sm" align="center">
+                <Text style={{ fontSize: '16px', color: '#6b7280', textDecoration: 'line-through' }}>₩700,000</Text>
+                <Badge color="green" size="sm">30% OFF</Badge>
+              </Group>
+              <Text style={{ fontSize: '32px', fontWeight: 800, color: '#a78bfa' }}>₩500,000</Text>
+            </Stack>
+            <Text style={{ fontSize: '12px', color: '#f59e0b' }}>
+              ⚠️ 2/1 이후 ₩600,000으로 인상 예정
+            </Text>
+            <Box
+              p="sm"
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                borderRadius: '12px',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+              }}
+            >
+              <Text ta="center" size="xs" c="dimmed" mb="xs">⏰ 얼리버드 마감까지</Text>
+              <Group justify="center" gap="xs">
+                <Stack gap={0} align="center">
+                  <Text style={{ fontSize: '20px', fontWeight: 700, color: '#ef4444' }}>{timeLeft.days}</Text>
+                  <Text size="xs" c="dimmed">일</Text>
+                </Stack>
+                <Text c="dimmed">:</Text>
+                <Stack gap={0} align="center">
+                  <Text style={{ fontSize: '20px', fontWeight: 700, color: '#ef4444' }}>{timeLeft.hours}</Text>
+                  <Text size="xs" c="dimmed">시</Text>
+                </Stack>
+                <Text c="dimmed">:</Text>
+                <Stack gap={0} align="center">
+                  <Text style={{ fontSize: '20px', fontWeight: 700, color: '#ef4444' }}>{timeLeft.minutes}</Text>
+                  <Text size="xs" c="dimmed">분</Text>
+                </Stack>
+                <Text c="dimmed">:</Text>
+                <Stack gap={0} align="center">
+                  <Text style={{ fontSize: '20px', fontWeight: 700, color: '#ef4444' }}>{timeLeft.seconds}</Text>
+                  <Text size="xs" c="dimmed">초</Text>
+                </Stack>
+              </Group>
+            </Box>
+            <Button
+              component={Link}
+              href="/pricing"
+              size="md"
+              fullWidth
+              style={{
+                background: 'linear-gradient(135deg, #a78bfa 0%, #6366f1 100%)',
+                fontWeight: 700,
+                fontSize: '16px',
+              }}
+            >
+              🚀 지금 신청하기
+            </Button>
+          </Stack>
+        </Paper>
+      </motion.div>
+    </Box>
+  );
+}
+
 // ============ [통합 Export] ============
 export default function LandingPage() {
   return (
@@ -1525,14 +1622,15 @@ export default function LandingPage() {
       <LandingHeader />
       <HeroSection />
       <PainPoint1Section />
-      <SocialProofSection />
       <StorySection />
+      <SocialProofSection />
       <AIRevealSection />
       <HowItWorksSection />
       <PackageSection />
       <FAQSection />
       <CTASection />
       <Footer />
+      <FloatingCTA />
     </main>
   );
 }

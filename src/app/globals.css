@@ -322,3 +322,86 @@
 .nav-link-hover:hover {
   color: #FFFFFF !important;
 }
+
+/* ============ MOBILE RESPONSIVE FIXES ============ */
+@media (max-width: 768px) {
+
+  /* 전체 컨테이너 오버플로우 방지 - 강력 모드 */
+  html {
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+
+  /* 모든 섹션 오버플로우 숨김 */
+  main,
+  section,
+  article,
+  aside,
+  header,
+  footer,
+  nav {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+  }
+
+  /* 랜딩 페이지 기본 패딩 */
+  .mantine-Container-root {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* 한글 줄바꿈 - 단어 단위로 */
+  * {
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* 제목 텍스트 */
+  h1,
+  h2,
+  h3,
+  .mantine-Title-root {
+    word-break: keep-all !important;
+    line-height: 1.4 !important;
+  }
+
+  /* 그룹 컴포넌트 줄바꿈 허용 */
+  .mantine-Group-root {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  /* 배지 크기 조정 */
+  .mantine-Badge-root {
+    white-space: normal !important;
+    text-align: center;
+  }
+
+  /* 카드/페이퍼 패딩 축소 */
+  .mantine-Paper-root {
+    padding: 16px !important;
+  }
+
+  /* 버튼 크기 조정 */
+  .mantine-Button-root {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  /* 하단 Floating CTA 위한 바디 여백 */
+  main {
+    padding-bottom: 80px;
+  }
+
+  /* 큰 텍스트 폰트 크기 제한 */
+  [style*="fontSize: clamp"] {
+    font-size: clamp(24px, 8vw, 40px) !important;
+  }
+}
