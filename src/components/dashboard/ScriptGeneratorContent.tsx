@@ -8,7 +8,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import {
-    Container,
     Title,
     Text,
     Button,
@@ -34,7 +33,6 @@ import {
     AlertCircle,
     RefreshCw,
     Save,
-    Coins,
     ArrowRight,
     Search,
     Pen,
@@ -676,38 +674,76 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
         return ARCHETYPE_NAMES[archetype] || archetype;
     };
 
+    // 현재 스텝 계산
+    const getCurrentStep = () => {
+        if (phase === 'idle' || phase === 'researching' || phase === 'research_ready') return 1;
+        if (phase === 'analyzing' || phase === 'generating' || phase === 'reviewing' || phase === 'hooks_ready') return 2;
+        return 3;
+    };
+    const currentStep = getCurrentStep();
+
     return (
-        <Container size="lg" py="md">
-            <Stack gap="xl">
-                {/* 헤더 */}
-                <Group justify="space-between" align="flex-start">
+        <Box style={{ display: 'flex', gap: '24px', minHeight: 'calc(100vh - 120px)' }}>
+            {/* 메인 컨텐츠 영역 */}
+            <Box style={{ flex: 1, minWidth: 0 }}>
+                <Stack gap="xl">
+                    {/* 헤더 */}
                     <Box>
                         <Group gap="sm" mb="xs">
-                            <Brain size={28} color="#8b5cf6" />
-                            <Title order={2} style={{ color: '#111827' }}>
+                            <Brain size={24} color="#8b5cf6" />
+                            <Title order={2} style={{ color: '#111827', fontSize: '1.5rem' }}>
                                 스크립트 에디터
                             </Title>
                         </Group>
-                        <Text c="gray.6">
+                        <Text c="gray.6" size="sm">
                             AI 에이전트 팀이 바이럴 훅을 분석하고 최적화된 스크립트를 생성해요
                         </Text>
                     </Box>
 
-                    {/* 크레딧 표시 */}
-                    <Card
-                        padding="sm"
-                        radius="lg"
-                        style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                        }}
-                    >
-                        <Group gap="xs">
-                            <Text size="sm" c="white">잔액:</Text>
-                            <Text fw={700} c="white">{credits}</Text>
-                            <Coins size={18} color="#fbbf24" />
-                        </Group>
-                    </Card>
-                </Group>
+                    {/* 스텝 인디케이터 */}
+                    <Group gap="sm" justify="flex-start">
+                        {/* Step 1 */}
+                        <Badge
+                            size="lg"
+                            radius="xl"
+                            variant={currentStep >= 1 ? 'filled' : 'outline'}
+                            color={currentStep >= 1 ? 'violet' : 'gray'}
+                            leftSection={<Check size={14} />}
+                            style={{ 
+                                padding: '8px 16px',
+                                border: currentStep === 1 ? '2px solid #8b5cf6' : undefined,
+                            }}
+                        >
+                            주제 입력
+                        </Badge>
+                        <ArrowRight size={16} color={currentStep >= 2 ? '#8b5cf6' : '#d1d5db'} />
+                        
+                        {/* Step 2 */}
+                        <Badge
+                            size="lg"
+                            radius="xl"
+                            variant={currentStep >= 2 ? 'filled' : 'outline'}
+                            color={currentStep >= 2 ? 'violet' : 'gray'}
+                            style={{ 
+                                padding: '8px 16px',
+                                border: currentStep === 2 ? '2px solid #8b5cf6' : undefined,
+                            }}
+                        >
+                            2 훅 선택
+                        </Badge>
+                        <ArrowRight size={16} color={currentStep >= 3 ? '#8b5cf6' : '#d1d5db'} />
+                        
+                        {/* Step 3 */}
+                        <Badge
+                            size="lg"
+                            radius="xl"
+                            variant={currentStep >= 3 ? 'filled' : 'outline'}
+                            color={currentStep >= 3 ? 'violet' : 'gray'}
+                            style={{ padding: '8px 16px' }}
+                        >
+                            3 스크립트 완성
+                        </Badge>
+                    </Group>
 
                 {/* 입력 섹션 */}
                 <Card padding="xl" radius="lg" withBorder>
@@ -1091,7 +1127,128 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                         </Badge>
                     </Group>
                 )}
-            </Stack>
-        </Container>
+                </Stack>
+            </Box>
+
+            {/* 우측 훅 패널 */}
+            <Box 
+                style={{ 
+                    width: '320px', 
+                    flexShrink: 0,
+                    position: 'sticky',
+                    top: '24px',
+                    alignSelf: 'flex-start',
+                    maxHeight: 'calc(100vh - 140px)',
+                    overflowY: 'auto',
+                }}
+            >
+                <Card 
+                    padding="lg" 
+                    radius="lg" 
+                    withBorder 
+                    style={{ 
+                        background: '#fefefe',
+                        border: '1px solid #e5e7eb',
+                    }}
+                >
+                    <Stack gap="md">
+                        {/* 헤더 */}
+                        <Group justify="space-between" align="center">
+                            <Group gap="xs">
+                                <Sparkles size={18} color="#8b5cf6" />
+                                <Text fw={600} size="sm">생성된 훅</Text>
+                            </Group>
+                            {result?.scripts && (
+                                <Badge size="sm" color="violet" variant="light">
+                                    {result.scripts.length}
+                                </Badge>
+                            )}
+                        </Group>
+
+                        {/* 훅이 없을 때 */}
+                        {!result?.scripts && (
+                            <Box 
+                                style={{ 
+                                    padding: '32px 16px', 
+                                    textAlign: 'center',
+                                    color: '#9ca3af',
+                                }}
+                            >
+                                <Text size="sm" c="gray.5">
+                                    주제를 입력하고 훅을 생성해보세요
+                                </Text>
+                            </Box>
+                        )}
+
+                        {/* 훅 카드들 */}
+                        {result?.scripts && result.scripts.map((script, index) => (
+                            <Card
+                                key={index}
+                                padding="md"
+                                radius="md"
+                                onClick={() => handleHookSelect(index)}
+                                style={{
+                                    cursor: 'pointer',
+                                    border: selectedHookIndex === index 
+                                        ? '2px solid #8b5cf6' 
+                                        : '1px solid #e5e7eb',
+                                    background: selectedHookIndex === index 
+                                        ? 'rgba(139, 92, 246, 0.05)' 
+                                        : '#fff',
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                <Stack gap="xs">
+                                    <Group justify="space-between">
+                                        <Badge 
+                                            size="xs" 
+                                            color="violet" 
+                                            variant="light"
+                                            radius="sm"
+                                        >
+                                            {getArchetypeName(script.archetype)}
+                                        </Badge>
+                                        <Text size="xs" c="gray.5">{index + 1}</Text>
+                                    </Group>
+                                    <Text 
+                                        size="sm" 
+                                        fw={500}
+                                        style={{ 
+                                            color: '#1f2937',
+                                            lineHeight: 1.5,
+                                        }}
+                                    >
+                                        "{script.hook_preview}"
+                                    </Text>
+                                    <Group gap="xs" mt="xs">
+                                        <CopyButton value={script.hook_preview}>
+                                            {({ copied, copy }) => (
+                                                <Button 
+                                                    size="xs" 
+                                                    variant="light" 
+                                                    color="gray"
+                                                    onClick={(e) => { e.stopPropagation(); copy(); }}
+                                                    leftSection={copied ? <Check size={12} /> : <Copy size={12} />}
+                                                >
+                                                    복사
+                                                </Button>
+                                            )}
+                                        </CopyButton>
+                                        <Button 
+                                            size="xs" 
+                                            variant={selectedHookIndex === index ? 'filled' : 'light'}
+                                            color="violet"
+                                            onClick={() => handleHookSelect(index)}
+                                        >
+                                            이 훅으로 생성
+                                        </Button>
+                                    </Group>
+                                </Stack>
+                            </Card>
+                        ))}
+                    </Stack>
+                </Card>
+            </Box>
+        </Box>
     );
 }
