@@ -79,9 +79,17 @@ interface DateInfo {
 }
 
 // 포맷팅 함수들
+function formatViewCount(num: number): string {
+    if (num >= 100000000) return `${(num / 100000000).toFixed(1)}억회`;
+    if (num >= 10000) return `${Math.floor(num / 10000)}만회`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}천회`;
+    return `${num}회`;
+}
+
 function formatNumber(num: number): string {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    if (num >= 100000000) return `${(num / 100000000).toFixed(1)}억`;
+    if (num >= 10000) return `${Math.floor(num / 10000)}만`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}천`;
     return num.toString();
 }
 
@@ -498,6 +506,7 @@ export function HotListContent() {
                                                 component="a"
                                                 href={`https://www.youtube.com/watch?v=${item.video_id}`}
                                                 target="_blank"
+                                                rel="noopener noreferrer"
                                                 style={{ cursor: 'pointer', lineHeight: 1.4, minHeight: '2.8em' }}
                                                 c="dark"
                                             >
@@ -526,7 +535,7 @@ export function HotListContent() {
                                             <Group gap={4}>
                                                 <Eye size={14} color="gray" />
                                                 <Text size="sm" fw={500}>
-                                                    {formatNumber(item.view_count)}
+                                                    {formatViewCount(item.view_count)}
                                                 </Text>
                                             </Group>
                                             <Group gap={4}>

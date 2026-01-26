@@ -398,7 +398,7 @@ export async function collectHotVideos(): Promise<{
     popularIds.forEach(id => allVideoIds.add(id));
 
     // 주요 카테고리별 수집 (음악 제외)
-    const categories = ['20', '22', '24', '25', '26', '27', '28']; // 게임, 블로그, 엔터, 뉴스, 노하우, 교육, 과학
+    const categories = ['15', '17', '19', '20', '22', '23', '24', '25', '26', '27', '28']; // 동물, 스포츠, 여행, 게임, 블로그, 코미디, 엔터, 뉴스, 노하우, 교육, 과학
     for (const catId of categories) {
         const catIds = await collectMostPopular(30, catId);
         catIds.forEach(id => allVideoIds.add(id));
