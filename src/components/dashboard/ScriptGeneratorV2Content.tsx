@@ -22,7 +22,6 @@ import {
     CopyButton,
     ActionIcon,
     Tooltip,
-    Select,
     Transition,
     Loader,
 } from '@mantine/core';
@@ -85,23 +84,21 @@ type GenerationPhase = 'idle' | 'analyzing' | 'generating' | 'reviewing' | 'done
 // ============ 니치 & 말투 옵션 ============
 
 const NICHE_OPTIONS = [
-    { value: 'knowledge', label: '지식/과학' },
-    { value: 'food', label: '음식/요리' },
-    { value: 'travel', label: '여행/장소' },
-    { value: 'animal', label: '동물/자연' },
-    { value: 'history', label: '역사/문화' },
-    { value: 'health', label: '건강/의학' },
-    { value: 'tech', label: '기술/IT' },
-    { value: 'finance', label: '경제/금융' },
-    { value: 'lifestyle', label: '일상/라이프' },
-    { value: 'other', label: '기타' },
+    { value: 'knowledge', emoji: '🔬', label: '지식/과학', desc: '놀라운 사실, 과학 원리' },
+    { value: 'animal', emoji: '🐾', label: '동물/자연', desc: '신기한 동물, 자연 현상' },
+    { value: 'history', emoji: '📜', label: '역사/문화', desc: '역사 속 놀라운 이야기' },
+    { value: 'place', emoji: '🌍', label: '장소/여행', desc: '세계 신기한 장소' },
+    { value: 'food', emoji: '🍜', label: '음식/요리', desc: '음식의 비밀, 제조 과정' },
+    { value: 'tech', emoji: '💻', label: '기술/IT', desc: '기술 트렌드, 디지털' },
+    { value: 'health', emoji: '🏥', label: '건강/의학', desc: '건강 팁, 의학 상식' },
+    { value: 'other', emoji: '✨', label: '기타', desc: '위 카테고리 외 주제' },
 ];
 
 const TONE_OPTIONS = [
-    { value: 'default', label: '기본 (다큐 나레이션)', description: '차분하고 정보 전달 중심의 존댓말' },
-    { value: 'casual', label: '친근한 반말', description: '~해, ~야 식의 편한 말투' },
-    { value: 'humorous', label: '유머러스', description: '재치있는 비유와 위트 섞인 톤' },
-    { value: 'emotional', label: '감성 스토리', description: '잔잔하고 여운이 남는 톤' },
+    { value: 'default', emoji: '🎙️', label: '다큐 나레이션', desc: '차분한 존댓말' },
+    { value: 'casual', emoji: '💬', label: '친근한 반말', desc: '~해, ~야 편한 말투' },
+    { value: 'humorous', emoji: '😄', label: '유머러스', desc: '재치있는 비유와 위트' },
+    { value: 'emotional', emoji: '🌙', label: '감성 스토리', desc: '잔잔하고 여운 남는 톤' },
 ];
 
 // ============ 로봇 에이전트 ============
@@ -571,15 +568,54 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 styles={{ input: { fontSize: '15px', lineHeight: 1.7 } }}
                             />
 
-                            {/* 니치 선택 */}
-                            <Select
-                                label="채널 니치"
-                                placeholder="니치 선택"
-                                value={selectedNiche}
-                                onChange={setSelectedNiche}
-                                data={NICHE_OPTIONS}
-                                disabled={isResearching || isGenerating}
-                            />
+                            {/* 니치 선택 - 카드 그리드 */}
+                            <Box>
+                                <Text fw={500} size="sm" mb="xs">채널 니치</Text>
+                                <Box style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(4, 1fr)',
+                                    gap: '10px',
+                                }}>
+                                    {NICHE_OPTIONS.map((niche) => {
+                                        const isSelected = selectedNiche === niche.value;
+                                        return (
+                                            <Box
+                                                key={niche.value}
+                                                onClick={() => !(isResearching || isGenerating) && setSelectedNiche(niche.value)}
+                                                style={{
+                                                    padding: '16px 12px',
+                                                    borderRadius: '14px',
+                                                    border: isSelected ? '2px solid #8b5cf6' : '2px solid #e5e7eb',
+                                                    background: isSelected ? 'rgba(139, 92, 246, 0.06)' : '#fff',
+                                                    cursor: (isResearching || isGenerating) ? 'not-allowed' : 'pointer',
+                                                    opacity: (isResearching || isGenerating) ? 0.5 : 1,
+                                                    transition: 'all 0.15s ease',
+                                                    textAlign: 'center',
+                                                    boxShadow: isSelected ? '0 4px 15px rgba(139, 92, 246, 0.15)' : '0 1px 3px rgba(0,0,0,0.04)',
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isSelected && !(isResearching || isGenerating)) {
+                                                        e.currentTarget.style.borderColor = '#a78bfa';
+                                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isSelected) {
+                                                        e.currentTarget.style.borderColor = '#e5e7eb';
+                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                    }
+                                                }}
+                                            >
+                                                <Text size="xl" mb={4}>{niche.emoji}</Text>
+                                                <Text fw={600} size="sm" style={{ color: isSelected ? '#8b5cf6' : '#374151' }}>
+                                                    {niche.label}
+                                                </Text>
+                                                <Text size="xs" c="gray.5" mt={2}>{niche.desc}</Text>
+                                            </Box>
+                                        );
+                                    })}
+                                </Box>
+                            </Box>
 
                             {/* 리서치 로딩 */}
                             {isResearching && (
@@ -647,16 +683,55 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 </Card>
                             )}
 
-                            {/* 말투 선택 (리서치 완료 후 노출) */}
+                            {/* 말투 선택 - 카드 (리서치 완료 후 노출) */}
                             {researchResult && !result && (
-                                <Select
-                                    label="말투 설정"
-                                    placeholder="말투 선택"
-                                    value={selectedTone}
-                                    onChange={setSelectedTone}
-                                    data={TONE_OPTIONS}
-                                    disabled={isGenerating}
-                                />
+                                <Box>
+                                    <Text fw={500} size="sm" mb="xs">말투 설정</Text>
+                                    <Box style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(4, 1fr)',
+                                        gap: '10px',
+                                    }}>
+                                        {TONE_OPTIONS.map((tone) => {
+                                            const isSelected = selectedTone === tone.value;
+                                            return (
+                                                <Box
+                                                    key={tone.value}
+                                                    onClick={() => !isGenerating && setSelectedTone(tone.value)}
+                                                    style={{
+                                                        padding: '16px 12px',
+                                                        borderRadius: '14px',
+                                                        border: isSelected ? '2px solid #ec4899' : '2px solid #e5e7eb',
+                                                        background: isSelected ? 'rgba(236, 72, 153, 0.06)' : '#fff',
+                                                        cursor: isGenerating ? 'not-allowed' : 'pointer',
+                                                        opacity: isGenerating ? 0.5 : 1,
+                                                        transition: 'all 0.15s ease',
+                                                        textAlign: 'center',
+                                                        boxShadow: isSelected ? '0 4px 15px rgba(236, 72, 153, 0.15)' : '0 1px 3px rgba(0,0,0,0.04)',
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        if (!isSelected && !isGenerating) {
+                                                            e.currentTarget.style.borderColor = '#f472b6';
+                                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        if (!isSelected) {
+                                                            e.currentTarget.style.borderColor = '#e5e7eb';
+                                                            e.currentTarget.style.transform = 'translateY(0)';
+                                                        }
+                                                    }}
+                                                >
+                                                    <Text size="xl" mb={4}>{tone.emoji}</Text>
+                                                    <Text fw={600} size="sm" style={{ color: isSelected ? '#ec4899' : '#374151' }}>
+                                                        {tone.label}
+                                                    </Text>
+                                                    <Text size="xs" c="gray.5" mt={2}>{tone.desc}</Text>
+                                                </Box>
+                                            );
+                                        })}
+                                    </Box>
+                                </Box>
                             )}
 
                             {/* 로봇 진행 표시 (스크립트 생성 중) */}
