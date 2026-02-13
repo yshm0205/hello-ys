@@ -3,18 +3,25 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export function CookieConsent() {
   const [show, setShow] = useState(false);
   const t = useTranslations("CookieConsent");
+  const locale = useLocale();
 
   useEffect(() => {
+    // 한국어 사용자는 쿠키 배너 표시 안 함
+    if (locale === "ko") {
+      setShow(false);
+      return;
+    }
+    
     const consent = localStorage.getItem("cookie_consent");
     if (consent === null) {
       setShow(true);
     }
-  }, []);
+  }, [locale]);
 
   const accept = () => {
     localStorage.setItem("cookie_consent", "true");
