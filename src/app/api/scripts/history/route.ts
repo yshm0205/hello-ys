@@ -12,13 +12,12 @@ export async function GET() {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        // [임시] 로그인 체크 비활성화 - 나중에 원복 필요
-        // if (!user) {
-        //     return NextResponse.json(
-        //         { error: "로그인이 필요합니다." },
-        //         { status: 401 }
-        //     );
-        // }
+        if (!user) {
+            return NextResponse.json(
+                { error: "로그인이 필요합니다." },
+                { status: 401 }
+            );
+        }
 
         // 게스트 사용자 처리: 전체 최근 스크립트 조회 (최대 20개)
         let query = supabase

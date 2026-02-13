@@ -183,7 +183,9 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
             >
                 <Stack gap="xs">
                     {navItems.map((item) => {
-                        const isActive = pathname.includes(item.href);
+                        const isActive = item.href === '/dashboard'
+                            ? pathname === '/dashboard'
+                            : pathname === item.href || pathname.startsWith(item.href + '/');
                         return (
                             <NavLink
                                 key={item.href}

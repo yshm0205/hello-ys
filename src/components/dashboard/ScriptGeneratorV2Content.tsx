@@ -285,7 +285,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
 
     // 현재 위저드 스텝
-    const currentStep: WizardStep = result ? 3 : researchResult ? 2 : 1;
+    const currentStep: WizardStep = result ? 3 : (researchResult || isGenerating) ? 2 : 1;
 
     // 경과 타이머
     useEffect(() => {
@@ -468,9 +468,9 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                         full_script: editedScript,
                         archetype: 'V2_PIPELINE',
                     } : null,
-                    scripts: result.scripts.map(s => ({
+                    scripts: result.scripts.map((s, i) => ({
                         hook_preview: s.hook,
-                        full_script: s.final,
+                        full_script: (i === selectedHookIndex) ? editedScript : s.final,
                         archetype: 'V2_PIPELINE',
                     })),
                 }),
