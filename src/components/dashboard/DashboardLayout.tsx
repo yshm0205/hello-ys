@@ -31,6 +31,7 @@ import {
     LayoutDashboard,
     TestTube,
     Flame,
+    Zap,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 
@@ -51,6 +52,12 @@ const navItems = [
         href: '/dashboard/scripts',
         icon: Sparkles,
         description: 'AI로 스크립트 만들기',
+    },
+    {
+        label: '스크립트 V2',
+        href: '/dashboard/scripts-v2',
+        icon: Zap,
+        description: '소재 → 3스크립트 자동 생성',
     },
     {
         label: '보관함',
