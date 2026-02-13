@@ -32,11 +32,8 @@ import {
     Check,
     AlertCircle,
     RefreshCw,
-    Save,
     ArrowRight,
     Search,
-    Pen,
-    ShieldCheck,
     Zap,
     Clock,
 } from 'lucide-react';
@@ -267,17 +264,14 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     const [genPhase, setGenPhase] = useState<GenerationPhase>('idle');
     const [result, setResult] = useState<V2Result | null>(null);
     const [selectedHookIndex, setSelectedHookIndex] = useState<number | null>(null);
-    const [editedScript, setEditedScript] = useState('');
     const [elapsed, setElapsed] = useState(0);
 
     // 공통
     const [error, setError] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const progressRef = useRef<HTMLDivElement>(null);
     const hookSelectionRef = useRef<HTMLDivElement>(null);
-    const scriptResultRef = useRef<HTMLDivElement>(null);
 
     const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
     const credits = isAdmin ? 9999 : 47;
@@ -318,11 +312,6 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         }
     }, [genPhase]);
 
-    useEffect(() => {
-        if (selectedHookIndex !== null && scriptResultRef.current) {
-            setTimeout(() => scriptResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 500);
-        }
-    }, [selectedHookIndex]);
 
     // ====== Step 1 → 리서치 ======
     const handleResearch = async () => {
@@ -367,7 +356,6 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         setError(null);
         setResult(null);
         setSelectedHookIndex(null);
-        setEditedScript('');
         setSaveMessage(null);
 
         try {
@@ -393,6 +381,8 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
             setResult(data);
             setGenPhase('done');
+            // 자동 저장
+            autoSave(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
             setGenPhase('idle');
@@ -401,76 +391,34 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         }
     };
 
-    // ====== Step 2 → 리서치 건너뛰고 바로 생성 ======
-    const handleSkipResearch = async () => {
-        setResearchResult(null);
-        setIsGenerating(true);
+    // ====== Step 1 → 리서치 건너뛰고 말투 선택으로 이동 ======
+    const handleSkipResearch = () => {
+        setResearchResult({
+            success: true,
+            research_text: '',
+            sources: [],
+        });
         setError(null);
-        setResult(null);
-        setSelectedHookIndex(null);
-        setEditedScript('');
-        setSaveMessage(null);
-
-        try {
-            const tone = selectedTone === 'default' ? '' : (selectedTone || '');
-
-            const response = await fetch(`${RENDER_API_URL}/api/v2/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    material,
-                    user_id: user?.email || 'guest',
-                    research_text: '',
-                    niche: selectedNiche || '',
-                    tone,
-                }),
-            });
-
-            const data: V2Result = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || '스크립트 생성에 실패했습니다.');
-            }
-
-            setResult(data);
-            setGenPhase('done');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
-            setGenPhase('idle');
-        } finally {
-            setIsGenerating(false);
-        }
     };
 
-    // 훅 선택
+    // 훅 선택 (개별 스크립트 펼치기)
     const handleHookSelect = (index: number) => {
         if (!result?.scripts[index]) return;
-        setSelectedHookIndex(index);
-        setEditedScript(result.scripts[index].final);
+        setSelectedHookIndex(selectedHookIndex === index ? null : index);
         setSaveMessage(null);
     };
 
-    // 저장
-    const handleSave = async () => {
-        if (!editedScript || !result) return;
-        setIsSaving(true);
-        setSaveMessage(null);
-
+    // 자동 저장 (생성 완료 시 호출) — resultData를 직접 받아 처리
+    const autoSave = async (resultData: V2Result) => {
         try {
-            const selected = selectedHookIndex !== null ? result.scripts[selectedHookIndex] : null;
             const response = await fetch('/api/scripts/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     input_text: material,
-                    selected_script: selected ? {
-                        hook_preview: selected.hook,
-                        full_script: editedScript,
-                        archetype: 'V2_PIPELINE',
-                    } : null,
-                    scripts: result.scripts.map((s, i) => ({
+                    scripts: resultData.scripts.map(s => ({
                         hook_preview: s.hook,
-                        full_script: (i === selectedHookIndex) ? editedScript : s.final,
+                        full_script: s.final,
                         archetype: 'V2_PIPELINE',
                     })),
                 }),
@@ -478,11 +426,9 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.error || '저장 실패');
-            setSaveMessage({ type: 'success', text: '스크립트가 저장되었습니다!' });
+            setSaveMessage({ type: 'success', text: '보관함에 자동 저장되었습니다!' });
         } catch (err) {
-            setSaveMessage({ type: 'error', text: err instanceof Error ? err.message : '저장 실패' });
-        } finally {
-            setIsSaving(false);
+            setSaveMessage({ type: 'error', text: err instanceof Error ? err.message : '자동 저장 실패' });
         }
     };
 
@@ -491,7 +437,6 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         setResearchResult(null);
         setGenPhase('idle');
         setSelectedHookIndex(null);
-        setEditedScript('');
         setError(null);
         setSaveMessage(null);
     };
@@ -628,7 +573,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                             )}
 
                             {/* 리서치 결과 (Step 2로 넘어갈 때 표시) */}
-                            {researchResult && (
+                            {researchResult && researchResult.research_text && (
                                 <Card
                                     padding="md"
                                     radius="md"
@@ -837,133 +782,94 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                         </Card>
                     )}
 
-                    {/* ====== Step 3: 훅 선택 ====== */}
+                    {/* ====== Step 3: 스크립트 결과 (3개 모두 표시) ====== */}
                     {genPhase === 'done' && result?.scripts && (
                         <Transition mounted transition="slide-up" duration={400}>
                             {(styles) => (
                                 <div ref={hookSelectionRef} style={styles}>
                                     <Stack gap="lg">
                                         <Group justify="space-between" align="center">
-                                            <Title order={4} style={{ color: '#374151' }}>훅 선택하기</Title>
-                                            <Text size="sm" c="gray.5">마음에 드는 훅을 선택하면 전체 스크립트를 확인할 수 있어요</Text>
+                                            <Title order={4} style={{ color: '#374151' }}>생성된 스크립트</Title>
+                                            <Group gap="sm">
+                                                {saveMessage && (
+                                                    <Badge
+                                                        variant="light"
+                                                        color={saveMessage.type === 'success' ? 'green' : 'red'}
+                                                        size="lg"
+                                                    >
+                                                        {saveMessage.text}
+                                                    </Badge>
+                                                )}
+                                                <Button leftSection={<RefreshCw size={16} />} onClick={handleReset} variant="light" color="gray" size="sm">
+                                                    다시 시작
+                                                </Button>
+                                            </Group>
                                         </Group>
 
-                                        <Group grow align="stretch">
-                                            {result.scripts.map((script, index) => (
-                                                <Card
-                                                    key={index} padding="lg" radius="lg"
-                                                    onClick={() => handleHookSelect(index)}
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        border: selectedHookIndex === index ? '2px solid #8b5cf6' : '2px solid #e5e7eb',
-                                                        background: selectedHookIndex === index ? 'rgba(139, 92, 246, 0.05)' : '#fff',
-                                                        transition: 'all 0.2s ease',
-                                                        boxShadow: selectedHookIndex === index ? '0 8px 25px rgba(139, 92, 246, 0.2)' : '0 2px 8px rgba(0,0,0,0.05)',
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        if (selectedHookIndex !== index) {
-                                                            e.currentTarget.style.borderColor = '#a78bfa';
-                                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                                        }
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        if (selectedHookIndex !== index) {
-                                                            e.currentTarget.style.borderColor = '#e5e7eb';
-                                                            e.currentTarget.style.transform = 'translateY(0)';
-                                                        }
-                                                    }}
-                                                >
-                                                    <Stack gap="md">
-                                                        <Group justify="space-between">
+                                        {result.scripts.map((script, index) => (
+                                            <Card
+                                                key={index} padding="lg" radius="lg" withBorder
+                                                style={{
+                                                    border: selectedHookIndex === index ? '2px solid #8b5cf6' : '1px solid #e5e7eb',
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                            >
+                                                <Stack gap="md">
+                                                    {/* 훅 헤더 */}
+                                                    <Group justify="space-between" align="flex-start">
+                                                        <Group gap="sm" style={{ flex: 1 }}>
                                                             <Badge variant="light" color="violet" size="sm">옵션 {index + 1}</Badge>
                                                             {script.template_id && (
                                                                 <Badge variant="outline" color="gray" size="sm">{script.template_id}</Badge>
                                                             )}
                                                         </Group>
-                                                        <Text size="md" fw={500} style={{ color: '#1f2937', lineHeight: 1.6, minHeight: 80 }}>
-                                                            &ldquo;{script.hook}&rdquo;
-                                                        </Text>
-                                                        {selectedHookIndex === index && (
-                                                            <Group gap={6} justify="center">
-                                                                <Check size={16} color="#8b5cf6" />
-                                                                <Text size="sm" fw={600} c="violet">선택됨</Text>
-                                                            </Group>
-                                                        )}
-                                                    </Stack>
-                                                </Card>
-                                            ))}
-                                        </Group>
-                                    </Stack>
-                                </div>
-                            )}
-                        </Transition>
-                    )}
+                                                        <Group gap="xs">
+                                                            <CopyButton value={script.final}>
+                                                                {({ copied, copy }) => (
+                                                                    <Button
+                                                                        size="xs" variant="light"
+                                                                        color={copied ? 'green' : 'violet'}
+                                                                        leftSection={copied ? <Check size={14} /> : <Copy size={14} />}
+                                                                        onClick={copy}
+                                                                    >
+                                                                        {copied ? '복사됨!' : '전체 복사'}
+                                                                    </Button>
+                                                                )}
+                                                            </CopyButton>
+                                                            <Button
+                                                                size="xs" variant="subtle" color="gray"
+                                                                onClick={() => handleHookSelect(index)}
+                                                            >
+                                                                {selectedHookIndex === index ? '접기' : '펼치기'}
+                                                            </Button>
+                                                        </Group>
+                                                    </Group>
 
-                    {/* 선택된 스크립트 에디터 */}
-                    {genPhase === 'done' && result?.scripts && selectedHookIndex !== null && (
-                        <Transition mounted transition="slide-up" duration={400}>
-                            {(styles) => (
-                                <div ref={scriptResultRef} style={styles}>
-                                    <Card padding="xl" radius="lg" withBorder>
-                                        <Stack gap="lg">
-                                            <Group justify="space-between">
-                                                <Title order={4} style={{ color: '#374151' }}>전체 스크립트</Title>
-                                                <Badge variant="light" color="violet">옵션 {selectedHookIndex + 1}</Badge>
-                                            </Group>
+                                                    {/* 훅 텍스트 */}
+                                                    <Text size="md" fw={500} style={{ color: '#1f2937', lineHeight: 1.6 }}>
+                                                        &ldquo;{script.hook}&rdquo;
+                                                    </Text>
 
-                                            <Alert icon={<Sparkles size={18} />} title="선택한 훅 (첫 문장)" color="violet" variant="light" radius="lg">
-                                                <Group justify="space-between" align="flex-start">
-                                                    <Text style={{ flex: 1 }}>{result.scripts[selectedHookIndex].hook}</Text>
-                                                    <CopyButton value={result.scripts[selectedHookIndex].hook}>
-                                                        {({ copied, copy }) => (
-                                                            <Tooltip label={copied ? '복사됨!' : '복사'}>
-                                                                <ActionIcon variant="subtle" color={copied ? 'green' : 'gray'} onClick={copy}>
-                                                                    {copied ? <Check size={16} /> : <Copy size={16} />}
-                                                                </ActionIcon>
-                                                            </Tooltip>
-                                                        )}
-                                                    </CopyButton>
-                                                </Group>
-                                            </Alert>
-
-                                            <Textarea
-                                                label="전체 스크립트 (수정 가능)"
-                                                value={editedScript}
-                                                onChange={(e) => setEditedScript(e.currentTarget.value)}
-                                                minRows={12} maxRows={20} autosize
-                                                styles={{ input: { lineHeight: 1.8, fontSize: '15px' } }}
-                                            />
-
-                                            <Text size="sm" c="gray.5">스크립트 길이: {editedScript.length}자</Text>
-
-                                            {saveMessage && (
-                                                <Alert color={saveMessage.type === 'success' ? 'green' : 'red'} radius="md" withCloseButton onClose={() => setSaveMessage(null)}>
-                                                    {saveMessage.text}
-                                                </Alert>
-                                            )}
-
-                                            <Group>
-                                                <Button
-                                                    leftSection={isSaving ? undefined : <Save size={18} />}
-                                                    onClick={handleSave} loading={isSaving} disabled={isSaving}
-                                                    variant="filled"
-                                                    style={{ background: isSaving ? undefined : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)' }}
-                                                >
-                                                    {isSaving ? '저장 중...' : '저장하기'}
-                                                </Button>
-                                                <CopyButton value={editedScript}>
-                                                    {({ copied, copy }) => (
-                                                        <Button leftSection={copied ? <Check size={18} /> : <Copy size={18} />} onClick={copy} variant="light" color={copied ? 'green' : 'gray'}>
-                                                            {copied ? '복사됨!' : '전체 복사'}
-                                                        </Button>
+                                                    {/* 펼쳤을 때: 전체 스크립트 */}
+                                                    {selectedHookIndex === index && (
+                                                        <Box
+                                                            style={{
+                                                                background: '#f8f9fa',
+                                                                borderRadius: '12px',
+                                                                padding: '16px',
+                                                                maxHeight: '400px',
+                                                                overflowY: 'auto',
+                                                            }}
+                                                        >
+                                                            <Text size="sm" style={{ lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                                                                {script.final}
+                                                            </Text>
+                                                        </Box>
                                                     )}
-                                                </CopyButton>
-                                                <Button leftSection={<RefreshCw size={18} />} onClick={handleReset} variant="light" color="gray">
-                                                    다시 시작
-                                                </Button>
-                                            </Group>
-                                        </Stack>
-                                    </Card>
+                                                </Stack>
+                                            </Card>
+                                        ))}
+                                    </Stack>
                                 </div>
                             )}
                         </Transition>
@@ -1026,17 +932,17 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                         &ldquo;{script.hook}&rdquo;
                                     </Text>
                                     <Group gap="xs" mt="xs">
-                                        <CopyButton value={script.hook}>
+                                        <CopyButton value={script.final}>
                                             {({ copied, copy }) => (
-                                                <Button size="xs" variant="light" color="gray"
+                                                <Button size="xs" variant="light" color={copied ? 'green' : 'gray'}
                                                     onClick={(e) => { e.stopPropagation(); copy(); }}
                                                     leftSection={copied ? <Check size={12} /> : <Copy size={12} />}
-                                                >복사</Button>
+                                                >{copied ? '복사됨' : '전체 복사'}</Button>
                                             )}
                                         </CopyButton>
                                         <Button size="xs" variant={selectedHookIndex === index ? 'filled' : 'light'} color="violet"
                                             onClick={() => handleHookSelect(index)}
-                                        >선택</Button>
+                                        >{selectedHookIndex === index ? '접기' : '보기'}</Button>
                                     </Group>
                                 </Stack>
                             </Card>
