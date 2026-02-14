@@ -81,21 +81,16 @@ type GenerationPhase = 'idle' | 'analyzing' | 'generating' | 'reviewing' | 'done
 // ============ 니치 & 말투 옵션 ============
 
 const NICHE_OPTIONS = [
-    { value: 'knowledge', emoji: '🔬', label: '지식/과학', desc: '놀라운 사실, 과학 원리' },
-    { value: 'animal', emoji: '🐾', label: '동물/자연', desc: '신기한 동물, 자연 현상' },
-    { value: 'history', emoji: '📜', label: '역사/문화', desc: '역사 속 놀라운 이야기' },
-    { value: 'place', emoji: '🌍', label: '장소/여행', desc: '세계 신기한 장소' },
-    { value: 'food', emoji: '🍜', label: '음식/요리', desc: '음식의 비밀, 제조 과정' },
-    { value: 'tech', emoji: '💻', label: '기술/IT', desc: '기술 트렌드, 디지털' },
-    { value: 'health', emoji: '🏥', label: '건강/의학', desc: '건강 팁, 의학 상식' },
-    { value: 'other', emoji: '✨', label: '기타', desc: '위 카테고리 외 주제' },
+    { value: 'knowledge', label: '잡학지식', desc: '놀라운 사실, 과학 원리', image: '/images/niches/knowledge.png', enabled: true },
+    { value: 'animal', label: '동물/자연', desc: '신기한 동물, 자연 현상', image: null, enabled: false },
+    { value: 'history', label: '역사/문화', desc: '역사 속 놀라운 이야기', image: null, enabled: false },
 ];
 
 const TONE_OPTIONS = [
     { value: 'default', emoji: '🎙️', label: '다큐 나레이션', desc: '차분한 존댓말' },
     { value: 'casual', emoji: '💬', label: '친근한 반말', desc: '~해, ~야 편한 말투' },
     { value: 'humorous', emoji: '😄', label: '유머러스', desc: '재치있는 비유와 위트' },
-    { value: 'emotional', emoji: '🌙', label: '감성 스토리', desc: '잔잔하고 여운 남는 톤' },
+    { value: 'emotional', emoji: '💜', label: '감성 스토리', desc: '잔잔하고 여운 남는 톤' },
 ];
 
 // ============ 로봇 에이전트 ============
@@ -150,10 +145,10 @@ function AgentProgressIndicator({ phase, elapsed }: { phase: GenerationPhase; el
     return (
         <Box
             style={{
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
+                background: 'rgba(139, 92, 246, 0.03)',
                 borderRadius: '20px',
                 padding: '32px',
-                border: '1px solid rgba(139, 92, 246, 0.15)',
+                border: '1px solid rgba(139, 92, 246, 0.12)',
             }}
         >
             <Stack gap="lg">
@@ -513,49 +508,98 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 styles={{ input: { fontSize: '15px', lineHeight: 1.7 } }}
                             />
 
-                            {/* 니치 선택 - 카드 그리드 */}
+                            {/* 니치 선택 - 이미지 카드 (3열, 9:13 비율) */}
                             <Box>
                                 <Text fw={500} size="sm" mb="xs">채널 니치</Text>
                                 <Box style={{
                                     display: 'grid',
-                                    gridTemplateColumns: 'repeat(4, 1fr)',
-                                    gap: '10px',
+                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                    gap: '16px',
                                 }}>
                                     {NICHE_OPTIONS.map((niche) => {
                                         const isSelected = selectedNiche === niche.value;
+                                        const isDisabled = !niche.enabled || isResearching || isGenerating;
                                         return (
                                             <Box
                                                 key={niche.value}
-                                                onClick={() => !(isResearching || isGenerating) && setSelectedNiche(niche.value)}
+                                                onClick={() => !isDisabled && setSelectedNiche(niche.value)}
                                                 style={{
-                                                    padding: '16px 12px',
-                                                    borderRadius: '14px',
-                                                    border: isSelected ? '2px solid #8b5cf6' : '2px solid #e5e7eb',
-                                                    background: isSelected ? 'rgba(139, 92, 246, 0.06)' : '#fff',
-                                                    cursor: (isResearching || isGenerating) ? 'not-allowed' : 'pointer',
-                                                    opacity: (isResearching || isGenerating) ? 0.5 : 1,
+                                                    borderRadius: '12px',
+                                                    border: isSelected ? '2px solid #8b5cf6' : niche.enabled ? '2px solid #e5e7eb' : '2px dashed #e5e7eb',
+                                                    background: isSelected ? '#faf5ff' : '#fff',
+                                                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                    opacity: !niche.enabled ? 0.5 : (isResearching || isGenerating) ? 0.5 : 1,
                                                     transition: 'all 0.15s ease',
-                                                    textAlign: 'center',
-                                                    boxShadow: isSelected ? '0 4px 15px rgba(139, 92, 246, 0.15)' : '0 1px 3px rgba(0,0,0,0.04)',
+                                                    overflow: 'hidden',
+                                                    boxShadow: isSelected ? '0 0 0 2px #8b5cf6' : 'none',
+                                                    position: 'relative',
                                                 }}
                                                 onMouseEnter={(e) => {
-                                                    if (!isSelected && !(isResearching || isGenerating)) {
-                                                        e.currentTarget.style.borderColor = '#a78bfa';
-                                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                                    if (!isSelected && niche.enabled && !(isResearching || isGenerating)) {
+                                                        e.currentTarget.style.borderColor = '#8b5cf6';
+                                                        e.currentTarget.style.boxShadow = '0 0 0 1px #8b5cf6';
                                                     }
                                                 }}
                                                 onMouseLeave={(e) => {
                                                     if (!isSelected) {
                                                         e.currentTarget.style.borderColor = '#e5e7eb';
-                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                        e.currentTarget.style.boxShadow = 'none';
                                                     }
                                                 }}
                                             >
-                                                <Text size="xl" mb={4}>{niche.emoji}</Text>
-                                                <Text fw={600} size="sm" style={{ color: isSelected ? '#8b5cf6' : '#374151' }}>
-                                                    {niche.label}
-                                                </Text>
-                                                <Text size="xs" c="gray.5" mt={2}>{niche.desc}</Text>
+                                                {/* Soon 뱃지 */}
+                                                {!niche.enabled && (
+                                                    <Box style={{
+                                                        position: 'absolute', top: 8, right: 8, zIndex: 10,
+                                                        padding: '2px 8px', borderRadius: '99px',
+                                                        background: '#9ca3af', color: '#fff',
+                                                        fontSize: '10px', fontWeight: 700,
+                                                        textTransform: 'uppercase', letterSpacing: '0.05em',
+                                                    }}>
+                                                        Soon
+                                                    </Box>
+                                                )}
+                                                {/* 선택 체크 */}
+                                                {isSelected && (
+                                                    <Box style={{
+                                                        position: 'absolute', top: 8, right: 8, zIndex: 10,
+                                                        width: 24, height: 24, borderRadius: '50%',
+                                                        background: '#8b5cf6', display: 'flex',
+                                                        alignItems: 'center', justifyContent: 'center',
+                                                    }}>
+                                                        <Check size={14} color="#fff" strokeWidth={3} />
+                                                    </Box>
+                                                )}
+                                                {/* 이미지 영역 (9:13 비율) */}
+                                                <Box style={{ aspectRatio: '9/13', width: '100%', overflow: 'hidden', background: '#f3f4f6' }}>
+                                                    {niche.image ? (
+                                                        // eslint-disable-next-line @next/next/no-img-element
+                                                        <img
+                                                            src={niche.image}
+                                                            alt={niche.label}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        />
+                                                    ) : (
+                                                        <Box style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <Box style={{ width: 40, height: 40, opacity: 0.3 }}>
+                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5">
+                                                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                                    <circle cx="8.5" cy="8.5" r="1.5" />
+                                                                    <path d="m21 15-5-5L5 21" />
+                                                                </svg>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+                                                </Box>
+                                                {/* 텍스트 영역 */}
+                                                <Box style={{ padding: '12px', textAlign: 'center' }}>
+                                                    <Text fw={600} size="sm" style={{ color: niche.enabled ? '#1f2937' : '#9ca3af' }}>
+                                                        {niche.label}
+                                                    </Text>
+                                                    <Text size="xs" style={{ color: niche.enabled ? '#6b7280' : '#d1d5db', marginTop: 2 }}>
+                                                        {niche.enabled ? niche.desc : '준비 중'}
+                                                    </Text>
+                                                </Box>
                                             </Box>
                                         );
                                     })}
@@ -646,29 +690,29 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                                     style={{
                                                         padding: '16px 12px',
                                                         borderRadius: '14px',
-                                                        border: isSelected ? '2px solid #ec4899' : '2px solid #e5e7eb',
-                                                        background: isSelected ? 'rgba(236, 72, 153, 0.06)' : '#fff',
+                                                        border: isSelected ? '2px solid #8b5cf6' : '2px solid #e5e7eb',
+                                                        background: isSelected ? 'rgba(139, 92, 246, 0.04)' : '#fff',
                                                         cursor: isGenerating ? 'not-allowed' : 'pointer',
                                                         opacity: isGenerating ? 0.5 : 1,
                                                         transition: 'all 0.15s ease',
                                                         textAlign: 'center',
-                                                        boxShadow: isSelected ? '0 4px 15px rgba(236, 72, 153, 0.15)' : '0 1px 3px rgba(0,0,0,0.04)',
+                                                        boxShadow: isSelected ? '0 0 0 1px #8b5cf6' : 'none',
                                                     }}
                                                     onMouseEnter={(e) => {
                                                         if (!isSelected && !isGenerating) {
-                                                            e.currentTarget.style.borderColor = '#f472b6';
-                                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                                            e.currentTarget.style.borderColor = '#8b5cf6';
+                                                            e.currentTarget.style.boxShadow = '0 0 0 1px #8b5cf6';
                                                         }
                                                     }}
                                                     onMouseLeave={(e) => {
                                                         if (!isSelected) {
                                                             e.currentTarget.style.borderColor = '#e5e7eb';
-                                                            e.currentTarget.style.transform = 'translateY(0)';
+                                                            e.currentTarget.style.boxShadow = 'none';
                                                         }
                                                     }}
                                                 >
                                                     <Text size="xl" mb={4}>{tone.emoji}</Text>
-                                                    <Text fw={600} size="sm" style={{ color: isSelected ? '#ec4899' : '#374151' }}>
+                                                    <Text fw={600} size="sm" style={{ color: isSelected ? '#8b5cf6' : '#374151' }}>
                                                         {tone.label}
                                                     </Text>
                                                     <Text size="xs" c="gray.5" mt={2}>{tone.desc}</Text>
@@ -712,8 +756,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                                 disabled={isResearching || isGenerating || material.length < 10}
                                                 loading={isResearching}
                                                 leftSection={isResearching ? undefined : <Search size={20} />}
-                                                variant="gradient"
-                                                gradient={{ from: '#8b5cf6', to: '#a78bfa' }}
+                                                color="violet"
                                             >
                                                 {isResearching ? '리서치 중...' : '리서치 시작'}
                                             </Button>
@@ -738,9 +781,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                             disabled={isGenerating || credits <= 0}
                                             loading={isGenerating}
                                             leftSection={isGenerating ? undefined : <Sparkles size={20} />}
-                                            style={{
-                                                background: isGenerating ? undefined : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                            }}
+                                            color="violet"
                                         >
                                             {isGenerating ? `생성 중... (${elapsed}초)` : '스크립트 생성 (1코인)'}
                                         </Button>
