@@ -56,6 +56,8 @@ export async function GET() {
             createdAt: new Date(item.created_at).toLocaleString("ko-KR"),
             archetype: item.scripts?.[0]?.archetype || "UNKNOWN",
             versions: item.scripts?.length || 0,
+            niche: item.niche || null,
+            tone: item.tone || null,
         })) || [];
 
         return NextResponse.json({

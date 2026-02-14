@@ -411,6 +411,8 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     input_text: material,
+                    niche: selectedNiche || '',
+                    tone: selectedTone || '',
                     scripts: resultData.scripts.map(s => ({
                         hook_preview: s.hook,
                         full_script: s.final,

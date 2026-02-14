@@ -163,28 +163,42 @@ function HeroSection() {
       <Container size="md" style={{ position: 'relative', zIndex: 1, padding: '0 16px' }}>
         <Stack align="center" gap="xl">
 
-          {/* 상단 권위 배지 (NEW) */}
+          {/* 메인 배너 이미지 */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            style={{ width: '100%', maxWidth: '800px' }}
           >
-            <Badge
-              size="lg"
-              variant="gradient"
-              gradient={{ from: 'indigo', to: 'violet' }}
-              radius="xl"
+            <Box
               style={{
-                padding: '18px 28px',
-                fontSize: '16px',
-                fontWeight: 700,
-                border: '1px solid rgba(255,255,255,0.4)',
-                marginBottom: '24px',
-                boxShadow: '0 0 30px rgba(139, 92, 246, 0.5)'
+                position: 'relative',
+                borderRadius: '24px',
+                overflow: 'hidden',
+                boxShadow: '0 25px 80px rgba(139, 92, 246, 0.4), 0 0 0 1px rgba(255,255,255,0.1)',
+                border: '4px solid rgba(255,255,255,0.05)',
+                background: '#130a26',
+                aspectRatio: '16 / 7',
               }}
             >
-              🎯 조회수가 안 나와서 고민이신가요?
-            </Badge>
+              <img
+                src="/images/hero_banner_300.png"
+                alt="유튜브 쇼츠로 월 300만원 - VOD & AI 스크립트 자동화 & 트렌드 채널 리스트 올인원 패키지"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'block',
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                }}
+              />
+              <Box style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(105deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.02) 100%)',
+                pointerEvents: 'none'
+              }} />
+            </Box>
           </motion.div>
 
           {/* 메인 헤드라인 (면죄부) */}

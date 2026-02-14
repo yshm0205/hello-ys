@@ -3,6 +3,7 @@
 /**
  * 보관함 페이지 콘텐츠
  * DB 연동: Supabase에서 스크립트 히스토리 조회
+ * V1 아키타입 + V2 니치/말투 필터 지원
  */
 
 import { useState, useEffect } from 'react';
@@ -42,7 +43,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
-// 아키타입 한글 이름
+// V1 아키타입 한글 이름
 const ARCHETYPE_NAMES: Record<string, string> = {
     'APPEARANCE_VS_REALITY': '겉보기 vs 실제',
     'EXTREME_METRIC_VARIANT': '극단 수치형',
@@ -50,6 +51,26 @@ const ARCHETYPE_NAMES: Record<string, string> = {
     'PHENOMENON_SITE': '현상 현장형',
     'HIDDEN_SCENE_DAILY': '숨겨진 장면형',
     'UNKNOWN': '기타',
+};
+
+// V2 니치 한글 이름
+const NICHE_NAMES: Record<string, string> = {
+    'knowledge': '지식/과학',
+    'animal': '동물/자연',
+    'history': '역사/문화',
+    'place': '장소/여행',
+    'food': '음식/요리',
+    'tech': '기술/IT',
+    'health': '건강/의학',
+    'other': '기타',
+};
+
+// V2 말투 한글 이름
+const TONE_NAMES: Record<string, string> = {
+    'default': '다큐 나레이션',
+    'casual': '친근한 반말',
+    'humorous': '유머러스',
+    'emotional': '감성 스토리',
 };
 
 // 스크립트 타입 정의
@@ -65,6 +86,24 @@ interface ScriptItem {
     createdAt: string;
     archetype: string;
     versions: number;
+    niche?: string | null;
+    tone?: string | null;
+}
+
+// V1/V2 구분 헬퍼
+function isV2Script(item: ScriptItem): boolean {
+    return item.archetype === 'V2_PIPELINE';
+}
+
+function getStyleLabel(item: ScriptItem): string {
+    if (isV2Script(item)) {
+        const niche = item.niche ? NICHE_NAMES[item.niche] || item.niche : null;
+        const tone = item.tone ? TONE_NAMES[item.tone] || item.tone : null;
+        if (niche && tone) return `${niche} / ${tone}`;
+        if (niche) return niche;
+        return 'V2';
+    }
+    return ARCHETYPE_NAMES[item.archetype] || item.archetype;
 }
 
 // 목 데이터: 스크립트 히스토리
@@ -107,6 +146,13 @@ const mockLinkedVideos = [
     },
 ];
 
+// 버전 필터 옵션
+const VERSION_FILTER_OPTIONS = [
+    { value: 'all', label: '전체' },
+    { value: 'v1', label: 'V1 스타일' },
+    { value: 'v2', label: 'V2 니치' },
+];
+
 export function ArchiveContent() {
     // 스크립트 데이터 상태
     const [scripts, setScripts] = useState<ScriptItem[]>([]);
@@ -114,7 +160,10 @@ export function ArchiveContent() {
     const [loadError, setLoadError] = useState<string | null>(null);
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [filterVersion, setFilterVersion] = useState<string | null>(null);
     const [filterArchetype, setFilterArchetype] = useState<string | null>(null);
+    const [filterNiche, setFilterNiche] = useState<string | null>(null);
+    const [filterTone, setFilterTone] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<string | null>('scripts');
 
     // 모달 상태
@@ -130,6 +179,14 @@ export function ArchiveContent() {
     const [selectedScript, setSelectedScript] = useState<string | null>(null);
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [linkSuccess, setLinkSuccess] = useState(false);
+
+    // 버전 필터 변경 시 하위 필터 초기화
+    const handleVersionChange = (value: string | null) => {
+        setFilterVersion(value);
+        setFilterArchetype(null);
+        setFilterNiche(null);
+        setFilterTone(null);
+    };
 
     // DB에서 스크립트 불러오기
     useEffect(() => {
@@ -159,10 +216,25 @@ export function ArchiveContent() {
             item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.inputText.toLowerCase().includes(searchQuery.toLowerCase());
 
+        // 버전 필터
+        const v2 = isV2Script(item);
+        let matchesVersion = true;
+        if (filterVersion === 'v1') matchesVersion = !v2;
+        if (filterVersion === 'v2') matchesVersion = v2;
+
+        // V1 아키타입 필터
         const matchesArchetype =
             !filterArchetype || item.archetype === filterArchetype;
 
-        return matchesSearch && matchesArchetype;
+        // V2 니치 필터
+        const matchesNiche =
+            !filterNiche || item.niche === filterNiche;
+
+        // V2 말투 필터
+        const matchesTone =
+            !filterTone || item.tone === filterTone;
+
+        return matchesSearch && matchesVersion && matchesArchetype && matchesNiche && matchesTone;
     });
 
     const handleOpenScript = (script: ScriptItem) => {
@@ -283,7 +355,7 @@ export function ArchiveContent() {
                             border: 'none',
                         }}
                     >
-                        ✨ 새 스크립트 만들기
+                        새 스크립트 만들기
                     </Button>
                 </Group>
 
@@ -291,10 +363,10 @@ export function ArchiveContent() {
                 <Tabs value={activeTab} onChange={setActiveTab} variant="pills" radius="lg">
                     <Tabs.List>
                         <Tabs.Tab value="scripts" leftSection={<FolderOpen size={18} />}>
-                            📋 내 스크립트
+                            내 스크립트
                         </Tabs.Tab>
                         <Tabs.Tab value="videos" leftSection={<Youtube size={18} />}>
-                            🔗 영상 연결
+                            영상 연결
                         </Tabs.Tab>
                     </Tabs.List>
 
@@ -302,27 +374,68 @@ export function ArchiveContent() {
                     <Tabs.Panel value="scripts" pt="xl">
                         {/* 필터 */}
                         <Card padding="md" radius="lg" withBorder mb="lg">
-                            <Group>
-                                <TextInput
-                                    placeholder="검색..."
-                                    leftSection={<Search size={18} />}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                                    style={{ flex: 1 }}
-                                />
-                                <Select
-                                    placeholder="스타일 필터"
-                                    leftSection={<Filter size={18} />}
-                                    clearable
-                                    value={filterArchetype}
-                                    onChange={setFilterArchetype}
-                                    data={Object.entries(ARCHETYPE_NAMES).map(([key, value]) => ({
-                                        value: key,
-                                        label: value,
-                                    }))}
-                                    style={{ width: 200 }}
-                                />
-                            </Group>
+                            <Stack gap="sm">
+                                <Group>
+                                    <TextInput
+                                        placeholder="검색..."
+                                        leftSection={<Search size={18} />}
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.currentTarget.value)}
+                                        style={{ flex: 1 }}
+                                    />
+                                    <Select
+                                        placeholder="버전"
+                                        leftSection={<Filter size={18} />}
+                                        clearable
+                                        value={filterVersion}
+                                        onChange={handleVersionChange}
+                                        data={VERSION_FILTER_OPTIONS}
+                                        style={{ width: 140 }}
+                                    />
+                                </Group>
+                                {/* 하위 필터: 버전에 따라 V1 아키타입 또는 V2 니치/말투 */}
+                                {filterVersion === 'v1' && (
+                                    <Group>
+                                        <Select
+                                            placeholder="아키타입 필터"
+                                            clearable
+                                            value={filterArchetype}
+                                            onChange={setFilterArchetype}
+                                            data={Object.entries(ARCHETYPE_NAMES).map(([key, value]) => ({
+                                                value: key,
+                                                label: value,
+                                            }))}
+                                            style={{ width: 200 }}
+                                        />
+                                    </Group>
+                                )}
+                                {filterVersion === 'v2' && (
+                                    <Group>
+                                        <Select
+                                            placeholder="니치 필터"
+                                            clearable
+                                            value={filterNiche}
+                                            onChange={setFilterNiche}
+                                            data={Object.entries(NICHE_NAMES).map(([key, value]) => ({
+                                                value: key,
+                                                label: value,
+                                            }))}
+                                            style={{ width: 160 }}
+                                        />
+                                        <Select
+                                            placeholder="말투 필터"
+                                            clearable
+                                            value={filterTone}
+                                            onChange={setFilterTone}
+                                            data={Object.entries(TONE_NAMES).map(([key, value]) => ({
+                                                value: key,
+                                                label: value,
+                                            }))}
+                                            style={{ width: 160 }}
+                                        />
+                                    </Group>
+                                )}
+                            </Stack>
                         </Card>
 
                         {/* 로딩 상태 */}
@@ -376,9 +489,20 @@ export function ArchiveContent() {
                                                         <Text size="sm" c="gray.6">{item.createdAt}</Text>
                                                     </Table.Td>
                                                     <Table.Td>
-                                                        <Badge variant="outline" color="violet">
-                                                            {ARCHETYPE_NAMES[item.archetype] || item.archetype}
-                                                        </Badge>
+                                                        <Group gap={6}>
+                                                            {isV2Script(item) ? (
+                                                                <>
+                                                                    <Badge variant="light" color="blue" size="sm">V2</Badge>
+                                                                    <Badge variant="outline" color="violet" size="sm">
+                                                                        {getStyleLabel(item)}
+                                                                    </Badge>
+                                                                </>
+                                                            ) : (
+                                                                <Badge variant="outline" color="violet">
+                                                                    {getStyleLabel(item)}
+                                                                </Badge>
+                                                            )}
+                                                        </Group>
                                                     </Table.Td>
                                                     <Table.Td>
                                                         <Group gap="xs">
@@ -418,7 +542,7 @@ export function ArchiveContent() {
                                 ) : (
                                     <Box p="xl" ta="center">
                                         <Text c="gray.5" size="lg">
-                                            📭 검색 결과가 없습니다
+                                            검색 결과가 없습니다
                                         </Text>
                                     </Box>
                                 )}
@@ -437,7 +561,7 @@ export function ArchiveContent() {
                         {/* 안내 */}
                         <Alert
                             icon={<AlertCircle size={18} />}
-                            title="💡 Step 1. 영상 자산화"
+                            title="Step 1. 영상 자산화"
                             color="blue"
                             variant="light"
                             radius="lg"
@@ -450,7 +574,7 @@ export function ArchiveContent() {
                         {/* 영상 연결 폼 */}
                         <Card padding="xl" radius="xl" withBorder mb="lg">
                             <Stack gap="lg">
-                                <Title order={4}>🔗 새 영상 연결</Title>
+                                <Title order={4}>새 영상 연결</Title>
 
                                 {linkSuccess && (
                                     <Alert icon={<Check size={18} />} color="green" radius="lg">
@@ -512,7 +636,7 @@ export function ArchiveContent() {
 
                         {/* 연결된 영상 목록 */}
                         <Card padding="lg" radius="xl" withBorder>
-                            <Title order={4} mb="lg">📋 연결된 영상 목록</Title>
+                            <Title order={4} mb="lg">연결된 영상 목록</Title>
 
                             {mockLinkedVideos.length > 0 ? (
                                 <Table>
@@ -544,7 +668,7 @@ export function ArchiveContent() {
                                                 </Table.Td>
                                                 <Table.Td>
                                                     <Badge color="green" variant="light">
-                                                        ✅ YouTube 연결됨
+                                                        YouTube 연결됨
                                                     </Badge>
                                                 </Table.Td>
                                                 <Table.Td>
@@ -584,9 +708,18 @@ export function ArchiveContent() {
                     {selectedScriptData && (
                         <Stack gap="md">
                             <Group>
-                                <Badge variant="outline" color="violet">
-                                    {ARCHETYPE_NAMES[selectedScriptData.archetype] || selectedScriptData.archetype}
-                                </Badge>
+                                {isV2Script(selectedScriptData) ? (
+                                    <>
+                                        <Badge variant="light" color="blue">V2</Badge>
+                                        <Badge variant="outline" color="violet">
+                                            {getStyleLabel(selectedScriptData)}
+                                        </Badge>
+                                    </>
+                                ) : (
+                                    <Badge variant="outline" color="violet">
+                                        {getStyleLabel(selectedScriptData)}
+                                    </Badge>
+                                )}
                                 <Text size="sm" c="gray.6">
                                     생성일: {selectedScriptData.createdAt}
                                 </Text>
@@ -601,7 +734,7 @@ export function ArchiveContent() {
                                     <Tabs.List mb="md">
                                         {selectedScriptData.scripts.map((script, index) => (
                                             <Tabs.Tab key={index} value={String(index)}>
-                                                옵션 {index + 1}: {ARCHETYPE_NAMES[script.archetype] || script.archetype}
+                                                옵션 {index + 1}{!isV2Script(selectedScriptData) && `: ${ARCHETYPE_NAMES[script.archetype] || script.archetype}`}
                                             </Tabs.Tab>
                                         ))}
                                     </Tabs.List>
@@ -611,7 +744,7 @@ export function ArchiveContent() {
                                             <Stack gap="sm">
                                                 {/* 훅 미리보기 */}
                                                 <Alert
-                                                    title="🎯 훅 (첫 문장)"
+                                                    title="훅 (첫 문장)"
                                                     color="violet"
                                                     variant="light"
                                                     radius="lg"
@@ -703,7 +836,7 @@ export function ArchiveContent() {
                                     background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                                 }}
                             >
-                                💾 저장하기
+                                저장하기
                             </Button>
                         </Group>
                     </Stack>

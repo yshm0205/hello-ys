@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         const userId = user.id;
 
         const body = await request.json();
-        const { input_text, scripts, selected_script } = body;
+        const { input_text, scripts, selected_script, niche, tone } = body;
 
         if (!input_text) {
             return NextResponse.json(
@@ -35,13 +35,17 @@ export async function POST(request: Request) {
         const scriptData = scripts || (selected_script ? [selected_script] : []);
 
         // DB에 저장
+        const insertData: Record<string, unknown> = {
+            user_id: userId,
+            input_text: input_text.substring(0, 1000), // 최대 1000자
+            scripts: scriptData,
+        };
+        if (niche) insertData.niche = niche;
+        if (tone) insertData.tone = tone;
+
         const { data, error } = await supabase
             .from("script_generations")
-            .insert({
-                user_id: userId,
-                input_text: input_text.substring(0, 1000), // 최대 1000자
-                scripts: scriptData,
-            })
+            .insert(insertData)
             .select()
             .single();
 
