@@ -160,13 +160,13 @@ function AgentProgressIndicator({ phase, elapsed }: { phase: GenerationPhase; el
                     <Badge variant="light" color="gray" size="sm">{elapsed}초</Badge>
                 </Group>
 
-                <Group justify="center" align="flex-start" gap="xl">
+                <Group justify="center" align="flex-start" gap="xl" wrap="wrap" className="v2-agent-team">
                     {AGENT_TEAM.map((agent, index) => {
                         const status = getAgentStatus(index);
                         return (
                             <Box key={agent.role} style={{ position: 'relative' }}>
-                                <Stack align="center" gap="md" style={{ width: 160 }}>
-                                    <Box style={{ position: 'relative', width: 100, height: 100 }}>
+                                <Stack align="center" gap="md" className="v2-agent-card">
+                                    <Box style={{ position: 'relative', width: 80, height: 80 }}>
                                         <Box
                                             style={{
                                                 position: 'absolute', inset: -4, borderRadius: '50%',
@@ -177,7 +177,7 @@ function AgentProgressIndicator({ phase, elapsed }: { phase: GenerationPhase; el
                                         />
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
-                                            src={agent.image} alt={agent.name} width={100} height={100}
+                                            src={agent.image} alt={agent.name} width={80} height={80}
                                             style={{
                                                 borderRadius: '50%', objectFit: 'cover',
                                                 filter: status === 'waiting' ? 'grayscale(80%) opacity(0.5)' : 'none',
@@ -210,8 +210,8 @@ function AgentProgressIndicator({ phase, elapsed }: { phase: GenerationPhase; el
                                     </Stack>
                                 </Stack>
                                 {index < 2 && (
-                                    <Box style={{ position: 'absolute', top: 50, right: -32, transform: 'translateY(-50%)' }}>
-                                        <ArrowRight size={24} color={getAgentStatus(index) === 'done' ? '#22c55e' : '#e5e7eb'} style={{ transition: 'color 0.3s' }} />
+                                    <Box className="v2-agent-arrow" style={{ position: 'absolute', top: 40, right: -28, transform: 'translateY(-50%)' }}>
+                                        <ArrowRight size={20} color={getAgentStatus(index) === 'done' ? '#22c55e' : '#e5e7eb'} style={{ transition: 'color 0.3s' }} />
                                     </Box>
                                 )}
                             </Box>
@@ -230,6 +230,11 @@ function AgentProgressIndicator({ phase, elapsed }: { phase: GenerationPhase; el
                 @keyframes pulse {
                     0%, 100% { opacity: 1; transform: scale(1); }
                     50% { opacity: 0.7; transform: scale(1.05); }
+                }
+                @media (max-width: 768px) {
+                    .v2-agent-team { gap: 12px !important; }
+                    .v2-agent-card { width: 90px !important; }
+                    .v2-agent-arrow { display: none !important; }
                 }
             `}</style>
         </Box>
@@ -439,7 +444,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     };
 
     return (
-        <Box style={{ display: 'flex', gap: '24px', minHeight: 'calc(100vh - 120px)' }}>
+        <Box className="v2-layout" style={{ display: 'flex', gap: '24px', minHeight: 'calc(100vh - 120px)' }}>
             {/* 메인 영역 */}
             <Box style={{ flex: 1, minWidth: 0 }}>
                 <Stack gap="xl">
@@ -458,7 +463,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                     </Box>
 
                     {/* 스텝 인디케이터 */}
-                    <Group gap="sm" justify="flex-start">
+                    <Group gap="sm" justify="flex-start" wrap="wrap" className="v2-step-indicator">
                         <Badge
                             size="lg" radius="xl"
                             variant={currentStep >= 1 ? 'filled' : 'outline'}
@@ -513,7 +518,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                             {/* 니치 선택 - 이미지 카드 (3열, 9:13 비율) */}
                             <Box>
                                 <Text fw={500} size="sm" mb="xs">채널 니치</Text>
-                                <Box style={{
+                                <Box className="v2-niche-grid" style={{
                                     display: 'grid',
                                     gridTemplateColumns: 'repeat(3, 1fr)',
                                     gap: '16px',
@@ -678,7 +683,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                             {researchResult && !result && (
                                 <Box>
                                     <Text fw={500} size="sm" mb="xs">말투 설정</Text>
-                                    <Box style={{
+                                    <Box className="v2-tone-grid" style={{
                                         display: 'grid',
                                         gridTemplateColumns: 'repeat(4, 1fr)',
                                         gap: '10px',
@@ -737,7 +742,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                             )}
 
                             {/* 하단 액션 */}
-                            <Group justify="space-between" align="center">
+                            <Group justify="space-between" align="center" wrap="wrap" className="v2-actions">
                                 <Group gap="md">
                                     <Badge variant="light" color="gray">{material.length}자</Badge>
                                     {material.length >= 10 && (
@@ -931,6 +936,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
             {/* 우측 훅 패널 */}
             <Box
+                className="v2-sidebar"
                 style={{
                     width: '320px', flexShrink: 0,
                     position: 'sticky', top: '24px', alignSelf: 'flex-start',
@@ -993,6 +999,41 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                     </Stack>
                 </Card>
             </Box>
+
+            {/* 반응형 CSS */}
+            <style>{`
+                @media (max-width: 768px) {
+                    .v2-layout {
+                        flex-direction: column !important;
+                    }
+                    .v2-sidebar {
+                        display: none !important;
+                    }
+                    .v2-tone-grid {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 8px !important;
+                    }
+                    .v2-niche-grid {
+                        gap: 10px !important;
+                    }
+                    .v2-step-indicator {
+                        gap: 6px !important;
+                    }
+                    .v2-actions {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                    }
+                    .v2-actions > * {
+                        justify-content: center !important;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .v2-niche-grid {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 8px !important;
+                    }
+                }
+            `}</style>
         </Box>
     );
 }
