@@ -108,7 +108,7 @@ const AGENT_TEAM = [
         name: '스크립트 작가',
         role: 'Script Writer',
         image: '/images/robot-hero.png',
-        color: '#ec4899',
+        color: '#8b5cf6',
         desc: '3개의 스크립트를 병렬 생성합니다',
         icon3D: '/images/icons/icon-pen.png',
     },
@@ -241,9 +241,6 @@ function AgentProgressIndicator({ phase, elapsed }: { phase: GenerationPhase; el
     );
 }
 
-// ============ 관리자 ============
-const ADMIN_EMAILS = ['hmys0205hmys@gmail.com', 'admin@flowspot.kr'];
-
 interface Props {
     user?: { email?: string };
 }
@@ -272,9 +269,6 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
     const progressRef = useRef<HTMLDivElement>(null);
     const hookSelectionRef = useRef<HTMLDivElement>(null);
-
-    const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
-    const credits = isAdmin ? 9999 : 47;
 
     const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
 
@@ -629,7 +623,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                     padding="md"
                                     radius="md"
                                     style={{
-                                        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                                        background: 'rgba(34, 197, 94, 0.05)',
                                         border: '1px solid rgba(34, 197, 94, 0.2)',
                                     }}
                                 >
@@ -770,7 +764,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                             <Button
                                                 size="lg" radius="lg"
                                                 onClick={handleSkipResearch}
-                                                disabled={isGenerating || material.length < 10 || credits <= 0}
+                                                disabled={isGenerating || material.length < 10}
                                                 loading={isGenerating}
                                                 leftSection={isGenerating ? undefined : <Sparkles size={20} />}
                                                 variant="light" color="gray"
@@ -785,12 +779,12 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                         <Button
                                             size="lg" radius="lg"
                                             onClick={handleGenerate}
-                                            disabled={isGenerating || credits <= 0}
+                                            disabled={isGenerating}
                                             loading={isGenerating}
                                             leftSection={isGenerating ? undefined : <Sparkles size={20} />}
                                             color="violet"
                                         >
-                                            {isGenerating ? `생성 중... (${elapsed}초)` : '스크립트 생성 (1코인)'}
+                                            {isGenerating ? `생성 중... (${elapsed}초)` : '스크립트 생성'}
                                         </Button>
                                     )}
                                 </Group>

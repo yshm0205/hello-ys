@@ -172,9 +172,13 @@ export function HotListContent() {
                 if (!selectedDate) {
                     setSelectedDate(json.dates[0].date);
                 }
+            } else {
+                // 날짜 데이터가 없으면 로딩 해제
+                setLoading(false);
             }
         } catch (error) {
             console.error('Failed to fetch dates:', error);
+            setLoading(false);
         } finally {
             setDatesLoading(false);
         }
@@ -300,12 +304,38 @@ export function HotListContent() {
         return found?.count || 0;
     };
 
-    if (loading && allItems.length === 0 && !datesLoading) {
+    // 날짜 로딩 중이거나 데이터 로딩 중
+    if (datesLoading || (loading && allItems.length === 0 && selectedDate)) {
         return (
             <Container size="xl" py={50}>
                 <Stack align="center" gap="xl">
                     <Loader size="xl" type="bars" />
                     <Text size="lg" fw={500}>핫 영상을 불러오는 중...</Text>
+                </Stack>
+            </Container>
+        );
+    }
+
+    // 수집된 날짜가 없음 (데이터 자체가 없는 상태)
+    if (!datesLoading && availableDates.length === 0) {
+        return (
+            <Container size="xl" py={50}>
+                <Stack align="center" gap="xl">
+                    <ThemeIcon size={64} radius="xl" color="gray" variant="light">
+                        <Flame size={32} />
+                    </ThemeIcon>
+                    <div style={{ textAlign: 'center' }}>
+                        <Title order={3} mb="xs">현재 핫 영상이 없습니다</Title>
+                        <Text c="dimmed" size="md">
+                            아직 수집된 핫 영상 데이터가 없어요.
+                        </Text>
+                        <Text c="dimmed" size="sm" mt={4}>
+                            데이터가 수집되면 여기에 표시됩니다.
+                        </Text>
+                    </div>
+                    <Button variant="light" leftSection={<RefreshCw size={16} />} onClick={() => fetchDates()}>
+                        다시 확인
+                    </Button>
                 </Stack>
             </Container>
         );

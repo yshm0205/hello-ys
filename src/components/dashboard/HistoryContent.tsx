@@ -122,7 +122,7 @@ export function HistoryContent() {
                         href="/dashboard/scripts"
                         leftSection={<Plus size={18} />}
                         style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                            background: '#8b5cf6',
                             border: 'none',
                         }}
                     >

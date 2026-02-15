@@ -266,7 +266,7 @@ function HeroSection() {
                 🧠 59강 영상 강의
               </Badge>
               <Text size="xl" fw={900} style={{ color: '#a78bfa' }}>+</Text>
-              <Badge size="lg" variant="gradient" gradient={{ from: 'violet', to: 'indigo' }} radius="xl" style={{ padding: 'clamp(12px, 3vw, 20px) clamp(16px, 4vw, 28px)', height: 'auto', border: '1px solid rgba(255,255,255,0.2)', fontSize: 'clamp(14px, 3.5vw, 18px)', boxShadow: '0 0 25px rgba(139, 92, 246, 0.5)' }}>
+              <Badge size="lg" variant="filled" color="violet" radius="xl" style={{ padding: 'clamp(12px, 3vw, 20px) clamp(16px, 4vw, 28px)', height: 'auto', border: '1px solid rgba(255,255,255,0.2)', fontSize: 'clamp(14px, 3.5vw, 18px)', boxShadow: '0 0 25px rgba(139, 92, 246, 0.5)' }}>
                 🤖 AI 직원 3인방
               </Badge>
             </Group>
@@ -351,9 +351,9 @@ function HeroSection() {
 
       <style>{`
         @keyframes ctaPulse {
-          0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7), 0 0 40px rgba(236, 72, 153, 0.5); }
-          70% { box-shadow: 0 0 0 20px rgba(236, 72, 153, 0), 0 0 40px rgba(236, 72, 153, 0.5); }
-          100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0), 0 0 40px rgba(236, 72, 153, 0.5); }
+          0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7), 0 0 40px rgba(139, 92, 246, 0.5); }
+          70% { box-shadow: 0 0 0 20px rgba(139, 92, 246, 0), 0 0 40px rgba(139, 92, 246, 0.5); }
+          100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0), 0 0 40px rgba(139, 92, 246, 0.5); }
         }
       `}</style>
     </Box>
@@ -491,7 +491,7 @@ function SocialProofSection() {
       title: "ROI 430%",
       subtitle: "10만원 → 43만원",
       icon: "💵",
-      color: "#ec4899",
+      color: "#8b5cf6",
       review: "수익 화면 인증",
       quote: "유튜브로 수익 창출돼서, 저 수익금으로 TV 샀어요 ㅎㅎ"
     },
@@ -1005,7 +1005,7 @@ function AIRevealSection() {
 
           {/* AI Reveal 헤더 */}
           <Stack align="center" gap="md">
-            <Badge size="lg" variant="gradient" gradient={{ from: '#00D9FF', to: '#a78bfa' }} radius="xl">
+            <Badge size="lg" variant="filled" color="violet" radius="xl">
               🤖 AI 도구 최초 공개
             </Badge>
             <Title order={2} ta="center" style={{ color: '#fff', fontSize: '36px' }}>
@@ -1018,13 +1018,13 @@ function AIRevealSection() {
 
           {/* 성과 요약 배지 */}
           <Group justify="center" gap="xl" wrap="wrap">
-            <Badge size="xl" variant="gradient" gradient={{ from: 'red', to: 'pink' }} radius="lg" style={{ padding: '16px 24px' }}>
+            <Badge size="xl" variant="filled" color="red" radius="lg" style={{ padding: '16px 24px' }}>
               🔥 YouTube 500만뷰+
             </Badge>
-            <Badge size="xl" variant="gradient" gradient={{ from: 'green', to: 'teal' }} radius="lg" style={{ padding: '16px 24px' }}>
+            <Badge size="xl" variant="filled" color="green" radius="lg" style={{ padding: '16px 24px' }}>
               ⚡ 48시간 1,200만뷰
             </Badge>
-            <Badge size="xl" variant="gradient" gradient={{ from: 'cyan', to: 'blue' }} radius="lg" style={{ padding: '16px 24px' }}>
+            <Badge size="xl" variant="filled" color="cyan" radius="lg" style={{ padding: '16px 24px' }}>
               � 월 1,356만원 수익
             </Badge>
           </Group>
@@ -1373,7 +1373,7 @@ function HowItWorksSection() {
             </Text>
           </Stack>
           <Stack align="center" gap="lg">
-            <ThemeIcon size={80} radius="xl" color="pink" style={{ fontSize: '32px', fontWeight: 700 }}>3</ThemeIcon>
+            <ThemeIcon size={80} radius="xl" color="violet" style={{ fontSize: '32px', fontWeight: 700 }}>3</ThemeIcon>
             <Title order={3} style={{ color: '#fff', fontSize: '24px' }}>대본 완성</Title>
             <Text ta="center" style={{ color: '#d1d5db', fontSize: '18px', lineHeight: 1.6 }}>
               촬영만 하면 되는<br /><span style={{ color: '#f59e0b', fontWeight: 600 }}>완벽한 대본</span>이 나옵니다.
@@ -1781,8 +1781,8 @@ function PackageSection() {
             mt={80}
             p={40}
             style={{
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(139, 92, 246, 0.1))',
-              border: '1px solid rgba(236, 72, 153, 0.3)',
+              background: 'rgba(139, 92, 246, 0.1)',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
               borderRadius: '24px',
               textAlign: 'center',
             }}
@@ -1798,7 +1798,7 @@ function PackageSection() {
               <Text style={{ fontSize: '32px', color: '#6b7280', fontWeight: 300 }}>vs</Text>
               <Stack gap={8} align="center">
                 <Text style={{ fontSize: '16px', color: '#d1d5db' }}>AI 스크립트 1년</Text>
-                <Text fw={800} style={{ fontSize: '32px', color: '#ec4899' }}>50만원</Text>
+                <Text fw={800} style={{ fontSize: '32px', color: '#8b5cf6' }}>50만원</Text>
               </Stack>
             </Group>
             <Text style={{ marginTop: '32px', fontSize: '20px', color: '#d1d5db' }}>
@@ -1842,7 +1842,7 @@ function CTASection() {
       <Container size="md">
         <Stack align="center" gap="xl">
           <Title order={2} c="white" ta="center">3분이면 충분합니다.<br />직접 경험해보세요.</Title>
-          <Button component={Link} href="/dashboard" size="xl" radius="xl" color="pink" h={60} fz={20}>
+          <Button component={Link} href="/dashboard" size="xl" radius="xl" color="violet" h={60} fz={20}>
             🔥 1기 30명 한정 시작하기
           </Button>
           <Text c="dimmed" size="sm">✅ 7일 100% 환불 보장 | ✅ 카드 등록 없음</Text>

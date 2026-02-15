@@ -351,7 +351,7 @@ export function ArchiveContent() {
                         href="/dashboard/scripts"
                         leftSection={<Plus size={18} />}
                         style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                            background: '#8b5cf6',
                             border: 'none',
                         }}
                     >
@@ -625,7 +625,7 @@ export function ArchiveContent() {
                                     onClick={handleLinkVideo}
                                     leftSection={<Link2 size={18} />}
                                     style={{
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                        background: '#8b5cf6',
                                         border: 'none',
                                     }}
                                 >
@@ -833,7 +833,7 @@ export function ArchiveContent() {
                             <Button
                                 onClick={handleSaveEdit}
                                 style={{
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                    background: '#8b5cf6',
                                 }}
                             >
                                 저장하기

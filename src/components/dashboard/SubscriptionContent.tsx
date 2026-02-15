@@ -93,7 +93,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                     padding="xl"
                     radius="xl"
                     style={{
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                        background: '#8b5cf6',
                         border: 'none',
                     }}
                 >
@@ -201,7 +201,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                             style={
                                                 plan.popular && !isCurrent
                                                     ? {
-                                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                                        background: '#8b5cf6',
                                                         border: 'none',
                                                     }
                                                     : undefined

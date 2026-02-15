@@ -17,7 +17,6 @@ import {
     Badge,
     Button,
     Box,
-    Progress,
     ThemeIcon,
     Table,
     ActionIcon,
@@ -34,7 +33,6 @@ import {
     TestTube,
     Pencil,
     Trash2,
-    Coins,
     Loader2,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
@@ -93,10 +91,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
         fetchProjects();
     }, []);
 
-    const credits = 47; // 목 데이터: 크레딧 잔액
     const usedCredits = projects.length;
-    const totalCredits = subscription?.plan_name === 'Free Plan' ? 50 : 500;
-    const usagePercent = (usedCredits / totalCredits) * 100;
 
     return (
         <Container size="lg" py="md">
@@ -112,33 +107,16 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         </Text>
                     </Box>
 
-                    {/* 크레딧 카드 - Streamlit 스타일 */}
-                    <Card
-                        padding="md"
+                    {/* Beta 배지 */}
+                    <Badge
+                        size="xl"
                         radius="lg"
-                        style={{
-                            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-                            border: '1px solid #3b82f6',
-                            minWidth: 140,
-                        }}
+                        variant="light"
+                        color="violet"
+                        style={{ padding: '12px 20px', fontSize: 14 }}
                     >
-                        <Stack gap={2} align="center">
-                            <Text size="xs" c="gray.5">보유 크레딧</Text>
-                            <Group gap="xs">
-                                <Text
-                                    style={{
-                                        fontSize: 28,
-                                        fontWeight: 700,
-                                        color: '#60a5fa',
-                                    }}
-                                >
-                                    {credits}
-                                </Text>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/images/icons/icon-coin.png" alt="" width={28} height={28} style={{ objectFit: 'contain' }} />
-                            </Group>
-                        </Stack>
-                    </Card>
+                        Beta 무료 체험 중
+                    </Badge>
                 </Group>
 
                 {/* 액션 카드 2개 - Streamlit 스타일 */}
@@ -148,7 +126,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         padding="xl"
                         radius="xl"
                         style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                            background: '#8b5cf6',
                             border: 'none',
                             cursor: 'pointer',
                             transition: 'transform 0.2s',
@@ -225,7 +203,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         <Stack gap="md">
                             <Group justify="space-between">
                                 <Text size="sm" c="gray.6">이번 달 사용량</Text>
-                                <ThemeIcon size="lg" radius="lg" color="pink" variant="light">
+                                <ThemeIcon size="lg" radius="lg" color="violet" variant="light">
                                     <TrendingUp size={20} />
                                 </ThemeIcon>
                             </Group>
@@ -234,15 +212,8 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                     <Title order={3} style={{ color: '#111827' }}>
                                         {usedCredits}
                                     </Title>
-                                    <Text size="sm" c="gray.5">/ {totalCredits} 회</Text>
+                                    <Text size="sm" c="gray.5">회 생성</Text>
                                 </Group>
-                                <Progress
-                                    value={usagePercent}
-                                    size="sm"
-                                    radius="xl"
-                                    color="pink"
-                                    mt="sm"
-                                />
                             </Box>
                         </Stack>
                     </Card>

@@ -148,7 +148,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
 
                         <Box
                             style={{
-                                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)',
+                                background: 'rgba(139, 92, 246, 0.1)',
                                 borderRadius: 16,
                                 padding: 20,
                             }}
@@ -170,7 +170,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                     href="/pricing"
                                     radius="lg"
                                     style={{
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                        background: '#8b5cf6',
                                         border: 'none',
                                     }}
                                 >

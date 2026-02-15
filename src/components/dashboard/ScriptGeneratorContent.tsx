@@ -64,7 +64,7 @@ const AGENT_TEAM = [
         name: '스크립트 작가',
         role: 'Script Writer',
         image: '/images/robot-hero.png',
-        color: '#ec4899',
+        color: '#8b5cf6',
         desc: '분석된 패턴으로 3개의 훅을 생성합니다',
         icon: Pen,
         icon3D: '/images/icons/icon-pen.png',
@@ -152,7 +152,7 @@ function AgentProgressIndicator({ phase }: { phase: GenerationPhase }) {
     return (
         <Box
             style={{
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%)',
+                background: 'rgba(139, 92, 246, 0.05)',
                 borderRadius: '20px',
                 padding: '32px',
                 border: '1px solid rgba(139, 92, 246, 0.15)',
@@ -399,12 +399,6 @@ function HookSelectionCards({
     );
 }
 
-// ============ 관리자 이메일 리스트 ============
-const ADMIN_EMAILS = [
-    'hmys0205hmys@gmail.com',
-    'admin@flowspot.kr',
-];
-
 interface ScriptGeneratorContentProps {
     user?: { email?: string };
 }
@@ -428,10 +422,6 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
     const progressRef = useRef<HTMLDivElement>(null);
     const hookSelectionRef = useRef<HTMLDivElement>(null);
     const scriptResultRef = useRef<HTMLDivElement>(null);
-
-    // 관리자 체크 - 무제한 크레딧
-    const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
-    const credits = isAdmin ? 9999 : 47;
 
     // 진행 단계 시뮬레이션
     useEffect(() => {
@@ -788,7 +778,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                 padding="md"
                                 radius="md"
                                 style={{
-                                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                                    background: 'rgba(34, 197, 94, 0.05)',
                                     border: '1px solid rgba(34, 197, 94, 0.2)',
                                 }}
                             >
@@ -893,8 +883,8 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                             disabled={isResearching || inputScript.length < 10}
                                             loading={isResearching}
                                             leftSection={isResearching ? undefined : <Search size={20} />}
-                                            variant="gradient"
-                                            gradient={{ from: '#8b5cf6', to: '#a78bfa' }}
+                                            variant="filled"
+                                            color="violet"
                                         >
                                             {isResearching ? '리서치 중...' : '리서치 시작'}
                                         </Button>
@@ -902,7 +892,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                             size="lg"
                                             radius="lg"
                                             onClick={handleGenerate}
-                                            disabled={isGenerating || inputScript.length < 10 || credits <= 0}
+                                            disabled={isGenerating || inputScript.length < 10}
                                             loading={isGenerating}
                                             leftSection={isGenerating ? undefined : <Sparkles size={20} />}
                                             variant="light"
@@ -919,16 +909,16 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                         size="lg"
                                         radius="lg"
                                         onClick={handleGenerate}
-                                        disabled={isGenerating || inputScript.length < 10 || credits <= 0}
+                                        disabled={isGenerating || inputScript.length < 10}
                                         loading={isGenerating}
                                         leftSection={isGenerating ? undefined : <Sparkles size={20} />}
                                         style={{
                                             background: isGenerating
                                                 ? undefined
-                                                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                                : '#8b5cf6',
                                         }}
                                     >
-                                        {isGenerating ? '훅 생성 중...' : '훅 생성 (1코인)'}
+                                        {isGenerating ? '훅 생성 중...' : '훅 생성'}
                                     </Button>
                                 )}
                             </Group>
@@ -1086,7 +1076,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                                                 disabled={isSaving}
                                                 variant="filled"
                                                 style={{
-                                                    background: isSaving ? undefined : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                                    background: isSaving ? undefined : '#8b5cf6',
                                                 }}
                                             >
                                                 {isSaving ? '저장 중...' : '저장하기'}

@@ -100,7 +100,7 @@ export function LandingHeader() {
                             href="/dashboard"
                             radius="lg"
                             style={{
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                background: '#8b5cf6',
                                 border: 'none',
                             }}
                         >
@@ -177,7 +177,7 @@ export function LandingHeader() {
                         size="lg"
                         radius="lg"
                         style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                            background: '#8b5cf6',
                             border: 'none',
                         }}
                         onClick={close}

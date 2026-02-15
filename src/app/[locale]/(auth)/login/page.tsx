@@ -254,7 +254,7 @@ export default function LoginPage() {
                   fullWidth
                   loading={isLoading}
                   style={{
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                    background: '#8b5cf6',
                     border: 'none',
                   }}
                 >
