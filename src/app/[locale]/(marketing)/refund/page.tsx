@@ -122,6 +122,7 @@ export default async function RefundPage() {
           <h2>제8조 (문의처)</h2>
           <ul>
             <li><strong>서비스명</strong>: FlowSpot (플로우스팟)</li>
+            <li><strong>전화</strong>: 070-8027-2849</li>
             <li><strong>이메일</strong>: hmys0205hmys@gmail.com</li>
             <li><strong>운영 시간</strong>: 평일 10:00 ~ 18:00 (공휴일 제외)</li>
           </ul>
