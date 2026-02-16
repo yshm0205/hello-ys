@@ -26,7 +26,8 @@ export function Footer() {
         {/* 사업자 정보 */}
         <div className="text-center text-xs text-gray-400 dark:text-gray-500 space-y-1 mb-4">
           <p>플로우스팟 | 대표: 이하민, 김예성 | 사업자등록번호: 693-07-02115</p>
-          <p>주소: 충남 천안시 서북구 두정동 1225, 401호 | 이메일: hmys0205hmys@gmail.com</p>
+          <p>통신판매업 신고번호: 2022-충남천안-0095 | 이메일: hmys0205hmys@gmail.com</p>
+          <p>주소: 충남 천안시 서북구 두정동 1225, 401호</p>
         </div>
 
         {/* 저작권 */}
