@@ -69,7 +69,7 @@ export default function PricingPage() {
           <Box>
             <Group justify="center" gap="xs" mb="lg">
               <Text fw={600} size="lg" style={{ color: '#9ca3af' }}>
-                SaaS 월 구독으로 따로 사면?
+                FlowSpot 월 구독으로 따로 사면?
               </Text>
             </Group>
 
@@ -177,14 +177,14 @@ export default function PricingPage() {
                   </Box>
                   <Box>
                     <Title order={3} style={{ color: '#111827' }}>마스터 번들</Title>
-                    <Text size="sm" c="gray.6">강의 + SaaS + 크레딧 — 올인원</Text>
+                    <Text size="sm" c="gray.6">강의 + FlowSpot + 크레딧 — 올인원</Text>
                   </Box>
                 </Group>
 
                 <List spacing="sm" size="sm" center>
                   {[
                     '강의 59강 (기획 → 촬영 → 편집 → 수익화)',
-                    'AI 스크립트 도구 1년 무제한',
+                    'FlowSpot 1년 무제한 이용',
                     '크레딧 300개 포함 (스크립트 300회)',
                     '훅 템플릿 79개 + 지속 업데이트',
                     '채널 분석 피드백 1회',
@@ -229,7 +229,7 @@ export default function PricingPage() {
                       <Text size="xs" c="gray.5" style={{ textDecoration: 'line-through' }}>₩590,000</Text>
                     </Group>
                     <Group justify="space-between">
-                      <Text size="xs" c="gray.5">SaaS Pro 1년</Text>
+                      <Text size="xs" c="gray.5">FlowSpot Pro 1년</Text>
                       <Text size="xs" c="gray.5" style={{ textDecoration: 'line-through' }}>₩228,000</Text>
                     </Group>
                     <Group justify="space-between">
