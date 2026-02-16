@@ -260,7 +260,7 @@ export default function PricingPage() {
           {/* ── FAQ 링크 ── */}
           <Stack align="center" gap="md">
             <Text size="sm" c="gray.6">궁금한 점이 있으신가요?</Text>
-            <Button component={Link} href="/support" variant="subtle" color="violet">
+            <Button component="a" href="/#faq" variant="subtle" color="violet">
               자주 묻는 질문 보기
             </Button>
           </Stack>

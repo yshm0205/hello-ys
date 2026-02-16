@@ -1821,7 +1821,7 @@ function FAQSection() {
     { q: "강의 기간은요?", a: "강의는 평생 소장, AI 도구는 1년 이용권입니다." },
   ];
   return (
-    <Box py={100} bg="#111827">
+    <Box py={100} bg="#111827" id="faq">
       <Container size="md">
         <Title order={2} ta="center" c="white" mb="xl">FAQ</Title>
         <Accordion variant="separated">
