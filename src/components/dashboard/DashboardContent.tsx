@@ -27,7 +27,6 @@ import {
 import {
     Sparkles,
     CreditCard,
-    TrendingUp,
     Clock,
     ArrowRight,
     Zap,
@@ -76,8 +75,10 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
     const [isLoading, setIsLoading] = useState(true);
     // 수강 진도 상태
     const [completedVodCount, setCompletedVodCount] = useState(0);
+    // 크레딧 상태
+    const [creditInfo, setCreditInfo] = useState<{ credits: number; plan_type: string; expires_at: string | null } | null>(null);
 
-    // DB에서 최근 프로젝트 + 수강 진도 불러오기
+    // DB에서 최근 프로젝트 + 수강 진도 + 크레딧 불러오기
     useEffect(() => {
         async function fetchProjects() {
             try {
@@ -108,11 +109,22 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
             }
         }
 
+        async function fetchCredits() {
+            try {
+                const res = await fetch('/api/credits');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCreditInfo(data);
+                }
+            } catch {
+                // 에러 시 무시
+            }
+        }
+
         fetchProjects();
         fetchLectureProgress();
+        fetchCredits();
     }, []);
-
-    const usedCredits = projects.length;
 
     return (
         <Container size="lg" py="md">
@@ -260,17 +272,17 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     <Card padding="lg" radius="xl" withBorder>
                         <Stack gap="md">
                             <Group justify="space-between">
-                                <Text size="sm" c="gray.6">이번 달 사용량</Text>
+                                <Text size="sm" c="gray.6">잔여 크레딧</Text>
                                 <ThemeIcon size="lg" radius="lg" color="violet" variant="light">
-                                    <TrendingUp size={20} />
+                                    <Zap size={20} />
                                 </ThemeIcon>
                             </Group>
                             <Box>
                                 <Group gap="xs" align="baseline">
                                     <Title order={3} style={{ color: '#111827' }}>
-                                        {usedCredits}
+                                        {creditInfo ? creditInfo.credits : 0}
                                     </Title>
-                                    <Text size="sm" c="gray.5">회 생성</Text>
+                                    <Text size="sm" c="gray.5">크레딧</Text>
                                 </Group>
                             </Box>
                         </Stack>
@@ -300,7 +312,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             </Group>
                             <Group gap="sm">
                                 <Title order={3} style={{ color: '#111827' }}>
-                                    {subscription?.plan_name || 'Free'}
+                                    {creditInfo?.plan_type === 'free' || !creditInfo ? 'Beta' : creditInfo.plan_type}
                                 </Title>
                                 <Badge color="green" variant="light">활성</Badge>
                             </Group>

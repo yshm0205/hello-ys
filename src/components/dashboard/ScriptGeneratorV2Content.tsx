@@ -241,6 +241,12 @@ function AgentProgressIndicator({ phase, elapsed }: { phase: GenerationPhase; el
     );
 }
 
+interface CreditInfo {
+    credits: number;
+    plan_type: string;
+    expires_at: string | null;
+}
+
 interface Props {
     user?: { email?: string };
 }
@@ -263,9 +269,28 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     const [selectedHookIndex, setSelectedHookIndex] = useState<number | null>(null);
     const [elapsed, setElapsed] = useState(0);
 
+    // 크레딧
+    const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+
     // 공통
     const [error, setError] = useState<string | null>(null);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // 크레딧 조회
+    useEffect(() => {
+        async function fetchCredits() {
+            try {
+                const res = await fetch('/api/credits');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCreditInfo(data);
+                }
+            } catch {
+                // 조회 실패 시 무시 (베타 모드)
+            }
+        }
+        fetchCredits();
+    }, []);
 
     const progressRef = useRef<HTMLDivElement>(null);
     const hookSelectionRef = useRef<HTMLDivElement>(null);
@@ -377,6 +402,18 @@ export function ScriptGeneratorV2Content({ user }: Props) {
             setGenPhase('done');
             // 자동 저장
             autoSave(data);
+            // 크레딧 차감 (유료 사용자만)
+            if (creditInfo && creditInfo.plan_type !== 'free' && creditInfo.credits > 0) {
+                try {
+                    const deductRes = await fetch('/api/credits/deduct', { method: 'POST' });
+                    if (deductRes.ok) {
+                        const deductData = await deductRes.json();
+                        setCreditInfo(prev => prev ? { ...prev, credits: deductData.credits } : prev);
+                    }
+                } catch {
+                    // 차감 실패 시 무시 (스크립트는 이미 생성됨)
+                }
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
             setGenPhase('idle');
@@ -444,12 +481,22 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                 <Stack gap="xl">
                     {/* 헤더 */}
                     <Box>
-                        <Group gap="sm" mb="xs">
-                            <Zap size={24} color="#8b5cf6" />
-                            <Title order={2} style={{ color: '#111827', fontSize: '1.5rem' }}>
-                                스크립트 V2
-                            </Title>
-                            <Badge variant="light" color="violet" size="sm">NEW</Badge>
+                        <Group gap="sm" mb="xs" justify="space-between">
+                            <Group gap="sm">
+                                <Zap size={24} color="#8b5cf6" />
+                                <Title order={2} style={{ color: '#111827', fontSize: '1.5rem' }}>
+                                    스크립트 V2
+                                </Title>
+                                <Badge variant="light" color="violet" size="sm">NEW</Badge>
+                            </Group>
+                            {creditInfo && creditInfo.plan_type !== 'free' && (
+                                <Badge
+                                    size="lg" variant="light"
+                                    color={creditInfo.credits > 5 ? 'violet' : creditInfo.credits > 0 ? 'orange' : 'red'}
+                                >
+                                    {creditInfo.credits} 크레딧 남음
+                                </Badge>
+                            )}
                         </Group>
                         <Text c="gray.6" size="sm">
                             소재 + 니치 → 리서치 → 말투 선택 → 스크립트 3개 자동 생성
