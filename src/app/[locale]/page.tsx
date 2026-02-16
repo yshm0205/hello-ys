@@ -27,6 +27,7 @@ import {
   Paper,
   Tabs,
   Accordion,
+  Anchor,
 } from '@mantine/core';
 import {
   Sparkles,
@@ -1861,9 +1862,23 @@ function Footer() {
             <Bot size={24} color="#a78bfa" />
             <Text size="lg" fw={600} style={{ color: '#FFFFFF' }}>FlowSpot</Text>
           </Group>
-          <Text size="sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            AI-Powered Script Generation
-          </Text>
+          <Group gap="lg" justify="center">
+            <Anchor href="/ko/terms" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>이용약관</Anchor>
+            <Anchor href="/ko/privacy" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>개인정보처리방침</Anchor>
+            <Anchor href="/ko/refund" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>환불 규정</Anchor>
+            <Anchor href="/ko/support" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>고객지원</Anchor>
+          </Group>
+          <Stack align="center" gap={4}>
+            <Text size="xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              플로우스팟 | 대표: 이하민, 김예성 | 사업자등록번호: 693-07-02115
+            </Text>
+            <Text size="xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              통신판매업 신고번호: 2022-충남천안-0095 | 이메일: hmys0205hmys@gmail.com
+            </Text>
+            <Text size="xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              주소: 충남 천안시 서북구 두정동 1225, 401호
+            </Text>
+          </Stack>
           <Text size="sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
             © 2026 FlowSpot. All rights reserved.
           </Text>
