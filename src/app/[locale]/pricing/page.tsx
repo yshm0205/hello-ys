@@ -20,7 +20,7 @@ import {
   ThemeIcon,
   Divider,
 } from '@mantine/core';
-import { Check, X, Sparkles, Zap, Crown, Package, Coins, ArrowDown } from 'lucide-react';
+import { Check, X, Sparkles, Zap, Crown, Package, ArrowDown } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
 const subscriptionPlans = [
@@ -255,41 +255,6 @@ export default function PricingPage() {
               </Stack>
             </SimpleGrid>
           </Card>
-          </Box>
-
-          {/* ── 섹션 3: 토큰 팩 ── */}
-          <Box>
-            <Group justify="center" gap="sm" mb="lg">
-              <Coins size={22} color="#8b5cf6" />
-              <Text fw={600} size="lg" style={{ color: '#374151' }}>
-                크레딧 추가 구매
-              </Text>
-              <Badge variant="light" color="gray" size="sm">번들 고객 전용</Badge>
-            </Group>
-
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" style={{ maxWidth: 600, margin: '0 auto' }}>
-              <Card padding="lg" radius="xl" withBorder>
-                <Group justify="space-between" align="center">
-                  <Box>
-                    <Text fw={600} style={{ color: '#111827' }}>30 크레딧</Text>
-                    <Text size="xs" c="gray.5">스크립트 약 30회</Text>
-                  </Box>
-                  <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩9,900</Text>
-                </Group>
-              </Card>
-              <Card padding="lg" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
-                <Group justify="space-between" align="center">
-                  <Box>
-                    <Group gap={6}>
-                      <Text fw={600} style={{ color: '#111827' }}>100 크레딧</Text>
-                      <Badge size="xs" color="green" variant="light">인기</Badge>
-                    </Group>
-                    <Text size="xs" c="gray.5">개당 ₩299 — 70% 저렴</Text>
-                  </Box>
-                  <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩29,900</Text>
-                </Group>
-              </Card>
-            </SimpleGrid>
           </Box>
 
           {/* ── FAQ 링크 ── */}
