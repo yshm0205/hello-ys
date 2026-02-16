@@ -58,10 +58,10 @@ export default function PricingPage() {
               Pricing
             </Badge>
             <Title order={1} ta="center" style={{ fontSize: '40px', color: '#111827' }}>
-              월 구독 vs 번들, 뭐가 이득일까요?
+              요금제
             </Title>
             <Text size="lg" c="gray.6" ta="center" maw={500}>
-              직접 비교해 보세요
+              숨겨진 비용 없이, 필요한 만큼만
             </Text>
           </Stack>
 
@@ -149,20 +149,20 @@ export default function PricingPage() {
           </Stack>
 
           {/* ── 섹션 2: 마스터 번들 ── */}
-          <Card
-            padding="xl" radius="xl"
-            style={{
-              border: '2px solid #8b5cf6',
-              background: '#fff',
-              position: 'relative',
-            }}
-          >
+          <Box style={{ position: 'relative', paddingTop: 16 }}>
             <Badge
-              style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)' }}
+              style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}
               size="lg" color="violet" variant="filled"
             >
               BEST — 64% 할인
             </Badge>
+            <Card
+              padding="xl" radius="xl"
+              style={{
+                border: '2px solid #8b5cf6',
+                background: '#fff',
+              }}
+            >
 
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" mt="md">
               {/* 왼쪽: 설명 */}
@@ -255,6 +255,7 @@ export default function PricingPage() {
               </Stack>
             </SimpleGrid>
           </Card>
+          </Box>
 
           {/* ── 섹션 3: 토큰 팩 ── */}
           <Box>
