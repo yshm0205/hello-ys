@@ -31,21 +31,21 @@ export default async function RefundPage() {
           <h2>제1조 (서비스 유형)</h2>
           <p>회사가 제공하는 유료 서비스는 다음과 같습니다.</p>
           <ul>
-            <li><strong>번들 패키지</strong>: 온라인 강의 + FlowSpot 이용권 + AI 크레딧(토큰) 포함</li>
+            <li><strong>올인원 패스</strong>: 온라인 강의 + FlowSpot 이용권 + AI 크레딧(토큰) 포함</li>
             <li><strong>토큰 팩</strong>: AI 스크립트 생성에 사용되는 크레딧 단위 구매</li>
             <li><strong>구독</strong>: 월간 정기 결제 (향후 제공 예정)</li>
           </ul>
 
-          <h2>제2조 (번들 패키지 환불)</h2>
+          <h2>제2조 (올인원 패스 환불)</h2>
           <p>
-            번들 패키지는 「이러닝(전자학습) 이용표준약관」 제28조 제1항 제2호에 따른
+            올인원 패스는 「이러닝(전자학습) 이용표준약관」 제28조 제1항 제2호에 따른
             <strong>학습회차 기준 상품</strong>에 해당합니다.
           </p>
 
           <h3>① 과금 기준</h3>
           <ul>
             <li>본 상품은 수강기간이 아닌 <strong>강의 회차(강의 수)</strong>를 기준으로 판매됩니다.</li>
-            <li>번들에 포함된 FlowSpot 이용권 및 크레딧(토큰)은 <strong>구매 특전</strong>으로 제공되며, 별도 과금 대상이 아닙니다.</li>
+            <li>패스에 포함된 FlowSpot 이용권 및 크레딧(토큰)은 <strong>구매 특전</strong>으로 제공되며, 별도 과금 대상이 아닙니다.</li>
           </ul>
 
           <h3>② 이용 간주 기준</h3>
@@ -72,7 +72,7 @@ export default async function RefundPage() {
 
           <h3>⑤ 특전 회수</h3>
           <ul>
-            <li>환불 시 번들에 포함된 <strong>FlowSpot 이용권 및 잔여 크레딧(토큰)은 즉시 회수</strong>됩니다.</li>
+            <li>환불 시 패스에 포함된 <strong>FlowSpot 이용권 및 잔여 크레딧(토큰)은 즉시 회수</strong>됩니다.</li>
             <li>이미 사용한 크레딧(토큰)에 대해서는 별도 공제하지 않습니다.</li>
           </ul>
 

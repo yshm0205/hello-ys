@@ -75,7 +75,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
     }, []);
 
     const isPaid = creditInfo && creditInfo.plan_type !== 'free';
-    const planLabel = isPaid ? '마스터 번들' : 'Beta 무료';
+    const planLabel = isPaid ? '올인원 패스' : 'Beta 무료';
 
     const formatDate = (dateString?: string | null) => {
         if (!dateString) return '-';
@@ -294,7 +294,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                         <Group gap="md">
                                             <Package size={32} color="#8b5cf6" />
                                             <Box>
-                                                <Title order={4} style={{ color: '#111827' }}>마스터 번들로 업그레이드</Title>
+                                                <Title order={4} style={{ color: '#111827' }}>올인원 패스로 업그레이드</Title>
                                                 <Text size="sm" c="gray.6">
                                                     강의 59강 + AI 스크립트 1년 + 크레딧 300개
                                                 </Text>

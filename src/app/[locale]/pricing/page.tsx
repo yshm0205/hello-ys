@@ -2,7 +2,7 @@
 
 /**
  * 가격 페이지
- * 상단: 월 구독 3개 (취소선) → 하단: 번들 (추천) + 토큰 팩
+ * 상단: 월 구독 3개 (취소선) → 하단: 올인원 패스 (추천)
  */
 
 import {
@@ -144,11 +144,11 @@ export default function PricingPage() {
           <Stack align="center" gap="xs">
             <ArrowDown size={28} color="#8b5cf6" />
             <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>
-              번들 하나면 전부 포함
+              올인원 패스 하나면 전부 포함
             </Text>
           </Stack>
 
-          {/* ── 섹션 2: 마스터 번들 ── */}
+          {/* ── 섹션 2: 올인원 패스 ── */}
           <Box style={{ position: 'relative', paddingTop: 16 }}>
             <Badge
               style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}
@@ -176,8 +176,8 @@ export default function PricingPage() {
                     <Package size={28} />
                   </Box>
                   <Box>
-                    <Title order={3} style={{ color: '#111827' }}>마스터 번들</Title>
-                    <Text size="sm" c="gray.6">강의 + FlowSpot + 크레딧 — 올인원</Text>
+                    <Title order={3} style={{ color: '#111827' }}>올인원 패스</Title>
+                    <Text size="sm" c="gray.6">강의 + FlowSpot + 크레딧 — 한 번에 전부</Text>
                   </Box>
                 </Group>
 
@@ -238,7 +238,7 @@ export default function PricingPage() {
                     </Group>
                     <Divider my={4} />
                     <Group justify="space-between">
-                      <Text size="sm" fw={600} style={{ color: '#8b5cf6' }}>번들 가격</Text>
+                      <Text size="sm" fw={600} style={{ color: '#8b5cf6' }}>패스 가격</Text>
                       <Text size="sm" fw={700} style={{ color: '#8b5cf6' }}>₩500,000</Text>
                     </Group>
                   </Stack>
@@ -250,7 +250,7 @@ export default function PricingPage() {
                   size="xl" radius="lg" fullWidth
                   style={{ background: '#8b5cf6', border: 'none', fontSize: '18px', height: 56 }}
                 >
-                  번들 시작하기
+                  올인원 패스 시작하기
                 </Button>
               </Stack>
             </SimpleGrid>
