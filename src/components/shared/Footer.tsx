@@ -5,60 +5,35 @@ export function Footer() {
   const t = useTranslations("Footer");
 
   return (
-    <footer className="footer footer-center p-10 bg-base-200 text-base-content rounded">
-      <nav className="grid grid-flow-col gap-4">
-        <Link href="/privacy" className="link link-hover">
-          개인정보처리방침
-        </Link>
-        <Link href="/terms" className="link link-hover">
-          이용약관
-        </Link>
-        <Link href="/support" className="link link-hover">
-          고객지원
-        </Link>
-      </nav>
-      <nav>
-        <div className="grid grid-flow-col gap-4">
-          <a href="https://twitter.com" target="_blank" rel="noreferrer">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="fill-current"
-            >
-              <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
-            </svg>
-          </a>
-          <a href="https://youtube.com" target="_blank" rel="noreferrer">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="fill-current"
-            >
-              <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path>
-            </svg>
-          </a>
-          <a href="https://facebook.com" target="_blank" rel="noreferrer">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="fill-current"
-            >
-              <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
-            </svg>
-          </a>
+    <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+      <div className="container mx-auto px-4 py-10 max-w-5xl">
+        {/* 링크 */}
+        <nav className="flex flex-wrap justify-center gap-6 mb-6 text-sm">
+          <Link href="/terms" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+            이용약관
+          </Link>
+          <Link href="/privacy" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+            개인정보처리방침
+          </Link>
+          <Link href="/refund" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+            환불 규정
+          </Link>
+          <Link href="/support" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+            고객지원
+          </Link>
+        </nav>
+
+        {/* 사업자 정보 */}
+        <div className="text-center text-xs text-gray-400 dark:text-gray-500 space-y-1 mb-4">
+          <p>플로우스팟 | 대표: 이하민, 김예성 | 사업자등록번호: 693-07-02115</p>
+          <p>주소: 충남 천안시 서북구 두정동 1225, 401호 | 이메일: hmys0205hmys@gmail.com</p>
         </div>
-      </nav>
-      <aside>
-        <p>
-          Copyright © {new Date().getFullYear()} FlowSpot. All rights reserved.
+
+        {/* 저작권 */}
+        <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+          Copyright &copy; {new Date().getFullYear()} FlowSpot. All rights reserved.
         </p>
-      </aside>
+      </div>
     </footer>
   );
 }

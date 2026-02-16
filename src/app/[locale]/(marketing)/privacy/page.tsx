@@ -69,7 +69,7 @@ export default async function PrivacyPage() {
           </p>
           <ul>
             <li><strong>Google</strong>: OAuth 로그인 인증, YouTube API 연동</li>
-            <li><strong>LemonSqueezy</strong>: 결제 처리 (결제 정보는 LemonSqueezy에서 직접 관리)</li>
+            <li><strong>포트원(PortOne)</strong>: 결제 처리 (결제 정보는 결제대행사에서 직접 관리)</li>
             <li><strong>Supabase</strong>: 데이터베이스 호스팅</li>
             <li><strong>Vercel</strong>: 웹사이트 호스팅</li>
           </ul>
