@@ -32,6 +32,7 @@ import {
     TestTube,
     Flame,
     Zap,
+    BookOpen,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 
@@ -46,6 +47,12 @@ const navItems = [
         href: '/dashboard',
         icon: LayoutDashboard,
         description: '홈, 통계, 빠른 액션',
+    },
+    {
+        label: '강의실',
+        href: '/dashboard/lectures',
+        icon: BookOpen,
+        description: '단계별 학습 + 실습',
     },
     {
         label: '스크립트 제작',

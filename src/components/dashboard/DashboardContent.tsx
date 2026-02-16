@@ -22,6 +22,7 @@ import {
     ActionIcon,
     Tooltip,
     Loader,
+    Progress,
 } from '@mantine/core';
 import {
     Sparkles,
@@ -34,6 +35,7 @@ import {
     Pencil,
     Trash2,
     Loader2,
+    BookOpen,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -65,12 +67,17 @@ const ARCHETYPE_NAMES: Record<string, string> = {
     'UNKNOWN': '기타',
 };
 
+// 전체 VOD 수 (강의실 데이터와 동기화)
+const TOTAL_LECTURE_VODS = 32;
+
 export function DashboardContent({ user, subscription }: DashboardContentProps) {
     // 프로젝트 데이터 상태
     const [projects, setProjects] = useState<ProjectItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    // 수강 진도 상태
+    const [completedVodCount, setCompletedVodCount] = useState(0);
 
-    // DB에서 최근 프로젝트 불러오기
+    // DB에서 최근 프로젝트 + 수강 진도 불러오기
     useEffect(() => {
         async function fetchProjects() {
             try {
@@ -88,7 +95,21 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                 setIsLoading(false);
             }
         }
+
+        async function fetchLectureProgress() {
+            try {
+                const res = await fetch('/api/lectures/progress');
+                const data = await res.json();
+                if (data.success) {
+                    setCompletedVodCount((data.completedVods || []).length);
+                }
+            } catch {
+                // 에러 시 0 유지
+            }
+        }
+
         fetchProjects();
+        fetchLectureProgress();
     }, []);
 
     const usedCredits = projects.length;
@@ -196,6 +217,43 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         </Stack>
                     </Card>
                 </SimpleGrid>
+
+                {/* 수강 진도 카드 */}
+                <Card padding="lg" radius="xl" withBorder>
+                    <Group justify="space-between" align="center">
+                        <Group gap="md">
+                            <ThemeIcon size="lg" radius="lg" color="violet" variant="light">
+                                <BookOpen size={20} />
+                            </ThemeIcon>
+                            <Box>
+                                <Text fw={600} style={{ color: '#111827' }}>
+                                    수강 진도
+                                </Text>
+                                <Text size="sm" c="gray.5">
+                                    {completedVodCount}/{TOTAL_LECTURE_VODS}강 완료
+                                </Text>
+                            </Box>
+                        </Group>
+                        <Button
+                            component={Link}
+                            href="/dashboard/lectures"
+                            variant="light"
+                            color="violet"
+                            radius="lg"
+                            size="sm"
+                            rightSection={<ArrowRight size={16} />}
+                        >
+                            강의실로 이동
+                        </Button>
+                    </Group>
+                    <Progress
+                        value={TOTAL_LECTURE_VODS > 0 ? Math.round((completedVodCount / TOTAL_LECTURE_VODS) * 100) : 0}
+                        color="violet"
+                        size="md"
+                        radius="xl"
+                        mt="md"
+                    />
+                </Card>
 
                 {/* 사용량 통계 */}
                 <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
