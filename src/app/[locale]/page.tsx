@@ -1844,7 +1844,7 @@ function CTASection() {
       <Container size="md">
         <Stack align="center" gap="xl">
           <Title order={2} c="white" ta="center">3분이면 충분합니다.<br />직접 경험해보세요.</Title>
-          <Button component={Link} href="/dashboard" size="xl" radius="xl" color="violet" h={60} fz={20}>
+          <Button component={Link} href="/pricing" size="xl" radius="xl" color="violet" h={60} fz={20}>
             🔥 1기 30명 한정 시작하기
           </Button>
           <Text c="dimmed" size="sm">✅ 7일 100% 환불 보장 | ✅ 카드 등록 없음</Text>
