@@ -25,8 +25,6 @@ import {
     FolderOpen,
     Settings,
     LogOut,
-    CreditCard,
-    User,
     ChevronDown,
     LayoutDashboard,
     TestTube,
@@ -83,12 +81,6 @@ const navItems = [
         href: '/dashboard/hot-list',
         icon: Flame,
         description: '터지는 영상 발굴',
-    },
-    {
-        label: '구독 관리',
-        href: '/subscription',
-        icon: CreditCard,
-        description: '플랜 및 결제',
     },
     {
         label: '설정',
@@ -160,11 +152,8 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                             </Group>
                         </Menu.Target>
                         <Menu.Dropdown>
-                            <Menu.Item leftSection={<User size={16} />} component={Link} href="/settings">
-                                프로필
-                            </Menu.Item>
-                            <Menu.Item leftSection={<CreditCard size={16} />} component={Link} href="/subscription">
-                                구독 관리
+                            <Menu.Item leftSection={<Settings size={16} />} component={Link} href="/settings">
+                                설정
                             </Menu.Item>
                             <Menu.Divider />
                             <Menu.Item
