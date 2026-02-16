@@ -1,10 +1,11 @@
 'use client';
 
 /**
- * 구독 관리 페이지 콘텐츠
- * 현재 플랜 + 업그레이드 옵션
+ * 구독 관리 페이지
+ * 현재 플랜 + 크레딧 잔액 + 토큰 팩 구매
  */
 
+import { useState, useEffect } from 'react';
 import {
     Container,
     Title,
@@ -16,17 +17,15 @@ import {
     Button,
     Box,
     SimpleGrid,
-    List,
-    ThemeIcon,
     Alert,
+    Progress,
 } from '@mantine/core';
 import {
     Crown,
-    CreditCard,
-    Check,
-    Sparkles,
     Zap,
     AlertCircle,
+    Coins,
+    Package,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -35,35 +34,37 @@ interface SubscriptionContentProps {
         plan_name?: string;
         status?: string;
         current_period_end?: string;
-        lemon_squeezy_subscription_id?: string;
     } | null;
 }
 
-const plans = [
-    {
-        name: 'Free',
-        price: 0,
-        features: ['월 3회 생성', '기본 템플릿', '이메일 지원'],
-        current: true,
-    },
-    {
-        name: 'Pro',
-        price: 19000,
-        features: ['무제한 생성', '모든 템플릿', '우선 처리', '히스토리 저장'],
-        popular: true,
-    },
-    {
-        name: 'Team',
-        price: 49000,
-        features: ['무제한 생성', '커스텀 템플릿', '최우선 처리', '전용 지원'],
-    },
-];
+interface CreditInfo {
+    credits: number;
+    plan_type: string;
+    expires_at: string | null;
+}
 
 export function SubscriptionContent({ subscription }: SubscriptionContentProps) {
-    const currentPlan = subscription?.plan_name || 'Free Plan';
-    const isActive = subscription?.status === 'active';
+    const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
 
-    const formatDate = (dateString?: string) => {
+    useEffect(() => {
+        async function fetchCredits() {
+            try {
+                const res = await fetch('/api/credits');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCreditInfo(data);
+                }
+            } catch {
+                // 에러 시 무시
+            }
+        }
+        fetchCredits();
+    }, []);
+
+    const isPaid = creditInfo && creditInfo.plan_type !== 'free';
+    const planLabel = isPaid ? '마스터 번들' : 'Beta 무료';
+
+    const formatDate = (dateString?: string | null) => {
         if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('ko-KR', {
             year: 'numeric',
@@ -78,153 +79,149 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                 {/* 헤더 */}
                 <Box>
                     <Group gap="sm" mb="xs">
-                        <Crown size={28} color="#f59e0b" />
+                        <Crown size={28} color="#8b5cf6" />
                         <Title order={2} style={{ color: '#111827' }}>
-                            구독 관리
+                            플랜 관리
                         </Title>
                     </Group>
                     <Text c="gray.6">
-                        현재 플랜을 확인하고 업그레이드하세요
+                        현재 플랜과 크레딧을 확인하세요
                     </Text>
                 </Box>
 
-                {/* 현재 플랜 카드 */}
-                <Card
-                    padding="xl"
-                    radius="xl"
-                    style={{
-                        background: '#8b5cf6',
-                        border: 'none',
-                    }}
-                >
-                    <Group justify="space-between" align="center">
+                {/* 현재 플랜 + 크레딧 */}
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                    {/* 플랜 카드 */}
+                    <Card padding="xl" radius="xl" style={{ background: '#8b5cf6', border: 'none' }}>
                         <Stack gap="xs">
                             <Text size="sm" c="white" opacity={0.8}>현재 플랜</Text>
-                            <Title order={2} c="white">
-                                {currentPlan}
-                            </Title>
+                            <Title order={2} c="white">{planLabel}</Title>
                             <Group gap="sm">
-                                <Badge
-                                    variant="white"
-                                    color={isActive ? 'white' : 'red'}
-                                    style={{ color: isActive ? '#8b5cf6' : undefined }}
-                                >
-                                    {isActive ? '활성' : '만료됨'}
+                                <Badge variant="white" style={{ color: '#8b5cf6' }}>
+                                    {isPaid ? '활성' : '무료'}
                                 </Badge>
-                                {subscription?.current_period_end && (
+                                {creditInfo?.expires_at && (
                                     <Text size="sm" c="white" opacity={0.8}>
-                                        다음 갱신: {formatDate(subscription.current_period_end)}
+                                        만료: {formatDate(creditInfo.expires_at)}
                                     </Text>
                                 )}
                             </Group>
                         </Stack>
-                        {subscription?.lemon_squeezy_subscription_id && (
-                            <Button
-                                variant="white"
-                                radius="lg"
-                                leftSection={<CreditCard size={18} />}
-                                style={{ color: '#8b5cf6' }}
-                            >
-                                결제 수단 관리
-                            </Button>
-                        )}
-                    </Group>
-                </Card>
+                    </Card>
 
-                {/* 플랜 비교 */}
-                <Box>
-                    <Title order={4} mb="lg" style={{ color: '#111827' }}>
-                        플랜 업그레이드
-                    </Title>
+                    {/* 크레딧 카드 */}
+                    <Card padding="xl" radius="xl" withBorder>
+                        <Stack gap="md">
+                            <Group justify="space-between">
+                                <Text size="sm" c="gray.6">잔여 크레딧</Text>
+                                <Zap size={20} color="#8b5cf6" />
+                            </Group>
+                            <Group gap="xs" align="baseline">
+                                <Title order={2} style={{ color: '#111827' }}>
+                                    {creditInfo ? creditInfo.credits : 0}
+                                </Title>
+                                <Text size="sm" c="gray.5">크레딧</Text>
+                            </Group>
+                            {isPaid && (
+                                <Progress
+                                    value={Math.min(((creditInfo?.credits || 0) / 300) * 100, 100)}
+                                    color={
+                                        (creditInfo?.credits || 0) > 50 ? 'violet' :
+                                        (creditInfo?.credits || 0) > 10 ? 'orange' : 'red'
+                                    }
+                                    size="md" radius="xl"
+                                />
+                            )}
+                        </Stack>
+                    </Card>
+                </SimpleGrid>
 
-                    <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
-                        {plans.map((plan) => {
-                            const isCurrent = currentPlan.toLowerCase().includes(plan.name.toLowerCase());
-                            return (
-                                <Card
-                                    key={plan.name}
-                                    padding="lg"
-                                    radius="xl"
-                                    withBorder
-                                    style={{
-                                        border: plan.popular ? '2px solid #8b5cf6' : undefined,
-                                        position: 'relative',
-                                    }}
+                {/* 번들 미구매자 → 업그레이드 CTA */}
+                {!isPaid && (
+                    <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
+                        <Group justify="space-between" align="center" wrap="wrap" gap="lg">
+                            <Group gap="md">
+                                <Package size={32} color="#8b5cf6" />
+                                <Box>
+                                    <Title order={4} style={{ color: '#111827' }}>마스터 번들로 업그레이드</Title>
+                                    <Text size="sm" c="gray.6">
+                                        강의 59강 + AI 스크립트 1년 + 크레딧 300개
+                                    </Text>
+                                </Box>
+                            </Group>
+                            <Box>
+                                <Group gap="sm" align="baseline">
+                                    <Text style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>
+                                        ₩700,000
+                                    </Text>
+                                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩500,000</Text>
+                                </Group>
+                                <Button
+                                    component={Link}
+                                    href="/pricing"
+                                    color="violet" radius="lg" mt="xs" fullWidth
+                                    style={{ background: '#8b5cf6' }}
                                 >
-                                    {plan.popular && (
-                                        <Badge
-                                            style={{
-                                                position: 'absolute',
-                                                top: -10,
-                                                right: 20,
-                                            }}
-                                            color="violet"
-                                        >
-                                            인기
-                                        </Badge>
-                                    )}
+                                    자세히 보기
+                                </Button>
+                            </Box>
+                        </Group>
+                    </Card>
+                )}
 
-                                    <Stack gap="md">
-                                        <Box>
-                                            <Text fw={600} size="lg">{plan.name}</Text>
-                                            <Group gap="xs" align="baseline" mt="xs">
-                                                <Text style={{ fontSize: 28, fontWeight: 700 }}>
-                                                    ₩{plan.price.toLocaleString()}
-                                                </Text>
-                                                {plan.price > 0 && <Text size="sm" c="gray.5">/월</Text>}
-                                            </Group>
-                                        </Box>
-
-                                        <List
-                                            spacing="xs"
-                                            size="sm"
-                                            center
-                                            icon={
-                                                <ThemeIcon size={18} radius="xl" color="green" variant="light">
-                                                    <Check size={12} />
-                                                </ThemeIcon>
-                                            }
-                                        >
-                                            {plan.features.map((feature, i) => (
-                                                <List.Item key={i}>{feature}</List.Item>
-                                            ))}
-                                        </List>
-
-                                        <Button
-                                            component={Link}
-                                            href="/pricing"
-                                            variant={isCurrent ? 'light' : plan.popular ? 'filled' : 'outline'}
-                                            color="violet"
-                                            fullWidth
-                                            radius="lg"
-                                            disabled={isCurrent}
-                                            style={
-                                                plan.popular && !isCurrent
-                                                    ? {
-                                                        background: '#8b5cf6',
-                                                        border: 'none',
-                                                    }
-                                                    : undefined
-                                            }
-                                        >
-                                            {isCurrent ? '현재 플랜' : '선택하기'}
+                {/* 토큰 팩 — 유료 사용자용 */}
+                {isPaid && (
+                    <Box>
+                        <Group gap="sm" mb="lg">
+                            <Coins size={24} color="#8b5cf6" />
+                            <Title order={4} style={{ color: '#111827' }}>크레딧 추가 구매</Title>
+                        </Group>
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                            <Card padding="lg" radius="xl" withBorder style={{ cursor: 'pointer' }}>
+                                <Group justify="space-between">
+                                    <Box>
+                                        <Text fw={600} size="lg" style={{ color: '#111827' }}>30 크레딧</Text>
+                                        <Text size="sm" c="gray.5">스크립트 약 30회 생성</Text>
+                                    </Box>
+                                    <Box ta="right">
+                                        <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩9,900</Text>
+                                        <Button size="xs" variant="light" color="violet" radius="lg" mt="xs">
+                                            구매하기
                                         </Button>
-                                    </Stack>
-                                </Card>
-                            );
-                        })}
-                    </SimpleGrid>
-                </Box>
+                                    </Box>
+                                </Group>
+                            </Card>
+                            <Card padding="lg" radius="xl" style={{ border: '2px solid #8b5cf6', cursor: 'pointer' }}>
+                                <Group justify="space-between">
+                                    <Box>
+                                        <Group gap="xs">
+                                            <Text fw={600} size="lg" style={{ color: '#111827' }}>100 크레딧</Text>
+                                            <Badge size="xs" color="green" variant="light">인기</Badge>
+                                        </Group>
+                                        <Text size="sm" c="gray.5">스크립트 약 100회 생성</Text>
+                                    </Box>
+                                    <Box ta="right">
+                                        <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩29,900</Text>
+                                        <Text size="xs" c="green">개당 ₩299</Text>
+                                        <Button size="xs" color="violet" radius="lg" mt="xs"
+                                            style={{ background: '#8b5cf6' }}
+                                        >
+                                            구매하기
+                                        </Button>
+                                    </Box>
+                                </Group>
+                            </Card>
+                        </SimpleGrid>
+                    </Box>
+                )}
 
                 {/* 도움말 */}
                 <Alert
                     icon={<AlertCircle size={18} />}
                     title="도움이 필요하세요?"
-                    color="blue"
-                    radius="lg"
-                    variant="light"
+                    color="blue" radius="lg" variant="light"
                 >
-                    구독 관련 문의는 support@flowspot.app으로 이메일을 보내주세요.
+                    플랜 및 결제 관련 문의는 hmys0205hmys@gmail.com으로 이메일을 보내주세요.
                 </Alert>
             </Stack>
         </Container>

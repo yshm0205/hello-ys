@@ -1415,7 +1415,7 @@ function FloatingCTA() {
 
   // 카운트다운 타이머
   useEffect(() => {
-    const targetDate = new Date('2026-02-01T00:00:00');
+    const targetDate = new Date('2026-03-01T00:00:00');
     const updateTimer = () => {
       const now = new Date();
       const diff = targetDate.getTime() - now.getTime();
@@ -1485,7 +1485,7 @@ function FloatingCTA() {
                 유튜브 수익화 마스터플랜
               </Text>
               <Text ta="center" style={{ fontSize: '12px', color: '#f59e0b' }}>
-                ⚠️ 2/1 이후 ₩600,000으로 인상 예정
+                ⚠️ 3/1 이후 ₩600,000으로 인상 예정
               </Text>
               {/* 카운트다운 */}
               <Group gap="sm" justify="center">
@@ -1577,7 +1577,7 @@ function FloatingCTA() {
               <Text style={{ fontSize: '32px', fontWeight: 800, color: '#a78bfa' }}>₩500,000</Text>
             </Stack>
             <Text style={{ fontSize: '12px', color: '#f59e0b' }}>
-              ⚠️ 2/1 이후 ₩600,000으로 인상 예정
+              ⚠️ 3/1 이후 ₩600,000으로 인상 예정
             </Text>
             <Box
               p="sm"

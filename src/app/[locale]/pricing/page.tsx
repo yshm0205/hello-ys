@@ -2,10 +2,9 @@
 
 /**
  * 가격 페이지
- * 3개 플랜 비교, Mantine UI
+ * 월 구독(취소선) vs 번들(추천) vs 토큰 팩
  */
 
-import { useState } from 'react';
 import {
   Container,
   Title,
@@ -17,294 +16,274 @@ import {
   Group,
   Badge,
   Box,
-  Switch,
   List,
   ThemeIcon,
   Divider,
 } from '@mantine/core';
-import { Check, X, Sparkles, Zap, Crown } from 'lucide-react';
+import { Check, X, Zap, Package, Coins } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
-interface Plan {
-  name: string;
-  description: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  features: { text: string; included: boolean }[];
-  popular?: boolean;
-  icon: React.ReactNode;
-  color: string;
-  buttonText: string;
-  buttonVariant: 'filled' | 'outline' | 'light';
-}
-
-const plans: Plan[] = [
-  {
-    name: 'Free',
-    description: '가볍게 시작하기',
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    icon: <Sparkles size={24} />,
-    color: '#6b7280',
-    buttonText: '무료로 시작',
-    buttonVariant: 'outline',
-    features: [
-      { text: '월 3회 스크립트 생성', included: true },
-      { text: '기본 훅 템플릿', included: true },
-      { text: '3개 옵션 제공', included: true },
-      { text: '우선 처리', included: false },
-      { text: '히스토리 저장', included: false },
-      { text: '이메일 지원', included: false },
-    ],
-  },
-  {
-    name: 'Pro',
-    description: '콘텐츠 크리에이터를 위한',
-    monthlyPrice: 19000,
-    yearlyPrice: 15000,
-    icon: <Zap size={24} />,
-    color: '#8b5cf6',
-    buttonText: 'Pro 시작하기',
-    buttonVariant: 'filled',
-    popular: true,
-    features: [
-      { text: '무제한 스크립트 생성', included: true },
-      { text: '모든 훅 템플릿 (200개)', included: true },
-      { text: '3개 옵션 제공', included: true },
-      { text: '우선 처리 (빠른 생성)', included: true },
-      { text: '히스토리 저장 (3개월)', included: true },
-      { text: '이메일 지원', included: true },
-    ],
-  },
-  {
-    name: 'Team',
-    description: '팀/에이전시용',
-    monthlyPrice: 49000,
-    yearlyPrice: 39000,
-    icon: <Crown size={24} />,
-    color: '#f59e0b',
-    buttonText: '문의하기',
-    buttonVariant: 'light',
-    features: [
-      { text: '무제한 스크립트 생성', included: true },
-      { text: '모든 훅 템플릿 + 커스텀', included: true },
-      { text: '5개 옵션 제공', included: true },
-      { text: '우선 처리 (최우선)', included: true },
-      { text: '히스토리 저장 (무제한)', included: true },
-      { text: '전용 슬랙 채널 지원', included: true },
-    ],
-  },
-];
-
-function formatPrice(price: number): string {
-  if (price === 0) return '무료';
-  return new Intl.NumberFormat('ko-KR').format(price);
-}
-
 export default function PricingPage() {
-  const [isYearly, setIsYearly] = useState(false);
-
   return (
-    <Box
-      style={{
-        background: 'linear-gradient(180deg, #F9FAFB 0%, #FFFFFF 100%)',
-        minHeight: '100vh',
-      }}
-    >
+    <Box style={{ background: '#fff', minHeight: '100vh' }}>
       <Container size="lg" py={80}>
         <Stack gap={60}>
           {/* 헤더 */}
           <Stack align="center" gap="lg">
-            <Badge
-              size="lg"
-              variant="light"
-              color="violet"
-              style={{ padding: '10px 20px' }}
-            >
+            <Badge size="lg" variant="light" color="violet" style={{ padding: '10px 20px' }}>
               Pricing
             </Badge>
-            <Title
-              order={1}
-              ta="center"
-              style={{ fontSize: '44px', color: '#111827' }}
-            >
-              심플한 가격 정책
+            <Title order={1} ta="center" style={{ fontSize: '44px', color: '#111827' }}>
+              SaaS만? 번들로 전부 가져가세요
             </Title>
-            <Text size="lg" c="gray.6" ta="center" maw={500}>
-              숨겨진 비용 없이, 필요한 만큼만 사용하세요
+            <Text size="lg" c="gray.6" ta="center" maw={600}>
+              월 구독보다 번들이 압도적으로 이득입니다
             </Text>
-
-            {/* 월/연 토글 */}
-            <Group gap="md" mt="md">
-              <Text size="sm" c={!isYearly ? 'violet' : 'gray.6'} fw={500}>
-                월간
-              </Text>
-              <Switch
-                checked={isYearly}
-                onChange={(e) => setIsYearly(e.currentTarget.checked)}
-                size="lg"
-                color="violet"
-              />
-              <Group gap="xs">
-                <Text size="sm" c={isYearly ? 'violet' : 'gray.6'} fw={500}>
-                  연간
-                </Text>
-                <Badge size="sm" variant="light" color="green">
-                  20% 할인
-                </Badge>
-              </Group>
-            </Group>
           </Stack>
 
-          {/* 플랜 카드 */}
+          {/* 3 카드 */}
           <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl">
-            {plans.map((plan) => (
-              <Card
-                key={plan.name}
-                padding="xl"
-                radius="xl"
-                style={{
-                  border: plan.popular
-                    ? '2px solid #8b5cf6'
-                    : '1px solid #E5E7EB',
-                  position: 'relative',
-                  background: '#FFFFFF',
-                  transform: plan.popular ? 'scale(1.02)' : undefined,
-                }}
+
+            {/* ── 1. 월 구독 (취소선) ── */}
+            <Card padding="xl" radius="xl" style={{ border: '1px solid #E5E7EB', background: '#FAFAFA', position: 'relative' }}>
+              <Badge
+                style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)' }}
+                size="md" color="gray" variant="light"
               >
-                {plan.popular && (
-                  <Badge
-                    style={{
-                      position: 'absolute',
-                      top: -12,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                    }}
-                    size="lg"
-                    color="violet"
-                  >
-                    가장 인기
-                  </Badge>
-                )}
-
-                <Stack gap="lg">
-                  {/* 아이콘 + 이름 */}
-                  <Group gap="md">
-                    <Box
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 12,
-                        background: `${plan.color}15`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: plan.color,
-                      }}
-                    >
-                      {plan.icon}
-                    </Box>
-                    <Box>
-                      <Title order={4} style={{ color: '#111827' }}>
-                        {plan.name}
-                      </Title>
-                      <Text size="sm" c="gray.6">
-                        {plan.description}
-                      </Text>
-                    </Box>
-                  </Group>
-
-                  {/* 가격 */}
-                  <Box>
-                    <Group gap="xs" align="baseline">
-                      <Text
-                        style={{
-                          fontSize: '36px',
-                          fontWeight: 700,
-                          color: '#111827',
-                        }}
-                      >
-                        ₩{formatPrice(isYearly ? plan.yearlyPrice : plan.monthlyPrice)}
-                      </Text>
-                      {plan.monthlyPrice > 0 && (
-                        <Text size="sm" c="gray.5">
-                          / 월
-                        </Text>
-                      )}
-                    </Group>
-                    {isYearly && plan.monthlyPrice > 0 && (
-                      <Text size="xs" c="green" mt={4}>
-                        연간 ₩{formatPrice(plan.yearlyPrice * 12)} (20% 절약)
-                      </Text>
-                    )}
+                SaaS만
+              </Badge>
+              <Stack gap="lg">
+                <Group gap="md">
+                  <Box style={{
+                    width: 48, height: 48, borderRadius: 12,
+                    background: '#f3f4f6', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color: '#9ca3af',
+                  }}>
+                    <Zap size={24} />
                   </Box>
+                  <Box>
+                    <Title order={4} style={{ color: '#9ca3af' }}>월 구독</Title>
+                    <Text size="sm" c="gray.5">AI 스크립트 도구만</Text>
+                  </Box>
+                </Group>
 
-                  <Divider />
+                {/* 가격 — 취소선 */}
+                <Box>
+                  <Text style={{ fontSize: '36px', fontWeight: 700, color: '#d1d5db', textDecoration: 'line-through' }}>
+                    ₩19,000
+                  </Text>
+                  <Text size="sm" c="gray.5">/ 월</Text>
+                  <Text size="xs" c="gray.4" mt={4}>
+                    1년이면 ₩228,000 — 강의 미포함
+                  </Text>
+                </Box>
 
-                  {/* 기능 목록 */}
-                  <List spacing="sm" size="sm" center>
-                    {plan.features.map((feature, i) => (
-                      <List.Item
-                        key={i}
-                        icon={
-                          <ThemeIcon
-                            size={20}
-                            radius="xl"
-                            color={feature.included ? 'green' : 'gray'}
-                            variant="light"
-                          >
-                            {feature.included ? (
-                              <Check size={12} />
-                            ) : (
-                              <X size={12} />
-                            )}
-                          </ThemeIcon>
-                        }
-                        style={{
-                          color: feature.included ? '#374151' : '#9CA3AF',
-                        }}
-                      >
-                        {feature.text}
-                      </List.Item>
-                    ))}
-                  </List>
+                <Divider />
 
-                  {/* CTA 버튼 */}
-                  <Button
-                    component={Link}
-                    href={plan.name === 'Team' ? '/support' : '/dashboard'}
-                    size="lg"
-                    radius="lg"
-                    variant={plan.buttonVariant}
-                    color={plan.popular ? 'violet' : 'gray'}
-                    fullWidth
-                    style={
-                      plan.popular
-                        ? {
-                          background: '#8b5cf6',
-                          border: 'none',
-                        }
-                        : undefined
-                    }
-                  >
-                    {plan.buttonText}
-                  </Button>
+                <List spacing="sm" size="sm" center>
+                  {[
+                    { text: '스크립트 생성 (월 30회)', included: true },
+                    { text: '훅 템플릿 79개', included: true },
+                    { text: '스크립트 보관함', included: true },
+                    { text: '강의 59강', included: false },
+                    { text: '채널 분석 피드백', included: false },
+                    { text: '터진 영상 템플릿', included: false },
+                  ].map((f, i) => (
+                    <List.Item key={i} icon={
+                      <ThemeIcon size={20} radius="xl" color={f.included ? 'gray' : 'gray'} variant="light">
+                        {f.included ? <Check size={12} /> : <X size={12} />}
+                      </ThemeIcon>
+                    } style={{ color: f.included ? '#9ca3af' : '#d1d5db' }}>
+                      {f.text}
+                    </List.Item>
+                  ))}
+                </List>
+
+                <Button size="lg" radius="lg" variant="outline" color="gray" fullWidth disabled>
+                  준비 중
+                </Button>
+              </Stack>
+            </Card>
+
+            {/* ── 2. 마스터 번들 (추천) ── */}
+            <Card padding="xl" radius="xl" style={{
+              border: '2px solid #8b5cf6', position: 'relative',
+              background: '#fff', transform: 'scale(1.03)',
+            }}>
+              <Badge
+                style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)' }}
+                size="lg" color="violet"
+              >
+                BEST
+              </Badge>
+              <Stack gap="lg">
+                <Group gap="md">
+                  <Box style={{
+                    width: 48, height: 48, borderRadius: 12,
+                    background: 'rgba(139,92,246,0.1)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color: '#8b5cf6',
+                  }}>
+                    <Package size={24} />
+                  </Box>
+                  <Box>
+                    <Title order={4} style={{ color: '#111827' }}>마스터 번들</Title>
+                    <Text size="sm" c="gray.6">강의 + SaaS + 크레딧</Text>
+                  </Box>
+                </Group>
+
+                {/* 가격 */}
+                <Box>
+                  <Group gap="sm" align="baseline">
+                    <Text style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>
+                      ₩700,000
+                    </Text>
+                  </Group>
+                  <Text style={{ fontSize: '36px', fontWeight: 700, color: '#8b5cf6' }}>
+                    ₩500,000
+                  </Text>
+                  <Text size="sm" c="gray.5">일시불 (얼리버드 특가)</Text>
+                  <Badge variant="light" color="green" size="sm" mt={4}>
+                    총 가치 ₩1,390,000 — 64% 할인
+                  </Badge>
+                </Box>
+
+                <Divider />
+
+                <List spacing="sm" size="sm" center>
+                  {[
+                    { text: '강의 59강 (기획→촬영→수익화)', included: true },
+                    { text: 'AI 스크립트 도구 1년 무제한', included: true },
+                    { text: '크레딧 300개 포함', included: true },
+                    { text: '훅 템플릿 79개 + 업데이트', included: true },
+                    { text: '채널 분석 피드백', included: true },
+                    { text: '터진 영상 템플릿 보너스', included: true },
+                  ].map((f, i) => (
+                    <List.Item key={i} icon={
+                      <ThemeIcon size={20} radius="xl" color="green" variant="light">
+                        <Check size={12} />
+                      </ThemeIcon>
+                    } style={{ color: '#374151' }}>
+                      {f.text}
+                    </List.Item>
+                  ))}
+                </List>
+
+                <Button
+                  component={Link}
+                  href="/login"
+                  size="lg" radius="lg" fullWidth
+                  style={{ background: '#8b5cf6', border: 'none' }}
+                >
+                  번들 시작하기
+                </Button>
+              </Stack>
+            </Card>
+
+            {/* ── 3. 토큰 팩 ── */}
+            <Card padding="xl" radius="xl" style={{ border: '1px solid #E5E7EB', background: '#fff', position: 'relative' }}>
+              <Badge
+                style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)' }}
+                size="md" color="violet" variant="light"
+              >
+                추가 구매
+              </Badge>
+              <Stack gap="lg">
+                <Group gap="md">
+                  <Box style={{
+                    width: 48, height: 48, borderRadius: 12,
+                    background: 'rgba(139,92,246,0.1)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color: '#8b5cf6',
+                  }}>
+                    <Coins size={24} />
+                  </Box>
+                  <Box>
+                    <Title order={4} style={{ color: '#111827' }}>토큰 팩</Title>
+                    <Text size="sm" c="gray.6">크레딧 소진 시 추가 구매</Text>
+                  </Box>
+                </Group>
+
+                {/* 토큰 팩 2가지 */}
+                <Stack gap="md">
+                  <Card padding="md" radius="md" withBorder>
+                    <Group justify="space-between">
+                      <Box>
+                        <Text fw={600} style={{ color: '#111827' }}>30 크레딧</Text>
+                        <Text size="xs" c="gray.5">스크립트 약 30회</Text>
+                      </Box>
+                      <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩9,900</Text>
+                    </Group>
+                  </Card>
+                  <Card padding="md" radius="md" style={{ border: '2px solid #8b5cf6' }}>
+                    <Group justify="space-between">
+                      <Box>
+                        <Group gap="xs">
+                          <Text fw={600} style={{ color: '#111827' }}>100 크레딧</Text>
+                          <Badge size="xs" color="green" variant="light">인기</Badge>
+                        </Group>
+                        <Text size="xs" c="gray.5">스크립트 약 100회</Text>
+                      </Box>
+                      <Box ta="right">
+                        <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩29,900</Text>
+                        <Text size="xs" c="green">개당 ₩299</Text>
+                      </Box>
+                    </Group>
+                  </Card>
                 </Stack>
-              </Card>
-            ))}
+
+                <Divider />
+
+                <List spacing="sm" size="sm" center>
+                  {[
+                    { text: '구매 즉시 충전', included: true },
+                    { text: '유효기간 없음', included: true },
+                    { text: '번들 고객 전용', included: true },
+                  ].map((f, i) => (
+                    <List.Item key={i} icon={
+                      <ThemeIcon size={20} radius="xl" color="green" variant="light">
+                        <Check size={12} />
+                      </ThemeIcon>
+                    } style={{ color: '#374151' }}>
+                      {f.text}
+                    </List.Item>
+                  ))}
+                </List>
+
+                <Button
+                  component={Link}
+                  href="/dashboard"
+                  size="lg" radius="lg" variant="light" color="violet" fullWidth
+                >
+                  대시보드에서 구매
+                </Button>
+              </Stack>
+            </Card>
           </SimpleGrid>
+
+          {/* 비교 요약 */}
+          <Card padding="xl" radius="xl" style={{ border: '1px solid #e5e7eb', background: '#faf5ff' }}>
+            <Stack gap="md" align="center">
+              <Title order={4} style={{ color: '#374151' }}>왜 번들이 압도적으로 이득인가요?</Title>
+              <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg" style={{ width: '100%' }}>
+                <Box ta="center">
+                  <Text size="sm" c="gray.5">강의만 따로</Text>
+                  <Text fw={700} size="xl" style={{ color: '#9ca3af', textDecoration: 'line-through' }}>₩590,000</Text>
+                </Box>
+                <Box ta="center">
+                  <Text size="sm" c="gray.5">SaaS 1년 구독</Text>
+                  <Text fw={700} size="xl" style={{ color: '#9ca3af', textDecoration: 'line-through' }}>₩228,000</Text>
+                </Box>
+                <Box ta="center">
+                  <Text size="sm" c="violet">번들로 전부</Text>
+                  <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩500,000</Text>
+                </Box>
+              </SimpleGrid>
+            </Stack>
+          </Card>
 
           {/* FAQ 링크 */}
           <Stack align="center" gap="md">
-            <Text size="sm" c="gray.6">
-              궁금한 점이 있으신가요?
-            </Text>
-            <Button
-              component={Link}
-              href="/support"
-              variant="subtle"
-              color="violet"
-            >
+            <Text size="sm" c="gray.6">궁금한 점이 있으신가요?</Text>
+            <Button component={Link} href="/support" variant="subtle" color="violet">
               자주 묻는 질문 보기
             </Button>
           </Stack>
