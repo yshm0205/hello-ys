@@ -1863,10 +1863,10 @@ function Footer() {
             <Text size="lg" fw={600} style={{ color: '#FFFFFF' }}>FlowSpot</Text>
           </Group>
           <Group gap="lg" justify="center">
-            <Anchor href="/ko/terms" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>이용약관</Anchor>
-            <Anchor href="/ko/privacy" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>개인정보처리방침</Anchor>
-            <Anchor href="/ko/refund" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>환불 규정</Anchor>
-            <Anchor href="/ko/support" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>고객지원</Anchor>
+            <Anchor component={Link} href="/terms" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>이용약관</Anchor>
+            <Anchor component={Link} href="/privacy" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>개인정보처리방침</Anchor>
+            <Anchor component={Link} href="/refund" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>환불 규정</Anchor>
+            <Anchor href="#faq" size="sm" style={{ color: 'rgba(255,255,255,0.5)' }}>고객지원</Anchor>
           </Group>
           <Stack align="center" gap={4}>
             <Text size="xs" style={{ color: 'rgba(255,255,255,0.3)' }}>

@@ -83,7 +83,7 @@ export default async function TermsPage() {
             <li>유료 서비스의 요금은 서비스 내 요금제 페이지에서 확인할 수 있습니다.</li>
             <li>결제는 포트원(PortOne)을 통해 처리되며, 결제 관련 문의는 회사로 연락 바랍니다.</li>
             <li>구독 취소는 결제 기간 종료 전까지 가능하며, 남은 기간 동안 서비스를 계속 이용할 수 있습니다.</li>
-            <li>환불 정책은 <a href="/ko/refund" className="underline">환불 및 취소 규정</a> 페이지를 참고해 주세요.</li>
+            <li>환불 정책은 <a href="/refund" className="underline">환불 및 취소 규정</a> 페이지를 참고해 주세요.</li>
           </ul>
 
           <h2>7. 계약 해지 및 이용 제한</h2>

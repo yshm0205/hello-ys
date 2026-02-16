@@ -18,9 +18,9 @@ export function Footer() {
           <Link href="/refund" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             환불 규정
           </Link>
-          <Link href="/support" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+          <a href="/#faq" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             고객지원
-          </Link>
+          </a>
         </nav>
 
         {/* 사업자 정보 */}
