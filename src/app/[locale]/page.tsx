@@ -184,7 +184,7 @@ function HeroSection() {
             >
               <img
                 src="/images/hero_banner_300.png"
-                alt="유튜브 쇼츠로 월 300만원 - VOD & AI 스크립트 자동화 & 트렌드 채널 리스트 올인원 패키지"
+                alt="유튜브 쇼츠로 월 300만원 - VOD & AI 스크립트 자동화 & 트렌드 채널 리스트 올인원 패스"
                 style={{
                   width: '100%',
                   height: '100%',
@@ -1482,7 +1482,7 @@ function FloatingCTA() {
                 🔥 1기 30명 중 23명 마감 — 7자리 남음
               </Badge>
               <Text ta="center" style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
-                유튜브 수익화 마스터플랜
+                유튜브 수익화 올인원 패스
               </Text>
               <Text ta="center" style={{ fontSize: '12px', color: '#f59e0b' }}>
                 ⚠️ 3/1 이후 ₩600,000으로 인상 예정
@@ -1567,7 +1567,7 @@ function FloatingCTA() {
               🔥 1기 30명 중 23명 마감 — 7자리 남음
             </Badge>
             <Text style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
-              유튜브 수익화 마스터플랜
+              유튜브 수익화 올인원 패스
             </Text>
             <Stack gap={4}>
               <Group gap="sm" align="center">
@@ -1663,7 +1663,7 @@ function PackageSection() {
             💰 왜 이 가격인가요?
           </Badge>
           <Title order={2} ta="center" style={{ color: '#fff', fontSize: '42px', lineHeight: 1.2 }}>
-            <span style={{ color: '#6b7280' }}>비싼 강의 vs</span> 마스터플랜
+            <span style={{ color: '#6b7280' }}>비싼 강의 vs</span> 올인원 패스
           </Title>
         </Stack>
 
@@ -1699,7 +1699,7 @@ function PackageSection() {
             </Stack>
           </Paper>
 
-          {/* 마스터플랜 */}
+          {/* 올인원 패스 */}
           <Paper
             p={40}
             radius="xl"
@@ -1711,7 +1711,7 @@ function PackageSection() {
           >
             <Group mb={32}>
               <Check size={32} color="#22c55e" />
-              <Text fw={700} style={{ fontSize: '24px', color: '#22c55e' }}>마스터플랜</Text>
+              <Text fw={700} style={{ fontSize: '24px', color: '#22c55e' }}>올인원 패스</Text>
               <Badge color="cyan" size="lg" style={{ fontSize: '14px' }}>추천</Badge>
             </Group>
             <Stack gap="lg">
@@ -1764,7 +1764,7 @@ function PackageSection() {
             <Text fw={700} style={{ fontSize: '24px', color: '#9ca3af', textDecoration: 'line-through' }}>₩1,390,000</Text>
           </Group>
           <Group justify="space-between" mt="md" align="center">
-            <Text fw={800} style={{ fontSize: '28px', color: '#fff' }}>마스터플랜 가격</Text>
+            <Text fw={800} style={{ fontSize: '28px', color: '#fff' }}>올인원 패스 가격</Text>
             <Group gap="md" align="center">
               <Text fw={800} style={{ fontSize: '36px', color: '#22c55e' }}>₩500,000</Text>
               <Badge color="red" size="xl" style={{ fontSize: '16px', padding: '12px' }}>64% 할인</Badge>
@@ -1817,8 +1817,9 @@ function FAQSection() {
   const faqs = [
     { q: "AI 1도 몰라도 되나요?", a: "네. 버튼 3개만 누르면 됩니다. 원리는 강의에서 알려드려요." },
     { q: "진짜 수익이 나나요?", a: "전자책 수강생 중 월 700만원 달성자가 있습니다. 실행만 하시면 됩니다." },
-    { q: "환불 되나요?", a: "7일 이내, 강의 10강 미만, AI 10회 미만 사용 시 100% 환불해드립니다." },
+    { q: "환불 되나요?", a: "결제 후 7일 이내, 강의 1강도 수강하지 않은 경우 전액 환불됩니다. 수강을 시작한 경우에도 이러닝 표준약관에 따라 (1강 단가 × 수강 강의 수 + 위약금 10%)를 공제 후 환불됩니다. 자세한 내용은 환불 규정 페이지를 참고해 주세요." },
     { q: "강의 기간은요?", a: "강의는 평생 소장, AI 도구는 1년 이용권입니다." },
+    { q: "크레딧을 다 쓰면요?", a: "설정 > 플랜 & 결제에서 크레딧 팩(30개 ₩9,900 / 100개 ₩29,900)을 추가 구매할 수 있습니다." },
   ];
   return (
     <Box py={100} bg="#111827" id="faq">
