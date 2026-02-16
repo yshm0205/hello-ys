@@ -110,6 +110,7 @@ export default async function TermsPage() {
           <ul>
             <li><strong>서비스명</strong>: FlowSpot (플로우스팟)</li>
             <li><strong>운영자</strong>: 이하민, 김예성</li>
+            <li><strong>전화</strong>: 070-8027-2849</li>
             <li><strong>이메일</strong>: hmys0205hmys@gmail.com</li>
           </ul>
         </div>

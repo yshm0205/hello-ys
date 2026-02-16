@@ -103,6 +103,7 @@ export default async function PrivacyPage() {
           <h2>8. 개인정보 보호책임자</h2>
           <ul>
             <li><strong>운영자</strong>: 이하민, 김예성</li>
+            <li><strong>전화</strong>: 070-8027-2849</li>
             <li><strong>이메일</strong>: hmys0205hmys@gmail.com</li>
           </ul>
 
