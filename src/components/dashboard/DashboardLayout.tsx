@@ -5,7 +5,7 @@
  * 사이드바 네비게이션 + 헤더
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import {
     AppShell,
     Burger,
@@ -93,6 +93,22 @@ const navItems = [
 export function DashboardLayout({ children, user }: DashboardLayoutProps) {
     const [opened, { toggle }] = useDisclosure();
     const pathname = usePathname();
+    const [credits, setCredits] = useState<number | null>(null);
+
+    useEffect(() => {
+        async function fetchCredits() {
+            try {
+                const res = await fetch('/api/credits');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCredits(data.credits);
+                }
+            } catch {
+                // 무시
+            }
+        }
+        fetchCredits();
+    }, []);
 
     return (
         <AppShell
@@ -208,8 +224,38 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                     })}
                 </Stack>
 
-                {/* 하단 로고 */}
+                {/* 하단: 크레딧 + 로고 */}
                 <Box mt="auto" pt="xl">
+                    {credits !== null && (
+                        <Box
+                            mb="md"
+                            style={{
+                                background: 'rgba(139, 92, 246, 0.06)',
+                                border: '1px solid rgba(139, 92, 246, 0.15)',
+                                borderRadius: 12,
+                                padding: '12px 14px',
+                            }}
+                        >
+                            <Group justify="space-between" align="center">
+                                <Group gap={8}>
+                                    <Zap size={16} color="#8b5cf6" />
+                                    <Text size="sm" fw={600} style={{ color: '#111827' }}>
+                                        {credits} 크레딧
+                                    </Text>
+                                </Group>
+                                <Text
+                                    size="xs"
+                                    c="violet"
+                                    fw={500}
+                                    component={Link}
+                                    href="/settings"
+                                    style={{ textDecoration: 'none' }}
+                                >
+                                    충전
+                                </Text>
+                            </Group>
+                        </Box>
+                    )}
                     <Divider mb="md" color="gray.2" />
                     <Group gap="xs">
                         <Bot size={20} color="#d1d5db" />
