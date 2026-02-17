@@ -218,11 +218,11 @@ export default function PricingPage() {
 
                 <Divider color="gray.2" />
 
-                <Text size="sm" fw={600} style={{ color: '#8b5cf6' }}>Pro의 모든 기능 포함, 그리고:</Text>
+                <Text size="xs" c="gray.5">포함:</Text>
                 <List spacing={8} size="sm" center>
                   {[
                     '쇼츠 성장 강의 59강 (기획→촬영→편집→수익화)',
-                    'Pro 6개월 제공',
+                    'FlowSpot Pro 6개월 기능 제공',
                     '6개월 후 Pro 구독 자격',
                   ].map((f, i) => (
                     <List.Item key={i} icon={
