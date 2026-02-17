@@ -333,14 +333,49 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
 
     // ====== Step 1 → 리서치 ======
+    // 크레딧 차감 헬퍼 — 성공 시 true, 실패 시 false + 에러 표시
+    const deductCredits = async (action: string, cost: number): Promise<boolean> => {
+        // 프론트 사전 체크 (UI 빠른 피드백)
+        if (creditInfo && creditInfo.credits < cost) {
+            setError(`크레딧이 부족합니다. (필요: ${cost}cr, 잔여: ${creditInfo.credits}cr)`);
+            return false;
+        }
+
+        try {
+            const res = await fetch('/api/credits/deduct', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action }),
+            });
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                setError(data.error || '크레딧 차감에 실패했습니다.');
+                return false;
+            }
+
+            // 잔량 업데이트
+            setCreditInfo(prev => prev ? { ...prev, credits: data.credits } : prev);
+            return true;
+        } catch {
+            setError('크레딧 서버에 연결할 수 없습니다.');
+            return false;
+        }
+    };
+
     const handleResearch = async () => {
         if (!material.trim() || material.length < 10) {
             setError('소재를 10자 이상 입력해주세요.');
             return;
         }
 
-        setIsResearching(true);
         setError(null);
+
+        // 크레딧 사전 차감 (3cr)
+        const ok = await deductCredits('research', 3);
+        if (!ok) return;
+
+        setIsResearching(true);
         setResearchResult(null);
         setResult(null);
         setSelectedHookIndex(null);
@@ -371,8 +406,13 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
     // ====== Step 2 → 스크립트 생성 ======
     const handleGenerate = async () => {
-        setIsGenerating(true);
         setError(null);
+
+        // 크레딧 사전 차감: 리서치 했으면 7cr, 안 했으면 7cr (리서치에서 이미 3cr 차감)
+        const ok = await deductCredits('generate_skip', 7);
+        if (!ok) return;
+
+        setIsGenerating(true);
         setResult(null);
         setSelectedHookIndex(null);
         setSaveMessage(null);
@@ -400,20 +440,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
             setResult(data);
             setGenPhase('done');
-            // 자동 저장
             autoSave(data);
-            // 크레딧 차감 (유료 사용자만)
-            if (creditInfo && creditInfo.plan_type !== 'free' && creditInfo.credits > 0) {
-                try {
-                    const deductRes = await fetch('/api/credits/deduct', { method: 'POST' });
-                    if (deductRes.ok) {
-                        const deductData = await deductRes.json();
-                        setCreditInfo(prev => prev ? { ...prev, credits: deductData.credits } : prev);
-                    }
-                } catch {
-                    // 차감 실패 시 무시 (스크립트는 이미 생성됨)
-                }
-            }
         } catch (err) {
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
             setGenPhase('idle');
@@ -487,12 +514,12 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 </Title>
                                 <Badge variant="light" color="violet" size="sm">NEW</Badge>
                             </Group>
-                            {creditInfo && creditInfo.plan_type !== 'free' && (
+                            {creditInfo && (
                                 <Badge
                                     size="lg" variant="light"
-                                    color={creditInfo.credits > 5 ? 'violet' : creditInfo.credits > 0 ? 'orange' : 'red'}
+                                    color={creditInfo.credits > 10 ? 'violet' : creditInfo.credits > 0 ? 'orange' : 'red'}
                                 >
-                                    {creditInfo.credits} 크레딧 남음
+                                    {creditInfo.credits} 크레딧
                                 </Badge>
                             )}
                         </Group>

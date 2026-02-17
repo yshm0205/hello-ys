@@ -1,9 +1,11 @@
 /**
  * Credits API Route
  * 사용자 크레딧 잔량 조회
+ * - user_plans 행 없으면 free/30cr 자동 생성 (무료 체험)
  */
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -11,7 +13,6 @@ export async function GET() {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        // 로그인 필수
         if (!user) {
             return NextResponse.json(
                 { error: "크레딧을 조회하려면 로그인이 필요합니다." },
@@ -26,12 +27,42 @@ export async function GET() {
             .eq("user_id", user.id)
             .single();
 
-        // 행이 없으면 무료 사용자 기본값 반환
+        // 행이 없으면 무료 체험 자동 생성 (30cr)
         if (error || !data) {
+            const adminClient = createAdminClient();
+            const { data: created, error: createError } = await adminClient
+                .from("user_plans")
+                .insert({
+                    user_id: user.id,
+                    plan_type: "free",
+                    credits: 30,
+                })
+                .select("credits, plan_type, expires_at")
+                .single();
+
+            if (createError || !created) {
+                // 이미 다른 요청에서 생성됨 → 재조회
+                const { data: retry } = await supabase
+                    .from("user_plans")
+                    .select("credits, plan_type, expires_at")
+                    .eq("user_id", user.id)
+                    .single();
+
+                if (retry) {
+                    return NextResponse.json(retry);
+                }
+
+                return NextResponse.json({
+                    credits: 30,
+                    plan_type: "free",
+                    expires_at: null,
+                });
+            }
+
             return NextResponse.json({
-                credits: 0,
-                plan_type: "free",
-                expires_at: null,
+                credits: created.credits,
+                plan_type: created.plan_type,
+                expires_at: created.expires_at,
             });
         }
 
