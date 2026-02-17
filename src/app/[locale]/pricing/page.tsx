@@ -21,7 +21,7 @@ import {
   ThemeIcon,
   Divider,
 } from '@mantine/core';
-import { Check, X, Sparkles, Zap, Package, Lock, Coins } from 'lucide-react';
+import { Check, X, Sparkles, Zap, Package, Lock } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
 export default function PricingPage() {
@@ -117,6 +117,7 @@ export default function PricingPage() {
                 border: '1px solid #e5e7eb',
                 background: '#fafafa',
                 position: 'relative',
+                overflow: 'visible',
               }}
             >
               <Badge
@@ -124,7 +125,7 @@ export default function PricingPage() {
                   position: 'absolute', top: -12, left: '50%',
                   transform: 'translateX(-50%)', zIndex: 10,
                 }}
-                size="lg" color="gray" variant="filled"
+                size="lg" color="dark" variant="filled"
                 leftSection={<Lock size={12} />}
               >
                 수강생 전용
@@ -149,7 +150,7 @@ export default function PricingPage() {
                     </Text>
                     <Text size="sm" c="gray.5">/ 월</Text>
                   </Group>
-                  <Text size="sm" c="gray.5">올인원 패스 수강생만 구독 가능</Text>
+                  <Text size="sm" c="gray.5">올인원 패스 수강생 전용 플랜</Text>
                 </Box>
 
                 <Divider color="gray.2" />
@@ -173,18 +174,17 @@ export default function PricingPage() {
                   ))}
                 </List>
 
-                <Button
-                  disabled
-                  radius="lg" fullWidth
-                  style={{
-                    height: 48, fontSize: '16px',
-                    background: '#e5e7eb', color: '#9ca3af',
-                    border: 'none', cursor: 'not-allowed',
-                  }}
-                  leftSection={<Lock size={16} />}
-                >
-                  올인원 패스 구매 후 이용
-                </Button>
+                <Box style={{
+                  background: '#f3f4f6', borderRadius: 12,
+                  padding: '12px 16px', textAlign: 'center',
+                }}>
+                  <Group gap={6} justify="center">
+                    <Lock size={14} color="#6b7280" />
+                    <Text size="sm" fw={500} c="gray.6">
+                      올인원 패스 수강생만 이용 가능
+                    </Text>
+                  </Group>
+                </Box>
               </Stack>
             </Card>
 
@@ -270,92 +270,6 @@ export default function PricingPage() {
               </Stack>
             </Card>
           </SimpleGrid>
-
-          {/* ── 개별 구매 비교표 ── */}
-          <Card padding="lg" radius="xl" style={{ background: '#f9fafb', border: '1px solid #e5e7eb' }}>
-            <Text fw={600} size="sm" c="gray.6" mb="sm">올인원 패스 = 따로 사면?</Text>
-            <Stack gap={4}>
-              <Group justify="space-between">
-                <Text size="sm" c="gray.5">강의 59강</Text>
-                <Text size="sm" c="gray.5" style={{ textDecoration: 'line-through' }}>₩590,000</Text>
-              </Group>
-              <Group justify="space-between">
-                <Text size="sm" c="gray.5">FlowSpot Pro 6개월</Text>
-                <Text size="sm" c="gray.5" style={{ textDecoration: 'line-through' }}>₩239,400</Text>
-              </Group>
-              <Group justify="space-between">
-                <Text size="sm" c="gray.5">크레딧 3,000개</Text>
-                <Text size="sm" c="gray.5" style={{ textDecoration: 'line-through' }}>₩99,000</Text>
-              </Group>
-              <Divider my={4} />
-              <Group justify="space-between">
-                <Text size="sm" fw={600} style={{ color: '#8b5cf6' }}>패스 가격</Text>
-                <Text size="sm" fw={700} style={{ color: '#8b5cf6' }}>₩500,000</Text>
-              </Group>
-            </Stack>
-          </Card>
-
-          {/* ── 크레딧 사용 안내 ── */}
-          <Box>
-            <Text fw={600} size="lg" ta="center" mb="lg" style={{ color: '#111827' }}>
-              크레딧 사용 안내
-            </Text>
-            <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
-              {[
-                { action: '스크립트 생성', cr: '10 cr', desc: '리서치 + 스크립트 3개' },
-                { action: '스크립트 생성 (스킵)', cr: '7 cr', desc: '리서치 없이 스크립트 3개' },
-                { action: '리서치 단독', cr: '3 cr', desc: '리서치 리포트 + 출처' },
-                { action: '리라이트', cr: '2 cr', desc: '말투/톤 변경' },
-              ].map((item, i) => (
-                <Card key={i} padding="md" radius="lg" withBorder>
-                  <Stack gap={4} align="center" ta="center">
-                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>{item.cr}</Text>
-                    <Text fw={600} size="sm" style={{ color: '#111827' }}>{item.action}</Text>
-                    <Text size="xs" c="gray.5">{item.desc}</Text>
-                  </Stack>
-                </Card>
-              ))}
-            </SimpleGrid>
-          </Box>
-
-          {/* ── 추가 크레딧 팩 ── */}
-          <Box>
-            <Group justify="center" gap="sm" mb="lg">
-              <Coins size={24} color="#8b5cf6" />
-              <Text fw={600} size="lg" style={{ color: '#111827' }}>
-                크레딧이 부족할 때
-              </Text>
-            </Group>
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" maw={600} mx="auto">
-              <Card padding="lg" radius="xl" withBorder>
-                <Group justify="space-between">
-                  <Box>
-                    <Text fw={600} size="lg" style={{ color: '#111827' }}>300 크레딧</Text>
-                    <Text size="sm" c="gray.5">스크립트 약 30회</Text>
-                  </Box>
-                  <Box ta="right">
-                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩9,900</Text>
-                    <Text size="xs" c="gray.5">cr당 ₩33</Text>
-                  </Box>
-                </Group>
-              </Card>
-              <Card padding="lg" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
-                <Group justify="space-between">
-                  <Box>
-                    <Group gap="xs">
-                      <Text fw={600} size="lg" style={{ color: '#111827' }}>1,000 크레딧</Text>
-                      <Badge size="xs" color="green" variant="light">인기</Badge>
-                    </Group>
-                    <Text size="sm" c="gray.5">스크립트 약 100회</Text>
-                  </Box>
-                  <Box ta="right">
-                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩29,900</Text>
-                    <Text size="xs" c="green">cr당 ₩30</Text>
-                  </Box>
-                </Group>
-              </Card>
-            </SimpleGrid>
-          </Box>
 
           {/* ── FAQ 링크 ── */}
           <Stack align="center" gap="md">
