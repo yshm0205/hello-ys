@@ -475,10 +475,8 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     };
 
     return (
-        <Box className="v2-layout" style={{ display: 'flex', gap: '24px', minHeight: 'calc(100vh - 120px)' }}>
-            {/* 메인 영역 */}
-            <Box style={{ flex: 1, minWidth: 0 }}>
-                <Stack gap="xl">
+        <Box style={{ minHeight: 'calc(100vh - 120px)' }}>
+            <Stack gap="xl">
                     {/* 헤더 */}
                     <Box>
                         <Group gap="sm" mb="xs" justify="space-between">
@@ -561,9 +559,9 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 <Text fw={500} size="sm" mb="xs">채널 니치</Text>
                                 <Box className="v2-niche-grid" style={{
                                     display: 'grid',
-                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                                     gap: '16px',
-                                    maxWidth: '500px',
+                                    maxWidth: '780px',
                                 }}>
                                     {NICHE_OPTIONS.map((niche) => {
                                         const isSelected = selectedNiche === niche.value;
@@ -974,83 +972,10 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                         </Group>
                     )}
                 </Stack>
-            </Box>
-
-            {/* 우측 훅 패널 */}
-            <Box
-                className="v2-sidebar"
-                style={{
-                    width: '320px', flexShrink: 0,
-                    position: 'sticky', top: '24px', alignSelf: 'flex-start',
-                    maxHeight: 'calc(100vh - 140px)', overflowY: 'auto',
-                }}
-            >
-                <Card padding="lg" radius="lg" withBorder style={{ background: '#fefefe', border: '1px solid #e5e7eb' }}>
-                    <Stack gap="md">
-                        <Group justify="space-between" align="center">
-                            <Group gap="xs">
-                                <Sparkles size={18} color="#8b5cf6" />
-                                <Text fw={600} size="sm">생성된 훅</Text>
-                            </Group>
-                            {result?.scripts && (
-                                <Badge size="sm" color="violet" variant="light">{result.scripts.length}</Badge>
-                            )}
-                        </Group>
-
-                        {!result?.scripts && (
-                            <Box style={{ padding: '32px 16px', textAlign: 'center' }}>
-                                <Text size="sm" c="gray.5" style={{ wordBreak: 'keep-all' }}>소재를 입력하고 스크립트를 생성해보세요</Text>
-                            </Box>
-                        )}
-
-                        {result?.scripts && result.scripts.map((script, index) => (
-                            <Card
-                                key={index} padding="md" radius="md"
-                                onClick={() => handleHookSelect(index)}
-                                style={{
-                                    cursor: 'pointer',
-                                    border: selectedHookIndex === index ? '2px solid #8b5cf6' : '1px solid #e5e7eb',
-                                    background: selectedHookIndex === index ? 'rgba(139, 92, 246, 0.05)' : '#fff',
-                                    transition: 'all 0.2s ease',
-                                }}
-                            >
-                                <Stack gap="xs">
-                                    <Group justify="space-between">
-                                        <Badge size="xs" color="violet" variant="light" radius="sm">옵션 {index + 1}</Badge>
-                                        {script.template_id && <Text size="xs" c="gray.5">{script.template_id}</Text>}
-                                    </Group>
-                                    <Text size="sm" fw={500} style={{ color: '#1f2937', lineHeight: 1.5 }}>
-                                        &ldquo;{script.hook}&rdquo;
-                                    </Text>
-                                    <Group gap="xs" mt="xs">
-                                        <CopyButton value={script.final}>
-                                            {({ copied, copy }) => (
-                                                <Button size="xs" variant="light" color={copied ? 'green' : 'gray'}
-                                                    onClick={(e) => { e.stopPropagation(); copy(); }}
-                                                    leftSection={copied ? <Check size={12} /> : <Copy size={12} />}
-                                                >{copied ? '복사됨' : '전체 복사'}</Button>
-                                            )}
-                                        </CopyButton>
-                                        <Button size="xs" variant={selectedHookIndex === index ? 'filled' : 'light'} color="violet"
-                                            onClick={() => handleHookSelect(index)}
-                                        >{selectedHookIndex === index ? '접기' : '보기'}</Button>
-                                    </Group>
-                                </Stack>
-                            </Card>
-                        ))}
-                    </Stack>
-                </Card>
-            </Box>
 
             {/* 반응형 CSS */}
             <style>{`
                 @media (max-width: 768px) {
-                    .v2-layout {
-                        flex-direction: column !important;
-                    }
-                    .v2-sidebar {
-                        display: none !important;
-                    }
                     .v2-tone-grid {
                         grid-template-columns: repeat(2, 1fr) !important;
                         gap: 8px !important;
