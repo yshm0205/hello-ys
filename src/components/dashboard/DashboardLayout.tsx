@@ -136,7 +136,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                 <Group h="100%" px="md" justify="space-between">
                     <Group>
                         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-                        <Link href="/" style={{ textDecoration: 'none' }}>
+                        <Link href="/dashboard" style={{ textDecoration: 'none' }}>
                             <Group gap="sm">
                                 <Bot size={28} color="#8b5cf6" />
                                 <Text

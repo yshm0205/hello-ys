@@ -23,7 +23,9 @@ import {
     Tooltip,
     Loader,
     Progress,
+    Modal,
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import {
     Sparkles,
     CreditCard,
@@ -77,6 +79,11 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
     const [completedVodCount, setCompletedVodCount] = useState(0);
     // 크레딧 상태
     const [creditInfo, setCreditInfo] = useState<{ credits: number; plan_type: string; expires_at: string | null } | null>(null);
+    // 삭제 모달 상태
+    const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+    const [deleteTargetTitle, setDeleteTargetTitle] = useState<string>('');
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // DB에서 최근 프로젝트 + 수강 진도 + 크레딧 불러오기
     useEffect(() => {
@@ -125,6 +132,41 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
         fetchLectureProgress();
         fetchCredits();
     }, []);
+
+    // 삭제 확인 모달 열기
+    const handleDeleteClick = (project: ProjectItem) => {
+        setDeleteTargetId(project.id);
+        setDeleteTargetTitle(project.title);
+        openDeleteModal();
+    };
+
+    // 삭제 실행
+    const handleDeleteConfirm = async () => {
+        if (!deleteTargetId) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch('/api/scripts/history', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: deleteTargetId }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setProjects(prev => prev.filter(p => p.id !== deleteTargetId));
+                closeDeleteModal();
+            } else {
+                alert('삭제 실패: ' + data.error);
+            }
+        } catch {
+            alert('서버 오류가 발생했습니다.');
+        } finally {
+            setIsDeleting(false);
+            setDeleteTargetId(null);
+            setDeleteTargetTitle('');
+        }
+    };
 
     return (
         <Container size="lg" py="md">
@@ -392,7 +434,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                                         <ActionIcon
                                                             variant="subtle"
                                                             color="red"
-                                                            onClick={() => alert('삭제 기능은 현재 준비 중입니다.')}
+                                                            onClick={() => handleDeleteClick(project)}
                                                         >
                                                             <Trash2 size={16} />
                                                         </ActionIcon>
@@ -446,6 +488,48 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     </Group>
                 </Card>
             </Stack>
+
+            {/* 삭제 확인 모달 */}
+            <Modal
+                opened={deleteModalOpened}
+                onClose={closeDeleteModal}
+                title="프로젝트 삭제"
+                centered
+                radius="lg"
+                size="sm"
+            >
+                <Stack gap="md">
+                    <Text size="sm" c="gray.7">
+                        다음 프로젝트를 삭제하시겠습니까?
+                    </Text>
+                    <Text fw={600} size="sm" style={{ color: '#111827' }}>
+                        {deleteTargetTitle}
+                    </Text>
+                    <Text size="xs" c="red.6">
+                        삭제된 프로젝트는 복구할 수 없습니다.
+                    </Text>
+                    <Group justify="flex-end" mt="sm">
+                        <Button
+                            variant="light"
+                            color="gray"
+                            radius="lg"
+                            onClick={closeDeleteModal}
+                            disabled={isDeleting}
+                        >
+                            취소
+                        </Button>
+                        <Button
+                            color="red"
+                            radius="lg"
+                            onClick={handleDeleteConfirm}
+                            loading={isDeleting}
+                            leftSection={!isDeleting ? <Trash2 size={16} /> : undefined}
+                        >
+                            삭제
+                        </Button>
+                    </Group>
+                </Stack>
+            </Modal>
         </Container >
     );
 }

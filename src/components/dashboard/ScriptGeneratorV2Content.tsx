@@ -563,6 +563,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                     display: 'grid',
                                     gridTemplateColumns: 'repeat(3, 1fr)',
                                     gap: '16px',
+                                    maxWidth: '500px',
                                 }}>
                                     {NICHE_OPTIONS.map((niche) => {
                                         const isSelected = selectedNiche === niche.value;
@@ -998,7 +999,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
                         {!result?.scripts && (
                             <Box style={{ padding: '32px 16px', textAlign: 'center' }}>
-                                <Text size="sm" c="gray.5">소재를 입력하고 스크립트를 생성해보세요</Text>
+                                <Text size="sm" c="gray.5" style={{ wordBreak: 'keep-all' }}>소재를 입력하고 스크립트를 생성해보세요</Text>
                             </Box>
                         )}
 
