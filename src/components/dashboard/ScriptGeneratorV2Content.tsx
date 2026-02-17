@@ -1038,7 +1038,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                     <Stack gap="sm" w="100%">
                         <Button
                             component={Link}
-                            href="/dashboard/subscription"
+                            href="/pricing"
                             size="md" radius="md" color="violet" fullWidth
                             leftSection={<CreditCard size={18} />}
                         >
