@@ -74,8 +74,11 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
         fetchCredits();
     }, []);
 
-    const isPaid = creditInfo && creditInfo.plan_type !== 'free';
-    const planLabel = isPaid ? '올인원 패스' : 'Beta 무료';
+    const planType = creditInfo?.plan_type || 'free';
+    const isPro = planType === 'pro';
+    const isAllinone = planType === 'allinone';
+    const isPaid = isPro || isAllinone;
+    const planLabel = isPro ? 'Pro 구독' : isAllinone ? '올인원 패스' : 'Beta 무료';
 
     const formatDate = (dateString?: string | null) => {
         if (!dateString) return '-';
@@ -85,6 +88,8 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
             day: 'numeric',
         });
     };
+
+    const maxCredits = isPro ? 500 : isAllinone ? 3000 : 30;
 
     return (
         <Container size="md" py="md">
@@ -257,6 +262,11 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                                 </Text>
                                             )}
                                         </Group>
+                                        {isPro && (
+                                            <Text size="xs" c="white" opacity={0.7} mt={4}>
+                                                매월 500 크레딧 충전 · ₩39,900/월
+                                            </Text>
+                                        )}
                                     </Stack>
                                 </Card>
 
@@ -273,30 +283,28 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                             </Title>
                                             <Text size="sm" c="gray.5">크레딧</Text>
                                         </Group>
-                                        {isPaid && (
-                                            <Progress
-                                                value={Math.min(((creditInfo?.credits || 0) / 300) * 100, 100)}
-                                                color={
-                                                    (creditInfo?.credits || 0) > 50 ? 'violet' :
-                                                    (creditInfo?.credits || 0) > 10 ? 'orange' : 'red'
-                                                }
-                                                size="md" radius="xl"
-                                            />
-                                        )}
+                                        <Progress
+                                            value={Math.min(((creditInfo?.credits || 0) / maxCredits) * 100, 100)}
+                                            color={
+                                                (creditInfo?.credits || 0) > maxCredits * 0.3 ? 'violet' :
+                                                (creditInfo?.credits || 0) > maxCredits * 0.1 ? 'orange' : 'red'
+                                            }
+                                            size="md" radius="xl"
+                                        />
                                     </Stack>
                                 </Card>
                             </SimpleGrid>
 
-                            {/* 번들 미구매자 → 업그레이드 CTA */}
+                            {/* 미구매자 → 올인원 업그레이드 CTA */}
                             {!isPaid && (
                                 <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
                                     <Group justify="space-between" align="center" wrap="wrap" gap="lg">
                                         <Group gap="md">
                                             <Package size={32} color="#8b5cf6" />
                                             <Box>
-                                                <Title order={4} style={{ color: '#111827' }}>올인원 패스로 업그레이드</Title>
+                                                <Title order={4} style={{ color: '#111827' }}>올인원 패스로 시작하기</Title>
                                                 <Text size="sm" c="gray.6">
-                                                    강의 59강 + AI 스크립트 6개월 + 크레딧 300개
+                                                    강의 59강 + AI 스크립트 6개월 + 크레딧 3,000개
                                                 </Text>
                                             </Box>
                                         </Group>
@@ -319,7 +327,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                 </Card>
                             )}
 
-                            {/* 토큰 팩 — 유료 사용자용 */}
+                            {/* 크레딧 추가 구매 — 유료 사용자용 */}
                             {isPaid && (
                                 <Box>
                                     <Group gap="sm" mb="lg">
@@ -330,7 +338,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                         <Card padding="lg" radius="xl" withBorder style={{ cursor: 'pointer' }}>
                                             <Group justify="space-between">
                                                 <Box>
-                                                    <Text fw={600} size="lg" style={{ color: '#111827' }}>30 크레딧</Text>
+                                                    <Text fw={600} size="lg" style={{ color: '#111827' }}>300 크레딧</Text>
                                                     <Text size="sm" c="gray.5">스크립트 약 30회 생성</Text>
                                                 </Box>
                                                 <Box ta="right">
@@ -345,14 +353,14 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                             <Group justify="space-between">
                                                 <Box>
                                                     <Group gap="xs">
-                                                        <Text fw={600} size="lg" style={{ color: '#111827' }}>100 크레딧</Text>
+                                                        <Text fw={600} size="lg" style={{ color: '#111827' }}>1,000 크레딧</Text>
                                                         <Badge size="xs" color="green" variant="light">인기</Badge>
                                                     </Group>
                                                     <Text size="sm" c="gray.5">스크립트 약 100회 생성</Text>
                                                 </Box>
                                                 <Box ta="right">
                                                     <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩29,900</Text>
-                                                    <Text size="xs" c="green">개당 ₩299</Text>
+                                                    <Text size="xs" c="green">cr당 ₩30</Text>
                                                     <Button size="xs" color="violet" radius="lg" mt="xs"
                                                         style={{ background: '#8b5cf6' }}
                                                     >
