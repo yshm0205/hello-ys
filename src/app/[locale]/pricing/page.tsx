@@ -21,7 +21,7 @@ import {
   ThemeIcon,
   Divider,
 } from '@mantine/core';
-import { Check, X, Sparkles, Zap, Package, Lock } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
 export default function PricingPage() {
@@ -50,51 +50,34 @@ export default function PricingPage() {
               style={{ border: '1px solid #e5e7eb', background: '#fff' }}
             >
               <Stack gap="md">
-                <Group gap="sm">
-                  <Box style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: 'rgba(139,92,246,0.1)', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', color: '#8b5cf6',
-                  }}>
-                    <Sparkles size={20} />
-                  </Box>
-                  <Text fw={600} style={{ color: '#111827' }}>Beta 무료</Text>
-                </Group>
+                <Box>
+                  <Text fw={700} size="xl" style={{ color: '#111827' }}>Beta</Text>
+                  <Text size="sm" c="gray.5">
+                    FlowSpot을 무료로 체험해보세요
+                  </Text>
+                </Box>
 
                 <Box>
                   <Text style={{ fontSize: '36px', fontWeight: 800, color: '#111827' }}>
                     ₩0
                   </Text>
-                  <Text size="sm" c="gray.5">영원히 무료</Text>
+                  <Text size="sm" c="gray.5">무료</Text>
                 </Box>
 
                 <Divider color="gray.2" />
 
+                <Text size="xs" c="gray.5">포함:</Text>
                 <List spacing={8} size="sm" center>
                   {[
-                    '월 30 크레딧',
-                    '스크립트 3회 생성 (9개)',
-                    '기본 니치 템플릿',
-                    '보관함 저장',
+                    '검증된 프레임워크 기반 AI 스크립트 생성',
+                    '소재에 맞는 실시간 리서치',
+                    '생성한 스크립트 보관함 저장',
                   ].map((f, i) => (
                     <List.Item key={i} icon={
                       <ThemeIcon size={20} radius="xl" color="violet" variant="light">
                         <Check size={12} />
                       </ThemeIcon>
                     } style={{ color: '#374151' }}>
-                      {f}
-                    </List.Item>
-                  ))}
-                  {[
-                    '강의 59강',
-                    '채널 분석 피드백',
-                    'Pro 전용 기능',
-                  ].map((f, i) => (
-                    <List.Item key={`m-${i}`} icon={
-                      <ThemeIcon size={20} radius="xl" color="gray" variant="light">
-                        <X size={12} />
-                      </ThemeIcon>
-                    } style={{ color: '#9ca3af' }}>
                       {f}
                     </List.Item>
                   ))}
@@ -132,16 +115,12 @@ export default function PricingPage() {
               </Badge>
 
               <Stack gap="md" mt={8}>
-                <Group gap="sm">
-                  <Box style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: 'rgba(139,92,246,0.1)', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', color: '#8b5cf6',
-                  }}>
-                    <Zap size={20} />
-                  </Box>
-                  <Text fw={600} style={{ color: '#111827' }}>Pro</Text>
-                </Group>
+                <Box>
+                  <Text fw={700} size="xl" style={{ color: '#111827' }}>Pro</Text>
+                  <Text size="sm" c="gray.5">
+                    올인원 패스 수강생을 위한 전용 플랜
+                  </Text>
+                </Box>
 
                 <Box>
                   <Group gap="xs" align="baseline">
@@ -150,19 +129,16 @@ export default function PricingPage() {
                     </Text>
                     <Text size="sm" c="gray.5">/ 월</Text>
                   </Group>
-                  <Text size="sm" c="gray.5">올인원 패스 수강생 전용 플랜</Text>
                 </Box>
 
                 <Divider color="gray.2" />
 
+                <Text size="xs" c="gray.5">Beta의 모든 기능 포함, 그리고:</Text>
                 <List spacing={8} size="sm" center>
                   {[
-                    '월 500 크레딧',
-                    '스크립트 50회 생성 (150개)',
-                    '모든 니치 템플릿',
-                    '리서치 + 출처 링크',
-                    '리라이트 / 톤 변경',
-                    '보관함 무제한',
+                    '원하는 말투로 스크립트 리라이트',
+                    '모든 니치 템플릿 사용',
+                    '보관함 무제한 저장',
                   ].map((f, i) => (
                     <List.Item key={i} icon={
                       <ThemeIcon size={20} radius="xl" color="violet" variant="light">
@@ -172,6 +148,13 @@ export default function PricingPage() {
                       {f}
                     </List.Item>
                   ))}
+                  <List.Item icon={
+                    <ThemeIcon size={20} radius="xl" color="violet" variant="light">
+                      <Check size={12} />
+                    </ThemeIcon>
+                  } style={{ color: '#374151' }}>
+                    <Text fw={700} size="sm">월 500 크레딧</Text>
+                  </List.Item>
                 </List>
 
                 <Box style={{
@@ -195,6 +178,7 @@ export default function PricingPage() {
                 border: '2px solid #8b5cf6',
                 background: '#fff',
                 position: 'relative',
+                overflow: 'visible',
               }}
             >
               <Badge
@@ -208,16 +192,12 @@ export default function PricingPage() {
               </Badge>
 
               <Stack gap="md" mt={8}>
-                <Group gap="sm">
-                  <Box style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: 'rgba(139,92,246,0.1)', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', color: '#8b5cf6',
-                  }}>
-                    <Package size={20} />
-                  </Box>
-                  <Text fw={600} style={{ color: '#111827' }}>올인원 패스</Text>
-                </Group>
+                <Box>
+                  <Text fw={700} size="xl" style={{ color: '#111827' }}>올인원 패스</Text>
+                  <Text size="sm" c="gray.5">
+                    강의부터 AI 스크립트까지, 쇼츠 성장에 필요한 전부
+                  </Text>
+                </Box>
 
                 <Box>
                   <Text style={{
@@ -238,13 +218,11 @@ export default function PricingPage() {
 
                 <Divider color="gray.2" />
 
+                <Text size="xs" c="gray.5">포함:</Text>
                 <List spacing={8} size="sm" center>
                   {[
-                    '강의 59강 (기획→촬영→편집→수익화)',
-                    'FlowSpot 6개월 이용',
-                    '크레딧 3,000개 포함',
-                    '훅 템플릿 79개 + 지속 업데이트',
-                    '채널 분석 피드백 1회',
+                    '쇼츠 성장 강의 59강 (기획→촬영→편집→수익화)',
+                    'FlowSpot AI 스크립트 생성기 6개월 이용',
                     '6개월 후 Pro 구독 자격',
                   ].map((f, i) => (
                     <List.Item key={i} icon={
@@ -255,6 +233,13 @@ export default function PricingPage() {
                       {f}
                     </List.Item>
                   ))}
+                  <List.Item icon={
+                    <ThemeIcon size={20} radius="xl" color="green" variant="light">
+                      <Check size={12} />
+                    </ThemeIcon>
+                  } style={{ color: '#374151' }}>
+                    <Text fw={700} size="sm">크레딧 3,000개 포함</Text>
+                  </List.Item>
                 </List>
 
                 <Button
