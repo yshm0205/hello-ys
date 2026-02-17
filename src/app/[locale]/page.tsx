@@ -1720,7 +1720,7 @@ function PackageSection() {
                 { text: '강의 + AI 도구로 바로 실행', good: true },
                 { text: '강의 평생 소장', good: true },
                 { text: 'AI가 3분 만에 대본 작성', good: true },
-                { text: 'AI 스크립트 도구 1년 무제한', good: true },
+                { text: 'AI 스크립트 도구 6개월', good: true },
               ].map((item, i) => (
                 <Group key={i} gap="md">
                   <div style={{ background: 'rgba(34, 197, 94, 0.2)', borderRadius: '50%', padding: '2px' }}>
@@ -1748,7 +1748,7 @@ function PackageSection() {
           <SimpleGrid cols={{ base: 1, md: 2 }} spacing={32}>
             {[
               { item: '강의 59강 (기획→촬영→수익화)', value: '₩590,000' },
-              { item: 'AI 스크립트 도구 1년 무제한', value: '₩600,000' },
+              { item: 'AI 스크립트 도구 6개월', value: '₩600,000' },
               { item: '채널 분석 피드백', value: '₩100,000' },
               { item: '보너스: 터진 영상 템플릿', value: '₩100,000' },
             ].map((item, i) => (
@@ -1798,7 +1798,7 @@ function PackageSection() {
               </Stack>
               <Text style={{ fontSize: '32px', color: '#6b7280', fontWeight: 300 }}>vs</Text>
               <Stack gap={8} align="center">
-                <Text style={{ fontSize: '16px', color: '#d1d5db' }}>AI 스크립트 1년</Text>
+                <Text style={{ fontSize: '16px', color: '#d1d5db' }}>AI 스크립트 6개월</Text>
                 <Text fw={800} style={{ fontSize: '32px', color: '#8b5cf6' }}>50만원</Text>
               </Stack>
             </Group>
@@ -1818,7 +1818,7 @@ function FAQSection() {
     { q: "AI 1도 몰라도 되나요?", a: "네. 버튼 3개만 누르면 됩니다. 원리는 강의에서 알려드려요." },
     { q: "진짜 수익이 나나요?", a: "전자책 수강생 중 월 700만원 달성자가 있습니다. 실행만 하시면 됩니다." },
     { q: "환불 되나요?", a: "결제 후 7일 이내, 강의 1강도 수강하지 않은 경우 전액 환불됩니다. 수강을 시작한 경우에도 이러닝 표준약관에 따라 (1강 단가 × 수강 강의 수 + 위약금 10%)를 공제 후 환불됩니다. 자세한 내용은 환불 규정 페이지를 참고해 주세요." },
-    { q: "강의 기간은요?", a: "강의는 평생 소장, AI 도구는 1년 이용권입니다." },
+    { q: "강의 기간은요?", a: "강의는 평생 소장, AI 도구는 6개월 이용권입니다." },
     { q: "크레딧을 다 쓰면요?", a: "설정 > 플랜 & 결제에서 크레딧 팩(30개 ₩9,900 / 100개 ₩29,900)을 추가 구매할 수 있습니다." },
   ];
   return (

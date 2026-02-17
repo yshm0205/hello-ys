@@ -42,7 +42,7 @@ const subscriptionPlans = [
     name: 'Team',
     price: 49000,
     icon: <Crown size={20} />,
-    features: ['무제한 생성', '커스텀 템플릿', '전용 지원'],
+    features: ['월 100회 생성', '커스텀 템플릿', '전용 지원'],
     missing: ['강의 59강', '채널 피드백', '터진 영상 템플릿'],
   },
 ];
@@ -106,7 +106,7 @@ export default function PricingPage() {
                       </Text>
                       {plan.price > 0 && (
                         <Text size="xs" c="gray.4">
-                          / 월 — 1년이면 ₩{(plan.price * 12).toLocaleString()}
+                          / 월 — 6개월이면 ₩{(plan.price * 6).toLocaleString()}
                         </Text>
                       )}
                     </Box>
@@ -184,7 +184,7 @@ export default function PricingPage() {
                 <List spacing="sm" size="sm" center>
                   {[
                     '강의 59강 (기획 → 촬영 → 편집 → 수익화)',
-                    'FlowSpot 1년 무제한 이용',
+                    'FlowSpot 6개월 이용',
                     '크레딧 300개 포함 (스크립트 300회)',
                     '훅 템플릿 79개 + 지속 업데이트',
                     '채널 분석 피드백 1회',
@@ -229,7 +229,7 @@ export default function PricingPage() {
                       <Text size="xs" c="gray.5" style={{ textDecoration: 'line-through' }}>₩590,000</Text>
                     </Group>
                     <Group justify="space-between">
-                      <Text size="xs" c="gray.5">FlowSpot Pro 1년</Text>
+                      <Text size="xs" c="gray.5">FlowSpot Pro 6개월</Text>
                       <Text size="xs" c="gray.5" style={{ textDecoration: 'line-through' }}>₩228,000</Text>
                     </Group>
                     <Group justify="space-between">
