@@ -2,8 +2,7 @@
 
 /**
  * 가격 페이지
- * 3단 카드: Beta 무료 | Pro 수강생 전용 (잠금) | 올인원 패스 (추천)
- * 하단: 추가 크레딧 팩
+ * 3단 카드: 무료 체험 | Pro 수강생 전용 (잠금) | 올인원 패스 (추천)
  */
 
 import {
@@ -44,16 +43,16 @@ export default function PricingPage() {
 
           {/* ── 3단 플랜 카드 ── */}
           <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
-            {/* Beta 무료 */}
+            {/* 무료 체험 */}
             <Card
               padding="xl" radius="xl"
               style={{ border: '1px solid #e5e7eb', background: '#fff' }}
             >
               <Stack gap="md">
                 <Box>
-                  <Text fw={700} size="xl" style={{ color: '#111827' }}>Beta</Text>
+                  <Text fw={700} size="xl" style={{ color: '#111827' }}>무료 체험</Text>
                   <Text size="sm" c="gray.5">
-                    FlowSpot을 무료로 체험해보세요
+                    FlowSpot을 직접 체험해보세요
                   </Text>
                 </Box>
 
@@ -61,7 +60,7 @@ export default function PricingPage() {
                   <Text style={{ fontSize: '36px', fontWeight: 800, color: '#111827' }}>
                     ₩0
                   </Text>
-                  <Text size="sm" c="gray.5">무료</Text>
+                  <Text size="sm" c="gray.5">매월 30 크레딧</Text>
                 </Box>
 
                 <Divider color="gray.2" />
@@ -133,7 +132,7 @@ export default function PricingPage() {
 
                 <Divider color="gray.2" />
 
-                <Text size="xs" c="gray.5">Beta의 모든 기능 포함, 그리고:</Text>
+                <Text size="xs" c="gray.5">무료 체험의 모든 기능 포함, 그리고:</Text>
                 <List spacing={8} size="sm" center>
                   {[
                     '원하는 말투로 스크립트 리라이트',

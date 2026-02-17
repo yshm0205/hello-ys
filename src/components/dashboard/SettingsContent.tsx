@@ -78,7 +78,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
     const isPro = planType === 'pro';
     const isAllinone = planType === 'allinone';
     const isPaid = isPro || isAllinone;
-    const planLabel = isPro ? 'Pro 구독' : isAllinone ? '올인원 패스' : 'Beta 무료';
+    const planLabel = isPro ? 'Pro 구독' : isAllinone ? '올인원 패스' : '무료 체험';
 
     const formatDate = (dateString?: string | null) => {
         if (!dateString) return '-';
@@ -89,7 +89,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
         });
     };
 
-    const maxCredits = isPro ? 500 : isAllinone ? 3000 : 30;
+    const maxCredits = isPro ? 500 : isAllinone ? 3000 : 100;
 
     return (
         <Container size="md" py="md">
