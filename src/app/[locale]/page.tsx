@@ -1847,7 +1847,7 @@ function CTASection() {
           <Button component={Link} href="/pricing" size="xl" radius="xl" color="violet" h={60} fz={20}>
             🔥 1기 30명 한정 시작하기
           </Button>
-          <Text c="dimmed" size="sm">✅ 7일 100% 환불 보장 | ✅ 카드 등록 없음</Text>
+          <Text c="dimmed" size="sm">✅ 7일 100% 환불 보장 | ✅ 무료 체험 가능</Text>
         </Stack>
       </Container>
     </Box>
