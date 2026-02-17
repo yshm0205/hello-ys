@@ -334,41 +334,39 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                         <Coins size={24} color="#8b5cf6" />
                                         <Title order={4} style={{ color: '#111827' }}>크레딧 추가 구매</Title>
                                     </Group>
+                                    <Text size="xs" c="gray.5" mb={4}>만료 없음 · 구매 즉시 충전</Text>
                                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                                        <Card padding="lg" radius="xl" withBorder style={{ cursor: 'pointer' }}>
-                                            <Group justify="space-between">
-                                                <Box>
-                                                    <Text fw={600} size="lg" style={{ color: '#111827' }}>300 크레딧</Text>
-                                                    <Text size="sm" c="gray.5">스크립트 약 30회 생성</Text>
-                                                </Box>
-                                                <Box ta="right">
-                                                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩9,900</Text>
-                                                    <Button size="xs" variant="light" color="violet" radius="lg" mt="xs">
-                                                        구매하기
-                                                    </Button>
-                                                </Box>
-                                            </Group>
-                                        </Card>
-                                        <Card padding="lg" radius="xl" style={{ border: '2px solid #8b5cf6', cursor: 'pointer' }}>
-                                            <Group justify="space-between">
-                                                <Box>
-                                                    <Group gap="xs">
-                                                        <Text fw={600} size="lg" style={{ color: '#111827' }}>1,000 크레딧</Text>
-                                                        <Badge size="xs" color="green" variant="light">인기</Badge>
-                                                    </Group>
-                                                    <Text size="sm" c="gray.5">스크립트 약 100회 생성</Text>
-                                                </Box>
-                                                <Box ta="right">
-                                                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩29,900</Text>
-                                                    <Text size="xs" c="green">cr당 ₩30</Text>
-                                                    <Button size="xs" color="violet" radius="lg" mt="xs"
-                                                        style={{ background: '#8b5cf6' }}
-                                                    >
-                                                        구매하기
-                                                    </Button>
-                                                </Box>
-                                            </Group>
-                                        </Card>
+                                        {[
+                                            { cr: 100, price: '₩14,900', per: '₩149', popular: false },
+                                            { cr: 300, price: '₩34,900', per: '₩116', popular: false },
+                                            { cr: 500, price: '₩54,900', per: '₩110', popular: true },
+                                            { cr: 1000, price: '₩99,900', per: '₩100', popular: false },
+                                        ].map((pack) => (
+                                            <Card key={pack.cr} padding="lg" radius="xl"
+                                                style={pack.popular
+                                                    ? { border: '2px solid #8b5cf6', cursor: 'pointer' }
+                                                    : { border: '1px solid #e5e7eb', cursor: 'pointer' }
+                                                }
+                                            >
+                                                <Group justify="space-between">
+                                                    <Box>
+                                                        <Group gap="xs">
+                                                            <Text fw={600} size="lg" style={{ color: '#111827' }}>{pack.cr.toLocaleString()} 크레딧</Text>
+                                                            {pack.popular && <Badge size="xs" color="green" variant="light">인기</Badge>}
+                                                        </Group>
+                                                        <Text size="xs" c="gray.5">cr당 {pack.per}</Text>
+                                                    </Box>
+                                                    <Box ta="right">
+                                                        <Text fw={700} size="lg" style={{ color: '#8b5cf6' }}>{pack.price}</Text>
+                                                        <Button size="xs" variant={pack.popular ? 'filled' : 'light'} color="violet" radius="lg" mt="xs"
+                                                            style={pack.popular ? { background: '#8b5cf6' } : undefined}
+                                                        >
+                                                            구매하기
+                                                        </Button>
+                                                    </Box>
+                                                </Group>
+                                            </Card>
+                                        ))}
                                     </SimpleGrid>
                                 </Box>
                             )}
