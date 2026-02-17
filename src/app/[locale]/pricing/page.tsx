@@ -218,7 +218,7 @@ export default function PricingPage() {
 
                 <Divider color="gray.2" />
 
-                <Text size="xs" c="gray.5">포함:</Text>
+                <Text size="xs" c="gray.5">Pro의 모든 기능 포함, 그리고:</Text>
                 <List spacing={8} size="sm" center>
                   {[
                     '쇼츠 성장 강의 59강 (기획→촬영→편집→수익화)',
@@ -233,13 +233,6 @@ export default function PricingPage() {
                       {f}
                     </List.Item>
                   ))}
-                  <List.Item icon={
-                    <ThemeIcon size={20} radius="xl" color="green" variant="light">
-                      <Check size={12} />
-                    </ThemeIcon>
-                  } style={{ color: '#374151' }}>
-                    <Text fw={700} size="sm">크레딧 3,000개 포함</Text>
-                  </List.Item>
                 </List>
 
                 <Button
