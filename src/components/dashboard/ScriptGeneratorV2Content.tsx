@@ -523,12 +523,15 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 <Badge variant="light" color="violet" size="sm">NEW</Badge>
                             </Group>
                             {creditInfo && (
-                                <Badge
-                                    size="lg" variant="light"
-                                    color={creditInfo.credits > 10 ? 'violet' : creditInfo.credits > 0 ? 'orange' : 'red'}
-                                >
-                                    {creditInfo.credits} 크레딧
-                                </Badge>
+                                <Link href="/dashboard/credits" style={{ textDecoration: 'none' }}>
+                                    <Badge
+                                        size="lg" variant="light"
+                                        color={creditInfo.credits > 10 ? 'violet' : creditInfo.credits > 0 ? 'orange' : 'red'}
+                                        style={{ cursor: 'pointer' }}
+                                    >
+                                        {creditInfo.credits} 크레딧
+                                    </Badge>
+                                </Link>
                             )}
                         </Group>
                         <Text c="gray.6" size="sm">
@@ -1038,7 +1041,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                     <Stack gap="sm" w="100%">
                         <Button
                             component={Link}
-                            href="/pricing#credit-packs"
+                            href="/dashboard/credits"
                             size="md" radius="md" color="violet" fullWidth
                             leftSection={<CreditCard size={18} />}
                         >

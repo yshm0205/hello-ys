@@ -248,7 +248,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                                     c="violet"
                                     fw={500}
                                     component={Link}
-                                    href="/settings"
+                                    href="/dashboard/credits"
                                     style={{ textDecoration: 'none' }}
                                 >
                                     충전
