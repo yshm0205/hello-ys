@@ -20,7 +20,7 @@ import {
   ThemeIcon,
   Divider,
 } from '@mantine/core';
-import { Check, Lock } from 'lucide-react';
+import { Check, Lock, Zap, Coins } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
 export default function PricingPage() {
@@ -247,6 +247,61 @@ export default function PricingPage() {
               </Stack>
             </Card>
           </SimpleGrid>
+
+          {/* ── 크레딧 추가팩 ── */}
+          <Box id="credit-packs">
+            <Stack align="center" gap="md" mb="xl">
+              <Group gap="sm">
+                <Coins size={24} color="#8b5cf6" />
+                <Title order={2} style={{ color: '#111827' }}>크레딧 추가 충전</Title>
+              </Group>
+              <Text size="sm" c="gray.5">만료 없음 · 구매 즉시 충전 · 모든 사용자 이용 가능</Text>
+            </Stack>
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg">
+              {[
+                { cr: 100, price: '₩14,900', per: '₩149', popular: false },
+                { cr: 300, price: '₩34,900', per: '₩116', popular: false },
+                { cr: 500, price: '₩54,900', per: '₩110', popular: true },
+                { cr: 1000, price: '₩99,900', per: '₩100', popular: false },
+              ].map((pack) => (
+                <Card key={pack.cr} padding="lg" radius="xl"
+                  style={pack.popular
+                    ? { border: '2px solid #8b5cf6', position: 'relative' as const, overflow: 'visible' as const }
+                    : { border: '1px solid #e5e7eb' }
+                  }
+                >
+                  {pack.popular && (
+                    <Badge
+                      size="sm" color="violet" variant="filled"
+                      style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)' }}
+                    >
+                      인기
+                    </Badge>
+                  )}
+                  <Stack align="center" gap="sm">
+                    <Group gap={6}>
+                      <Zap size={18} color="#8b5cf6" />
+                      <Text fw={700} size="lg" style={{ color: '#111827' }}>
+                        {pack.cr.toLocaleString()} 크레딧
+                      </Text>
+                    </Group>
+                    <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6' }}>
+                      {pack.price}
+                    </Text>
+                    <Text size="xs" c="gray.5">cr당 {pack.per}</Text>
+                    <Button
+                      fullWidth radius="lg" size="sm"
+                      variant={pack.popular ? 'filled' : 'light'} color="violet"
+                      style={pack.popular ? { background: '#8b5cf6' } : undefined}
+                      disabled
+                    >
+                      준비 중
+                    </Button>
+                  </Stack>
+                </Card>
+              ))}
+            </SimpleGrid>
+          </Box>
 
           {/* ── FAQ 링크 ── */}
           <Stack align="center" gap="md">

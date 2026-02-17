@@ -205,7 +205,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                 )}
 
                 {/* 크레딧 추가 구매 */}
-                {isPaid && (
+                {(
                     <Box>
                         <Group gap="sm" mb="lg">
                             <Coins size={24} color="#8b5cf6" />
