@@ -18,7 +18,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
 
     return (
         <DashboardLayout user={user}>
-            <LecturePlayerContent vodId={vodId} />
+            <LecturePlayerContent vodId={vodId} userEmail={user.email} />
         </DashboardLayout>
     );
 }

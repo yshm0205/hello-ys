@@ -34,9 +34,11 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { CHAPTERS } from './LecturesContent';
+import { VideoWatermark } from './VideoWatermark';
 
 interface LecturePlayerContentProps {
     vodId: string;
+    userEmail?: string;
 }
 
 // 모든 VOD를 순서대로 펼친 배열 생성
@@ -54,7 +56,7 @@ function getAllVods() {
     return allVods;
 }
 
-export function LecturePlayerContent({ vodId }: LecturePlayerContentProps) {
+export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentProps) {
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isMarking, setIsMarking] = useState(false);
@@ -202,13 +204,13 @@ export function LecturePlayerContent({ vodId }: LecturePlayerContentProps) {
                             </Group>
                         </Box>
 
-                        {/* 영상 영역 (Vimeo placeholder) */}
+                        {/* 영상 영역 (Vimeo placeholder) + 워터마크 */}
                         <Card padding={0} radius="lg" withBorder style={{ overflow: 'hidden' }}>
                             <div
                                 style={{
                                     position: 'relative',
                                     paddingBottom: '56.25%',
-                                    background: '#f3f4f6',
+                                    background: '#000',
                                 }}
                             >
                                 <div
@@ -218,12 +220,15 @@ export function LecturePlayerContent({ vodId }: LecturePlayerContentProps) {
                                         display: 'flex', flexDirection: 'column',
                                         alignItems: 'center', justifyContent: 'center',
                                         gap: 8,
+                                        background: '#f3f4f6',
                                     }}
                                 >
                                     <BookOpen size={48} color="#d1d5db" />
                                     <Text c="gray.4" size="lg" fw={500}>영상 준비 중</Text>
                                     <Text c="gray.4" size="sm">Vimeo 영상이 곧 업로드됩니다</Text>
                                 </div>
+                                {/* 동적 워터마크 오버레이 */}
+                                {userEmail && <VideoWatermark email={userEmail} />}
                             </div>
                         </Card>
 
