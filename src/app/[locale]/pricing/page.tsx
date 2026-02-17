@@ -27,7 +27,7 @@ import { Link } from '@/i18n/routing';
 export default function PricingPage() {
   return (
     <Box style={{ background: '#fff', minHeight: '100vh' }}>
-      <Container size="lg" py={80}>
+      <Container size="xl" py={80}>
         <Stack gap={48}>
           {/* ── 헤더 ── */}
           <Stack align="center" gap="lg">
@@ -222,7 +222,7 @@ export default function PricingPage() {
                 <List spacing={8} size="sm" center>
                   {[
                     '쇼츠 성장 강의 59강 (기획→촬영→편집→수익화)',
-                    'FlowSpot AI 스크립트 생성기 6개월 이용',
+                    'Pro 6개월 제공',
                     '6개월 후 Pro 구독 자격',
                   ].map((f, i) => (
                     <List.Item key={i} icon={
