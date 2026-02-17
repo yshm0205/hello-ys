@@ -24,6 +24,7 @@ import {
     Tooltip,
     Transition,
     Loader,
+    Modal,
 } from '@mantine/core';
 import {
     Brain,
@@ -36,7 +37,9 @@ import {
     Search,
     Zap,
     Clock,
+    CreditCard,
 } from 'lucide-react';
+import { Link } from '@/i18n/routing';
 
 // ============ 타입 ============
 
@@ -271,6 +274,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
     // 크레딧
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+    const [creditModal, setCreditModal] = useState<{ open: boolean; needed: number }>({ open: false, needed: 0 });
 
     // 공통
     const [error, setError] = useState<string | null>(null);
@@ -333,11 +337,11 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
 
     // ====== Step 1 → 리서치 ======
-    // 크레딧 차감 헬퍼 — 성공 시 true, 실패 시 false + 에러 표시
+    // 크레딧 차감 헬퍼 — 성공 시 true, 실패 시 false + 모달 표시
     const deductCredits = async (action: string, cost: number): Promise<boolean> => {
-        // 프론트 사전 체크 (UI 빠른 피드백)
+        // 프론트 사전 체크 → 부족 시 모달
         if (creditInfo && creditInfo.credits < cost) {
-            setError(`크레딧이 부족합니다. (필요: ${cost}cr, 잔여: ${creditInfo.credits}cr)`);
+            setCreditModal({ open: true, needed: cost });
             return false;
         }
 
@@ -350,11 +354,15 @@ export function ScriptGeneratorV2Content({ user }: Props) {
             const data = await res.json();
 
             if (!res.ok || !data.success) {
-                setError(data.error || '크레딧 차감에 실패했습니다.');
+                // 서버에서도 부족 판정 → 모달
+                if (res.status === 403 && data.error?.includes('부족')) {
+                    setCreditModal({ open: true, needed: cost });
+                } else {
+                    setError(data.error || '크레딧 차감에 실패했습니다.');
+                }
                 return false;
             }
 
-            // 잔량 업데이트
             setCreditInfo(prev => prev ? { ...prev, credits: data.credits } : prev);
             return true;
         } catch {
@@ -999,6 +1007,52 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                         </Group>
                     )}
                 </Stack>
+
+            {/* 크레딧 부족 모달 */}
+            <Modal
+                opened={creditModal.open}
+                onClose={() => setCreditModal({ open: false, needed: 0 })}
+                centered
+                radius="lg"
+                padding="xl"
+                withCloseButton={false}
+                overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
+            >
+                <Stack align="center" gap="lg">
+                    <Box style={{
+                        width: 64, height: 64, borderRadius: '50%',
+                        background: '#fef2f2', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        <CreditCard size={28} color="#ef4444" />
+                    </Box>
+
+                    <Stack gap={4} align="center">
+                        <Text fw={700} size="lg" ta="center">크레딧이 부족합니다</Text>
+                        <Text size="sm" c="gray.6" ta="center">
+                            이 작업에는 <Text span fw={700} c="violet">{creditModal.needed}cr</Text>이 필요하지만,
+                            현재 <Text span fw={700} c="red">{creditInfo?.credits ?? 0}cr</Text> 남아있습니다.
+                        </Text>
+                    </Stack>
+
+                    <Stack gap="sm" w="100%">
+                        <Button
+                            component={Link}
+                            href="/dashboard/subscription"
+                            size="md" radius="md" color="violet" fullWidth
+                            leftSection={<CreditCard size={18} />}
+                        >
+                            크레딧 충전하기
+                        </Button>
+                        <Button
+                            variant="subtle" color="gray" size="sm" fullWidth
+                            onClick={() => setCreditModal({ open: false, needed: 0 })}
+                        >
+                            닫기
+                        </Button>
+                    </Stack>
+                </Stack>
+            </Modal>
 
             {/* 반응형 CSS */}
             <style>{`
