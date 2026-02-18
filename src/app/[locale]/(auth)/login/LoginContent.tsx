@@ -54,6 +54,10 @@ export function LoginContent() {
       }
       // If successful, redirect happens server-side, loading stays true
     } catch (error) {
+      // Next.js redirect()는 NEXT_REDIRECT 에러를 throw — 이건 정상 동작이므로 무시
+      if (error && typeof error === 'object' && 'digest' in error &&
+          typeof (error as { digest: string }).digest === 'string' &&
+          (error as { digest: string }).digest.includes('NEXT_REDIRECT')) return;
       setMessage({ type: 'error', text: 'Google 로그인에 실패했습니다. 다시 시도해주세요.' });
       setIsGoogleLoading(false);
     }
