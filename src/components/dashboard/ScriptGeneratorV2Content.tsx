@@ -40,6 +40,7 @@ import {
     CreditCard,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 
 // ============ 타입 ============
 
@@ -254,6 +255,96 @@ interface Props {
     user?: { email?: string };
 }
 
+// ============ 백그라운드 생성 (컴포넌트 수명과 무관) ============
+const RENDER_API_URL_BG = 'https://script-generator-api-civ5.onrender.com';
+
+interface BgGenerationState {
+    promise: Promise<V2Result | null> | null;
+    material: string;
+    done: boolean;
+    result: V2Result | null;
+}
+
+const bgGeneration: BgGenerationState = { promise: null, material: '', done: false, result: null };
+
+// 리서치 백그라운드 상태
+interface BgResearchState {
+    promise: Promise<ResearchResult | null> | null;
+    done: boolean;
+    result: ResearchResult | null;
+}
+
+const bgResearch: BgResearchState = { promise: null, done: false, result: null };
+
+async function runBackgroundResearch(params: {
+    topic: string;
+    user_id: string;
+}): Promise<ResearchResult | null> {
+    try {
+        const response = await fetch(`${RENDER_API_URL_BG}/api/research`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params),
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || '리서치 실패');
+
+        bgResearch.done = true;
+        bgResearch.result = data;
+        return data;
+    } catch (err) {
+        console.error('[BackgroundResearch] 실패:', err);
+        bgResearch.done = true;
+        bgResearch.result = null;
+        return null;
+    }
+}
+
+async function runBackgroundGeneration(params: {
+    material: string;
+    user_id: string;
+    research_text: string;
+    niche: string;
+    tone: string;
+}): Promise<V2Result | null> {
+    try {
+        const response = await fetch(`${RENDER_API_URL_BG}/api/v2/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params),
+        });
+
+        const data: V2Result = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || '생성 실패');
+
+        // 백그라운드 저장 (컴포넌트 상태와 무관)
+        await fetch('/api/scripts/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                input_text: params.material,
+                niche: params.niche,
+                tone: params.tone,
+                scripts: data.scripts.map(s => ({
+                    hook_preview: s.hook,
+                    full_script: s.final,
+                    archetype: 'V2_PIPELINE',
+                })),
+            }),
+        });
+
+        bgGeneration.done = true;
+        bgGeneration.result = data;
+        return data;
+    } catch (err) {
+        console.error('[BackgroundGeneration] 실패:', err);
+        bgGeneration.done = true;
+        bgGeneration.result = null;
+        return null;
+    }
+}
+
 // ============ 메인 컴포넌트 ============
 export function ScriptGeneratorV2Content({ user }: Props) {
     // Step 1 state
@@ -298,8 +389,57 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
     const progressRef = useRef<HTMLDivElement>(null);
     const hookSelectionRef = useRef<HTMLDivElement>(null);
+    const searchParams = useSearchParams();
 
     const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
+
+    // 보관함에서 "V2에서 열기" → ?edit=<id> 로 진입 시 데이터 복원
+    useEffect(() => {
+        const editId = searchParams.get('edit');
+        if (!editId) return;
+
+        async function loadScript() {
+            try {
+                const res = await fetch('/api/scripts/history');
+                const data = await res.json();
+                if (!data.success) return;
+
+                const target = data.scripts.find((s: { id: string }) => s.id === editId);
+                if (!target) return;
+
+                // 소재 복원
+                setMaterial(target.inputText || '');
+                // 니치 복원
+                if (target.niche) setSelectedNiche(target.niche);
+                // 말투 복원
+                if (target.tone) setSelectedTone(target.tone);
+                // 스크립트 결과 복원
+                if (target.scripts && target.scripts.length > 0) {
+                    setResult({
+                        success: true,
+                        research_text: '',
+                        analysis: { topic: target.inputText || '' },
+                        hooks: target.scripts.map((s: { hook_preview?: string }) => s.hook_preview || ''),
+                        scripts: target.scripts.map((s: { hook_preview?: string; full_script?: string }) => ({
+                            hook: s.hook_preview || '',
+                            template_id: '',
+                            draft: '',
+                            final: s.full_script || '',
+                        })),
+                        token_usage: { total_input: 0, total_output: 0, calls: 0 },
+                        timings: { research: 0, analysis: 0, hooks: 0, scripts: 0, total: 0 },
+                    });
+                    setGenPhase('done');
+                    // 리서치 스킵 상태로 설정 (Step 2 표시를 위해)
+                    setResearchResult({ success: true, research_text: '', sources: [] });
+                }
+            } catch {
+                // 무시
+            }
+        }
+
+        loadScript();
+    }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // 현재 위저드 스텝
     const currentStep: WizardStep = result ? 3 : (researchResult || isGenerating) ? 2 : 1;
@@ -321,6 +461,26 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         timers.push(setTimeout(() => setGenPhase('reviewing'), 50000));
         return () => timers.forEach(clearTimeout);
     }, [isGenerating]);
+
+    // 페이지 복귀 시 백그라운드 리서치/생성 결과 확인
+    useEffect(() => {
+        // 백그라운드 생성 완료 확인
+        if (bgGeneration.done && bgGeneration.result && !result) {
+            setResult(bgGeneration.result);
+            setGenPhase('done');
+            setSaveMessage({ type: 'success', text: '백그라운드에서 생성 완료! 보관함에 저장되었습니다.' });
+            bgGeneration.done = false;
+            bgGeneration.result = null;
+            bgGeneration.promise = null;
+        }
+        // 백그라운드 리서치 완료 확인
+        if (bgResearch.done && bgResearch.result && !researchResult) {
+            setResearchResult(bgResearch.result);
+            bgResearch.done = false;
+            bgResearch.result = null;
+            bgResearch.promise = null;
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // 자동 스크롤
     useEffect(() => {
@@ -388,20 +548,19 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         setResult(null);
         setSelectedHookIndex(null);
 
+        // 백그라운드 리서치 시작
+        bgResearch.promise = runBackgroundResearch({
+            topic: material,
+            user_id: user?.email || 'guest',
+        });
+        bgResearch.done = false;
+        bgResearch.result = null;
+
         try {
-            const response = await fetch(`${RENDER_API_URL}/api/research`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    topic: material,
-                    user_id: user?.email || 'guest',
-                }),
-            });
+            const data = await bgResearch.promise;
 
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || '리서치에 실패했습니다.');
+            if (!data) {
+                throw new Error('리서치에 실패했습니다.');
             }
 
             setResearchResult(data);
@@ -412,7 +571,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         }
     };
 
-    // ====== Step 2 → 스크립트 생성 ======
+    // ====== Step 2 → 스크립트 생성 (백그라운드 실행) ======
     const handleGenerate = async () => {
         setError(null);
 
@@ -425,30 +584,31 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         setSelectedHookIndex(null);
         setSaveMessage(null);
 
+        const tone = selectedTone === 'default' ? '' : (selectedTone || '');
+        const params = {
+            material,
+            user_id: user?.email || 'guest',
+            research_text: researchResult?.research_text || '',
+            niche: selectedNiche || '',
+            tone,
+        };
+
+        // 백그라운드 생성 시작 (컴포넌트 언마운트돼도 완료+저장됨)
+        bgGeneration.promise = runBackgroundGeneration(params);
+        bgGeneration.material = material;
+        bgGeneration.done = false;
+        bgGeneration.result = null;
+
         try {
-            const tone = selectedTone === 'default' ? '' : (selectedTone || '');
+            const data = await bgGeneration.promise;
 
-            const response = await fetch(`${RENDER_API_URL}/api/v2/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    material,
-                    user_id: user?.email || 'guest',
-                    research_text: researchResult?.research_text || '',
-                    niche: selectedNiche || '',
-                    tone,
-                }),
-            });
-
-            const data: V2Result = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || '스크립트 생성에 실패했습니다.');
+            if (!data) {
+                throw new Error('스크립트 생성에 실패했습니다.');
             }
 
             setResult(data);
             setGenPhase('done');
-            autoSave(data);
+            setSaveMessage({ type: 'success', text: '보관함에 자동 저장되었습니다!' });
         } catch (err) {
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
             setGenPhase('idle');
@@ -472,32 +632,6 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         if (!result?.scripts[index]) return;
         setSelectedHookIndex(selectedHookIndex === index ? null : index);
         setSaveMessage(null);
-    };
-
-    // 자동 저장 (생성 완료 시 호출) — resultData를 직접 받아 처리
-    const autoSave = async (resultData: V2Result) => {
-        try {
-            const response = await fetch('/api/scripts/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    input_text: material,
-                    niche: selectedNiche || '',
-                    tone: selectedTone || '',
-                    scripts: resultData.scripts.map(s => ({
-                        hook_preview: s.hook,
-                        full_script: s.final,
-                        archetype: 'V2_PIPELINE',
-                    })),
-                }),
-            });
-
-            const data = await response.json();
-            if (!response.ok || !data.success) throw new Error(data.error || '저장 실패');
-            setSaveMessage({ type: 'success', text: '보관함에 자동 저장되었습니다!' });
-        } catch (err) {
-            setSaveMessage({ type: 'error', text: err instanceof Error ? err.message : '자동 저장 실패' });
-        }
     };
 
     const handleReset = () => {
@@ -693,12 +827,19 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
                             {/* 리서치 로딩 */}
                             {isResearching && (
-                                <Card padding="md" radius="md" style={{ border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                                    <Group gap="sm" justify="center">
-                                        <Loader size="sm" color="violet" />
-                                        <Text size="sm" c="gray.6">AI가 주제를 리서치하는 중...</Text>
-                                    </Group>
-                                </Card>
+                                <Stack gap="sm">
+                                    <Card padding="md" radius="md" style={{ border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                                        <Group gap="sm" justify="center">
+                                            <Loader size="sm" color="violet" />
+                                            <Text size="sm" c="gray.6">AI가 주제를 리서치하는 중...</Text>
+                                        </Group>
+                                    </Card>
+                                    <Alert color="violet" variant="light" radius="lg" icon={<Sparkles size={18} />} style={{ textAlign: 'center' }}>
+                                        <Text size="sm" fw={500}>
+                                            다른 페이지를 둘러보셔도 괜찮아요. 리서치가 완료되면 돌아와서 이어서 진행할 수 있습니다.
+                                        </Text>
+                                    </Alert>
+                                </Stack>
                             )}
 
                             {/* 리서치 결과 (Step 2로 넘어갈 때 표시) */}
@@ -817,6 +958,21 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                         </div>
                                     )}
                                 </Transition>
+                            )}
+
+                            {/* 생성 중 안내 */}
+                            {isGenerating && (
+                                <Alert
+                                    color="violet"
+                                    variant="light"
+                                    radius="lg"
+                                    icon={<Sparkles size={18} />}
+                                    style={{ textAlign: 'center' }}
+                                >
+                                    <Text size="sm" fw={500}>
+                                        다른 페이지를 둘러보셔도 괜찮아요. 생성이 완료되면 보관함에 자동 저장됩니다.
+                                    </Text>
+                                </Alert>
                             )}
 
                             {/* 하단 액션 */}

@@ -40,6 +40,7 @@ import {
     Check,
     AlertCircle,
     Loader2,
+    Zap,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -515,6 +516,18 @@ export function ArchiveContent() {
                                                                     <FolderOpen size={16} />
                                                                 </ActionIcon>
                                                             </Tooltip>
+                                                            {isV2Script(item) && (
+                                                                <Tooltip label="V2에서 열기">
+                                                                    <ActionIcon
+                                                                        variant="light"
+                                                                        color="violet"
+                                                                        component={Link}
+                                                                        href={`/dashboard/scripts-v2?edit=${item.id}`}
+                                                                    >
+                                                                        <Zap size={16} />
+                                                                    </ActionIcon>
+                                                                </Tooltip>
+                                                            )}
                                                             <Tooltip label="수정">
                                                                 <ActionIcon
                                                                     variant="subtle"
