@@ -10,17 +10,26 @@ export async function GET() {
         }
         const { data, error } = await supabase
             .from("lecture_progress")
-            .select("vod_id")
+            .select("vod_id, completed_at, last_position")
             .eq("user_id", user.id);
         if (error) {
             console.error("[Lectures API] DB Error:", error);
-            return NextResponse.json({ success: true, completedVods: [] });
+            return NextResponse.json({ success: true, completedVods: [], positions: {} });
         }
-        const completedVods = (data || []).map((row: { vod_id: string }) => row.vod_id);
-        return NextResponse.json({ success: true, completedVods });
+        const completedVods: string[] = [];
+        const positions: Record<string, number> = {};
+        for (const row of data || []) {
+            if (row.completed_at) {
+                completedVods.push(row.vod_id);
+            }
+            if (row.last_position && row.last_position > 0) {
+                positions[row.vod_id] = row.last_position;
+            }
+        }
+        return NextResponse.json({ success: true, completedVods, positions });
     } catch (err) {
         console.error("[Lectures API] GET Error:", err);
-        return NextResponse.json({ success: true, completedVods: [] });
+        return NextResponse.json({ success: true, completedVods: [], positions: {} });
     }
 }
 
@@ -36,8 +45,24 @@ export async function POST(request: Request) {
         if (!vodId || typeof vodId !== "string") {
             return NextResponse.json({ error: "vod_id required" }, { status: 400 });
         }
+
+        const upsertData: Record<string, unknown> = {
+            user_id: user.id,
+            vod_id: vodId,
+        };
+
+        // last_position이 있으면 저장
+        if (typeof body.last_position === "number") {
+            upsertData.last_position = body.last_position;
+        }
+
+        // completed 플래그가 있으면 완료 처리
+        if (body.completed) {
+            upsertData.completed_at = new Date().toISOString();
+        }
+
         const { error } = await supabase.from("lecture_progress").upsert(
-            { user_id: user.id, vod_id: vodId, completed_at: new Date().toISOString() },
+            upsertData,
             { onConflict: "user_id,vod_id" }
         );
         if (error) {
@@ -50,4 +75,3 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
 }
-

@@ -4,9 +4,14 @@
  * 강의 시청 페이지 컴포넌트
  * 왼쪽: VdoCipher 플레이어 + 수강 완료 + 이전/다음
  * 오른쪽: 챕터별 강의 목록 사이드 패널
+ *
+ * VdoCipher api.js 연동:
+ * - 이어서 듣기 (last_position 저장/복원)
+ * - 자동 진도 체크 (90%+ 시청 시 자동 완료)
+ * - 자동 다음 강의 (ended → 5초 카운트다운)
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
     Container,
     Title,
@@ -32,8 +37,9 @@ import {
     ChevronDown,
     ChevronRight,
     List,
+    X,
 } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import { CHAPTERS } from './LecturesContent';
 import { VideoWatermark } from './VideoWatermark';
 
@@ -57,8 +63,30 @@ function getAllVods() {
     return allVods;
 }
 
+// VdoPlayer 타입 (api.js 글로벌)
+declare global {
+    interface Window {
+        VdoPlayer?: {
+            getInstance: (iframe: HTMLIFrameElement) => {
+                video: {
+                    currentTime: number;
+                    duration: number;
+                    addEventListener: (event: string, handler: () => void) => void;
+                    removeEventListener: (event: string, handler: () => void) => void;
+                    play: () => void;
+                };
+                api: {
+                    getTotalCovered: () => Promise<number>;
+                };
+            };
+        };
+    }
+}
+
 export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentProps) {
+    const router = useRouter();
     const [completedVods, setCompletedVods] = useState<string[]>([]);
+    const [positions, setPositions] = useState<Record<string, number>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [isMarking, setIsMarking] = useState(false);
     const [showList, setShowList] = useState(true);
@@ -66,6 +94,14 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
     const [playbackInfo, setPlaybackInfo] = useState<string | null>(null);
     const [isVideoLoading, setIsVideoLoading] = useState(false);
     const [videoError, setVideoError] = useState<string | null>(null);
+
+    // 자동 다음 강의 카운트다운
+    const [countdown, setCountdown] = useState<number | null>(null);
+
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const lastSaveRef = useRef<number>(0);
+    const autoCompletedRef = useRef(false);
+    const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const allVods = useMemo(() => getAllVods(), []);
     const currentIndex = allVods.findIndex((v) => v.id === vodId);
@@ -82,12 +118,27 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
         return init;
     });
 
-    // vodId 변경 시 해당 챕터 열기
+    // vodId 변경 시 해당 챕터 열기 + 카운트다운/자동완료 초기화
     useEffect(() => {
         if (currentVod) {
             setOpenChapters((prev) => ({ ...prev, [currentVod.chapterId]: true }));
         }
+        autoCompletedRef.current = false;
+        setCountdown(null);
+        if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+        }
     }, [vodId, currentVod]);
+
+    // VdoCipher api.js 로드 (한번만)
+    useEffect(() => {
+        if (document.querySelector('script[src*="vdocipher.com/v2/api.js"]')) return;
+        const script = document.createElement('script');
+        script.src = 'https://player.vdocipher.com/v2/api.js';
+        script.async = true;
+        document.head.appendChild(script);
+    }, []);
 
     // VdoCipher OTP 발급
     useEffect(() => {
@@ -121,7 +172,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
             });
     }, [vodId, currentVod?.vdoCipherId]);
 
-    // 수강 진도 불러오기
+    // 수강 진도 불러오기 (completedVods + positions)
     useEffect(() => {
         async function fetchProgress() {
             try {
@@ -129,6 +180,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                 const data = await res.json();
                 if (data.success) {
                     setCompletedVods(data.completedVods || []);
+                    setPositions(data.positions || {});
                 }
             } catch {
                 // 에러 시 빈 배열 유지
@@ -139,7 +191,127 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
         fetchProgress();
     }, []);
 
-    // 수강 완료 처리
+    // 진도 저장 함수
+    const savePosition = useCallback((position: number) => {
+        fetch('/api/lectures/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vod_id: vodId, last_position: position }),
+        }).catch(() => { /* 무시 */ });
+    }, [vodId]);
+
+    // 완료 처리 함수
+    const markComplete = useCallback((position?: number) => {
+        const body: Record<string, unknown> = { vod_id: vodId, completed: true };
+        if (typeof position === 'number') body.last_position = position;
+        fetch('/api/lectures/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    setCompletedVods((prev) =>
+                        prev.includes(vodId) ? prev : [...prev, vodId]
+                    );
+                }
+            })
+            .catch(() => { /* 무시 */ });
+    }, [vodId]);
+
+    // VdoPlayer 인스턴스 + 이벤트 바인딩
+    useEffect(() => {
+        if (!videoOtp || !iframeRef.current) return;
+
+        const iframe = iframeRef.current;
+        let cleanedUp = false;
+
+        // api.js 로드 대기 후 플레이어 초기화
+        const waitForApi = setInterval(() => {
+            if (cleanedUp) { clearInterval(waitForApi); return; }
+            if (!window.VdoPlayer) return;
+            clearInterval(waitForApi);
+
+            try {
+                const player = window.VdoPlayer.getInstance(iframe);
+
+                // 이어서 듣기: loadedmetadata 후 저장된 위치로 seek
+                const savedPos = positions[vodId] || 0;
+                player.video.addEventListener('loadedmetadata', () => {
+                    if (savedPos > 5) {
+                        // 끝에서 5초 이내면 처음부터
+                        const dur = player.video.duration;
+                        if (dur > 0 && savedPos < dur - 5) {
+                            player.video.currentTime = savedPos;
+                        }
+                    }
+                });
+
+                // 15초마다 진도 저장 + 90% 자동 완료 체크
+                player.video.addEventListener('timeupdate', () => {
+                    const current = player.video.currentTime;
+                    const duration = player.video.duration;
+
+                    // 15초마다 위치 저장
+                    const now = Date.now();
+                    if (now - lastSaveRef.current >= 15000) {
+                        lastSaveRef.current = now;
+                        savePosition(current);
+                    }
+
+                    // 90% 자동 완료 (한번만)
+                    if (!autoCompletedRef.current && duration > 0 && current / duration >= 0.9) {
+                        autoCompletedRef.current = true;
+                        markComplete(current);
+                    }
+                });
+
+                // 영상 끝: 완료 처리 + 다음 강의 카운트다운
+                player.video.addEventListener('ended', () => {
+                    // 완료 처리
+                    if (!autoCompletedRef.current) {
+                        autoCompletedRef.current = true;
+                        markComplete();
+                    }
+
+                    // 다음 강의 카운트다운 시작
+                    if (nextVod) {
+                        setCountdown(5);
+                    }
+                });
+            } catch {
+                // VdoPlayer 초기화 실패 — 무시 (DRM 미지원 브라우저 등)
+            }
+        }, 300);
+
+        return () => {
+            cleanedUp = true;
+            clearInterval(waitForApi);
+        };
+    // positions는 초기 로드 후 변하지 않으므로 deps에서 제외 (stale closure 의도)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [videoOtp, vodId, savePosition, markComplete, nextVod]);
+
+    // 카운트다운 타이머
+    useEffect(() => {
+        if (countdown === null) return;
+        if (countdown <= 0 && nextVod) {
+            router.push(`/dashboard/lectures/${nextVod.id}`);
+            return;
+        }
+        const timer = setTimeout(() => {
+            setCountdown((c) => (c !== null ? c - 1 : null));
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [countdown, nextVod, router]);
+
+    // 카운트다운 취소
+    const cancelCountdown = () => {
+        setCountdown(null);
+    };
+
+    // 수강 완료 처리 (수동 버튼)
     const handleMarkComplete = async () => {
         if (isMarking || isCompleted) return;
         setIsMarking(true);
@@ -147,7 +319,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
             const res = await fetch('/api/lectures/progress', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ vod_id: vodId }),
+                body: JSON.stringify({ vod_id: vodId, completed: true }),
             });
             const data = await res.json();
             if (data.success) {
@@ -276,7 +448,8 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                         </div>
                                     ) : videoOtp && playbackInfo ? (
                                         <iframe
-                                            src={`https://player.vdocipher.com/v2/?otp=${videoOtp}&playbackInfo=${playbackInfo}`}
+                                            ref={iframeRef}
+                                            src={`https://player.vdocipher.com/v2/?otp=${videoOtp}&playbackInfo=${playbackInfo}&primaryColor=8B5CF6`}
                                             style={{
                                                 position: 'absolute',
                                                 top: 0, left: 0,
@@ -302,6 +475,43 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                         <Text c="gray.4" size="sm">곧 업로드됩니다</Text>
                                     </div>
                                 )}
+
+                                {/* 다음 강의 카운트다운 오버레이 */}
+                                {countdown !== null && nextVod && (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0, left: 0, right: 0, bottom: 0,
+                                            display: 'flex', flexDirection: 'column',
+                                            alignItems: 'center', justifyContent: 'center',
+                                            gap: 12,
+                                            background: 'rgba(0, 0, 0, 0.85)',
+                                            zIndex: 10,
+                                        }}
+                                    >
+                                        <Text c="white" size="sm" opacity={0.7}>
+                                            다음 강의
+                                        </Text>
+                                        <Text c="white" size="lg" fw={600}>
+                                            {nextVod.title}
+                                        </Text>
+                                        <Text c="white" size="xl" fw={700} mt={4}>
+                                            {countdown}초
+                                        </Text>
+                                        <Button
+                                            variant="subtle"
+                                            color="gray"
+                                            size="sm"
+                                            mt={8}
+                                            leftSection={<X size={14} />}
+                                            onClick={cancelCountdown}
+                                            styles={{ root: { color: 'white', '&:hover': { background: 'rgba(255,255,255,0.1)' } } }}
+                                        >
+                                            취소
+                                        </Button>
+                                    </div>
+                                )}
+
                                 {/* 동적 워터마크 오버레이 */}
                                 {userEmail && <VideoWatermark email={userEmail} />}
                             </div>
