@@ -669,6 +669,59 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                                     {chapter.vods.map((vod) => {
                                                         const isDone = completedVods.includes(vod.id);
                                                         const isCurrent = vod.id === vodId;
+                                                        const isReady = !!vod.vdoCipherId;
+
+                                                        const rowInner = (
+                                                            <Group gap={8} wrap="nowrap">
+                                                                {isDone ? (
+                                                                    <CheckCircle2
+                                                                        size={14}
+                                                                        color="#8b5cf6"
+                                                                        fill="#8b5cf6"
+                                                                        strokeWidth={0}
+                                                                        style={{ flexShrink: 0 }}
+                                                                    />
+                                                                ) : (
+                                                                    <Circle
+                                                                        size={14}
+                                                                        color={isReady ? '#d1d5db' : '#e5e7eb'}
+                                                                        style={{ flexShrink: 0 }}
+                                                                    />
+                                                                )}
+                                                                <Text
+                                                                    size="xs"
+                                                                    fw={isCurrent ? 600 : 400}
+                                                                    c={isCurrent ? 'violet.7' : isDone ? 'gray.5' : isReady ? 'gray.7' : 'gray.4'}
+                                                                    style={{
+                                                                        whiteSpace: 'nowrap',
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                    }}
+                                                                >
+                                                                    {vod.title}
+                                                                </Text>
+                                                                <Text size="xs" c="gray.4" style={{ flexShrink: 0, marginLeft: 'auto' }}>
+                                                                    {isReady ? `${vod.duration}분` : '준비 중'}
+                                                                </Text>
+                                                            </Group>
+                                                        );
+
+                                                        if (!isReady) {
+                                                            return (
+                                                                <Box
+                                                                    key={vod.id}
+                                                                    py={8}
+                                                                    px="md"
+                                                                    style={{
+                                                                        opacity: 0.45,
+                                                                        cursor: 'default',
+                                                                        borderLeft: '3px solid transparent',
+                                                                    }}
+                                                                >
+                                                                    {rowInner}
+                                                                </Box>
+                                                            );
+                                                        }
 
                                                         return (
                                                             <UnstyledButton
@@ -688,38 +741,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                                                 py={8}
                                                                 px="md"
                                                             >
-                                                                <Group gap={8} wrap="nowrap">
-                                                                    {isDone ? (
-                                                                        <CheckCircle2
-                                                                            size={14}
-                                                                            color="#8b5cf6"
-                                                                            fill="#8b5cf6"
-                                                                            strokeWidth={0}
-                                                                            style={{ flexShrink: 0 }}
-                                                                        />
-                                                                    ) : (
-                                                                        <Circle
-                                                                            size={14}
-                                                                            color="#d1d5db"
-                                                                            style={{ flexShrink: 0 }}
-                                                                        />
-                                                                    )}
-                                                                    <Text
-                                                                        size="xs"
-                                                                        fw={isCurrent ? 600 : 400}
-                                                                        c={isCurrent ? 'violet.7' : isDone ? 'gray.5' : 'gray.7'}
-                                                                        style={{
-                                                                            whiteSpace: 'nowrap',
-                                                                            overflow: 'hidden',
-                                                                            textOverflow: 'ellipsis',
-                                                                        }}
-                                                                    >
-                                                                        {vod.title}
-                                                                    </Text>
-                                                                    <Text size="xs" c="gray.4" style={{ flexShrink: 0, marginLeft: 'auto' }}>
-                                                                        {vod.duration}분
-                                                                    </Text>
-                                                                </Group>
+                                                                {rowInner}
                                                             </UnstyledButton>
                                                         );
                                                     })}

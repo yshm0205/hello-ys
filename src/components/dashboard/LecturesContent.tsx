@@ -257,7 +257,49 @@ export function LecturesContent() {
                                         <Stack gap={0}>
                                             {chapter.vods.map((vod, idx) => {
                                                 const isDone = completedVods.includes(vod.id);
-                                                return (
+                                                const isReady = !!vod.vdoCipherId;
+                                                const rowContent = (
+                                                    <Group justify="space-between">
+                                                        <Group gap="sm">
+                                                            {isDone ? (
+                                                                <CheckCircle2
+                                                                    size={18}
+                                                                    color="#8b5cf6"
+                                                                    fill="#8b5cf6"
+                                                                    strokeWidth={0}
+                                                                />
+                                                            ) : (
+                                                                <Circle
+                                                                    size={18}
+                                                                    color={isReady ? '#d1d5db' : '#e5e7eb'}
+                                                                />
+                                                            )}
+                                                            <Text
+                                                                size="sm"
+                                                                c={isDone ? 'gray.6' : isReady ? 'gray.8' : 'gray.4'}
+                                                                fw={isDone ? 400 : 500}
+                                                                td={isDone ? 'line-through' : undefined}
+                                                            >
+                                                                {vod.title}
+                                                            </Text>
+                                                        </Group>
+                                                        <Group gap="xs">
+                                                            {!isReady ? (
+                                                                <Badge variant="light" color="gray" size="xs">
+                                                                    준비 중
+                                                                </Badge>
+                                                            ) : (
+                                                                <>
+                                                                    <Clock size={14} color="#9ca3af" />
+                                                                    <Text size="xs" c="gray.5">
+                                                                        {vod.duration}분
+                                                                    </Text>
+                                                                </>
+                                                            )}
+                                                        </Group>
+                                                    </Group>
+                                                );
+                                                return isReady ? (
                                                     <UnstyledButton
                                                         key={vod.id}
                                                         component={Link}
@@ -278,38 +320,21 @@ export function LecturesContent() {
                                                             },
                                                         }}
                                                     >
-                                                        <Group justify="space-between">
-                                                            <Group gap="sm">
-                                                                {isDone ? (
-                                                                    <CheckCircle2
-                                                                        size={18}
-                                                                        color="#8b5cf6"
-                                                                        fill="#8b5cf6"
-                                                                        strokeWidth={0}
-                                                                    />
-                                                                ) : (
-                                                                    <Circle
-                                                                        size={18}
-                                                                        color="#d1d5db"
-                                                                    />
-                                                                )}
-                                                                <Text
-                                                                    size="sm"
-                                                                    c={isDone ? 'gray.6' : 'gray.8'}
-                                                                    fw={isDone ? 400 : 500}
-                                                                    td={isDone ? 'line-through' : undefined}
-                                                                >
-                                                                    {vod.title}
-                                                                </Text>
-                                                            </Group>
-                                                            <Group gap="xs">
-                                                                <Clock size={14} color="#9ca3af" />
-                                                                <Text size="xs" c="gray.5">
-                                                                    {vod.duration}분
-                                                                </Text>
-                                                            </Group>
-                                                        </Group>
+                                                        {rowContent}
                                                     </UnstyledButton>
+                                                ) : (
+                                                    <Box
+                                                        key={vod.id}
+                                                        p="sm"
+                                                        pl="xl"
+                                                        style={{
+                                                            borderTop: '1px solid #f3f4f6',
+                                                            opacity: 0.45,
+                                                            cursor: 'default',
+                                                        }}
+                                                    >
+                                                        {rowContent}
+                                                    </Box>
                                                 );
                                             })}
                                         </Stack>
