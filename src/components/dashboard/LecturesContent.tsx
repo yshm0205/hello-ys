@@ -52,9 +52,9 @@ const CHAPTERS: Chapter[] = [
         title: 'Ch 1. 채널 기획',
         vods: [
             { id: 'vod_04', title: '채널 기획의 기본', duration: 15, vdoCipherId: 'c478d967ac36483ead7203ea414468dc' },
-            { id: 'vod_05', title: '니치 선택하기', duration: 12 },
-            { id: 'vod_06', title: '경쟁 분석', duration: 18 },
-            { id: 'vod_07', title: '실수 피하기', duration: 10 },
+            { id: 'vod_05', title: '니치 선택하기', duration: 12, vdoCipherId: '21e19db2a4494c2a90010683607bfc39' },
+            { id: 'vod_06', title: '경쟁 분석', duration: 18, vdoCipherId: 'd8f85c93013949bb888ff8cc3a9ec32b' },
+            { id: 'vod_07', title: '실수 피하기', duration: 10, vdoCipherId: 'a91251514a354df3a74e1bfcb738f048' },
         ],
     },
     {
