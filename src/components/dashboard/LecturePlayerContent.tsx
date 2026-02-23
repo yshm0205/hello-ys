@@ -2,7 +2,7 @@
 
 /**
  * 강의 시청 페이지 컴포넌트
- * 왼쪽: Vimeo 플레이어 + 수강 완료 + 이전/다음
+ * 왼쪽: VdoCipher 플레이어 + 수강 완료 + 이전/다음
  * 오른쪽: 챕터별 강의 목록 사이드 패널
  */
 
@@ -20,6 +20,7 @@ import {
     Collapse,
     UnstyledButton,
     ScrollArea,
+    Loader,
 } from '@mantine/core';
 import {
     ArrowLeft,
@@ -43,7 +44,7 @@ interface LecturePlayerContentProps {
 
 // 모든 VOD를 순서대로 펼친 배열 생성
 function getAllVods() {
-    const allVods: { id: string; title: string; duration: number; chapterTitle: string; chapterId: string }[] = [];
+    const allVods: { id: string; title: string; duration: number; chapterTitle: string; chapterId: string; vdoCipherId?: string }[] = [];
     for (const ch of CHAPTERS) {
         for (const vod of ch.vods) {
             allVods.push({
@@ -61,6 +62,10 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
     const [isLoading, setIsLoading] = useState(true);
     const [isMarking, setIsMarking] = useState(false);
     const [showList, setShowList] = useState(true);
+    const [videoOtp, setVideoOtp] = useState<string | null>(null);
+    const [playbackInfo, setPlaybackInfo] = useState<string | null>(null);
+    const [isVideoLoading, setIsVideoLoading] = useState(false);
+    const [videoError, setVideoError] = useState<string | null>(null);
 
     const allVods = useMemo(() => getAllVods(), []);
     const currentIndex = allVods.findIndex((v) => v.id === vodId);
@@ -83,6 +88,38 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
             setOpenChapters((prev) => ({ ...prev, [currentVod.chapterId]: true }));
         }
     }, [vodId, currentVod]);
+
+    // VdoCipher OTP 발급
+    useEffect(() => {
+        setVideoOtp(null);
+        setPlaybackInfo(null);
+        setVideoError(null);
+
+        const vdoCipherId = currentVod?.vdoCipherId;
+        if (!vdoCipherId) return;
+
+        setIsVideoLoading(true);
+        fetch('/api/lectures/otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoId: vdoCipherId }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.otp && data.playbackInfo) {
+                    setVideoOtp(data.otp);
+                    setPlaybackInfo(data.playbackInfo);
+                } else {
+                    setVideoError('영상을 불러올 수 없습니다');
+                }
+            })
+            .catch(() => {
+                setVideoError('영상을 불러올 수 없습니다');
+            })
+            .finally(() => {
+                setIsVideoLoading(false);
+            });
+    }, [vodId, currentVod?.vdoCipherId]);
 
     // 수강 진도 불러오기
     useEffect(() => {
@@ -204,7 +241,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                             </Group>
                         </Box>
 
-                        {/* 영상 영역 (Vimeo placeholder) + 워터마크 */}
+                        {/* 영상 영역 + 워터마크 */}
                         <Card padding={0} radius="lg" withBorder style={{ overflow: 'hidden' }}>
                             <div
                                 style={{
@@ -213,20 +250,58 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                     background: '#000',
                                 }}
                             >
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0, left: 0, right: 0, bottom: 0,
-                                        display: 'flex', flexDirection: 'column',
-                                        alignItems: 'center', justifyContent: 'center',
-                                        gap: 8,
-                                        background: '#f3f4f6',
-                                    }}
-                                >
-                                    <BookOpen size={48} color="#d1d5db" />
-                                    <Text c="gray.4" size="lg" fw={500}>영상 준비 중</Text>
-                                    <Text c="gray.4" size="sm">Vimeo 영상이 곧 업로드됩니다</Text>
-                                </div>
+                                {currentVod.vdoCipherId ? (
+                                    isVideoLoading ? (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0, left: 0, right: 0, bottom: 0,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                background: '#000',
+                                            }}
+                                        >
+                                            <Loader size="lg" color="violet" />
+                                        </div>
+                                    ) : videoError ? (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0, left: 0, right: 0, bottom: 0,
+                                                display: 'flex', flexDirection: 'column',
+                                                alignItems: 'center', justifyContent: 'center',
+                                                gap: 8, background: '#f3f4f6',
+                                            }}
+                                        >
+                                            <Text c="gray.5" size="sm">{videoError}</Text>
+                                        </div>
+                                    ) : videoOtp && playbackInfo ? (
+                                        <iframe
+                                            src={`https://player.vdocipher.com/v2/?otp=${videoOtp}&playbackInfo=${playbackInfo}`}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0, left: 0,
+                                                width: '100%', height: '100%',
+                                                border: 0,
+                                            }}
+                                            allow="encrypted-media"
+                                            allowFullScreen
+                                        />
+                                    ) : null
+                                ) : (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0, left: 0, right: 0, bottom: 0,
+                                            display: 'flex', flexDirection: 'column',
+                                            alignItems: 'center', justifyContent: 'center',
+                                            gap: 8, background: '#f3f4f6',
+                                        }}
+                                    >
+                                        <BookOpen size={48} color="#d1d5db" />
+                                        <Text c="gray.4" size="lg" fw={500}>영상 준비 중</Text>
+                                        <Text c="gray.4" size="sm">곧 업로드됩니다</Text>
+                                    </div>
+                                )}
                                 {/* 동적 워터마크 오버레이 */}
                                 {userEmail && <VideoWatermark email={userEmail} />}
                             </div>

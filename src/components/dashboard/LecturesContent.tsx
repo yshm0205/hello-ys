@@ -36,6 +36,7 @@ interface Vod {
     id: string;
     title: string;
     duration: number; // 분
+    vdoCipherId?: string;
 }
 
 interface Chapter {
@@ -50,7 +51,7 @@ const CHAPTERS: Chapter[] = [
         id: 'ch1',
         title: 'Ch 1. 채널 기획',
         vods: [
-            { id: 'vod_04', title: '채널 기획의 기본', duration: 15 },
+            { id: 'vod_04', title: '채널 기획의 기본', duration: 15, vdoCipherId: 'c478d967ac36483ead7203ea414468dc' },
             { id: 'vod_05', title: '니치 선택하기', duration: 12 },
             { id: 'vod_06', title: '경쟁 분석', duration: 18 },
             { id: 'vod_07', title: '실수 피하기', duration: 10 },
