@@ -278,7 +278,6 @@ export function LecturesContent() {
                                                                 size="sm"
                                                                 c={isDone ? 'gray.6' : isReady ? 'gray.8' : 'gray.4'}
                                                                 fw={isDone ? 400 : 500}
-                                                                td={isDone ? 'line-through' : undefined}
                                                             >
                                                                 {vod.title}
                                                             </Text>
