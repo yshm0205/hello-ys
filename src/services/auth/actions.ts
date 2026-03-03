@@ -54,6 +54,25 @@ export async function loginWithMagicLink(email: string) {
 }
 
 /**
+ * Signs in with email and password.
+ */
+export async function loginWithEmailPassword(email: string, password: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    console.error("Email/Password Login Error:", error);
+    return { error: error.message };
+  }
+
+  redirect("/ko/dashboard");
+}
+
+/**
  * Signs out the current user and redirects to the home page.
  */
 export async function logout() {

@@ -22,15 +22,17 @@ import {
   Loader,
   Alert,
 } from '@mantine/core';
-import { Bot, Mail, AlertCircle, Check } from 'lucide-react';
+import { Bot, Mail, Lock, AlertCircle, Check } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
-import { loginWithGoogle, loginWithMagicLink } from '@/services/auth/actions';
+import { loginWithGoogle, loginWithMagicLink, loginWithEmailPassword } from '@/services/auth/actions';
 
 export function LoginContent() {
   const t = useTranslations('Auth');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const searchParams = useSearchParams();
@@ -82,6 +84,34 @@ export function LoginContent() {
       setEmail('');
     }
     setIsLoading(false);
+  };
+
+  const handleEmailPasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      setMessage({ type: 'error', text: '유효한 이메일을 입력해주세요.' });
+      return;
+    }
+    if (!password) {
+      setMessage({ type: 'error', text: '비밀번호를 입력해주세요.' });
+      return;
+    }
+
+    setIsPasswordLoading(true);
+    setMessage(null);
+
+    try {
+      const res = await loginWithEmailPassword(email, password);
+      if (res?.error) {
+        setMessage({ type: 'error', text: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+      }
+    } catch (error) {
+      if (error && typeof error === 'object' && 'digest' in error &&
+          typeof (error as { digest: string }).digest === 'string' &&
+          (error as { digest: string }).digest.includes('NEXT_REDIRECT')) return;
+      setMessage({ type: 'error', text: '로그인에 실패했습니다. 다시 시도해주세요.' });
+    }
+    setIsPasswordLoading(false);
   };
 
   return (
@@ -239,43 +269,75 @@ export function LoginContent() {
               color="dark.5"
             />
 
-            {/* 이메일 매직 링크 */}
-            <form onSubmit={handleMagicLink}>
-              <Stack gap="md">
-                <TextInput
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.currentTarget.value)}
-                  size="lg"
-                  radius="lg"
-                  leftSection={<Mail size={18} color="#6b7280" />}
-                  styles={{
-                    input: {
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#FFFFFF',
-                      '&::placeholder': {
-                        color: 'rgba(255, 255, 255, 0.4)',
-                      },
+            {/* 이메일 + 비밀번호 / 매직 링크 */}
+            <Stack gap="md">
+              <TextInput
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.currentTarget.value)}
+                size="lg"
+                radius="lg"
+                leftSection={<Mail size={18} color="#6b7280" />}
+                styles={{
+                  input: {
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    '&::placeholder': {
+                      color: 'rgba(255, 255, 255, 0.4)',
                     },
-                  }}
-                />
+                  },
+                }}
+              />
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  radius="lg"
-                  fullWidth
-                  loading={isLoading}
-                  style={{
-                    background: '#8b5cf6',
-                    border: 'none',
-                  }}
-                >
-                  {t('sendMagicLink')}
-                </Button>
-              </Stack>
-            </form>
+              <TextInput
+                type="password"
+                placeholder="비밀번호"
+                value={password}
+                onChange={(e) => setPassword(e.currentTarget.value)}
+                size="lg"
+                radius="lg"
+                leftSection={<Lock size={18} color="#6b7280" />}
+                styles={{
+                  input: {
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    '&::placeholder': {
+                      color: 'rgba(255, 255, 255, 0.4)',
+                    },
+                  },
+                }}
+              />
+
+              <Button
+                size="lg"
+                radius="lg"
+                fullWidth
+                loading={isPasswordLoading}
+                onClick={handleEmailPasswordLogin}
+                style={{
+                  background: '#8b5cf6',
+                  border: 'none',
+                }}
+              >
+                로그인
+              </Button>
+
+              <Button
+                size="lg"
+                radius="lg"
+                fullWidth
+                loading={isLoading}
+                onClick={handleMagicLink}
+                variant="subtle"
+                style={{
+                  color: '#a78bfa',
+                }}
+              >
+                {t('sendMagicLink')}
+              </Button>
+            </Stack>
 
             {/* 메시지 */}
             {message && (
