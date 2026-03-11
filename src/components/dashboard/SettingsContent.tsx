@@ -36,6 +36,7 @@ import {
     Package,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useTossPayment } from '@/hooks/useTossPayment';
 
 interface SettingsContentProps {
     user?: {
@@ -58,6 +59,7 @@ interface CreditInfo {
 
 export function SettingsContent({ user, subscription }: SettingsContentProps) {
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+    const { requestPayment, loading: paymentLoading } = useTossPayment(user?.id);
 
     useEffect(() => {
         async function fetchCredits() {
@@ -360,6 +362,8 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                                         <Text fw={700} size="lg" style={{ color: '#8b5cf6' }}>{pack.price}</Text>
                                                         <Button size="xs" variant={pack.popular ? 'filled' : 'light'} color="violet" radius="lg" mt="xs"
                                                             style={pack.popular ? { background: '#8b5cf6' } : undefined}
+                                                            loading={paymentLoading}
+                                                            onClick={() => requestPayment(pack.cr)}
                                                         >
                                                             구매하기
                                                         </Button>

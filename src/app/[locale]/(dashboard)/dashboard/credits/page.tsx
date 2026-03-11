@@ -8,7 +8,7 @@ export default async function CreditsPage() {
 
     return (
         <DashboardLayout user={user || undefined}>
-            <CreditsContent />
+            <CreditsContent userId={user?.id} />
         </DashboardLayout>
     );
 }

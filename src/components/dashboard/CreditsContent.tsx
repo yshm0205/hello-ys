@@ -31,6 +31,7 @@ import {
     RefreshCw,
     SkipForward,
 } from 'lucide-react';
+import { useTossPayment } from '@/hooks/useTossPayment';
 
 interface CreditInfo {
     credits: number;
@@ -38,8 +39,13 @@ interface CreditInfo {
     expires_at: string | null;
 }
 
-export function CreditsContent() {
+interface CreditsContentProps {
+    userId?: string;
+}
+
+export function CreditsContent({ userId }: CreditsContentProps) {
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+    const { requestPayment, loading: paymentLoading } = useTossPayment(userId);
 
     useEffect(() => {
         async function fetchCredits() {
@@ -166,9 +172,10 @@ export function CreditsContent() {
                                             size="xs" radius="lg" mt={4}
                                             variant={pack.popular ? 'filled' : 'light'} color="violet"
                                             style={pack.popular ? { background: '#8b5cf6' } : undefined}
-                                            disabled
+                                            loading={paymentLoading}
+                                            onClick={() => requestPayment(pack.cr)}
                                         >
-                                            준비 중
+                                            구매하기
                                         </Button>
                                     </Box>
                                 </Group>
