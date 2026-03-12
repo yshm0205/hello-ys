@@ -2,7 +2,7 @@
 
 /**
  * 토스페이먼츠 결제 요청 훅
- * - widgets() + requestPaymentWindow() 방식 (결제위젯 연동 키 사용)
+ * - widgets().requestPaymentWindow() 방식 (결제위젯 연동 키 gck 사용)
  * - successUrl/failUrl로 리다이렉트
  */
 
