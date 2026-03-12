@@ -123,6 +123,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                 main: {
                     background: '#F9FAFB',
                     minHeight: '100vh',
+                    overflowX: 'hidden',
                 },
             }}
         >

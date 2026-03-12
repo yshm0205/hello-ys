@@ -332,7 +332,7 @@ export function ArchiveContent() {
     };
 
     return (
-        <Container size="lg" py="md">
+        <Container size="xl" py="md" style={{ maxWidth: '100%' }}>
             <Stack gap="xl">
                 {/* 헤더 */}
                 <Group justify="space-between">
