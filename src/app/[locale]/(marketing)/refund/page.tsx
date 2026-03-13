@@ -88,6 +88,9 @@ export default async function RefundPage() {
           <ul>
             <li>결제일로부터 <strong>7일 이내</strong>, 토큰을 <strong>1개도 사용하지 않은 경우</strong> 전액 환불</li>
             <li>토큰을 <strong>1개 이상 사용한 경우</strong> 환불 불가 (디지털 재화 즉시 소비)</li>
+            <li>토큰(크레딧) 환불은 <strong>결제 시 사용한 수단</strong>으로 진행됩니다.</li>
+            <li>구매한 토큰(크레딧)은 <strong>회원 간 양도, 매매, 이전이 불가</strong>합니다.</li>
+            <li>토큰(크레딧)의 사용, 취소, 환불은 <strong>충전일로부터 1년 이내</strong>에 가능하며, 유효기간 경과 후 미사용 토큰은 소멸됩니다.</li>
           </ul>
 
           <h2>제4조 (구독 취소) — 향후 적용</h2>
