@@ -82,7 +82,7 @@ export function CreditsContent({ userId }: CreditsContentProps) {
     ];
 
     return (
-        <Container size="xl" py="md" style={{ maxWidth: '100%' }}>
+        <Container size="xl" py="md">
             <Stack gap="xl">
                 {/* 헤더 */}
                 <Box>

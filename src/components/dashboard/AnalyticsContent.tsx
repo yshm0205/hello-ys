@@ -285,7 +285,7 @@ export function AnalyticsContent() {
     };
 
     return (
-        <Container size="xl" py="md" style={{ maxWidth: '100%' }}>
+        <Container size="xl" py="md">
             <Stack gap="xl">
                 {/* 헤더 */}
                 <Group justify="space-between">

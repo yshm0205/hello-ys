@@ -80,7 +80,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
     const maxCredits = isPro ? 500 : isAllinone ? 3000 : 100;
 
     return (
-        <Container size="xl" py="md" style={{ maxWidth: '100%' }}>
+        <Container size="xl" py="md">
             <Stack gap="xl">
                 {/* 헤더 */}
                 <Box>
