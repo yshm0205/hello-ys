@@ -38,8 +38,8 @@ const fadeUp = {
 
 const gridBg = {
   backgroundImage: `
-    linear-gradient(rgba(0,0,0,0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.018) 1px, transparent 1px)
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)
   `,
   backgroundSize: '56px 56px',
 };
@@ -86,7 +86,7 @@ function HeroSection() {
       {/* Ambient glow */}
       <Box style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 70% 50% at 50% 45%, rgba(139,92,246,0.04) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse 70% 50% at 50% 45%, rgba(139,92,246,0.07) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
@@ -97,14 +97,14 @@ function HeroSection() {
       <Box style={{
         position: 'absolute', top: '-100px', right: '-100px',
         width: '360px', height: '360px', borderRadius: '50%',
-        border: '1px solid rgba(139,92,246,0.07)', pointerEvents: 'none',
+        border: '1px solid rgba(139,92,246,0.12)', pointerEvents: 'none',
       }} />
 
       {/* Deco ring — bottom left */}
       <Box style={{
         position: 'absolute', bottom: '-60px', left: '-60px',
         width: '240px', height: '240px', borderRadius: '50%',
-        border: '1px solid rgba(139,92,246,0.05)', pointerEvents: 'none',
+        border: '1px solid rgba(139,92,246,0.1)', pointerEvents: 'none',
       }} />
 
       <Container size={620} py={80} style={{ position: 'relative', zIndex: 1 }}>
@@ -116,7 +116,7 @@ function HeroSection() {
             transition={{ duration: 0.5, delay: 0.15, ease }}
           >
             <Text ta="center" style={{
-              color: '#a1a1aa', fontSize: '15px', fontWeight: 500,
+              color: '#71717a', fontSize: '15px', fontWeight: 500,
               letterSpacing: '0.03em', marginBottom: '20px',
             }}>
               지금부터 소개해드리는 이 길이,
@@ -145,7 +145,7 @@ function HeroSection() {
                 월 <CountUp target={300} />
                 <Box style={{
                   position: 'absolute', bottom: '2px', left: '-2px', right: '-2px',
-                  height: '10px', background: 'rgba(139,92,246,0.14)',
+                  height: '10px', background: 'rgba(139,92,246,0.22)',
                   borderRadius: '5px', zIndex: -1,
                 }} />
               </span>
@@ -161,7 +161,7 @@ function HeroSection() {
             transition={{ duration: 0.5, delay: 0.55, ease }}
           >
             <Text ta="center" style={{
-              color: '#71717a', fontSize: 'clamp(17px, 2.5vw, 20px)',
+              color: '#52525b', fontSize: 'clamp(17px, 2.5vw, 20px)',
               maxWidth: '440px', lineHeight: 1.6, marginBottom: '36px',
             }}>
               뭘 해야 하는지 알려주고, AI가 대신 실행합니다
@@ -179,7 +179,7 @@ function HeroSection() {
                 <Badge key={label} size="lg" variant="light" radius="xl" style={{
                   padding: '10px 18px', fontSize: '13px', fontWeight: 600,
                   color: '#52525b', background: 'rgba(250,250,250,0.9)',
-                  border: '1px solid #e4e4e7',
+                  border: '1px solid #d4d4d8',
                 }}>
                   {label}
                 </Badge>
@@ -205,7 +205,7 @@ function HeroSection() {
               >
                 무료로 시작하기
               </Button>
-              <Text size="sm" style={{ color: '#a1a1aa', fontSize: '13px' }}>
+              <Text size="sm" style={{ color: '#71717a', fontSize: '13px' }}>
                 30크레딧 무료 · 카드 등록 없음
               </Text>
             </Stack>
@@ -236,7 +236,7 @@ function PainSection() {
   const pains = [
     { num: '01', title: '혼자 영상 만들어봤는데', desc: '6시간 걸려 만들었는데', metric: '조회수 47회', accent: '#ef4444' },
     { num: '02', title: '강의 들어봤는데', desc: '수십만 원 썼는데', metric: '돌아온 건 "노력 부족"', accent: '#f59e0b' },
-    { num: '03', title: 'AI 써봤는데', desc: '쇼츠 공식 모르는 AI', metric: '조회수 안 나옴', accent: '#71717a' },
+    { num: '03', title: 'AI 써봤는데', desc: '쇼츠 공식 모르는 AI', metric: '조회수 안 나옴', accent: '#52525b' },
   ];
 
   return (
@@ -271,8 +271,9 @@ function PainSection() {
                 style={{ flex: '1 1 0' }}
               >
                 <Paper p={0} radius="lg" style={{
-                  background: '#fafafa', border: '1px solid #e4e4e7',
+                  background: '#ffffff', border: '1px solid #d4d4d8',
                   overflow: 'hidden', height: '100%',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                 }}>
                   {/* Top accent bar */}
                   <Box style={{ height: '4px', background: p.accent }} />
@@ -286,7 +287,7 @@ function PainSection() {
                     <Text fw={700} style={{ fontSize: '18px', color: '#18181b', marginBottom: '12px', lineHeight: 1.4 }}>
                       {p.title}
                     </Text>
-                    <Text style={{ fontSize: '15px', color: '#71717a', lineHeight: 1.6, marginBottom: '8px' }}>
+                    <Text style={{ fontSize: '15px', color: '#52525b', lineHeight: 1.6, marginBottom: '8px' }}>
                       {p.desc}
                     </Text>
                     <Text fw={700} style={{ fontSize: '17px', color: p.accent, ...mono }}>
@@ -300,7 +301,7 @@ function PainSection() {
         </Box>
 
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.4, ease }}>
-          <Text ta="center" style={{ color: '#a1a1aa', fontSize: '15px', marginTop: '48px', fontStyle: 'italic' }}>
+          <Text ta="center" style={{ color: '#71717a', fontSize: '15px', marginTop: '48px', fontStyle: 'italic' }}>
             공식 없이 시작하면 전부 돌아가는 길입니다.
           </Text>
         </motion.div>
@@ -331,16 +332,16 @@ function WhyFlowSpotSection() {
         transition={{ duration: 0.4, delay, ease }}
         style={{ flex: '1 1 0' }}
       >
-        <Paper radius="lg" style={{ border: '2px dashed #d4d4d8', background: '#ffffff', overflow: 'hidden' }}>
+        <Paper radius="lg" style={{ border: '2px dashed #a1a1aa', background: '#ffffff', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
           {/* Window chrome */}
           <Box style={{
-            padding: '8px 12px', borderBottom: '1px solid #e4e4e7',
+            padding: '8px 12px', borderBottom: '1px solid #d4d4d8',
             display: 'flex', alignItems: 'center', gap: '6px',
           }}>
-            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: '#d4d4d8' }} />
-            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: '#d4d4d8' }} />
-            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: '#d4d4d8' }} />
-            <Text size="xs" style={{ color: '#a1a1aa', marginLeft: '8px', fontSize: '11px' }}>{r.label}</Text>
+            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: '#a1a1aa' }} />
+            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: '#a1a1aa' }} />
+            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: '#a1a1aa' }} />
+            <Text size="xs" style={{ color: '#71717a', marginLeft: '8px', fontSize: '11px' }}>{r.label}</Text>
           </Box>
           {/* Capture area */}
           <Box style={{
@@ -349,15 +350,15 @@ function WhyFlowSpotSection() {
           }}>
             <Stack align="center" gap={4}>
               <Text style={{ fontSize: '28px' }}>{r.icon}</Text>
-              <Text size="xs" style={{ color: '#a1a1aa', fontSize: '11px' }}>수익 캡처</Text>
+              <Text size="xs" style={{ color: '#71717a', fontSize: '11px' }}>수익 캡처</Text>
             </Stack>
           </Box>
           {/* Amount */}
           <Box style={{
-            padding: '10px 14px', borderTop: '1px solid #e4e4e7',
+            padding: '10px 14px', borderTop: '1px solid #d4d4d8',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <Text style={{ color: '#71717a', fontSize: '12px' }}>{r.label}</Text>
+            <Text style={{ color: '#52525b', fontSize: '12px' }}>{r.label}</Text>
             <Text fw={800} style={{ fontSize: '16px', color: '#18181b', ...mono }}>{r.amount}</Text>
           </Box>
         </Paper>
@@ -378,7 +379,7 @@ function WhyFlowSpotSection() {
             }}>
               저도 돌아가는 길 다 걸어봤습니다
             </Title>
-            <Text ta="center" style={{ fontSize: '16px', color: '#a1a1aa', marginBottom: '56px' }}>
+            <Text ta="center" style={{ fontSize: '16px', color: '#71717a', marginBottom: '56px' }}>
               그리고 결국 공식을 찾았습니다.
             </Text>
           </Stack>
@@ -410,7 +411,7 @@ function WhyFlowSpotSection() {
               borderLeft: '4px solid #8b5cf6',
               background: '#ffffff',
               borderRadius: '0 16px 16px 0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
             }}>
               <Text style={{
                 fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 800,
@@ -418,7 +419,7 @@ function WhyFlowSpotSection() {
               }}>
                 분야가 달라도 통하는 공식이 있었습니다
               </Text>
-              <Text style={{ fontSize: '16px', color: '#71717a', lineHeight: 1.7, marginBottom: '20px' }}>
+              <Text style={{ fontSize: '16px', color: '#52525b', lineHeight: 1.7, marginBottom: '20px' }}>
                 체계화한 뒤, 채널 1개 주 4시간으로 월 200-300
               </Text>
               <Text fw={700} style={{ fontSize: '18px', color: '#8b5cf6' }}>
@@ -524,7 +525,7 @@ function HowItWorksSection() {
                     }}>
                       <Box style={{
                         width: '40px', height: '0',
-                        borderTop: '2px dashed #d4d4d8',
+                        borderTop: '2px dashed #a1a1aa',
                       }} />
                       <Box style={{
                         background: '#f4f4f5',
@@ -534,14 +535,14 @@ function HowItWorksSection() {
                       }}>
                         <Text style={{
                           ...mono, fontSize: '11px', fontWeight: 700,
-                          color: '#a1a1aa',
+                          color: '#71717a',
                         }}>
                           NO →
                         </Text>
                       </Box>
                       <Box style={{
                         width: '40px', height: '0',
-                        borderTop: '2px dashed #d4d4d8',
+                        borderTop: '2px dashed #a1a1aa',
                       }} />
                     </Box>
                   )}
@@ -615,8 +616,9 @@ function HowItWorksSection() {
                   }}
                 >
                   <Paper radius="lg" p={0} style={{
-                    background: '#fafafa', border: '1px solid #e4e4e7',
+                    background: '#ffffff', border: '1px solid #d4d4d8',
                     overflow: 'hidden',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                   }}>
                     {/* Label header */}
                     <Box style={{
@@ -632,15 +634,15 @@ function HowItWorksSection() {
                     {/* Card body */}
                     <Box p={20}>
                       <Text style={{
-                        fontSize: '13px', color: '#71717a', lineHeight: 1.6, marginBottom: '16px',
+                        fontSize: '13px', color: '#52525b', lineHeight: 1.6, marginBottom: '16px',
                       }}>
                         {s.answer}
                       </Text>
 
-                      <Box style={{ height: '1px', background: '#e4e4e7', marginBottom: '14px' }} />
+                      <Box style={{ height: '1px', background: '#d4d4d8', marginBottom: '14px' }} />
 
                       <Text size="xs" fw={600} mb={10} style={{
-                        color: '#a1a1aa', letterSpacing: '0.04em', fontSize: '10px',
+                        color: '#71717a', letterSpacing: '0.04em', fontSize: '10px',
                         textTransform: 'uppercase',
                       }}>
                         포함 솔루션
@@ -725,8 +727,8 @@ function PackageSection() {
               style={{ flex: '1 1 0', maxWidth: '380px' }}
             >
               <Paper p={32} radius="lg" style={{
-                background: '#ffffff', border: '1px solid #e4e4e7',
-                height: '100%', opacity: 0.85,
+                background: '#ffffff', border: '1px solid #d4d4d8',
+                height: '100%',
               }}>
                 <Group mb={24} gap={10}>
                   <Box style={{
@@ -735,7 +737,7 @@ function PackageSection() {
                   }}>
                     <X size={18} color="#ef4444" />
                   </Box>
-                  <Text fw={700} style={{ fontSize: '18px', color: '#71717a' }}>일반 유료 강의</Text>
+                  <Text fw={700} style={{ fontSize: '18px', color: '#52525b' }}>일반 유료 강의</Text>
                 </Group>
                 <Stack gap={14}>
                   {[
@@ -746,8 +748,8 @@ function PackageSection() {
                     'AI 도구 없음',
                   ].map((t, i) => (
                     <Group key={i} gap={10} wrap="nowrap">
-                      <X size={14} color="#d4d4d8" style={{ flexShrink: 0 }} />
-                      <Text style={{ color: '#71717a', fontSize: '14px', lineHeight: 1.5 }}>{t}</Text>
+                      <X size={14} color="#a1a1aa" style={{ flexShrink: 0 }} />
+                      <Text style={{ color: '#52525b', fontSize: '14px', lineHeight: 1.5 }}>{t}</Text>
                     </Group>
                   ))}
                 </Stack>
@@ -804,8 +806,9 @@ function PackageSection() {
         {/* Value breakdown — receipt */}
         <motion.div {...fadeUp}>
           <Paper p={36} radius="lg" style={{
-            background: '#ffffff', border: '1px solid #e4e4e7',
+            background: '#ffffff', border: '1px solid #d4d4d8',
             maxWidth: '720px', margin: '0 auto',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           }}>
             <Text fw={700} ta="center" style={{ fontSize: '20px', color: '#18181b', marginBottom: '28px' }}>
               뭐가 들어있나요?
@@ -821,13 +824,13 @@ function PackageSection() {
                   padding: '14px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
                 }}>
                   <Text style={{ color: '#3f3f46', fontSize: '14px' }}>{row.item}</Text>
-                  <Text fw={600} style={{ color: '#71717a', fontSize: '14px', ...mono }}>{row.value}</Text>
+                  <Text fw={600} style={{ color: '#52525b', fontSize: '14px', ...mono }}>{row.value}</Text>
                 </Group>
               ))}
             </Stack>
-            <Divider my="xl" color="#e4e4e7" />
+            <Divider my="xl" color="#d4d4d8" />
             <Group justify="space-between" align="center" wrap="wrap" gap={12}>
-              <Text fw={600} style={{ color: '#a1a1aa', fontSize: '15px', textDecoration: 'line-through', ...mono }}>
+              <Text fw={600} style={{ color: '#71717a', fontSize: '15px', textDecoration: 'line-through', ...mono }}>
                 총 ₩1,390,000
               </Text>
               <Group gap={12} align="center">
@@ -841,26 +844,27 @@ function PackageSection() {
         {/* Employee comparison */}
         <motion.div {...fadeUp}>
           <Paper p={36} radius="lg" style={{
-            background: '#ffffff', border: '1px solid #e4e4e7',
+            background: '#ffffff', border: '1px solid #d4d4d8',
             textAlign: 'center', maxWidth: '600px', margin: '40px auto 0',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           }}>
-            <Text fw={600} style={{ fontSize: '16px', color: '#71717a', marginBottom: '24px' }}>
+            <Text fw={600} style={{ fontSize: '16px', color: '#52525b', marginBottom: '24px' }}>
               이렇게 생각해보세요
             </Text>
             <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <Group justify="center" gap={36} wrap="nowrap" style={{ minWidth: '380px' }}>
                 <Stack gap={4} align="center">
-                  <Text style={{ fontSize: '13px', color: '#a1a1aa' }}>스크립트 작가 1명</Text>
+                  <Text style={{ fontSize: '13px', color: '#71717a' }}>스크립트 작가 1명</Text>
                   <Text fw={800} style={{ fontSize: '26px', color: '#18181b', ...mono }}>월 200만원</Text>
                 </Stack>
-                <Text style={{ fontSize: '24px', color: '#d4d4d8', fontWeight: 300 }}>vs</Text>
+                <Text style={{ fontSize: '24px', color: '#a1a1aa', fontWeight: 300 }}>vs</Text>
                 <Stack gap={4} align="center">
-                  <Text style={{ fontSize: '13px', color: '#a1a1aa' }}>AI 스크립트 6개월</Text>
+                  <Text style={{ fontSize: '13px', color: '#71717a' }}>AI 스크립트 6개월</Text>
                   <Text fw={800} style={{ fontSize: '26px', color: '#8b5cf6', ...mono }}>50만원</Text>
                 </Stack>
               </Group>
             </Box>
-            <Text mt={20} style={{ fontSize: '15px', color: '#71717a' }}>
+            <Text mt={20} style={{ fontSize: '15px', color: '#52525b' }}>
               = <b style={{ color: '#18181b' }}>월 4만원</b> = 커피 10잔 값으로{' '}
               <b style={{ color: '#8b5cf6' }}>24시간 일하는 직원</b>
             </Text>
@@ -899,9 +903,9 @@ function FAQSection() {
           variant="separated"
           radius="lg"
           styles={{
-            item: { background: '#fafafa', border: '1px solid #e4e4e7', marginBottom: '8px' },
+            item: { background: '#ffffff', border: '1px solid #d4d4d8', marginBottom: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
             control: { color: '#18181b', fontWeight: 600, fontSize: '15px', padding: '18px 20px' },
-            panel: { color: '#71717a', fontSize: '14px', lineHeight: 1.7, padding: '0 20px 18px' },
+            panel: { color: '#52525b', fontSize: '14px', lineHeight: 1.7, padding: '0 20px 18px' },
           }}
         >
           {faqs.map((f, i) => (
@@ -929,7 +933,7 @@ function CTASection() {
         position: 'absolute', top: '50%', left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '500px', height: '400px',
-        background: 'radial-gradient(ellipse, rgba(139,92,246,0.05) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse, rgba(139,92,246,0.08) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
       <Container size="md" style={{ position: 'relative', zIndex: 1 }}>
@@ -955,10 +959,10 @@ function CTASection() {
               무료로 시작하기
             </Button>
             <Stack align="center" gap={4}>
-              <Text size="sm" style={{ color: '#a1a1aa', fontSize: '13px' }}>
+              <Text size="sm" style={{ color: '#71717a', fontSize: '13px' }}>
                 30크레딧 무료 · 7일 환불 보장
               </Text>
-              <Text size="sm" style={{ color: '#a1a1aa', fontSize: '13px' }}>
+              <Text size="sm" style={{ color: '#71717a', fontSize: '13px' }}>
                 문의: hmys0205hmys@gmail.com
               </Text>
             </Stack>
@@ -983,22 +987,22 @@ function Footer() {
             <Text fw={600} style={{ color: '#ffffff', fontSize: '16px' }}>FlowSpot</Text>
           </Group>
           <Group gap={16} justify="center">
-            <Anchor component={Link} href="/terms" size="sm" style={{ color: '#71717a', fontSize: '13px' }}>이용약관</Anchor>
-            <Anchor component={Link} href="/privacy" size="sm" style={{ color: '#71717a', fontSize: '13px' }}>개인정보처리방침</Anchor>
-            <Anchor component={Link} href="/refund" size="sm" style={{ color: '#71717a', fontSize: '13px' }}>환불 규정</Anchor>
+            <Anchor component={Link} href="/terms" size="sm" style={{ color: '#a1a1aa', fontSize: '13px' }}>이용약관</Anchor>
+            <Anchor component={Link} href="/privacy" size="sm" style={{ color: '#a1a1aa', fontSize: '13px' }}>개인정보처리방침</Anchor>
+            <Anchor component={Link} href="/refund" size="sm" style={{ color: '#a1a1aa', fontSize: '13px' }}>환불 규정</Anchor>
           </Group>
           <Stack align="center" gap={2}>
-            <Text size="xs" style={{ color: '#52525b', fontSize: '12px' }}>
+            <Text size="xs" style={{ color: '#71717a', fontSize: '12px' }}>
               플로우스팟 | 대표: 이하민, 김예성 | 사업자등록번호: 693-07-02115
             </Text>
-            <Text size="xs" style={{ color: '#52525b', fontSize: '12px' }}>
+            <Text size="xs" style={{ color: '#71717a', fontSize: '12px' }}>
               통신판매업 신고번호: 2022-충남천안-0095 | 전화: 070-8027-2849
             </Text>
-            <Text size="xs" style={{ color: '#52525b', fontSize: '12px' }}>
+            <Text size="xs" style={{ color: '#71717a', fontSize: '12px' }}>
               주소: 충남 천안시 서북구 두정동 1225, 401호
             </Text>
           </Stack>
-          <Text size="xs" style={{ color: '#3f3f46', fontSize: '12px' }}>
+          <Text size="xs" style={{ color: '#71717a', fontSize: '12px' }}>
             © 2026 FlowSpot. All rights reserved.
           </Text>
         </Stack>
@@ -1033,14 +1037,14 @@ function FloatingCTA() {
     return (
       <Box style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000,
-        background: '#ffffff', borderTop: '1px solid #e4e4e7',
+        background: '#ffffff', borderTop: '1px solid #d4d4d8',
         padding: '12px 16px',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
         boxShadow: '0 -2px 16px rgba(0,0,0,0.06)',
       }}>
         <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
           <Stack gap={2}>
-            <Text style={{ fontSize: '12px', color: '#a1a1aa', textDecoration: 'line-through', ...mono }}>₩700,000</Text>
+            <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩700,000</Text>
             <Text style={{ fontSize: '20px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩500,000</Text>
           </Stack>
           <Button
@@ -1068,13 +1072,13 @@ function FloatingCTA() {
         transition={{ duration: 0.35, ease }}
       >
         <Paper p="lg" radius="lg" style={{
-          background: '#ffffff', border: '1px solid #e4e4e7',
+          background: '#ffffff', border: '1px solid #d4d4d8',
           boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
         }}>
           <Stack gap={12}>
             <Text fw={700} style={{ fontSize: '15px', color: '#18181b' }}>올인원 패스</Text>
             <Stack gap={2}>
-              <Text style={{ fontSize: '12px', color: '#a1a1aa', textDecoration: 'line-through', ...mono }}>₩700,000</Text>
+              <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩700,000</Text>
               <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩500,000</Text>
             </Stack>
             <Button
@@ -1086,7 +1090,7 @@ function FloatingCTA() {
             >
               신청하기
             </Button>
-            <Text size="xs" ta="center" style={{ color: '#a1a1aa', fontSize: '11px' }}>
+            <Text size="xs" ta="center" style={{ color: '#71717a', fontSize: '11px' }}>
               무료 체험 30크레딧 포함
             </Text>
           </Stack>
