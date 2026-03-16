@@ -1,8 +1,7 @@
 'use client';
 
 /**
- * 랜딩 페이지 네비게이션 헤더
- * Mantine UI
+ * 랜딩 페이지 네비게이션 헤더 — 화이트 테마
  */
 
 import {
@@ -17,13 +16,13 @@ import {
     Divider,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Bot, Menu } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
 const navLinks = [
-    { label: '기능', href: '#features' },
     { label: '사용 방법', href: '#how-it-works' },
     { label: '가격', href: '/pricing' },
+    { label: 'FAQ', href: '#faq' },
 ];
 
 export function LandingHeader() {
@@ -38,9 +37,9 @@ export function LandingHeader() {
                 left: 0,
                 right: 0,
                 zIndex: 100,
-                background: 'rgba(10, 10, 20, 0.8)',
+                background: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(12px)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                borderBottom: '1px solid #e5e7eb',
             }}
         >
             <Container size="lg" py="md">
@@ -48,16 +47,8 @@ export function LandingHeader() {
                     {/* 로고 */}
                     <Link href="/" style={{ textDecoration: 'none' }}>
                         <Group gap="sm">
-                            <Bot size={28} color="#a78bfa" />
-                            <Text
-                                size="xl"
-                                fw={700}
-                                style={{
-                                    background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                }}
-                            >
+                            <Bot size={28} color="#8b5cf6" />
+                            <Text size="xl" fw={700} style={{ color: '#8b5cf6' }}>
                                 FlowSpot
                             </Text>
                         </Group>
@@ -73,25 +64,24 @@ export function LandingHeader() {
                                 size="sm"
                                 fw={500}
                                 style={{
-                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    color: '#4b5563',
                                     textDecoration: 'none',
                                     transition: 'color 0.2s',
                                 }}
-                                className="nav-link-hover"
                             >
                                 {link.label}
                             </Text>
                         ))}
                     </Group>
 
-                    {/* 데스크톱 CTA 버튼 */}
+                    {/* 데스크톱 CTA */}
                     <Group gap="md" visibleFrom="sm">
                         <Button
                             component={Link}
                             href="/login"
                             variant="subtle"
                             color="gray"
-                            style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                            style={{ color: '#4b5563' }}
                         >
                             로그인
                         </Button>
@@ -113,7 +103,7 @@ export function LandingHeader() {
                         opened={opened}
                         onClick={toggle}
                         hiddenFrom="sm"
-                        color="white"
+                        color="#374151"
                         size="sm"
                     />
                 </Group>
@@ -129,11 +119,11 @@ export function LandingHeader() {
                 zIndex={200}
                 styles={{
                     body: {
-                        background: '#0a0a14',
+                        background: '#fff',
                         height: '100%',
                     },
                     header: {
-                        background: '#0a0a14',
+                        background: '#fff',
                     },
                 }}
             >
@@ -146,7 +136,7 @@ export function LandingHeader() {
                             size="lg"
                             fw={500}
                             style={{
-                                color: 'rgba(255, 255, 255, 0.8)',
+                                color: '#374151',
                                 textDecoration: 'none',
                             }}
                             onClick={close}
@@ -155,7 +145,7 @@ export function LandingHeader() {
                         </Text>
                     ))}
 
-                    <Divider color="dark.5" my="sm" />
+                    <Divider color="#e5e7eb" my="sm" />
 
                     <Button
                         component={Link}
