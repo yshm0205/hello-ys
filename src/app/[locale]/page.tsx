@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * FlowSpot 랜딩 페이지 — 리디자인 Phase 1
+ * FlowSpot 랜딩 페이지 — 리디자인 Phase 1 (v2)
  * 디자인: 순백 배경 + violet(#8b5cf6) 액센트
- * 모바일/데스크톱 동일 레이아웃 (가로 스크롤)
+ * 모바일/데스크톱 동일 레이아웃
  */
 
 import { useState, useEffect } from 'react';
@@ -21,7 +21,7 @@ import {
   Anchor,
   Divider,
 } from '@mantine/core';
-import { Check, X, Bot } from 'lucide-react';
+import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion } from 'framer-motion';
@@ -32,53 +32,142 @@ import { motion } from 'framer-motion';
 // ============================================================
 function HeroSection() {
   return (
-    <Box component="section" style={{ background: '#fff', paddingTop: '140px', paddingBottom: '80px' }}>
-      <Container size="sm">
+    <Box
+      component="section"
+      style={{
+        background: '#fff',
+        paddingTop: 'clamp(120px, 20vh, 180px)',
+        paddingBottom: 'clamp(60px, 12vh, 120px)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* 배경 데코 — 미니멀 도트 패턴 */}
+      <Box
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+          opacity: 0.5,
+          pointerEvents: 'none',
+        }}
+      />
+      {/* 배경 글로우 */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '-20%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '800px',
+          height: '600px',
+          background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.08) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <Container size="sm" style={{ position: 'relative', zIndex: 1 }}>
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <Stack align="center" gap="lg">
-            <Text ta="center" size="lg" style={{ color: '#6b7280' }}>
+          <Stack align="center" gap={0}>
+            {/* 프리헤더 */}
+            <Text
+              ta="center"
+              style={{
+                color: '#9ca3af',
+                fontSize: 'clamp(15px, 2.5vw, 18px)',
+                fontWeight: 500,
+                letterSpacing: '0.02em',
+                marginBottom: '16px',
+              }}
+            >
               지금부터 소개해드리는 이 길이,
             </Text>
+
+            {/* 메인 헤드라인 */}
             <Title
               order={1}
               ta="center"
               style={{
-                fontSize: 'clamp(32px, 5vw, 52px)',
-                fontWeight: 800,
+                fontSize: 'clamp(36px, 6vw, 64px)',
+                fontWeight: 900,
                 color: '#111827',
-                lineHeight: 1.2,
-                letterSpacing: '-0.02em',
+                lineHeight: 1.15,
+                letterSpacing: '-0.03em',
+                marginBottom: '24px',
               }}
             >
-              쇼츠 <span style={{ color: '#8b5cf6' }}>월 300</span>까지의
+              쇼츠{' '}
+              <span
+                style={{
+                  color: '#8b5cf6',
+                  position: 'relative',
+                  display: 'inline-block',
+                }}
+              >
+                월 300
+                <Box
+                  style={{
+                    position: 'absolute',
+                    bottom: '2px',
+                    left: 0,
+                    right: 0,
+                    height: '8px',
+                    background: 'rgba(139, 92, 246, 0.2)',
+                    borderRadius: '4px',
+                  }}
+                />
+              </span>
+              까지의
               <br />
               최단거리입니다
             </Title>
-            <Text ta="center" style={{ color: '#6b7280', fontSize: '18px', maxWidth: '480px' }}>
+
+            {/* 서브라인 */}
+            <Text
+              ta="center"
+              style={{
+                color: '#6b7280',
+                fontSize: 'clamp(16px, 2.5vw, 20px)',
+                maxWidth: '520px',
+                lineHeight: 1.6,
+                marginBottom: '32px',
+              }}
+            >
               뭘 해야 하는지 알려주고, AI가 대신 실행합니다
             </Text>
 
             {/* 배지 */}
-            <Group gap="sm" justify="center" mt="xs">
+            <Group gap="md" justify="center" mb={36}>
               <Badge
-                size="lg"
+                size="xl"
                 variant="light"
                 color="violet"
                 radius="xl"
-                style={{ padding: '10px 20px', fontSize: '15px' }}
+                style={{
+                  padding: '12px 24px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  border: '1px solid rgba(139, 92, 246, 0.2)',
+                }}
               >
                 📚 VOD 59강
               </Badge>
               <Badge
-                size="lg"
+                size="xl"
                 variant="light"
                 color="violet"
                 radius="xl"
-                style={{ padding: '10px 20px', fontSize: '15px' }}
+                style={{
+                  padding: '12px 24px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  border: '1px solid rgba(139, 92, 246, 0.2)',
+                }}
               >
                 🤖 AI 스크립트
               </Badge>
@@ -88,20 +177,21 @@ function HeroSection() {
             <Button
               component={Link}
               href="/dashboard"
-              size="lg"
+              size="xl"
               radius="xl"
-              mt="md"
               style={{
                 background: '#8b5cf6',
                 fontSize: '18px',
                 fontWeight: 700,
-                padding: '14px 48px',
+                padding: '16px 56px',
                 height: 'auto',
+                boxShadow: '0 4px 24px rgba(139, 92, 246, 0.4)',
+                transition: 'all 0.2s ease',
               }}
             >
               무료로 시작하기
             </Button>
-            <Text size="sm" style={{ color: '#9ca3af' }}>
+            <Text size="sm" mt="md" style={{ color: '#9ca3af' }}>
               30크레딧 무료 · 카드 등록 없음
             </Text>
           </Stack>
@@ -122,26 +212,35 @@ function PainSection() {
       title: '혼자 영상 만들어봤는데',
       line1: '6시간 걸려 만들었는데',
       line2: '조회수 47회',
+      accent: '#ef4444',
     },
     {
       emoji: '💸',
       title: '강의 들어봤는데',
       line1: '수십만 원 썼는데',
       line2: '돌아온 건 "노력 부족"',
+      accent: '#f59e0b',
     },
     {
       emoji: '🤖',
       title: 'AI 써봤는데',
       line1: '쇼츠 공식 모르는 AI',
       line2: '조회수 안 나옴',
+      accent: '#6b7280',
     },
   ];
 
   return (
-    <Box component="section" py={80} style={{ background: '#f9fafb' }}>
+    <Box
+      component="section"
+      py={100}
+      style={{
+        background: 'linear-gradient(180deg, #f9fafb 0%, #fff 100%)',
+      }}
+    >
       <Container size="lg">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
@@ -150,46 +249,81 @@ function PainSection() {
             order={2}
             ta="center"
             style={{
-              fontSize: 'clamp(24px, 4vw, 36px)',
-              fontWeight: 700,
+              fontSize: 'clamp(28px, 4.5vw, 42px)',
+              fontWeight: 800,
               color: '#111827',
-              marginBottom: '40px',
+              marginBottom: '56px',
+              letterSpacing: '-0.02em',
             }}
           >
             그런데 대부분은 이 길을{' '}
-            <span style={{ color: '#ef4444' }}>돌아가고</span> 있습니다
+            <span style={{ color: '#ef4444', textDecoration: 'underline', textDecorationColor: 'rgba(239, 68, 68, 0.3)', textUnderlineOffset: '6px' }}>
+              돌아가고
+            </span>{' '}
+            있습니다
           </Title>
 
           {/* 3카드 — 가로 고정, 모바일 스크롤 */}
           <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <Box style={{ display: 'flex', gap: '20px', minWidth: '760px' }}>
+            <Box style={{ display: 'flex', gap: '24px', minWidth: '780px' }}>
               {pains.map((p, i) => (
-                <Paper
+                <motion.div
                   key={i}
-                  p="xl"
-                  radius="lg"
-                  style={{
-                    flex: '1 1 0',
-                    background: '#fff',
-                    border: '1px solid #e5e7eb',
-                    textAlign: 'center',
-                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  style={{ flex: '1 1 0' }}
                 >
-                  <Text style={{ fontSize: '44px', marginBottom: '16px' }}>{p.emoji}</Text>
-                  <Text fw={700} style={{ fontSize: '17px', color: '#111827', marginBottom: '10px' }}>
-                    {p.title}
-                  </Text>
-                  <Text style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.6 }}>
-                    {p.line1}
-                    <br />
-                    {p.line2}
-                  </Text>
-                </Paper>
+                  <Paper
+                    p={32}
+                    radius="xl"
+                    style={{
+                      background: '#fff',
+                      border: '1px solid #e5e7eb',
+                      textAlign: 'center',
+                      height: '100%',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                    }}
+                  >
+                    <Text style={{ fontSize: '52px', marginBottom: '20px' }}>{p.emoji}</Text>
+                    <Text
+                      fw={700}
+                      style={{
+                        fontSize: '19px',
+                        color: '#111827',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      {p.title}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: '15px',
+                        color: '#6b7280',
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {p.line1}
+                      <br />
+                      <span style={{ color: p.accent, fontWeight: 600 }}>{p.line2}</span>
+                    </Text>
+                  </Paper>
+                </motion.div>
               ))}
             </Box>
           </Box>
 
-          <Text ta="center" style={{ color: '#9ca3af', fontSize: '15px', marginTop: '32px' }}>
+          <Text
+            ta="center"
+            style={{
+              color: '#9ca3af',
+              fontSize: '16px',
+              marginTop: '40px',
+              fontStyle: 'italic',
+            }}
+          >
             공식 없이 시작하면 전부 돌아가는 길입니다.
           </Text>
         </motion.div>
@@ -212,126 +346,189 @@ function WhyFlowSpotSection() {
   ];
 
   return (
-    <Box component="section" py={80} style={{ background: '#fff' }}>
+    <Box component="section" py={100} style={{ background: '#fff' }}>
       <Container size="lg">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <Stack align="center" gap="xl">
+          <Stack align="center" gap={0}>
+            {/* 타이틀 */}
             <Title
               order={2}
               ta="center"
               style={{
-                fontSize: 'clamp(24px, 4vw, 36px)',
-                fontWeight: 700,
+                fontSize: 'clamp(28px, 4.5vw, 42px)',
+                fontWeight: 800,
                 color: '#111827',
+                letterSpacing: '-0.02em',
+                marginBottom: '16px',
               }}
             >
               저도 돌아가는 길 다 걸어봤습니다
             </Title>
+            <Text
+              ta="center"
+              style={{
+                fontSize: '17px',
+                color: '#9ca3af',
+                marginBottom: '48px',
+              }}
+            >
+              그리고 결국 공식을 찾았습니다.
+            </Text>
 
-            {/* 수익 캡처 그리드: 3 + 2 — 가로 고정 */}
-            <Box style={{ width: '100%', maxWidth: '900px' }}>
+            {/* 수익 캡처 그리드 — 가로 고정 */}
+            <Box style={{ width: '100%', maxWidth: '960px' }}>
               {/* Row 1: 3 */}
               <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                <Box style={{ display: 'flex', gap: '16px', minWidth: '700px', marginBottom: '16px' }}>
+                <Box style={{ display: 'flex', gap: '20px', minWidth: '720px', marginBottom: '20px' }}>
                   {revenues.slice(0, 3).map((r, i) => (
-                    <Paper
+                    <motion.div
                       key={i}
-                      p="lg"
-                      radius="lg"
-                      style={{
-                        flex: '1 1 0',
-                        background: '#f9fafb',
-                        border: '1px dashed #d1d5db',
-                        textAlign: 'center',
-                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      style={{ flex: '1 1 0' }}
                     >
-                      <Box
+                      <Paper
+                        p="lg"
+                        radius="xl"
                         style={{
-                          height: '100px',
-                          background: '#e5e7eb',
-                          borderRadius: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginBottom: '12px',
+                          background: '#f9fafb',
+                          border: '2px dashed #d1d5db',
+                          textAlign: 'center',
+                          transition: 'all 0.2s ease',
                         }}
                       >
-                        <Text size="xs" style={{ color: '#9ca3af' }}>수익 캡처</Text>
-                      </Box>
-                      <Text size="sm" fw={500} style={{ color: '#6b7280' }}>{r.label}</Text>
-                      <Text fw={800} style={{ fontSize: '22px', color: r.color }}>{r.amount}</Text>
-                    </Paper>
+                        {/* 이미지 플레이스홀더 */}
+                        <Box
+                          style={{
+                            height: '120px',
+                            background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '16px',
+                            border: '1px solid #e5e7eb',
+                          }}
+                        >
+                          <Stack align="center" gap={4}>
+                            <Text style={{ fontSize: '24px' }}>📊</Text>
+                            <Text size="xs" style={{ color: '#9ca3af' }}>수익 캡처 이미지</Text>
+                          </Stack>
+                        </Box>
+                        <Text size="sm" fw={500} style={{ color: '#6b7280', marginBottom: '4px' }}>
+                          {r.label}
+                        </Text>
+                        <Text fw={800} style={{ fontSize: '24px', color: r.color }}>
+                          {r.amount}
+                        </Text>
+                      </Paper>
+                    </motion.div>
                   ))}
                 </Box>
               </Box>
 
               {/* Row 2: 2 */}
               <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                <Box style={{ display: 'flex', gap: '16px', minWidth: '480px', justifyContent: 'center' }}>
+                <Box style={{ display: 'flex', gap: '20px', minWidth: '500px', justifyContent: 'center' }}>
                   {revenues.slice(3).map((r, i) => (
-                    <Paper
+                    <motion.div
                       key={i}
-                      p="lg"
-                      radius="lg"
-                      style={{
-                        flex: '0 1 280px',
-                        background: '#f9fafb',
-                        border: '1px dashed #d1d5db',
-                        textAlign: 'center',
-                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
+                      style={{ flex: '0 1 300px' }}
                     >
-                      <Box
+                      <Paper
+                        p="lg"
+                        radius="xl"
                         style={{
-                          height: '100px',
-                          background: '#e5e7eb',
-                          borderRadius: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginBottom: '12px',
+                          background: '#f9fafb',
+                          border: '2px dashed #d1d5db',
+                          textAlign: 'center',
                         }}
                       >
-                        <Text size="xs" style={{ color: '#9ca3af' }}>수익 캡처</Text>
-                      </Box>
-                      <Text size="sm" fw={500} style={{ color: '#6b7280' }}>{r.label}</Text>
-                      <Text fw={800} style={{ fontSize: '22px', color: r.color }}>{r.amount}</Text>
-                    </Paper>
+                        <Box
+                          style={{
+                            height: '120px',
+                            background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '16px',
+                            border: '1px solid #e5e7eb',
+                          }}
+                        >
+                          <Stack align="center" gap={4}>
+                            <Text style={{ fontSize: '24px' }}>📊</Text>
+                            <Text size="xs" style={{ color: '#9ca3af' }}>수익 캡처 이미지</Text>
+                          </Stack>
+                        </Box>
+                        <Text size="sm" fw={500} style={{ color: '#6b7280', marginBottom: '4px' }}>
+                          {r.label}
+                        </Text>
+                        <Text fw={800} style={{ fontSize: '24px', color: r.color }}>
+                          {r.amount}
+                        </Text>
+                      </Paper>
+                    </motion.div>
                   ))}
                 </Box>
               </Box>
             </Box>
 
             {/* 브릿지 텍스트 */}
-            <Stack align="center" gap="md" mt="xl">
+            <Box
+              mt={64}
+              p={48}
+              style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(139, 92, 246, 0.08) 100%)',
+                borderRadius: '24px',
+                border: '1px solid rgba(139, 92, 246, 0.12)',
+                maxWidth: '700px',
+                width: '100%',
+                textAlign: 'center',
+              }}
+            >
               <Text
-                ta="center"
                 style={{
-                  fontSize: 'clamp(18px, 3vw, 24px)',
-                  fontWeight: 700,
+                  fontSize: 'clamp(22px, 3.5vw, 32px)',
+                  fontWeight: 800,
                   color: '#111827',
+                  lineHeight: 1.4,
+                  marginBottom: '16px',
                 }}
               >
                 분야가 달라도 통하는 공식이 있었습니다
               </Text>
-              <Text ta="center" style={{ fontSize: '16px', color: '#6b7280', maxWidth: '500px', lineHeight: 1.7 }}>
+              <Text
+                style={{
+                  fontSize: '17px',
+                  color: '#6b7280',
+                  lineHeight: 1.7,
+                  marginBottom: '24px',
+                }}
+              >
                 체계화한 뒤, 채널 1개 주 4시간으로 월 200-300
               </Text>
               <Text
-                ta="center"
                 style={{
-                  fontSize: '18px',
-                  fontWeight: 600,
+                  fontSize: '20px',
+                  fontWeight: 700,
                   color: '#8b5cf6',
                 }}
               >
-                그 체계가 59강 강의와 AI 스크립트 도구입니다
+                그 체계가 59강 강의와 AI 스크립트 도구입니다 →
               </Text>
-            </Stack>
+            </Box>
           </Stack>
         </motion.div>
       </Container>
@@ -344,158 +541,251 @@ function WhyFlowSpotSection() {
 // 섹션 4: HowItWorks — 진단형 플로우차트
 // ============================================================
 function HowItWorksSection() {
-  const paths = [
+  const [selected, setSelected] = useState<number | null>(null);
+
+  const questions = [
     {
-      question: '처음 시작이에요',
+      id: 0,
+      question: '쇼츠, 처음 시작이에요',
       icon: '🌱',
       label: '입문',
       color: '#8b5cf6',
-      bgColor: 'rgba(139, 92, 246, 0.08)',
-      borderColor: 'rgba(139, 92, 246, 0.3)',
-      includes: ['전자책', 'VOD 59강', 'AI 스크립트 6개월'],
+      bgColor: 'rgba(139, 92, 246, 0.06)',
+      borderColor: '#8b5cf6',
+      answer: '걱정 마세요. 기획부터 수익화까지 순서대로 알려드립니다.',
+      includes: ['전자책 (기초 가이드)', 'VOD 59강 (순차 학습)', 'AI 스크립트 6개월'],
     },
     {
-      question: '하고 있는데\n성장이 안돼요',
+      id: 1,
+      question: '하고 있는데 성장이 안 돼요',
       icon: '📈',
       label: '성장',
       color: '#10b981',
-      bgColor: 'rgba(16, 185, 129, 0.08)',
-      borderColor: 'rgba(16, 185, 129, 0.3)',
-      includes: ['채널 리스트', 'AI 스크립트', 'VOD 59강'],
+      bgColor: 'rgba(16, 185, 129, 0.06)',
+      borderColor: '#10b981',
+      answer: '터지는 영상에는 공식이 있습니다. 그 공식을 드립니다.',
+      includes: ['채널 리스트 (벤치마크)', 'AI 스크립트 (검증된 구조)', 'VOD 59강 (심화)'],
     },
     {
-      question: '혼자 하려니\n힘들어요',
+      id: 2,
+      question: '혼자 하려니 너무 힘들어요',
       icon: '⚙️',
       label: '시스템화',
       color: '#3b82f6',
-      bgColor: 'rgba(59, 130, 246, 0.08)',
-      borderColor: 'rgba(59, 130, 246, 0.3)',
-      includes: ['노션 템플릿', 'AI 스크립트', '채널 리스트'],
+      bgColor: 'rgba(59, 130, 246, 0.06)',
+      borderColor: '#3b82f6',
+      answer: '반복 작업은 AI에게. 당신은 기획만 하세요.',
+      includes: ['노션 운영 템플릿', 'AI 스크립트 (자동화)', '채널 리스트 (트렌드)'],
     },
   ];
 
   return (
-    <Box component="section" py={80} style={{ background: '#f9fafb' }}>
-      <Container size="lg">
+    <Box
+      component="section"
+      id="how-it-works"
+      py={100}
+      style={{
+        background: 'linear-gradient(180deg, #f9fafb 0%, #fff 100%)',
+      }}
+    >
+      <Container size="md">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <Title
-            order={2}
-            ta="center"
-            style={{
-              fontSize: 'clamp(24px, 4vw, 36px)',
-              fontWeight: 700,
-              color: '#111827',
-              marginBottom: '48px',
-            }}
-          >
-            지금 어디에 계신가요?
-          </Title>
-
-          {/* 3경로 — 가로 고정, 모바일 스크롤 */}
-          <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <Box style={{ display: 'flex', gap: '20px', minWidth: '760px' }}>
-              {paths.map((path, i) => (
-                <Paper
-                  key={i}
-                  p="xl"
-                  radius="lg"
-                  style={{
-                    flex: '1 1 0',
-                    background: '#fff',
-                    border: `2px solid ${path.borderColor}`,
-                    textAlign: 'center',
-                  }}
-                >
-                  <Stack align="center" gap="md">
-                    {/* 질문 */}
-                    <Box
-                      style={{
-                        background: path.bgColor,
-                        borderRadius: '12px',
-                        padding: '20px',
-                        width: '100%',
-                      }}
-                    >
-                      <Text style={{ fontSize: '36px', marginBottom: '8px' }}>{path.icon}</Text>
-                      <Text
-                        fw={600}
-                        style={{
-                          fontSize: '15px',
-                          color: '#374151',
-                          whiteSpace: 'pre-line',
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        &ldquo;{path.question}&rdquo;
-                      </Text>
-                    </Box>
-
-                    {/* 화살표 */}
-                    <Text style={{ fontSize: '24px', color: path.color }}>↓</Text>
-
-                    {/* 결과 배지 */}
-                    <Badge
-                      size="xl"
-                      variant="filled"
-                      style={{
-                        background: path.color,
-                        fontSize: '16px',
-                        fontWeight: 700,
-                        padding: '10px 28px',
-                        height: 'auto',
-                      }}
-                    >
-                      {path.label}
-                    </Badge>
-
-                    {/* 포함 항목 */}
-                    <Stack gap="xs" align="center">
-                      {path.includes.map((item, j) => (
-                        <Group key={j} gap="xs" justify="center">
-                          <Check size={14} color={path.color} />
-                          <Text size="sm" style={{ color: '#4b5563' }}>{item}</Text>
-                        </Group>
-                      ))}
-                    </Stack>
-                  </Stack>
-                </Paper>
-              ))}
-            </Box>
-          </Box>
-
-          {/* 하단 CTA */}
-          <Stack align="center" gap="md" mt={48}>
-            <Text
+          {/* 타이틀 */}
+          <Stack align="center" gap="sm" mb={56}>
+            <Badge
+              size="lg"
+              variant="light"
+              color="violet"
+              radius="xl"
+              style={{ padding: '8px 20px', fontSize: '14px' }}
+            >
+              자가 진단
+            </Badge>
+            <Title
+              order={2}
               ta="center"
               style={{
-                fontSize: 'clamp(20px, 3vw, 28px)',
-                fontWeight: 700,
+                fontSize: 'clamp(28px, 4.5vw, 42px)',
+                fontWeight: 800,
                 color: '#111827',
+                letterSpacing: '-0.02em',
               }}
             >
-              어떤 단계든, <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
+              지금 어디에 계신가요?
+            </Title>
+            <Text ta="center" style={{ color: '#9ca3af', fontSize: '16px' }}>
+              해당하는 상황을 선택해보세요
             </Text>
-            <Button
-              component={Link}
-              href="/dashboard"
-              size="lg"
-              radius="xl"
-              style={{
-                background: '#8b5cf6',
-                fontSize: '16px',
-                fontWeight: 700,
-                padding: '12px 36px',
-                height: 'auto',
-              }}
-            >
-              무료로 시작하기
-            </Button>
           </Stack>
+
+          {/* 질문 카드 3개 */}
+          <Stack gap="md">
+            {questions.map((q) => {
+              const isOpen = selected === q.id;
+              return (
+                <motion.div
+                  key={q.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: q.id * 0.1 }}
+                >
+                  <Paper
+                    radius="xl"
+                    style={{
+                      border: isOpen ? `2px solid ${q.borderColor}` : '2px solid #e5e7eb',
+                      background: isOpen ? q.bgColor : '#fff',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      boxShadow: isOpen ? `0 4px 24px rgba(0,0,0,0.06)` : '0 1px 3px rgba(0,0,0,0.04)',
+                    }}
+                    onClick={() => setSelected(isOpen ? null : q.id)}
+                  >
+                    {/* 질문 헤더 */}
+                    <Box
+                      p={24}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                      }}
+                    >
+                      <Text style={{ fontSize: '36px', flexShrink: 0 }}>{q.icon}</Text>
+                      <Box style={{ flex: 1 }}>
+                        <Text
+                          fw={700}
+                          style={{
+                            fontSize: '18px',
+                            color: '#111827',
+                          }}
+                        >
+                          &ldquo;{q.question}&rdquo;
+                        </Text>
+                      </Box>
+                      <Badge
+                        variant="filled"
+                        size="lg"
+                        style={{
+                          background: q.color,
+                          fontWeight: 700,
+                          fontSize: '14px',
+                          padding: '8px 20px',
+                          height: 'auto',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {q.label}
+                      </Badge>
+                      <ChevronDown
+                        size={20}
+                        color="#9ca3af"
+                        style={{
+                          transition: 'transform 0.3s',
+                          transform: isOpen ? 'rotate(180deg)' : 'rotate(0)',
+                          flexShrink: 0,
+                        }}
+                      />
+                    </Box>
+
+                    {/* 답변 (펼침) */}
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Box
+                          px={24}
+                          pb={28}
+                          style={{
+                            borderTop: `1px solid rgba(0,0,0,0.06)`,
+                          }}
+                        >
+                          <Text
+                            mt={20}
+                            mb={20}
+                            style={{
+                              fontSize: '17px',
+                              color: '#374151',
+                              fontWeight: 600,
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            → {q.answer}
+                          </Text>
+                          <Box
+                            p={20}
+                            style={{
+                              background: '#fff',
+                              borderRadius: '16px',
+                              border: '1px solid #e5e7eb',
+                            }}
+                          >
+                            <Text size="sm" fw={600} mb="sm" style={{ color: '#6b7280' }}>
+                              올인원에 포함된 솔루션:
+                            </Text>
+                            <Stack gap="xs">
+                              {q.includes.map((item, j) => (
+                                <Group key={j} gap="sm">
+                                  <Check size={16} color={q.color} />
+                                  <Text size="sm" style={{ color: '#374151' }}>{item}</Text>
+                                </Group>
+                              ))}
+                            </Stack>
+                          </Box>
+                        </Box>
+                      </motion.div>
+                    )}
+                  </Paper>
+                </motion.div>
+              );
+            })}
+          </Stack>
+
+          {/* 하단 CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Stack align="center" gap="md" mt={56}>
+              <Text
+                ta="center"
+                style={{
+                  fontSize: 'clamp(22px, 3.5vw, 32px)',
+                  fontWeight: 800,
+                  color: '#111827',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                어떤 단계든,{' '}
+                <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
+              </Text>
+              <Button
+                component={Link}
+                href="/dashboard"
+                size="lg"
+                radius="xl"
+                style={{
+                  background: '#8b5cf6',
+                  fontSize: '17px',
+                  fontWeight: 700,
+                  padding: '14px 44px',
+                  height: 'auto',
+                  boxShadow: '0 4px 24px rgba(139, 92, 246, 0.4)',
+                }}
+              >
+                무료로 시작하기
+              </Button>
+            </Stack>
+          </motion.div>
         </motion.div>
       </Container>
     </Box>
@@ -504,39 +794,62 @@ function HowItWorksSection() {
 
 
 // ============================================================
-// 섹션 5~10: Phase 2 (기존 콘텐츠, 화이트 테마 전환)
+// 섹션 5~10: Phase 2 (기존 콘텐츠, 화이트 테마)
 // ============================================================
 
 function PackageSection() {
   return (
-    <Box component="section" py={80} style={{ background: '#fff' }}>
+    <Box component="section" py={100} style={{ background: '#fff' }}>
       <Container size="lg">
-        <Title order={2} ta="center" style={{ color: '#111827', fontSize: '36px', marginBottom: '16px' }}>
-          왜 이 가격인가요?
-        </Title>
-        <Text ta="center" style={{ color: '#6b7280', marginBottom: '48px', fontSize: '16px' }}>
-          비싼 강의 vs 올인원 패스
-        </Text>
+        <Stack align="center" gap="sm" mb={56}>
+          <Badge
+            size="lg"
+            variant="light"
+            color="cyan"
+            radius="xl"
+            style={{ padding: '8px 20px', fontSize: '14px' }}
+          >
+            가격 비교
+          </Badge>
+          <Title
+            order={2}
+            ta="center"
+            style={{
+              fontSize: 'clamp(28px, 4.5vw, 42px)',
+              fontWeight: 800,
+              color: '#111827',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            왜 이 가격인가요?
+          </Title>
+          <Text style={{ color: '#9ca3af', fontSize: '16px' }}>
+            비싼 강의 vs 올인원 패스
+          </Text>
+        </Stack>
 
         {/* 비교 — 가로 고정 */}
-        <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: '48px' }}>
-          <Box style={{ display: 'flex', gap: '24px', minWidth: '700px', justifyContent: 'center' }}>
+        <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: '56px' }}>
+          <Box style={{ display: 'flex', gap: '24px', minWidth: '720px', justifyContent: 'center' }}>
             {/* 일반 유료 강의 */}
             <Paper
-              p="xl"
-              radius="lg"
+              p={36}
+              radius="xl"
               style={{
                 flex: '1 1 0',
                 maxWidth: '400px',
                 border: '1px solid #fecaca',
                 background: '#fff',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
               }}
             >
-              <Group mb="xl" gap="sm">
-                <X size={24} color="#ef4444" />
+              <Group mb={28} gap="sm">
+                <Box style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <X size={20} color="#ef4444" />
+                </Box>
                 <Text fw={700} style={{ fontSize: '20px', color: '#ef4444' }}>일반 유료 강의</Text>
               </Group>
-              <Stack gap="md">
+              <Stack gap="lg">
                 {[
                   '가격 99~160만원',
                   '강의만 제공 (실행은 알아서)',
@@ -545,7 +858,7 @@ function PackageSection() {
                   'AI 도구 없음',
                 ].map((t, i) => (
                   <Group key={i} gap="sm">
-                    <X size={16} color="#ef4444" />
+                    <X size={16} color="#d1d5db" />
                     <Text style={{ color: '#6b7280', fontSize: '15px' }}>{t}</Text>
                   </Group>
                 ))}
@@ -554,21 +867,37 @@ function PackageSection() {
 
             {/* 올인원 패스 */}
             <Paper
-              p="xl"
-              radius="lg"
+              p={36}
+              radius="xl"
               style={{
                 flex: '1 1 0',
                 maxWidth: '400px',
                 border: '2px solid #8b5cf6',
-                background: '#faf5ff',
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.03) 0%, rgba(139,92,246,0.07) 100%)',
+                boxShadow: '0 4px 24px rgba(139, 92, 246, 0.12)',
+                position: 'relative',
               }}
             >
-              <Group mb="xl" gap="sm">
-                <Check size={24} color="#22c55e" />
+              {/* 추천 리본 */}
+              <Badge
+                color="violet"
+                size="md"
+                style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  right: '24px',
+                  boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)',
+                }}
+              >
+                추천
+              </Badge>
+              <Group mb={28} gap="sm">
+                <Box style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Check size={20} color="#22c55e" />
+                </Box>
                 <Text fw={700} style={{ fontSize: '20px', color: '#111827' }}>올인원 패스</Text>
-                <Badge color="violet" size="md">추천</Badge>
               </Group>
-              <Stack gap="md">
+              <Stack gap="lg">
                 {[
                   '가격 50만원 (60% 저렴)',
                   '강의 + AI로 바로 실행',
@@ -588,8 +917,8 @@ function PackageSection() {
 
         {/* 부분별 가치 */}
         <Paper
-          p="xl"
-          radius="lg"
+          p={40}
+          radius="xl"
           style={{
             background: '#f9fafb',
             border: '1px solid #e5e7eb',
@@ -597,7 +926,7 @@ function PackageSection() {
             margin: '0 auto',
           }}
         >
-          <Title order={3} ta="center" style={{ fontSize: '22px', color: '#111827', marginBottom: '32px' }}>
+          <Title order={3} ta="center" style={{ fontSize: '22px', color: '#111827', marginBottom: '32px', fontWeight: 700 }}>
             뭐가 들어있나요?
           </Title>
           <Stack gap="lg">
@@ -607,56 +936,63 @@ function PackageSection() {
               { item: '채널 분석 피드백', value: '₩100,000' },
               { item: '보너스: 터진 영상 템플릿', value: '₩100,000' },
             ].map((row, i) => (
-              <Group key={i} justify="space-between" style={{ borderBottom: '1px dashed #d1d5db', paddingBottom: '12px' }}>
+              <Group key={i} justify="space-between" style={{ borderBottom: '1px dashed #d1d5db', paddingBottom: '14px' }}>
                 <Text style={{ color: '#374151', fontSize: '15px' }}>{row.item}</Text>
                 <Text fw={600} style={{ color: '#8b5cf6', fontSize: '16px' }}>{row.value}</Text>
               </Group>
             ))}
           </Stack>
-          <Divider my="lg" color="#e5e7eb" />
-          <Group justify="space-between" align="center">
+          <Divider my="xl" color="#e5e7eb" />
+          <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <Text fw={700} style={{ color: '#9ca3af', fontSize: '16px', textDecoration: 'line-through' }}>
               총 가치: ₩1,390,000
             </Text>
             <Group gap="md" align="center">
-              <Text fw={800} style={{ fontSize: '28px', color: '#22c55e' }}>₩500,000</Text>
-              <Badge color="red" size="lg">64% 할인</Badge>
+              <Text fw={800} style={{ fontSize: '32px', color: '#22c55e' }}>₩500,000</Text>
+              <Badge color="red" size="lg" style={{ fontSize: '14px' }}>64% 할인</Badge>
             </Group>
-          </Group>
+          </Box>
         </Paper>
 
         {/* 직원 비유 */}
-        <Paper
-          p="xl"
-          radius="lg"
-          style={{
-            background: '#faf5ff',
-            border: '1px solid rgba(139, 92, 246, 0.2)',
-            textAlign: 'center',
-            maxWidth: '700px',
-            margin: '40px auto 0',
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
         >
-          <Text fw={700} style={{ fontSize: '20px', color: '#111827', marginBottom: '20px' }}>
-            이렇게 생각해보세요
-          </Text>
-          <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <Group justify="center" gap="xl" wrap="nowrap" style={{ minWidth: '400px' }}>
-              <Stack gap={4} align="center">
-                <Text style={{ fontSize: '14px', color: '#6b7280' }}>스크립트 작가 1명</Text>
-                <Text fw={800} style={{ fontSize: '24px', color: '#111827' }}>월 200만원</Text>
-              </Stack>
-              <Text style={{ fontSize: '24px', color: '#d1d5db' }}>vs</Text>
-              <Stack gap={4} align="center">
-                <Text style={{ fontSize: '14px', color: '#6b7280' }}>AI 스크립트 6개월</Text>
-                <Text fw={800} style={{ fontSize: '24px', color: '#8b5cf6' }}>50만원</Text>
-              </Stack>
-            </Group>
-          </Box>
-          <Text style={{ marginTop: '20px', fontSize: '16px', color: '#6b7280' }}>
-            = <b style={{ color: '#111827' }}>월 4만원</b> = 커피 10잔 값
-          </Text>
-        </Paper>
+          <Paper
+            p={40}
+            radius="xl"
+            style={{
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(139, 92, 246, 0.08) 100%)',
+              border: '1px solid rgba(139, 92, 246, 0.15)',
+              textAlign: 'center',
+              maxWidth: '700px',
+              margin: '48px auto 0',
+            }}
+          >
+            <Text fw={700} style={{ fontSize: '20px', color: '#111827', marginBottom: '24px' }}>
+              이렇게 생각해보세요
+            </Text>
+            <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <Group justify="center" gap={40} wrap="nowrap" style={{ minWidth: '400px' }}>
+                <Stack gap={4} align="center">
+                  <Text style={{ fontSize: '14px', color: '#6b7280' }}>스크립트 작가 1명</Text>
+                  <Text fw={800} style={{ fontSize: '28px', color: '#111827' }}>월 200만원</Text>
+                </Stack>
+                <Text style={{ fontSize: '28px', color: '#d1d5db', fontWeight: 300 }}>vs</Text>
+                <Stack gap={4} align="center">
+                  <Text style={{ fontSize: '14px', color: '#6b7280' }}>AI 스크립트 6개월</Text>
+                  <Text fw={800} style={{ fontSize: '28px', color: '#8b5cf6' }}>50만원</Text>
+                </Stack>
+              </Group>
+            </Box>
+            <Text style={{ marginTop: '24px', fontSize: '17px', color: '#6b7280' }}>
+              = <b style={{ color: '#111827' }}>월 4만원</b> = 커피 10잔 값으로{' '}
+              <b style={{ color: '#8b5cf6' }}>24시간 일하는 직원</b>
+            </Text>
+          </Paper>
+        </motion.div>
       </Container>
     </Box>
   );
@@ -673,17 +1009,42 @@ function FAQSection() {
   ];
 
   return (
-    <Box component="section" py={80} style={{ background: '#f9fafb' }} id="faq">
+    <Box component="section" py={100} style={{ background: '#f9fafb' }} id="faq">
       <Container size="md">
-        <Title order={2} ta="center" style={{ color: '#111827', marginBottom: '32px' }}>
-          FAQ
+        <Title
+          order={2}
+          ta="center"
+          style={{
+            color: '#111827',
+            fontSize: 'clamp(28px, 4.5vw, 36px)',
+            fontWeight: 800,
+            marginBottom: '40px',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          자주 묻는 질문
         </Title>
         <Accordion
           variant="separated"
+          radius="xl"
           styles={{
-            item: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px' },
-            control: { color: '#111827' },
-            panel: { color: '#6b7280' },
+            item: {
+              background: '#fff',
+              border: '1px solid #e5e7eb',
+              marginBottom: '12px',
+            },
+            control: {
+              color: '#111827',
+              fontWeight: 600,
+              fontSize: '16px',
+              padding: '20px 24px',
+            },
+            panel: {
+              color: '#6b7280',
+              fontSize: '15px',
+              lineHeight: 1.7,
+              padding: '0 24px 20px',
+            },
           }}
         >
           {faqs.map((f, i) => (
@@ -701,10 +1062,41 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <Box component="section" py={80} style={{ background: '#fff' }}>
-      <Container size="md">
+    <Box
+      component="section"
+      py={100}
+      style={{
+        background: '#fff',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* 배경 글로우 */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '600px',
+          height: '400px',
+          background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.06) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <Container size="md" style={{ position: 'relative', zIndex: 1 }}>
         <Stack align="center" gap="lg">
-          <Title order={2} ta="center" style={{ color: '#111827', fontSize: '32px', lineHeight: 1.4 }}>
+          <Title
+            order={2}
+            ta="center"
+            style={{
+              color: '#111827',
+              fontSize: 'clamp(28px, 4.5vw, 40px)',
+              fontWeight: 800,
+              lineHeight: 1.35,
+              letterSpacing: '-0.02em',
+            }}
+          >
             지금 시작하지 않으면,
             <br />
             내일도 같은 고민을 하게 됩니다
@@ -718,18 +1110,21 @@ function CTASection() {
               background: '#8b5cf6',
               fontSize: '18px',
               fontWeight: 700,
-              padding: '14px 48px',
+              padding: '16px 56px',
               height: 'auto',
+              boxShadow: '0 4px 24px rgba(139, 92, 246, 0.4)',
             }}
           >
             무료로 시작하기
           </Button>
-          <Text size="sm" style={{ color: '#9ca3af' }}>
-            30크레딧 무료 · 7일 환불 보장
-          </Text>
-          <Text size="sm" style={{ color: '#9ca3af' }}>
-            문의: hmys0205hmys@gmail.com
-          </Text>
+          <Stack align="center" gap={4}>
+            <Text size="sm" style={{ color: '#9ca3af' }}>
+              30크레딧 무료 · 7일 환불 보장
+            </Text>
+            <Text size="sm" style={{ color: '#9ca3af' }}>
+              문의: hmys0205hmys@gmail.com
+            </Text>
+          </Stack>
         </Stack>
       </Container>
     </Box>
@@ -773,7 +1168,7 @@ function Footer() {
 
 
 // ============================================================
-// FloatingCTA — 스크롤 시 고정 가격/CTA
+// FloatingCTA
 // ============================================================
 function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false);
@@ -793,7 +1188,6 @@ function FloatingCTA() {
 
   if (!isVisible) return null;
 
-  // 모바일: 하단 고정 바
   if (isMobile) {
     return (
       <Box
@@ -807,26 +1201,25 @@ function FloatingCTA() {
           borderTop: '1px solid #e5e7eb',
           padding: '12px 16px',
           paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
-          boxShadow: '0 -4px 12px rgba(0,0,0,0.08)',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
         }}
       >
         <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
           <Stack gap={2}>
-            <Text style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'line-through' }}>
-              ₩700,000
-            </Text>
-            <Text style={{ fontSize: '18px', fontWeight: 800, color: '#8b5cf6' }}>₩500,000</Text>
+            <Text style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'line-through' }}>₩700,000</Text>
+            <Text style={{ fontSize: '20px', fontWeight: 800, color: '#8b5cf6' }}>₩500,000</Text>
           </Stack>
           <Button
             component={Link}
             href="/pricing"
-            size="sm"
+            size="md"
             radius="xl"
             style={{
               background: '#8b5cf6',
               fontWeight: 700,
-              fontSize: '14px',
+              fontSize: '15px',
               flexShrink: 0,
+              boxShadow: '0 2px 12px rgba(139, 92, 246, 0.3)',
             }}
           >
             신청하기
@@ -836,13 +1229,12 @@ function FloatingCTA() {
     );
   }
 
-  // 데스크톱: 오른쪽 사이드
   return (
     <Box
       style={{
         position: 'fixed',
         top: '50%',
-        right: '20px',
+        right: '24px',
         transform: 'translateY(-50%)',
         zIndex: 1000,
         width: '260px',
@@ -854,31 +1246,33 @@ function FloatingCTA() {
         transition={{ duration: 0.4 }}
       >
         <Paper
-          p="lg"
-          radius="lg"
+          p="xl"
+          radius="xl"
           style={{
             background: '#fff',
             border: '1px solid #e5e7eb',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.1)',
           }}
         >
           <Stack gap="md">
-            <Text fw={700} style={{ fontSize: '16px', color: '#111827' }}>
+            <Text fw={700} style={{ fontSize: '17px', color: '#111827' }}>
               올인원 패스
             </Text>
             <Stack gap={4}>
-              <Text style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>
-                ₩700,000
-              </Text>
-              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6' }}>₩500,000</Text>
+              <Text style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>₩700,000</Text>
+              <Text style={{ fontSize: '30px', fontWeight: 800, color: '#8b5cf6' }}>₩500,000</Text>
             </Stack>
             <Button
               component={Link}
               href="/pricing"
               size="md"
               fullWidth
-              radius="lg"
-              style={{ background: '#8b5cf6', fontWeight: 700 }}
+              radius="xl"
+              style={{
+                background: '#8b5cf6',
+                fontWeight: 700,
+                boxShadow: '0 2px 12px rgba(139, 92, 246, 0.3)',
+              }}
             >
               신청하기
             </Button>
