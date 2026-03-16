@@ -149,9 +149,8 @@ function HeroSection() {
                   borderRadius: '5px', zIndex: -1,
                 }} />
               </span>
-              까지의
               <br />
-              최단거리입니다
+              까지의 최단거리입니다
             </Title>
           </motion.div>
 
