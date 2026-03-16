@@ -434,25 +434,25 @@ function WhyFlowSpotSection() {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   섹션 4: HowItWorks — 3열 단계별 카드 (한눈에 보기)
+   섹션 4: HowItWorks — 플로우차트 진단 (Q→NO→Q→YES↓→카드)
    ═══════════════════════════════════════════════════════════════ */
 function HowItWorksSection() {
   const stages = [
     {
-      num: '01', label: '입문', color: '#8b5cf6', bg: 'rgba(139,92,246,0.06)',
-      question: '쇼츠, 처음 시작이에요',
+      qNum: 'Q1', question: '쇼츠, 처음이신가요?',
+      label: '입문', color: '#8b5cf6',
       answer: '기획부터 수익화까지 순서대로 알려드립니다.',
       includes: ['전자책 (기초 가이드)', 'VOD 59강 (순차 학습)', 'AI 스크립트 6개월'],
     },
     {
-      num: '02', label: '성장', color: '#22c55e', bg: 'rgba(34,197,94,0.06)',
-      question: '하고 있는데 성장이 안 돼요',
+      qNum: 'Q2', question: '하고 있는데 성장이 안 되나요?',
+      label: '성장', color: '#22c55e',
       answer: '터지는 영상에는 공식이 있습니다. 그 공식을 드립니다.',
       includes: ['채널 리스트 (벤치마크)', 'AI 스크립트 (검증된 구조)', 'VOD 59강 (심화)'],
     },
     {
-      num: '03', label: '시스템화', color: '#3b82f6', bg: 'rgba(59,130,246,0.06)',
-      question: '혼자 하려니 너무 힘들어요',
+      qNum: 'Q3', question: '혼자 하려니 지치셨나요?',
+      label: '시스템화', color: '#3b82f6',
       answer: '반복 작업은 AI에게. 당신은 기획만 하세요.',
       includes: ['노션 운영 템플릿', 'AI 스크립트 (자동화)', '채널 리스트 (트렌드)'],
     },
@@ -477,75 +477,188 @@ function HowItWorksSection() {
           </Stack>
         </motion.div>
 
-        {/* 3-column cards */}
+        {/* Flowchart */}
         <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <Box style={{ display: 'flex', gap: '20px', minWidth: '900px' }}>
-            {stages.map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.12, ease }}
-                style={{ flex: '1 1 0' }}
-              >
-                <Paper radius="lg" p={0} style={{
-                  background: '#fafafa', border: '1px solid #e4e4e7',
-                  overflow: 'hidden', height: '100%',
-                  display: 'flex', flexDirection: 'column',
-                }}>
-                  {/* Colored header strip */}
+          <Box style={{ minWidth: '900px', padding: '0 20px' }}>
+
+            {/* ── Row 1: Question boxes + NO arrows ── */}
+            <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
+              {stages.map((s, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.15, ease }}
+                  style={{ display: 'flex', alignItems: 'center' }}
+                >
+                  {/* Question box */}
                   <Box style={{
-                    background: s.bg, padding: '16px 24px',
-                    borderBottom: `2px solid ${s.color}`,
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    width: '240px',
+                    background: '#18181b',
+                    borderRadius: '16px',
+                    padding: '24px 20px',
+                    textAlign: 'center',
+                    position: 'relative',
                   }}>
-                    <Text style={{ ...mono, fontSize: '13px', fontWeight: 700, color: s.color, letterSpacing: '0.08em' }}>
-                      {s.num}
-                    </Text>
-                    <Badge variant="filled" size="md" style={{
-                      background: s.color, fontWeight: 700, fontSize: '13px',
-                      padding: '6px 16px', height: 'auto',
-                    }}>
-                      {s.label}
-                    </Badge>
-                  </Box>
-
-                  {/* Content */}
-                  <Box p={24} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    {/* Question */}
-                    <Text fw={700} style={{
-                      fontSize: '17px', color: '#18181b', marginBottom: '10px', lineHeight: 1.4,
-                    }}>
-                      &ldquo;{s.question}&rdquo;
-                    </Text>
-
-                    {/* Answer */}
+                    {/* Q badge */}
                     <Text style={{
-                      fontSize: '14px', color: '#71717a', lineHeight: 1.6, marginBottom: '20px',
+                      ...mono, fontSize: '12px', fontWeight: 800,
+                      color: s.color, letterSpacing: '0.1em',
+                      marginBottom: '10px',
                     }}>
-                      → {s.answer}
+                      {s.qNum}
                     </Text>
-
-                    {/* Divider */}
-                    <Box style={{ height: '1px', background: '#e4e4e7', marginBottom: '16px' }} />
-
-                    {/* Includes */}
-                    <Text size="xs" fw={600} mb={10} style={{ color: '#a1a1aa', letterSpacing: '0.04em', fontSize: '11px' }}>
-                      포함 솔루션
+                    <Text fw={700} style={{
+                      fontSize: '15px', color: '#ffffff', lineHeight: 1.5,
+                    }}>
+                      {s.question}
                     </Text>
-                    <Stack gap={8}>
-                      {s.includes.map((item, j) => (
-                        <Group key={j} gap={8} wrap="nowrap">
-                          <Check size={14} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
-                          <Text style={{ color: '#3f3f46', fontSize: '13px' }}>{item}</Text>
-                        </Group>
-                      ))}
-                    </Stack>
                   </Box>
-                </Paper>
-              </motion.div>
-            ))}
+
+                  {/* NO → arrow (between Q boxes, not after last) */}
+                  {i < stages.length - 1 && (
+                    <Box style={{
+                      display: 'flex', alignItems: 'center', padding: '0 8px',
+                      flexShrink: 0,
+                    }}>
+                      <Box style={{
+                        width: '40px', height: '0',
+                        borderTop: '2px dashed #d4d4d8',
+                      }} />
+                      <Box style={{
+                        background: '#f4f4f5',
+                        borderRadius: '20px',
+                        padding: '4px 12px',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        <Text style={{
+                          ...mono, fontSize: '11px', fontWeight: 700,
+                          color: '#a1a1aa',
+                        }}>
+                          NO →
+                        </Text>
+                      </Box>
+                      <Box style={{
+                        width: '40px', height: '0',
+                        borderTop: '2px dashed #d4d4d8',
+                      }} />
+                    </Box>
+                  )}
+                </motion.div>
+              ))}
+            </Box>
+
+            {/* ── Row 2: YES ↓ indicators ── */}
+            <Box style={{
+              display: 'flex', justifyContent: 'center', gap: 0,
+              marginTop: '16px',
+            }}>
+              {stages.map((s, i) => (
+                <Box key={i} style={{
+                  width: '240px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  /* spacing to match Q boxes + NO arrows between them */
+                  marginLeft: i > 0 ? '112px' : 0,
+                }}>
+                  {/* Dashed vertical line */}
+                  <Box style={{
+                    width: '0', height: '20px',
+                    borderLeft: `2px dashed ${s.color}`,
+                    opacity: 0.4,
+                  }} />
+                  {/* YES badge */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: 0.3 + i * 0.1, ease }}
+                  >
+                    <Box style={{
+                      background: s.color,
+                      borderRadius: '20px',
+                      padding: '4px 16px',
+                      display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    }}>
+                      <Text style={{
+                        ...mono, fontSize: '11px', fontWeight: 800,
+                        color: '#ffffff',
+                      }}>
+                        YES ↓
+                      </Text>
+                    </Box>
+                  </motion.div>
+                  {/* Dashed vertical line */}
+                  <Box style={{
+                    width: '0', height: '20px',
+                    borderLeft: `2px dashed ${s.color}`,
+                    opacity: 0.4,
+                  }} />
+                </Box>
+              ))}
+            </Box>
+
+            {/* ── Row 3: Answer cards ── */}
+            <Box style={{
+              display: 'flex', justifyContent: 'center', gap: 0,
+            }}>
+              {stages.map((s, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: 0.4 + i * 0.12, ease }}
+                  style={{
+                    width: '240px',
+                    marginLeft: i > 0 ? '112px' : 0,
+                  }}
+                >
+                  <Paper radius="lg" p={0} style={{
+                    background: '#fafafa', border: '1px solid #e4e4e7',
+                    overflow: 'hidden',
+                  }}>
+                    {/* Label header */}
+                    <Box style={{
+                      background: s.color,
+                      padding: '10px 20px',
+                      textAlign: 'center',
+                    }}>
+                      <Text fw={800} style={{ fontSize: '14px', color: '#ffffff', letterSpacing: '0.02em' }}>
+                        {s.label}
+                      </Text>
+                    </Box>
+
+                    {/* Card body */}
+                    <Box p={20}>
+                      <Text style={{
+                        fontSize: '13px', color: '#71717a', lineHeight: 1.6, marginBottom: '16px',
+                      }}>
+                        {s.answer}
+                      </Text>
+
+                      <Box style={{ height: '1px', background: '#e4e4e7', marginBottom: '14px' }} />
+
+                      <Text size="xs" fw={600} mb={10} style={{
+                        color: '#a1a1aa', letterSpacing: '0.04em', fontSize: '10px',
+                        textTransform: 'uppercase',
+                      }}>
+                        포함 솔루션
+                      </Text>
+                      <Stack gap={7}>
+                        {s.includes.map((item, j) => (
+                          <Group key={j} gap={7} wrap="nowrap">
+                            <Check size={13} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
+                            <Text style={{ color: '#3f3f46', fontSize: '12px', lineHeight: 1.4 }}>{item}</Text>
+                          </Group>
+                        ))}
+                      </Stack>
+                    </Box>
+                  </Paper>
+                </motion.div>
+              ))}
+            </Box>
+
           </Box>
         </Box>
 
