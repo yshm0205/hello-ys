@@ -5,7 +5,7 @@
  * Refined Editorial: zinc neutrals, monospace data accents, intentional violet
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Container,
   Title,
@@ -63,6 +63,40 @@ function CountUp({ target }: { target: number }) {
     return () => clearTimeout(delay);
   }, [target]);
   return <>{count}</>;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ScaleToFit — 모바일에서 데스크톱 레이아웃을 비례 축소
+   ═══════════════════════════════════════════════════════════════ */
+function ScaleToFit({ children, contentWidth }: { children: React.ReactNode; contentWidth: number }) {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [visibleH, setVisibleH] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const update = () => {
+      if (!outerRef.current || !innerRef.current) return;
+      const avail = outerRef.current.clientWidth;
+      const s = Math.min(1, avail / contentWidth);
+      setScale(s);
+      setVisibleH(s < 1 ? innerRef.current.scrollHeight * s : undefined);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    if (outerRef.current) ro.observe(outerRef.current);
+    return () => ro.disconnect();
+  }, [contentWidth]);
+
+  const needsScale = scale < 1;
+  return (
+    <Box ref={outerRef} style={{ width: '100%', overflow: needsScale ? 'hidden' : undefined, height: visibleH }}>
+      <Box ref={innerRef} style={needsScale ? { width: contentWidth, transform: `scale(${scale})`, transformOrigin: 'top left' } : undefined}>
+        {children}
+      </Box>
+    </Box>
+  );
 }
 
 
@@ -259,7 +293,7 @@ function PainSection() {
           </Title>
         </motion.div>
 
-        <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <ScaleToFit contentWidth={860}>
           <Box style={{ display: 'flex', gap: '20px', minWidth: '840px' }}>
             {pains.map((p, i) => (
               <motion.div
@@ -298,7 +332,7 @@ function PainSection() {
               </motion.div>
             ))}
           </Box>
-        </Box>
+        </ScaleToFit>
 
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.4, ease }}>
           <Text ta="center" style={{ color: '#71717a', fontSize: '15px', marginTop: '48px', fontStyle: 'italic' }}>
@@ -387,20 +421,18 @@ function WhyFlowSpotSection() {
 
         {/* Revenue grid */}
         <Box style={{ maxWidth: '920px', margin: '0 auto' }}>
-          <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <ScaleToFit contentWidth={760}>
             <Box style={{ display: 'flex', gap: '14px', minWidth: '720px', marginBottom: '14px' }}>
               {revenues.slice(0, 3).map((r, i) => (
                 <ScreenFrame key={i} r={r} delay={i * 0.1} />
               ))}
             </Box>
-          </Box>
-          <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <Box style={{ display: 'flex', gap: '14px', minWidth: '500px', justifyContent: 'center' }}>
               {revenues.slice(3).map((r, i) => (
                 <ScreenFrame key={i} r={r} delay={0.3 + i * 0.1} />
               ))}
             </Box>
-          </Box>
+          </ScaleToFit>
         </Box>
 
         {/* Bridge — pull-quote style */}
@@ -479,7 +511,7 @@ function HowItWorksSection() {
         </motion.div>
 
         {/* Flowchart */}
-        <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <ScaleToFit contentWidth={960}>
           <Box style={{ minWidth: '900px', padding: '0 20px' }}>
 
             {/* ── Row 1: Question boxes + NO arrows ── */}
@@ -662,7 +694,7 @@ function HowItWorksSection() {
             </Box>
 
           </Box>
-        </Box>
+        </ScaleToFit>
 
         {/* Convergence CTA */}
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.3, ease }}>
@@ -716,8 +748,9 @@ function PackageSection() {
         </motion.div>
 
         {/* Comparison */}
-        <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: '56px' }}>
-          <Box style={{ display: 'flex', gap: '20px', minWidth: '720px', justifyContent: 'center', alignItems: 'stretch' }}>
+        <Box style={{ marginBottom: '56px' }}>
+          <ScaleToFit contentWidth={760}>
+            <Box style={{ display: 'flex', gap: '20px', minWidth: '720px', justifyContent: 'center', alignItems: 'stretch' }}>
             {/* 일반 유료 강의 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -800,7 +833,8 @@ function PackageSection() {
                 </Stack>
               </Paper>
             </motion.div>
-          </Box>
+            </Box>
+          </ScaleToFit>
         </Box>
 
         {/* Value breakdown — receipt */}
