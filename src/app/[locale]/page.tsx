@@ -136,22 +136,22 @@ function HeroSection() {
               marginBottom: 'clamp(20px, 4vw, 28px)',
               ...mono,
             }}>
-              VOD 59강 + AI 스크립트 + 채널 리스트 + 전자책
+              VOD강의 + 매달 트렌드 채널 데이터 + 전자책 + AI 스크립트 도구
             </Text>
 
             {/* 헤드라인 */}
             <Title order={1} ta="center" style={{
-              fontSize: 'clamp(32px, 7vw, 56px)',
+              fontSize: 'clamp(28px, 6.5vw, 52px)',
               fontWeight: 900, color: '#ffffff',
               lineHeight: 1.15, letterSpacing: '-0.03em',
-              marginBottom: 'clamp(16px, 3vw, 24px)',
+              marginBottom: 'clamp(24px, 5vw, 36px)',
             }}>
               쇼츠 수익화
               <br />
               <span style={{
                 color: '#a78bfa', position: 'relative', display: 'inline-block',
               }}>
-                All-In-One
+                최단거리
                 <Box style={{
                   position: 'absolute', bottom: '2px', left: '-2px', right: '-2px',
                   height: '8px', background: 'rgba(167,139,250,0.3)',
@@ -160,16 +160,6 @@ function HeroSection() {
               </span>
               {' '}패키지
             </Title>
-
-            {/* 서브라인 */}
-            <Text ta="center" style={{
-              color: 'rgba(255,255,255,0.75)',
-              fontSize: 'clamp(15px, 2.5vw, 18px)',
-              lineHeight: 1.5, marginBottom: 'clamp(24px, 5vw, 36px)',
-              maxWidth: '380px',
-            }}>
-              뭘 해야 하는지 알려주고, AI가 대신 실행합니다
-            </Text>
 
             {/* CTA 버튼 */}
             <Button
@@ -188,29 +178,25 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-      {/* 카드 아래 정보 */}
+      {/* 카드 아래 — 포지셔닝 멘트 */}
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6, ease }}
       >
-        <Stack align="center" gap={12} mt={28}>
-          <Text size="sm" ta="center" style={{ color: '#71717a', fontSize: '13px' }}>
-            30크레딧 무료 · 카드 등록 없음
-          </Text>
-          {/* 뱃지 */}
-          <Group gap={8} justify="center" style={{ flexWrap: 'wrap' }}>
-            {['📚 VOD 59강', '🤖 AI 스크립트', '📊 채널 리스트', '📖 전자책'].map((label) => (
-              <Badge key={label} size="md" variant="light" radius="xl" style={{
-                padding: '6px 14px', fontSize: '12px', fontWeight: 600,
-                color: '#52525b', background: '#f4f4f5',
-                border: '1px solid #e4e4e7',
-              }}>
-                {label}
-              </Badge>
-            ))}
-          </Group>
-        </Stack>
+        <Text ta="center" style={{
+          color: '#52525b', fontSize: 'clamp(16px, 3vw, 20px)',
+          fontWeight: 600, lineHeight: 1.5, marginTop: '32px',
+          maxWidth: '420px',
+        }}>
+          지금부터 소개해드리는 이 길이,
+          <br />
+          <span style={{ color: '#18181b', fontWeight: 800 }}>
+            쇼츠 수익화의{' '}
+            <span style={{ color: '#8b5cf6' }}>최단거리</span>
+            입니다
+          </span>
+        </Text>
       </motion.div>
 
       {/* Scroll indicator */}
