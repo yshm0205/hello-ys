@@ -292,18 +292,18 @@ function PainSection() {
                   <Box style={{ height: isMobile ? '3px' : '4px', background: p.accent }} />
                   <Box style={{ padding: isMobile ? '12px' : '28px' }}>
                     <Text style={{
-                      fontSize: isMobile ? '11px' : '13px', fontWeight: 700, color: p.accent,
+                      fontSize: isMobile ? '12px' : '13px', fontWeight: 700, color: p.accent,
                       letterSpacing: '0.08em', marginBottom: isMobile ? '8px' : '16px', ...mono,
                     }}>
                       {p.num}
                     </Text>
-                    <Text fw={700} style={{ fontSize: isMobile ? '13px' : '18px', color: '#18181b', marginBottom: isMobile ? '6px' : '12px', lineHeight: 1.4 }}>
+                    <Text fw={700} style={{ fontSize: isMobile ? '14px' : '18px', color: '#18181b', marginBottom: isMobile ? '6px' : '12px', lineHeight: 1.4 }}>
                       {p.title}
                     </Text>
-                    <Text style={{ fontSize: isMobile ? '11px' : '15px', color: '#52525b', lineHeight: 1.5, marginBottom: isMobile ? '4px' : '8px' }}>
+                    <Text style={{ fontSize: isMobile ? '12px' : '15px', color: '#52525b', lineHeight: 1.5, marginBottom: isMobile ? '4px' : '8px' }}>
                       {p.desc}
                     </Text>
-                    <Text fw={700} style={{ fontSize: isMobile ? '12px' : '17px', color: p.accent, ...mono }}>
+                    <Text fw={700} style={{ fontSize: isMobile ? '13px' : '17px', color: p.accent, ...mono }}>
                       {p.metric}
                     </Text>
                   </Box>
@@ -354,7 +354,7 @@ function WhyFlowSpotSection() {
             <Box style={{ width: isMobile ? 5 : 7, height: isMobile ? 5 : 7, borderRadius: '50%', background: '#a1a1aa' }} />
             <Box style={{ width: isMobile ? 5 : 7, height: isMobile ? 5 : 7, borderRadius: '50%', background: '#a1a1aa' }} />
             <Box style={{ width: isMobile ? 5 : 7, height: isMobile ? 5 : 7, borderRadius: '50%', background: '#a1a1aa' }} />
-            <Text size="xs" style={{ color: '#71717a', marginLeft: isMobile ? '4px' : '8px', fontSize: isMobile ? '9px' : '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</Text>
+            <Text size="xs" style={{ color: '#71717a', marginLeft: isMobile ? '4px' : '8px', fontSize: isMobile ? '10px' : '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</Text>
           </Box>
           {/* Capture area */}
           <Box style={{
@@ -372,7 +372,7 @@ function WhyFlowSpotSection() {
             display: 'flex', justifyContent: isMobile ? 'center' : 'space-between', alignItems: 'center',
           }}>
             {!isMobile && <Text style={{ color: '#52525b', fontSize: '12px' }}>{r.label}</Text>}
-            <Text fw={800} style={{ fontSize: isMobile ? '11px' : '16px', color: '#18181b', ...mono }}>{r.amount}</Text>
+            <Text fw={800} style={{ fontSize: isMobile ? '12px' : '16px', color: '#18181b', ...mono }}>{r.amount}</Text>
           </Box>
         </Paper>
       </motion.div>
@@ -513,14 +513,14 @@ function HowItWorksSection() {
                     position: 'relative',
                   }}>
                     <Text style={{
-                      ...mono, fontSize: isMobile ? '10px' : '12px', fontWeight: 800,
+                      ...mono, fontSize: isMobile ? '11px' : '12px', fontWeight: 800,
                       color: s.color, letterSpacing: '0.1em',
                       marginBottom: isMobile ? '6px' : '10px',
                     }}>
                       {s.qNum}
                     </Text>
                     <Text fw={700} style={{
-                      fontSize: isMobile ? '11px' : '15px', color: '#ffffff', lineHeight: 1.4,
+                      fontSize: isMobile ? '12px' : '15px', color: '#ffffff', lineHeight: 1.4,
                     }}>
                       {s.question}
                     </Text>
@@ -537,7 +537,7 @@ function HowItWorksSection() {
                         background: '#f4f4f5', borderRadius: '20px',
                         padding: isMobile ? '3px 8px' : '4px 12px', whiteSpace: 'nowrap',
                       }}>
-                        <Text style={{ ...mono, fontSize: isMobile ? '9px' : '11px', fontWeight: 700, color: '#71717a' }}>
+                        <Text style={{ ...mono, fontSize: isMobile ? '10px' : '11px', fontWeight: 700, color: '#71717a' }}>
                           NO →
                         </Text>
                       </Box>
@@ -571,7 +571,7 @@ function HowItWorksSection() {
                       padding: isMobile ? '3px 10px' : '4px 16px',
                       display: 'inline-flex', alignItems: 'center', gap: '4px',
                     }}>
-                      <Text style={{ ...mono, fontSize: isMobile ? '9px' : '11px', fontWeight: 800, color: '#ffffff' }}>
+                      <Text style={{ ...mono, fontSize: isMobile ? '10px' : '11px', fontWeight: 800, color: '#ffffff' }}>
                         YES ↓
                       </Text>
                     </Box>
@@ -604,14 +604,14 @@ function HowItWorksSection() {
                       padding: isMobile ? '6px 10px' : '10px 20px',
                       textAlign: 'center',
                     }}>
-                      <Text fw={800} style={{ fontSize: isMobile ? '11px' : '14px', color: '#ffffff', letterSpacing: '0.02em' }}>
+                      <Text fw={800} style={{ fontSize: isMobile ? '12px' : '14px', color: '#ffffff', letterSpacing: '0.02em' }}>
                         {s.label}
                       </Text>
                     </Box>
 
                     <Box style={{ padding: isMobile ? '10px' : '20px' }}>
                       <Text style={{
-                        fontSize: isMobile ? '10px' : '13px', color: '#52525b', lineHeight: 1.5, marginBottom: isMobile ? '8px' : '16px',
+                        fontSize: isMobile ? '11px' : '13px', color: '#52525b', lineHeight: 1.5, marginBottom: isMobile ? '8px' : '16px',
                       }}>
                         {s.answer}
                       </Text>
@@ -619,7 +619,7 @@ function HowItWorksSection() {
                       <Box style={{ height: '1px', background: '#d4d4d8', marginBottom: isMobile ? '8px' : '14px' }} />
 
                       <Text size="xs" fw={600} mb={isMobile ? 6 : 10} style={{
-                        color: '#71717a', letterSpacing: '0.04em', fontSize: isMobile ? '8px' : '10px',
+                        color: '#71717a', letterSpacing: '0.04em', fontSize: isMobile ? '9px' : '10px',
                         textTransform: 'uppercase',
                       }}>
                         포함 솔루션
@@ -628,7 +628,7 @@ function HowItWorksSection() {
                         {s.includes.map((item, j) => (
                           <Group key={j} gap={isMobile ? 4 : 7} wrap="nowrap">
                             <Check size={isMobile ? 10 : 13} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
-                            <Text style={{ color: '#3f3f46', fontSize: isMobile ? '9px' : '12px', lineHeight: 1.3 }}>{item}</Text>
+                            <Text style={{ color: '#3f3f46', fontSize: isMobile ? '10px' : '12px', lineHeight: 1.3 }}>{item}</Text>
                           </Group>
                         ))}
                       </Stack>
@@ -715,7 +715,7 @@ function PackageSection() {
                   }}>
                     <X size={isMobile ? 14 : 18} color="#ef4444" />
                   </Box>
-                  <Text fw={700} style={{ fontSize: isMobile ? '13px' : '18px', color: '#52525b' }}>일반 유료 강의</Text>
+                  <Text fw={700} style={{ fontSize: isMobile ? '14px' : '18px', color: '#52525b' }}>일반 유료 강의</Text>
                 </Group>
                 <Stack gap={isMobile ? 8 : 14}>
                   {[
@@ -726,8 +726,8 @@ function PackageSection() {
                     'AI 도구 없음',
                   ].map((t, i) => (
                     <Group key={i} gap={isMobile ? 6 : 10} wrap="nowrap">
-                      <X size={isMobile ? 11 : 14} color="#a1a1aa" style={{ flexShrink: 0 }} />
-                      <Text style={{ color: '#52525b', fontSize: isMobile ? '11px' : '14px', lineHeight: 1.4 }}>{t}</Text>
+                      <X size={isMobile ? 12 : 14} color="#a1a1aa" style={{ flexShrink: 0 }} />
+                      <Text style={{ color: '#52525b', fontSize: isMobile ? '12px' : '14px', lineHeight: 1.4 }}>{t}</Text>
                     </Group>
                   ))}
                 </Stack>
@@ -761,7 +761,7 @@ function PackageSection() {
                   }}>
                     <Check size={isMobile ? 14 : 18} color="#22c55e" />
                   </Box>
-                  <Text fw={700} style={{ fontSize: isMobile ? '13px' : '18px', color: '#18181b' }}>올인원 패스</Text>
+                  <Text fw={700} style={{ fontSize: isMobile ? '14px' : '18px', color: '#18181b' }}>올인원 패스</Text>
                 </Group>
                 <Stack gap={isMobile ? 8 : 14}>
                   {[
@@ -772,8 +772,8 @@ function PackageSection() {
                     'AI 스크립트 도구 6개월',
                   ].map((t, i) => (
                     <Group key={i} gap={isMobile ? 6 : 10} wrap="nowrap">
-                      <Check size={isMobile ? 11 : 14} color="#22c55e" style={{ flexShrink: 0 }} />
-                      <Text fw={500} style={{ color: '#18181b', fontSize: isMobile ? '11px' : '14px', lineHeight: 1.4 }}>{t}</Text>
+                      <Check size={isMobile ? 12 : 14} color="#22c55e" style={{ flexShrink: 0 }} />
+                      <Text fw={500} style={{ color: '#18181b', fontSize: isMobile ? '12px' : '14px', lineHeight: 1.4 }}>{t}</Text>
                     </Group>
                   ))}
                 </Stack>
