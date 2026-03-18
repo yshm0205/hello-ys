@@ -178,81 +178,201 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-      {/* 카드 아래 — A→B 최단거리 SVG + 스토리 오프닝 */}
+      {/* 카드 아래 — 과정 비교 인포그래픽 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6, ease }}
-        style={{ width: '100%', maxWidth: '480px', marginTop: 'clamp(40px, 7vw, 64px)' }}
+        style={{ width: '100%', maxWidth: '540px', marginTop: 'clamp(48px, 8vw, 72px)' }}
       >
-        {/* A→B 직선 vs 구불구불 SVG */}
-        <Box style={{ width: '100%', marginBottom: '28px' }}>
-          <svg viewBox="0 0 400 120" fill="none" style={{ width: '100%', height: 'auto' }}>
-            {/* 구불구불한 길 (회색) */}
-            <motion.path
-              d="M 50 60 C 80 20, 120 100, 150 60 C 180 20, 220 100, 250 60 C 280 20, 320 100, 350 60"
-              stroke="#d4d4d8"
-              strokeWidth="3"
-              strokeDasharray="6 4"
-              fill="none"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 1.2, delay: 0.8, ease: 'easeInOut' }}
-            />
-            {/* 직선 화살표 (violet) */}
-            <motion.line
-              x1="50" y1="60" x2="340" y2="60"
-              stroke="#8b5cf6"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.8, delay: 1.6, ease: 'easeOut' }}
-            />
-            {/* 화살표 머리 */}
-            <motion.polygon
-              points="340,60 328,52 328,68"
-              fill="#8b5cf6"
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 2.3 }}
-            />
-            {/* A 라벨 */}
-            <circle cx="50" cy="60" r="16" fill="#f4f4f5" stroke="#a1a1aa" strokeWidth="1.5" />
-            <text x="50" y="65" textAnchor="middle" fill="#52525b" fontSize="13" fontWeight="700" fontFamily="var(--font-geist-mono), monospace">A</text>
-            {/* B 라벨 */}
-            <motion.g
+        {/* 혼자 하면 — 복잡한 과정 */}
+        <Box style={{ marginBottom: 'clamp(32px, 5vw, 48px)' }}>
+          <Text ta="center" style={{
+            fontSize: 'clamp(13px, 2.2vw, 15px)', color: '#a1a1aa',
+            fontWeight: 600, marginBottom: '16px', ...mono,
+          }}>
+            혼자 하면
+          </Text>
+          <Box style={{
+            display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
+            gap: '8px', position: 'relative',
+          }}>
+            {['채널 분석', '기획', '스크립트', '촬영', '편집', '업로드', '실패'].map((step, i) => (
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.8 + i * 0.1, ease }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <Box style={{
+                  padding: '8px 14px', borderRadius: '8px',
+                  background: i === 6 ? 'rgba(239,68,68,0.08)' : '#f4f4f5',
+                  border: i === 6 ? '1px solid rgba(239,68,68,0.2)' : '1px solid #e4e4e7',
+                }}>
+                  <Text style={{
+                    fontSize: 'clamp(12px, 2vw, 14px)',
+                    color: i === 6 ? '#ef4444' : '#71717a',
+                    fontWeight: 500, whiteSpace: 'nowrap',
+                  }}>
+                    {step}
+                  </Text>
+                </Box>
+                {i < 6 && (
+                  <Text style={{ color: '#d4d4d8', fontSize: '12px' }}>→</Text>
+                )}
+              </motion.div>
+            ))}
+            {/* 되돌아감 화살표 */}
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 2.3 }}
+              transition={{ duration: 0.4, delay: 1.8 }}
+              style={{ width: '100%', textAlign: 'center', marginTop: '4px' }}
             >
-              <circle cx="355" cy="60" r="16" fill="#8b5cf6" stroke="#7c3aed" strokeWidth="1.5" />
-              <text x="355" y="65" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="700" fontFamily="var(--font-geist-mono), monospace">B</text>
-            </motion.g>
-            {/* 구불구불 라벨 */}
-            <text x="200" y="105" textAnchor="middle" fill="#a1a1aa" fontSize="11" fontFamily="var(--font-geist-mono), monospace">남들이 가는 길</text>
-            {/* 직선 라벨 */}
-            <motion.text
-              x="200" y="45" textAnchor="middle" fill="#8b5cf6" fontSize="12" fontWeight="700"
-              fontFamily="var(--font-geist-mono), monospace"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 2.0 }}
-            >FlowSpot</motion.text>
-          </svg>
+              <Text style={{
+                fontSize: 'clamp(11px, 1.8vw, 13px)', color: '#ef4444',
+                fontWeight: 600, ...mono,
+              }}>
+                ↩ 처음부터 다시
+              </Text>
+            </motion.div>
+          </Box>
         </Box>
 
-        <Title order={2} ta="center" style={{
-          fontSize: 'clamp(24px, 5vw, 40px)',
-          fontWeight: 800, lineHeight: 1.3,
-          color: '#18181b', letterSpacing: '-0.03em',
-        }}>
-          지금부터 소개해드리는 이 길이,
-          <br />
-          쇼츠 수익화의{' '}
-          <span style={{ color: '#8b5cf6' }}>최단거리</span>
-          입니다
-        </Title>
+        {/* 구분선 + VS */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 2.0 }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '16px',
+            marginBottom: 'clamp(32px, 5vw, 48px)',
+          }}
+        >
+          <Box style={{ flex: 1, height: '1px', background: '#e4e4e7' }} />
+          <Text style={{
+            fontSize: '13px', color: '#a1a1aa', fontWeight: 700, ...mono,
+          }}>VS</Text>
+          <Box style={{ flex: 1, height: '1px', background: '#e4e4e7' }} />
+        </motion.div>
+
+        {/* FlowSpot — 심플한 과정 */}
+        <Box style={{ marginBottom: 'clamp(40px, 6vw, 56px)' }}>
+          <Text ta="center" style={{
+            fontSize: 'clamp(13px, 2.2vw, 15px)', color: '#8b5cf6',
+            fontWeight: 700, marginBottom: '16px', ...mono,
+          }}>
+            FlowSpot
+          </Text>
+          <Box style={{
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            gap: 'clamp(10px, 2vw, 16px)',
+          }}>
+            {[
+              { label: 'AI 스크립트', sub: '10분' },
+              { label: '촬영' },
+              { label: '업로드' },
+            ].map((step, i) => (
+              <motion.div
+                key={step.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 2.2 + i * 0.15, ease }}
+                style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px, 2vw, 16px)' }}
+              >
+                <Box style={{
+                  padding: 'clamp(10px, 2vw, 14px) clamp(16px, 3vw, 24px)',
+                  borderRadius: '12px',
+                  background: i === 0 ? '#8b5cf6' : 'rgba(139,92,246,0.08)',
+                  border: i === 0 ? 'none' : '1px solid rgba(139,92,246,0.2)',
+                  textAlign: 'center',
+                }}>
+                  <Text style={{
+                    fontSize: 'clamp(13px, 2.2vw, 15px)',
+                    color: i === 0 ? '#ffffff' : '#8b5cf6',
+                    fontWeight: 700, whiteSpace: 'nowrap',
+                  }}>
+                    {step.label}
+                  </Text>
+                  {step.sub && (
+                    <Text style={{
+                      fontSize: '11px', color: 'rgba(255,255,255,0.7)',
+                      fontWeight: 500, marginTop: '2px', ...mono,
+                    }}>
+                      {step.sub}
+                    </Text>
+                  )}
+                </Box>
+                {i < 2 && (
+                  <Text style={{ color: '#8b5cf6', fontSize: '14px', fontWeight: 700 }}>→</Text>
+                )}
+              </motion.div>
+            ))}
+            {/* 완료 체크 */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 2.9 }}
+            >
+              <Box style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                background: '#8b5cf6', display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                marginLeft: '4px',
+              }}>
+                <Check size={16} color="#ffffff" strokeWidth={3} />
+              </Box>
+            </motion.div>
+          </Box>
+        </Box>
+
+        {/* 1.5억 조회수 증명 */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 3.1, ease }}
+          style={{ textAlign: 'center', marginBottom: 'clamp(32px, 5vw, 48px)' }}
+        >
+          <Text style={{
+            fontSize: 'clamp(14px, 2.5vw, 17px)', color: '#52525b',
+            fontWeight: 500, marginBottom: '8px',
+          }}>
+            이 공식으로
+          </Text>
+          <Title order={2} style={{
+            fontSize: 'clamp(36px, 8vw, 64px)', fontWeight: 900,
+            color: '#18181b', lineHeight: 1.1, letterSpacing: '-0.04em',
+            ...mono,
+          }}>
+            1.5억 <span style={{ color: '#8b5cf6' }}>조회수</span>
+          </Title>
+          <Text style={{
+            fontSize: 'clamp(12px, 2vw, 14px)', color: '#a1a1aa',
+            marginTop: '8px', ...mono,
+          }}>
+            (수강생 성과 제외)
+          </Text>
+        </motion.div>
+
+        {/* 스토리 오프닝 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 3.5 }}
+        >
+          <Title order={2} ta="center" style={{
+            fontSize: 'clamp(24px, 5vw, 40px)',
+            fontWeight: 800, lineHeight: 1.3,
+            color: '#18181b', letterSpacing: '-0.03em',
+          }}>
+            지금부터 소개해드리는 이 길이,
+            <br />
+            쇼츠 수익화의{' '}
+            <span style={{ color: '#8b5cf6' }}>최단거리</span>
+            입니다
+          </Title>
+        </motion.div>
       </motion.div>
 
       {/* Scroll indicator */}
