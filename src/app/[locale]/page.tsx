@@ -178,201 +178,247 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-      {/* 카드 아래 — 과정 비교 인포그래픽 */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6, ease }}
-        style={{ width: '100%', maxWidth: '540px', marginTop: 'clamp(48px, 8vw, 72px)' }}
-      >
-        {/* 혼자 하면 — 복잡한 과정 */}
-        <Box style={{ marginBottom: 'clamp(32px, 5vw, 48px)' }}>
-          <Text ta="center" style={{
-            fontSize: 'clamp(13px, 2.2vw, 15px)', color: '#a1a1aa',
-            fontWeight: 600, marginBottom: '16px', ...mono,
-          }}>
-            혼자 하면
-          </Text>
+      {/* 카드 아래 — 두 세계 비교 (에디토리얼 스타일) */}
+      <Box style={{
+        width: '100%', maxWidth: '600px',
+        marginTop: 'clamp(48px, 8vw, 72px)',
+        display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 3vw, 24px)',
+      }}>
+        {/* 돌아가는 길 카드 — 어둡고 무겁고 복잡 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6, ease }}
+        >
           <Box style={{
-            display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
-            gap: '8px', position: 'relative',
+            background: '#27272a', borderRadius: '20px',
+            padding: 'clamp(28px, 5vw, 40px)',
+            position: 'relative', overflow: 'hidden',
           }}>
-            {['채널 분석', '기획', '스크립트', '촬영', '편집', '업로드', '실패'].map((step, i) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.8 + i * 0.1, ease }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                <Box style={{
-                  padding: '8px 14px', borderRadius: '8px',
-                  background: i === 6 ? 'rgba(239,68,68,0.08)' : '#f4f4f5',
-                  border: i === 6 ? '1px solid rgba(239,68,68,0.2)' : '1px solid #e4e4e7',
-                }}>
-                  <Text style={{
-                    fontSize: 'clamp(12px, 2vw, 14px)',
-                    color: i === 6 ? '#ef4444' : '#71717a',
-                    fontWeight: 500, whiteSpace: 'nowrap',
+            {/* 노이즈 오버레이 느낌 */}
+            <Box style={{
+              position: 'absolute', inset: 0,
+              background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
+              pointerEvents: 'none',
+            }} />
+            <Text style={{
+              fontSize: 'clamp(12px, 2vw, 13px)', color: '#71717a',
+              fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+              marginBottom: 'clamp(20px, 4vw, 28px)', ...mono,
+            }}>
+              돌아가는 길
+            </Text>
+            {/* 타임라인 스텝 */}
+            <Box style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+              {[
+                { step: '01', label: '채널 리서치', desc: '어떤 채널을 봐야 하는지 모름' },
+                { step: '02', label: '콘텐츠 기획', desc: '뭘 찍어야 하는지 감으로 판단' },
+                { step: '03', label: '스크립트 작성', desc: '6시간 걸려서 대본 작성' },
+                { step: '04', label: '촬영 + 편집', desc: '올리고 기다림' },
+                { step: '05', label: '조회수 확인', desc: '47회' },
+                { step: '06', label: '원인 분석', desc: '뭐가 문제인지 모름' },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.8 + i * 0.08, ease }}
+                >
+                  <Box style={{
+                    display: 'flex', gap: 'clamp(14px, 3vw, 20px)',
+                    alignItems: 'flex-start',
                   }}>
-                    {step}
-                  </Text>
-                </Box>
-                {i < 6 && (
-                  <Text style={{ color: '#d4d4d8', fontSize: '12px' }}>→</Text>
-                )}
-              </motion.div>
-            ))}
-            {/* 되돌아감 화살표 */}
+                    {/* 타임라인 도트 + 라인 */}
+                    <Box style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      width: '20px', flexShrink: 0,
+                    }}>
+                      <Box style={{
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        background: i === 5 ? '#ef4444' : '#52525b',
+                        marginTop: '6px',
+                      }} />
+                      {i < 5 && (
+                        <Box style={{
+                          width: '1px', height: '32px',
+                          background: 'linear-gradient(to bottom, #3f3f46, transparent)',
+                        }} />
+                      )}
+                    </Box>
+                    {/* 텍스트 */}
+                    <Box style={{ paddingBottom: i < 5 ? '16px' : '0' }}>
+                      <Text style={{
+                        fontSize: 'clamp(14px, 2.5vw, 16px)',
+                        color: i === 5 ? '#ef4444' : '#d4d4d8',
+                        fontWeight: 600, lineHeight: 1.3,
+                      }}>
+                        {item.label}
+                      </Text>
+                      <Text style={{
+                        fontSize: 'clamp(12px, 2vw, 13px)',
+                        color: '#71717a', lineHeight: 1.4, marginTop: '2px',
+                      }}>
+                        {item.desc}
+                      </Text>
+                    </Box>
+                  </Box>
+                </motion.div>
+              ))}
+            </Box>
+            {/* 루프백 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 1.8 }}
-              style={{ width: '100%', textAlign: 'center', marginTop: '4px' }}
-            >
-              <Text style={{
-                fontSize: 'clamp(11px, 1.8vw, 13px)', color: '#ef4444',
-                fontWeight: 600, ...mono,
-              }}>
-                ↩ 처음부터 다시
-              </Text>
-            </motion.div>
-          </Box>
-        </Box>
-
-        {/* 구분선 + VS */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: 2.0 }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '16px',
-            marginBottom: 'clamp(32px, 5vw, 48px)',
-          }}
-        >
-          <Box style={{ flex: 1, height: '1px', background: '#e4e4e7' }} />
-          <Text style={{
-            fontSize: '13px', color: '#a1a1aa', fontWeight: 700, ...mono,
-          }}>VS</Text>
-          <Box style={{ flex: 1, height: '1px', background: '#e4e4e7' }} />
-        </motion.div>
-
-        {/* FlowSpot — 심플한 과정 */}
-        <Box style={{ marginBottom: 'clamp(40px, 6vw, 56px)' }}>
-          <Text ta="center" style={{
-            fontSize: 'clamp(13px, 2.2vw, 15px)', color: '#8b5cf6',
-            fontWeight: 700, marginBottom: '16px', ...mono,
-          }}>
-            FlowSpot
-          </Text>
-          <Box style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            gap: 'clamp(10px, 2vw, 16px)',
-          }}>
-            {[
-              { label: 'AI 스크립트', sub: '10분' },
-              { label: '촬영' },
-              { label: '업로드' },
-            ].map((step, i) => (
-              <motion.div
-                key={step.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 2.2 + i * 0.15, ease }}
-                style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px, 2vw, 16px)' }}
-              >
-                <Box style={{
-                  padding: 'clamp(10px, 2vw, 14px) clamp(16px, 3vw, 24px)',
-                  borderRadius: '12px',
-                  background: i === 0 ? '#8b5cf6' : 'rgba(139,92,246,0.08)',
-                  border: i === 0 ? 'none' : '1px solid rgba(139,92,246,0.2)',
-                  textAlign: 'center',
-                }}>
-                  <Text style={{
-                    fontSize: 'clamp(13px, 2.2vw, 15px)',
-                    color: i === 0 ? '#ffffff' : '#8b5cf6',
-                    fontWeight: 700, whiteSpace: 'nowrap',
-                  }}>
-                    {step.label}
-                  </Text>
-                  {step.sub && (
-                    <Text style={{
-                      fontSize: '11px', color: 'rgba(255,255,255,0.7)',
-                      fontWeight: 500, marginTop: '2px', ...mono,
-                    }}>
-                      {step.sub}
-                    </Text>
-                  )}
-                </Box>
-                {i < 2 && (
-                  <Text style={{ color: '#8b5cf6', fontSize: '14px', fontWeight: 700 }}>→</Text>
-                )}
-              </motion.div>
-            ))}
-            {/* 완료 체크 */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 2.9 }}
+              transition={{ duration: 0.4, delay: 1.6 }}
             >
               <Box style={{
-                width: '32px', height: '32px', borderRadius: '50%',
-                background: '#8b5cf6', display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-                marginLeft: '4px',
+                marginTop: '20px', paddingTop: '16px',
+                borderTop: '1px dashed #3f3f46',
+                textAlign: 'center',
               }}>
-                <Check size={16} color="#ffffff" strokeWidth={3} />
+                <Text style={{
+                  fontSize: 'clamp(13px, 2.2vw, 15px)', color: '#ef4444',
+                  fontWeight: 700, ...mono,
+                }}>
+                  ↩ 처음부터 다시 반복
+                </Text>
               </Box>
             </motion.div>
           </Box>
-        </Box>
+        </motion.div>
 
-        {/* 1.5억 조회수 증명 */}
+        {/* 최단거리 카드 — 밝고 가볍고 심플 */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 3.1, ease }}
-          style={{ textAlign: 'center', marginBottom: 'clamp(32px, 5vw, 48px)' }}
+          transition={{ duration: 0.6, delay: 1.2, ease }}
         >
-          <Text style={{
-            fontSize: 'clamp(14px, 2.5vw, 17px)', color: '#52525b',
-            fontWeight: 500, marginBottom: '8px',
+          <Box style={{
+            background: '#ffffff', borderRadius: '20px',
+            padding: 'clamp(28px, 5vw, 40px)',
+            border: '1.5px solid rgba(139,92,246,0.2)',
+            boxShadow: '0 4px 24px rgba(139,92,246,0.06)',
+            position: 'relative',
           }}>
-            이 공식으로
-          </Text>
-          <Title order={2} style={{
-            fontSize: 'clamp(36px, 8vw, 64px)', fontWeight: 900,
-            color: '#18181b', lineHeight: 1.1, letterSpacing: '-0.04em',
-            ...mono,
-          }}>
-            1.5억 <span style={{ color: '#8b5cf6' }}>조회수</span>
-          </Title>
-          <Text style={{
-            fontSize: 'clamp(12px, 2vw, 14px)', color: '#a1a1aa',
-            marginTop: '8px', ...mono,
-          }}>
-            (수강생 성과 제외)
-          </Text>
+            {/* violet 글로우 */}
+            <Box style={{
+              position: 'absolute', top: '-30px', right: '-30px',
+              width: '120px', height: '120px', borderRadius: '50%',
+              background: 'rgba(139,92,246,0.06)', filter: 'blur(30px)',
+              pointerEvents: 'none',
+            }} />
+            <Text style={{
+              fontSize: 'clamp(12px, 2vw, 13px)', color: '#8b5cf6',
+              fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+              marginBottom: 'clamp(20px, 4vw, 28px)', ...mono,
+            }}>
+              최단거리
+            </Text>
+            {/* 3 스텝 — 넉넉한 간격, 큰 글씨 */}
+            <Box style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+              {[
+                { step: '01', label: 'AI 스크립트 생성', desc: '검증된 공식 적용, 10분', accent: true },
+                { step: '02', label: '촬영', desc: '스크립트대로 읽기만' },
+                { step: '03', label: '업로드', desc: '끝' },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.35, delay: 1.5 + i * 0.15, ease }}
+                >
+                  <Box style={{
+                    display: 'flex', gap: 'clamp(14px, 3vw, 20px)',
+                    alignItems: 'flex-start',
+                  }}>
+                    {/* 타임라인 도트 + 라인 */}
+                    <Box style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      width: '20px', flexShrink: 0,
+                    }}>
+                      <Box style={{
+                        width: i === 2 ? '20px' : '8px',
+                        height: i === 2 ? '20px' : '8px',
+                        borderRadius: '50%',
+                        background: '#8b5cf6',
+                        marginTop: '6px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {i === 2 && <Check size={12} color="#fff" strokeWidth={3} />}
+                      </Box>
+                      {i < 2 && (
+                        <Box style={{
+                          width: '1px', height: '32px',
+                          background: 'linear-gradient(to bottom, #c4b5fd, transparent)',
+                        }} />
+                      )}
+                    </Box>
+                    {/* 텍스트 */}
+                    <Box style={{ paddingBottom: i < 2 ? '16px' : '0' }}>
+                      <Text style={{
+                        fontSize: 'clamp(14px, 2.5vw, 16px)',
+                        color: '#18181b', fontWeight: 700, lineHeight: 1.3,
+                      }}>
+                        {item.label}
+                      </Text>
+                      <Text style={{
+                        fontSize: 'clamp(12px, 2vw, 13px)',
+                        color: item.accent ? '#8b5cf6' : '#71717a',
+                        fontWeight: item.accent ? 600 : 400,
+                        lineHeight: 1.4, marginTop: '2px',
+                      }}>
+                        {item.desc}
+                      </Text>
+                    </Box>
+                  </Box>
+                </motion.div>
+              ))}
+            </Box>
+          </Box>
         </motion.div>
+      </Box>
 
-        {/* 스토리 오프닝 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 3.5 }}
-        >
-          <Title order={2} ta="center" style={{
-            fontSize: 'clamp(24px, 5vw, 40px)',
-            fontWeight: 800, lineHeight: 1.3,
-            color: '#18181b', letterSpacing: '-0.03em',
-          }}>
-            지금부터 소개해드리는 이 길이,
-            <br />
-            쇼츠 수익화의{' '}
-            <span style={{ color: '#8b5cf6' }}>최단거리</span>
-            입니다
-          </Title>
-        </motion.div>
+      {/* 1.5억 조회수 증명 + 스토리 오프닝 */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 2.2, ease }}
+        style={{
+          width: '100%', maxWidth: '540px',
+          textAlign: 'center', marginTop: 'clamp(48px, 8vw, 72px)',
+        }}
+      >
+        <Text style={{
+          fontSize: 'clamp(15px, 2.5vw, 18px)', color: '#52525b',
+          fontWeight: 500, marginBottom: '12px',
+        }}>
+          이 공식으로
+        </Text>
+        <Title order={2} style={{
+          fontSize: 'clamp(40px, 9vw, 72px)', fontWeight: 900,
+          color: '#18181b', lineHeight: 1.05, letterSpacing: '-0.04em',
+          ...mono,
+        }}>
+          1.5억 <span style={{ color: '#8b5cf6' }}>조회수</span>
+        </Title>
+        <Text style={{
+          fontSize: 'clamp(12px, 2vw, 14px)', color: '#a1a1aa',
+          marginTop: '10px', marginBottom: 'clamp(40px, 7vw, 64px)', ...mono,
+        }}>
+          (수강생 성과 제외)
+        </Text>
+
+        <Title order={2} ta="center" style={{
+          fontSize: 'clamp(22px, 4.5vw, 38px)',
+          fontWeight: 800, lineHeight: 1.35,
+          color: '#18181b', letterSpacing: '-0.03em',
+        }}>
+          지금부터 소개해드리는 이 길이,
+          <br />
+          쇼츠 수익화의{' '}
+          <span style={{ color: '#8b5cf6' }}>최단거리</span>
+          입니다
+        </Title>
       </motion.div>
 
       {/* Scroll indicator */}
