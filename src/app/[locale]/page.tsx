@@ -178,17 +178,74 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-      {/* 카드 아래 — 스토리 오프닝 멘트 */}
+      {/* 카드 아래 — A→B 최단거리 SVG + 스토리 오프닝 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6, ease }}
+        style={{ width: '100%', maxWidth: '480px', marginTop: 'clamp(40px, 7vw, 64px)' }}
       >
+        {/* A→B 직선 vs 구불구불 SVG */}
+        <Box style={{ width: '100%', marginBottom: '28px' }}>
+          <svg viewBox="0 0 400 120" fill="none" style={{ width: '100%', height: 'auto' }}>
+            {/* 구불구불한 길 (회색) */}
+            <motion.path
+              d="M 50 60 C 80 20, 120 100, 150 60 C 180 20, 220 100, 250 60 C 280 20, 320 100, 350 60"
+              stroke="#d4d4d8"
+              strokeWidth="3"
+              strokeDasharray="6 4"
+              fill="none"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1.2, delay: 0.8, ease: 'easeInOut' }}
+            />
+            {/* 직선 화살표 (violet) */}
+            <motion.line
+              x1="50" y1="60" x2="340" y2="60"
+              stroke="#8b5cf6"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.8, delay: 1.6, ease: 'easeOut' }}
+            />
+            {/* 화살표 머리 */}
+            <motion.polygon
+              points="340,60 328,52 328,68"
+              fill="#8b5cf6"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 2.3 }}
+            />
+            {/* A 라벨 */}
+            <circle cx="50" cy="60" r="16" fill="#f4f4f5" stroke="#a1a1aa" strokeWidth="1.5" />
+            <text x="50" y="65" textAnchor="middle" fill="#52525b" fontSize="13" fontWeight="700" fontFamily="var(--font-geist-mono), monospace">A</text>
+            {/* B 라벨 */}
+            <motion.g
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 2.3 }}
+            >
+              <circle cx="355" cy="60" r="16" fill="#8b5cf6" stroke="#7c3aed" strokeWidth="1.5" />
+              <text x="355" y="65" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="700" fontFamily="var(--font-geist-mono), monospace">B</text>
+            </motion.g>
+            {/* 구불구불 라벨 */}
+            <text x="200" y="105" textAnchor="middle" fill="#a1a1aa" fontSize="11" fontFamily="var(--font-geist-mono), monospace">남들이 가는 길</text>
+            {/* 직선 라벨 */}
+            <motion.text
+              x="200" y="45" textAnchor="middle" fill="#8b5cf6" fontSize="12" fontWeight="700"
+              fontFamily="var(--font-geist-mono), monospace"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 2.0 }}
+            >FlowSpot</motion.text>
+          </svg>
+        </Box>
+
         <Title order={2} ta="center" style={{
           fontSize: 'clamp(24px, 5vw, 40px)',
           fontWeight: 800, lineHeight: 1.3,
           color: '#18181b', letterSpacing: '-0.03em',
-          marginTop: 'clamp(40px, 7vw, 64px)',
         }}>
           지금부터 소개해드리는 이 길이,
           <br />
