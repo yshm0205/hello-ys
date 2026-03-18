@@ -81,7 +81,7 @@ function useIsMobile(bp = 768) {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   섹션 1: Hero — 최단거리 포지셔닝
+   섹션 1: Hero — 다크 카드 블록 (크리투스 스타일)
    ═══════════════════════════════════════════════════════════════ */
 function HeroSection() {
   return (
@@ -90,142 +90,128 @@ function HeroSection() {
       style={{
         minHeight: '100dvh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
-        background: '#fafafa',
+        background: '#ffffff',
+        padding: 'clamp(80px, 12vw, 120px) clamp(16px, 4vw, 24px) clamp(48px, 8vw, 80px)',
       }}
     >
-      {/* Ambient glow */}
-      <Box style={{
-        position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 70% 50% at 50% 45%, rgba(139,92,246,0.07) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
+      {/* 다크 히어로 카드 */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.1, ease }}
+        style={{ width: '100%', maxWidth: '540px' }}
+      >
+        <Box style={{
+          background: '#18181b',
+          borderRadius: '24px',
+          padding: 'clamp(32px, 6vw, 48px) clamp(24px, 5vw, 40px)',
+          position: 'relative',
+          overflow: 'hidden',
+          boxShadow: '0 8px 40px rgba(24,24,27,0.3), 0 2px 8px rgba(0,0,0,0.1)',
+        }}>
+          {/* 배경 데코 — violet glow */}
+          <Box style={{
+            position: 'absolute', top: '-60px', right: '-60px',
+            width: '200px', height: '200px', borderRadius: '50%',
+            background: 'rgba(139,92,246,0.12)', filter: 'blur(40px)',
+            pointerEvents: 'none',
+          }} />
+          <Box style={{
+            position: 'absolute', bottom: '-40px', left: '-40px',
+            width: '160px', height: '160px', borderRadius: '50%',
+            background: 'rgba(139,92,246,0.08)', filter: 'blur(30px)',
+            pointerEvents: 'none',
+          }} />
 
-      {/* Grid */}
-      <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
-
-      {/* Deco ring — top right */}
-      <Box style={{
-        position: 'absolute', top: '-100px', right: '-100px',
-        width: '360px', height: '360px', borderRadius: '50%',
-        border: '1px solid rgba(139,92,246,0.12)', pointerEvents: 'none',
-      }} />
-
-      {/* Deco ring — bottom left */}
-      <Box style={{
-        position: 'absolute', bottom: '-60px', left: '-60px',
-        width: '240px', height: '240px', borderRadius: '50%',
-        border: '1px solid rgba(139,92,246,0.1)', pointerEvents: 'none',
-      }} />
-
-      <Container size={620} py={80} style={{ position: 'relative', zIndex: 1 }}>
-        <Stack align="center" gap={0}>
-          {/* Package components — 한눈에 구성요소 */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15, ease }}
-          >
+          <Stack align="center" gap={0} style={{ position: 'relative', zIndex: 1 }}>
+            {/* 구성요소 나열 */}
             <Text ta="center" style={{
-              color: '#71717a', fontSize: '14px', fontWeight: 600,
-              letterSpacing: '0.05em', marginBottom: '24px',
+              color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(13px, 2vw, 15px)',
+              fontWeight: 600, letterSpacing: '0.04em',
+              marginBottom: 'clamp(20px, 4vw, 28px)',
               ...mono,
             }}>
-              VOD 59강 · AI 스크립트 · 채널 리스트 · 전자책
+              VOD 59강 + AI 스크립트 + 채널 리스트 + 전자책
             </Text>
-          </motion.div>
 
-          {/* Headline */}
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.35, ease }}
-          >
+            {/* 헤드라인 */}
             <Title order={1} ta="center" style={{
-              fontSize: 'clamp(38px, 8vw, 72px)',
-              fontWeight: 900,
-              color: '#18181b',
-              lineHeight: 1.1,
-              letterSpacing: '-0.04em',
-              marginBottom: '28px',
+              fontSize: 'clamp(32px, 7vw, 56px)',
+              fontWeight: 900, color: '#ffffff',
+              lineHeight: 1.15, letterSpacing: '-0.03em',
+              marginBottom: 'clamp(16px, 3vw, 24px)',
             }}>
-              쇼츠 수익화의
+              쇼츠 수익화
               <br />
               <span style={{
-                color: '#8b5cf6', position: 'relative', display: 'inline-block',
-                ...mono,
+                color: '#a78bfa', position: 'relative', display: 'inline-block',
               }}>
-                최단거리
+                All-In-One
                 <Box style={{
-                  position: 'absolute', bottom: '2px', left: '-4px', right: '-4px',
-                  height: '10px', background: 'rgba(139,92,246,0.22)',
-                  borderRadius: '5px', zIndex: -1,
+                  position: 'absolute', bottom: '2px', left: '-2px', right: '-2px',
+                  height: '8px', background: 'rgba(167,139,250,0.3)',
+                  borderRadius: '4px', zIndex: -1,
                 }} />
               </span>
+              {' '}패키지
             </Title>
-          </motion.div>
 
-          {/* Subline */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.55, ease }}
-          >
+            {/* 서브라인 */}
             <Text ta="center" style={{
-              color: '#52525b', fontSize: 'clamp(17px, 2.5vw, 20px)',
-              maxWidth: '440px', lineHeight: 1.6, marginBottom: '36px',
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: 'clamp(15px, 2.5vw, 18px)',
+              lineHeight: 1.5, marginBottom: 'clamp(24px, 5vw, 36px)',
+              maxWidth: '380px',
             }}>
               뭘 해야 하는지 알려주고, AI가 대신 실행합니다
             </Text>
-          </motion.div>
 
-          {/* Badges — 4개 */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.7, ease }}
-          >
-            <Group gap={10} justify="center" mb={40} style={{ flexWrap: 'wrap' }}>
-              {['📚 VOD 59강', '🤖 AI 스크립트', '📊 채널 리스트', '📖 전자책'].map((label) => (
-                <Badge key={label} size="lg" variant="light" radius="xl" style={{
-                  padding: '10px 18px', fontSize: '13px', fontWeight: 600,
-                  color: '#52525b', background: 'rgba(250,250,250,0.9)',
-                  border: '1px solid #d4d4d8',
-                }}>
-                  {label}
-                </Badge>
-              ))}
-            </Group>
-          </motion.div>
+            {/* CTA 버튼 */}
+            <Button
+              component={Link} href="/dashboard" size="xl" radius="xl"
+              rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
+              style={{
+                background: '#ffffff', color: '#18181b',
+                fontSize: 'clamp(15px, 2.5vw, 17px)', fontWeight: 700,
+                padding: '16px 40px', height: 'auto', border: 'none',
+                boxShadow: '0 2px 12px rgba(255,255,255,0.15)',
+              }}
+            >
+              무료로 시작하기
+            </Button>
+          </Stack>
+        </Box>
+      </motion.div>
 
-          {/* CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.85, ease }}
-          >
-            <Stack align="center" gap={14}>
-              <Button
-                component={Link} href="/dashboard" size="xl" radius="xl"
-                rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
-                style={{
-                  background: '#8b5cf6', fontSize: '17px', fontWeight: 700,
-                  padding: '18px 44px', height: 'auto', border: 'none',
-                  boxShadow: '0 1px 2px rgba(139,92,246,0.15), 0 4px 16px rgba(139,92,246,0.2)',
-                }}
-              >
-                무료로 시작하기
-              </Button>
-              <Text size="sm" style={{ color: '#71717a', fontSize: '13px' }}>
-                30크레딧 무료 · 카드 등록 없음
-              </Text>
-            </Stack>
-          </motion.div>
+      {/* 카드 아래 정보 */}
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6, ease }}
+      >
+        <Stack align="center" gap={12} mt={28}>
+          <Text size="sm" ta="center" style={{ color: '#71717a', fontSize: '13px' }}>
+            30크레딧 무료 · 카드 등록 없음
+          </Text>
+          {/* 뱃지 */}
+          <Group gap={8} justify="center" style={{ flexWrap: 'wrap' }}>
+            {['📚 VOD 59강', '🤖 AI 스크립트', '📊 채널 리스트', '📖 전자책'].map((label) => (
+              <Badge key={label} size="md" variant="light" radius="xl" style={{
+                padding: '6px 14px', fontSize: '12px', fontWeight: 600,
+                color: '#52525b', background: '#f4f4f5',
+                border: '1px solid #e4e4e7',
+              }}>
+                {label}
+              </Badge>
+            ))}
+          </Group>
         </Stack>
-      </Container>
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div
