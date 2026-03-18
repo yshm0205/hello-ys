@@ -178,25 +178,24 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-      {/* 카드 아래 — 포지셔닝 멘트 */}
+      {/* 카드 아래 — 스토리 오프닝 멘트 */}
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6, ease }}
+        transition={{ duration: 0.6, delay: 0.6, ease }}
       >
-        <Text ta="center" style={{
-          color: '#52525b', fontSize: 'clamp(16px, 3vw, 20px)',
-          fontWeight: 600, lineHeight: 1.5, marginTop: '32px',
-          maxWidth: '420px',
+        <Title order={2} ta="center" style={{
+          fontSize: 'clamp(24px, 5vw, 40px)',
+          fontWeight: 800, lineHeight: 1.3,
+          color: '#18181b', letterSpacing: '-0.03em',
+          marginTop: 'clamp(40px, 7vw, 64px)',
         }}>
           지금부터 소개해드리는 이 길이,
           <br />
-          <span style={{ color: '#18181b', fontWeight: 800 }}>
-            쇼츠 수익화의{' '}
-            <span style={{ color: '#8b5cf6' }}>최단거리</span>
-            입니다
-          </span>
-        </Text>
+          쇼츠 수익화의{' '}
+          <span style={{ color: '#8b5cf6' }}>최단거리</span>
+          입니다
+        </Title>
       </motion.div>
 
       {/* Scroll indicator */}
