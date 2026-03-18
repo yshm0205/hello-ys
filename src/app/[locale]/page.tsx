@@ -247,7 +247,6 @@ function HeroSection() {
    섹션 2: Pain — 돌아가는 길 3가지
    ═══════════════════════════════════════════════════════════════ */
 function PainSection() {
-  const isMobile = useIsMobile();
   const pains = [
     { num: '01', title: '혼자 영상 만들어봤는데', desc: '6시간 걸려 만들었는데', metric: '조회수 47회', accent: '#ef4444' },
     { num: '02', title: '강의 들어봤는데', desc: '수십만 원 썼는데', metric: '돌아온 건 "노력 부족"', accent: '#f59e0b' },
@@ -255,12 +254,12 @@ function PainSection() {
   ];
 
   return (
-    <Box component="section" style={{ background: '#ffffff', padding: '120px 0' }}>
+    <Box component="section" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
-            fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800,
-            color: '#18181b', letterSpacing: '-0.03em', marginBottom: '64px',
+            fontSize: 'clamp(22px, 5vw, 44px)', fontWeight: 800,
+            color: '#18181b', letterSpacing: '-0.03em', marginBottom: 'clamp(32px, 6vw, 64px)',
           }}>
             그런데 대부분은 이 길을{' '}
             <span style={{
@@ -274,7 +273,7 @@ function PainSection() {
           </Title>
         </motion.div>
 
-        <Box style={{ display: 'flex', gap: isMobile ? '8px' : '20px' }}>
+        <Box style={{ display: 'flex', gap: 'clamp(8px, 2vw, 20px)' }}>
             {pains.map((p, i) => (
               <motion.div
                 key={i}
@@ -284,26 +283,26 @@ function PainSection() {
                 transition={{ duration: 0.5, delay: i * 0.12, ease }}
                 style={{ flex: '1 1 0', minWidth: 0 }}
               >
-                <Paper p={0} radius={isMobile ? 'md' : 'lg'} style={{
+                <Paper p={0} radius="lg" style={{
                   background: '#ffffff', border: '1px solid #d4d4d8',
                   overflow: 'hidden', height: '100%',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                 }}>
-                  <Box style={{ height: isMobile ? '3px' : '4px', background: p.accent }} />
-                  <Box style={{ padding: isMobile ? '12px' : '28px' }}>
+                  <Box style={{ height: '4px', background: p.accent }} />
+                  <Box style={{ padding: 'clamp(12px, 3vw, 28px)' }}>
                     <Text style={{
-                      fontSize: isMobile ? '12px' : '13px', fontWeight: 700, color: p.accent,
-                      letterSpacing: '0.08em', marginBottom: isMobile ? '8px' : '16px', ...mono,
+                      fontSize: 'clamp(11px, 1.5vw, 13px)', fontWeight: 700, color: p.accent,
+                      letterSpacing: '0.08em', marginBottom: 'clamp(8px, 1.5vw, 16px)', ...mono,
                     }}>
                       {p.num}
                     </Text>
-                    <Text fw={700} style={{ fontSize: isMobile ? '14px' : '18px', color: '#18181b', marginBottom: isMobile ? '6px' : '12px', lineHeight: 1.4 }}>
+                    <Text fw={700} style={{ fontSize: 'clamp(13px, 2vw, 18px)', color: '#18181b', marginBottom: 'clamp(6px, 1vw, 12px)', lineHeight: 1.4 }}>
                       {p.title}
                     </Text>
-                    <Text style={{ fontSize: isMobile ? '12px' : '15px', color: '#52525b', lineHeight: 1.5, marginBottom: isMobile ? '4px' : '8px' }}>
+                    <Text style={{ fontSize: 'clamp(12px, 1.6vw, 15px)', color: '#52525b', lineHeight: 1.5, marginBottom: 'clamp(4px, 0.8vw, 8px)' }}>
                       {p.desc}
                     </Text>
-                    <Text fw={700} style={{ fontSize: isMobile ? '13px' : '17px', color: p.accent, ...mono }}>
+                    <Text fw={700} style={{ fontSize: 'clamp(12px, 1.8vw, 17px)', color: p.accent, ...mono }}>
                       {p.metric}
                     </Text>
                   </Box>
@@ -327,7 +326,6 @@ function PainSection() {
    섹션 3: WhyFlowSpot — 스토리 + 수익 증명
    ═══════════════════════════════════════════════════════════════ */
 function WhyFlowSpotSection() {
-  const isMobile = useIsMobile();
   const revenues = [
     { label: '채널A 지식/정보', amount: '₩488만', icon: '📊' },
     { label: '채널B 게임', amount: '₩1,567만', icon: '🎮' },
@@ -345,34 +343,33 @@ function WhyFlowSpotSection() {
         transition={{ duration: 0.4, delay, ease }}
         style={{ flex: '1 1 0', minWidth: 0 }}
       >
-        <Paper radius={isMobile ? 'md' : 'lg'} style={{ border: '2px dashed #a1a1aa', background: '#ffffff', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
+        <Paper radius="lg" style={{ border: '2px dashed #a1a1aa', background: '#ffffff', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
           {/* Window chrome */}
           <Box style={{
-            padding: isMobile ? '5px 6px' : '8px 12px', borderBottom: '1px solid #d4d4d8',
-            display: 'flex', alignItems: 'center', gap: isMobile ? '3px' : '6px',
+            padding: 'clamp(5px, 0.8vw, 8px) clamp(6px, 1vw, 12px)', borderBottom: '1px solid #d4d4d8',
+            display: 'flex', alignItems: 'center', gap: 'clamp(3px, 0.5vw, 6px)',
           }}>
-            <Box style={{ width: isMobile ? 5 : 7, height: isMobile ? 5 : 7, borderRadius: '50%', background: '#a1a1aa' }} />
-            <Box style={{ width: isMobile ? 5 : 7, height: isMobile ? 5 : 7, borderRadius: '50%', background: '#a1a1aa' }} />
-            <Box style={{ width: isMobile ? 5 : 7, height: isMobile ? 5 : 7, borderRadius: '50%', background: '#a1a1aa' }} />
-            <Text size="xs" style={{ color: '#71717a', marginLeft: isMobile ? '4px' : '8px', fontSize: isMobile ? '10px' : '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</Text>
+            <Box style={{ width: 'clamp(5px, 0.6vw, 7px)', height: 'clamp(5px, 0.6vw, 7px)', borderRadius: '50%', background: '#a1a1aa' }} />
+            <Box style={{ width: 'clamp(5px, 0.6vw, 7px)', height: 'clamp(5px, 0.6vw, 7px)', borderRadius: '50%', background: '#a1a1aa' }} />
+            <Box style={{ width: 'clamp(5px, 0.6vw, 7px)', height: 'clamp(5px, 0.6vw, 7px)', borderRadius: '50%', background: '#a1a1aa' }} />
+            <Text size="xs" style={{ color: '#71717a', marginLeft: 'clamp(4px, 0.6vw, 8px)', fontSize: 'clamp(9px, 1.2vw, 11px)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</Text>
           </Box>
           {/* Capture area */}
           <Box style={{
-            height: isMobile ? '56px' : '100px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            height: 'clamp(56px, 8vw, 100px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: '#fafafa',
           }}>
             <Stack align="center" gap={2}>
-              <Text style={{ fontSize: isMobile ? '18px' : '28px' }}>{r.icon}</Text>
-              {!isMobile && <Text size="xs" style={{ color: '#71717a', fontSize: '11px' }}>수익 캡처</Text>}
+              <Text style={{ fontSize: 'clamp(18px, 3vw, 28px)' }}>{r.icon}</Text>
+              <Text size="xs" style={{ color: '#71717a', fontSize: 'clamp(9px, 1.1vw, 11px)' }}>수익 캡처</Text>
             </Stack>
           </Box>
           {/* Amount */}
           <Box style={{
-            padding: isMobile ? '6px 6px' : '10px 14px', borderTop: '1px solid #d4d4d8',
-            display: 'flex', justifyContent: isMobile ? 'center' : 'space-between', alignItems: 'center',
+            padding: 'clamp(6px, 1vw, 10px) clamp(6px, 1vw, 14px)', borderTop: '1px solid #d4d4d8',
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
           }}>
-            {!isMobile && <Text style={{ color: '#52525b', fontSize: '12px' }}>{r.label}</Text>}
-            <Text fw={800} style={{ fontSize: isMobile ? '12px' : '16px', color: '#18181b', ...mono }}>{r.amount}</Text>
+            <Text fw={800} style={{ fontSize: 'clamp(11px, 1.5vw, 16px)', color: '#18181b', ...mono }}>{r.amount}</Text>
           </Box>
         </Paper>
       </motion.div>
@@ -380,19 +377,19 @@ function WhyFlowSpotSection() {
   }
 
   return (
-    <Box component="section" style={{ background: '#fafafa', padding: '120px 0', position: 'relative' }}>
+    <Box component="section" style={{ background: '#fafafa', padding: 'clamp(60px, 10vw, 120px) 0', position: 'relative' }}>
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
         <motion.div {...fadeUp}>
           <Stack align="center" gap={0}>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800,
+              fontSize: 'clamp(22px, 5vw, 44px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.03em', marginBottom: '12px',
             }}>
               저도 돌아가는 길 다 걸어봤습니다
             </Title>
-            <Text ta="center" style={{ fontSize: '16px', color: '#71717a', marginBottom: '56px' }}>
+            <Text ta="center" style={{ fontSize: 'clamp(14px, 2vw, 16px)', color: '#71717a', marginBottom: 'clamp(32px, 5vw, 56px)' }}>
               그리고 결국 공식을 찾았습니다.
             </Text>
           </Stack>
@@ -400,12 +397,12 @@ function WhyFlowSpotSection() {
 
         {/* Revenue grid */}
         <Box style={{ maxWidth: '920px', margin: '0 auto' }}>
-          <Box style={{ display: 'flex', gap: isMobile ? '6px' : '14px', marginBottom: isMobile ? '6px' : '14px' }}>
+          <Box style={{ display: 'flex', gap: 'clamp(6px, 1.2vw, 14px)', marginBottom: 'clamp(6px, 1.2vw, 14px)' }}>
             {revenues.slice(0, 3).map((r, i) => (
               <ScreenFrame key={i} r={r} delay={i * 0.1} />
             ))}
           </Box>
-          <Box style={{ display: 'flex', gap: isMobile ? '6px' : '14px', justifyContent: 'center' }}>
+          <Box style={{ display: 'flex', gap: 'clamp(6px, 1.2vw, 14px)', justifyContent: 'center' }}>
             {revenues.slice(3).map((r, i) => (
               <ScreenFrame key={i} r={r} delay={0.3 + i * 0.1} />
             ))}
@@ -447,7 +444,6 @@ function WhyFlowSpotSection() {
    섹션 4: HowItWorks — 플로우차트 진단 (Q→NO→Q→YES↓→카드)
    ═══════════════════════════════════════════════════════════════ */
 function HowItWorksSection() {
-  const isMobile = useIsMobile();
   const stages = [
     {
       qNum: 'Q1', question: '쇼츠, 처음이신가요?',
@@ -470,7 +466,7 @@ function HowItWorksSection() {
   ];
 
   return (
-    <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: '120px 0' }}>
+    <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
@@ -490,7 +486,7 @@ function HowItWorksSection() {
 
         {/* Flowchart */}
         <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <Box style={{ minWidth: isMobile ? '600px' : '900px', padding: '0 20px' }}>
+          <Box style={{ minWidth: '680px', padding: '0 20px' }}>
 
             {/* ── Row 1: Question boxes + NO arrows ── */}
             <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
@@ -505,22 +501,22 @@ function HowItWorksSection() {
                 >
                   {/* Question box */}
                   <Box style={{
-                    width: isMobile ? '160px' : '240px',
+                    width: 'clamp(160px, 18vw, 240px)',
                     background: '#18181b',
-                    borderRadius: isMobile ? '12px' : '16px',
-                    padding: isMobile ? '14px 10px' : '24px 20px',
+                    borderRadius: '16px',
+                    padding: 'clamp(14px, 2vw, 24px) clamp(10px, 1.5vw, 20px)',
                     textAlign: 'center',
                     position: 'relative',
                   }}>
                     <Text style={{
-                      ...mono, fontSize: isMobile ? '11px' : '12px', fontWeight: 800,
+                      ...mono, fontSize: 'clamp(10px, 1.2vw, 12px)', fontWeight: 800,
                       color: s.color, letterSpacing: '0.1em',
-                      marginBottom: isMobile ? '6px' : '10px',
+                      marginBottom: 'clamp(6px, 0.8vw, 10px)',
                     }}>
                       {s.qNum}
                     </Text>
                     <Text fw={700} style={{
-                      fontSize: isMobile ? '12px' : '15px', color: '#ffffff', lineHeight: 1.4,
+                      fontSize: 'clamp(11px, 1.4vw, 15px)', color: '#ffffff', lineHeight: 1.4,
                     }}>
                       {s.question}
                     </Text>
@@ -529,19 +525,19 @@ function HowItWorksSection() {
                   {/* NO → arrow */}
                   {i < stages.length - 1 && (
                     <Box style={{
-                      display: 'flex', alignItems: 'center', padding: isMobile ? '0 4px' : '0 8px',
+                      display: 'flex', alignItems: 'center', padding: '0 clamp(4px, 0.6vw, 8px)',
                       flexShrink: 0,
                     }}>
-                      <Box style={{ width: isMobile ? '16px' : '40px', height: '0', borderTop: '2px dashed #a1a1aa' }} />
+                      <Box style={{ width: 'clamp(12px, 3vw, 40px)', height: '0', borderTop: '2px dashed #a1a1aa' }} />
                       <Box style={{
                         background: '#f4f4f5', borderRadius: '20px',
-                        padding: isMobile ? '3px 8px' : '4px 12px', whiteSpace: 'nowrap',
+                        padding: '4px clamp(8px, 1vw, 12px)', whiteSpace: 'nowrap',
                       }}>
-                        <Text style={{ ...mono, fontSize: isMobile ? '10px' : '11px', fontWeight: 700, color: '#71717a' }}>
+                        <Text style={{ ...mono, fontSize: 'clamp(9px, 1vw, 11px)', fontWeight: 700, color: '#71717a' }}>
                           NO →
                         </Text>
                       </Box>
-                      <Box style={{ width: isMobile ? '16px' : '40px', height: '0', borderTop: '2px dashed #a1a1aa' }} />
+                      <Box style={{ width: 'clamp(12px, 3vw, 40px)', height: '0', borderTop: '2px dashed #a1a1aa' }} />
                     </Box>
                   )}
                 </motion.div>
@@ -551,15 +547,18 @@ function HowItWorksSection() {
             {/* ── Row 2: YES ↓ indicators ── */}
             <Box style={{
               display: 'flex', justifyContent: 'center', gap: 0,
-              marginTop: isMobile ? '10px' : '16px',
+              marginTop: 'clamp(10px, 1.5vw, 16px)',
             }}>
-              {stages.map((s, i) => (
+              {stages.map((s, i) => {
+                /* NO arrow 폭 계산: clamp(12px,3vw,40px)*2 + pill + padding*2 — 근사값 사용 */
+                const arrowGap = 'calc(clamp(12px, 3vw, 40px) * 2 + clamp(8px, 1vw, 12px) * 2 + 36px)';
+                return (
                 <Box key={i} style={{
-                  width: isMobile ? '160px' : '240px',
+                  width: 'clamp(160px, 18vw, 240px)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  marginLeft: i > 0 ? (isMobile ? '60px' : '112px') : 0,
+                  marginLeft: i > 0 ? arrowGap : 0,
                 }}>
-                  <Box style={{ width: '0', height: isMobile ? '12px' : '20px', borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
+                  <Box style={{ width: '0', height: 'clamp(12px, 1.5vw, 20px)', borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -568,22 +567,25 @@ function HowItWorksSection() {
                   >
                     <Box style={{
                       background: s.color, borderRadius: '20px',
-                      padding: isMobile ? '3px 10px' : '4px 16px',
+                      padding: '4px clamp(10px, 1.2vw, 16px)',
                       display: 'inline-flex', alignItems: 'center', gap: '4px',
                     }}>
-                      <Text style={{ ...mono, fontSize: isMobile ? '10px' : '11px', fontWeight: 800, color: '#ffffff' }}>
+                      <Text style={{ ...mono, fontSize: 'clamp(9px, 1vw, 11px)', fontWeight: 800, color: '#ffffff' }}>
                         YES ↓
                       </Text>
                     </Box>
                   </motion.div>
-                  <Box style={{ width: '0', height: isMobile ? '12px' : '20px', borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
+                  <Box style={{ width: '0', height: 'clamp(12px, 1.5vw, 20px)', borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
                 </Box>
-              ))}
+                );
+              })}
             </Box>
 
             {/* ── Row 3: Answer cards ── */}
             <Box style={{ display: 'flex', justifyContent: 'center', gap: 0 }}>
-              {stages.map((s, i) => (
+              {stages.map((s, i) => {
+                const arrowGap = 'calc(clamp(12px, 3vw, 40px) * 2 + clamp(8px, 1vw, 12px) * 2 + 36px)';
+                return (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 16 }}
@@ -591,51 +593,52 @@ function HowItWorksSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: 0.4 + i * 0.12, ease }}
                   style={{
-                    width: isMobile ? '160px' : '240px',
-                    marginLeft: i > 0 ? (isMobile ? '60px' : '112px') : 0,
+                    width: 'clamp(160px, 18vw, 240px)',
+                    marginLeft: i > 0 ? arrowGap : 0,
                   }}
                 >
-                  <Paper radius={isMobile ? 'md' : 'lg'} p={0} style={{
+                  <Paper radius="lg" p={0} style={{
                     background: '#ffffff', border: '1px solid #d4d4d8',
                     overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                   }}>
                     <Box style={{
                       background: s.color,
-                      padding: isMobile ? '6px 10px' : '10px 20px',
+                      padding: 'clamp(6px, 0.8vw, 10px) clamp(10px, 1.5vw, 20px)',
                       textAlign: 'center',
                     }}>
-                      <Text fw={800} style={{ fontSize: isMobile ? '12px' : '14px', color: '#ffffff', letterSpacing: '0.02em' }}>
+                      <Text fw={800} style={{ fontSize: 'clamp(11px, 1.3vw, 14px)', color: '#ffffff', letterSpacing: '0.02em' }}>
                         {s.label}
                       </Text>
                     </Box>
 
-                    <Box style={{ padding: isMobile ? '10px' : '20px' }}>
+                    <Box style={{ padding: 'clamp(10px, 1.5vw, 20px)' }}>
                       <Text style={{
-                        fontSize: isMobile ? '11px' : '13px', color: '#52525b', lineHeight: 1.5, marginBottom: isMobile ? '8px' : '16px',
+                        fontSize: 'clamp(10px, 1.2vw, 13px)', color: '#52525b', lineHeight: 1.5, marginBottom: 'clamp(8px, 1.2vw, 16px)',
                       }}>
                         {s.answer}
                       </Text>
 
-                      <Box style={{ height: '1px', background: '#d4d4d8', marginBottom: isMobile ? '8px' : '14px' }} />
+                      <Box style={{ height: '1px', background: '#d4d4d8', marginBottom: 'clamp(8px, 1vw, 14px)' }} />
 
-                      <Text size="xs" fw={600} mb={isMobile ? 6 : 10} style={{
-                        color: '#71717a', letterSpacing: '0.04em', fontSize: isMobile ? '9px' : '10px',
+                      <Text size="xs" fw={600} mb={8} style={{
+                        color: '#71717a', letterSpacing: '0.04em', fontSize: 'clamp(8px, 0.9vw, 10px)',
                         textTransform: 'uppercase',
                       }}>
                         포함 솔루션
                       </Text>
-                      <Stack gap={isMobile ? 4 : 7}>
+                      <Stack gap={6}>
                         {s.includes.map((item, j) => (
-                          <Group key={j} gap={isMobile ? 4 : 7} wrap="nowrap">
-                            <Check size={isMobile ? 10 : 13} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
-                            <Text style={{ color: '#3f3f46', fontSize: isMobile ? '10px' : '12px', lineHeight: 1.3 }}>{item}</Text>
+                          <Group key={j} gap={6} wrap="nowrap">
+                            <Check size={12} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
+                            <Text style={{ color: '#3f3f46', fontSize: 'clamp(9px, 1.1vw, 12px)', lineHeight: 1.3 }}>{item}</Text>
                           </Group>
                         ))}
                       </Stack>
                     </Box>
                   </Paper>
                 </motion.div>
-              ))}
+                );
+              })}
             </Box>
 
           </Box>
@@ -673,9 +676,8 @@ function HowItWorksSection() {
    섹션 5: Package — 가격 비교 + 부분별 가치
    ═══════════════════════════════════════════════════════════════ */
 function PackageSection() {
-  const isMobile = useIsMobile();
   return (
-    <Box component="section" style={{ background: '#fafafa', padding: '120px 0', position: 'relative' }}>
+    <Box component="section" style={{ background: '#fafafa', padding: 'clamp(60px, 10vw, 120px) 0', position: 'relative' }}>
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
@@ -695,7 +697,7 @@ function PackageSection() {
 
         {/* Comparison */}
         <Box style={{ marginBottom: '56px' }}>
-          <Box style={{ display: 'flex', gap: isMobile ? '8px' : '20px', justifyContent: 'center', alignItems: 'stretch' }}>
+          <Box style={{ display: 'flex', gap: 'clamp(8px, 2vw, 20px)', justifyContent: 'center', alignItems: 'stretch' }}>
             {/* 일반 유료 강의 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -704,20 +706,20 @@ function PackageSection() {
               transition={{ duration: 0.5, ease }}
               style={{ flex: '1 1 0', maxWidth: '380px', minWidth: 0 }}
             >
-              <Paper radius={isMobile ? 'md' : 'lg'} style={{
+              <Paper radius="lg" style={{
                 background: '#ffffff', border: '1px solid #d4d4d8',
-                height: '100%', padding: isMobile ? '16px' : '32px',
+                height: '100%', padding: 'clamp(16px, 3vw, 32px)',
               }}>
-                <Group mb={isMobile ? 12 : 24} gap={isMobile ? 6 : 10}>
+                <Group mb={20} gap={10}>
                   <Box style={{
-                    width: isMobile ? 24 : 32, height: isMobile ? 24 : 32, borderRadius: 8,
+                    width: 'clamp(24px, 3vw, 32px)', height: 'clamp(24px, 3vw, 32px)', borderRadius: 8,
                     background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <X size={isMobile ? 14 : 18} color="#ef4444" />
+                    <X size={16} color="#ef4444" />
                   </Box>
-                  <Text fw={700} style={{ fontSize: isMobile ? '14px' : '18px', color: '#52525b' }}>일반 유료 강의</Text>
+                  <Text fw={700} style={{ fontSize: 'clamp(14px, 2vw, 18px)', color: '#52525b' }}>일반 유료 강의</Text>
                 </Group>
-                <Stack gap={isMobile ? 8 : 14}>
+                <Stack gap={12}>
                   {[
                     '가격 99~160만원',
                     '강의만 제공 (실행은 알아서)',
@@ -725,9 +727,9 @@ function PackageSection() {
                     '대본은 직접 써야 함',
                     'AI 도구 없음',
                   ].map((t, i) => (
-                    <Group key={i} gap={isMobile ? 6 : 10} wrap="nowrap">
-                      <X size={isMobile ? 12 : 14} color="#a1a1aa" style={{ flexShrink: 0 }} />
-                      <Text style={{ color: '#52525b', fontSize: isMobile ? '12px' : '14px', lineHeight: 1.4 }}>{t}</Text>
+                    <Group key={i} gap={8} wrap="nowrap">
+                      <X size={13} color="#a1a1aa" style={{ flexShrink: 0 }} />
+                      <Text style={{ color: '#52525b', fontSize: 'clamp(12px, 1.5vw, 14px)', lineHeight: 1.4 }}>{t}</Text>
                     </Group>
                   ))}
                 </Stack>
@@ -742,28 +744,28 @@ function PackageSection() {
               transition={{ duration: 0.5, delay: 0.15, ease }}
               style={{ flex: '1 1 0', maxWidth: '380px', minWidth: 0 }}
             >
-              <Paper radius={isMobile ? 'md' : 'lg'} style={{
+              <Paper radius="lg" style={{
                 background: '#ffffff', border: '2px solid #8b5cf6',
                 height: '100%', position: 'relative',
-                padding: isMobile ? '16px' : '32px',
+                padding: 'clamp(16px, 3vw, 32px)',
                 boxShadow: '0 4px 24px rgba(139,92,246,0.1), 0 1px 2px rgba(0,0,0,0.04)',
               }}>
                 <Badge color="violet" size="sm" style={{
-                  position: 'absolute', top: -10, right: isMobile ? 12 : 20,
+                  position: 'absolute', top: -10, right: 20,
                   boxShadow: '0 2px 8px rgba(139,92,246,0.25)',
                 }}>
                   추천
                 </Badge>
-                <Group mb={isMobile ? 12 : 24} gap={isMobile ? 6 : 10}>
+                <Group mb={20} gap={10}>
                   <Box style={{
-                    width: isMobile ? 24 : 32, height: isMobile ? 24 : 32, borderRadius: 8,
+                    width: 'clamp(24px, 3vw, 32px)', height: 'clamp(24px, 3vw, 32px)', borderRadius: 8,
                     background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Check size={isMobile ? 14 : 18} color="#22c55e" />
+                    <Check size={16} color="#22c55e" />
                   </Box>
-                  <Text fw={700} style={{ fontSize: isMobile ? '14px' : '18px', color: '#18181b' }}>올인원 패스</Text>
+                  <Text fw={700} style={{ fontSize: 'clamp(14px, 2vw, 18px)', color: '#18181b' }}>올인원 패스</Text>
                 </Group>
-                <Stack gap={isMobile ? 8 : 14}>
+                <Stack gap={12}>
                   {[
                     '가격 50만원 (60% 저렴)',
                     '강의 + AI로 바로 실행',
@@ -771,9 +773,9 @@ function PackageSection() {
                     'AI가 3분 만에 대본 작성',
                     'AI 스크립트 도구 6개월',
                   ].map((t, i) => (
-                    <Group key={i} gap={isMobile ? 6 : 10} wrap="nowrap">
-                      <Check size={isMobile ? 12 : 14} color="#22c55e" style={{ flexShrink: 0 }} />
-                      <Text fw={500} style={{ color: '#18181b', fontSize: isMobile ? '12px' : '14px', lineHeight: 1.4 }}>{t}</Text>
+                    <Group key={i} gap={8} wrap="nowrap">
+                      <Check size={13} color="#22c55e" style={{ flexShrink: 0 }} />
+                      <Text fw={500} style={{ color: '#18181b', fontSize: 'clamp(12px, 1.5vw, 14px)', lineHeight: 1.4 }}>{t}</Text>
                     </Group>
                   ))}
                 </Stack>
