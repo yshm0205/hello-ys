@@ -244,13 +244,25 @@ function HeroSection() {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   섹션 2: Pain — 돌아가는 길 3가지
+   섹션 2: Pain — 돌아가는 길 3가지 (풀폭 임팩트)
    ═══════════════════════════════════════════════════════════════ */
 function PainSection() {
   const pains = [
-    { num: '01', title: '혼자 영상 만들어봤는데', desc: '6시간 걸려 만들었는데', metric: '조회수 47회', accent: '#ef4444' },
-    { num: '02', title: '강의 들어봤는데', desc: '수십만 원 썼는데', metric: '돌아온 건 "노력 부족"', accent: '#f59e0b' },
-    { num: '03', title: 'AI 써봤는데', desc: '쇼츠 공식 모르는 AI', metric: '조회수 안 나옴', accent: '#52525b' },
+    {
+      num: '01', title: '혼자 영상 만들어봤는데',
+      desc: '6시간 걸려 만들었는데', metric: '조회수 47회',
+      accent: '#ef4444', bg: '#fef2f2', border: '#fecaca',
+    },
+    {
+      num: '02', title: '강의 들어봤는데',
+      desc: '수십만 원 썼는데', metric: '돌아온 건 "노력 부족"',
+      accent: '#f59e0b', bg: '#fffbeb', border: '#fde68a',
+    },
+    {
+      num: '03', title: 'AI 써봤는데',
+      desc: '쇼츠 공식 모르는 AI', metric: '조회수 안 나옴',
+      accent: '#52525b', bg: '#f4f4f5', border: '#d4d4d8',
+    },
   ];
 
   return (
@@ -258,8 +270,8 @@ function PainSection() {
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
-            fontSize: 'clamp(22px, 5vw, 44px)', fontWeight: 800,
-            color: '#18181b', letterSpacing: '-0.03em', marginBottom: 'clamp(32px, 6vw, 64px)',
+            fontSize: 'clamp(24px, 5vw, 44px)', fontWeight: 800,
+            color: '#18181b', letterSpacing: '-0.03em', marginBottom: 'clamp(36px, 6vw, 64px)',
           }}>
             그런데 대부분은 이 길을{' '}
             <span style={{
@@ -273,46 +285,60 @@ function PainSection() {
           </Title>
         </motion.div>
 
-        <Box style={{ display: 'flex', gap: 'clamp(8px, 2vw, 20px)' }}>
-            {pains.map((p, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.12, ease }}
-                style={{ flex: '1 1 0', minWidth: 0 }}
-              >
-                <Paper p={0} radius="lg" style={{
-                  background: '#ffffff', border: '1px solid #d4d4d8',
-                  overflow: 'hidden', height: '100%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        <Stack gap={16} style={{ maxWidth: '640px', margin: '0 auto' }}>
+          {pains.map((p, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.12, ease }}
+            >
+              <Box style={{
+                background: p.bg, border: `1.5px solid ${p.border}`,
+                borderRadius: '16px', padding: 'clamp(20px, 4vw, 32px)',
+                display: 'flex', alignItems: 'center', gap: 'clamp(16px, 3vw, 24px)',
+              }}>
+                {/* 큰 번호 */}
+                <Box style={{
+                  flexShrink: 0, width: 'clamp(48px, 8vw, 64px)', height: 'clamp(48px, 8vw, 64px)',
+                  borderRadius: '50%', background: p.accent,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Box style={{ height: '4px', background: p.accent }} />
-                  <Box style={{ padding: 'clamp(12px, 3vw, 28px)' }}>
-                    <Text style={{
-                      fontSize: 'clamp(11px, 1.5vw, 13px)', fontWeight: 700, color: p.accent,
-                      letterSpacing: '0.08em', marginBottom: 'clamp(8px, 1.5vw, 16px)', ...mono,
-                    }}>
-                      {p.num}
-                    </Text>
-                    <Text fw={700} style={{ fontSize: 'clamp(13px, 2vw, 18px)', color: '#18181b', marginBottom: 'clamp(6px, 1vw, 12px)', lineHeight: 1.4 }}>
-                      {p.title}
-                    </Text>
-                    <Text style={{ fontSize: 'clamp(12px, 1.6vw, 15px)', color: '#52525b', lineHeight: 1.5, marginBottom: 'clamp(4px, 0.8vw, 8px)' }}>
-                      {p.desc}
-                    </Text>
-                    <Text fw={700} style={{ fontSize: 'clamp(12px, 1.8vw, 17px)', color: p.accent, ...mono }}>
-                      {p.metric}
-                    </Text>
-                  </Box>
-                </Paper>
-              </motion.div>
-            ))}
-          </Box>
+                  <Text style={{
+                    ...mono, fontSize: 'clamp(18px, 3vw, 24px)',
+                    fontWeight: 900, color: '#ffffff',
+                  }}>
+                    {p.num}
+                  </Text>
+                </Box>
+                {/* 텍스트 */}
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                  <Text fw={700} style={{
+                    fontSize: 'clamp(16px, 3vw, 20px)', color: '#18181b',
+                    lineHeight: 1.3, marginBottom: '4px',
+                  }}>
+                    {p.title}
+                  </Text>
+                  <Text style={{
+                    fontSize: 'clamp(14px, 2.2vw, 16px)', color: '#52525b',
+                    lineHeight: 1.4, marginBottom: '6px',
+                  }}>
+                    {p.desc}
+                  </Text>
+                  <Text fw={800} style={{
+                    fontSize: 'clamp(18px, 3.5vw, 24px)', color: p.accent, ...mono,
+                  }}>
+                    {p.metric}
+                  </Text>
+                </Box>
+              </Box>
+            </motion.div>
+          ))}
+        </Stack>
 
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.4, ease }}>
-          <Text ta="center" style={{ color: '#71717a', fontSize: '15px', marginTop: '48px', fontStyle: 'italic' }}>
+          <Text ta="center" style={{ color: '#71717a', fontSize: 'clamp(14px, 2vw, 15px)', marginTop: '48px', fontStyle: 'italic' }}>
             공식 없이 시작하면 전부 돌아가는 길입니다.
           </Text>
         </motion.div>
@@ -334,48 +360,6 @@ function WhyFlowSpotSection() {
     { label: '다음 숏폼', amount: '₩149만', icon: '▶️' },
   ];
 
-  function ScreenFrame({ r, delay }: { r: typeof revenues[0]; delay: number }) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4, delay, ease }}
-        style={{ flex: '1 1 0', minWidth: 0 }}
-      >
-        <Paper radius="lg" style={{ border: '2px dashed #a1a1aa', background: '#ffffff', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
-          {/* Window chrome */}
-          <Box style={{
-            padding: 'clamp(5px, 0.8vw, 8px) clamp(6px, 1vw, 12px)', borderBottom: '1px solid #d4d4d8',
-            display: 'flex', alignItems: 'center', gap: 'clamp(3px, 0.5vw, 6px)',
-          }}>
-            <Box style={{ width: 'clamp(5px, 0.6vw, 7px)', height: 'clamp(5px, 0.6vw, 7px)', borderRadius: '50%', background: '#a1a1aa' }} />
-            <Box style={{ width: 'clamp(5px, 0.6vw, 7px)', height: 'clamp(5px, 0.6vw, 7px)', borderRadius: '50%', background: '#a1a1aa' }} />
-            <Box style={{ width: 'clamp(5px, 0.6vw, 7px)', height: 'clamp(5px, 0.6vw, 7px)', borderRadius: '50%', background: '#a1a1aa' }} />
-            <Text size="xs" style={{ color: '#71717a', marginLeft: 'clamp(4px, 0.6vw, 8px)', fontSize: 'clamp(9px, 1.2vw, 11px)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</Text>
-          </Box>
-          {/* Capture area */}
-          <Box style={{
-            height: 'clamp(56px, 8vw, 100px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#fafafa',
-          }}>
-            <Stack align="center" gap={2}>
-              <Text style={{ fontSize: 'clamp(18px, 3vw, 28px)' }}>{r.icon}</Text>
-              <Text size="xs" style={{ color: '#71717a', fontSize: 'clamp(9px, 1.1vw, 11px)' }}>수익 캡처</Text>
-            </Stack>
-          </Box>
-          {/* Amount */}
-          <Box style={{
-            padding: 'clamp(6px, 1vw, 10px) clamp(6px, 1vw, 14px)', borderTop: '1px solid #d4d4d8',
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-          }}>
-            <Text fw={800} style={{ fontSize: 'clamp(11px, 1.5vw, 16px)', color: '#18181b', ...mono }}>{r.amount}</Text>
-          </Box>
-        </Paper>
-      </motion.div>
-    );
-  }
-
   return (
     <Box component="section" style={{ background: '#fafafa', padding: 'clamp(60px, 10vw, 120px) 0', position: 'relative' }}>
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
@@ -384,51 +368,80 @@ function WhyFlowSpotSection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={0}>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(22px, 5vw, 44px)', fontWeight: 800,
+              fontSize: 'clamp(24px, 5vw, 44px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.03em', marginBottom: '12px',
             }}>
               저도 돌아가는 길 다 걸어봤습니다
             </Title>
-            <Text ta="center" style={{ fontSize: 'clamp(14px, 2vw, 16px)', color: '#71717a', marginBottom: 'clamp(32px, 5vw, 56px)' }}>
+            <Text ta="center" style={{ fontSize: 'clamp(14px, 2.5vw, 16px)', color: '#71717a', marginBottom: 'clamp(32px, 5vw, 56px)' }}>
               그리고 결국 공식을 찾았습니다.
             </Text>
           </Stack>
         </motion.div>
 
-        {/* Revenue grid */}
-        <Box style={{ maxWidth: '920px', margin: '0 auto' }}>
-          <Box style={{ display: 'flex', gap: 'clamp(6px, 1.2vw, 14px)', marginBottom: 'clamp(6px, 1.2vw, 14px)' }}>
-            {revenues.slice(0, 3).map((r, i) => (
-              <ScreenFrame key={i} r={r} delay={i * 0.1} />
-            ))}
-          </Box>
-          <Box style={{ display: 'flex', gap: 'clamp(6px, 1.2vw, 14px)', justifyContent: 'center' }}>
-            {revenues.slice(3).map((r, i) => (
-              <ScreenFrame key={i} r={r} delay={0.3 + i * 0.1} />
-            ))}
-          </Box>
-        </Box>
+        {/* Revenue list — 세로 풀폭 */}
+        <Stack gap={12} style={{ maxWidth: '640px', margin: '0 auto' }}>
+          {revenues.map((r, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.08, ease }}
+            >
+              <Box style={{
+                display: 'flex', alignItems: 'center',
+                gap: 'clamp(12px, 3vw, 20px)',
+                padding: 'clamp(14px, 3vw, 20px) clamp(16px, 3vw, 24px)',
+                background: '#ffffff', borderRadius: '14px',
+                border: '1px solid #d4d4d8',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+              }}>
+                <Text style={{ fontSize: 'clamp(24px, 4vw, 32px)', flexShrink: 0 }}>{r.icon}</Text>
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={{
+                    fontSize: 'clamp(13px, 2vw, 14px)', color: '#71717a',
+                    marginBottom: '2px',
+                  }}>
+                    {r.label}
+                  </Text>
+                  <Text fw={800} style={{
+                    fontSize: 'clamp(20px, 4vw, 28px)', color: '#18181b', ...mono,
+                  }}>
+                    {r.amount}
+                  </Text>
+                </Box>
+                <Text style={{
+                  ...mono, fontSize: 'clamp(11px, 1.5vw, 12px)',
+                  color: '#a1a1aa', flexShrink: 0,
+                }}>
+                  수익 캡처
+                </Text>
+              </Box>
+            </motion.div>
+          ))}
+        </Stack>
 
         {/* Bridge — pull-quote style */}
         <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2, ease }}>
-          <Box style={{ maxWidth: '640px', margin: '72px auto 0' }}>
+          <Box style={{ maxWidth: '640px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
             <Box style={{
-              padding: '40px 32px',
+              padding: 'clamp(24px, 5vw, 40px) clamp(20px, 4vw, 32px)',
               borderLeft: '4px solid #8b5cf6',
               background: '#ffffff',
               borderRadius: '0 16px 16px 0',
               boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
             }}>
               <Text style={{
-                fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 800,
+                fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 800,
                 color: '#18181b', lineHeight: 1.35, marginBottom: '16px',
               }}>
                 분야가 달라도 통하는 공식이 있었습니다
               </Text>
-              <Text style={{ fontSize: '16px', color: '#52525b', lineHeight: 1.7, marginBottom: '20px' }}>
+              <Text style={{ fontSize: 'clamp(14px, 2.2vw, 16px)', color: '#52525b', lineHeight: 1.7, marginBottom: '20px' }}>
                 체계화한 뒤, 채널 1개 주 4시간으로 월 200-300
               </Text>
-              <Text fw={700} style={{ fontSize: '18px', color: '#8b5cf6' }}>
+              <Text fw={700} style={{ fontSize: 'clamp(16px, 2.5vw, 18px)', color: '#8b5cf6' }}>
                 그 체계가 59강 강의와 AI 스크립트 도구입니다 →
               </Text>
             </Box>
@@ -441,7 +454,7 @@ function WhyFlowSpotSection() {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   섹션 4: HowItWorks — 플로우차트 진단 (Q→NO→Q→YES↓→카드)
+   섹션 4: HowItWorks — 단계별 진단 (세로 스택)
    ═══════════════════════════════════════════════════════════════ */
 function HowItWorksSection() {
   const stages = [
@@ -469,14 +482,14 @@ function HowItWorksSection() {
     <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
-          <Stack align="center" gap={8} mb={56}>
+          <Stack align="center" gap={8} mb={48}>
             <Badge size="lg" variant="light" color="violet" radius="xl" style={{
               padding: '8px 18px', fontSize: '13px',
             }}>
               자가 진단
             </Badge>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800,
+              fontSize: 'clamp(24px, 5vw, 44px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.03em',
             }}>
               지금 어디에 계신가요?
@@ -484,171 +497,122 @@ function HowItWorksSection() {
           </Stack>
         </motion.div>
 
-        {/* Flowchart */}
-        <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <Box style={{ minWidth: '680px', padding: '0 20px' }}>
+        {/* 세로 플로차트 */}
+        <Stack gap={0} style={{ maxWidth: '540px', margin: '0 auto' }}>
+          {stages.map((s, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.15, ease }}
+            >
+              {/* Q 박스 */}
+              <Box style={{
+                background: '#18181b', borderRadius: '16px',
+                padding: 'clamp(16px, 3vw, 24px) clamp(20px, 4vw, 28px)',
+                display: 'flex', alignItems: 'center', gap: 'clamp(12px, 2vw, 16px)',
+              }}>
+                <Box style={{
+                  flexShrink: 0, width: 'clamp(40px, 6vw, 48px)', height: 'clamp(40px, 6vw, 48px)',
+                  borderRadius: '12px', background: s.color,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ ...mono, fontSize: 'clamp(14px, 2vw, 16px)', fontWeight: 900, color: '#ffffff' }}>
+                    {s.qNum}
+                  </Text>
+                </Box>
+                <Text fw={700} style={{ fontSize: 'clamp(16px, 3vw, 20px)', color: '#ffffff', lineHeight: 1.3 }}>
+                  {s.question}
+                </Text>
+              </Box>
 
-            {/* ── Row 1: Question boxes + NO arrows ── */}
-            <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0 }}>
-              {stages.map((s, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.45, delay: i * 0.15, ease }}
-                  style={{ display: 'flex', alignItems: 'center' }}
-                >
-                  {/* Question box */}
+              {/* YES → 답변 카드 */}
+              <Box style={{
+                display: 'flex', alignItems: 'stretch',
+                marginLeft: 'clamp(28px, 4vw, 40px)',
+              }}>
+                {/* 세로선 + YES 뱃지 */}
+                <Box style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  width: '24px', flexShrink: 0,
+                }}>
+                  <Box style={{ width: 0, flex: 1, borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
                   <Box style={{
-                    width: 'clamp(160px, 18vw, 240px)',
-                    background: '#18181b',
-                    borderRadius: '16px',
-                    padding: 'clamp(14px, 2vw, 24px) clamp(10px, 1.5vw, 20px)',
-                    textAlign: 'center',
-                    position: 'relative',
+                    background: s.color, borderRadius: '10px',
+                    padding: '2px 8px', flexShrink: 0,
                   }}>
-                    <Text style={{
-                      ...mono, fontSize: 'clamp(10px, 1.2vw, 12px)', fontWeight: 800,
-                      color: s.color, letterSpacing: '0.1em',
-                      marginBottom: 'clamp(6px, 0.8vw, 10px)',
-                    }}>
-                      {s.qNum}
-                    </Text>
-                    <Text fw={700} style={{
-                      fontSize: 'clamp(11px, 1.4vw, 15px)', color: '#ffffff', lineHeight: 1.4,
-                    }}>
-                      {s.question}
+                    <Text style={{ ...mono, fontSize: '10px', fontWeight: 800, color: '#ffffff' }}>YES</Text>
+                  </Box>
+                  <Box style={{ width: 0, flex: 1, borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
+                </Box>
+
+                {/* 답변 카드 */}
+                <Box style={{
+                  flex: 1, margin: '12px 0 12px 12px',
+                  background: '#ffffff', border: '1px solid #d4d4d8',
+                  borderRadius: '14px', overflow: 'hidden',
+                  boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+                }}>
+                  <Box style={{
+                    background: s.color, padding: '8px 16px',
+                  }}>
+                    <Text fw={800} style={{ fontSize: 'clamp(13px, 2vw, 15px)', color: '#ffffff' }}>
+                      {s.label}
                     </Text>
                   </Box>
-
-                  {/* NO → arrow */}
-                  {i < stages.length - 1 && (
-                    <Box style={{
-                      display: 'flex', alignItems: 'center', padding: '0 clamp(4px, 0.6vw, 8px)',
-                      flexShrink: 0,
+                  <Box style={{ padding: 'clamp(14px, 3vw, 20px)' }}>
+                    <Text style={{
+                      fontSize: 'clamp(14px, 2.2vw, 15px)', color: '#52525b',
+                      lineHeight: 1.5, marginBottom: '12px',
                     }}>
-                      <Box style={{ width: 'clamp(12px, 3vw, 40px)', height: '0', borderTop: '2px dashed #a1a1aa' }} />
-                      <Box style={{
-                        background: '#f4f4f5', borderRadius: '20px',
-                        padding: '4px clamp(8px, 1vw, 12px)', whiteSpace: 'nowrap',
-                      }}>
-                        <Text style={{ ...mono, fontSize: 'clamp(9px, 1vw, 11px)', fontWeight: 700, color: '#71717a' }}>
-                          NO →
-                        </Text>
-                      </Box>
-                      <Box style={{ width: 'clamp(12px, 3vw, 40px)', height: '0', borderTop: '2px dashed #a1a1aa' }} />
-                    </Box>
-                  )}
-                </motion.div>
-              ))}
-            </Box>
-
-            {/* ── Row 2: YES ↓ indicators ── */}
-            <Box style={{
-              display: 'flex', justifyContent: 'center', gap: 0,
-              marginTop: 'clamp(10px, 1.5vw, 16px)',
-            }}>
-              {stages.map((s, i) => {
-                /* NO arrow 폭 계산: clamp(12px,3vw,40px)*2 + pill + padding*2 — 근사값 사용 */
-                const arrowGap = 'calc(clamp(12px, 3vw, 40px) * 2 + clamp(8px, 1vw, 12px) * 2 + 36px)';
-                return (
-                <Box key={i} style={{
-                  width: 'clamp(160px, 18vw, 240px)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  marginLeft: i > 0 ? arrowGap : 0,
-                }}>
-                  <Box style={{ width: '0', height: 'clamp(12px, 1.5vw, 20px)', borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: 0.3 + i * 0.1, ease }}
-                  >
-                    <Box style={{
-                      background: s.color, borderRadius: '20px',
-                      padding: '4px clamp(10px, 1.2vw, 16px)',
-                      display: 'inline-flex', alignItems: 'center', gap: '4px',
+                      {s.answer}
+                    </Text>
+                    <Box style={{ height: '1px', background: '#e4e4e7', marginBottom: '12px' }} />
+                    <Text fw={600} style={{
+                      color: '#71717a', fontSize: '11px', letterSpacing: '0.04em',
+                      marginBottom: '8px', textTransform: 'uppercase',
                     }}>
-                      <Text style={{ ...mono, fontSize: 'clamp(9px, 1vw, 11px)', fontWeight: 800, color: '#ffffff' }}>
-                        YES ↓
-                      </Text>
-                    </Box>
-                  </motion.div>
-                  <Box style={{ width: '0', height: 'clamp(12px, 1.5vw, 20px)', borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
+                      포함 솔루션
+                    </Text>
+                    <Stack gap={6}>
+                      {s.includes.map((item, j) => (
+                        <Group key={j} gap={8} wrap="nowrap">
+                          <Check size={14} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
+                          <Text style={{ color: '#3f3f46', fontSize: 'clamp(13px, 2vw, 14px)', lineHeight: 1.3 }}>{item}</Text>
+                        </Group>
+                      ))}
+                    </Stack>
+                  </Box>
                 </Box>
-                );
-              })}
-            </Box>
+              </Box>
 
-            {/* ── Row 3: Answer cards ── */}
-            <Box style={{ display: 'flex', justifyContent: 'center', gap: 0 }}>
-              {stages.map((s, i) => {
-                const arrowGap = 'calc(clamp(12px, 3vw, 40px) * 2 + clamp(8px, 1vw, 12px) * 2 + 36px)';
-                return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.45, delay: 0.4 + i * 0.12, ease }}
-                  style={{
-                    width: 'clamp(160px, 18vw, 240px)',
-                    marginLeft: i > 0 ? arrowGap : 0,
-                  }}
-                >
-                  <Paper radius="lg" p={0} style={{
-                    background: '#ffffff', border: '1px solid #d4d4d8',
-                    overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              {/* NO 화살표 (마지막 스테이지 제외) */}
+              {i < stages.length - 1 && (
+                <Box style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  marginLeft: 'clamp(28px, 4vw, 40px)',
+                  height: '36px',
+                }}>
+                  <Box style={{ width: 0, flex: 1, borderLeft: '2px dashed #a1a1aa' }} />
+                  <Box style={{
+                    background: '#f4f4f5', borderRadius: '12px',
+                    padding: '3px 12px', flexShrink: 0,
                   }}>
-                    <Box style={{
-                      background: s.color,
-                      padding: 'clamp(6px, 0.8vw, 10px) clamp(10px, 1.5vw, 20px)',
-                      textAlign: 'center',
-                    }}>
-                      <Text fw={800} style={{ fontSize: 'clamp(11px, 1.3vw, 14px)', color: '#ffffff', letterSpacing: '0.02em' }}>
-                        {s.label}
-                      </Text>
-                    </Box>
-
-                    <Box style={{ padding: 'clamp(10px, 1.5vw, 20px)' }}>
-                      <Text style={{
-                        fontSize: 'clamp(10px, 1.2vw, 13px)', color: '#52525b', lineHeight: 1.5, marginBottom: 'clamp(8px, 1.2vw, 16px)',
-                      }}>
-                        {s.answer}
-                      </Text>
-
-                      <Box style={{ height: '1px', background: '#d4d4d8', marginBottom: 'clamp(8px, 1vw, 14px)' }} />
-
-                      <Text size="xs" fw={600} mb={8} style={{
-                        color: '#71717a', letterSpacing: '0.04em', fontSize: 'clamp(8px, 0.9vw, 10px)',
-                        textTransform: 'uppercase',
-                      }}>
-                        포함 솔루션
-                      </Text>
-                      <Stack gap={6}>
-                        {s.includes.map((item, j) => (
-                          <Group key={j} gap={6} wrap="nowrap">
-                            <Check size={12} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
-                            <Text style={{ color: '#3f3f46', fontSize: 'clamp(9px, 1.1vw, 12px)', lineHeight: 1.3 }}>{item}</Text>
-                          </Group>
-                        ))}
-                      </Stack>
-                    </Box>
-                  </Paper>
-                </motion.div>
-                );
-              })}
-            </Box>
-
-          </Box>
-        </Box>
+                    <Text style={{ ...mono, fontSize: '11px', fontWeight: 700, color: '#71717a' }}>NO ↓</Text>
+                  </Box>
+                  <Box style={{ width: 0, flex: 1, borderLeft: '2px dashed #a1a1aa' }} />
+                </Box>
+              )}
+            </motion.div>
+          ))}
+        </Stack>
 
         {/* Convergence CTA */}
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.3, ease }}>
-          <Stack align="center" gap={16} mt={64}>
+          <Stack align="center" gap={16} mt={56}>
             <Text ta="center" style={{
-              fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 800,
+              fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.02em',
             }}>
               어떤 단계든,{' '}
@@ -695,103 +659,99 @@ function PackageSection() {
           </Stack>
         </motion.div>
 
-        {/* Comparison */}
-        <Box style={{ marginBottom: '56px' }}>
-          <Box style={{ display: 'flex', gap: 'clamp(8px, 2vw, 20px)', justifyContent: 'center', alignItems: 'stretch' }}>
-            {/* 일반 유료 강의 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease }}
-              style={{ flex: '1 1 0', maxWidth: '380px', minWidth: 0 }}
-            >
-              <Paper radius="lg" style={{
-                background: '#ffffff', border: '1px solid #d4d4d8',
-                height: '100%', padding: 'clamp(16px, 3vw, 32px)',
-              }}>
-                <Group mb={20} gap={10}>
-                  <Box style={{
-                    width: 'clamp(24px, 3vw, 32px)', height: 'clamp(24px, 3vw, 32px)', borderRadius: 8,
-                    background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <X size={16} color="#ef4444" />
-                  </Box>
-                  <Text fw={700} style={{ fontSize: 'clamp(14px, 2vw, 18px)', color: '#52525b' }}>일반 유료 강의</Text>
-                </Group>
-                <Stack gap={12}>
-                  {[
-                    '가격 99~160만원',
-                    '강의만 제공 (실행은 알아서)',
-                    '기간 제한 (100일, 기수제)',
-                    '대본은 직접 써야 함',
-                    'AI 도구 없음',
-                  ].map((t, i) => (
-                    <Group key={i} gap={8} wrap="nowrap">
-                      <X size={13} color="#a1a1aa" style={{ flexShrink: 0 }} />
-                      <Text style={{ color: '#52525b', fontSize: 'clamp(12px, 1.5vw, 14px)', lineHeight: 1.4 }}>{t}</Text>
-                    </Group>
-                  ))}
-                </Stack>
-              </Paper>
-            </motion.div>
-
-            {/* 올인원 패스 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15, ease }}
-              style={{ flex: '1 1 0', maxWidth: '380px', minWidth: 0 }}
-            >
-              <Paper radius="lg" style={{
-                background: '#ffffff', border: '2px solid #8b5cf6',
-                height: '100%', position: 'relative',
-                padding: 'clamp(16px, 3vw, 32px)',
-                boxShadow: '0 4px 24px rgba(139,92,246,0.1), 0 1px 2px rgba(0,0,0,0.04)',
-              }}>
-                <Badge color="violet" size="sm" style={{
-                  position: 'absolute', top: -10, right: 20,
-                  boxShadow: '0 2px 8px rgba(139,92,246,0.25)',
+        {/* Comparison — 세로 스택 */}
+        <Stack gap={16} style={{ maxWidth: '480px', margin: '0 auto 56px' }}>
+          {/* 일반 유료 강의 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease }}
+          >
+            <Paper radius="lg" style={{
+              background: '#ffffff', border: '1px solid #d4d4d8',
+              padding: 'clamp(20px, 4vw, 32px)',
+            }}>
+              <Group mb={20} gap={10}>
+                <Box style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  추천
-                </Badge>
-                <Group mb={20} gap={10}>
-                  <Box style={{
-                    width: 'clamp(24px, 3vw, 32px)', height: 'clamp(24px, 3vw, 32px)', borderRadius: 8,
-                    background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Check size={16} color="#22c55e" />
-                  </Box>
-                  <Text fw={700} style={{ fontSize: 'clamp(14px, 2vw, 18px)', color: '#18181b' }}>올인원 패스</Text>
-                </Group>
-                <Stack gap={12}>
-                  {[
-                    '가격 50만원 (60% 저렴)',
-                    '강의 + AI로 바로 실행',
-                    '강의 4개월 수강',
-                    'AI가 3분 만에 대본 작성',
-                    'AI 스크립트 도구 6개월',
-                  ].map((t, i) => (
-                    <Group key={i} gap={8} wrap="nowrap">
-                      <Check size={13} color="#22c55e" style={{ flexShrink: 0 }} />
-                      <Text fw={500} style={{ color: '#18181b', fontSize: 'clamp(12px, 1.5vw, 14px)', lineHeight: 1.4 }}>{t}</Text>
-                    </Group>
-                  ))}
-                </Stack>
-              </Paper>
-            </motion.div>
-          </Box>
-        </Box>
+                  <X size={16} color="#ef4444" />
+                </Box>
+                <Text fw={700} style={{ fontSize: 'clamp(16px, 3vw, 18px)', color: '#52525b' }}>일반 유료 강의</Text>
+              </Group>
+              <Stack gap={12}>
+                {[
+                  '가격 99~160만원',
+                  '강의만 제공 (실행은 알아서)',
+                  '기간 제한 (100일, 기수제)',
+                  '대본은 직접 써야 함',
+                  'AI 도구 없음',
+                ].map((t, i) => (
+                  <Group key={i} gap={8} wrap="nowrap">
+                    <X size={14} color="#a1a1aa" style={{ flexShrink: 0 }} />
+                    <Text style={{ color: '#52525b', fontSize: 'clamp(14px, 2vw, 15px)', lineHeight: 1.4 }}>{t}</Text>
+                  </Group>
+                ))}
+              </Stack>
+            </Paper>
+          </motion.div>
+
+          {/* 올인원 패스 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15, ease }}
+          >
+            <Paper radius="lg" style={{
+              background: '#ffffff', border: '2px solid #8b5cf6',
+              position: 'relative', padding: 'clamp(20px, 4vw, 32px)',
+              boxShadow: '0 4px 24px rgba(139,92,246,0.1), 0 1px 2px rgba(0,0,0,0.04)',
+            }}>
+              <Badge color="violet" size="sm" style={{
+                position: 'absolute', top: -10, right: 20,
+                boxShadow: '0 2px 8px rgba(139,92,246,0.25)',
+              }}>
+                추천
+              </Badge>
+              <Group mb={20} gap={10}>
+                <Box style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Check size={16} color="#22c55e" />
+                </Box>
+                <Text fw={700} style={{ fontSize: 'clamp(16px, 3vw, 18px)', color: '#18181b' }}>올인원 패스</Text>
+              </Group>
+              <Stack gap={12}>
+                {[
+                  '가격 50만원 (60% 저렴)',
+                  '강의 + AI로 바로 실행',
+                  '강의 4개월 수강',
+                  'AI가 3분 만에 대본 작성',
+                  'AI 스크립트 도구 6개월',
+                ].map((t, i) => (
+                  <Group key={i} gap={8} wrap="nowrap">
+                    <Check size={14} color="#22c55e" style={{ flexShrink: 0 }} />
+                    <Text fw={500} style={{ color: '#18181b', fontSize: 'clamp(14px, 2vw, 15px)', lineHeight: 1.4 }}>{t}</Text>
+                  </Group>
+                ))}
+              </Stack>
+            </Paper>
+          </motion.div>
+        </Stack>
 
         {/* Value breakdown — receipt */}
         <motion.div {...fadeUp}>
-          <Paper p={36} radius="lg" style={{
+          <Paper radius="lg" style={{
             background: '#ffffff', border: '1px solid #d4d4d8',
-            maxWidth: '720px', margin: '0 auto',
+            maxWidth: '480px', margin: '0 auto',
+            padding: 'clamp(24px, 5vw, 36px)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           }}>
-            <Text fw={700} ta="center" style={{ fontSize: '20px', color: '#18181b', marginBottom: '28px' }}>
+            <Text fw={700} ta="center" style={{ fontSize: 'clamp(18px, 3vw, 20px)', color: '#18181b', marginBottom: '24px' }}>
               뭐가 들어있나요?
             </Text>
             <Stack gap={0}>
@@ -801,51 +761,50 @@ function PackageSection() {
                 { item: '채널 분석 피드백', value: '₩100,000' },
                 { item: '보너스: 터진 영상 템플릿', value: '₩100,000' },
               ].map((row, i) => (
-                <Group key={i} justify="space-between" style={{
-                  padding: '14px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
+                <Group key={i} justify="space-between" wrap="nowrap" style={{
+                  padding: '12px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
                 }}>
-                  <Text style={{ color: '#3f3f46', fontSize: '14px' }}>{row.item}</Text>
-                  <Text fw={600} style={{ color: '#52525b', fontSize: '14px', ...mono }}>{row.value}</Text>
+                  <Text style={{ color: '#3f3f46', fontSize: 'clamp(13px, 2vw, 14px)', lineHeight: 1.3 }}>{row.item}</Text>
+                  <Text fw={600} style={{ color: '#52525b', fontSize: 'clamp(13px, 2vw, 14px)', ...mono, flexShrink: 0, marginLeft: '8px' }}>{row.value}</Text>
                 </Group>
               ))}
             </Stack>
             <Divider my="xl" color="#d4d4d8" />
-            <Group justify="space-between" align="center" wrap="wrap" gap={12}>
-              <Text fw={600} style={{ color: '#71717a', fontSize: '15px', textDecoration: 'line-through', ...mono }}>
+            <Stack align="center" gap={4}>
+              <Text fw={600} style={{ color: '#71717a', fontSize: 'clamp(14px, 2vw, 15px)', textDecoration: 'line-through', ...mono }}>
                 총 ₩1,390,000
               </Text>
               <Group gap={12} align="center">
-                <Text fw={900} style={{ fontSize: '32px', color: '#18181b', ...mono }}>₩500,000</Text>
+                <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#18181b', ...mono }}>₩500,000</Text>
                 <Badge color="red" size="md" style={{ fontSize: '13px' }}>64%</Badge>
               </Group>
-            </Group>
+            </Stack>
           </Paper>
         </motion.div>
 
         {/* Employee comparison */}
         <motion.div {...fadeUp}>
-          <Paper p={36} radius="lg" style={{
+          <Paper radius="lg" style={{
             background: '#ffffff', border: '1px solid #d4d4d8',
-            textAlign: 'center', maxWidth: '600px', margin: '40px auto 0',
+            textAlign: 'center', maxWidth: '480px', margin: '40px auto 0',
+            padding: 'clamp(24px, 5vw, 36px)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
           }}>
-            <Text fw={600} style={{ fontSize: '16px', color: '#52525b', marginBottom: '24px' }}>
+            <Text fw={600} style={{ fontSize: 'clamp(14px, 2.5vw, 16px)', color: '#52525b', marginBottom: '24px' }}>
               이렇게 생각해보세요
             </Text>
-            <Box style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <Group justify="center" gap={36} wrap="nowrap" style={{ minWidth: '380px' }}>
-                <Stack gap={4} align="center">
-                  <Text style={{ fontSize: '13px', color: '#71717a' }}>스크립트 작가 1명</Text>
-                  <Text fw={800} style={{ fontSize: '26px', color: '#18181b', ...mono }}>월 200만원</Text>
-                </Stack>
-                <Text style={{ fontSize: '24px', color: '#a1a1aa', fontWeight: 300 }}>vs</Text>
-                <Stack gap={4} align="center">
-                  <Text style={{ fontSize: '13px', color: '#71717a' }}>AI 스크립트 6개월</Text>
-                  <Text fw={800} style={{ fontSize: '26px', color: '#8b5cf6', ...mono }}>50만원</Text>
-                </Stack>
-              </Group>
-            </Box>
-            <Text mt={20} style={{ fontSize: '15px', color: '#52525b' }}>
+            <Group justify="center" gap={24} wrap="wrap">
+              <Stack gap={4} align="center">
+                <Text style={{ fontSize: 'clamp(13px, 2vw, 14px)', color: '#71717a' }}>스크립트 작가 1명</Text>
+                <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#18181b', ...mono }}>월 200만원</Text>
+              </Stack>
+              <Text style={{ fontSize: 'clamp(20px, 3vw, 24px)', color: '#a1a1aa', fontWeight: 300 }}>vs</Text>
+              <Stack gap={4} align="center">
+                <Text style={{ fontSize: 'clamp(13px, 2vw, 14px)', color: '#71717a' }}>AI 스크립트 6개월</Text>
+                <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#8b5cf6', ...mono }}>50만원</Text>
+              </Stack>
+            </Group>
+            <Text mt={20} style={{ fontSize: 'clamp(14px, 2.2vw, 15px)', color: '#52525b' }}>
               = <b style={{ color: '#18181b' }}>월 4만원</b> = 커피 10잔 값으로{' '}
               <b style={{ color: '#8b5cf6' }}>24시간 일하는 직원</b>
             </Text>
