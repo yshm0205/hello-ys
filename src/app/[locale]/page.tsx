@@ -191,115 +191,86 @@ function HeroSection() {
         }}
       >
         <Box style={{ maxWidth: '520px', margin: '0 auto' }}>
-          {/* 원형 루프 시각화 — 전체 SVG */}
-          <svg
-            viewBox="-80 0 660 500"
-            style={{
-              width: 'clamp(300px, 85vw, 440px)',
-              height: 'auto',
-              margin: '0 auto',
-              display: 'block',
-            }}
-          >
-            {/* 점선 원형 경로 */}
-            <circle
-              cx={250} cy={250} r={110}
-              fill="none" stroke="#d4d4d8"
-              strokeWidth={1.8}
-              strokeDasharray="10 7"
+          {/* 원형 루프 시각화 — SVG 원 + HTML 라벨 */}
+          <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', maxWidth: '380px', margin: '0 auto' }}>
+            {/* SVG: 원 + 화살표 + 빨간 점만 */}
+            <svg
+              viewBox="0 0 200 200"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '60%',
+                height: '60%',
+              }}
             >
-              <animate
-                attributeName="stroke-dashoffset"
-                from="0" to="-51"
-                dur="3s"
-                repeatCount="indefinite"
-              />
-            </circle>
-
-            {/* 방향 화살표 (노드 사이 5개) */}
-            {[36, 108, 180, 252, 324].map((angle) => {
-              const rad = (angle * Math.PI) / 180;
-              const x = 250 + 110 * Math.sin(rad);
-              const y = 250 - 110 * Math.cos(rad);
-              return (
-                <polygon
-                  key={angle}
-                  points="0,-5 4,3 -4,3"
-                  fill="#a1a1aa"
-                  transform={`translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${angle + 90})`}
-                />
-              );
-            })}
-
-            {/* 궤도를 도는 빨간 점 */}
-            <g>
-              <animateTransform
-                attributeName="transform"
-                type="rotate"
-                from="0 250 250"
-                to="360 250 250"
-                dur="8s"
-                repeatCount="indefinite"
-              />
-              <circle cx={250} cy={140} r={5} fill="#ef4444" opacity={0.9} />
-              <circle cx={250} cy={140} r={5} fill="none" stroke="#ef4444" strokeWidth={1.5}>
-                <animate attributeName="r" values="5;14;5" dur="2s" repeatCount="indefinite" />
-                <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+              <circle cx={100} cy={100} r={85} fill="none" stroke="#d4d4d8" strokeWidth={1.2} strokeDasharray="7 5">
+                <animate attributeName="stroke-dashoffset" from="0" to="-36" dur="3s" repeatCount="indefinite" />
               </circle>
-            </g>
+              {[36, 108, 180, 252, 324].map((angle) => {
+                const rad = (angle * Math.PI) / 180;
+                const x = 100 + 85 * Math.sin(rad);
+                const y = 100 - 85 * Math.cos(rad);
+                return (
+                  <polygon key={angle} points="0,-4 3,2.5 -3,2.5" fill="#a1a1aa"
+                    transform={`translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${angle + 90})`} />
+                );
+              })}
+              <g>
+                <animateTransform attributeName="transform" type="rotate"
+                  from="0 100 100" to="360 100 100" dur="8s" repeatCount="indefinite" />
+                <circle cx={100} cy={15} r={4} fill="#ef4444" opacity={0.9} />
+                <circle cx={100} cy={15} r={4} fill="none" stroke="#ef4444" strokeWidth={1.2}>
+                  <animate attributeName="r" values="4;11;4" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+              {/* 원 위 5개 노드 점 */}
+              {[0, 72, 144, 216, 288].map((angle) => {
+                const rad = (angle * Math.PI) / 180;
+                const cx = 100 + 85 * Math.sin(rad);
+                const cy = 100 - 85 * Math.cos(rad);
+                const isFail = angle === 288;
+                return (
+                  <circle key={angle} cx={cx} cy={cy} r={4}
+                    fill={isFail ? '#fef2f2' : '#fff'}
+                    stroke={isFail ? '#fca5a5' : '#d4d4d8'} strokeWidth={1.5} />
+                );
+              })}
+            </svg>
 
-            {/* 노드: 원 위 점 + 바깥 라벨 (72° 간격) */}
+            {/* HTML 라벨들 — CSS 절대 배치, clamp 폰트 */}
             {[
-              { label: '채널 리서치', angle: 0, fail: false, tx: 250, ty: 52, anchor: 'middle' },
-              { label: '기획', angle: 72, fail: false, tx: 448, ty: 168, anchor: 'start' },
-              { label: '대본 작성', angle: 144, fail: false, tx: 420, ty: 440, anchor: 'start' },
-              { label: '촬영·편집', angle: 216, fail: false, tx: 80, ty: 440, anchor: 'end' },
-              { label: '실패', angle: 288, fail: true, tx: 52, ty: 168, anchor: 'end' },
-            ].map((node) => {
-              const rad = (node.angle * Math.PI) / 180;
-              const cx = 250 + 110 * Math.sin(rad);
-              const cy = 250 - 110 * Math.cos(rad);
-              return (
-                <g key={node.label}>
-                  {/* 원 위의 점 */}
-                  <circle cx={cx} cy={cy} r={6}
-                    fill={node.fail ? '#fef2f2' : '#ffffff'}
-                    stroke={node.fail ? '#fca5a5' : '#d4d4d8'}
-                    strokeWidth={2}
-                  />
-                  {/* 점→라벨 연결선 */}
-                  <line
-                    x1={cx} y1={cy} x2={node.tx} y2={node.ty}
-                    stroke={node.fail ? '#fca5a5' : '#e4e4e7'}
-                    strokeWidth={1}
-                    strokeDasharray="3 3"
-                  />
-                  {/* 라벨 배경 */}
-                  <rect
-                    x={node.anchor === 'middle' ? node.tx - 72 : node.anchor === 'start' ? node.tx - 6 : node.tx - 138}
-                    y={node.ty - 22}
-                    width={144} height={44} rx={12}
-                    fill={node.fail ? '#fef2f2' : '#ffffff'}
-                    stroke={node.fail ? '#fca5a5' : '#e4e4e7'}
-                    strokeWidth={1.2}
-                  />
-                  {/* 라벨 텍스트 */}
-                  <text
-                    x={node.anchor === 'middle' ? node.tx : node.anchor === 'start' ? node.tx + 66 : node.tx - 66}
-                    y={node.ty + 1}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill={node.fail ? '#ef4444' : '#3f3f46'}
-                    fontSize={24}
-                    fontWeight={700}
-                    style={{ fontFamily: 'inherit' }}
-                  >
-                    {node.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+              { label: '채널 리서치', top: '2%', left: '50%', transform: 'translateX(-50%)', fail: false },
+              { label: '기획', top: '24%', right: '0%', transform: 'none', fail: false },
+              { label: '대본 작성', bottom: '4%', right: '2%', transform: 'none', fail: false },
+              { label: '촬영·편집', bottom: '4%', left: '2%', transform: 'none', fail: false },
+              { label: '실패', top: '24%', left: '0%', transform: 'none', fail: true },
+            ].map((node) => (
+              <span
+                key={node.label}
+                style={{
+                  position: 'absolute',
+                  top: node.top,
+                  bottom: node.bottom,
+                  left: node.left,
+                  right: node.right,
+                  transform: node.transform,
+                  fontSize: 'clamp(14px, 3.8vw, 17px)',
+                  fontWeight: 700,
+                  color: node.fail ? '#ef4444' : '#3f3f46',
+                  background: node.fail ? '#fef2f2' : '#ffffff',
+                  border: `1.5px solid ${node.fail ? '#fca5a5' : '#e4e4e7'}`,
+                  borderRadius: '10px',
+                  padding: '6px 14px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {node.label}
+              </span>
+            ))}
+          </div>
 
           {/* Todd Brown Copy 1 */}
           <motion.div
