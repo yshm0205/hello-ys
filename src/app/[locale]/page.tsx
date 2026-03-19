@@ -193,7 +193,7 @@ function HeroSection() {
         <Box style={{ maxWidth: '520px', margin: '0 auto' }}>
           {/* 원형 루프 시각화 — 전체 SVG */}
           <svg
-            viewBox="0 0 500 500"
+            viewBox="-80 0 660 500"
             style={{
               width: 'clamp(300px, 85vw, 440px)',
               height: 'auto',
