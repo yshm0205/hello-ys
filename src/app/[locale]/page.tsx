@@ -194,9 +194,10 @@ function HeroSection() {
           {/* 원형 루프 시각화 */}
           <Box style={{
             position: 'relative',
-            width: 'clamp(300px, 80vw, 420px)',
+            width: 'clamp(260px, 65vw, 340px)',
             aspectRatio: '1 / 1',
             margin: '0 auto',
+            overflow: 'visible',
           }}>
             <svg
               viewBox="0 0 400 400"
@@ -254,13 +255,13 @@ function HeroSection() {
               </g>
             </svg>
 
-            {/* 노드 라벨 */}
+            {/* 노드 라벨 — 원 바깥쪽 배치 */}
             {[
-              { label: '채널 리서치', top: '4%', left: '50%', fail: false },
-              { label: '기획', top: '35%', left: '93%', fail: false },
-              { label: '대본 작성', top: '83%', left: '79%', fail: false },
-              { label: '촬영·편집', top: '83%', left: '21%', fail: false },
-              { label: '실패', top: '35%', left: '7%', fail: true },
+              { label: '채널 리서치', top: '-6%', left: '50%', fail: false },
+              { label: '기획', top: '34%', left: '100%', fail: false },
+              { label: '대본 작성', top: '92%', left: '78%', fail: false },
+              { label: '촬영·편집', top: '92%', left: '22%', fail: false },
+              { label: '실패', top: '34%', left: '0%', fail: true },
             ].map((node, i) => (
               <motion.div
                 key={node.label}
