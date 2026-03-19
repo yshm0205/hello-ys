@@ -406,8 +406,9 @@ function PainSection() {
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
-            fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
-            color: '#18181b', letterSpacing: '-0.03em', marginBottom: 'clamp(36px, 6vw, 64px)',
+            fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
+            color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
+            marginBottom: 'clamp(36px, 7vw, 64px)',
           }}>
             그런데 대부분은 이 길을{' '}
             <span style={{
@@ -474,7 +475,7 @@ function PainSection() {
         </Stack>
 
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.4, ease }}>
-          <Text ta="center" style={{ color: '#71717a', fontSize: 'clamp(16px, 3.5vw, 18px)', marginTop: '48px', fontStyle: 'italic' }}>
+          <Text ta="center" style={{ color: '#71717a', fontSize: 'clamp(16px, 4vw, 20px)', marginTop: 'clamp(40px, 8vw, 64px)', fontStyle: 'italic', lineHeight: 1.8 }}>
             공식 없이 시작하면 전부 돌아가는 길입니다.
           </Text>
         </motion.div>
@@ -504,12 +505,13 @@ function WhyFlowSpotSection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={0}>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
-              color: '#18181b', letterSpacing: '-0.03em', marginBottom: '12px',
+              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
+              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
+              marginBottom: 'clamp(12px, 3vw, 20px)',
             }}>
               저도 돌아가는 길 다 걸어봤습니다
             </Title>
-            <Text ta="center" style={{ fontSize: 'clamp(17px, 4vw, 20px)', color: '#71717a', marginBottom: 'clamp(32px, 5vw, 56px)' }}>
+            <Text ta="center" style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#71717a', marginBottom: 'clamp(36px, 7vw, 56px)' }}>
               그리고 결국 공식을 찾았습니다.
             </Text>
           </Stack>
@@ -569,15 +571,15 @@ function WhyFlowSpotSection() {
               boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
             }}>
               <Text style={{
-                fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 800,
-                color: '#18181b', lineHeight: 1.35, marginBottom: '16px',
+                fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900,
+                color: '#18181b', lineHeight: 1.25, marginBottom: '20px',
               }}>
                 분야가 달라도 통하는 공식이 있었습니다
               </Text>
-              <Text style={{ fontSize: 'clamp(17px, 4vw, 20px)', color: '#52525b', lineHeight: 1.7, marginBottom: '20px' }}>
+              <Text style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#71717a', lineHeight: 1.8, marginBottom: '24px' }}>
                 체계화한 뒤, 채널 1개 주 4시간으로 월 200-300
               </Text>
-              <Text fw={700} style={{ fontSize: 'clamp(18px, 4vw, 22px)', color: '#8b5cf6' }}>
+              <Text fw={700} style={{ fontSize: 'clamp(18px, 4.5vw, 22px)', color: '#8b5cf6' }}>
                 그 체계가 59강 강의와 AI 스크립트 도구입니다 →
               </Text>
             </Box>
@@ -618,15 +620,15 @@ function HowItWorksSection() {
     <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
-          <Stack align="center" gap={8} mb={48}>
+          <Stack align="center" gap={8} mb={56}>
             <Badge size="lg" variant="light" color="violet" radius="xl" style={{
               padding: '8px 18px', fontSize: '14px',
             }}>
               자가 진단
             </Badge>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
-              color: '#18181b', letterSpacing: '-0.03em',
+              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
+              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
             }}>
               지금 어디에 계신가요?
             </Title>
@@ -748,8 +750,8 @@ function HowItWorksSection() {
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.3, ease }}>
           <Stack align="center" gap={16} mt={56}>
             <Text ta="center" style={{
-              fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 800,
-              color: '#18181b', letterSpacing: '-0.02em',
+              fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900,
+              color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.2,
             }}>
               어떤 단계든,{' '}
               <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
@@ -787,8 +789,8 @@ function PackageSection() {
               가격 비교
             </Badge>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
-              color: '#18181b', letterSpacing: '-0.03em',
+              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
+              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
             }}>
               왜 이 가격인가요?
             </Title>
@@ -969,8 +971,9 @@ function FAQSection() {
       <Container size={640}>
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
-            color: '#18181b', fontSize: 'clamp(28px, 6vw, 44px)',
-            fontWeight: 800, marginBottom: '48px', letterSpacing: '-0.03em',
+            color: '#18181b', fontSize: 'clamp(32px, 9vw, 52px)',
+            fontWeight: 900, marginBottom: '56px', letterSpacing: '-0.03em',
+            lineHeight: 1.2,
           }}>
             자주 묻는 질문
           </Title>
@@ -1016,8 +1019,8 @@ function CTASection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={20}>
             <Title order={2} ta="center" style={{
-              color: '#18181b', fontSize: 'clamp(28px, 6vw, 46px)',
-              fontWeight: 800, lineHeight: 1.3, letterSpacing: '-0.03em',
+              color: '#18181b', fontSize: 'clamp(32px, 9vw, 52px)',
+              fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.03em',
             }}>
               지금 시작하지 않으면,
               <br />
