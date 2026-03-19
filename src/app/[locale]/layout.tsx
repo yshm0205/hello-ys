@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans_KR, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -16,9 +16,11 @@ import { tossTheme } from '@/theme';
 
 import { ClientWidgets } from "@/components/shared/ClientWidgets";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const notoSansKR = Noto_Sans_KR({
+  variable: "--font-noto-sans-kr",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -100,7 +102,7 @@ export default async function LocaleLayout({
         <ColorSchemeScript />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${notoSansKR.variable} ${geistMono.variable} antialiased`}
       >
         <MantineProvider theme={tossTheme}>
           <NextIntlClientProvider messages={messages}>

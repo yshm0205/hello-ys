@@ -42,10 +42,10 @@ export const tossTheme = createTheme({
     },
 
     // 폰트 설정
-    fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: 'var(--font-noto-sans-kr), "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 
     headings: {
-        fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, sans-serif',
+        fontFamily: 'var(--font-noto-sans-kr), "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif',
         fontWeight: '700',
         sizes: {
             h1: { fontSize: '56px', lineHeight: '1.2' },
