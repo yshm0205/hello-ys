@@ -131,7 +131,7 @@ function HeroSection() {
           <Stack align="center" gap={0} style={{ position: 'relative', zIndex: 1 }}>
             {/* 구성요소 나열 */}
             <Text ta="center" style={{
-              color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(15px, 3.5vw, 17px)',
+              color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(17px, 4vw, 20px)',
               fontWeight: 600, letterSpacing: '0.04em',
               marginBottom: 'clamp(20px, 4vw, 28px)',
               ...mono,
@@ -141,7 +141,7 @@ function HeroSection() {
 
             {/* 헤드라인 */}
             <Title order={1} ta="center" style={{
-              fontSize: 'clamp(28px, 6.5vw, 52px)',
+              fontSize: 'clamp(32px, 8vw, 56px)',
               fontWeight: 900, color: '#ffffff',
               lineHeight: 1.15, letterSpacing: '-0.03em',
               marginBottom: 'clamp(24px, 5vw, 36px)',
@@ -199,7 +199,7 @@ function HeroSection() {
             transition={{ duration: 0.5, delay: 0.8, ease }}
           >
             <Text ta="center" style={{
-              fontSize: 'clamp(15px, 3vw, 17px)', color: '#71717a',
+              fontSize: 'clamp(18px, 4vw, 22px)', color: '#71717a',
               fontWeight: 600, letterSpacing: '0.1em',
               marginBottom: 'clamp(32px, 6vw, 48px)', ...mono,
             }}>
@@ -224,14 +224,14 @@ function HeroSection() {
                 style={{ textAlign: 'center', width: '100%' }}
               >
                 <Text style={{
-                  fontSize: 'clamp(20px, 4.5vw, 28px)',
+                  fontSize: 'clamp(24px, 5.5vw, 32px)',
                   color: item.red ? '#ef4444' : '#e4e4e7',
                   fontWeight: 800, lineHeight: 1.3, letterSpacing: '-0.02em',
                 }}>
                   {item.label}
                 </Text>
                 <Text style={{
-                  fontSize: 'clamp(16px, 3.5vw, 18px)',
+                  fontSize: 'clamp(18px, 4vw, 22px)',
                   color: item.red ? 'rgba(239,68,68,0.6)' : '#52525b',
                   fontWeight: 400, lineHeight: 1.4, marginTop: '4px',
                 }}>
@@ -283,7 +283,7 @@ function HeroSection() {
             transition={{ duration: 0.5, delay: 1.4, ease }}
           >
             <Text ta="center" style={{
-              fontSize: 'clamp(15px, 3vw, 17px)', color: '#8b5cf6',
+              fontSize: 'clamp(18px, 4vw, 22px)', color: '#8b5cf6',
               fontWeight: 700, letterSpacing: '0.1em',
               marginBottom: 'clamp(32px, 6vw, 48px)', ...mono,
             }}>
@@ -305,14 +305,14 @@ function HeroSection() {
                 style={{ textAlign: 'center', width: '100%' }}
               >
                 <Text style={{
-                  fontSize: 'clamp(22px, 5vw, 32px)',
+                  fontSize: 'clamp(26px, 6vw, 36px)',
                   color: '#18181b',
                   fontWeight: 800, lineHeight: 1.3, letterSpacing: '-0.02em',
                 }}>
                   {item.label}
                 </Text>
                 <Text style={{
-                  fontSize: 'clamp(16px, 3.5vw, 18px)',
+                  fontSize: 'clamp(18px, 4vw, 22px)',
                   color: item.accent ? '#8b5cf6' : '#71717a',
                   fontWeight: item.accent ? 600 : 400,
                   lineHeight: 1.4, marginTop: '4px',
@@ -365,7 +365,7 @@ function HeroSection() {
         }}
       >
         <Text style={{
-          fontSize: 'clamp(15px, 3vw, 19px)', color: '#52525b',
+          fontSize: 'clamp(18px, 4vw, 22px)', color: '#52525b',
           fontWeight: 500, marginBottom: '12px',
         }}>
           이 공식으로
@@ -378,7 +378,7 @@ function HeroSection() {
           1.5억 <span style={{ color: '#8b5cf6' }}>조회수</span>
         </Title>
         <Text style={{
-          fontSize: 'clamp(15px, 3vw, 16px)', color: '#a1a1aa',
+          fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#a1a1aa',
           marginTop: '12px', marginBottom: 'clamp(48px, 8vw, 72px)', ...mono,
         }}>
           (수강생 성과 제외)
@@ -440,7 +440,7 @@ function PainSection() {
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
-            fontSize: 'clamp(24px, 5vw, 44px)', fontWeight: 800,
+            fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
             color: '#18181b', letterSpacing: '-0.03em', marginBottom: 'clamp(36px, 6vw, 64px)',
           }}>
             그런데 대부분은 이 길을{' '}
@@ -485,19 +485,19 @@ function PainSection() {
                 {/* 텍스트 */}
                 <Box style={{ flex: 1, minWidth: 0 }}>
                   <Text fw={700} style={{
-                    fontSize: 'clamp(16px, 3vw, 20px)', color: '#18181b',
+                    fontSize: 'clamp(18px, 4vw, 22px)', color: '#18181b',
                     lineHeight: 1.3, marginBottom: '4px',
                   }}>
                     {p.title}
                   </Text>
                   <Text style={{
-                    fontSize: 'clamp(15px, 3vw, 16px)', color: '#52525b',
+                    fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#52525b',
                     lineHeight: 1.4, marginBottom: '6px',
                   }}>
                     {p.desc}
                   </Text>
                   <Text fw={800} style={{
-                    fontSize: 'clamp(18px, 3.5vw, 24px)', color: p.accent, ...mono,
+                    fontSize: 'clamp(20px, 4.5vw, 26px)', color: p.accent, ...mono,
                   }}>
                     {p.metric}
                   </Text>
@@ -508,7 +508,7 @@ function PainSection() {
         </Stack>
 
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.4, ease }}>
-          <Text ta="center" style={{ color: '#71717a', fontSize: 'clamp(15px, 3vw, 16px)', marginTop: '48px', fontStyle: 'italic' }}>
+          <Text ta="center" style={{ color: '#71717a', fontSize: 'clamp(16px, 3.5vw, 18px)', marginTop: '48px', fontStyle: 'italic' }}>
             공식 없이 시작하면 전부 돌아가는 길입니다.
           </Text>
         </motion.div>
@@ -538,12 +538,12 @@ function WhyFlowSpotSection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={0}>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(24px, 5vw, 44px)', fontWeight: 800,
+              fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.03em', marginBottom: '12px',
             }}>
               저도 돌아가는 길 다 걸어봤습니다
             </Title>
-            <Text ta="center" style={{ fontSize: 'clamp(15px, 3vw, 17px)', color: '#71717a', marginBottom: 'clamp(32px, 5vw, 56px)' }}>
+            <Text ta="center" style={{ fontSize: 'clamp(17px, 4vw, 20px)', color: '#71717a', marginBottom: 'clamp(32px, 5vw, 56px)' }}>
               그리고 결국 공식을 찾았습니다.
             </Text>
           </Stack>
@@ -570,13 +570,13 @@ function WhyFlowSpotSection() {
                 <Text style={{ fontSize: 'clamp(24px, 4vw, 32px)', flexShrink: 0 }}>{r.icon}</Text>
                 <Box style={{ flex: 1, minWidth: 0 }}>
                   <Text style={{
-                    fontSize: 'clamp(15px, 3vw, 16px)', color: '#71717a',
+                    fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a',
                     marginBottom: '2px',
                   }}>
                     {r.label}
                   </Text>
                   <Text fw={800} style={{
-                    fontSize: 'clamp(20px, 4vw, 28px)', color: '#18181b', ...mono,
+                    fontSize: 'clamp(22px, 5vw, 30px)', color: '#18181b', ...mono,
                   }}>
                     {r.amount}
                   </Text>
@@ -603,15 +603,15 @@ function WhyFlowSpotSection() {
               boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
             }}>
               <Text style={{
-                fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 800,
+                fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 800,
                 color: '#18181b', lineHeight: 1.35, marginBottom: '16px',
               }}>
                 분야가 달라도 통하는 공식이 있었습니다
               </Text>
-              <Text style={{ fontSize: 'clamp(15px, 3vw, 17px)', color: '#52525b', lineHeight: 1.7, marginBottom: '20px' }}>
+              <Text style={{ fontSize: 'clamp(17px, 4vw, 20px)', color: '#52525b', lineHeight: 1.7, marginBottom: '20px' }}>
                 체계화한 뒤, 채널 1개 주 4시간으로 월 200-300
               </Text>
-              <Text fw={700} style={{ fontSize: 'clamp(16px, 2.5vw, 18px)', color: '#8b5cf6' }}>
+              <Text fw={700} style={{ fontSize: 'clamp(18px, 4vw, 22px)', color: '#8b5cf6' }}>
                 그 체계가 59강 강의와 AI 스크립트 도구입니다 →
               </Text>
             </Box>
@@ -654,12 +654,12 @@ function HowItWorksSection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={48}>
             <Badge size="lg" variant="light" color="violet" radius="xl" style={{
-              padding: '8px 18px', fontSize: '13px',
+              padding: '8px 18px', fontSize: '14px',
             }}>
               자가 진단
             </Badge>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(24px, 5vw, 44px)', fontWeight: 800,
+              fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.03em',
             }}>
               지금 어디에 계신가요?
@@ -688,11 +688,11 @@ function HowItWorksSection() {
                   borderRadius: '12px', background: s.color,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Text style={{ ...mono, fontSize: 'clamp(14px, 2vw, 16px)', fontWeight: 900, color: '#ffffff' }}>
+                  <Text style={{ ...mono, fontSize: 'clamp(16px, 3vw, 18px)', fontWeight: 900, color: '#ffffff' }}>
                     {s.qNum}
                   </Text>
                 </Box>
-                <Text fw={700} style={{ fontSize: 'clamp(16px, 3vw, 20px)', color: '#ffffff', lineHeight: 1.3 }}>
+                <Text fw={700} style={{ fontSize: 'clamp(18px, 4vw, 22px)', color: '#ffffff', lineHeight: 1.3 }}>
                   {s.question}
                 </Text>
               </Box>
@@ -727,13 +727,13 @@ function HowItWorksSection() {
                   <Box style={{
                     background: s.color, padding: '8px 16px',
                   }}>
-                    <Text fw={800} style={{ fontSize: 'clamp(15px, 3vw, 16px)', color: '#ffffff' }}>
+                    <Text fw={800} style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#ffffff' }}>
                       {s.label}
                     </Text>
                   </Box>
                   <Box style={{ padding: 'clamp(14px, 3vw, 20px)' }}>
                     <Text style={{
-                      fontSize: 'clamp(15px, 3vw, 16px)', color: '#52525b',
+                      fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#52525b',
                       lineHeight: 1.5, marginBottom: '12px',
                     }}>
                       {s.answer}
@@ -749,7 +749,7 @@ function HowItWorksSection() {
                       {s.includes.map((item, j) => (
                         <Group key={j} gap={8} wrap="nowrap">
                           <Check size={14} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
-                          <Text style={{ color: '#3f3f46', fontSize: 'clamp(15px, 3vw, 16px)', lineHeight: 1.3 }}>{item}</Text>
+                          <Text style={{ color: '#3f3f46', fontSize: 'clamp(16px, 3.5vw, 18px)', lineHeight: 1.3 }}>{item}</Text>
                         </Group>
                       ))}
                     </Stack>
@@ -782,7 +782,7 @@ function HowItWorksSection() {
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.3, ease }}>
           <Stack align="center" gap={16} mt={56}>
             <Text ta="center" style={{
-              fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 800,
+              fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.02em',
             }}>
               어떤 단계든,{' '}
@@ -817,11 +817,11 @@ function PackageSection() {
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
-            <Badge size="lg" variant="light" color="cyan" radius="xl" style={{ padding: '8px 18px', fontSize: '13px' }}>
+            <Badge size="lg" variant="light" color="cyan" radius="xl" style={{ padding: '8px 18px', fontSize: '14px' }}>
               가격 비교
             </Badge>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800,
+              fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 800,
               color: '#18181b', letterSpacing: '-0.03em',
             }}>
               왜 이 가격인가요?
@@ -893,7 +893,7 @@ function PackageSection() {
                 }}>
                   <Check size={16} color="#22c55e" />
                 </Box>
-                <Text fw={700} style={{ fontSize: 'clamp(16px, 3vw, 18px)', color: '#18181b' }}>올인원 패스</Text>
+                <Text fw={700} style={{ fontSize: 'clamp(18px, 4vw, 20px)', color: '#18181b' }}>올인원 패스</Text>
               </Group>
               <Stack gap={12}>
                 {[
@@ -965,16 +965,16 @@ function PackageSection() {
             </Text>
             <Group justify="center" gap={24} wrap="wrap">
               <Stack gap={4} align="center">
-                <Text style={{ fontSize: 'clamp(15px, 3vw, 16px)', color: '#71717a' }}>스크립트 작가 1명</Text>
+                <Text style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a' }}>스크립트 작가 1명</Text>
                 <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#18181b', ...mono }}>월 200만원</Text>
               </Stack>
               <Text style={{ fontSize: 'clamp(20px, 3vw, 24px)', color: '#a1a1aa', fontWeight: 300 }}>vs</Text>
               <Stack gap={4} align="center">
-                <Text style={{ fontSize: 'clamp(15px, 3vw, 16px)', color: '#71717a' }}>AI 스크립트 6개월</Text>
+                <Text style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a' }}>AI 스크립트 6개월</Text>
                 <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#8b5cf6', ...mono }}>50만원</Text>
               </Stack>
             </Group>
-            <Text mt={20} style={{ fontSize: 'clamp(15px, 3vw, 16px)', color: '#52525b' }}>
+            <Text mt={20} style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#52525b' }}>
               = <b style={{ color: '#18181b' }}>월 4만원</b> = 커피 10잔 값으로{' '}
               <b style={{ color: '#8b5cf6' }}>24시간 일하는 직원</b>
             </Text>
@@ -1003,7 +1003,7 @@ function FAQSection() {
       <Container size={640}>
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
-            color: '#18181b', fontSize: 'clamp(28px, 5vw, 40px)',
+            color: '#18181b', fontSize: 'clamp(28px, 6vw, 44px)',
             fontWeight: 800, marginBottom: '48px', letterSpacing: '-0.03em',
           }}>
             자주 묻는 질문
@@ -1014,8 +1014,8 @@ function FAQSection() {
           radius="lg"
           styles={{
             item: { background: '#ffffff', border: '1px solid #d4d4d8', marginBottom: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
-            control: { color: '#18181b', fontWeight: 600, fontSize: '15px', padding: '18px 20px' },
-            panel: { color: '#52525b', fontSize: '14px', lineHeight: 1.7, padding: '0 20px 18px' },
+            control: { color: '#18181b', fontWeight: 600, fontSize: '17px', padding: '18px 20px' },
+            panel: { color: '#52525b', fontSize: '16px', lineHeight: 1.7, padding: '0 20px 18px' },
           }}
         >
           {faqs.map((f, i) => (
@@ -1050,7 +1050,7 @@ function CTASection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={20}>
             <Title order={2} ta="center" style={{
-              color: '#18181b', fontSize: 'clamp(28px, 5vw, 42px)',
+              color: '#18181b', fontSize: 'clamp(28px, 6vw, 46px)',
               fontWeight: 800, lineHeight: 1.3, letterSpacing: '-0.03em',
             }}>
               지금 시작하지 않으면,
@@ -1069,10 +1069,10 @@ function CTASection() {
               무료로 시작하기
             </Button>
             <Stack align="center" gap={4}>
-              <Text size="sm" style={{ color: '#71717a', fontSize: '13px' }}>
+              <Text size="sm" style={{ color: '#71717a', fontSize: '15px' }}>
                 30크레딧 무료 · 7일 환불 보장
               </Text>
-              <Text size="sm" style={{ color: '#71717a', fontSize: '13px' }}>
+              <Text size="sm" style={{ color: '#71717a', fontSize: '15px' }}>
                 문의: hmys0205hmys@gmail.com
               </Text>
             </Stack>
