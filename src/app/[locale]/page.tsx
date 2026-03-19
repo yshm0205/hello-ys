@@ -272,17 +272,18 @@ function HeroSection() {
             ))}
           </div>
 
-          {/* Todd Brown Copy 1 */}
+          {/* Todd Brown Copy — 크리투스 벤치마크 스타일 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.4, ease }}
-            style={{ marginTop: 'clamp(24px, 5vw, 40px)', textAlign: 'center' }}
+            style={{ marginTop: 'clamp(40px, 8vw, 64px)', textAlign: 'center' }}
           >
+            {/* 임팩트 제목 — 48px급 */}
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(30px, 8vw, 52px)',
+              fontSize: 'clamp(32px, 9vw, 56px)',
               fontWeight: 900, color: '#18181b',
-              lineHeight: 1.25, letterSpacing: '-0.03em',
+              lineHeight: 1.2, letterSpacing: '-0.03em',
             }}>
               혹시 지금도
               <br />
@@ -291,46 +292,69 @@ function HeroSection() {
               갇혀 계신가요?
             </Title>
 
+            {/* 서브 텍스트 — 16px급, 넉넉한 여백 */}
             <Text ta="center" style={{
-              fontSize: 'clamp(18px, 4.5vw, 22px)',
-              color: '#52525b', lineHeight: 1.8,
-              marginTop: 'clamp(20px, 4vw, 32px)',
-              maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto',
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              color: '#71717a', lineHeight: 1.8,
+              marginTop: 'clamp(36px, 7vw, 56px)',
             }}>
               수십 시간을 쏟아부어도 매번 제자리인 이유,
-              <br />
-              <strong style={{ color: '#18181b' }}>당신의 노력이 부족해서가 아닙니다.</strong>
             </Text>
 
+            {/* 중간 제목 — 24px급 */}
             <Text ta="center" style={{
-              fontSize: 'clamp(18px, 4.5vw, 22px)',
-              color: '#52525b', lineHeight: 1.8,
-              marginTop: 'clamp(16px, 3vw, 24px)',
-              maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto',
+              fontSize: 'clamp(22px, 6vw, 32px)',
+              fontWeight: 800, color: '#18181b',
+              lineHeight: 1.4,
+              marginTop: 'clamp(8px, 2vw, 12px)',
+            }}>
+              당신의 노력이 부족해서가 아닙니다.
+            </Text>
+
+            {/* 서브 텍스트 */}
+            <Text ta="center" style={{
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              color: '#71717a', lineHeight: 1.8,
+              marginTop: 'clamp(40px, 8vw, 64px)',
             }}>
               이 잔인한 루프를 단숨에 끊어낼
-              <br />
-              <span style={{ color: '#8b5cf6', fontWeight: 800, fontSize: 'clamp(20px, 5vw, 26px)' }}>
-                &lsquo;검증된 쇼츠 공식&rsquo;
-              </span>
-              <br />이 없었을 뿐입니다.
+            </Text>
+
+            {/* 임팩트 강조 — 40px급 */}
+            <Text ta="center" style={{
+              fontSize: 'clamp(34px, 9vw, 52px)',
+              fontWeight: 900, color: '#8b5cf6',
+              lineHeight: 1.2,
+              marginTop: 'clamp(8px, 2vw, 12px)',
+              letterSpacing: '-0.02em',
+            }}>
+              &lsquo;검증된 쇼츠 공식&rsquo;
+            </Text>
+
+            {/* 서브 텍스트 */}
+            <Text ta="center" style={{
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              color: '#71717a', lineHeight: 1.8,
+              marginTop: 'clamp(8px, 2vw, 12px)',
+            }}>
+              이 없었을 뿐입니다.
             </Text>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1.8, ease }}
-              style={{ marginTop: 'clamp(32px, 6vw, 48px)' }}
+              style={{ marginTop: 'clamp(48px, 10vw, 72px)' }}
             >
               <Box style={{
                 display: 'inline-block',
-                padding: '16px 32px',
+                padding: '20px 36px',
                 background: '#f5f3ff',
                 borderRadius: '16px',
                 border: '1px solid #ede9fe',
               }}>
                 <Text ta="center" style={{
-                  fontSize: 'clamp(17px, 4.5vw, 22px)',
+                  fontSize: 'clamp(18px, 4.5vw, 22px)',
                   fontWeight: 700, color: '#8b5cf6',
                   lineHeight: 1.5,
                 }}>
