@@ -96,7 +96,7 @@ function HeroSection() {
         position: 'relative',
         overflow: 'hidden',
         background: '#ffffff',
-        padding: 'clamp(80px, 12vw, 120px) clamp(16px, 4vw, 24px) clamp(48px, 8vw, 80px)',
+        padding: 'clamp(80px, 12vw, 120px) 16px clamp(48px, 8vw, 80px)',
       }}
     >
       {/* 다크 히어로 카드 */}
@@ -104,12 +104,12 @@ function HeroSection() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.1, ease }}
-        style={{ width: '100%', maxWidth: '540px' }}
+        style={{ width: '100%', maxWidth: '600px' }}
       >
         <Box style={{
           background: '#18181b',
           borderRadius: '24px',
-          padding: 'clamp(32px, 6vw, 48px) clamp(24px, 5vw, 40px)',
+          padding: 'clamp(32px, 6vw, 48px) clamp(20px, 4vw, 40px)',
           position: 'relative',
           overflow: 'hidden',
           boxShadow: '0 8px 40px rgba(24,24,27,0.3), 0 2px 8px rgba(0,0,0,0.1)',
@@ -131,7 +131,7 @@ function HeroSection() {
           <Stack align="center" gap={0} style={{ position: 'relative', zIndex: 1 }}>
             {/* 구성요소 나열 */}
             <Text ta="center" style={{
-              color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(13px, 2vw, 15px)',
+              color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(14px, 2.5vw, 15px)',
               fontWeight: 600, letterSpacing: '0.04em',
               marginBottom: 'clamp(20px, 4vw, 28px)',
               ...mono,
@@ -189,17 +189,17 @@ function HeroSection() {
           width: '100vw', marginLeft: 'calc(-50vw + 50%)',
           marginTop: 'clamp(56px, 9vw, 80px)',
           background: '#18181b',
-          padding: 'clamp(48px, 8vw, 80px) clamp(24px, 6vw, 48px)',
+          padding: 'clamp(48px, 8vw, 80px) 16px',
         }}
       >
-        <Box style={{ maxWidth: '420px', margin: '0 auto' }}>
+        <Box style={{ maxWidth: '500px', margin: '0 auto' }}>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.8, ease }}
           >
             <Text ta="center" style={{
-              fontSize: 'clamp(13px, 2.5vw, 15px)', color: '#71717a',
+              fontSize: 'clamp(14px, 2.5vw, 15px)', color: '#71717a',
               fontWeight: 600, letterSpacing: '0.1em',
               marginBottom: 'clamp(32px, 6vw, 48px)', ...mono,
             }}>
@@ -231,7 +231,7 @@ function HeroSection() {
                   {item.label}
                 </Text>
                 <Text style={{
-                  fontSize: 'clamp(13px, 2.5vw, 16px)',
+                  fontSize: 'clamp(15px, 2.8vw, 16px)',
                   color: item.red ? 'rgba(239,68,68,0.6)' : '#52525b',
                   fontWeight: 400, lineHeight: 1.4, marginTop: '4px',
                 }}>
@@ -273,17 +273,17 @@ function HeroSection() {
         style={{
           width: '100vw', marginLeft: 'calc(-50vw + 50%)',
           background: '#faf5ff',
-          padding: 'clamp(48px, 8vw, 80px) clamp(24px, 6vw, 48px)',
+          padding: 'clamp(48px, 8vw, 80px) 16px',
         }}
       >
-        <Box style={{ maxWidth: '420px', margin: '0 auto' }}>
+        <Box style={{ maxWidth: '500px', margin: '0 auto' }}>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1.4, ease }}
           >
             <Text ta="center" style={{
-              fontSize: 'clamp(13px, 2.5vw, 15px)', color: '#8b5cf6',
+              fontSize: 'clamp(14px, 2.5vw, 15px)', color: '#8b5cf6',
               fontWeight: 700, letterSpacing: '0.1em',
               marginBottom: 'clamp(32px, 6vw, 48px)', ...mono,
             }}>
@@ -359,9 +359,9 @@ function HeroSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 2.5, ease }}
         style={{
-          width: '100%', maxWidth: '540px',
+          width: '100%', maxWidth: '600px',
           textAlign: 'center',
-          padding: 'clamp(56px, 9vw, 88px) clamp(16px, 4vw, 24px)',
+          padding: 'clamp(56px, 9vw, 88px) 0',
         }}
       >
         <Text style={{
@@ -378,7 +378,7 @@ function HeroSection() {
           1.5억 <span style={{ color: '#8b5cf6' }}>조회수</span>
         </Title>
         <Text style={{
-          fontSize: 'clamp(13px, 2.2vw, 15px)', color: '#a1a1aa',
+          fontSize: 'clamp(14px, 2.2vw, 15px)', color: '#a1a1aa',
           marginTop: '12px', marginBottom: 'clamp(48px, 8vw, 72px)', ...mono,
         }}>
           (수강생 성과 제외)
@@ -570,7 +570,7 @@ function WhyFlowSpotSection() {
                 <Text style={{ fontSize: 'clamp(24px, 4vw, 32px)', flexShrink: 0 }}>{r.icon}</Text>
                 <Box style={{ flex: 1, minWidth: 0 }}>
                   <Text style={{
-                    fontSize: 'clamp(13px, 2vw, 14px)', color: '#71717a',
+                    fontSize: 'clamp(14px, 2.2vw, 15px)', color: '#71717a',
                     marginBottom: '2px',
                   }}>
                     {r.label}
@@ -727,7 +727,7 @@ function HowItWorksSection() {
                   <Box style={{
                     background: s.color, padding: '8px 16px',
                   }}>
-                    <Text fw={800} style={{ fontSize: 'clamp(13px, 2vw, 15px)', color: '#ffffff' }}>
+                    <Text fw={800} style={{ fontSize: 'clamp(14px, 2.2vw, 15px)', color: '#ffffff' }}>
                       {s.label}
                     </Text>
                   </Box>
@@ -749,7 +749,7 @@ function HowItWorksSection() {
                       {s.includes.map((item, j) => (
                         <Group key={j} gap={8} wrap="nowrap">
                           <Check size={14} color={s.color} strokeWidth={3} style={{ flexShrink: 0 }} />
-                          <Text style={{ color: '#3f3f46', fontSize: 'clamp(13px, 2vw, 14px)', lineHeight: 1.3 }}>{item}</Text>
+                          <Text style={{ color: '#3f3f46', fontSize: 'clamp(14px, 2.2vw, 15px)', lineHeight: 1.3 }}>{item}</Text>
                         </Group>
                       ))}
                     </Stack>
@@ -934,8 +934,8 @@ function PackageSection() {
                 <Group key={i} justify="space-between" wrap="nowrap" style={{
                   padding: '12px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
                 }}>
-                  <Text style={{ color: '#3f3f46', fontSize: 'clamp(13px, 2vw, 14px)', lineHeight: 1.3 }}>{row.item}</Text>
-                  <Text fw={600} style={{ color: '#52525b', fontSize: 'clamp(13px, 2vw, 14px)', ...mono, flexShrink: 0, marginLeft: '8px' }}>{row.value}</Text>
+                  <Text style={{ color: '#3f3f46', fontSize: 'clamp(14px, 2.2vw, 15px)', lineHeight: 1.3 }}>{row.item}</Text>
+                  <Text fw={600} style={{ color: '#52525b', fontSize: 'clamp(14px, 2.2vw, 15px)', ...mono, flexShrink: 0, marginLeft: '8px' }}>{row.value}</Text>
                 </Group>
               ))}
             </Stack>
@@ -965,12 +965,12 @@ function PackageSection() {
             </Text>
             <Group justify="center" gap={24} wrap="wrap">
               <Stack gap={4} align="center">
-                <Text style={{ fontSize: 'clamp(13px, 2vw, 14px)', color: '#71717a' }}>스크립트 작가 1명</Text>
+                <Text style={{ fontSize: 'clamp(14px, 2.2vw, 15px)', color: '#71717a' }}>스크립트 작가 1명</Text>
                 <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#18181b', ...mono }}>월 200만원</Text>
               </Stack>
               <Text style={{ fontSize: 'clamp(20px, 3vw, 24px)', color: '#a1a1aa', fontWeight: 300 }}>vs</Text>
               <Stack gap={4} align="center">
-                <Text style={{ fontSize: 'clamp(13px, 2vw, 14px)', color: '#71717a' }}>AI 스크립트 6개월</Text>
+                <Text style={{ fontSize: 'clamp(14px, 2.2vw, 15px)', color: '#71717a' }}>AI 스크립트 6개월</Text>
                 <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#8b5cf6', ...mono }}>50만원</Text>
               </Stack>
             </Group>
