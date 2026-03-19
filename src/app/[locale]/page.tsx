@@ -84,6 +84,8 @@ function useIsMobile(bp = 768) {
    섹션 1: Hero — 다크 카드 블록 (크리투스 스타일)
    ═══════════════════════════════════════════════════════════════ */
 function HeroSection() {
+  const [loopBroken, setLoopBroken] = useState(false);
+
   return (
     <Box
       component="section"
@@ -177,7 +179,7 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-            {/* 루트 비교 — 네비게이션 지도형 */}
+      {/* 무한 루프 섹션 */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -185,238 +187,196 @@ function HeroSection() {
         style={{
           width: '100%',
           marginTop: 'clamp(56px, 9vw, 80px)',
-          padding: 'clamp(48px, 8vw, 80px) 16px',
+          padding: 'clamp(48px, 8vw, 80px) 16px clamp(32px, 5vw, 48px)',
           background: '#fafafa',
         }}
       >
-        <Box style={{ maxWidth: '500px', margin: '0 auto' }}>
-          {/* 두 경로 비교 */}
-          <Box style={{ display: 'flex', gap: '16px' }}>
+        <Box style={{ maxWidth: '520px', margin: '0 auto' }}>
+          {/* 원형 루프 시각화 */}
+          <Box style={{
+            position: 'relative',
+            width: 'clamp(280px, 72vw, 380px)',
+            aspectRatio: '1 / 1',
+            margin: '0 auto',
+          }}>
+            <svg
+              viewBox="0 0 400 400"
+              style={{
+                position: 'absolute', inset: 0,
+                width: '100%', height: '100%',
+                overflow: 'visible',
+              }}
+            >
+              {/* 점선 원형 경로 */}
+              <circle
+                cx={200} cy={200} r={150}
+                fill="none"
+                strokeWidth={2}
+                strokeDasharray="12 8"
+                style={{
+                  stroke: loopBroken ? '#c4b5fd' : '#d4d4d8',
+                  transition: 'stroke 1s ease',
+                }}
+              >
+                <animate
+                  attributeName="stroke-dashoffset"
+                  from="0" to="-60"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+              </circle>
 
-            {/* 왼쪽: 돌아가는 길 */}
-            <Box style={{ flex: 1 }}>
-              <Text ta="center" style={{
-                fontSize: 'clamp(15px, 3.5vw, 18px)', color: '#a1a1aa',
-                fontWeight: 700, marginBottom: '24px',
-              }}>
-                돌아가는 길
-              </Text>
+              {/* 방향 화살표 (노드 사이 5개) */}
+              {[36, 108, 180, 252, 324].map((angle) => {
+                const rad = (angle * Math.PI) / 180;
+                const x = 200 + 150 * Math.sin(rad);
+                const y = 200 - 150 * Math.cos(rad);
+                return (
+                  <polygon
+                    key={angle}
+                    points="0,-5 4,3 -4,3"
+                    fill="#a1a1aa"
+                    transform={`translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${angle + 90})`}
+                  />
+                );
+              })}
 
-              {/* 경유지 — 지그재그 */}
-              <Box style={{ position: 'relative', paddingLeft: '24px' }}>
-                {/* 수직 점선 */}
-                <Box style={{
-                  position: 'absolute', left: '7px', top: '8px', bottom: '8px',
-                  width: '0', borderLeft: '2px dashed #d4d4d8',
-                }} />
+              {/* 궤도를 도는 빨간 점 */}
+              <g>
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from="0 200 200"
+                  to="360 200 200"
+                  dur="8s"
+                  repeatCount="indefinite"
+                />
+                <circle cx={200} cy={50} r={5} fill="#ef4444" opacity={0.9} />
+                <circle cx={200} cy={50} r={5} fill="none" stroke="#ef4444" strokeWidth={1}>
+                  <animate attributeName="r" values="5;14;5" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+            </svg>
 
-                {['채널 뒤지기', '감으로 기획', '대본 6시간', '촬영+편집', '47회...', '뭐가 문제지?'].map((step, i) => (
-                  <motion.div
-                    key={step}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.8 + i * 0.1, ease }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                      marginBottom: i < 5 ? 'clamp(16px, 3vw, 22px)' : '0',
-                      paddingLeft: i % 2 === 1 ? '14px' : '0',
-                    }}
-                  >
-                    <Box style={{
-                      width: '14px', height: '14px', borderRadius: '50%',
-                      background: i >= 4 ? '#ef4444' : '#a1a1aa',
-                      flexShrink: 0, position: 'relative', zIndex: 1,
-                      border: '2px solid #fafafa',
-                    }} />
-                    <Text style={{
-                      fontSize: 'clamp(14px, 3.5vw, 16px)',
-                      color: i >= 4 ? '#ef4444' : '#71717a',
-                      fontWeight: 600,
-                    }}>
-                      {step}
-                    </Text>
-                  </motion.div>
-                ))}
-              </Box>
-
-              {/* 요약 카드 */}
+            {/* 노드 라벨 */}
+            {[
+              { label: '채널 리서치', top: '6%', left: '50%', fail: false },
+              { label: '기획', top: '36%', left: '91%', fail: false },
+              { label: '대본 작성', top: '82%', left: '77%', fail: false },
+              { label: '촬영·편집', top: '82%', left: '23%', fail: false },
+              { label: '실패', top: '36%', left: '9%', fail: true },
+            ].map((node, i) => (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 1.6 }}
+                key={node.label}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.8 + i * 0.08, ease }}
+                style={{
+                  position: 'absolute',
+                  top: node.top, left: node.left,
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 2,
+                }}
               >
                 <Box style={{
-                  marginTop: 'clamp(20px, 4vw, 28px)', padding: '14px 12px',
-                  background: '#fef2f2', borderRadius: '12px',
-                  border: '1px solid #fecaca',
+                  background: node.fail ? '#fef2f2' : '#ffffff',
+                  border: `1.5px solid ${node.fail ? '#fca5a5' : '#d4d4d8'}`,
+                  borderRadius: '10px',
+                  padding: 'clamp(5px, 1.5vw, 8px) clamp(10px, 3vw, 16px)',
+                  whiteSpace: 'nowrap',
+                  boxShadow: node.fail
+                    ? '0 2px 8px rgba(239,68,68,0.15)'
+                    : '0 1px 4px rgba(0,0,0,0.06)',
                 }}>
-                  <Text ta="center" style={{
-                    fontSize: 'clamp(20px, 4.5vw, 26px)', fontWeight: 900,
-                    color: '#ef4444', lineHeight: 1.2,
-                    ...mono,
+                  <Text style={{
+                    fontSize: 'clamp(11px, 3vw, 14px)',
+                    fontWeight: 600,
+                    color: node.fail ? '#ef4444' : '#52525b',
                   }}>
-                    6단계
-                  </Text>
-                  <Text ta="center" style={{
-                    fontSize: 'clamp(13px, 3vw, 15px)', color: '#ef4444',
-                    fontWeight: 600, marginTop: '4px', ...mono,
-                  }}>
-                    6시간+
-                  </Text>
-                  <Text ta="center" style={{
-                    fontSize: 'clamp(13px, 3vw, 15px)', color: '#a1a1aa',
-                    fontWeight: 500, marginTop: '6px',
-                  }}>
-                    그리고 처음부터 다시
+                    {node.label}
                   </Text>
                 </Box>
               </motion.div>
-            </Box>
+            ))}
+          </Box>
 
-            {/* 구분선 */}
-            <Box style={{
-              width: '1px', background: '#e4e4e7',
-              alignSelf: 'stretch', flexShrink: 0,
-            }} />
+          {/* Todd Brown Copy 1 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.4, ease }}
+            onViewportEnter={() => setTimeout(() => setLoopBroken(true), 2000)}
+            viewport={{ once: true }}
+            style={{ marginTop: 'clamp(24px, 5vw, 40px)', textAlign: 'center' }}
+          >
+            <Title order={2} ta="center" style={{
+              fontSize: 'clamp(22px, 5.5vw, 32px)',
+              fontWeight: 800, color: '#18181b',
+              lineHeight: 1.4, letterSpacing: '-0.02em',
+            }}>
+              혹시 지금도 이 무한 루프 속에
+              <br />
+              갇혀 계신가요?
+            </Title>
 
-            {/* 오른쪽: 최단거리 */}
-            <Box style={{ flex: 1 }}>
-              <Text ta="center" style={{
-                fontSize: 'clamp(15px, 3.5vw, 18px)', color: '#8b5cf6',
-                fontWeight: 700, marginBottom: '24px',
+            <Text ta="center" style={{
+              fontSize: 'clamp(14px, 3.5vw, 16px)',
+              color: '#52525b', lineHeight: 1.8,
+              marginTop: 'clamp(16px, 3vw, 24px)',
+              maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto',
+            }}>
+              수십 시간을 쏟아부어도 매번 제자리인 이유,
+              <br />
+              당신의 노력이 부족해서가 아닙니다.
+            </Text>
+
+            <Text ta="center" style={{
+              fontSize: 'clamp(14px, 3.5vw, 16px)',
+              color: '#52525b', lineHeight: 1.8,
+              marginTop: 'clamp(12px, 2vw, 16px)',
+              maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto',
+            }}>
+              이 잔인한 루프를 단숨에 끊어낼
+              <br />
+              <span style={{ color: '#8b5cf6', fontWeight: 700 }}>
+                &lsquo;검증된 쇼츠 공식&rsquo;
+              </span>이 없었을 뿐입니다.
+            </Text>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1.8, ease }}
+              style={{ marginTop: 'clamp(28px, 5vw, 40px)' }}
+            >
+              <Box style={{
+                display: 'inline-block',
+                padding: '14px 28px',
+                background: '#f5f3ff',
+                borderRadius: '16px',
+                border: '1px solid #ede9fe',
               }}>
-                최단거리
-              </Text>
-
-              {/* 경유지 — 직선 */}
-              <Box style={{ position: 'relative', paddingLeft: '24px' }}>
-                {/* 수직 실선 */}
-                <Box style={{
-                  position: 'absolute', left: '7px', top: '8px', bottom: '8px',
-                  width: '2px', background: '#c4b5fd',
-                }} />
-
-                {['공식 입력', 'AI가 대본 생성', '촬영+업로드'].map((step, i) => (
-                  <motion.div
-                    key={step}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.8 + i * 0.15, ease }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                      marginBottom: i < 2 ? 'clamp(16px, 3vw, 22px)' : '0',
-                    }}
-                  >
-                    <Box style={{
-                      width: '14px', height: '14px', borderRadius: '50%',
-                      background: '#8b5cf6',
-                      flexShrink: 0, position: 'relative', zIndex: 1,
-                      border: '2px solid #fafafa',
-                    }} />
-                    <Text style={{
-                      fontSize: 'clamp(14px, 3.5vw, 16px)',
-                      color: '#18181b',
-                      fontWeight: 600,
-                    }}>
-                      {step}
-                    </Text>
-                  </motion.div>
-                ))}
-
-                {/* 완료 체크 */}
+                <Text ta="center" style={{
+                  fontSize: 'clamp(14px, 3.5vw, 16px)',
+                  fontWeight: 700, color: '#8b5cf6',
+                  lineHeight: 1.5,
+                }}>
+                  이제, 최단거리로 빠져나오는 길을 보여드리겠습니다
+                </Text>
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 1.4 }}
-                  style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}
                 >
-                  <Box style={{
-                    width: '14px', height: '14px', borderRadius: '50%',
-                    background: '#22c55e',
-                    flexShrink: 0, position: 'relative', zIndex: 1,
-                    border: '2px solid #fafafa',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Check size={8} color="#ffffff" strokeWidth={4} />
-                  </Box>
-                  <Text style={{ fontSize: '13px', color: '#22c55e', fontWeight: 700 }}>
-                    끝
-                  </Text>
+                  <ChevronDown size={20} color="#8b5cf6" />
                 </motion.div>
               </Box>
-
-              {/* 요약 카드 */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 1.6 }}
-              >
-                <Box style={{
-                  marginTop: 'clamp(20px, 4vw, 28px)', padding: '14px 12px',
-                  background: '#f5f3ff', borderRadius: '12px',
-                  border: '1px solid #ddd6fe',
-                }}>
-                  <Text ta="center" style={{
-                    fontSize: 'clamp(20px, 4.5vw, 26px)', fontWeight: 900,
-                    color: '#8b5cf6', lineHeight: 1.2,
-                    ...mono,
-                  }}>
-                    3단계
-                  </Text>
-                  <Text ta="center" style={{
-                    fontSize: 'clamp(13px, 3vw, 15px)', color: '#8b5cf6',
-                    fontWeight: 600, marginTop: '4px', ...mono,
-                  }}>
-                    10분
-                  </Text>
-                  <Text ta="center" style={{
-                    fontSize: 'clamp(13px, 3vw, 15px)', color: '#71717a',
-                    fontWeight: 500, marginTop: '6px',
-                  }}>
-                    1.5억 조회수 공식
-                  </Text>
-                </Box>
-              </motion.div>
-            </Box>
-          </Box>
+            </motion.div>
+          </motion.div>
         </Box>
       </motion.div>
 
-      {/* 스토리 오프닝 */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 1.8, ease }}
-        style={{
-          width: '100%', maxWidth: '600px',
-          textAlign: 'center',
-          padding: 'clamp(48px, 8vw, 72px) 16px',
-        }}
-      >
-        <Title order={2} ta="center" style={{
-          fontSize: 'clamp(24px, 5vw, 40px)',
-          fontWeight: 800, lineHeight: 1.35,
-          color: '#18181b', letterSpacing: '-0.03em',
-        }}>
-          지금부터 소개해드리는 이 길이,
-          <br />
-          쇼츠 수익화의{' '}
-          <span style={{ color: '#8b5cf6' }}>최단거리</span>
-          입니다
-        </Title>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.8, duration: 0.8 }}
-        style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)' }}
-      >
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
-          <ChevronDown size={20} color="#a1a1aa" />
-        </motion.div>
-      </motion.div>
     </Box>
   );
 }
