@@ -242,11 +242,11 @@ function HeroSection() {
 
             {/* HTML 라벨들 — 원 노드 바로 옆 배치 */}
             {[
-              { label: '채널 리서치', top: '10%', left: '50%', transform: 'translateX(-50%)', fail: false },
-              { label: '기획', top: '33%', right: '4%', transform: 'none', fail: false },
-              { label: '대본 작성', bottom: '14%', right: '12%', transform: 'none', fail: false },
-              { label: '촬영·편집', bottom: '14%', left: '12%', transform: 'none', fail: false },
-              { label: '실패', top: '33%', left: '4%', transform: 'none', fail: true },
+              { label: '뭘 올리지 고민', top: '10%', left: '50%', transform: 'translateX(-50%)', fail: false },
+              { label: '몇 시간 투자', top: '33%', right: '4%', transform: 'none', fail: false },
+              { label: '떨리는 업로드', bottom: '14%', right: '12%', transform: 'none', fail: false },
+              { label: '조회수 47회', bottom: '14%', left: '12%', transform: 'none', fail: true },
+              { label: '다시 처음부터', top: '33%', left: '4%', transform: 'none', fail: true },
             ].map((node) => (
               <span
                 key={node.label}
