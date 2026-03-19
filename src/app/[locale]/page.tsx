@@ -210,7 +210,7 @@ function HeroSection() {
                   width: '0', borderLeft: '2px dashed #d4d4d8',
                 }} />
 
-                {['리서치', '기획', '대본', '촬영', '확인', '???'].map((step, i) => (
+                {['채널 뒤지기', '감으로 기획', '대본 6시간', '촬영+편집', '47회...', '뭐가 문제지?'].map((step, i) => (
                   <motion.div
                     key={step}
                     initial={{ opacity: 0, x: -8 }}
@@ -261,13 +261,13 @@ function HeroSection() {
                     fontSize: 'clamp(13px, 3vw, 15px)', color: '#ef4444',
                     fontWeight: 600, marginTop: '4px', ...mono,
                   }}>
-                    6시간+ 소요
+                    6시간+
                   </Text>
                   <Text ta="center" style={{
                     fontSize: 'clamp(13px, 3vw, 15px)', color: '#a1a1aa',
                     fontWeight: 500, marginTop: '6px',
                   }}>
-                    결과: 조회수 47회
+                    그리고 처음부터 다시
                   </Text>
                 </Box>
               </motion.div>
@@ -296,7 +296,7 @@ function HeroSection() {
                   width: '2px', background: '#c4b5fd',
                 }} />
 
-                {['AI 생성', '촬영', '업로드'].map((step, i) => (
+                {['공식 입력', 'AI가 대본 생성', '촬영+업로드'].map((step, i) => (
                   <motion.div
                     key={step}
                     initial={{ opacity: 0, x: -8 }}
@@ -373,7 +373,7 @@ function HeroSection() {
                     fontSize: 'clamp(13px, 3vw, 15px)', color: '#71717a',
                     fontWeight: 500, marginTop: '6px',
                   }}>
-                    검증된 공식 적용
+                    1.5억 조회수 공식
                   </Text>
                 </Box>
               </motion.div>
