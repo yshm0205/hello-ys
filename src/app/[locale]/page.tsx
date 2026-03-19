@@ -96,7 +96,7 @@ function HeroSection() {
         position: 'relative',
         overflow: 'hidden',
         background: '#ffffff',
-        padding: 'clamp(80px, 12vw, 120px) 16px clamp(48px, 8vw, 80px)',
+        padding: 'clamp(80px, 12vw, 120px) 0 clamp(48px, 8vw, 80px)',
       }}
     >
       {/* 다크 히어로 카드 */}
@@ -104,7 +104,7 @@ function HeroSection() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.1, ease }}
-        style={{ width: '100%', maxWidth: '600px' }}
+        style={{ width: '100%', maxWidth: '600px', padding: '0 16px' }}
       >
         <Box style={{
           background: '#18181b',
@@ -186,7 +186,7 @@ function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.6, ease }}
         style={{
-          width: '100vw', marginLeft: 'calc(-50vw + 50%)',
+          width: '100%',
           marginTop: 'clamp(56px, 9vw, 80px)',
           background: '#18181b',
           padding: 'clamp(48px, 8vw, 80px) 16px',
@@ -271,7 +271,7 @@ function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 1.2, ease }}
         style={{
-          width: '100vw', marginLeft: 'calc(-50vw + 50%)',
+          width: '100%',
           background: '#faf5ff',
           padding: 'clamp(48px, 8vw, 80px) 16px',
         }}
@@ -361,7 +361,7 @@ function HeroSection() {
         style={{
           width: '100%', maxWidth: '600px',
           textAlign: 'center',
-          padding: 'clamp(56px, 9vw, 88px) 0',
+          padding: 'clamp(56px, 9vw, 88px) 16px',
         }}
       >
         <Text style={{
