@@ -203,7 +203,7 @@ function HeroSection() {
           >
             {/* 점선 원형 경로 */}
             <circle
-              cx={250} cy={250} r={140}
+              cx={250} cy={250} r={110}
               fill="none" stroke="#d4d4d8"
               strokeWidth={1.8}
               strokeDasharray="10 7"
@@ -219,8 +219,8 @@ function HeroSection() {
             {/* 방향 화살표 (노드 사이 5개) */}
             {[36, 108, 180, 252, 324].map((angle) => {
               const rad = (angle * Math.PI) / 180;
-              const x = 250 + 140 * Math.sin(rad);
-              const y = 250 - 140 * Math.cos(rad);
+              const x = 250 + 110 * Math.sin(rad);
+              const y = 250 - 110 * Math.cos(rad);
               return (
                 <polygon
                   key={angle}
@@ -241,8 +241,8 @@ function HeroSection() {
                 dur="8s"
                 repeatCount="indefinite"
               />
-              <circle cx={250} cy={110} r={5} fill="#ef4444" opacity={0.9} />
-              <circle cx={250} cy={110} r={5} fill="none" stroke="#ef4444" strokeWidth={1.5}>
+              <circle cx={250} cy={140} r={5} fill="#ef4444" opacity={0.9} />
+              <circle cx={250} cy={140} r={5} fill="none" stroke="#ef4444" strokeWidth={1.5}>
                 <animate attributeName="r" values="5;14;5" dur="2s" repeatCount="indefinite" />
                 <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
               </circle>
@@ -250,15 +250,15 @@ function HeroSection() {
 
             {/* 노드: 원 위 점 + 바깥 라벨 (72° 간격) */}
             {[
-              { label: '채널 리서치', angle: 0, fail: false, tx: 250, ty: 72, anchor: 'middle' },
-              { label: '기획', angle: 72, fail: false, tx: 428, ty: 170, anchor: 'start' },
-              { label: '대본 작성', angle: 144, fail: false, tx: 400, ty: 420, anchor: 'start' },
-              { label: '촬영·편집', angle: 216, fail: false, tx: 100, ty: 420, anchor: 'end' },
-              { label: '실패', angle: 288, fail: true, tx: 72, ty: 170, anchor: 'end' },
+              { label: '채널 리서치', angle: 0, fail: false, tx: 250, ty: 62, anchor: 'middle' },
+              { label: '기획', angle: 72, fail: false, tx: 438, ty: 168, anchor: 'start' },
+              { label: '대본 작성', angle: 144, fail: false, tx: 410, ty: 430, anchor: 'start' },
+              { label: '촬영·편집', angle: 216, fail: false, tx: 90, ty: 430, anchor: 'end' },
+              { label: '실패', angle: 288, fail: true, tx: 62, ty: 168, anchor: 'end' },
             ].map((node) => {
               const rad = (node.angle * Math.PI) / 180;
-              const cx = 250 + 140 * Math.sin(rad);
-              const cy = 250 - 140 * Math.cos(rad);
+              const cx = 250 + 110 * Math.sin(rad);
+              const cy = 250 - 110 * Math.cos(rad);
               return (
                 <g key={node.label}>
                   {/* 원 위의 점 */}
@@ -276,21 +276,21 @@ function HeroSection() {
                   />
                   {/* 라벨 배경 */}
                   <rect
-                    x={node.anchor === 'middle' ? node.tx - 52 : node.anchor === 'start' ? node.tx - 6 : node.tx - 98}
-                    y={node.ty - 16}
-                    width={104} height={32} rx={10}
+                    x={node.anchor === 'middle' ? node.tx - 62 : node.anchor === 'start' ? node.tx - 6 : node.tx - 118}
+                    y={node.ty - 20}
+                    width={124} height={40} rx={12}
                     fill={node.fail ? '#fef2f2' : '#ffffff'}
                     stroke={node.fail ? '#fca5a5' : '#e4e4e7'}
                     strokeWidth={1.2}
                   />
                   {/* 라벨 텍스트 */}
                   <text
-                    x={node.anchor === 'middle' ? node.tx : node.anchor === 'start' ? node.tx + 46 : node.tx - 46}
+                    x={node.anchor === 'middle' ? node.tx : node.anchor === 'start' ? node.tx + 56 : node.tx - 56}
                     y={node.ty + 1}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fill={node.fail ? '#ef4444' : '#3f3f46'}
-                    fontSize={15}
+                    fontSize={19}
                     fontWeight={700}
                     style={{ fontFamily: 'inherit' }}
                   >
