@@ -255,13 +255,13 @@ function HeroSection() {
               </g>
             </svg>
 
-            {/* 노드 라벨 — 원 바깥쪽 배치 */}
+            {/* 노드 라벨 — 원 위 정확한 72° 간격 배치 */}
             {[
-              { label: '채널 리서치', top: '-6%', left: '50%', fail: false },
-              { label: '기획', top: '34%', left: '100%', fail: false },
-              { label: '대본 작성', top: '92%', left: '78%', fail: false },
-              { label: '촬영·편집', top: '92%', left: '22%', fail: false },
-              { label: '실패', top: '34%', left: '0%', fail: true },
+              { label: '채널 리서치', top: '12.5%', left: '50%', fail: false },
+              { label: '기획', top: '38.4%', left: '85.7%', fail: false },
+              { label: '대본 작성', top: '80.3%', left: '72%', fail: false },
+              { label: '촬영·편집', top: '80.3%', left: '28%', fail: false },
+              { label: '실패', top: '38.4%', left: '14.3%', fail: true },
             ].map((node, i) => (
               <motion.div
                 key={node.label}
