@@ -240,13 +240,13 @@ function HeroSection() {
               })}
             </svg>
 
-            {/* HTML 라벨들 — CSS 절대 배치, clamp 폰트 */}
+            {/* HTML 라벨들 — 원 노드 바로 옆 배치 */}
             {[
-              { label: '채널 리서치', top: '2%', left: '50%', transform: 'translateX(-50%)', fail: false },
-              { label: '기획', top: '24%', right: '0%', transform: 'none', fail: false },
-              { label: '대본 작성', bottom: '4%', right: '2%', transform: 'none', fail: false },
-              { label: '촬영·편집', bottom: '4%', left: '2%', transform: 'none', fail: false },
-              { label: '실패', top: '24%', left: '0%', transform: 'none', fail: true },
+              { label: '채널 리서치', top: '10%', left: '50%', transform: 'translateX(-50%)', fail: false },
+              { label: '기획', top: '33%', right: '4%', transform: 'none', fail: false },
+              { label: '대본 작성', bottom: '14%', right: '12%', transform: 'none', fail: false },
+              { label: '촬영·편집', bottom: '14%', left: '12%', transform: 'none', fail: false },
+              { label: '실패', top: '33%', left: '4%', transform: 'none', fail: true },
             ].map((node) => (
               <span
                 key={node.label}
