@@ -84,7 +84,6 @@ function useIsMobile(bp = 768) {
    섹션 1: Hero — 다크 카드 블록 (크리투스 스타일)
    ═══════════════════════════════════════════════════════════════ */
 function HeroSection() {
-  const [loopBroken, setLoopBroken] = useState(false);
 
   return (
     <Box
@@ -195,158 +194,106 @@ function HeroSection() {
           {/* 원형 루프 시각화 */}
           <Box style={{
             position: 'relative',
-            width: 'clamp(280px, 72vw, 380px)',
+            width: 'clamp(300px, 80vw, 420px)',
             aspectRatio: '1 / 1',
             margin: '0 auto',
           }}>
-            {/* --- 루프 원형 (loopBroken 시 fade out) --- */}
-            <motion.div
-              animate={{ opacity: loopBroken ? 0 : 1, scale: loopBroken ? 0.85 : 1 }}
-              transition={{ duration: 0.8, ease }}
-              style={{ position: 'absolute', inset: 0 }}
-            >
-              <svg
-                viewBox="0 0 400 400"
-                style={{
-                  position: 'absolute', inset: 0,
-                  width: '100%', height: '100%',
-                  overflow: 'visible',
-                }}
-              >
-                {/* 점선 원형 경로 */}
-                <circle
-                  cx={200} cy={200} r={150}
-                  fill="none" stroke="#d4d4d8"
-                  strokeWidth={2}
-                  strokeDasharray="12 8"
-                >
-                  <animate
-                    attributeName="stroke-dashoffset"
-                    from="0" to="-60"
-                    dur="3s"
-                    repeatCount="indefinite"
-                  />
-                </circle>
-
-                {/* 방향 화살표 (노드 사이 5개) */}
-                {[36, 108, 180, 252, 324].map((angle) => {
-                  const rad = (angle * Math.PI) / 180;
-                  const x = 200 + 150 * Math.sin(rad);
-                  const y = 200 - 150 * Math.cos(rad);
-                  return (
-                    <polygon
-                      key={angle}
-                      points="0,-5 4,3 -4,3"
-                      fill="#a1a1aa"
-                      transform={`translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${angle + 90})`}
-                    />
-                  );
-                })}
-
-                {/* 궤도를 도는 빨간 점 */}
-                <g>
-                  <animateTransform
-                    attributeName="transform"
-                    type="rotate"
-                    from="0 200 200"
-                    to="360 200 200"
-                    dur="8s"
-                    repeatCount="indefinite"
-                  />
-                  <circle cx={200} cy={50} r={5} fill="#ef4444" opacity={0.9} />
-                  <circle cx={200} cy={50} r={5} fill="none" stroke="#ef4444" strokeWidth={1}>
-                    <animate attributeName="r" values="5;14;5" dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                </g>
-              </svg>
-
-              {/* 노드 라벨 */}
-              {[
-                { label: '채널 리서치', top: '6%', left: '50%', fail: false },
-                { label: '기획', top: '36%', left: '91%', fail: false },
-                { label: '대본 작성', top: '82%', left: '77%', fail: false },
-                { label: '촬영·편집', top: '82%', left: '23%', fail: false },
-                { label: '실패', top: '36%', left: '9%', fail: true },
-              ].map((node, i) => (
-                <motion.div
-                  key={node.label}
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.8 + i * 0.08, ease }}
-                  style={{
-                    position: 'absolute',
-                    top: node.top, left: node.left,
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 2,
-                  }}
-                >
-                  <Box style={{
-                    background: node.fail ? '#fef2f2' : '#ffffff',
-                    border: `1.5px solid ${node.fail ? '#fca5a5' : '#d4d4d8'}`,
-                    borderRadius: '10px',
-                    padding: 'clamp(5px, 1.5vw, 8px) clamp(10px, 3vw, 16px)',
-                    whiteSpace: 'nowrap',
-                    boxShadow: node.fail
-                      ? '0 2px 8px rgba(239,68,68,0.15)'
-                      : '0 1px 4px rgba(0,0,0,0.06)',
-                  }}>
-                    <Text style={{
-                      fontSize: 'clamp(13px, 3.5vw, 16px)',
-                      fontWeight: 600,
-                      color: node.fail ? '#ef4444' : '#52525b',
-                    }}>
-                      {node.label}
-                    </Text>
-                  </Box>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* --- "탁 끊어짐" 후 직선 화살표 (loopBroken 시 fade in) --- */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: loopBroken ? 1 : 0 }}
-              transition={{ duration: 0.6, delay: loopBroken ? 0.5 : 0, ease }}
+            <svg
+              viewBox="0 0 400 400"
               style={{
                 position: 'absolute', inset: 0,
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                pointerEvents: loopBroken ? 'auto' : 'none',
+                width: '100%', height: '100%',
+                overflow: 'visible',
               }}
             >
-              <svg viewBox="0 0 400 400" style={{ width: '100%', height: '100%' }}>
-                {/* 직선 화살표 — 위에서 아래로 */}
-                <motion.line
-                  x1={200} y1={60} x2={200} y2={320}
-                  stroke="#8b5cf6" strokeWidth={3} strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: loopBroken ? 1 : 0 }}
-                  transition={{ duration: 0.8, delay: 0.6, ease }}
+              {/* 점선 원형 경로 */}
+              <circle
+                cx={200} cy={200} r={150}
+                fill="none" stroke="#d4d4d8"
+                strokeWidth={2}
+                strokeDasharray="12 8"
+              >
+                <animate
+                  attributeName="stroke-dashoffset"
+                  from="0" to="-60"
+                  dur="3s"
+                  repeatCount="indefinite"
                 />
-                {/* 화살표 머리 */}
-                <motion.polygon
-                  points="200,340 190,315 210,315"
-                  fill="#8b5cf6"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: loopBroken ? 1 : 0, y: loopBroken ? 0 : -10 }}
-                  transition={{ duration: 0.4, delay: 1.3, ease }}
+              </circle>
+
+              {/* 방향 화살표 (노드 사이 5개) */}
+              {[36, 108, 180, 252, 324].map((angle) => {
+                const rad = (angle * Math.PI) / 180;
+                const x = 200 + 150 * Math.sin(rad);
+                const y = 200 - 150 * Math.cos(rad);
+                return (
+                  <polygon
+                    key={angle}
+                    points="0,-6 5,4 -5,4"
+                    fill="#a1a1aa"
+                    transform={`translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${angle + 90})`}
+                  />
+                );
+              })}
+
+              {/* 궤도를 도는 빨간 점 */}
+              <g>
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from="0 200 200"
+                  to="360 200 200"
+                  dur="8s"
+                  repeatCount="indefinite"
                 />
-                {/* "최단거리" 라벨 */}
-                <motion.text
-                  x={200} y={200}
-                  textAnchor="middle"
-                  fill="#8b5cf6"
-                  fontSize={16}
-                  fontWeight={700}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: loopBroken ? 1 : 0 }}
-                  transition={{ duration: 0.5, delay: 1.5, ease }}
-                >
-                  최단거리
-                </motion.text>
-              </svg>
-            </motion.div>
+                <circle cx={200} cy={50} r={6} fill="#ef4444" opacity={0.9} />
+                <circle cx={200} cy={50} r={6} fill="none" stroke="#ef4444" strokeWidth={1.5}>
+                  <animate attributeName="r" values="6;16;6" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+            </svg>
+
+            {/* 노드 라벨 */}
+            {[
+              { label: '채널 리서치', top: '4%', left: '50%', fail: false },
+              { label: '기획', top: '35%', left: '93%', fail: false },
+              { label: '대본 작성', top: '83%', left: '79%', fail: false },
+              { label: '촬영·편집', top: '83%', left: '21%', fail: false },
+              { label: '실패', top: '35%', left: '7%', fail: true },
+            ].map((node, i) => (
+              <motion.div
+                key={node.label}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.8 + i * 0.08, ease }}
+                style={{
+                  position: 'absolute',
+                  top: node.top, left: node.left,
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 2,
+                }}
+              >
+                <Box style={{
+                  background: node.fail ? '#fef2f2' : '#ffffff',
+                  border: `1.5px solid ${node.fail ? '#fca5a5' : '#d4d4d8'}`,
+                  borderRadius: '12px',
+                  padding: 'clamp(6px, 2vw, 10px) clamp(12px, 3.5vw, 18px)',
+                  whiteSpace: 'nowrap',
+                  boxShadow: node.fail
+                    ? '0 2px 8px rgba(239,68,68,0.15)'
+                    : '0 1px 4px rgba(0,0,0,0.06)',
+                }}>
+                  <Text style={{
+                    fontSize: 'clamp(14px, 3.8vw, 17px)',
+                    fontWeight: 700,
+                    color: node.fail ? '#ef4444' : '#3f3f46',
+                  }}>
+                    {node.label}
+                  </Text>
+                </Box>
+              </motion.div>
+            ))}
           </Box>
 
           {/* Todd Brown Copy 1 */}
@@ -354,70 +301,72 @@ function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.4, ease }}
-            onViewportEnter={() => setTimeout(() => setLoopBroken(true), 2000)}
-            viewport={{ once: true }}
             style={{ marginTop: 'clamp(24px, 5vw, 40px)', textAlign: 'center' }}
           >
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 6vw, 48px)',
-              fontWeight: 800, color: '#18181b',
-              lineHeight: 1.3, letterSpacing: '-0.02em',
+              fontSize: 'clamp(30px, 8vw, 52px)',
+              fontWeight: 900, color: '#18181b',
+              lineHeight: 1.25, letterSpacing: '-0.03em',
             }}>
-              혹시 지금도 이 무한 루프 속에
+              혹시 지금도
+              <br />
+              이 무한 루프 속에
               <br />
               갇혀 계신가요?
             </Title>
 
             <Text ta="center" style={{
-              fontSize: 'clamp(17px, 4vw, 20px)',
+              fontSize: 'clamp(18px, 4.5vw, 22px)',
               color: '#52525b', lineHeight: 1.8,
-              marginTop: 'clamp(16px, 3vw, 24px)',
+              marginTop: 'clamp(20px, 4vw, 32px)',
               maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto',
             }}>
               수십 시간을 쏟아부어도 매번 제자리인 이유,
               <br />
-              당신의 노력이 부족해서가 아닙니다.
+              <strong style={{ color: '#18181b' }}>당신의 노력이 부족해서가 아닙니다.</strong>
             </Text>
 
             <Text ta="center" style={{
-              fontSize: 'clamp(17px, 4vw, 20px)',
+              fontSize: 'clamp(18px, 4.5vw, 22px)',
               color: '#52525b', lineHeight: 1.8,
-              marginTop: 'clamp(12px, 2vw, 16px)',
+              marginTop: 'clamp(16px, 3vw, 24px)',
               maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto',
             }}>
               이 잔인한 루프를 단숨에 끊어낼
               <br />
-              <span style={{ color: '#8b5cf6', fontWeight: 700 }}>
+              <span style={{ color: '#8b5cf6', fontWeight: 800, fontSize: 'clamp(20px, 5vw, 26px)' }}>
                 &lsquo;검증된 쇼츠 공식&rsquo;
-              </span>이 없었을 뿐입니다.
+              </span>
+              <br />이 없었을 뿐입니다.
             </Text>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1.8, ease }}
-              style={{ marginTop: 'clamp(28px, 5vw, 40px)' }}
+              style={{ marginTop: 'clamp(32px, 6vw, 48px)' }}
             >
               <Box style={{
                 display: 'inline-block',
-                padding: '14px 28px',
+                padding: '16px 32px',
                 background: '#f5f3ff',
                 borderRadius: '16px',
                 border: '1px solid #ede9fe',
               }}>
                 <Text ta="center" style={{
-                  fontSize: 'clamp(17px, 4vw, 20px)',
+                  fontSize: 'clamp(17px, 4.5vw, 22px)',
                   fontWeight: 700, color: '#8b5cf6',
                   lineHeight: 1.5,
                 }}>
-                  이제, 최단거리로 빠져나오는 길을 보여드리겠습니다
+                  이제, 최단거리로 빠져나오는
+                  <br />길을 보여드리겠습니다
                 </Text>
                 <motion.div
                   animate={{ y: [0, 6, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                   style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}
                 >
-                  <ChevronDown size={20} color="#8b5cf6" />
+                  <ChevronDown size={24} color="#8b5cf6" />
                 </motion.div>
               </Box>
             </motion.div>
