@@ -132,9 +132,8 @@ function HeroSection() {
             {/* 구성요소 나열 */}
             <Text ta="center" style={{
               color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(17px, 4vw, 20px)',
-              fontWeight: 600, letterSpacing: '0.04em',
+              fontWeight: 600, letterSpacing: '0.02em',
               marginBottom: 'clamp(20px, 4vw, 28px)',
-              ...mono,
             }}>
               VOD강의 + 매달 트렌드 채널 데이터 + 전자책 + AI 스크립트 도구
             </Text>
@@ -200,8 +199,8 @@ function HeroSection() {
           >
             <Text ta="center" style={{
               fontSize: 'clamp(18px, 4vw, 22px)', color: '#71717a',
-              fontWeight: 600, letterSpacing: '0.1em',
-              marginBottom: 'clamp(32px, 6vw, 48px)', ...mono,
+              fontWeight: 600, letterSpacing: '0.04em',
+              marginBottom: 'clamp(32px, 6vw, 48px)',
             }}>
               돌아가는 길
             </Text>
@@ -257,7 +256,7 @@ function HeroSection() {
           >
             <Text style={{
               fontSize: 'clamp(16px, 3vw, 20px)', color: '#ef4444',
-              fontWeight: 800, ...mono,
+              fontWeight: 800,
             }}>
               ↩ 처음부터 다시
             </Text>
@@ -284,8 +283,8 @@ function HeroSection() {
           >
             <Text ta="center" style={{
               fontSize: 'clamp(18px, 4vw, 22px)', color: '#8b5cf6',
-              fontWeight: 700, letterSpacing: '0.1em',
-              marginBottom: 'clamp(32px, 6vw, 48px)', ...mono,
+              fontWeight: 700, letterSpacing: '0.04em',
+              marginBottom: 'clamp(32px, 6vw, 48px)',
             }}>
               최단거리
             </Text>
@@ -379,7 +378,7 @@ function HeroSection() {
         </Title>
         <Text style={{
           fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#a1a1aa',
-          marginTop: '12px', marginBottom: 'clamp(48px, 8vw, 72px)', ...mono,
+          marginTop: '12px', marginBottom: 'clamp(48px, 8vw, 72px)',
         }}>
           (수강생 성과 제외)
         </Text>
@@ -582,7 +581,7 @@ function WhyFlowSpotSection() {
                   </Text>
                 </Box>
                 <Text style={{
-                  ...mono, fontSize: 'clamp(11px, 1.5vw, 12px)',
+                  fontSize: 'clamp(12px, 2vw, 13px)',
                   color: '#a1a1aa', flexShrink: 0,
                 }}>
                   수익 캡처
