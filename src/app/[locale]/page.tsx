@@ -358,8 +358,8 @@ function HeroSection() {
                   fontWeight: 700, color: '#8b5cf6',
                   lineHeight: 1.5,
                 }}>
-                  이제, 최단거리로 빠져나오는
-                  <br />길을 보여드리겠습니다
+                  혹시 내가 시간 낭비하고
+                  <br />있진 않았는지 확인해보세요
                 </Text>
                 <motion.div
                   animate={{ y: [0, 6, 0] }}
