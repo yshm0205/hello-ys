@@ -317,7 +317,7 @@ function HeroSection() {
               color: '#71717a', lineHeight: 1.8,
               marginTop: 'clamp(40px, 8vw, 64px)',
             }}>
-              이 잔인한 루프를 단숨에 끊어낼
+              이 끝없는 악순환을 끊어줄
             </Text>
 
             {/* 임팩트 강조 — 40px급 */}
@@ -410,15 +410,17 @@ function PainSection() {
             color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
             marginBottom: 'clamp(36px, 7vw, 64px)',
           }}>
-            그런데 대부분은 이 길을{' '}
+            이 3가지 중 하나라도 해당되면,
+            <br />
+            지금{' '}
             <span style={{
               color: '#ef4444', textDecoration: 'underline',
               textDecorationColor: 'rgba(239,68,68,0.25)',
               textUnderlineOffset: '6px', textDecorationThickness: '3px',
             }}>
-              돌아가고
+              돌아가는 중
             </span>
-            {' '}있습니다
+            입니다
           </Title>
         </motion.div>
 
