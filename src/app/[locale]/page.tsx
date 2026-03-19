@@ -250,11 +250,11 @@ function HeroSection() {
 
             {/* 노드: 원 위 점 + 바깥 라벨 (72° 간격) */}
             {[
-              { label: '채널 리서치', angle: 0, fail: false, tx: 250, ty: 62, anchor: 'middle' },
-              { label: '기획', angle: 72, fail: false, tx: 438, ty: 168, anchor: 'start' },
-              { label: '대본 작성', angle: 144, fail: false, tx: 410, ty: 430, anchor: 'start' },
-              { label: '촬영·편집', angle: 216, fail: false, tx: 90, ty: 430, anchor: 'end' },
-              { label: '실패', angle: 288, fail: true, tx: 62, ty: 168, anchor: 'end' },
+              { label: '채널 리서치', angle: 0, fail: false, tx: 250, ty: 52, anchor: 'middle' },
+              { label: '기획', angle: 72, fail: false, tx: 448, ty: 168, anchor: 'start' },
+              { label: '대본 작성', angle: 144, fail: false, tx: 420, ty: 440, anchor: 'start' },
+              { label: '촬영·편집', angle: 216, fail: false, tx: 80, ty: 440, anchor: 'end' },
+              { label: '실패', angle: 288, fail: true, tx: 52, ty: 168, anchor: 'end' },
             ].map((node) => {
               const rad = (node.angle * Math.PI) / 180;
               const cx = 250 + 110 * Math.sin(rad);
@@ -276,21 +276,21 @@ function HeroSection() {
                   />
                   {/* 라벨 배경 */}
                   <rect
-                    x={node.anchor === 'middle' ? node.tx - 62 : node.anchor === 'start' ? node.tx - 6 : node.tx - 118}
-                    y={node.ty - 20}
-                    width={124} height={40} rx={12}
+                    x={node.anchor === 'middle' ? node.tx - 72 : node.anchor === 'start' ? node.tx - 6 : node.tx - 138}
+                    y={node.ty - 22}
+                    width={144} height={44} rx={12}
                     fill={node.fail ? '#fef2f2' : '#ffffff'}
                     stroke={node.fail ? '#fca5a5' : '#e4e4e7'}
                     strokeWidth={1.2}
                   />
                   {/* 라벨 텍스트 */}
                   <text
-                    x={node.anchor === 'middle' ? node.tx : node.anchor === 'start' ? node.tx + 56 : node.tx - 56}
+                    x={node.anchor === 'middle' ? node.tx : node.anchor === 'start' ? node.tx + 66 : node.tx - 66}
                     y={node.ty + 1}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     fill={node.fail ? '#ef4444' : '#3f3f46'}
-                    fontSize={19}
+                    fontSize={24}
                     fontWeight={700}
                     style={{ fontFamily: 'inherit' }}
                   >
