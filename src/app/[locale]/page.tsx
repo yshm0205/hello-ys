@@ -437,7 +437,7 @@ function PainSection() {
             marginTop: 'clamp(12px, 3vw, 20px)',
             letterSpacing: '-0.02em',
           }}>
-            &lsquo;검증된 쇼츠 공식&rsquo;
+            &lsquo;최단거리&rsquo;
           </Text>
 
           <Text ta="center" style={{
@@ -465,8 +465,8 @@ function PainSection() {
             fontWeight: 800, color: '#8b5cf6',
             lineHeight: 1.4,
           }}>
-            이 루프를 탈출할 최단거리를
-            <br />지금부터 알려드릴게요
+            이 최단거리,
+            <br />하루 아침에 찾은 게 아닙니다
           </Text>
           <motion.div
             animate={{ y: [0, 6, 0] }}
@@ -489,7 +489,7 @@ function PainSection() {
             fontSize: 'clamp(24px, 6.5vw, 34px)',
             fontWeight: 600, color: '#52525b', lineHeight: 1.5,
           }}>
-            사실 저도
+            저도
           </Text>
 
           <Text ta="center" style={{
