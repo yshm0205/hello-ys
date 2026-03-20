@@ -425,7 +425,7 @@ function PainSection() {
             fontSize: 'clamp(30px, 8vw, 48px)',
             fontWeight: 900, color: '#18181b',
             lineHeight: 1.25, letterSpacing: '-0.02em',
-            marginTop: 'clamp(12px, 3vw, 20px)',
+            marginTop: 'clamp(32px, 6vw, 48px)',
           }}>
             다만 그 &lsquo;천천히&rsquo;가
             <br />1년이 될 수도, 4년이 될 수도 있습니다.
@@ -435,7 +435,7 @@ function PainSection() {
             fontSize: 'clamp(26px, 7vw, 38px)',
             fontWeight: 800, color: '#8b5cf6',
             lineHeight: 1.3,
-            marginTop: 'clamp(40px, 8vw, 64px)',
+            marginTop: 'clamp(56px, 12vw, 96px)',
             letterSpacing: '-0.02em',
             textShadow: '0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(139,92,246,0.1)',
           }}>
@@ -451,7 +451,7 @@ function PainSection() {
           transition={{ duration: 0.5, ease }}
           style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            marginTop: 'clamp(56px, 12vw, 96px)',
+            marginTop: 'clamp(72px, 15vw, 120px)',
           }}
         >
           <Text ta="center" style={{
