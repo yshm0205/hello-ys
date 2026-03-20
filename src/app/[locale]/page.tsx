@@ -712,16 +712,13 @@ function PainSection() {
           </Text>
         </motion.div>
 
-        {/* 수강생 후기 — 통합 */}
-        <Stack gap={48} style={{ maxWidth: '400px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
+        {/* 수강생 후기 — 성과 인증 */}
+        <Stack gap={40} style={{ maxWidth: '400px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
           {[
             { src: '/images/reviews/review_1_revenue.png', caption: '월 1,356만 수익 달성', alt: '수강생 성과 — 월 1356만 수익' },
             { src: '/images/reviews/review_3_kakao.png', caption: '월 700만 수익', alt: '수강생 성과 — 월 700만 수익' },
             { src: '/images/reviews/review_7_kakao.png', caption: '구독자 1,000명 돌파', alt: '수강생 성과 — 구독자 1000 달성' },
             { src: '/images/reviews/review_6_youtube.png', caption: '조회수 폭발', alt: '수강생 성과 — 조회수 폭발' },
-            { src: '/images/reviews/comment_osy.png', caption: '"300만원 유료강의보다 낫습니다"', alt: '수강생 후기 — 유료강의급' },
-            { src: '/images/reviews/review_4_kakao.png', caption: '"드디어 제대로 된 길을 찾았다"', alt: '수강생 후기 — 방향 발견' },
-            { src: '/images/reviews/comment_comfort.png', caption: '"귀인을 만난 기분입니다"', alt: '수강생 후기 — 귀인' },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -730,20 +727,75 @@ function PainSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.06, ease }}
             >
+              <Group gap={10} align="center" mb={12} justify="center" wrap="nowrap">
+                <Box style={{
+                  flexShrink: 0, width: 22, height: 22, borderRadius: '50%',
+                  background: '#22c55e',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Check size={13} color="#ffffff" strokeWidth={3} />
+                </Box>
+                <Text style={{
+                  fontSize: 'clamp(16px, 4.2vw, 20px)',
+                  fontWeight: 800, color: 'rgba(255,255,255,0.7)',
+                  ...mono,
+                }}>
+                  {item.caption}
+                </Text>
+              </Group>
+              <Box
+                onClick={() => setLightboxSrc(item.src)}
+                style={{
+                  borderRadius: '12px', overflow: 'hidden',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+                  cursor: 'zoom-in',
+                  position: 'relative',
+                }}
+              >
+                <img src={item.src} alt={item.alt} style={{ width: '100%', display: 'block' }} />
+                {i === 0 && (
+                  <Text style={{
+                    position: 'absolute', bottom: '10px', right: '12px',
+                    fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)',
+                    background: 'rgba(0,0,0,0.5)', borderRadius: '4px',
+                    padding: '3px 8px',
+                  }}>
+                    탭하여 확대
+                  </Text>
+                )}
+              </Box>
+            </motion.div>
+          ))}
+        </Stack>
+
+        {/* 수강생 후기 — 감성 후기 */}
+        <Stack gap={40} style={{ maxWidth: '400px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
+          {[
+            { src: '/images/reviews/comment_osy.png', caption: '300만원 유료강의보다 낫습니다', alt: '수강생 후기 — 유료강의급' },
+            { src: '/images/reviews/review_4_kakao.png', caption: '드디어 제대로 된 길을 찾았다', alt: '수강생 후기 — 방향 발견' },
+            { src: '/images/reviews/comment_comfort.png', caption: '귀인을 만난 기분입니다', alt: '수강생 후기 — 귀인' },
+          ].map((item, i) => (
+            <motion.div
+              key={`voice-${i}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.06, ease }}
+            >
               <Text ta="center" style={{
-                fontSize: 'clamp(15px, 3.8vw, 19px)',
-                fontWeight: 700,
-                color: i < 4 ? 'rgba(255,255,255,0.45)' : 'rgba(167,139,250,0.6)',
+                fontSize: 'clamp(16px, 4.2vw, 20px)',
+                fontWeight: 700, color: 'rgba(167,139,250,0.7)',
                 marginBottom: '12px',
-                letterSpacing: '-0.01em',
+                lineHeight: 1.4,
               }}>
-                {item.caption}
+                &ldquo;{item.caption}&rdquo;
               </Text>
               <Box
                 onClick={() => setLightboxSrc(item.src)}
                 style={{
                   borderRadius: '12px', overflow: 'hidden',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+                  border: '1px solid rgba(167,139,250,0.15)',
                   cursor: 'zoom-in',
                 }}
               >
