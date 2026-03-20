@@ -292,40 +292,41 @@ function HeroSection() {
               갇혀 계신가요?
             </Title>
 
-            {/* 서브 텍스트 — 16px급, 넉넉한 여백 */}
+            {/* 서브 텍스트 */}
             <Text ta="center" style={{
-              fontSize: 'clamp(16px, 4vw, 20px)',
-              color: '#71717a', lineHeight: 1.8,
-              marginTop: 'clamp(36px, 7vw, 56px)',
+              fontSize: 'clamp(20px, 5.5vw, 28px)',
+              fontWeight: 600, color: '#52525b', lineHeight: 1.6,
+              marginTop: 'clamp(48px, 10vw, 80px)',
             }}>
               수십 시간을 쏟아부어도 매번 제자리인 이유,
             </Text>
 
-            {/* 중간 제목 — 24px급 */}
+            {/* 임팩트 */}
             <Text ta="center" style={{
-              fontSize: 'clamp(22px, 6vw, 32px)',
-              fontWeight: 800, color: '#18181b',
-              lineHeight: 1.4,
-              marginTop: 'clamp(8px, 2vw, 12px)',
+              fontSize: 'clamp(28px, 7.5vw, 44px)',
+              fontWeight: 900, color: '#18181b',
+              lineHeight: 1.25, letterSpacing: '-0.02em',
+              marginTop: 'clamp(12px, 3vw, 20px)',
             }}>
-              당신의 노력이 부족해서가 아닙니다.
+              당신의 노력이 부족해서가
+              <br />아닙니다.
             </Text>
 
             {/* 서브 텍스트 */}
             <Text ta="center" style={{
-              fontSize: 'clamp(16px, 4vw, 20px)',
-              color: '#71717a', lineHeight: 1.8,
-              marginTop: 'clamp(40px, 8vw, 64px)',
+              fontSize: 'clamp(20px, 5.5vw, 28px)',
+              fontWeight: 600, color: '#52525b', lineHeight: 1.6,
+              marginTop: 'clamp(56px, 12vw, 96px)',
             }}>
               이 끝없는 악순환을 끊어줄
             </Text>
 
-            {/* 임팩트 강조 — 40px급 */}
+            {/* 임팩트 강조 */}
             <Text ta="center" style={{
               fontSize: 'clamp(34px, 9vw, 52px)',
               fontWeight: 900, color: '#8b5cf6',
               lineHeight: 1.2,
-              marginTop: 'clamp(8px, 2vw, 12px)',
+              marginTop: 'clamp(12px, 3vw, 20px)',
               letterSpacing: '-0.02em',
             }}>
               &lsquo;검증된 쇼츠 공식&rsquo;
@@ -333,9 +334,9 @@ function HeroSection() {
 
             {/* 서브 텍스트 */}
             <Text ta="center" style={{
-              fontSize: 'clamp(16px, 4vw, 20px)',
-              color: '#71717a', lineHeight: 1.8,
-              marginTop: 'clamp(8px, 2vw, 12px)',
+              fontSize: 'clamp(20px, 5.5vw, 28px)',
+              fontWeight: 600, color: '#52525b', lineHeight: 1.6,
+              marginTop: 'clamp(12px, 3vw, 20px)',
             }}>
               이 없었을 뿐입니다.
             </Text>
@@ -348,15 +349,15 @@ function HeroSection() {
             >
               <Box style={{
                 display: 'inline-block',
-                padding: '20px 36px',
+                padding: 'clamp(24px, 5vw, 36px) clamp(32px, 6vw, 48px)',
                 background: '#f5f3ff',
-                borderRadius: '16px',
+                borderRadius: '20px',
                 border: '1px solid #ede9fe',
               }}>
                 <Text ta="center" style={{
-                  fontSize: 'clamp(18px, 4.5vw, 22px)',
-                  fontWeight: 700, color: '#8b5cf6',
-                  lineHeight: 1.5,
+                  fontSize: 'clamp(22px, 5.5vw, 28px)',
+                  fontWeight: 800, color: '#8b5cf6',
+                  lineHeight: 1.4,
                 }}>
                   혹시 내가 시간 낭비하고
                   <br />있진 않았는지 확인해보세요
