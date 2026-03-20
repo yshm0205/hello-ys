@@ -587,32 +587,12 @@ function PainSection() {
           </Text>
         </motion.div>
 
-        {/* 성과 카드들 — 체크 + 헤드라인 + 스크린샷 */}
+        {/* 성과 카드들 — 체크 + 수익 + 스크린샷 */}
         <Stack gap={48} style={{ maxWidth: '560px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
-            {
-              headline: '지식/정보 채널, 주 4시간 투자로\n수익창출 달성',
-              src: '/images/success-ch-a.png',
-            },
-            {
-              headline: '해외반응 채널, 연 2,375만 조회\n수익 923만원 돌파',
-              src: '/images/success-ch-c.png',
-            },
-            {
-              headline: '게임 채널, 연 5,937만 조회\n수익 1,567만원 돌파',
-              src: '/images/success-ch-b.png',
-            },
-            {
-              headline: '네이버 클립 누적 수익\n1,128만원 달성',
-              src: '/images/success-naver-clip.png',
-              lightBg: true,
-            },
-            {
-              headline: '현재 네이버 클립\n월 80~240만원 꾸준 수익 중',
-              src: '/images/success-naver-revenue.jpg',
-              lightBg: true,
-              portrait: true,
-            },
+            { headline: '채널A 지식/정보 — 수익 159만원', src: '/images/success-ch-a.png' },
+            { headline: '채널B 해외반응 — 수익 923만원', src: '/images/success-ch-c.png' },
+            { headline: '채널C 게임 — 수익 1,567만원', src: '/images/success-ch-b.png' },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -621,40 +601,73 @@ function PainSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1, ease }}
             >
-              {/* 체크 + 헤드라인 */}
-              <Group gap={12} align="flex-start" mb={16} wrap="nowrap">
+              <Group gap={12} align="center" mb={16} wrap="nowrap">
                 <Box style={{
                   flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
                   background: '#22c55e',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginTop: '2px',
                 }}>
                   <Check size={16} color="#ffffff" strokeWidth={3} />
                 </Box>
                 <Text style={{
                   fontSize: 'clamp(18px, 4.5vw, 22px)',
-                  fontWeight: 700, color: '#ffffff',
-                  lineHeight: 1.4, whiteSpace: 'pre-line',
+                  fontWeight: 700, color: '#ffffff', lineHeight: 1.4,
                 }}>
                   {item.headline}
                 </Text>
               </Group>
-              {/* 스크린샷 */}
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                ...(item.lightBg ? { background: '#ffffff' } : {}),
-                ...(item.portrait ? { maxWidth: '300px', margin: '0 auto' } : {}),
               }}>
-                <img
-                  src={item.src}
-                  alt={item.headline}
-                  style={{ width: '100%', display: 'block' }}
-                />
+                <img src={item.src} alt={item.headline} style={{ width: '100%', display: 'block' }} />
               </Box>
             </motion.div>
           ))}
+
+          {/* 네이버 클립 — 2개 합산 1,128만원 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1, ease }}
+          >
+            <Group gap={12} align="center" mb={16} wrap="nowrap">
+              <Box style={{
+                flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+                background: '#22c55e',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Check size={16} color="#ffffff" strokeWidth={3} />
+              </Box>
+              <Text style={{
+                fontSize: 'clamp(18px, 4.5vw, 22px)',
+                fontWeight: 700, color: '#ffffff', lineHeight: 1.4,
+              }}>
+                네이버 클립 — 수익 1,128만원
+              </Text>
+            </Group>
+            <Stack gap={16}>
+              <Box style={{
+                borderRadius: '12px', overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                background: '#ffffff',
+              }}>
+                <img src="/images/success-naver-clip.png" alt="네이버 클립 수익" style={{ width: '100%', display: 'block' }} />
+              </Box>
+              <Box style={{
+                borderRadius: '12px', overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                background: '#ffffff',
+                maxWidth: '300px', margin: '0 auto',
+              }}>
+                <img src="/images/success-naver-revenue.jpg" alt="네이버 클립 월별 수익" style={{ width: '100%', display: 'block' }} />
+              </Box>
+            </Stack>
+          </motion.div>
         </Stack>
 
         {/* 공식 발견 브릿지 */}
