@@ -391,7 +391,7 @@ function PainSection() {
     },
     {
       num: '02', title: '강의 들어봤는데',
-      desc: '수십만 원 썼는데', metric: '돌아온 건 "노력 부족"',
+      desc: '돈만 많이 받고 알맹이는 없고', metric: '"이번 강의는 다르겠지..." (또 결제)',
       accent: '#f59e0b', bg: '#fffbeb', border: '#fde68a',
     },
     {
