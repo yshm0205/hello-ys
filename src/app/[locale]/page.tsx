@@ -399,7 +399,11 @@ function PainSection() {
     </Box>
 
     {/* Todd Brown 위로 + 브릿지 — 보라 틴트 */}
-    <Box style={{ background: '#faf5ff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
+    <Box style={{
+      background: 'radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.08) 0%, rgba(139,92,246,0.03) 40%, #faf5ff 70%)',
+      padding: 'clamp(60px, 10vw, 120px) 0',
+      position: 'relative',
+    }}>
       <Container size="lg">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -440,6 +444,7 @@ function PainSection() {
             lineHeight: 1.2,
             marginTop: 'clamp(12px, 3vw, 20px)',
             letterSpacing: '-0.02em',
+            textShadow: '0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(139,92,246,0.1)',
           }}>
             &lsquo;최단거리&rsquo;
           </Text>
@@ -483,7 +488,11 @@ function PainSection() {
     </Box>
 
     {/* 파운더 스토리 — 실패 증거 */}
-    <Box style={{ background: '#f9fafb', padding: 'clamp(60px, 10vw, 120px) 0' }}>
+    <Box style={{
+      background: 'linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%)',
+      padding: 'clamp(60px, 10vw, 120px) 0',
+      borderTop: '1px solid #e5e7eb',
+    }}>
       <Container size="lg">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -531,14 +540,22 @@ function PainSection() {
               >
                 <Box style={{
                   borderRadius: '12px', overflow: 'hidden',
-                  border: '1px solid #e4e4e7',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  border: '2px solid #fecaca',
+                  boxShadow: '0 4px 20px rgba(239,68,68,0.1), 0 2px 8px rgba(0,0,0,0.06)',
+                  position: 'relative',
                 }}>
                   <img
                     src={img.src}
                     alt={img.caption}
                     style={{ width: '100%', display: 'block' }}
                   />
+                  {/* 실패 오버레이 그래디언트 */}
+                  <Box style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                    height: '40%',
+                    background: 'linear-gradient(transparent, rgba(239,68,68,0.06))',
+                    pointerEvents: 'none',
+                  }} />
                 </Box>
                 <Text ta="center" style={{
                   fontSize: 'clamp(14px, 3.5vw, 16px)',
