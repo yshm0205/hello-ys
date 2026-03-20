@@ -554,19 +554,11 @@ function PainSection() {
       <Container size="lg">
         {/* 전환 멘트 */}
         <motion.div {...fadeUp} style={{ textAlign: 'center' }}>
-          <Text ta="center" style={{
-            fontSize: 'clamp(24px, 6.5vw, 34px)',
-            fontWeight: 600, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5,
-          }}>
-            하지만 포기 대신,
-          </Text>
-
           {/* 하.지.만 극적 전환 */}
           <Text ta="center" style={{
             fontSize: 'clamp(36px, 9vw, 56px)',
             fontWeight: 900, color: '#a78bfa',
             lineHeight: 1.2, letterSpacing: '0.15em',
-            marginTop: 'clamp(56px, 12vw, 96px)',
           }}>
             하 . 지 . 만
           </Text>
