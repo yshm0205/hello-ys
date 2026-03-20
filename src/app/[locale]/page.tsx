@@ -322,6 +322,7 @@ function PainSection() {
   ];
 
   return (
+    <>
     <Box component="section" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
       <Container size="lg">
         {/* 제목 — 갇혀 계신 거예요 */}
@@ -394,8 +395,12 @@ function PainSection() {
             </motion.div>
           ))}
         </Stack>
+      </Container>
+    </Box>
 
-        {/* Todd Brown 위로 */}
+    {/* Todd Brown 위로 + 브릿지 — 보라 틴트 */}
+    <Box style={{ background: '#faf5ff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
+      <Container size="lg">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -406,7 +411,6 @@ function PainSection() {
           <Text ta="center" style={{
             fontSize: 'clamp(24px, 6.5vw, 34px)',
             fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-            marginTop: 'clamp(56px, 12vw, 96px)',
           }}>
             수십 시간을 쏟아부어도
             <br />매번 제자리인 이유,
@@ -445,11 +449,10 @@ function PainSection() {
             fontWeight: 600, color: '#52525b', lineHeight: 1.5,
             marginTop: 'clamp(12px, 3vw, 20px)',
           }}>
-            이 없었을 뿐입니다.
+            가 없었을 뿐입니다.
           </Text>
         </motion.div>
 
-        {/* 솔루션 브릿지 */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -476,14 +479,18 @@ function PainSection() {
             <ChevronDown size={28} color="#8b5cf6" />
           </motion.div>
         </motion.div>
+      </Container>
+    </Box>
 
-        {/* 파운더 스토리 — 실패 증거 */}
+    {/* 파운더 스토리 — 실패 증거 */}
+    <Box style={{ background: '#f9fafb', padding: 'clamp(60px, 10vw, 120px) 0' }}>
+      <Container size="lg">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease }}
-          style={{ textAlign: 'center', marginTop: 'clamp(56px, 12vw, 96px)' }}
+          style={{ textAlign: 'center' }}
         >
           <Text ta="center" style={{
             fontSize: 'clamp(24px, 6.5vw, 34px)',
@@ -510,7 +517,6 @@ function PainSection() {
             4년간 채널 운영하며 겪은 실패의 기록입니다
           </Text>
 
-          {/* 실패 스크린샷 */}
           <Stack gap={16} style={{ maxWidth: '520px', margin: 'clamp(32px, 6vw, 48px) auto 0' }}>
             {[
               { src: '/images/fail-stats-1.png', caption: '첫 번째 채널 — 조회수 524, 구독자 +11' },
@@ -546,6 +552,7 @@ function PainSection() {
         </motion.div>
       </Container>
     </Box>
+    </>
   );
 }
 
