@@ -612,7 +612,6 @@ function PainSection() {
                 <Text style={{
                   fontSize: 'clamp(20px, 5.5vw, 26px)',
                   fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
-                  ...mono,
                 }}>
                   {item.amount}
                 </Text>
@@ -651,7 +650,6 @@ function PainSection() {
               <Text style={{
                 fontSize: 'clamp(20px, 5.5vw, 26px)',
                 fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
-                ...mono,
               }}>
                 1,945만원
               </Text>
@@ -692,7 +690,6 @@ function PainSection() {
             fontSize: 'clamp(32px, 9vw, 48px)',
             fontWeight: 900, color: '#ffffff',
             lineHeight: 1.2, marginTop: '6px',
-            ...mono,
           }}>
             5,082만원
           </Text>
@@ -772,7 +769,6 @@ function PainSection() {
                 <Text style={{
                   fontSize: 'clamp(16px, 4.2vw, 20px)',
                   fontWeight: 800, color: 'rgba(255,255,255,0.7)',
-                  ...mono,
                 }}>
                   {item.caption}
                 </Text>
