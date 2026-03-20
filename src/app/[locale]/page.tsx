@@ -590,10 +590,10 @@ function PainSection() {
         {/* 성과 카드들 — 체크 + 수익 + 스크린샷 */}
         <Stack gap={48} style={{ maxWidth: '560px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
-            { headline: '채널A 지식/정보 — 수익 159만원', src: '/images/success-ch-a.png' },
-            { headline: '채널B 해외반응 — 수익 488만원', src: '/images/success-ch-d.png' },
-            { headline: '채널C 해외반응 — 수익 923만원', src: '/images/success-ch-c.png' },
-            { headline: '채널D 게임 — 수익 1,567만원', src: '/images/success-ch-b.png' },
+            { headline: '채널A 게임 — 수익 1,567만원', src: '/images/success-ch-b.png' },
+            { headline: '채널B 해외반응 — 수익 923만원', src: '/images/success-ch-c.png' },
+            { headline: '채널C 해외반응 — 수익 488만원', src: '/images/success-ch-d.png' },
+            { headline: '채널D 지식/정보 — 수익 159만원', src: '/images/success-ch-a.png' },
           ].map((item, i) => (
             <motion.div
               key={i}
