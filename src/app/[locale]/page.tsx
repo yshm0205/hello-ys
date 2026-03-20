@@ -449,6 +449,34 @@ function PainSection() {
           </Text>
         </motion.div>
 
+        {/* 솔루션 브릿지 */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease }}
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            marginTop: 'clamp(56px, 12vw, 96px)',
+          }}
+        >
+          <Text ta="center" style={{
+            fontSize: 'clamp(26px, 7vw, 38px)',
+            fontWeight: 800, color: '#8b5cf6',
+            lineHeight: 1.4,
+          }}>
+            이 루프를 탈출할 최단거리를
+            <br />지금부터 알려드릴게요
+          </Text>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ marginTop: '16px' }}
+          >
+            <ChevronDown size={28} color="#8b5cf6" />
+          </motion.div>
+        </motion.div>
+
         {/* 파운더 스토리 — 실패 증거 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -461,7 +489,7 @@ function PainSection() {
             fontSize: 'clamp(24px, 6.5vw, 34px)',
             fontWeight: 600, color: '#52525b', lineHeight: 1.5,
           }}>
-            이걸 어떻게 아냐고요?
+            사실 저도
           </Text>
 
           <Text ta="center" style={{
@@ -470,7 +498,7 @@ function PainSection() {
             lineHeight: 1.25, letterSpacing: '-0.02em',
             marginTop: 'clamp(12px, 3vw, 20px)',
           }}>
-            저도 돌아가는 길
+            돌아가는 길
             <br />다 걸어봤습니다
           </Text>
 
@@ -515,34 +543,6 @@ function PainSection() {
               </motion.div>
             ))}
           </Stack>
-        </motion.div>
-
-        {/* 솔루션 브릿지 */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease }}
-          style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            marginTop: 'clamp(56px, 12vw, 96px)',
-          }}
-        >
-          <Text ta="center" style={{
-            fontSize: 'clamp(26px, 7vw, 38px)',
-            fontWeight: 800, color: '#8b5cf6',
-            lineHeight: 1.4,
-          }}>
-            이 루프를 탈출할 최단거리를
-            <br />지금부터 알려드릴게요
-          </Text>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ marginTop: '16px' }}
-          >
-            <ChevronDown size={28} color="#8b5cf6" />
-          </motion.div>
         </motion.div>
       </Container>
     </Box>
