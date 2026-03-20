@@ -272,14 +272,13 @@ function HeroSection() {
             ))}
           </div>
 
-          {/* Todd Brown Copy — 크리투스 벤치마크 스타일 */}
+          {/* 질문 — 갇혀 계신가요? */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.4, ease }}
             style={{ marginTop: 'clamp(40px, 8vw, 64px)', textAlign: 'center' }}
           >
-            {/* 임팩트 제목 — 48px급 */}
             <Title order={2} ta="center" style={{
               fontSize: 'clamp(32px, 9vw, 56px)',
               fontWeight: 900, color: '#18181b',
@@ -291,87 +290,6 @@ function HeroSection() {
               <br />
               갇혀 계신가요?
             </Title>
-
-            {/* 서브 텍스트 */}
-            <Text ta="center" style={{
-              fontSize: 'clamp(24px, 6.5vw, 34px)',
-              fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-              marginTop: 'clamp(48px, 10vw, 80px)',
-            }}>
-              수십 시간을 쏟아부어도
-              <br />매번 제자리인 이유,
-            </Text>
-
-            {/* 임팩트 */}
-            <Text ta="center" style={{
-              fontSize: 'clamp(30px, 8vw, 48px)',
-              fontWeight: 900, color: '#18181b',
-              lineHeight: 1.25, letterSpacing: '-0.02em',
-              marginTop: 'clamp(12px, 3vw, 20px)',
-            }}>
-              당신의 노력이
-              <br />부족해서가 아닙니다.
-            </Text>
-
-            {/* 서브 텍스트 */}
-            <Text ta="center" style={{
-              fontSize: 'clamp(24px, 6.5vw, 34px)',
-              fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-              marginTop: 'clamp(56px, 12vw, 96px)',
-            }}>
-              이 끝없는 악순환을 끊어줄
-            </Text>
-
-            {/* 임팩트 강조 */}
-            <Text ta="center" style={{
-              fontSize: 'clamp(36px, 9.5vw, 56px)',
-              fontWeight: 900, color: '#8b5cf6',
-              lineHeight: 1.2,
-              marginTop: 'clamp(12px, 3vw, 20px)',
-              letterSpacing: '-0.02em',
-            }}>
-              &lsquo;검증된 쇼츠 공식&rsquo;
-            </Text>
-
-            {/* 서브 텍스트 */}
-            <Text ta="center" style={{
-              fontSize: 'clamp(24px, 6.5vw, 34px)',
-              fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-              marginTop: 'clamp(12px, 3vw, 20px)',
-            }}>
-              이 없었을 뿐입니다.
-            </Text>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.8, ease }}
-              style={{ marginTop: 'clamp(48px, 10vw, 72px)' }}
-            >
-              <Box style={{
-                display: 'inline-block',
-                padding: 'clamp(24px, 5vw, 36px) clamp(32px, 6vw, 48px)',
-                background: '#f5f3ff',
-                borderRadius: '20px',
-                border: '1px solid #ede9fe',
-              }}>
-                <Text ta="center" style={{
-                  fontSize: 'clamp(24px, 6vw, 32px)',
-                  fontWeight: 800, color: '#8b5cf6',
-                  lineHeight: 1.4,
-                }}>
-                  혹시 내가 시간 낭비하고
-                  <br />있진 않았는지 확인해보세요
-                </Text>
-                <motion.div
-                  animate={{ y: [0, 6, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                  style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}
-                >
-                  <ChevronDown size={24} color="#8b5cf6" />
-                </motion.div>
-              </Box>
-            </motion.div>
           </motion.div>
         </Box>
       </motion.div>
@@ -406,26 +324,7 @@ function PainSection() {
   return (
     <Box component="section" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
       <Container size="lg">
-        <motion.div {...fadeUp}>
-          <Title order={2} ta="center" style={{
-            fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
-            color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
-            marginBottom: 'clamp(36px, 7vw, 64px)',
-          }}>
-            이 3가지 중 하나라도 해당되면,
-            <br />
-            지금{' '}
-            <span style={{
-              color: '#ef4444', textDecoration: 'underline',
-              textDecorationColor: 'rgba(239,68,68,0.25)',
-              textUnderlineOffset: '6px', textDecorationThickness: '3px',
-            }}>
-              돌아가는 중
-            </span>
-            입니다
-          </Title>
-        </motion.div>
-
+        {/* Pain 카드 */}
         <Stack gap={16} style={{ maxWidth: '640px', margin: '0 auto' }}>
           {pains.map((p, i) => (
             <motion.div
@@ -440,7 +339,6 @@ function PainSection() {
                 borderRadius: '16px', padding: 'clamp(20px, 4vw, 32px)',
                 display: 'flex', alignItems: 'center', gap: 'clamp(16px, 3vw, 24px)',
               }}>
-                {/* 큰 번호 */}
                 <Box style={{
                   flexShrink: 0, width: 'clamp(48px, 8vw, 64px)', height: 'clamp(48px, 8vw, 64px)',
                   borderRadius: '50%', background: p.accent,
@@ -453,7 +351,6 @@ function PainSection() {
                     {p.num}
                   </Text>
                 </Box>
-                {/* 텍스트 */}
                 <Box style={{ flex: 1, minWidth: 0 }}>
                   <Text fw={700} style={{
                     fontSize: 'clamp(18px, 4vw, 22px)', color: '#18181b',
@@ -478,10 +375,106 @@ function PainSection() {
           ))}
         </Stack>
 
+        {/* 결론 — 갇혀 계신 거예요 (콜백) */}
         <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.4, ease }}>
-          <Text ta="center" style={{ color: '#71717a', fontSize: 'clamp(16px, 4vw, 20px)', marginTop: 'clamp(40px, 8vw, 64px)', fontStyle: 'italic', lineHeight: 1.8 }}>
-            공식 없이 시작하면 전부 돌아가는 길입니다.
+          <Title order={2} ta="center" style={{
+            fontSize: 'clamp(28px, 7.5vw, 44px)', fontWeight: 900,
+            color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
+            marginTop: 'clamp(48px, 10vw, 80px)',
+          }}>
+            이 3가지 중 하나라도 해당되면,
+            <br />
+            여러분은 지금{' '}
+            <span style={{
+              color: '#ef4444', textDecoration: 'underline',
+              textDecorationColor: 'rgba(239,68,68,0.25)',
+              textUnderlineOffset: '6px', textDecorationThickness: '3px',
+            }}>
+              갇혀 계신 거예요
+            </span>
+          </Title>
+        </motion.div>
+
+        {/* Todd Brown 위로 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease }}
+          style={{ textAlign: 'center' }}
+        >
+          <Text ta="center" style={{
+            fontSize: 'clamp(24px, 6.5vw, 34px)',
+            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
+            marginTop: 'clamp(56px, 12vw, 96px)',
+          }}>
+            수십 시간을 쏟아부어도
+            <br />매번 제자리인 이유,
           </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(30px, 8vw, 48px)',
+            fontWeight: 900, color: '#18181b',
+            lineHeight: 1.25, letterSpacing: '-0.02em',
+            marginTop: 'clamp(12px, 3vw, 20px)',
+          }}>
+            당신의 노력이
+            <br />부족해서가 아닙니다.
+          </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(24px, 6.5vw, 34px)',
+            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
+            marginTop: 'clamp(56px, 12vw, 96px)',
+          }}>
+            이 끝없는 악순환을 끊어줄
+          </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(36px, 9.5vw, 56px)',
+            fontWeight: 900, color: '#8b5cf6',
+            lineHeight: 1.2,
+            marginTop: 'clamp(12px, 3vw, 20px)',
+            letterSpacing: '-0.02em',
+          }}>
+            &lsquo;검증된 쇼츠 공식&rsquo;
+          </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(24px, 6.5vw, 34px)',
+            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
+            marginTop: 'clamp(12px, 3vw, 20px)',
+          }}>
+            이 없었을 뿐입니다.
+          </Text>
+        </motion.div>
+
+        {/* 솔루션 브릿지 */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease }}
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            marginTop: 'clamp(56px, 12vw, 96px)',
+          }}
+        >
+          <Text ta="center" style={{
+            fontSize: 'clamp(26px, 7vw, 38px)',
+            fontWeight: 800, color: '#8b5cf6',
+            lineHeight: 1.4,
+          }}>
+            이 루프를 탈출할 최단거리를
+            <br />지금부터 알려드릴게요
+          </Text>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ marginTop: '16px' }}
+          >
+            <ChevronDown size={28} color="#8b5cf6" />
+          </motion.div>
         </motion.div>
       </Container>
     </Box>
