@@ -432,30 +432,15 @@ function PainSection() {
           </Text>
 
           <Text ta="center" style={{
-            fontSize: 'clamp(24px, 6.5vw, 34px)',
-            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-            marginTop: 'clamp(56px, 12vw, 96px)',
-          }}>
-            이 시간을 줄여줄
-          </Text>
-
-          <Text ta="center" style={{
-            fontSize: 'clamp(36px, 9.5vw, 56px)',
-            fontWeight: 900, color: '#8b5cf6',
-            lineHeight: 1.2,
-            marginTop: 'clamp(12px, 3vw, 20px)',
+            fontSize: 'clamp(26px, 7vw, 38px)',
+            fontWeight: 800, color: '#8b5cf6',
+            lineHeight: 1.3,
+            marginTop: 'clamp(40px, 8vw, 64px)',
             letterSpacing: '-0.02em',
             textShadow: '0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(139,92,246,0.1)',
           }}>
-            &lsquo;최단거리&rsquo;
-          </Text>
-
-          <Text ta="center" style={{
-            fontSize: 'clamp(24px, 6.5vw, 34px)',
-            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-            marginTop: 'clamp(12px, 3vw, 20px)',
-          }}>
-            가 없었을 뿐입니다
+            쇼츠 수익화의 최단거리를
+            <br />모른다면요.
           </Text>
         </motion.div>
 
