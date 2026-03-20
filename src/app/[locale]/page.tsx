@@ -324,6 +324,26 @@ function PainSection() {
   return (
     <Box component="section" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
       <Container size="lg">
+        {/* 제목 — 갇혀 계신 거예요 */}
+        <motion.div {...fadeUp}>
+          <Title order={2} ta="center" style={{
+            fontSize: 'clamp(28px, 7.5vw, 44px)', fontWeight: 900,
+            color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
+            marginBottom: 'clamp(36px, 7vw, 64px)',
+          }}>
+            이 3가지 중 하나라도 해당되면,
+            <br />
+            여러분은 지금{' '}
+            <span style={{
+              color: '#ef4444', textDecoration: 'underline',
+              textDecorationColor: 'rgba(239,68,68,0.25)',
+              textUnderlineOffset: '6px', textDecorationThickness: '3px',
+            }}>
+              갇혀 계신 거예요
+            </span>
+          </Title>
+        </motion.div>
+
         {/* Pain 카드 */}
         <Stack gap={16} style={{ maxWidth: '640px', margin: '0 auto' }}>
           {pains.map((p, i) => (
@@ -374,26 +394,6 @@ function PainSection() {
             </motion.div>
           ))}
         </Stack>
-
-        {/* 결론 — 갇혀 계신 거예요 (콜백) */}
-        <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.4, ease }}>
-          <Title order={2} ta="center" style={{
-            fontSize: 'clamp(28px, 7.5vw, 44px)', fontWeight: 900,
-            color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
-            marginTop: 'clamp(48px, 10vw, 80px)',
-          }}>
-            이 3가지 중 하나라도 해당되면,
-            <br />
-            여러분은 지금{' '}
-            <span style={{
-              color: '#ef4444', textDecoration: 'underline',
-              textDecorationColor: 'rgba(239,68,68,0.25)',
-              textUnderlineOffset: '6px', textDecorationThickness: '3px',
-            }}>
-              갇혀 계신 거예요
-            </span>
-          </Title>
-        </motion.div>
 
         {/* Todd Brown 위로 */}
         <motion.div
