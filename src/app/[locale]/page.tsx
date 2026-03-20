@@ -663,47 +663,26 @@ function PainSection() {
           </motion.div>
         </Stack>
 
-        {/* 공식 발견 브릿지 */}
-        <motion.div {...fadeUp}>
-          <Box style={{
-            maxWidth: '560px', margin: 'clamp(56px, 10vw, 96px) auto 0',
-            padding: 'clamp(24px, 5vw, 40px) clamp(20px, 4vw, 32px)',
-            borderLeft: '4px solid #8b5cf6',
-            background: 'rgba(139,92,246,0.08)',
-            borderRadius: '0 16px 16px 0',
-          }}>
-            <Text style={{
-              fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900,
-              color: '#ffffff', lineHeight: 1.25, marginBottom: '20px',
-            }}>
-              분야가 달라도 통하는 공식이 있었습니다
-            </Text>
-            <Text style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: '24px' }}>
-              체계화한 뒤, 채널 1개 주 4시간으로 월 200-300만원
-            </Text>
-            <Text fw={700} style={{ fontSize: 'clamp(18px, 4.5vw, 22px)', color: '#a78bfa' }}>
-              그 체계가 59강 강의와 AI 스크립트 도구입니다 →
-            </Text>
-          </Box>
-        </motion.div>
-
         {/* ── 반론 제기 + 수강생 후기 ── */}
         <motion.div {...fadeUp} style={{
           textAlign: 'center',
           marginTop: 'clamp(80px, 14vw, 140px)',
         }}>
           <Text style={{
-            fontSize: 'clamp(30px, 8vw, 48px)',
+            fontSize: 'clamp(28px, 7.5vw, 44px)',
             fontWeight: 900, color: '#ffffff',
             lineHeight: 1.3,
           }}>
-            제가 특별해서라고요?
+            제가 유튜브 천재라서
+            <br />가능했을까요?
           </Text>
+
           <Box style={{
             width: '1px', height: 'clamp(32px, 6vw, 48px)',
             background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 100%)',
             margin: 'clamp(16px, 3vw, 24px) auto',
           }} />
+
           <Text style={{
             fontSize: 'clamp(24px, 6.5vw, 36px)',
             fontWeight: 900, color: '#a78bfa',
@@ -711,12 +690,24 @@ function PainSection() {
           }}>
             아닙니다.
           </Text>
-          <Text style={{
-            fontSize: 'clamp(18px, 4.5vw, 24px)',
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(17px, 4.3vw, 22px)',
             fontWeight: 600, color: 'rgba(255,255,255,0.6)',
-            lineHeight: 1.6, marginTop: 'clamp(8px, 2vw, 16px)',
+            lineHeight: 1.7, marginTop: 'clamp(12px, 3vw, 20px)',
+            maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto',
           }}>
-            공식이 특별한 겁니다.
+            수백 시간 돌아가며 벽에 부딪혀봤기에
+            <br />최단거리를 뚫어낼 수 있었던 겁니다.
+          </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(18px, 4.5vw, 24px)',
+            fontWeight: 700, color: 'rgba(255,255,255,0.8)',
+            lineHeight: 1.5, marginTop: 'clamp(32px, 6vw, 48px)',
+          }}>
+            같은 최단거리를 걷고 있는
+            <br />분들의 결과입니다.
           </Text>
         </motion.div>
 
