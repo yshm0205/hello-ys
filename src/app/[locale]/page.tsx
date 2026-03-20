@@ -466,7 +466,7 @@ function PainSection() {
                     {p.desc}
                   </Text>
                   <Text fw={800} style={{
-                    fontSize: 'clamp(20px, 4.5vw, 26px)', color: p.accent, ...mono,
+                    fontSize: 'clamp(20px, 4.5vw, 26px)', color: p.accent,
                   }}>
                     {p.metric}
                   </Text>
