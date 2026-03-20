@@ -23,7 +23,7 @@ import {
 import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LandingHeader } from '@/components/landing/LandingHeader';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
@@ -303,6 +303,7 @@ function HeroSection() {
    섹션 2: Pain — 돌아가는 길 3가지 (풀폭 임팩트)
    ═══════════════════════════════════════════════════════════════ */
 function PainSection() {
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const pains = [
     {
       num: '01', title: '혼자 영상 만들어봤는데',
@@ -738,10 +739,14 @@ function PainSection() {
               }}>
                 {item.caption}
               </Text>
-              <Box style={{
-                borderRadius: '12px', overflow: 'hidden',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-              }}>
+              <Box
+                onClick={() => setLightboxSrc(item.src)}
+                style={{
+                  borderRadius: '12px', overflow: 'hidden',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+                  cursor: 'zoom-in',
+                }}
+              >
                 <img src={item.src} alt={item.alt} style={{ width: '100%', display: 'block' }} />
               </Box>
             </motion.div>
@@ -750,6 +755,40 @@ function PainSection() {
 
       </Container>
     </Box>
+
+    {/* ── 라이트박스 오버레이 ── */}
+    <AnimatePresence>
+      {lightboxSrc && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={() => setLightboxSrc(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '24px',
+            cursor: 'zoom-out',
+          }}
+        >
+          <motion.img
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            src={lightboxSrc}
+            alt="후기 확대"
+            style={{
+              maxWidth: '100%', maxHeight: '85vh',
+              borderRadius: '8px',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+            }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
     </>
   );
 }
