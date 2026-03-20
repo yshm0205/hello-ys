@@ -416,8 +416,8 @@ function PainSection() {
             fontSize: 'clamp(24px, 6.5vw, 34px)',
             fontWeight: 600, color: '#52525b', lineHeight: 1.5,
           }}>
-            수십 시간을 쏟아부어도
-            <br />매번 제자리인 이유,
+            실력은 분명
+            <br />올라가고 있을 겁니다.
           </Text>
 
           <Text ta="center" style={{
@@ -426,8 +426,8 @@ function PainSection() {
             lineHeight: 1.25, letterSpacing: '-0.02em',
             marginTop: 'clamp(12px, 3vw, 20px)',
           }}>
-            당신의 노력이
-            <br />부족해서가 아닙니다.
+            다만 그 &lsquo;천천히&rsquo;가
+            <br />1년이 될 수도, 4년이 될 수도 있습니다.
           </Text>
 
           <Text ta="center" style={{
@@ -435,7 +435,7 @@ function PainSection() {
             fontWeight: 600, color: '#52525b', lineHeight: 1.5,
             marginTop: 'clamp(56px, 12vw, 96px)',
           }}>
-            이 끝없는 악순환을 끊어줄
+            이 시간을 줄여줄
           </Text>
 
           <Text ta="center" style={{
@@ -454,7 +454,7 @@ function PainSection() {
             fontWeight: 600, color: '#52525b', lineHeight: 1.5,
             marginTop: 'clamp(12px, 3vw, 20px)',
           }}>
-            가 없었을 뿐입니다.
+            가 없었을 뿐입니다
           </Text>
         </motion.div>
 
