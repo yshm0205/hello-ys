@@ -627,7 +627,7 @@ function PainSection() {
             </motion.div>
           ))}
 
-          {/* 네이버 클립 — 2개 합산 1,128만원 */}
+          {/* 네이버 클립 — 2개 합산 1,945만원 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -646,7 +646,7 @@ function PainSection() {
                 fontSize: 'clamp(18px, 4.5vw, 22px)',
                 fontWeight: 700, color: '#ffffff', lineHeight: 1.4,
               }}>
-                네이버 클립 — 수익 1,128만원
+                네이버 클립 — 수익 1,945만원
               </Text>
             </Group>
             <Stack gap={16}>
