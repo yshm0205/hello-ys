@@ -711,64 +711,33 @@ function PainSection() {
           </Text>
         </motion.div>
 
-        {/* 수강생 성과 후기 */}
-        <Stack gap={32} style={{ maxWidth: '400px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
+        {/* 수강생 후기 — 통합 */}
+        <Stack gap={48} style={{ maxWidth: '400px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
           {[
-            { src: '/images/reviews/review_3_kakao.png', alt: '수강생 후기 — 월 700만 수익' },
-            { src: '/images/reviews/review_7_kakao.png', alt: '수강생 후기 — 구독자 1000 달성' },
-            { src: '/images/reviews/review_6_youtube.png', alt: '수강생 후기 — 조회수 폭발' },
+            { src: '/images/reviews/review_1_revenue.png', caption: '월 1,356만 수익 달성', alt: '수강생 성과 — 월 1356만 수익' },
+            { src: '/images/reviews/review_3_kakao.png', caption: '월 700만 수익', alt: '수강생 성과 — 월 700만 수익' },
+            { src: '/images/reviews/review_7_kakao.png', caption: '구독자 1,000명 돌파', alt: '수강생 성과 — 구독자 1000 달성' },
+            { src: '/images/reviews/review_6_youtube.png', caption: '조회수 폭발', alt: '수강생 성과 — 조회수 폭발' },
+            { src: '/images/reviews/comment_osy.png', caption: '"300만원 유료강의보다 낫습니다"', alt: '수강생 후기 — 유료강의급' },
+            { src: '/images/reviews/review_4_kakao.png', caption: '"드디어 제대로 된 길을 찾았다"', alt: '수강생 후기 — 방향 발견' },
+            { src: '/images/reviews/comment_comfort.png', caption: '"귀인을 만난 기분입니다"', alt: '수강생 후기 — 귀인' },
           ].map((item, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease }}
+              transition={{ duration: 0.5, delay: i * 0.06, ease }}
             >
-              <Box style={{
-                borderRadius: '12px', overflow: 'hidden',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+              <Text ta="center" style={{
+                fontSize: 'clamp(15px, 3.8vw, 19px)',
+                fontWeight: 700,
+                color: i < 4 ? 'rgba(255,255,255,0.45)' : 'rgba(167,139,250,0.6)',
+                marginBottom: '12px',
+                letterSpacing: '-0.01em',
               }}>
-                <img src={item.src} alt={item.alt} style={{ width: '100%', display: 'block' }} />
-              </Box>
-            </motion.div>
-          ))}
-        </Stack>
-
-        {/* 전자책 후기 전환 */}
-        <motion.div {...fadeUp} style={{
-          textAlign: 'center',
-          marginTop: 'clamp(72px, 12vw, 120px)',
-        }}>
-          <Text style={{
-            fontSize: 'clamp(22px, 6vw, 32px)',
-            fontWeight: 800, color: '#ffffff',
-            lineHeight: 1.4,
-          }}>
-            전자책 하나만으로도
-          </Text>
-          <Text style={{
-            fontSize: 'clamp(18px, 4.5vw, 24px)',
-            fontWeight: 600, color: 'rgba(255,255,255,0.5)',
-            lineHeight: 1.6, marginTop: '4px',
-          }}>
-            방향을 잡은 분들이 있습니다
-          </Text>
-        </motion.div>
-
-        {/* 전자책 후기 */}
-        <Stack gap={32} style={{ maxWidth: '400px', margin: 'clamp(40px, 7vw, 60px) auto 0' }}>
-          {[
-            { src: '/images/reviews/review_4_kakao.png', alt: '전자책 후기 — 드디어 제대로 찾았다' },
-            { src: '/images/reviews/review_5_kakao.png', alt: '전자책 후기 — 초보자에게 꼭 필요한 내용' },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease }}
-            >
+                {item.caption}
+              </Text>
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
