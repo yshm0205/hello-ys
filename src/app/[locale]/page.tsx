@@ -178,52 +178,6 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-      {/* 제품 프리뷰 — 브라우저 프레임 목업 */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.5, ease }}
-        style={{
-          width: '100%', maxWidth: '680px',
-          marginTop: 'clamp(40px, 7vw, 64px)',
-          padding: '0 16px',
-        }}
-      >
-        <Box style={{
-          borderRadius: '12px',
-          overflow: 'hidden',
-          border: '1px solid rgba(0,0,0,0.08)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06)',
-          background: '#ffffff',
-        }}>
-          {/* 브라우저 상단 바 */}
-          <Box style={{
-            display: 'flex', alignItems: 'center', gap: '6px',
-            padding: '10px 14px',
-            background: '#f4f4f5',
-            borderBottom: '1px solid #e4e4e7',
-          }}>
-            <Box style={{ width: 10, height: 10, borderRadius: '50%', background: '#fca5a5' }} />
-            <Box style={{ width: 10, height: 10, borderRadius: '50%', background: '#fde68a' }} />
-            <Box style={{ width: 10, height: 10, borderRadius: '50%', background: '#86efac' }} />
-            <Box style={{
-              marginLeft: '12px', flex: 1, height: '22px',
-              background: '#ffffff', borderRadius: '6px',
-              border: '1px solid #e4e4e7',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Text style={{ fontSize: '11px', color: '#a1a1aa', ...mono }}>flowspot-kr.vercel.app</Text>
-            </Box>
-          </Box>
-          {/* 스크린샷 */}
-          <img
-            src="/images/product-preview.png"
-            alt="FlowSpot AI 스크립트 생성 화면"
-            style={{ width: '100%', display: 'block' }}
-          />
-        </Box>
-      </motion.div>
-
       {/* 무한 루프 섹션 */}
       <motion.div
         initial={{ opacity: 0 }}
