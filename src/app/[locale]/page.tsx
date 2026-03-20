@@ -560,123 +560,102 @@ function PainSection() {
           }}>
             하지만 포기 대신,
           </Text>
+
+          {/* 하.지.만 극적 전환 */}
           <Text ta="center" style={{
-            fontSize: 'clamp(30px, 8vw, 48px)',
-            fontWeight: 900, color: '#ffffff',
-            lineHeight: 1.25, letterSpacing: '-0.02em',
-            marginTop: 'clamp(12px, 3vw, 20px)',
+            fontSize: 'clamp(36px, 9vw, 56px)',
+            fontWeight: 900, color: '#a78bfa',
+            lineHeight: 1.2, letterSpacing: '0.15em',
+            marginTop: 'clamp(56px, 12vw, 96px)',
           }}>
-            공식을 찾기 시작했습니다
+            하 . 지 . 만
+          </Text>
+
+          {/* 세로선 */}
+          <Box style={{
+            width: '1px', height: 'clamp(40px, 8vw, 64px)',
+            background: 'linear-gradient(180deg, #a78bfa 0%, rgba(167,139,250,0.2) 100%)',
+            margin: 'clamp(20px, 4vw, 32px) auto',
+          }} />
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(24px, 6.5vw, 34px)',
+            fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.5,
+          }}>
+            가설을 세우고 끊임없이
+            <br />테스트한 결과,
           </Text>
         </motion.div>
 
-        {/* YouTube 채널 성과 */}
-        <Stack gap={20} style={{ maxWidth: '560px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
+        {/* 성과 카드들 — 체크 + 헤드라인 + 스크린샷 */}
+        <Stack gap={48} style={{ maxWidth: '560px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
-            { src: '/images/success-ch-a.png', label: '채널A 지식/정보', amount: '₩159만' },
-            { src: '/images/success-ch-c.png', label: '채널B 해외반응', amount: '₩923만' },
-            { src: '/images/success-ch-b.png', label: '채널C 게임', amount: '₩1,567만' },
+            {
+              headline: '지식/정보 채널, 주 4시간 투자로\n수익창출 달성',
+              src: '/images/success-ch-a.png',
+            },
+            {
+              headline: '해외반응 채널, 연 2,375만 조회\n수익 923만원 돌파',
+              src: '/images/success-ch-c.png',
+            },
+            {
+              headline: '게임 채널, 연 5,937만 조회\n수익 1,567만원 돌파',
+              src: '/images/success-ch-b.png',
+            },
+            {
+              headline: '네이버 클립 누적 수익\n1,128만원 달성',
+              src: '/images/success-naver-clip.png',
+              lightBg: true,
+            },
+            {
+              headline: '현재 네이버 클립\n월 80~240만원 꾸준 수익 중',
+              src: '/images/success-naver-revenue.jpg',
+              lightBg: true,
+              portrait: true,
+            },
           ].map((item, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.12, ease }}
+              transition={{ duration: 0.5, delay: 0.1, ease }}
             >
+              {/* 체크 + 헤드라인 */}
+              <Group gap={12} align="flex-start" mb={16} wrap="nowrap">
+                <Box style={{
+                  flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+                  background: '#22c55e',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginTop: '2px',
+                }}>
+                  <Check size={16} color="#ffffff" strokeWidth={3} />
+                </Box>
+                <Text style={{
+                  fontSize: 'clamp(18px, 4.5vw, 22px)',
+                  fontWeight: 700, color: '#ffffff',
+                  lineHeight: 1.4, whiteSpace: 'pre-line',
+                }}>
+                  {item.headline}
+                </Text>
+              </Group>
+              {/* 스크린샷 */}
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                ...(item.lightBg ? { background: '#ffffff' } : {}),
+                ...(item.portrait ? { maxWidth: '300px', margin: '0 auto' } : {}),
               }}>
                 <img
                   src={item.src}
-                  alt={item.label}
+                  alt={item.headline}
                   style={{ width: '100%', display: 'block' }}
                 />
               </Box>
-              <Group justify="space-between" mt={8} px={4}>
-                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
-                  {item.label}
-                </Text>
-                <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
-                  {item.amount}
-                </Text>
-              </Group>
             </motion.div>
           ))}
         </Stack>
-
-        {/* 네이버/다음 성과 */}
-        <motion.div {...fadeUp}>
-          <Text ta="center" style={{
-            fontSize: 'clamp(20px, 5vw, 26px)',
-            fontWeight: 700, color: 'rgba(255,255,255,0.5)',
-            marginTop: 'clamp(48px, 8vw, 72px)',
-            marginBottom: 'clamp(24px, 5vw, 36px)',
-          }}>
-            YouTube 외 플랫폼
-          </Text>
-        </motion.div>
-        {/* 네이버 — 가로형 (클립 총 수익) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease }}
-          style={{ maxWidth: '560px', margin: '0 auto' }}
-        >
-          <Box style={{
-            borderRadius: '12px', overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-            background: '#ffffff',
-          }}>
-            <img
-              src="/images/success-naver-clip.png"
-              alt="네이버 클립 수익"
-              style={{ width: '100%', display: 'block' }}
-            />
-          </Box>
-          <Group justify="space-between" mt={8} px={4}>
-            <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
-              네이버 클립
-            </Text>
-            <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
-              ₩1,128만
-            </Text>
-          </Group>
-        </motion.div>
-
-        {/* 네이버 — 세로형 (월별 수익) → 폭 제한 + 센터 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.12, ease }}
-          style={{ maxWidth: '300px', margin: '20px auto 0' }}
-        >
-          <Box style={{
-            borderRadius: '12px', overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-            background: '#ffffff',
-          }}>
-            <img
-              src="/images/success-naver-revenue.jpg"
-              alt="네이버 클립 월별 수익"
-              style={{ width: '100%', display: 'block' }}
-            />
-          </Box>
-          <Group justify="space-between" mt={8} px={4}>
-            <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
-              네이버 클립 월별 수익
-            </Text>
-            <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
-              월 80~240만
-            </Text>
-          </Group>
-        </motion.div>
 
         {/* 공식 발견 브릿지 */}
         <motion.div {...fadeUp}>
