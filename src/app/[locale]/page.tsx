@@ -583,10 +583,10 @@ function PainSection() {
         {/* 성과 카드들 — 체크 + 수익 + 풀 스크린샷 */}
         <Stack gap={48} style={{ maxWidth: '560px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
-            { headline: '채널A 게임 — 수익 1,567만원', src: '/images/success-ch-b.png' },
-            { headline: '채널B 해외반응 — 수익 923만원', src: '/images/success-ch-c.png' },
-            { headline: '채널C 해외반응 — 수익 488만원', src: '/images/success-ch-d.png' },
-            { headline: '채널D 지식/정보 — 수익 159만원', src: '/images/success-ch-a.png' },
+            { label: '채널A 게임', amount: '1,567만원', src: '/images/success-ch-b.png' },
+            { label: '채널B 해외반응', amount: '923만원', src: '/images/success-ch-c.png' },
+            { label: '채널C 해외반응', amount: '488만원', src: '/images/success-ch-d.png' },
+            { label: '채널D 지식/정보', amount: '159만원', src: '/images/success-ch-a.png' },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -595,7 +595,7 @@ function PainSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1, ease }}
             >
-              <Group gap={12} align="center" mb={16} wrap="nowrap">
+              <Group gap={10} align="center" mb={14} wrap="nowrap">
                 <Box style={{
                   flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
                   background: '#22c55e',
@@ -604,10 +604,17 @@ function PainSection() {
                   <Check size={16} color="#ffffff" strokeWidth={3} />
                 </Box>
                 <Text style={{
-                  fontSize: 'clamp(18px, 4.5vw, 22px)',
-                  fontWeight: 700, color: '#ffffff', lineHeight: 1.4,
+                  fontSize: 'clamp(15px, 3.8vw, 18px)',
+                  fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.4,
                 }}>
-                  {item.headline}
+                  {item.label}
+                </Text>
+                <Text style={{
+                  fontSize: 'clamp(20px, 5.5vw, 26px)',
+                  fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
+                  ...mono,
+                }}>
+                  {item.amount}
                 </Text>
               </Group>
               <Box style={{
@@ -615,7 +622,7 @@ function PainSection() {
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               }}>
-                <img src={item.src} alt={item.headline} style={{ width: '100%', display: 'block' }} />
+                <img src={item.src} alt={`${item.label} 수익 ${item.amount}`} style={{ width: '100%', display: 'block' }} />
               </Box>
             </motion.div>
           ))}
@@ -627,7 +634,7 @@ function PainSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1, ease }}
           >
-            <Group gap={12} align="center" mb={16} wrap="nowrap">
+            <Group gap={10} align="center" mb={14} wrap="nowrap">
               <Box style={{
                 flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
                 background: '#22c55e',
@@ -636,10 +643,17 @@ function PainSection() {
                 <Check size={16} color="#ffffff" strokeWidth={3} />
               </Box>
               <Text style={{
-                fontSize: 'clamp(18px, 4.5vw, 22px)',
-                fontWeight: 700, color: '#ffffff', lineHeight: 1.4,
+                fontSize: 'clamp(15px, 3.8vw, 18px)',
+                fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.4,
               }}>
-                네이버 클립 — 수익 1,945만원
+                네이버 클립
+              </Text>
+              <Text style={{
+                fontSize: 'clamp(20px, 5.5vw, 26px)',
+                fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
+                ...mono,
+              }}>
+                1,945만원
               </Text>
             </Group>
             <Stack gap={16}>
@@ -656,13 +670,34 @@ function PainSection() {
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
                 background: '#ffffff',
-                maxWidth: '300px', margin: '0 auto',
               }}>
                 <img src="/images/success-naver-revenue.jpg" alt="네이버 클립 월별 수익" style={{ width: '100%', display: 'block' }} />
               </Box>
             </Stack>
           </motion.div>
         </Stack>
+
+        {/* 총 합산 */}
+        <motion.div {...fadeUp} style={{
+          textAlign: 'center',
+          marginTop: 'clamp(48px, 8vw, 72px)',
+        }}>
+          <Text style={{
+            fontSize: 'clamp(14px, 3.5vw, 16px)',
+            fontWeight: 600, color: 'rgba(255,255,255,0.35)',
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+          }}>
+            5개 채널 총 수익
+          </Text>
+          <Text style={{
+            fontSize: 'clamp(36px, 10vw, 56px)',
+            fontWeight: 900, color: '#ffffff',
+            lineHeight: 1.1, marginTop: '8px',
+            ...mono,
+          }}>
+            5,082<span style={{ fontSize: '0.6em', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>만원</span>
+          </Text>
+        </motion.div>
 
         {/* ── 반론 제기 + 수강생 후기 ── */}
         <motion.div {...fadeUp} style={{
