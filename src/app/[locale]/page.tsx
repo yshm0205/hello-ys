@@ -545,115 +545,148 @@ function PainSection() {
         </motion.div>
       </Container>
     </Box>
+
+    {/* 성과 증거 — 전환점 + 스크린샷 */}
+    <Box style={{
+      background: '#18181b',
+      padding: 'clamp(60px, 10vw, 120px) 0',
+    }}>
+      <Container size="lg">
+        {/* 전환 멘트 */}
+        <motion.div {...fadeUp} style={{ textAlign: 'center' }}>
+          <Text ta="center" style={{
+            fontSize: 'clamp(24px, 6.5vw, 34px)',
+            fontWeight: 600, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5,
+          }}>
+            하지만 포기 대신,
+          </Text>
+          <Text ta="center" style={{
+            fontSize: 'clamp(30px, 8vw, 48px)',
+            fontWeight: 900, color: '#ffffff',
+            lineHeight: 1.25, letterSpacing: '-0.02em',
+            marginTop: 'clamp(12px, 3vw, 20px)',
+          }}>
+            공식을 찾기 시작했습니다
+          </Text>
+        </motion.div>
+
+        {/* YouTube 채널 성과 */}
+        <Stack gap={20} style={{ maxWidth: '560px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
+          {[
+            { src: '/images/success-ch-a.png', label: '채널A 지식/정보', amount: '₩159만' },
+            { src: '/images/success-ch-c.png', label: '채널B 해외반응', amount: '₩923만' },
+            { src: '/images/success-ch-b.png', label: '채널C 게임', amount: '₩1,567만' },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.12, ease }}
+            >
+              <Box style={{
+                borderRadius: '12px', overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              }}>
+                <img
+                  src={item.src}
+                  alt={item.label}
+                  style={{ width: '100%', display: 'block' }}
+                />
+              </Box>
+              <Group justify="space-between" mt={8} px={4}>
+                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
+                  {item.label}
+                </Text>
+                <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
+                  {item.amount}
+                </Text>
+              </Group>
+            </motion.div>
+          ))}
+        </Stack>
+
+        {/* 네이버/다음 성과 */}
+        <motion.div {...fadeUp}>
+          <Text ta="center" style={{
+            fontSize: 'clamp(20px, 5vw, 26px)',
+            fontWeight: 700, color: 'rgba(255,255,255,0.5)',
+            marginTop: 'clamp(48px, 8vw, 72px)',
+            marginBottom: 'clamp(24px, 5vw, 36px)',
+          }}>
+            YouTube 외 플랫폼
+          </Text>
+        </motion.div>
+        <Stack gap={20} style={{ maxWidth: '560px', margin: '0 auto' }}>
+          {[
+            { src: '/images/success-naver-clip.png', label: '네이버 클립', amount: '₩1,128만' },
+            { src: '/images/success-naver-revenue.jpg', label: '네이버 클립 월별 수익', amount: '월 80~240만' },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.12, ease }}
+            >
+              <Box style={{
+                borderRadius: '12px', overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                background: '#ffffff',
+              }}>
+                <img
+                  src={item.src}
+                  alt={item.label}
+                  style={{ width: '100%', display: 'block' }}
+                />
+              </Box>
+              <Group justify="space-between" mt={8} px={4}>
+                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
+                  {item.label}
+                </Text>
+                <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
+                  {item.amount}
+                </Text>
+              </Group>
+            </motion.div>
+          ))}
+        </Stack>
+
+        {/* 공식 발견 브릿지 */}
+        <motion.div {...fadeUp}>
+          <Box style={{
+            maxWidth: '560px', margin: 'clamp(56px, 10vw, 96px) auto 0',
+            padding: 'clamp(24px, 5vw, 40px) clamp(20px, 4vw, 32px)',
+            borderLeft: '4px solid #8b5cf6',
+            background: 'rgba(139,92,246,0.08)',
+            borderRadius: '0 16px 16px 0',
+          }}>
+            <Text style={{
+              fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900,
+              color: '#ffffff', lineHeight: 1.25, marginBottom: '20px',
+            }}>
+              분야가 달라도 통하는 공식이 있었습니다
+            </Text>
+            <Text style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: '24px' }}>
+              체계화한 뒤, 채널 1개 주 4시간으로 월 200-300만원
+            </Text>
+            <Text fw={700} style={{ fontSize: 'clamp(18px, 4.5vw, 22px)', color: '#a78bfa' }}>
+              그 체계가 59강 강의와 AI 스크립트 도구입니다 →
+            </Text>
+          </Box>
+        </motion.div>
+      </Container>
+    </Box>
     </>
   );
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   섹션 3: WhyFlowSpot — 스토리 + 수익 증명
+   섹션 3: WhyFlowSpot — (removed, merged into PainSection success)
    ═══════════════════════════════════════════════════════════════ */
-function WhyFlowSpotSection() {
-  const revenues = [
-    { label: '채널A 지식/정보', amount: '₩488만', icon: '📊' },
-    { label: '채널B 게임', amount: '₩1,567만', icon: '🎮' },
-    { label: '채널C 해외반응', amount: '₩923만', icon: '🌍' },
-    { label: '네이버 클립', amount: '₩1,920만', icon: '📱' },
-    { label: '다음 숏폼', amount: '₩149만', icon: '▶️' },
-  ];
-
-  return (
-    <Box component="section" style={{ background: '#fafafa', padding: 'clamp(60px, 10vw, 120px) 0', position: 'relative' }}>
-      <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
-
-      <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
-        <motion.div {...fadeUp}>
-          <Stack align="center" gap={0}>
-            <Title order={2} ta="center" style={{
-              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
-              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
-              marginBottom: 'clamp(12px, 3vw, 20px)',
-            }}>
-              저도 돌아가는 길 다 걸어봤습니다
-            </Title>
-            <Text ta="center" style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#71717a', marginBottom: 'clamp(36px, 7vw, 56px)' }}>
-              그리고 결국 공식을 찾았습니다.
-            </Text>
-          </Stack>
-        </motion.div>
-
-        {/* Revenue list — 세로 풀폭 */}
-        <Stack gap={12} style={{ maxWidth: '640px', margin: '0 auto' }}>
-          {revenues.map((r, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08, ease }}
-            >
-              <Box style={{
-                display: 'flex', alignItems: 'center',
-                gap: 'clamp(12px, 3vw, 20px)',
-                padding: 'clamp(14px, 3vw, 20px) clamp(16px, 3vw, 24px)',
-                background: '#ffffff', borderRadius: '14px',
-                border: '1px solid #d4d4d8',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-              }}>
-                <Text style={{ fontSize: 'clamp(24px, 4vw, 32px)', flexShrink: 0 }}>{r.icon}</Text>
-                <Box style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={{
-                    fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a',
-                    marginBottom: '2px',
-                  }}>
-                    {r.label}
-                  </Text>
-                  <Text fw={800} style={{
-                    fontSize: 'clamp(22px, 5vw, 30px)', color: '#18181b', ...mono,
-                  }}>
-                    {r.amount}
-                  </Text>
-                </Box>
-                <Text style={{
-                  fontSize: 'clamp(12px, 2vw, 13px)',
-                  color: '#a1a1aa', flexShrink: 0,
-                }}>
-                  수익 캡처
-                </Text>
-              </Box>
-            </motion.div>
-          ))}
-        </Stack>
-
-        {/* Bridge — pull-quote style */}
-        <motion.div {...fadeUp} transition={{ duration: 0.6, delay: 0.2, ease }}>
-          <Box style={{ maxWidth: '640px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
-            <Box style={{
-              padding: 'clamp(24px, 5vw, 40px) clamp(20px, 4vw, 32px)',
-              borderLeft: '4px solid #8b5cf6',
-              background: '#ffffff',
-              borderRadius: '0 16px 16px 0',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-            }}>
-              <Text style={{
-                fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900,
-                color: '#18181b', lineHeight: 1.25, marginBottom: '20px',
-              }}>
-                분야가 달라도 통하는 공식이 있었습니다
-              </Text>
-              <Text style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#71717a', lineHeight: 1.8, marginBottom: '24px' }}>
-                체계화한 뒤, 채널 1개 주 4시간으로 월 200-300
-              </Text>
-              <Text fw={700} style={{ fontSize: 'clamp(18px, 4.5vw, 22px)', color: '#8b5cf6' }}>
-                그 체계가 59강 강의와 AI 스크립트 도구입니다 →
-              </Text>
-            </Box>
-          </Box>
-        </motion.div>
-      </Container>
-    </Box>
-  );
-}
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1254,7 +1287,6 @@ export default function LandingPage() {
       <LandingHeader />
       <HeroSection />
       <PainSection />
-      <WhyFlowSpotSection />
       <HowItWorksSection />
       <PackageSection />
       <FAQSection />
