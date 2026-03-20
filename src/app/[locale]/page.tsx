@@ -449,6 +449,74 @@ function PainSection() {
           </Text>
         </motion.div>
 
+        {/* 파운더 스토리 — 실패 증거 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease }}
+          style={{ textAlign: 'center', marginTop: 'clamp(56px, 12vw, 96px)' }}
+        >
+          <Text ta="center" style={{
+            fontSize: 'clamp(24px, 6.5vw, 34px)',
+            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
+          }}>
+            이걸 어떻게 아냐고요?
+          </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(30px, 8vw, 48px)',
+            fontWeight: 900, color: '#18181b',
+            lineHeight: 1.25, letterSpacing: '-0.02em',
+            marginTop: 'clamp(12px, 3vw, 20px)',
+          }}>
+            저도 돌아가는 길
+            <br />다 걸어봤습니다
+          </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(18px, 4.5vw, 22px)',
+            fontWeight: 500, color: '#71717a', lineHeight: 1.6,
+            marginTop: 'clamp(16px, 4vw, 28px)',
+          }}>
+            4년간 채널 운영하며 겪은 실패의 기록입니다
+          </Text>
+
+          {/* 실패 스크린샷 */}
+          <Stack gap={16} style={{ maxWidth: '520px', margin: 'clamp(32px, 6vw, 48px) auto 0' }}>
+            {[
+              { src: '/images/fail-stats-1.png', caption: '첫 번째 채널 — 조회수 524, 구독자 +11' },
+              { src: '/images/fail-stats-2.png', caption: '두 번째 채널 — 26.6만 조회 후 급락' },
+            ].map((img, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.15, ease }}
+              >
+                <Box style={{
+                  borderRadius: '12px', overflow: 'hidden',
+                  border: '1px solid #e4e4e7',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                }}>
+                  <img
+                    src={img.src}
+                    alt={img.caption}
+                    style={{ width: '100%', display: 'block' }}
+                  />
+                </Box>
+                <Text ta="center" style={{
+                  fontSize: 'clamp(14px, 3.5vw, 16px)',
+                  color: '#a1a1aa', marginTop: '8px',
+                }}>
+                  {img.caption}
+                </Text>
+              </motion.div>
+            ))}
+          </Stack>
+        </motion.div>
+
         {/* 솔루션 브릿지 */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
