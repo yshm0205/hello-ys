@@ -611,7 +611,7 @@ function PainSection() {
           </Box>
         </motion.div>
 
-        {/* 나머지 채널 — 요약 그리드 */}
+        {/* 나머지 채널 — 썸네일 그리드 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -619,55 +619,45 @@ function PainSection() {
           transition={{ duration: 0.5, delay: 0.15, ease }}
           style={{ maxWidth: '560px', margin: 'clamp(32px, 6vw, 48px) auto 0' }}
         >
-          <Text style={{
-            fontSize: '13px', color: 'rgba(255,255,255,0.4)',
-            ...mono, letterSpacing: '0.05em',
-            marginBottom: '12px',
-          }}>
-            OTHER CHANNELS
-          </Text>
           <Box style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: '10px',
           }}>
             {[
-              { name: '채널B 해외반응', revenue: '923만', views: '2,375만 조회' },
-              { name: '채널C 해외반응', revenue: '488만', views: '3,005만 조회' },
-              { name: '채널D 지식/정보', revenue: '159만', views: '46만 조회' },
-              { name: '네이버 클립', revenue: '1,945만', views: '누적 수익' },
+              { name: '채널B 해외반응', revenue: '₩923만', src: '/images/success-ch-c.png' },
+              { name: '채널C 해외반응', revenue: '₩488만', src: '/images/success-ch-d.png' },
+              { name: '채널D 지식/정보', revenue: '₩159만', src: '/images/success-ch-a.png' },
+              { name: '네이버 클립', revenue: '₩1,945만', src: '/images/success-naver-clip.png' },
             ].map((ch, i) => (
               <Box key={i} style={{
-                padding: 'clamp(14px, 3.5vw, 20px)',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
                 borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.03)',
               }}>
-                <Text style={{
-                  fontSize: 'clamp(11px, 3vw, 13px)',
-                  color: 'rgba(255,255,255,0.45)',
-                  marginBottom: '6px',
-                  lineHeight: 1.3,
-                }}>
-                  {ch.name}
-                </Text>
-                <Text style={{
-                  ...mono,
-                  fontSize: 'clamp(18px, 4.5vw, 24px)',
-                  fontWeight: 700,
-                  color: '#4ade80',
-                  lineHeight: 1.2,
-                }}>
-                  ₩{ch.revenue}
-                </Text>
-                <Text style={{
-                  ...mono,
-                  fontSize: 'clamp(10px, 2.5vw, 12px)',
-                  color: 'rgba(255,255,255,0.25)',
-                  marginTop: '4px',
-                }}>
-                  {ch.views}
-                </Text>
+                <Box style={{ overflow: 'hidden' }}>
+                  <img src={ch.src} alt={ch.name} style={{ width: '100%', display: 'block' }} />
+                </Box>
+                <Box style={{ padding: '10px 12px' }}>
+                  <Text style={{
+                    fontSize: 'clamp(10px, 2.8vw, 12px)',
+                    color: 'rgba(255,255,255,0.45)',
+                    marginBottom: '2px',
+                    lineHeight: 1.3,
+                  }}>
+                    {ch.name}
+                  </Text>
+                  <Text style={{
+                    ...mono,
+                    fontSize: 'clamp(15px, 4vw, 18px)',
+                    fontWeight: 700,
+                    color: '#4ade80',
+                    lineHeight: 1.3,
+                  }}>
+                    {ch.revenue}
+                  </Text>
+                </Box>
               </Box>
             ))}
           </Box>
