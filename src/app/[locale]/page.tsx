@@ -473,8 +473,7 @@ function PainSection() {
             fontWeight: 800, color: '#8b5cf6',
             lineHeight: 1.4,
           }}>
-            이 최단거리,
-            <br />하루 아침에 찾은 게 아닙니다
+            어떻게 알았냐고요?
           </Text>
           <motion.div
             animate={{ y: [0, 6, 0] }}
@@ -502,20 +501,11 @@ function PainSection() {
           style={{ textAlign: 'center' }}
         >
           <Text ta="center" style={{
-            fontSize: 'clamp(24px, 6.5vw, 34px)',
-            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-          }}>
-            저도
-          </Text>
-
-          <Text ta="center" style={{
             fontSize: 'clamp(30px, 8vw, 48px)',
             fontWeight: 900, color: '#18181b',
             lineHeight: 1.25, letterSpacing: '-0.02em',
-            marginTop: 'clamp(12px, 3vw, 20px)',
           }}>
-            돌아가는 길
-            <br />다 걸어봤습니다
+            저도 돌아가봤으니까요
           </Text>
 
           <Text ta="center" style={{
