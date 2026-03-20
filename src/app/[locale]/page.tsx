@@ -683,19 +683,18 @@ function PainSection() {
           marginTop: 'clamp(48px, 8vw, 72px)',
         }}>
           <Text style={{
-            fontSize: 'clamp(14px, 3.5vw, 16px)',
-            fontWeight: 600, color: 'rgba(255,255,255,0.35)',
-            letterSpacing: '0.08em', textTransform: 'uppercase',
+            fontSize: 'clamp(15px, 3.8vw, 17px)',
+            fontWeight: 600, color: 'rgba(255,255,255,0.4)',
           }}>
             5개 채널 총 수익
           </Text>
           <Text style={{
-            fontSize: 'clamp(36px, 10vw, 56px)',
+            fontSize: 'clamp(32px, 9vw, 48px)',
             fontWeight: 900, color: '#ffffff',
-            lineHeight: 1.1, marginTop: '8px',
+            lineHeight: 1.2, marginTop: '6px',
             ...mono,
           }}>
-            5,082<span style={{ fontSize: '0.6em', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>만원</span>
+            5,082만원
           </Text>
         </motion.div>
 
