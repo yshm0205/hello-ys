@@ -618,41 +618,65 @@ function PainSection() {
             YouTube 외 플랫폼
           </Text>
         </motion.div>
-        <Stack gap={20} style={{ maxWidth: '560px', margin: '0 auto' }}>
-          {[
-            { src: '/images/success-naver-clip.png', label: '네이버 클립', amount: '₩1,128만' },
-            { src: '/images/success-naver-revenue.jpg', label: '네이버 클립 월별 수익', amount: '월 80~240만' },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.12, ease }}
-            >
-              <Box style={{
-                borderRadius: '12px', overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                background: '#ffffff',
-              }}>
-                <img
-                  src={item.src}
-                  alt={item.label}
-                  style={{ width: '100%', display: 'block' }}
-                />
-              </Box>
-              <Group justify="space-between" mt={8} px={4}>
-                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
-                  {item.label}
-                </Text>
-                <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
-                  {item.amount}
-                </Text>
-              </Group>
-            </motion.div>
-          ))}
-        </Stack>
+        {/* 네이버 — 가로형 (클립 총 수익) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease }}
+          style={{ maxWidth: '560px', margin: '0 auto' }}
+        >
+          <Box style={{
+            borderRadius: '12px', overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: '#ffffff',
+          }}>
+            <img
+              src="/images/success-naver-clip.png"
+              alt="네이버 클립 수익"
+              style={{ width: '100%', display: 'block' }}
+            />
+          </Box>
+          <Group justify="space-between" mt={8} px={4}>
+            <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
+              네이버 클립
+            </Text>
+            <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
+              ₩1,128만
+            </Text>
+          </Group>
+        </motion.div>
+
+        {/* 네이버 — 세로형 (월별 수익) → 폭 제한 + 센터 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.12, ease }}
+          style={{ maxWidth: '300px', margin: '20px auto 0' }}
+        >
+          <Box style={{
+            borderRadius: '12px', overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: '#ffffff',
+          }}>
+            <img
+              src="/images/success-naver-revenue.jpg"
+              alt="네이버 클립 월별 수익"
+              style={{ width: '100%', display: 'block' }}
+            />
+          </Box>
+          <Group justify="space-between" mt={8} px={4}>
+            <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa' }}>
+              네이버 클립 월별 수익
+            </Text>
+            <Text fw={700} style={{ fontSize: 'clamp(16px, 4vw, 20px)', color: '#22c55e', ...mono }}>
+              월 80~240만
+            </Text>
+          </Group>
+        </motion.div>
 
         {/* 공식 발견 브릿지 */}
         <motion.div {...fadeUp}>
