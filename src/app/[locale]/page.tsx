@@ -969,8 +969,8 @@ function ProductRevealSection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={12} mb={56}>
             <Text style={{
-              fontSize: 'clamp(24px, 6.5vw, 36px)',
-              fontWeight: 800, color: '#8b5cf6',
+              fontSize: 'clamp(18px, 4.5vw, 22px)',
+              fontWeight: 700, color: '#8b5cf6',
             }}>
               그래서 그 최단거리가 뭐냐고요?
             </Text>
@@ -978,9 +978,16 @@ function ProductRevealSection() {
               fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 900,
               color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.3,
             }}>
-              혼자 헤매지 않도록
-              <br />전부 준비했습니다.
+              원리를 체득하고
+              <br />즉시 실행하는 구조입니다.
             </Title>
+            <Text ta="center" style={{
+              fontSize: 'clamp(16px, 4vw, 19px)',
+              fontWeight: 600, color: '#71717a',
+              marginTop: '8px',
+            }}>
+              쇼츠 수익화 최단거리 패스를 소개합니다.
+            </Text>
           </Stack>
         </motion.div>
 
