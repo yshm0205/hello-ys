@@ -888,8 +888,141 @@ function PainSection() {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   섹션 3: WhyFlowSpot — (removed, merged into PainSection success)
+   섹션 3: ProductReveal — 최단거리의 정체 (강의 + AI 소개)
    ═══════════════════════════════════════════════════════════════ */
+function ProductRevealSection() {
+  const items = [
+    {
+      tag: '기본기',
+      title: '전자책',
+      desc: '유튜브 초보가 반복해서 보며 기본기를 잡는 로드맵',
+      placeholder: '전자책 표지',
+      accent: '#8b5cf6',
+    },
+    {
+      tag: '시스템',
+      title: '노션 운영 템플릿',
+      desc: '편집자 협업까지 갖춘 채널 운영 시스템',
+      placeholder: '노션 화면 GIF',
+      accent: '#3b82f6',
+    },
+    {
+      tag: '트렌드',
+      title: '채널 목록',
+      desc: '매달 업데이트 — 조회수 잘 나오는 트렌드 채널',
+      placeholder: '채널 목록 화면',
+      accent: '#22c55e',
+    },
+    {
+      tag: '전 과정',
+      title: 'VOD 강의',
+      desc: '채널 기획 · 촬영 · AI 생성 · 편집 3종 · 스크립트 작성법',
+      placeholder: '강의 화면',
+      accent: '#f59e0b',
+    },
+    {
+      tag: 'AI',
+      title: 'AI 스크립트 프로그램',
+      desc: '소재만 넣으면 검증된 구조로 대본이 완성됩니다',
+      placeholder: 'AI 스크립트 작동 GIF',
+      accent: '#a78bfa',
+    },
+  ];
+
+  return (
+    <Box component="section" style={{
+      background: '#faf5ff',
+      padding: 'clamp(60px, 10vw, 120px) 0',
+    }}>
+      <Container size="lg">
+        <motion.div {...fadeUp}>
+          <Stack align="center" gap={12} mb={56}>
+            <Text style={{
+              fontSize: 'clamp(15px, 3.8vw, 17px)',
+              fontWeight: 600, color: '#8b5cf6',
+            }}>
+              그래서, 이 최단거리는?
+            </Text>
+            <Title order={2} ta="center" style={{
+              fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 900,
+              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.3,
+            }}>
+              혼자 헤매지 않도록
+              <br />전부 준비했습니다.
+            </Title>
+          </Stack>
+        </motion.div>
+
+        <Stack gap={40} style={{ maxWidth: '480px', margin: '0 auto' }}>
+          {items.map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.08, ease }}
+            >
+              <Box style={{
+                background: '#ffffff',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                border: '1px solid rgba(0,0,0,0.06)',
+              }}>
+                {/* 플레이스홀더 이미지 영역 */}
+                <Box style={{
+                  width: '100%',
+                  aspectRatio: '16 / 9',
+                  background: `linear-gradient(135deg, ${item.accent}08 0%, ${item.accent}15 100%)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderBottom: '1px solid rgba(0,0,0,0.04)',
+                }}>
+                  <Text style={{
+                    fontSize: '14px', fontWeight: 600,
+                    color: item.accent, opacity: 0.6,
+                    border: `1.5px dashed ${item.accent}40`,
+                    borderRadius: '8px', padding: '8px 16px',
+                  }}>
+                    {item.placeholder}
+                  </Text>
+                </Box>
+
+                {/* 텍스트 영역 */}
+                <Box style={{ padding: 'clamp(16px, 4vw, 24px)' }}>
+                  <Group gap={8} align="center" mb={6}>
+                    <Badge size="sm" variant="light" color={item.accent} radius="xl" style={{
+                      background: `${item.accent}15`,
+                      color: item.accent,
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: '11px',
+                    }}>
+                      {item.tag}
+                    </Badge>
+                  </Group>
+                  <Text style={{
+                    fontSize: 'clamp(20px, 5vw, 24px)',
+                    fontWeight: 800, color: '#18181b',
+                    lineHeight: 1.3, marginBottom: '6px',
+                  }}>
+                    {item.title}
+                  </Text>
+                  <Text style={{
+                    fontSize: 'clamp(14px, 3.5vw, 16px)',
+                    fontWeight: 500, color: '#71717a',
+                    lineHeight: 1.6,
+                  }}>
+                    {item.desc}
+                  </Text>
+                </Box>
+              </Box>
+            </motion.div>
+          ))}
+        </Stack>
+      </Container>
+    </Box>
+  );
+}
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1490,6 +1623,7 @@ export default function LandingPage() {
       <LandingHeader />
       <HeroSection />
       <PainSection />
+      <ProductRevealSection />
       <HowItWorksSection />
       <PackageSection />
       <FAQSection />
