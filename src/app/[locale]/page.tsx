@@ -896,7 +896,7 @@ function ProductRevealSection() {
       tag: '기본기',
       num: '01',
       title: '전자책',
-      desc: '유튜브 초보가 반복해서 보며 기본기를 잡는 로드맵',
+      desc: '쇼츠의 기초 체력을 잡습니다. 반복해서 보며 원리를 체득하는 로드맵.',
       placeholder: '전자책 표지',
       accent: '#8b5cf6',
       icon: (
@@ -906,36 +906,10 @@ function ProductRevealSection() {
       ),
     },
     {
-      tag: '시스템',
-      num: '02',
-      title: '노션 운영 템플릿',
-      desc: '편집자 협업까지 갖춘 채널 운영 시스템',
-      placeholder: '노션 화면 GIF',
-      accent: '#3b82f6',
-      icon: (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-        </svg>
-      ),
-    },
-    {
-      tag: '트렌드',
-      num: '03',
-      title: '월간 채널 추천 리스트',
-      desc: '매달 업데이트 — 조회수 잘 나오는 트렌드 채널',
-      placeholder: '채널 목록 화면',
-      accent: '#22c55e',
-      icon: (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
-        </svg>
-      ),
-    },
-    {
       tag: '전 과정',
-      num: '04',
-      title: 'VOD 강의',
-      desc: '채널 기획 · 촬영 · AI 생성 · 편집 3종 · 스크립트 작성법',
+      num: '02',
+      title: 'VOD 강의 59강',
+      desc: '채널 기획부터 촬영, AI 생성, 편집, 스크립트까지. 수익화의 전 과정을 익힙니다.',
       placeholder: '강의 화면',
       accent: '#f59e0b',
       icon: (
@@ -945,10 +919,23 @@ function ProductRevealSection() {
       ),
     },
     {
+      tag: '트렌드',
+      num: '03',
+      title: '월간 채널 추천 리스트',
+      desc: '뭘 만들지 고민 끝. 매달 업데이트되는 트렌드 채널로 소재를 찾습니다.',
+      placeholder: '채널 목록 화면',
+      accent: '#22c55e',
+      icon: (
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+        </svg>
+      ),
+    },
+    {
       tag: 'AI',
-      num: '05',
+      num: '04',
       title: 'AI 스크립트 프로그램',
-      desc: '소재만 넣으면 검증된 구조로 대본이 완성됩니다',
+      desc: '소재만 넣으면 검증된 구조로 대본이 완성됩니다. 3분이면 끝.',
       placeholder: 'AI 스크립트 작동 GIF',
       accent: '#8b5cf6',
       icon: (
@@ -957,6 +944,19 @@ function ProductRevealSection() {
         </svg>
       ),
       featured: true,
+    },
+    {
+      tag: '시스템',
+      num: '05',
+      title: '노션 운영 템플릿',
+      desc: '편집자 협업부터 일정 관리까지. 채널을 지속 성장시키는 운영 시스템.',
+      placeholder: '노션 화면 GIF',
+      accent: '#3b82f6',
+      icon: (
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+        </svg>
+      ),
     },
   ];
 
