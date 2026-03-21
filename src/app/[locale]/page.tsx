@@ -749,8 +749,15 @@ function PainSection() {
             fontWeight: 700, color: 'rgba(255,255,255,0.8)',
             lineHeight: 1.5, marginTop: 'clamp(32px, 6vw, 48px)',
           }}>
-            이 최단거리를 먼저 걸은
-            <br />수강생들의 결과입니다.
+            그리고 그 최단거리를 그대로 전달했습니다.
+          </Text>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(17px, 4.3vw, 22px)',
+            fontWeight: 600, color: 'rgba(255,255,255,0.6)',
+            lineHeight: 1.5, marginTop: 'clamp(16px, 3vw, 24px)',
+          }}>
+            먼저 실행한 수강생들의 결과입니다.
           </Text>
         </motion.div>
 
