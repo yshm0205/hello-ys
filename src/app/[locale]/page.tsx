@@ -618,8 +618,12 @@ function PainSection() {
               </Group>
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                border: i === 0
+                  ? '1.5px solid rgba(34,197,94,0.4)'
+                  : '1px solid rgba(34,197,94,0.2)',
+                boxShadow: i === 0
+                  ? '0 4px 20px rgba(0,0,0,0.3), 0 0 24px rgba(34,197,94,0.12)'
+                  : '0 4px 20px rgba(0,0,0,0.3), 0 0 12px rgba(34,197,94,0.06)',
               }}>
                 <img src={item.src} alt={`${item.label} 수익 ${item.amount}`} style={{ width: '100%', display: 'block' }} />
               </Box>
@@ -657,16 +661,16 @@ function PainSection() {
             <Stack gap={16}>
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                border: '1px solid rgba(34,197,94,0.2)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 12px rgba(34,197,94,0.06)',
                 background: '#ffffff',
               }}>
                 <img src="/images/success-naver-clip.png" alt="네이버 클립 수익" style={{ width: '100%', display: 'block' }} />
               </Box>
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                border: '1px solid rgba(34,197,94,0.2)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 12px rgba(34,197,94,0.06)',
                 background: '#ffffff',
               }}>
                 <img src="/images/success-naver-revenue.jpg" alt="네이버 클립 월별 수익" style={{ width: '100%', display: 'block' }} />
