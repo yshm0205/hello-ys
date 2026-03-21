@@ -697,6 +697,13 @@ function PainSection() {
           }}>
             5,082만원
           </Text>
+          <Text style={{
+            fontSize: 'clamp(11px, 2.8vw, 13px)',
+            fontWeight: 500, color: 'rgba(255,255,255,0.25)',
+            marginTop: '12px',
+          }}>
+            (판매된 채널의 성과는 포함하지 않았습니다)
+          </Text>
         </motion.div>
 
         {/* ── 반론 제기 + 수강생 후기 ── */}
