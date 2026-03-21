@@ -771,15 +771,15 @@ function PainSection() {
             >
               <Group gap={10} align="center" mb={12} justify="center" wrap="nowrap">
                 <Box style={{
-                  flexShrink: 0, width: 22, height: 22, borderRadius: '50%',
+                  flexShrink: 0, width: 26, height: 26, borderRadius: '50%',
                   background: '#22c55e',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Check size={13} color="#ffffff" strokeWidth={3} />
+                  <Check size={15} color="#ffffff" strokeWidth={3} />
                 </Box>
                 <Text style={{
-                  fontSize: 'clamp(16px, 4.2vw, 20px)',
-                  fontWeight: 800, color: 'rgba(255,255,255,0.7)',
+                  fontSize: 'clamp(20px, 5.5vw, 28px)',
+                  fontWeight: 800, color: 'rgba(255,255,255,0.85)',
                 }}>
                   {item.caption}
                 </Text>
@@ -824,8 +824,8 @@ function PainSection() {
               transition={{ duration: 0.5, delay: i * 0.06, ease }}
             >
               <Text ta="center" style={{
-                fontSize: 'clamp(16px, 4.2vw, 20px)',
-                fontWeight: 700, color: 'rgba(167,139,250,0.7)',
+                fontSize: 'clamp(20px, 5.5vw, 28px)',
+                fontWeight: 700, color: 'rgba(167,139,250,0.85)',
                 marginBottom: '12px',
                 lineHeight: 1.4,
               }}>
@@ -969,8 +969,8 @@ function ProductRevealSection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={12} mb={56}>
             <Text style={{
-              fontSize: 'clamp(15px, 3.8vw, 17px)',
-              fontWeight: 600, color: '#8b5cf6',
+              fontSize: 'clamp(24px, 6.5vw, 36px)',
+              fontWeight: 800, color: '#8b5cf6',
             }}>
               그래서 그 최단거리가 뭐냐고요?
             </Text>
