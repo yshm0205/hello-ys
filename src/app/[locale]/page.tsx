@@ -921,7 +921,7 @@ function ProductRevealSection() {
     {
       tag: '트렌드',
       num: '03',
-      title: '채널 목록',
+      title: '월간 채널 추천 리스트',
       desc: '매달 업데이트 — 조회수 잘 나오는 트렌드 채널',
       placeholder: '채널 목록 화면',
       accent: '#22c55e',
@@ -972,7 +972,7 @@ function ProductRevealSection() {
               fontSize: 'clamp(15px, 3.8vw, 17px)',
               fontWeight: 600, color: '#8b5cf6',
             }}>
-              그래서, 이 최단거리는?
+              그래서 그 최단거리가 뭐냐고요?
             </Text>
             <Title order={2} ta="center" style={{
               fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 900,
