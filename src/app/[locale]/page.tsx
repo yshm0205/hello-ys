@@ -1105,6 +1105,205 @@ function ProductRevealSection() {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   섹션 3.5: WhySpecial — 이 코스가 특별한 이유 (비교 + 커리큘럼)
+   ═══════════════════════════════════════════════════════════════ */
+function WhySpecialSection() {
+  const isMobile = useIsMobile();
+
+  const comparisonRows = [
+    { label: '가격', left: '99~160만원', right: '50만원' },
+    { label: '제공 범위', left: '강의만 제공', right: '강의 + AI + 도구 전부' },
+    { label: '수강 기간', left: '100일 (기수제)', right: '4개월 수강' },
+    { label: '대본 작성', left: '직접 작성', right: 'AI가 3분 만에 완성' },
+    { label: 'AI 도구', left: '없음', right: '6개월 포함' },
+  ];
+
+  const curriculum = [
+    { part: 'Part 1', title: '채널 기획', desc: '니치 선정, 채널 컨셉, 벤치마크 분석' },
+    { part: 'Part 2', title: '촬영 & 편집', desc: '장비, 촬영 기법, 편집 워크플로우' },
+    { part: 'Part 3', title: '스크립트 & AI', desc: '대본 구조, AI 활용, 훅 작성법' },
+    { part: 'Part 4', title: '수익화', desc: '애드센스, 브랜드딜, 채널 매각' },
+  ];
+
+  return (
+    <Box component="section" style={{
+      background: '#ffffff',
+      padding: 'clamp(60px, 10vw, 120px) 0',
+      position: 'relative',
+    }}>
+      <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
+
+      <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
+        <motion.div {...fadeUp}>
+          <Stack align="center" gap={8} mb={56}>
+            <Badge size="lg" variant="light" color="violet" radius="xl" style={{
+              padding: '8px 18px', fontSize: '14px',
+            }}>
+              차별화
+            </Badge>
+            <Title order={2} ta="center" style={{
+              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
+              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
+            }}>
+              이 코스가 특별한 이유
+            </Title>
+          </Stack>
+        </motion.div>
+
+        {/* 양쪽 비교표 */}
+        <motion.div {...fadeUp}>
+          <Box style={{
+            maxWidth: '640px', margin: '0 auto',
+            borderRadius: '16px', overflow: 'hidden',
+            border: '1px solid #d4d4d8',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+          }}>
+            {/* 헤더 */}
+            <Box style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr',
+            }}>
+              <Box style={{
+                background: '#f4f4f5',
+                padding: 'clamp(14px, 3vw, 20px)',
+                textAlign: 'center',
+                borderRight: '1px solid #d4d4d8',
+                borderBottom: '1px solid #d4d4d8',
+              }}>
+                <Group gap={6} justify="center" wrap="nowrap">
+                  <X size={16} color="#a1a1aa" />
+                  <Text fw={700} style={{ fontSize: 'clamp(14px, 3.5vw, 17px)', color: '#71717a' }}>
+                    일반 강의
+                  </Text>
+                </Group>
+              </Box>
+              <Box style={{
+                background: '#faf5ff',
+                padding: 'clamp(14px, 3vw, 20px)',
+                textAlign: 'center',
+                borderBottom: '1px solid rgba(139,92,246,0.2)',
+              }}>
+                <Group gap={6} justify="center" wrap="nowrap">
+                  <Check size={16} color="#8b5cf6" />
+                  <Text fw={700} style={{ fontSize: 'clamp(14px, 3.5vw, 17px)', color: '#8b5cf6' }}>
+                    올인원 패스
+                  </Text>
+                </Group>
+              </Box>
+            </Box>
+
+            {/* 비교 행들 */}
+            {comparisonRows.map((row, i) => (
+              <Box key={i} style={{
+                display: 'grid', gridTemplateColumns: '1fr 1fr',
+                borderBottom: i < comparisonRows.length - 1 ? '1px solid #f4f4f5' : 'none',
+              }}>
+                <Box style={{
+                  padding: 'clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 20px)',
+                  borderRight: '1px solid #f4f4f5',
+                  background: '#ffffff',
+                }}>
+                  <Text style={{
+                    fontSize: '11px', fontWeight: 600, color: '#a1a1aa',
+                    letterSpacing: '0.04em', marginBottom: '4px',
+                    textTransform: 'uppercase',
+                  }}>
+                    {row.label}
+                  </Text>
+                  <Text style={{
+                    fontSize: 'clamp(14px, 3.2vw, 16px)', color: '#71717a',
+                    lineHeight: 1.4,
+                  }}>
+                    {row.left}
+                  </Text>
+                </Box>
+                <Box style={{
+                  padding: 'clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 20px)',
+                  background: '#ffffff',
+                }}>
+                  <Text style={{
+                    fontSize: '11px', fontWeight: 600, color: 'rgba(139,92,246,0.5)',
+                    letterSpacing: '0.04em', marginBottom: '4px',
+                    textTransform: 'uppercase',
+                  }}>
+                    {row.label}
+                  </Text>
+                  <Text fw={600} style={{
+                    fontSize: 'clamp(14px, 3.2vw, 16px)', color: '#18181b',
+                    lineHeight: 1.4,
+                  }}>
+                    {row.right}
+                  </Text>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </motion.div>
+
+        {/* 전환 멘트 */}
+        <motion.div {...fadeUp}>
+          <Text ta="center" style={{
+            fontSize: 'clamp(18px, 4.5vw, 22px)',
+            fontWeight: 700, color: '#8b5cf6',
+            marginTop: 'clamp(56px, 10vw, 80px)',
+            marginBottom: 'clamp(32px, 6vw, 48px)',
+          }}>
+            그래서 뭘 배우냐고요?
+          </Text>
+        </motion.div>
+
+        {/* 커리큘럼 아코디언 */}
+        <Box style={{ maxWidth: '540px', margin: '0 auto' }}>
+          <Accordion
+            variant="separated"
+            radius="lg"
+            styles={{
+              item: {
+                background: '#ffffff', border: '1px solid #d4d4d8',
+                marginBottom: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+              },
+              control: {
+                color: '#18181b', fontWeight: 700,
+                fontSize: 'clamp(16px, 3.5vw, 18px)', padding: '16px 20px',
+              },
+              panel: {
+                color: '#52525b', fontSize: 'clamp(15px, 3vw, 16px)',
+                lineHeight: 1.7, padding: '0 20px 16px',
+              },
+            }}
+          >
+            {curriculum.map((c, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08, ease }}
+              >
+                <Accordion.Item value={c.title}>
+                  <Accordion.Control>
+                    <Group gap={10} wrap="nowrap">
+                      <Text style={{
+                        ...mono, fontSize: '12px', fontWeight: 800,
+                        color: '#8b5cf6', flexShrink: 0,
+                      }}>
+                        {c.part}
+                      </Text>
+                      {c.title}
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>{c.desc}</Accordion.Panel>
+                </Accordion.Item>
+              </motion.div>
+            ))}
+          </Accordion>
+        </Box>
+      </Container>
+    </Box>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    섹션 4: HowItWorks — 단계별 진단 (세로 스택)
    ═══════════════════════════════════════════════════════════════ */
 function HowItWorksSection() {
@@ -1299,100 +1498,16 @@ function PackageSection() {
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
             <Badge size="lg" variant="light" color="cyan" radius="xl" style={{ padding: '8px 18px', fontSize: '14px' }}>
-              가격 비교
+              가격
             </Badge>
             <Title order={2} ta="center" style={{
               fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
               color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
             }}>
-              왜 이 가격인가요?
+              얼마인가요?
             </Title>
           </Stack>
         </motion.div>
-
-        {/* Comparison — 세로 스택 */}
-        <Stack gap={16} style={{ maxWidth: '480px', margin: '0 auto 56px' }}>
-          {/* 일반 유료 강의 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease }}
-          >
-            <Paper radius="lg" style={{
-              background: '#ffffff', border: '1px solid #d4d4d8',
-              padding: 'clamp(20px, 4vw, 32px)',
-            }}>
-              <Group mb={20} gap={10}>
-                <Box style={{
-                  width: 32, height: 32, borderRadius: 8,
-                  background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <X size={16} color="#ef4444" />
-                </Box>
-                <Text fw={700} style={{ fontSize: 'clamp(16px, 3vw, 18px)', color: '#52525b' }}>일반 유료 강의</Text>
-              </Group>
-              <Stack gap={12}>
-                {[
-                  '가격 99~160만원',
-                  '강의만 제공 (실행은 알아서)',
-                  '기간 제한 (100일, 기수제)',
-                  '대본은 직접 써야 함',
-                  'AI 도구 없음',
-                ].map((t, i) => (
-                  <Group key={i} gap={8} wrap="nowrap">
-                    <X size={14} color="#a1a1aa" style={{ flexShrink: 0 }} />
-                    <Text style={{ color: '#52525b', fontSize: 'clamp(15px, 3vw, 16px)', lineHeight: 1.4 }}>{t}</Text>
-                  </Group>
-                ))}
-              </Stack>
-            </Paper>
-          </motion.div>
-
-          {/* 올인원 패스 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.15, ease }}
-          >
-            <Paper radius="lg" style={{
-              background: '#ffffff', border: '2px solid #8b5cf6',
-              position: 'relative', padding: 'clamp(20px, 4vw, 32px)',
-              boxShadow: '0 4px 24px rgba(139,92,246,0.1), 0 1px 2px rgba(0,0,0,0.04)',
-            }}>
-              <Badge color="violet" size="sm" style={{
-                position: 'absolute', top: -10, right: 20,
-                boxShadow: '0 2px 8px rgba(139,92,246,0.25)',
-              }}>
-                추천
-              </Badge>
-              <Group mb={20} gap={10}>
-                <Box style={{
-                  width: 32, height: 32, borderRadius: 8,
-                  background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Check size={16} color="#22c55e" />
-                </Box>
-                <Text fw={700} style={{ fontSize: 'clamp(18px, 4vw, 20px)', color: '#18181b' }}>올인원 패스</Text>
-              </Group>
-              <Stack gap={12}>
-                {[
-                  '가격 50만원 (60% 저렴)',
-                  '강의 + AI로 바로 실행',
-                  '강의 4개월 수강',
-                  'AI가 3분 만에 대본 작성',
-                  'AI 스크립트 도구 6개월',
-                ].map((t, i) => (
-                  <Group key={i} gap={8} wrap="nowrap">
-                    <Check size={14} color="#22c55e" style={{ flexShrink: 0 }} />
-                    <Text fw={500} style={{ color: '#18181b', fontSize: 'clamp(15px, 3vw, 16px)', lineHeight: 1.4 }}>{t}</Text>
-                  </Group>
-                ))}
-              </Stack>
-            </Paper>
-          </motion.div>
-        </Stack>
 
         {/* Value breakdown — receipt */}
         <motion.div {...fadeUp}>
@@ -1703,6 +1818,7 @@ export default function LandingPage() {
       <HeroSection />
       <PainSection />
       <ProductRevealSection />
+      <WhySpecialSection />
       <HowItWorksSection />
       <PackageSection />
       <FAQSection />
