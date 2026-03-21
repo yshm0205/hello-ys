@@ -749,8 +749,8 @@ function PainSection() {
             fontWeight: 700, color: 'rgba(255,255,255,0.8)',
             lineHeight: 1.5, marginTop: 'clamp(32px, 6vw, 48px)',
           }}>
-            같은 최단거리를 걷고 있는
-            <br />분들의 결과입니다.
+            이 최단거리를 먼저 걸은
+            <br />수강생들의 결과입니다.
           </Text>
         </motion.div>
 
