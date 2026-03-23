@@ -904,52 +904,32 @@ function ProductRevealSection() {
       num: '01',
       title: '전자책',
       desc: '쇼츠의 기초 체력을 잡습니다. 반복해서 보며 원리를 체득하는 로드맵.',
-      placeholder: '전자책 표지',
+      src: '/images/product-ebook.gif',
       accent: '#8b5cf6',
-      icon: (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        </svg>
-      ),
     },
     {
       tag: '전 과정',
       num: '02',
       title: 'VOD 강의 59강',
       desc: '채널 기획부터 촬영, AI 생성, 편집, 스크립트까지. 수익화의 전 과정을 익힙니다.',
-      placeholder: '강의 화면',
+      src: '/images/product-vod.gif',
       accent: '#f59e0b',
-      icon: (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-      ),
     },
     {
       tag: '트렌드',
       num: '03',
       title: '월간 채널 추천 리스트',
       desc: '뭘 만들지 고민 끝. 매달 업데이트되는 트렌드 채널로 소재를 찾습니다.',
-      placeholder: '채널 목록 화면',
+      src: '/images/product-channel-list.gif',
       accent: '#22c55e',
-      icon: (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
-        </svg>
-      ),
     },
     {
       tag: 'AI',
       num: '04',
       title: 'AI 스크립트 프로그램',
       desc: '소재만 넣으면 검증된 구조로 대본이 완성됩니다. 3분이면 끝.',
-      placeholder: 'AI 스크립트 작동 GIF',
+      src: '/images/product-ai-script.gif',
       accent: '#8b5cf6',
-      icon: (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" /><path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z" /><circle cx="12" cy="6" r="1" fill="currentColor" /><path d="M9 22l1-3M15 22l-1-3" />
-        </svg>
-      ),
       featured: true,
     },
     {
@@ -957,13 +937,8 @@ function ProductRevealSection() {
       num: '05',
       title: '노션 운영 템플릿',
       desc: '편집자 협업부터 일정 관리까지. 채널을 지속 성장시키는 운영 시스템.',
-      placeholder: '노션 화면 GIF',
+      src: '/images/product-notion.gif',
       accent: '#3b82f6',
-      icon: (
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-        </svg>
-      ),
     },
   ];
 
@@ -1016,53 +991,19 @@ function ProductRevealSection() {
                   : '0 2px 12px rgba(0,0,0,0.06)',
                 border: item.featured ? '1.5px solid rgba(139,92,246,0.3)' : '1px solid rgba(0,0,0,0.06)',
               }}>
-                {/* 플레이스홀더 이미지 영역 */}
+                {/* GIF 이미지 영역 */}
                 <Box style={{
                   width: '100%',
-                  aspectRatio: '16 / 9',
-                  background: item.featured
-                    ? `linear-gradient(145deg, #1e1b4b 0%, #312e81 40%, #1e1b4b 100%)`
-                    : `linear-gradient(145deg, ${item.accent}06 0%, ${item.accent}12 60%, ${item.accent}06 100%)`,
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center',
-                  gap: '12px',
                   borderBottom: item.featured ? '1px solid rgba(139,92,246,0.2)' : '1px solid rgba(0,0,0,0.04)',
                   position: 'relative',
                   overflow: 'hidden',
                 }}>
-                  {/* 배경 패턴 — 도트 그리드 */}
-                  <Box style={{
-                    position: 'absolute', inset: 0,
-                    backgroundImage: item.featured
-                      ? 'radial-gradient(circle, rgba(139,92,246,0.15) 1px, transparent 1px)'
-                      : `radial-gradient(circle, ${item.accent}12 1px, transparent 1px)`,
-                    backgroundSize: '20px 20px',
-                  }} />
-                  {/* 넘버링 */}
-                  <Text style={{
-                    position: 'absolute', top: '12px', left: '16px',
-                    fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em',
-                    color: item.featured ? 'rgba(167,139,250,0.5)' : `${item.accent}50`,
-                  }}>
-                    {item.num}
-                  </Text>
-                  {/* 아이콘 */}
-                  <Box style={{
-                    color: item.featured ? '#a78bfa' : item.accent,
-                    opacity: item.featured ? 0.9 : 0.45,
-                    position: 'relative',
-                  }}>
-                    {item.icon}
-                  </Box>
-                  {/* 플레이스홀더 라벨 */}
-                  <Text style={{
-                    fontSize: '12px', fontWeight: 600,
-                    color: item.featured ? 'rgba(167,139,250,0.6)' : `${item.accent}60`,
-                    position: 'relative',
-                    letterSpacing: '0.02em',
-                  }}>
-                    {item.placeholder}
-                  </Text>
+                  <img
+                    src={item.src}
+                    alt={item.title}
+                    loading="lazy"
+                    style={{ width: '100%', display: 'block' }}
+                  />
                 </Box>
 
                 {/* 텍스트 영역 */}
