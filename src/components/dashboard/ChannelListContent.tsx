@@ -37,7 +37,6 @@ interface ChannelData {
 
 // ── 상수 ──
 const AVAILABLE_MONTHS = [
-    { value: '2026-03', label: '2026년 3월', file: 'channels_2026_03.json' },
     { value: '2026-02', label: '2026년 2월', file: 'channels_2026_02.json' },
     { value: '2026-01', label: '2026년 1월', file: 'channels_2026_01.json' },
 ];
