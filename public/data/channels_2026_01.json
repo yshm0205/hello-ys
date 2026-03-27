@@ -1,0 +1,4287 @@
+{
+  "month": "2026-01",
+  "updated_at": "2026-01-28",
+  "total": 428,
+  "channels": [
+    {
+      "name": "유유타이거_유타가족TV",
+      "subscribers": 437000,
+      "avg_views": 4014450,
+      "median_views": 2450006,
+      "category": "일상/공감",
+      "subcategory": "가족 일상",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EC%9C%A0%EC%9C%A0%ED%83%80%EC%9D%B4%EA%B1%B0/shorts"
+    },
+    {
+      "name": "인간국",
+      "subscribers": 464000,
+      "avg_views": 3464686,
+      "median_views": 1503126,
+      "category": "일상/공감",
+      "subcategory": "감동 스토리",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@HumanWon/shorts"
+    },
+    {
+      "name": "숏랭커",
+      "subscribers": 129000,
+      "avg_views": 2798399,
+      "median_views": 1235700,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%88%8F%EB%9E%AD%EC%BB%A4/shorts"
+    },
+    {
+      "name": "케이팝 읽어주는 남녀",
+      "subscribers": 64000,
+      "avg_views": 2771318,
+      "median_views": 1616752,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%BC%80%EC%9D%B4%ED%8C%9D%EC%9D%BD%EC%96%B4%EC%A3%BC%EB%8A%94%EB%82%A8%EB%85%80/shorts"
+    },
+    {
+      "name": "꿀팁주부 백살림",
+      "subscribers": 184000,
+      "avg_views": 2730820,
+      "median_views": 1861935,
+      "category": "일상/공감",
+      "subcategory": "꿀팁",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EA%BF%80%ED%8C%81%EC%A3%BC%EB%B6%80%EB%B0%B1%EC%82%B4%EB%A6%BC/shorts"
+    },
+    {
+      "name": "쌤온다",
+      "subscribers": 133000,
+      "avg_views": 2657139,
+      "median_views": 1586436,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@teacherscoming/shorts"
+    },
+    {
+      "name": "tennis boost",
+      "subscribers": 10100,
+      "avg_views": 2588930,
+      "median_views": 1132912,
+      "category": "취미/덕질",
+      "subcategory": "테니스",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@tennisboost/shorts"
+    },
+    {
+      "name": "이거아새우",
+      "subscribers": 240000,
+      "avg_views": 2481236,
+      "median_views": 469480,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@U_Know_This_1/shorts"
+    },
+    {
+      "name": "공간 탐닉 Space Tamnik",
+      "subscribers": 464000,
+      "avg_views": 2414107,
+      "median_views": 1803003,
+      "category": "푸드/뷰티",
+      "subcategory": "음식점 리뷰",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@space_tamnik/shorts"
+    },
+    {
+      "name": "투미영 Too miyeong",
+      "subscribers": 108000,
+      "avg_views": 2397627,
+      "median_views": 143635,
+      "category": "취미/덕질",
+      "subcategory": "DIY",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@toomiyeong/shorts"
+    },
+    {
+      "name": "둥깜박",
+      "subscribers": 190000,
+      "avg_views": 2346820,
+      "median_views": 1218616,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Ohwhatisit/shorts"
+    },
+    {
+      "name": "녱",
+      "subscribers": 51000,
+      "avg_views": 2219781,
+      "median_views": 1514554,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%85%B1%EC%9D%B4/shorts"
+    },
+    {
+      "name": "꿀잼츄러스",
+      "subscribers": 60800,
+      "avg_views": 2144491,
+      "median_views": 575308,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "소리없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EA%BF%80%EC%9E%BC%EC%B8%84%EB%9F%AC%EC%8A%A4/shorts"
+    },
+    {
+      "name": "풀썰리",
+      "subscribers": 5280,
+      "avg_views": 2101484,
+      "median_views": 283885,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@full_sulli/shorts"
+    },
+    {
+      "name": "엠아이피랭킹",
+      "subscribers": 22600,
+      "avg_views": 2045639,
+      "median_views": 1405304,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%97%A0%EC%95%84%EC%9D%B4%ED%94%BC%EB%9E%AD%ED%82%B9/shorts"
+    },
+    {
+      "name": "동파민",
+      "subscribers": 12000,
+      "avg_views": 2036063,
+      "median_views": 202329,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "랭킹쇼츠 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8F%99%ED%8C%8C%EB%AF%BC-u9e/shorts"
+    },
+    {
+      "name": "돌무비",
+      "subscribers": 14200,
+      "avg_views": 1986392,
+      "median_views": 627482,
+      "category": "연예/팬덤",
+      "subcategory": "영화 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8F%8C%EB%AC%B4%EB%B9%84-q3c/shorts"
+    },
+    {
+      "name": "쇼츠공장",
+      "subscribers": 218000,
+      "avg_views": 1915132,
+      "median_views": 1405248,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@shorts_factoryy/shorts"
+    },
+    {
+      "name": "리뷰띠",
+      "subscribers": 577000,
+      "avg_views": 1910564,
+      "median_views": 1312006,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈 / 리뷰",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EB%A6%AC%EB%B7%B0%EB%9D%A0/shorts"
+    },
+    {
+      "name": "배구따라 여행따라",
+      "subscribers": 14900,
+      "avg_views": 1878280,
+      "median_views": 867810,
+      "category": "취미/덕질",
+      "subcategory": "배구",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Volleyandtravel/shorts"
+    },
+    {
+      "name": "잇템로그",
+      "subscribers": 26900,
+      "avg_views": 1787472,
+      "median_views": 497930,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응/화장품",
+      "format": "해설형/짜집기 편집",
+      "channel_url": "https://www.youtube.com/@it_item_log/shorts"
+    },
+    {
+      "name": "여우냥",
+      "subscribers": 15400,
+      "avg_views": 1720755,
+      "median_views": 774156,
+      "category": "취미/덕질",
+      "subcategory": "귀여운 동물",
+      "format": "소리없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%97%AC%EC%9A%B0%EB%83%A5-r1n/shorts"
+    },
+    {
+      "name": "로켓업",
+      "subscribers": 13100,
+      "avg_views": 1658791,
+      "median_views": 385996,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A1%9C%EC%BC%93UP/shorts"
+    },
+    {
+      "name": "마군입니다",
+      "subscribers": 101000,
+      "avg_views": 1628348,
+      "median_views": 1000204,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EB%A7%88%EA%B5%B0%EC%9E%85%EB%8B%88%EB%8B%A4/shorts"
+    },
+    {
+      "name": "버큐멘터리",
+      "subscribers": 165000,
+      "avg_views": 1613731,
+      "median_views": 387518,
+      "category": "취미/덕질",
+      "subcategory": "커뮤니티/버튜버",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EB%B2%84%ED%81%90%EB%A9%98%ED%84%B0%EB%A6%AC/shorts"
+    },
+    {
+      "name": "패션탐정냥",
+      "subscribers": 122000,
+      "avg_views": 1593003,
+      "median_views": 1108913,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@tamjeongcat/shorts"
+    },
+    {
+      "name": "개떡상",
+      "subscribers": 51500,
+      "avg_views": 1566331,
+      "median_views": 1142581,
+      "category": "취미/덕질",
+      "subcategory": "동물/강아지",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B0%9C%EB%96%A1%EC%83%81dream2/shorts"
+    },
+    {
+      "name": "크볼Z",
+      "subscribers": 38900,
+      "avg_views": 1508297,
+      "median_views": 942315,
+      "category": "취미/덕질",
+      "subcategory": "축구 / 손흥민",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%81%AC%EB%B3%BCZ/shorts"
+    },
+    {
+      "name": "이해불가 | 연예계 이슈",
+      "subscribers": 283000,
+      "avg_views": 1503432,
+      "median_views": 1085046,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%ED%95%B4%EB%B6%88%EA%B0%80_%EC%97%B0%EC%98%88%EA%B3%84/shorts"
+    },
+    {
+      "name": "미디어 파도",
+      "subscribers": 50200,
+      "avg_views": 1492859,
+      "median_views": 328252,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@mediapado/shorts"
+    },
+    {
+      "name": "전교 1등 재헌이",
+      "subscribers": 16900,
+      "avg_views": 1480211,
+      "median_views": 376011,
+      "category": "지식/정보",
+      "subcategory": "공부/입시",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@1stjaelaw/shorts"
+    },
+    {
+      "name": "오늘핫이슈",
+      "subscribers": 65700,
+      "avg_views": 1443498,
+      "median_views": 849595,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@todaywashot/shorts"
+    },
+    {
+      "name": "아이유참좋다",
+      "subscribers": 7040,
+      "avg_views": 1430648,
+      "median_views": 967788,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@IU_Good/shorts"
+    },
+    {
+      "name": "더펄슨",
+      "subscribers": 119000,
+      "avg_views": 1425750,
+      "median_views": 851772,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@%EB%8D%94%ED%8E%84%EC%8A%A8/shorts"
+    },
+    {
+      "name": "오마주 투 연아",
+      "subscribers": 28800,
+      "avg_views": 1405669,
+      "median_views": 551764,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@yunakimfan/shorts"
+    },
+    {
+      "name": "프피의 삶 INFP's Daily",
+      "subscribers": 250000,
+      "avg_views": 1400757,
+      "median_views": 600093,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@infps_daily/shorts"
+    },
+    {
+      "name": "동파민",
+      "subscribers": 11900,
+      "avg_views": 1393187,
+      "median_views": 204934,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8F%99%ED%8C%8C%EB%AF%BC-u9e/shorts"
+    },
+    {
+      "name": "발발이",
+      "subscribers": 9420,
+      "avg_views": 1362015,
+      "median_views": 66760,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B0%9C%EB%B0%9C%EC%9D%B41/shorts"
+    },
+    {
+      "name": "ALLADP",
+      "subscribers": 12400,
+      "avg_views": 1315823,
+      "median_views": 131040,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@ALL_ADP/shorts"
+    },
+    {
+      "name": "요부해",
+      "subscribers": 2640,
+      "avg_views": 1308233,
+      "median_views": 43974,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9A%94%EB%A6%AC%EB%A5%BC%EB%B6%80%ED%83%81%ED%95%B497/shorts"
+    },
+    {
+      "name": "소일 - SOIL",
+      "subscribers": 149000,
+      "avg_views": 1304249,
+      "median_views": 783655,
+      "category": "취미/덕질",
+      "subcategory": "노래",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%86%8C%EC%9D%BCMusic/shorts"
+    },
+    {
+      "name": "영상10도",
+      "subscribers": 6470,
+      "avg_views": 1277935,
+      "median_views": 36876,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%98%81%EC%83%8110%EB%8F%84-u5c/shorts"
+    },
+    {
+      "name": "군림보",
+      "subscribers": 1520000,
+      "avg_views": 1276044,
+      "median_views": 894311,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EA%B5%B0%EB%A6%BC%EB%B3%B4/shorts"
+    },
+    {
+      "name": "아아한잔",
+      "subscribers": 49600,
+      "avg_views": 1254246,
+      "median_views": 223263,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%95%84%EC%95%84%ED%95%9C%EC%9E%944/shorts"
+    },
+    {
+      "name": "방구석 친구들",
+      "subscribers": 20300,
+      "avg_views": 1244567,
+      "median_views": 486000,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "신기한 물건",
+      "format": "썰형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@방구석친구들D"
+    },
+    {
+      "name": "알짜베스트",
+      "subscribers": 31400,
+      "avg_views": 1237269,
+      "median_views": 999774,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%95%8C%EC%A7%9C%EB%B2%A0%EC%8A%A4%ED%8A%B8/shorts"
+    },
+    {
+      "name": "하뉴두뉴",
+      "subscribers": 857000,
+      "avg_views": 1235552,
+      "median_views": 923280,
+      "category": "일상/공감",
+      "subcategory": "가족 일상",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%ED%95%98%EB%89%B4%EB%91%90%EB%89%B4/shorts"
+    },
+    {
+      "name": "3분무비",
+      "subscribers": 121000,
+      "avg_views": 1226910,
+      "median_views": 456036,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@3%EB%B6%84%EB%AC%B4%EB%B9%84/shorts"
+    },
+    {
+      "name": "연예부기자 다람이",
+      "subscribers": 144000,
+      "avg_views": 1224320,
+      "median_views": 225884,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@kpop_reporter_daram/shorts"
+    },
+    {
+      "name": "무비바라",
+      "subscribers": 52000,
+      "avg_views": 1217607,
+      "median_views": 508766,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%AC%B4%EB%B9%84%EB%B0%94%EB%9D%BC/shorts"
+    },
+    {
+      "name": "라마의드라마",
+      "subscribers": 52400,
+      "avg_views": 1204927,
+      "median_views": 626804,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%9D%BC%EB%A7%88%EC%9D%98%EB%93%9C%EB%9D%BC%EB%A7%88/shorts"
+    },
+    {
+      "name": "뭔데그래?",
+      "subscribers": 56600,
+      "avg_views": 1176433,
+      "median_views": 259500,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "음식 / 신기한 물건",
+      "format": "썰형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@좋아요누르면차은우"
+    },
+    {
+      "name": "짤비돌",
+      "subscribers": 8560,
+      "avg_views": 1161458,
+      "median_views": 162170,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%A4%EB%B9%84%EB%8F%8C/shorts"
+    },
+    {
+      "name": "맛있는 친구들",
+      "subscribers": 27900,
+      "avg_views": 1160926,
+      "median_views": 781906,
+      "category": "푸드/뷰티",
+      "subcategory": "음식 / 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@yammyknow/shorts"
+    },
+    {
+      "name": "유머모음집",
+      "subscribers": 101000,
+      "avg_views": 1106330,
+      "median_views": 652601,
+      "category": "푸드/뷰티",
+      "subcategory": "먹방/디저트",
+      "format": "썰형",
+      "channel_url": "https://www.youtube.com/@%EA%B5%AC%EB%8F%85%EC%8B%9C-2026%EB%85%84%EC%B4%88%EB%8C%80%EB%B0%95/shorts"
+    },
+    {
+      "name": "말랑콩떡 유이진",
+      "subscribers": 268000,
+      "avg_views": 1105636,
+      "median_views": 512487,
+      "category": "일상/공감",
+      "subcategory": "가족 일상",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@yoo_may/shorts"
+    },
+    {
+      "name": "[ DEW ]옌린",
+      "subscribers": 495000,
+      "avg_views": 1096343,
+      "median_views": 163340,
+      "category": "푸드/뷰티",
+      "subcategory": "먹방/디저트",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@DEW_yenlin/shorts"
+    },
+    {
+      "name": "콩자반",
+      "subscribers": 10200,
+      "avg_views": 1081913,
+      "median_views": 134216,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%BD%A9%EC%9E%90%EB%B0%98d/shorts"
+    },
+    {
+      "name": "세계속감동캠",
+      "subscribers": 35800,
+      "avg_views": 1067048,
+      "median_views": 260064,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%84%B8%EA%B3%84%EC%86%8D%EA%B0%90%EB%8F%99%EC%BA%A0/shorts"
+    },
+    {
+      "name": "김로카",
+      "subscribers": 10900,
+      "avg_views": 1053759,
+      "median_views": 347526,
+      "category": "음악/댄스",
+      "subcategory": "랭킹/모음",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B9%80%EB%A1%9C%EC%B9%B4_com/shorts"
+    },
+    {
+      "name": "띠미 ddimmi",
+      "subscribers": 1220000,
+      "avg_views": 1053522,
+      "median_views": 344064,
+      "category": "푸드/뷰티",
+      "subcategory": "먹방/디저트",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@ddimmi96/shorts"
+    },
+    {
+      "name": "요건 인정이지",
+      "subscribers": 128000,
+      "avg_views": 1048080,
+      "median_views": 342069,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9A%94%EA%B1%B4%EC%9D%B8%EC%A0%95%EC%9D%B4%EC%A7%80/shorts"
+    },
+    {
+      "name": "만월뷰",
+      "subscribers": 30400,
+      "avg_views": 1036992,
+      "median_views": 995369,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A7%8C%EC%9B%94%EB%B7%B0/shorts"
+    },
+    {
+      "name": "놀라워라~",
+      "subscribers": 206000,
+      "avg_views": 1035062,
+      "median_views": 798994,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9A%B0%EC%99%80%EB%86%80%EB%9D%BC%EC%9B%8C%EB%9D%BC/shorts"
+    },
+    {
+      "name": "60shorts",
+      "subscribers": 167000,
+      "avg_views": 1025822,
+      "median_views": 97970,
+      "category": "취미/덕질",
+      "subcategory": "스포츠 / 손흥민",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@60shorts502/shorts"
+    },
+    {
+      "name": "스포츠도파민",
+      "subscribers": 5150,
+      "avg_views": 995981,
+      "median_views": 535510,
+      "category": "취미/덕질",
+      "subcategory": "축구",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@sportsdopamine/shorts"
+    },
+    {
+      "name": "별쇼츠",
+      "subscribers": 229000,
+      "avg_views": 983168,
+      "median_views": 132204,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@StarShorts2/shorts"
+    },
+    {
+      "name": "바름투더탑",
+      "subscribers": 66100,
+      "avg_views": 981943,
+      "median_views": 750328,
+      "category": "취미/덕질",
+      "subcategory": "종합스포츠",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%82%90%EC%95%BD/shorts"
+    },
+    {
+      "name": "숨 한 번, 다시",
+      "subscribers": 9690,
+      "avg_views": 981262,
+      "median_views": 32257,
+      "category": "일상/공감",
+      "subcategory": "학습/동기부여",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%88%A8%ED%95%9C%EB%B2%88%EB%8B%A4%EC%8B%9C/shorts"
+    },
+    {
+      "name": "지식창",
+      "subscribers": 287000,
+      "avg_views": 972967,
+      "median_views": 547373,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EC%8B%9D%EC%B0%BD/shorts"
+    },
+    {
+      "name": "근성마톡",
+      "subscribers": 505000,
+      "avg_views": 971477,
+      "median_views": 424773,
+      "category": "일상/공감",
+      "subcategory": "청소",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EA%B7%BC%EC%84%B1%EB%A7%88%ED%86%A1/shorts"
+    },
+    {
+      "name": "DaeHyun",
+      "subscribers": 49700,
+      "avg_views": 965211,
+      "median_views": 718464,
+      "category": "취미/덕질",
+      "subcategory": "롤(LoL)",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@DH_9911/shorts"
+    },
+    {
+      "name": "유유미미",
+      "subscribers": 72200,
+      "avg_views": 948038,
+      "median_views": 512194,
+      "category": "지식/정보",
+      "subcategory": "역사",
+      "format": "AI / 해설형",
+      "channel_url": "https://www.youtube.com/@%EC%9C%A0%EC%9C%A0%EB%AF%B8%EB%AF%B8-e6g/shorts"
+    },
+    {
+      "name": "포포TV",
+      "subscribers": 75500,
+      "avg_views": 942051,
+      "median_views": 456480,
+      "category": "취미/덕질",
+      "subcategory": "동물",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%8F%AC%ED%8F%ACTV/shorts"
+    },
+    {
+      "name": "옷미새 미홀",
+      "subscribers": 89900,
+      "avg_views": 937345,
+      "median_views": 174386,
+      "category": "푸드/뷰티",
+      "subcategory": "패션/코디",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EC%98%B7%EB%AF%B8%EC%83%88%EB%AF%B8%ED%99%80/shorts"
+    },
+    {
+      "name": "wonderwilds",
+      "subscribers": 31000,
+      "avg_views": 935062,
+      "median_views": 367318,
+      "category": "취미/덕질",
+      "subcategory": "동물 지식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@wonderwilds-z5z/shorts"
+    },
+    {
+      "name": "어떻게살것인가",
+      "subscribers": 187000,
+      "avg_views": 928464,
+      "median_views": 373106,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%96%B4%EB%96%BB%EA%B2%8C%EC%82%B4%EA%B2%83%EC%9D%B8%EA%B0%800513/shorts"
+    },
+    {
+      "name": "복순무비",
+      "subscribers": 4870,
+      "avg_views": 927816,
+      "median_views": 601754,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B3%B5%EC%88%9C%EB%AC%B4%EB%B9%84/shorts"
+    },
+    {
+      "name": "지니 쇼츠",
+      "subscribers": 36400,
+      "avg_views": 924810,
+      "median_views": 367206,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EB%8B%88%EC%87%BC%EC%B8%A0/shorts"
+    },
+    {
+      "name": "낭만박상환",
+      "subscribers": 1030000,
+      "avg_views": 911283,
+      "median_views": 839519,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EB%82%AD%EB%A7%8C%EB%B0%95%EC%83%81%ED%99%98/shorts"
+    },
+    {
+      "name": "대한국뽕만세",
+      "subscribers": 36200,
+      "avg_views": 907878,
+      "median_views": 81486,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@NICEKOREAZZANG/shorts"
+    },
+    {
+      "name": "온리아나그란데",
+      "subscribers": 77500,
+      "avg_views": 907775,
+      "median_views": 498944,
+      "category": "연예/팬덤",
+      "subcategory": "해외 팬채널 / 아리아나",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%98%A8%EB%A6%AC%EC%95%84%EB%82%98%EA%B7%B8%EB%9E%80%EB%8D%B0/shorts"
+    },
+    {
+      "name": "소리질러",
+      "subscribers": 49800,
+      "avg_views": 907285,
+      "median_views": 189110,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@sori%EC%A7%88%EB%9F%AC/shorts"
+    },
+    {
+      "name": "옛장수",
+      "subscribers": 233000,
+      "avg_views": 902623,
+      "median_views": 672354,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EC%98%9B%EC%9E%A5%EC%88%98/shorts"
+    },
+    {
+      "name": "이슈부기",
+      "subscribers": 84900,
+      "avg_views": 900241,
+      "median_views": 562344,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EC%8A%88%EB%B6%80%EA%B8%B0/shorts"
+    },
+    {
+      "name": "린박스",
+      "subscribers": 24700,
+      "avg_views": 887687,
+      "median_views": 581580,
+      "category": "연예/팬덤",
+      "subcategory": "영화 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A6%B0%EB%B0%95%EC%8A%A4/shorts"
+    },
+    {
+      "name": "요즘밈",
+      "subscribers": 50000,
+      "avg_views": 886660,
+      "median_views": 543856,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%9A%94%EC%A6%98.%EB%B0%88/shorts"
+    },
+    {
+      "name": "이거 어떻노",
+      "subscribers": 63100,
+      "avg_views": 881205,
+      "median_views": 191160,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EA%B1%B0%EC%96%B4%EB%96%BB%EB%85%B8/shorts"
+    },
+    {
+      "name": "아이돌다있슈",
+      "subscribers": 34000,
+      "avg_views": 878158,
+      "median_views": 596838,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@idoldaissu/shorts"
+    },
+    {
+      "name": "랭킹을확인하세요",
+      "subscribers": 64100,
+      "avg_views": 877259,
+      "median_views": 192148,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EB%9E%AD%ED%82%B9%EC%9D%84%ED%99%95%EC%9D%B8%ED%95%98%EC%84%B8%EC%9A%94/shorts"
+    },
+    {
+      "name": "셀카멍",
+      "subscribers": 24500,
+      "avg_views": 860262,
+      "median_views": 113480,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "소리없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%85%80%EC%B9%B4%EB%A9%8D/shorts"
+    },
+    {
+      "name": "머올리지",
+      "subscribers": 1480,
+      "avg_views": 858358,
+      "median_views": 129794,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 롤",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A8%B8%EC%98%AC%EB%A6%AC%EC%A7%80-w7u/shorts"
+    },
+    {
+      "name": "숏싹숏싹",
+      "subscribers": 287000,
+      "avg_views": 852343,
+      "median_views": 581944,
+      "category": "푸드/뷰티",
+      "subcategory": "패션/코디",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@shortSSack/shorts"
+    },
+    {
+      "name": "똘킹",
+      "subscribers": 932000,
+      "avg_views": 846737,
+      "median_views": 901776,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@ddolking/shorts"
+    },
+    {
+      "name": "맛집남자 foodman",
+      "subscribers": 471000,
+      "avg_views": 835092,
+      "median_views": 223838,
+      "category": "푸드/뷰티",
+      "subcategory": "음식점 리뷰",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EB%A7%9B%EC%A7%91%EB%82%A8%EC%9E%90foodman/shorts"
+    },
+    {
+      "name": "푸짐스",
+      "subscribers": 177000,
+      "avg_views": 826601,
+      "median_views": 374628,
+      "category": "푸드/뷰티",
+      "subcategory": "음식점 리뷰",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%91%B8%EC%A7%90%EC%8A%A4/shorts"
+    },
+    {
+      "name": "쇼츠잉",
+      "subscribers": 24300,
+      "avg_views": 823084,
+      "median_views": 258819,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@shotsingg/shorts"
+    },
+    {
+      "name": "난드",
+      "subscribers": 110000,
+      "avg_views": 820932,
+      "median_views": 347975,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@user-NanD/shorts"
+    },
+    {
+      "name": "악동 김블루",
+      "subscribers": 2200000,
+      "avg_views": 819674,
+      "median_views": 650020,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EA%B9%80%EB%B8%94%EB%A3%A8%EB%8B%98/shorts"
+    },
+    {
+      "name": "통찰맨",
+      "subscribers": 29100,
+      "avg_views": 817526,
+      "median_views": 519866,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%ED%86%B5%EC%B0%B0%EB%A7%A8/shorts"
+    },
+    {
+      "name": "핸콕TV",
+      "subscribers": 142000,
+      "avg_views": 813375,
+      "median_views": 436328,
+      "category": "취미/덕질",
+      "subcategory": "원피스",
+      "format": "해설형 / 촬영 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%95%B8%EC%BD%95%ED%8B%B0%EB%B9%84/shorts"
+    },
+    {
+      "name": "레이다 - 팬메이드 IVE 아이브쇼츠",
+      "subscribers": 31900,
+      "avg_views": 803674,
+      "median_views": 291388,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A0%88%EC%9D%B4%EB%8B%A4/shorts"
+    },
+    {
+      "name": "지우멍",
+      "subscribers": 8290,
+      "avg_views": 801300,
+      "median_views": 361506,
+      "category": "지식/정보",
+      "subcategory": "공부 / 입시",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EC%9A%B0%EB%A9%8D/shorts"
+    },
+    {
+      "name": "랭킹끝판왕",
+      "subscribers": 89400,
+      "avg_views": 797909,
+      "median_views": 236692,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EB%9E%AD%ED%82%B9%EB%81%9D%ED%8C%90%EC%99%95/shorts"
+    },
+    {
+      "name": "여돌찐(여돌에 찐심인 채널)",
+      "subscribers": 8060,
+      "avg_views": 796257,
+      "median_views": 33622,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황/ 제니",
+      "format": "자집기 편집",
+      "channel_url": "https://www.youtube.com/@jjingirlgroup/shorts"
+    },
+    {
+      "name": "라밍",
+      "subscribers": 224000,
+      "avg_views": 794346,
+      "median_views": 523918,
+      "category": "푸드/뷰티",
+      "subcategory": "디저트",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EB%9D%BC%EB%B0%8D/shorts"
+    },
+    {
+      "name": "안나엄마",
+      "subscribers": 6280,
+      "avg_views": 790748,
+      "median_views": 38613,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EC%95%88%EB%82%98%EC%97%84%EB%A7%88/shorts"
+    },
+    {
+      "name": "스타등용문",
+      "subscribers": 3250,
+      "avg_views": 783622,
+      "median_views": 29984,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%8A%A4%ED%83%80%EB%93%B1%EC%9A%A9%EB%AC%B8-1/shorts"
+    },
+    {
+      "name": "수산도감",
+      "subscribers": 3520,
+      "avg_views": 781087,
+      "median_views": 61412,
+      "category": "취미/덕질",
+      "subcategory": "동물 지식",
+      "format": "썰형 / 짜집기편집",
+      "channel_url": "https://www.youtube.com/@%EC%88%98%EC%82%B0%EB%8F%84%EA%B0%90/shorts"
+    },
+    {
+      "name": "다비드클립",
+      "subscribers": 52600,
+      "avg_views": 779653,
+      "median_views": 34346,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@david-clip/shorts"
+    },
+    {
+      "name": "드짱",
+      "subscribers": 12600,
+      "avg_views": 763320,
+      "median_views": 97708,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%93%9C%EC%A7%B1/shorts"
+    },
+    {
+      "name": "킴스무비",
+      "subscribers": 5480,
+      "avg_views": 762284,
+      "median_views": 75690,
+      "category": "연예/팬덤",
+      "subcategory": "영화 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%82%B4%EC%8A%A4%EB%AC%B4%EB%B9%84/shorts"
+    },
+    {
+      "name": "푸댕이",
+      "subscribers": 12300,
+      "avg_views": 759273,
+      "median_views": 175395,
+      "category": "푸드/뷰티",
+      "subcategory": "음식점 리뷰",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@fooddaeng/shorts"
+    },
+    {
+      "name": "김동댕",
+      "subscribers": 49400,
+      "avg_views": 756275,
+      "median_views": 522562,
+      "category": "취미/덕질",
+      "subcategory": "마블",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8F%99%EB%8C%95%EA%B9%80/shorts"
+    },
+    {
+      "name": "김켈리 Kellyfornia",
+      "subscribers": 1230000,
+      "avg_views": 755812,
+      "median_views": 568029,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EA%B9%80%EC%BC%88%EB%A6%AC_Kellyfornia/shorts"
+    },
+    {
+      "name": "팬덤",
+      "subscribers": 13400,
+      "avg_views": 749868,
+      "median_views": 310209,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@pen%EB%8D%A4/shorts"
+    },
+    {
+      "name": "몰입쩜",
+      "subscribers": 7520,
+      "avg_views": 747893,
+      "median_views": 614682,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드 / 환승연애",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@molipjjeom/shorts"
+    },
+    {
+      "name": "강설화",
+      "subscribers": 39200,
+      "avg_views": 732576,
+      "median_views": 112234,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EB%A7%9B%EC%9E%88%EB%8A%94%EC%9D%B4%EC%95%BC%EA%B8%B0/shorts"
+    },
+    {
+      "name": "하루한쪼가리",
+      "subscribers": 20000,
+      "avg_views": 731669,
+      "median_views": 61362,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%95%98%EB%A3%A8%ED%95%9C%EC%AA%BC%EA%B0%80%EB%A6%AC/shorts"
+    },
+    {
+      "name": "케이팝있쥬?",
+      "subscribers": 106000,
+      "avg_views": 728223,
+      "median_views": 153142,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널 / GD",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@kpop_itzu/shorts"
+    },
+    {
+      "name": "수희무비",
+      "subscribers": 11100,
+      "avg_views": 703791,
+      "median_views": 364504,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@soohee_movie/shorts"
+    },
+    {
+      "name": "unlockroom",
+      "subscribers": 41100,
+      "avg_views": 702191,
+      "median_views": 182836,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@unlockroom-on/shorts"
+    },
+    {
+      "name": "Movie.5",
+      "subscribers": 10900,
+      "avg_views": 702133,
+      "median_views": 49540,
+      "category": "연예/팬덤",
+      "subcategory": "영화 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@0.5%EC%B4%88%EB%A7%8C%EC%97%90%EB%B9%A0%EC%A0%B8%EB%93%9C%EB%8A%94%EC%98%81%ED%99%94/shorts"
+    },
+    {
+      "name": "에어포켓",
+      "subscribers": 5400,
+      "avg_views": 692171,
+      "median_views": 192332,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%95%84%EB%AA%B0%EB%9E%91%ED%8C%8C%EC%9B%8C/shorts"
+    },
+    {
+      "name": "수원 게임왕",
+      "subscribers": 29300,
+      "avg_views": 682802,
+      "median_views": 357588,
+      "category": "지식/정보",
+      "subcategory": "잡학상식/발명",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@when_gta6/shorts"
+    },
+    {
+      "name": "밍",
+      "subscribers": 590000,
+      "avg_views": 681198,
+      "median_views": 642642,
+      "category": "취미/덕질",
+      "subcategory": "게임/로블록스",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EB%8F%84%EB%84%9B-%EB%B0%8D/shorts"
+    },
+    {
+      "name": "TITI TFT",
+      "subscribers": 22500,
+      "avg_views": 672702,
+      "median_views": 379368,
+      "category": "취미/덕질",
+      "subcategory": "게임/롤",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@tftinlifte/shorts"
+    },
+    {
+      "name": "대한민국뽕만세",
+      "subscribers": 36100,
+      "avg_views": 664304,
+      "median_views": 162098,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@NICEKOREAZZANG/shorts"
+    },
+    {
+      "name": "이게맏나",
+      "subscribers": 166000,
+      "avg_views": 659531,
+      "median_views": 775282,
+      "category": "지식/정보",
+      "subcategory": "이슈 / 인플루언서",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EA%B2%8C%EB%A7%8F%EB%82%98/shorts"
+    },
+    {
+      "name": "연예인한입",
+      "subscribers": 24100,
+      "avg_views": 654933,
+      "median_views": 324340,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%97%B0%EC%98%88%EC%9D%B8%ED%95%9C%EC%9E%85/shorts"
+    },
+    {
+      "name": "1분악기",
+      "subscribers": 145000,
+      "avg_views": 648446,
+      "median_views": 539480,
+      "category": "취미/덕질",
+      "subcategory": "악기",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@1%EB%B6%84%EC%95%85%EA%B8%B0/shorts"
+    },
+    {
+      "name": "국뽕충전소",
+      "subscribers": 47100,
+      "avg_views": 642003,
+      "median_views": 383743,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응 / 한국 회사",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@KUKBBONGCHARGE/shorts"
+    },
+    {
+      "name": "펫파라치",
+      "subscribers": 17700,
+      "avg_views": 640999,
+      "median_views": 141412,
+      "category": "취미/덕질",
+      "subcategory": "동물 지식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%8E%AB%ED%8C%8C%EB%9D%BC%EC%B9%98/shorts"
+    },
+    {
+      "name": "땀의 순간",
+      "subscribers": 2730,
+      "avg_views": 640783,
+      "median_views": 320324,
+      "category": "취미/덕질",
+      "subcategory": "스포츠 / 김동현",
+      "format": "썰형 / 짜집기편집",
+      "channel_url": "https://www.youtube.com/@%EB%95%80%EC%9D%98%EC%88%9C%EA%B0%84/shorts"
+    },
+    {
+      "name": "우주바둑",
+      "subscribers": 8950,
+      "avg_views": 635131,
+      "median_views": 273893,
+      "category": "취미/덕질",
+      "subcategory": "바둑",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9A%B0%EC%A3%BC%EB%B0%94%EB%91%91/shorts"
+    },
+    {
+      "name": "PrimeFoot",
+      "subscribers": 7070,
+      "avg_views": 632620,
+      "median_views": 223438,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%95%B4%EC%99%B8%EC%B6%95%EA%B5%AC%ED%8E%B8%EC%A7%91/shorts"
+    },
+    {
+      "name": "오늘의픽",
+      "subscribers": 1443,
+      "avg_views": 629196,
+      "median_views": 225406,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 롤",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%98%A4%EB%8A%98%EC%9D%98%ED%94%BD-SUCX/shorts"
+    },
+    {
+      "name": "롤따봉",
+      "subscribers": 15400,
+      "avg_views": 628675,
+      "median_views": 534515,
+      "category": "취미/덕질",
+      "subcategory": "롤(LoL)",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@lol_ddabong/shorts"
+    },
+    {
+      "name": "썰스데이",
+      "subscribers": 46900,
+      "avg_views": 627187,
+      "median_views": 285361,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%8D%B0%EC%8A%A4%EB%8D%B0%EC%9D%B4-u1z/shorts"
+    },
+    {
+      "name": "키득잼",
+      "subscribers": 11200,
+      "avg_views": 626129,
+      "median_views": 272756,
+      "category": "취미/덕질",
+      "subcategory": "애니",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%82%A4%EB%93%9D%EC%9E%BC/shorts"
+    },
+    {
+      "name": "자체공감",
+      "subscribers": 301000,
+      "avg_views": 624870,
+      "median_views": 470077,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@gong_gam/shorts"
+    },
+    {
+      "name": "청와대로1",
+      "subscribers": 143000,
+      "avg_views": 618768,
+      "median_views": 487542,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%B2%AD%EC%99%80%EB%8C%80%EB%A1%9C1/shorts"
+    },
+    {
+      "name": "404 CCTV",
+      "subscribers": 5820,
+      "avg_views": 615276,
+      "median_views": 262446,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@404CCTV/shorts"
+    },
+    {
+      "name": "다이슈",
+      "subscribers": 130000,
+      "avg_views": 610507,
+      "median_views": 345554,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@daissuekorea/shorts"
+    },
+    {
+      "name": "단포",
+      "subscribers": 619000,
+      "avg_views": 602446,
+      "median_views": 573590,
+      "category": "취미/덕질",
+      "subcategory": "게임/로블록스",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EB%8B%A8%ED%8F%AC/shorts"
+    },
+    {
+      "name": "뫄옹",
+      "subscribers": 496000,
+      "avg_views": 588800,
+      "median_views": 170694,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@dalpang3/shorts"
+    },
+    {
+      "name": "캠플릭스",
+      "subscribers": 77600,
+      "avg_views": 585728,
+      "median_views": 462213,
+      "category": "일상/공감",
+      "subcategory": "감동 스토리",
+      "format": "해설형 / AI",
+      "channel_url": "https://www.youtube.com/@campl1x/shorts"
+    },
+    {
+      "name": "숏애니몰",
+      "subscribers": 5430,
+      "avg_views": 583260,
+      "median_views": 136268,
+      "category": "취미/덕질",
+      "subcategory": "동물 지식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%88%8F%EC%95%A0%EB%8B%88%EB%AA%B0/shorts"
+    },
+    {
+      "name": "가요톱5",
+      "subscribers": 14700,
+      "avg_views": 582839,
+      "median_views": 465508,
+      "category": "음악/댄스",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EA%B0%80%EC%9A%94%ED%86%B15/shorts"
+    },
+    {
+      "name": "러블릿",
+      "subscribers": 7820,
+      "avg_views": 582357,
+      "median_views": 212772,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@lovelittt/shorts"
+    },
+    {
+      "name": "빵또아",
+      "subscribers": 176000,
+      "avg_views": 578177,
+      "median_views": 178943,
+      "category": "음악/댄스",
+      "subcategory": "팝송 / 팝스타 소개",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B9%B5%EB%98%90A/shorts"
+    },
+    {
+      "name": "단짠단짠당충전",
+      "subscribers": 7860,
+      "avg_views": 576316,
+      "median_views": 169294,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8B%A8%EC%A7%A0%EB%8B%A8%EC%A7%A0%EB%8B%B9%EC%B6%A9%EC%A0%84/shorts"
+    },
+    {
+      "name": "파이터즈",
+      "subscribers": 27800,
+      "avg_views": 572402,
+      "median_views": 205868,
+      "category": "취미/덕질",
+      "subcategory": "격투기",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%ED%8C%8C%EC%9D%B4%ED%84%B0%EC%A6%88-o1f/shorts"
+    },
+    {
+      "name": "케로의 스타일기",
+      "subscribers": 22100,
+      "avg_views": 571424,
+      "median_views": 51445,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@kero_diaryy/shorts"
+    },
+    {
+      "name": "정보통나무",
+      "subscribers": 4530,
+      "avg_views": 571393,
+      "median_views": 540695,
+      "category": "취미/덕질",
+      "subcategory": "일본 애니",
+      "format": "커뮤니티 / 해설형 / 짜집기",
+      "channel_url": "https://www.youtube.com/@%EC%A0%95%EB%B3%B4%ED%86%B5%EB%82%98%EB%AC%B4/shorts"
+    },
+    {
+      "name": "지식코리야",
+      "subscribers": 933000,
+      "avg_views": 570063,
+      "median_views": 283681,
+      "category": "지식/정보",
+      "subcategory": "건강",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@koreyaman/shorts"
+    },
+    {
+      "name": "들었어?",
+      "subscribers": 218000,
+      "avg_views": 567220,
+      "median_views": 281425,
+      "category": "취미/덕질",
+      "subcategory": "축구",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%93%A4%EC%97%88%EC%96%B4/shorts"
+    },
+    {
+      "name": "입덕갤러리",
+      "subscribers": 22000,
+      "avg_views": 564978,
+      "median_views": 107481,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9E%85%EB%8D%95%EA%B0%A4%EB%9F%AC%EB%A6%AC/shorts"
+    },
+    {
+      "name": "스타템픽",
+      "subscribers": 12200,
+      "avg_views": 560763,
+      "median_views": 49556,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@startempick/shorts"
+    },
+    {
+      "name": "남자의무비",
+      "subscribers": 3360,
+      "avg_views": 560437,
+      "median_views": 44539,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%82%A8%EC%9E%90%EC%9D%98%EB%AC%B4%EB%B9%84-t2e/shorts"
+    },
+    {
+      "name": "그녀의 감성트롯",
+      "subscribers": 133000,
+      "avg_views": 558402,
+      "median_views": 366966,
+      "category": "음악/댄스",
+      "subcategory": "음악/노래/스님",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@%EA%B7%B8%EB%85%80%EC%9D%98%EA%B0%90%EC%84%B1%ED%8A%B8%EB%A1%AF/shorts"
+    },
+    {
+      "name": "숲멍일기(Woof in the Woods)",
+      "subscribers": 24900,
+      "avg_views": 557567,
+      "median_views": 81452,
+      "category": "취미/덕질",
+      "subcategory": "귀여운 동물",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@woofwithsarang/shorts"
+    },
+    {
+      "name": "펀한거 주웠다",
+      "subscribers": 34600,
+      "avg_views": 556397,
+      "median_views": 160922,
+      "category": "취미/덕질",
+      "subcategory": "농구",
+      "format": "지식",
+      "channel_url": "https://www.youtube.com/@funfunzzup/shorts"
+    },
+    {
+      "name": "뉴스피드",
+      "subscribers": 505000,
+      "avg_views": 548213,
+      "median_views": 418498,
+      "category": "지식/정보",
+      "subcategory": "정치 / 시사",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@newsfeed_official/shorts"
+    },
+    {
+      "name": "트로트정원",
+      "subscribers": 111000,
+      "avg_views": 542875,
+      "median_views": 166772,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@TrotGarden/shorts"
+    },
+    {
+      "name": "패션뻐꾹이",
+      "subscribers": 129000,
+      "avg_views": 537831,
+      "median_views": 256315,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@bbeogguk/shorts"
+    },
+    {
+      "name": "Record Shop",
+      "subscribers": 39200,
+      "avg_views": 536459,
+      "median_views": 67998,
+      "category": "취미/덕질",
+      "subcategory": "애니 / 체인소맨",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@recordshopmusic/shorts"
+    },
+    {
+      "name": "리병현",
+      "subscribers": 64100,
+      "avg_views": 532385,
+      "median_views": 474501,
+      "category": "취미/덕질",
+      "subcategory": "게임/롤",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@02BH13/shorts"
+    },
+    {
+      "name": "레츠무빗",
+      "subscribers": 11300,
+      "avg_views": 531904,
+      "median_views": 53628,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@letsmovitt/shorts"
+    },
+    {
+      "name": "FOOTstory",
+      "subscribers": 26600,
+      "avg_views": 525509,
+      "median_views": 268681,
+      "category": "취미/덕질",
+      "subcategory": "축구",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@FOOTstory_esp/shorts"
+    },
+    {
+      "name": "잰츄리챙",
+      "subscribers": 3070,
+      "avg_views": 520977,
+      "median_views": 104280,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널 / 블랙핑크",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@jenchuricheng/shorts"
+    },
+    {
+      "name": "뒷이야기",
+      "subscribers": 27400,
+      "avg_views": 520525,
+      "median_views": 395866,
+      "category": "지식/정보",
+      "subcategory": "사건/범죄/블랙박스",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%92%A4%EC%9D%B4%EC%95%BC%EA%B8%B0/shorts"
+    },
+    {
+      "name": "연예계 비하인드",
+      "subscribers": 30900,
+      "avg_views": 519941,
+      "median_views": 139827,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%97%B0%EC%98%88%EA%B3%84%EB%B9%84%ED%95%98%EC%9D%B8%EB%93%9C/shorts"
+    },
+    {
+      "name": "이게뭐지우",
+      "subscribers": 2580,
+      "avg_views": 519670,
+      "median_views": 218993,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널 / 하투하",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EA%B2%8C%EB%AD%90%EC%A7%80%EC%9A%B0/shorts"
+    },
+    {
+      "name": "숏츠툰",
+      "subscribers": 92600,
+      "avg_views": 515363,
+      "median_views": 132170,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@shortstoon19/shorts"
+    },
+    {
+      "name": "예능내컷",
+      "subscribers": 296000,
+      "avg_views": 515330,
+      "median_views": 390358,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@My_Way_Edit_Cut/shorts"
+    },
+    {
+      "name": "한국의목소리",
+      "subscribers": 624000,
+      "avg_views": 514738,
+      "median_views": 470996,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%95%9C%EA%B5%AD%EC%9D%98%EB%AA%A9%EC%86%8C%EB%A6%AC/shorts"
+    },
+    {
+      "name": "썰호빵",
+      "subscribers": 109000,
+      "avg_views": 506884,
+      "median_views": 148640,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@ssulhobbang/shorts"
+    },
+    {
+      "name": "마금이",
+      "subscribers": 157000,
+      "avg_views": 503025,
+      "median_views": 420862,
+      "category": "취미/덕질",
+      "subcategory": "일본 애니",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A7%88%EA%B8%88%EC%9D%B4/shorts"
+    },
+    {
+      "name": "안녕! 치앙마이 | annyeong.chiangmai",
+      "subscribers": 10900,
+      "avg_views": 500670,
+      "median_views": 54760,
+      "category": "일상/공감",
+      "subcategory": "감동 스토리",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%95%88%EB%85%95%EC%B9%98%EC%95%99%EB%A7%88%EC%9D%B4-p9r/shorts"
+    },
+    {
+      "name": "최현준TV",
+      "subscribers": 347000,
+      "avg_views": 498039,
+      "median_views": 339373,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%B5%9C%ED%98%84%EC%A4%80tv/shorts"
+    },
+    {
+      "name": "명순조",
+      "subscribers": 391000,
+      "avg_views": 496638,
+      "median_views": 43513,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@MSG_JMT/shorts"
+    },
+    {
+      "name": "몽글몽글 연우",
+      "subscribers": 79500,
+      "avg_views": 493751,
+      "median_views": 381706,
+      "category": "취미/덕질",
+      "subcategory": "귀여운동물",
+      "format": "해설형 / AI",
+      "channel_url": "https://www.youtube.com/@%EB%AA%BD%EA%B8%80%EB%AA%BD%EA%B8%80%EC%97%B0%EC%9A%B0/shorts"
+    },
+    {
+      "name": "M과함께",
+      "subscribers": 16300,
+      "avg_views": 492048,
+      "median_views": 198780,
+      "category": "취미/덕질",
+      "subcategory": "자동차",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@M%EA%B3%BC%ED%95%A8%EA%BB%98-m1u/shorts"
+    },
+    {
+      "name": "요리에 진심인 편",
+      "subscribers": 270000,
+      "avg_views": 489706,
+      "median_views": 382630,
+      "category": "푸드/뷰티",
+      "subcategory": "먹방/디저트",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EC%9A%94%EB%A6%AC%EC%97%90%EC%A7%84%EC%8B%AC%EC%9D%B8%ED%8E%B8/shorts"
+    },
+    {
+      "name": "진짜 잠깐만",
+      "subscribers": 342000,
+      "avg_views": 489695,
+      "median_views": 44014,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%84%EC%A7%9C%EC%9E%A0%EA%B9%90%EB%A7%8C/shorts"
+    },
+    {
+      "name": "우리 바보 아니야",
+      "subscribers": 75600,
+      "avg_views": 483108,
+      "median_views": 387730,
+      "category": "일상/공감",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9A%B0%EB%A6%AC%EB%B0%94%EB%B3%B4%EC%95%84%EB%8B%88%EC%95%BC/shorts"
+    },
+    {
+      "name": "숏달봉",
+      "subscribers": 4340,
+      "avg_views": 481459,
+      "median_views": 30284,
+      "category": "취미/덕질",
+      "subcategory": "귀여운 동물",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%88%8F%EB%8B%AC%EB%B4%89/shorts"
+    },
+    {
+      "name": "쑈옷",
+      "subscribers": 449000,
+      "avg_views": 473559,
+      "median_views": 240050,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@SSoooc4/shorts"
+    },
+    {
+      "name": "최솜이",
+      "subscribers": 157000,
+      "avg_views": 472075,
+      "median_views": 139454,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@some_s2/shorts"
+    },
+    {
+      "name": "실시간 속보",
+      "subscribers": 226000,
+      "avg_views": 470494,
+      "median_views": 348053,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@ijoaksl/shorts"
+    },
+    {
+      "name": "진짜대한민국",
+      "subscribers": 116600,
+      "avg_views": 461337,
+      "median_views": 135911,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "헤설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@RealKoreabroadcasting/shorts"
+    },
+    {
+      "name": "전국댓글자랑",
+      "subscribers": 10100,
+      "avg_views": 447226,
+      "median_views": 44404,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A0%84%EA%B5%AD%EB%8C%93%EA%B8%80%EC%9E%90%EB%9E%91/shorts"
+    },
+    {
+      "name": "오늘썰방",
+      "subscribers": 20300,
+      "avg_views": 442216,
+      "median_views": 56499,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%98%A4%EB%8A%98%EC%8D%B0%EB%B0%A9/shorts"
+    },
+    {
+      "name": "나 잘한다해짜나",
+      "subscribers": 171000,
+      "avg_views": 441446,
+      "median_views": 331710,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%82%98%EC%9E%98%ED%95%9C%EB%8B%A4%ED%95%B4%EC%A7%9C%EB%82%98/shorts"
+    },
+    {
+      "name": "연예속보24",
+      "subscribers": 135000,
+      "avg_views": 437830,
+      "median_views": 307396,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@trot8282/shorts"
+    },
+    {
+      "name": "지식록",
+      "subscribers": 11500,
+      "avg_views": 432776,
+      "median_views": 107938,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EC%8B%9D%EB%A1%9D/shorts"
+    },
+    {
+      "name": "김진솔",
+      "subscribers": 262000,
+      "avg_views": 428450,
+      "median_views": 286714,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 아이온2",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@kimjinsxl/shorts"
+    },
+    {
+      "name": "애교천재 김영주",
+      "subscribers": 19000,
+      "avg_views": 427469,
+      "median_views": 397781,
+      "category": "취미/덕질",
+      "subcategory": "동물 지식",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@%EC%95%A0%EA%B5%90%EC%B2%9C%EC%9E%AC%EA%B9%80%EC%98%81%EC%A3%BC/shorts"
+    },
+    {
+      "name": "축구 한접시",
+      "subscribers": 37000,
+      "avg_views": 425296,
+      "median_views": 425296,
+      "category": "취미/덕질",
+      "subcategory": "축구",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@%EC%B6%95%EA%B5%AC%ED%95%9C%EC%A0%91%EC%8B%9C/shorts"
+    },
+    {
+      "name": "엔돏힌 ENDORPHIN",
+      "subscribers": 21300,
+      "avg_views": 422256,
+      "median_views": 66362,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%97%94%EB%8F%8F%ED%9E%8CENDORPHIN/shorts"
+    },
+    {
+      "name": "해달특파원",
+      "subscribers": 28400,
+      "avg_views": 420382,
+      "median_views": 62252,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "사진 / 국내 짜집기",
+      "channel_url": "https://www.youtube.com/@%ED%95%B4%EB%8B%AC%ED%8A%B9%ED%8C%8C%EC%9B%90/shorts"
+    },
+    {
+      "name": "판결의순간",
+      "subscribers": 53500,
+      "avg_views": 417192,
+      "median_views": 203292,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%8C%90%EA%B2%B0%EC%88%9C%EA%B0%84/shorts"
+    },
+    {
+      "name": "시대의 목소리",
+      "subscribers": 66000,
+      "avg_views": 413389,
+      "median_views": 250552,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%8B%9C%EB%8C%80%EC%9D%98%EB%AA%A9%EC%86%8C%EB%A6%AC/shorts"
+    },
+    {
+      "name": "금빛노후",
+      "subscribers": 112000,
+      "avg_views": 412817,
+      "median_views": 265458,
+      "category": "지식/정보",
+      "subcategory": "패션",
+      "format": "해설형 / AI",
+      "channel_url": "https://www.youtube.com/@%EA%B8%88%EB%B9%9B%EB%85%B8/shorts"
+    },
+    {
+      "name": "Jiwon 지원",
+      "subscribers": 457000,
+      "avg_views": 411541,
+      "median_views": 352580,
+      "category": "푸드/뷰티",
+      "subcategory": "제품 리뷰",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@jiwondm_028/shorts"
+    },
+    {
+      "name": "대한시민김상식",
+      "subscribers": 52400,
+      "avg_views": 411136,
+      "median_views": 240570,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8C%80%ED%95%9C%EC%8B%9C%EB%AF%BC%EA%B9%80%EC%83%81%EC%8B%9D/shorts"
+    },
+    {
+      "name": "하츠온하츠",
+      "subscribers": 6320,
+      "avg_views": 411134,
+      "median_views": 196419,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%95%98%EC%B8%A0%EC%98%A8%ED%95%98%EC%B8%A0/shorts"
+    },
+    {
+      "name": "전모음",
+      "subscribers": 25400,
+      "avg_views": 410699,
+      "median_views": 75894,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@junmoeum/shorts"
+    },
+    {
+      "name": "유머모아볼래",
+      "subscribers": 6030,
+      "avg_views": 410601,
+      "median_views": 106466,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%9C%A0%EB%A8%B8%EB%AA%A8%EC%95%84%EB%B3%BC%EB%9E%98/shorts"
+    },
+    {
+      "name": "트로트좋아요",
+      "subscribers": 772000,
+      "avg_views": 408951,
+      "median_views": 227281,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%8A%B8%EB%A1%9C%ED%8A%B8%EC%82%AC%EB%9E%91%ED%95%B4%EC%9A%94/shorts"
+    },
+    {
+      "name": "길리저니",
+      "subscribers": 80200,
+      "avg_views": 406211,
+      "median_views": 94016,
+      "category": "취미/덕질",
+      "subcategory": "일본 애니 / 실사화",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@gilyjourney/shorts"
+    },
+    {
+      "name": "익명썰툰",
+      "subscribers": 51500,
+      "avg_views": 404900,
+      "median_views": 365450,
+      "category": "일상/공감",
+      "subcategory": "연애 / 달달한썰",
+      "format": "썰형 / AI",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B5%EB%AA%85%EC%8D%B0%ED%88%B0/shorts"
+    },
+    {
+      "name": "K썩은물",
+      "subscribers": 200000,
+      "avg_views": 398584,
+      "median_views": 198878,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Krottenwater/shorts"
+    },
+    {
+      "name": "40초 갤러리",
+      "subscribers": 48100,
+      "avg_views": 397840,
+      "median_views": 159190,
+      "category": "글로벌/문화",
+      "subcategory": "북한",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@30chogj/shorts"
+    },
+    {
+      "name": "건강행복지킴이",
+      "subscribers": 139000,
+      "avg_views": 397812,
+      "median_views": 159738,
+      "category": "푸드/뷰티",
+      "subcategory": "패션/코디",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@healthhappinessguardian/shorts"
+    },
+    {
+      "name": "또부깅",
+      "subscribers": 63300,
+      "avg_views": 395833,
+      "median_views": 130962,
+      "category": "일상/공감",
+      "subcategory": "감동 스토리",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%98%90%EB%B6%80%EA%B9%85/shorts"
+    },
+    {
+      "name": "트로트모아모아",
+      "subscribers": 128000,
+      "avg_views": 395738,
+      "median_views": 158210,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%B0%A9%ED%95%9C%EC%82%AC%EB%9E%8C%EC%9D%80%EA%B5%AC%EB%8F%85%EC%A2%8B%EC%95%84%EC%9A%94/shorts"
+    },
+    {
+      "name": "꿀잼순삭",
+      "subscribers": 20800,
+      "avg_views": 386791,
+      "median_views": 34032,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음/아이",
+      "format": "랭킹쇼츠 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@honeyjamtimecutting/shorts"
+    },
+    {
+      "name": "깔깔쇼츠",
+      "subscribers": 52900,
+      "avg_views": 384372,
+      "median_views": 188408,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B9%94%EC%87%BC/shorts"
+    },
+    {
+      "name": "모나피자",
+      "subscribers": 1100,
+      "avg_views": 382822,
+      "median_views": 30262,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EB%AA%A8%EB%82%98%ED%94%BC%EC%9E%90/shorts"
+    },
+    {
+      "name": "오늘의 데스크",
+      "subscribers": 179000,
+      "avg_views": 379633,
+      "median_views": 121500,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "데스크테리어",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@OHDESK"
+    },
+    {
+      "name": "아무엔터",
+      "subscribers": 5180,
+      "avg_views": 376935,
+      "median_views": 28825,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@amuenter/shorts"
+    },
+    {
+      "name": "1분순삭",
+      "subscribers": 417000,
+      "avg_views": 376746,
+      "median_views": 220002,
+      "category": "연예/팬덤",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@1-minute/shorts"
+    },
+    {
+      "name": "숏믈리에",
+      "subscribers": 31500,
+      "avg_views": 372838,
+      "median_views": 31617,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%88%8F%EB%AF%88%EB%A6%AC%EC%97%90/shorts"
+    },
+    {
+      "name": "jenniebara",
+      "subscribers": 9720,
+      "avg_views": 372668,
+      "median_views": 77182,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "방송",
+      "channel_url": "https://www.youtube.com/@jennie_bara/shorts"
+    },
+    {
+      "name": "시간순삭 모음",
+      "subscribers": 91700,
+      "avg_views": 372084,
+      "median_views": 31946,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@sigansunsakmoeum/shorts"
+    },
+    {
+      "name": "에스파쇼츠야",
+      "subscribers": 741,
+      "avg_views": 370682,
+      "median_views": 40686,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "썰형 / 짜집기편집",
+      "channel_url": "https://www.youtube.com/@%EC%97%90%EC%8A%A4%ED%8C%8C%EC%87%BC%EC%B8%A0%EC%95%BC/shorts"
+    },
+    {
+      "name": "찌릿한세상",
+      "subscribers": 46900,
+      "avg_views": 370310,
+      "median_views": 67014,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%B0%8C%EB%A6%BF%ED%95%9C%EC%84%B8%EC%83%81/shorts"
+    },
+    {
+      "name": "카리나 귀여워",
+      "subscribers": 123000,
+      "avg_views": 369775,
+      "median_views": 39962,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Karinasocute/shorts"
+    },
+    {
+      "name": "김두룹",
+      "subscribers": 8170,
+      "avg_views": 366265,
+      "median_views": 86448,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@kim_durup/shorts"
+    },
+    {
+      "name": "달빗의노래",
+      "subscribers": 17500,
+      "avg_views": 365530,
+      "median_views": 117650,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8B%AC%EB%B9%97%EC%9D%98%EB%85%B8%EB%9E%98/shorts"
+    },
+    {
+      "name": "뉴스팩트",
+      "subscribers": 89700,
+      "avg_views": 364303,
+      "median_views": 351510,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%89%B4%EC%8A%A4%ED%8C%A9%ED%8A%B825/shorts"
+    },
+    {
+      "name": "드라마내컷",
+      "subscribers": 67300,
+      "avg_views": 363663,
+      "median_views": 83013,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@My_Way_Edit_drama_Cut/shorts"
+    },
+    {
+      "name": "무비체인",
+      "subscribers": 473000,
+      "avg_views": 361217,
+      "median_views": 147938,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%AC%B4%EB%B9%84%EC%B2%B4%EC%9D%B8/shorts"
+    },
+    {
+      "name": "이슈붕",
+      "subscribers": 91000,
+      "avg_views": 360553,
+      "median_views": 65107,
+      "category": "일상/공감",
+      "subcategory": "학습/동기부여",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EC%8A%88%EB%B6%95/shorts"
+    },
+    {
+      "name": "금휘",
+      "subscribers": 235000,
+      "avg_views": 358457,
+      "median_views": 256628,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "커뮤니티 / 촬영",
+      "channel_url": "https://www.youtube.com/@%EA%B8%88%ED%9C%98%EC%9C%A0%ED%8A%9C%EB%B8%8C/shorts"
+    },
+    {
+      "name": "메리엄",
+      "subscribers": 95400,
+      "avg_views": 357987,
+      "median_views": 148478,
+      "category": "취미/덕질",
+      "subcategory": "배틀그라운드",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EB%A9%94%EB%A6%AC%EC%97%84/shorts"
+    },
+    {
+      "name": "다악살",
+      "subscribers": 27400,
+      "avg_views": 357651,
+      "median_views": 91826,
+      "category": "취미/덕질",
+      "subcategory": "애니 정보",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8B%A4%EC%95%85%EC%82%B4/shorts"
+    },
+    {
+      "name": "초코봐",
+      "subscribers": 13200,
+      "avg_views": 356615,
+      "median_views": 39544,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%B4%88%EC%BD%94%EB%B4%90/shorts"
+    },
+    {
+      "name": "나도 알고 너도 알고",
+      "subscribers": 66100,
+      "avg_views": 348950,
+      "median_views": 35317,
+      "category": "글로벌/문화",
+      "subcategory": "해외 문화",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%82%98%EB%8F%84%EC%95%8C%EA%B3%A0%EB%84%88%EB%8F%84%EC%95%8C%EA%B3%A0/shorts"
+    },
+    {
+      "name": "더있슈",
+      "subscribers": 3120,
+      "avg_views": 347703,
+      "median_views": 70752,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8D%94%EC%9E%88%EC%8A%88/shorts"
+    },
+    {
+      "name": "있슈",
+      "subscribers": 2630,
+      "avg_views": 347530,
+      "median_views": 70742,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EA%B2%9C%EC%9E%88%EC%8A%88/shorts"
+    },
+    {
+      "name": "애국청년김태풍",
+      "subscribers": 384000,
+      "avg_views": 347017,
+      "median_views": 146911,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%95%A0%EA%B5%AD%EC%B2%AD%EB%85%84%EA%B9%80%ED%83%9C%ED%92%8D/shorts"
+    },
+    {
+      "name": "볼륨올려",
+      "subscribers": 17100,
+      "avg_views": 345415,
+      "median_views": 60282,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EB%B3%BC%EB%A5%A8%EC%98%AC%EB%A0%A4/shorts"
+    },
+    {
+      "name": "쭈쭈바",
+      "subscribers": 139000,
+      "avg_views": 343184,
+      "median_views": 221706,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%AD%88%EC%AD%88%EB%B0%94-kck/shorts"
+    },
+    {
+      "name": "이프나",
+      "subscribers": 71900,
+      "avg_views": 337699,
+      "median_views": 121470,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@IFNA/shorts"
+    },
+    {
+      "name": "주간소녀",
+      "subscribers": 18700,
+      "avg_views": 334555,
+      "median_views": 62774,
+      "category": "푸드/뷰티",
+      "subcategory": "제품 리뷰",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A3%BC%EA%B0%84%EC%86%8C%EB%85%80/shorts"
+    },
+    {
+      "name": "정치 읽어주는 여자",
+      "subscribers": 627000,
+      "avg_views": 331778,
+      "median_views": 186206,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A0%95%EC%B9%98%EB%89%B4%EC%8A%A4/shorts"
+    },
+    {
+      "name": "연예계근황",
+      "subscribers": 75400,
+      "avg_views": 330101,
+      "median_views": 119156,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@ghwang24/shorts"
+    },
+    {
+      "name": "Beyond Layer Studio",
+      "subscribers": 22700,
+      "avg_views": 329934,
+      "median_views": 49373,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 실사화",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@Beyond-Layer/shorts"
+    },
+    {
+      "name": "지구촌1분",
+      "subscribers": 184000,
+      "avg_views": 327996,
+      "median_views": 40300,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EA%B5%AC%EC%B4%8C1%EB%B6%84/shorts"
+    },
+    {
+      "name": "민주픽",
+      "subscribers": 325000,
+      "avg_views": 325944,
+      "median_views": 139068,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@minjupick/shorts"
+    },
+    {
+      "name": "지식플러그",
+      "subscribers": 7200,
+      "avg_views": 325282,
+      "median_views": 33237,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EC%8B%9D%ED%94%8C/shorts"
+    },
+    {
+      "name": "크랜베리TV",
+      "subscribers": 414000,
+      "avg_views": 322978,
+      "median_views": 45674,
+      "category": "지식/정보",
+      "subcategory": "건강",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%81%AC%EB%9E%9C%EB%B2%A0%EB%A6%ACTV/shorts"
+    },
+    {
+      "name": "사연의언덕",
+      "subscribers": 30500,
+      "avg_views": 320745,
+      "median_views": 58850,
+      "category": "일상/공감",
+      "subcategory": "재밌는 썰",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@%EC%82%AC%EC%97%B0%EC%9D%98%EC%96%B8%EB%8D%95-p7d/shorts"
+    },
+    {
+      "name": "털어드림",
+      "subscribers": 169000,
+      "avg_views": 319889,
+      "median_views": 153268,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%84%B8%EC%96%B4%EB%93%9C%EB%A6%BC/shorts"
+    },
+    {
+      "name": "난쟁이성현",
+      "subscribers": 708000,
+      "avg_views": 319385,
+      "median_views": 106882,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EB%82%9C%EC%9F%81%EC%9D%B4%EC%84%B1%ED%98%84/shorts"
+    },
+    {
+      "name": "이슈를알고싶다",
+      "subscribers": 156000,
+      "avg_views": 317602,
+      "median_views": 73342,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EC%8A%88%EB%A5%BC%EC%95%8C%EA%B3%A0%EC%8B%B6%EB%8B%A4/shorts"
+    },
+    {
+      "name": "예능모아",
+      "subscribers": 5000,
+      "avg_views": 316752,
+      "median_views": 152055,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%98%88%EB%8A%A5%EB%AA%A8%EC%95%84-e5n/shorts"
+    },
+    {
+      "name": "빵공장",
+      "subscribers": 290000,
+      "avg_views": 313259,
+      "median_views": 35696,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B9%B5%ED%84%B0%EC%A7%80%EB%8A%94%EC%98%88%EB%8A%A5%EA%B3%B5%EC%9E%A5/shorts"
+    },
+    {
+      "name": "studio 103",
+      "subscribers": 188000,
+      "avg_views": 309867,
+      "median_views": 226040,
+      "category": "취미/덕질",
+      "subcategory": "그림",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@103layers/shorts"
+    },
+    {
+      "name": "댄디스(Dandys)",
+      "subscribers": 19900,
+      "avg_views": 306688,
+      "median_views": 87820,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@gudoklucky/shorts"
+    },
+    {
+      "name": "딱콩애니멀",
+      "subscribers": 35600,
+      "avg_views": 300794,
+      "median_views": 236252,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음/동물",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EB%94%B1%EC%BD%A9%EC%95%A0%EB%8B%88%EB%A9%80/shorts"
+    },
+    {
+      "name": "드림힐 shorts",
+      "subscribers": 82900,
+      "avg_views": 299833,
+      "median_views": 294782,
+      "category": "취미/덕질",
+      "subcategory": "애니",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@dream_heal/shorts"
+    },
+    {
+      "name": "숏파일럿",
+      "subscribers": 3540,
+      "avg_views": 298497,
+      "median_views": 59666,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%88%8F%ED%8C%8C%EC%9D%BC%EB%9F%BFv/shorts"
+    },
+    {
+      "name": "연필상자",
+      "subscribers": 15600,
+      "avg_views": 297889,
+      "median_views": 95000,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "신기한 물건",
+      "format": "썰형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@연필상자"
+    },
+    {
+      "name": "히든푸드",
+      "subscribers": 12300,
+      "avg_views": 297578,
+      "median_views": 36000,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "음식",
+      "format": "썰형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@hiddenfoood"
+    },
+    {
+      "name": "나만 몰랐넴",
+      "subscribers": 7110,
+      "avg_views": 294739,
+      "median_views": 218223,
+      "category": "취미/덕질",
+      "subcategory": "국민 애니(짱구)",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%AA%B0%EB%9E%90%EB%84%B4/shorts"
+    },
+    {
+      "name": "지식의 땅",
+      "subscribers": 10000,
+      "avg_views": 293064,
+      "median_views": 30870,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EC%8B%9D%EC%9D%98%EB%95%85/shorts"
+    },
+    {
+      "name": "멍기자",
+      "subscribers": 55200,
+      "avg_views": 292781,
+      "median_views": 49090,
+      "category": "지식/정보",
+      "subcategory": "재벌 / 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A9%8D%EA%B8%B0%EC%9E%90/shorts"
+    },
+    {
+      "name": "예능 뭐볼래",
+      "subscribers": 22300,
+      "avg_views": 290090,
+      "median_views": 115131,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%98%88%EB%8A%A5%EB%AD%90%EB%B3%BC%EB%9E%98/shorts"
+    },
+    {
+      "name": "애슬레틱 라이프 Athletic Life",
+      "subscribers": 150000,
+      "avg_views": 289927,
+      "median_views": 80528,
+      "category": "취미/덕질",
+      "subcategory": "종합스포츠",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Athletic-Life/shorts"
+    },
+    {
+      "name": "예고공식",
+      "subscribers": 7350,
+      "avg_views": 287408,
+      "median_views": 71711,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%98%88%EA%B3%A0%EA%B3%B5%EC%8B%9D/shorts"
+    },
+    {
+      "name": "쇼잉",
+      "subscribers": 369000,
+      "avg_views": 287285,
+      "median_views": 177866,
+      "category": "일상/공감",
+      "subcategory": "가족 일상",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B5%AC%EB%8F%85%EC%9D%80%EB%84%88%EB%AC%B4%EC%A2%8B%EC%95%84%EC%9A%94/shorts"
+    },
+    {
+      "name": "셀럽톡톡",
+      "subscribers": 87300,
+      "avg_views": 286703,
+      "median_views": 125015,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%85%80%EB%9F%BD%ED%86%A1%ED%86%A1-m9r/shorts"
+    },
+    {
+      "name": "StarBitszip",
+      "subscribers": 5010,
+      "avg_views": 286461,
+      "median_views": 38139,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Starbitszip/shorts"
+    },
+    {
+      "name": "거리의 무법자들",
+      "subscribers": 154000,
+      "avg_views": 285623,
+      "median_views": 127542,
+      "category": "지식/정보",
+      "subcategory": "사건/범죄",
+      "format": "AI / 해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B1%B0%EB%A6%AC%EC%9D%98%EB%AC%B4%EB%B2%95%EC%9E%90%EB%93%A4/shorts"
+    },
+    {
+      "name": "스타썰",
+      "subscribers": 196000,
+      "avg_views": 281645,
+      "median_views": 215470,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "랭킹쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%8A%A4%ED%83%80%EC%8D%B0/shorts"
+    },
+    {
+      "name": "랭크월드",
+      "subscribers": 7390,
+      "avg_views": 279777,
+      "median_views": 73127,
+      "category": "취미/덕질",
+      "subcategory": "스포츠",
+      "format": "랭킹쇼츠 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%9E%AD%ED%81%AC%EC%9B%94%EB%93%9C8/shorts"
+    },
+    {
+      "name": "이쓰이쓰",
+      "subscribers": 18600,
+      "avg_views": 279142,
+      "median_views": 99911,
+      "category": "취미/덕질",
+      "subcategory": "스포츠 선수",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@issesisses/shorts"
+    },
+    {
+      "name": "랭크뽀이",
+      "subscribers": 8440,
+      "avg_views": 278397,
+      "median_views": 29816,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EB%9E%AD%ED%81%AC%EB%BD%80%EC%9D%B4/shorts"
+    },
+    {
+      "name": "잼킷리스트",
+      "subscribers": 12500,
+      "avg_views": 276783,
+      "median_views": 102446,
+      "category": "지식/정보",
+      "subcategory": "시사",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%9E%BC%ED%82%B7%EB%A6%AC%EC%8A%A4%ED%8A%B8/shorts"
+    },
+    {
+      "name": "심쿵건강",
+      "subscribers": 68700,
+      "avg_views": 275876,
+      "median_views": 51568,
+      "category": "지식/정보",
+      "subcategory": "건강",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%8B%AC%EC%BF%B5%EA%B1%B4%EA%B0%95/shorts"
+    },
+    {
+      "name": "피겨캣",
+      "subscribers": 4760,
+      "avg_views": 274195,
+      "median_views": 147680,
+      "category": "취미/덕질",
+      "subcategory": "스포츠/피겨",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@fscatu/shorts"
+    },
+    {
+      "name": "뽀용뇽 l 남다른 뷰티꿀팁",
+      "subscribers": 436000,
+      "avg_views": 267005,
+      "median_views": 142366,
+      "category": "푸드/뷰티",
+      "subcategory": "화장품 / 제품 리뷰",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EB%BD%80%EC%9A%A9%EB%87%BD/shorts"
+    },
+    {
+      "name": "원피스 도서관",
+      "subscribers": 37400,
+      "avg_views": 264946,
+      "median_views": 132380,
+      "category": "취미/덕질",
+      "subcategory": "일본 애니 / 원피스",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@onepieceLibrary/shorts"
+    },
+    {
+      "name": "축구한판",
+      "subscribers": 2480,
+      "avg_views": 260726,
+      "median_views": 44015,
+      "category": "취미/덕질",
+      "subcategory": "축구",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%B6%95%EA%B5%AC%ED%95%9C%ED%8C%90%EC%A2%8B%EC%95%84%EC%9A%94/shorts"
+    },
+    {
+      "name": "지식애플",
+      "subscribers": 15900,
+      "avg_views": 260462,
+      "median_views": 37556,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%80%EC%8B%9D%EC%95%A0%ED%94%8C/shorts"
+    },
+    {
+      "name": "유나몽 yunamong_",
+      "subscribers": 570000,
+      "avg_views": 257464,
+      "median_views": 195304,
+      "category": "음악/댄스",
+      "subcategory": "음악/댄스",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EC%9C%A0%EB%82%98%EB%AA%BD/shorts"
+    },
+    {
+      "name": "원룸맨",
+      "subscribers": 14100,
+      "avg_views": 255385,
+      "median_views": 36338,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "해설형",
+      "channel_url": "https://www.youtube.com/@%EC%9B%90%EB%A3%B8%EB%A7%A8/shorts"
+    },
+    {
+      "name": "요놔",
+      "subscribers": 6780,
+      "avg_views": 253799,
+      "median_views": 185944,
+      "category": "취미/덕질",
+      "subcategory": "일본 애니",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9A%94%EB%86%94/shorts"
+    },
+    {
+      "name": "오!득템",
+      "subscribers": 25200,
+      "avg_views": 252680,
+      "median_views": 35500,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "생활용품 / 꿀템",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@오득템404"
+    },
+    {
+      "name": "히든셀럽",
+      "subscribers": 13200,
+      "avg_views": 251248,
+      "median_views": 78949,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%9E%88%EB%93%A0%EC%85%80%EB%9F%BD/shorts"
+    },
+    {
+      "name": "인플루 - Kpop Culture",
+      "subscribers": 35400,
+      "avg_views": 251153,
+      "median_views": 83576,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "AI / 촬영",
+      "channel_url": "https://www.youtube.com/@influkpop/shorts"
+    },
+    {
+      "name": "야구매니아",
+      "subscribers": 35100,
+      "avg_views": 250424,
+      "median_views": 60277,
+      "category": "취미/덕질",
+      "subcategory": "스포츠 / 야구",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%95%BC%EA%B5%AC%EB%A7%A4%EB%8B%88%EC%95%84-p9h/shorts"
+    },
+    {
+      "name": "썰라디오 - 실화사연",
+      "subscribers": 21400,
+      "avg_views": 248952,
+      "median_views": 69326,
+      "category": "일상/공감",
+      "subcategory": "가족 일상",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@ssulradio1/shorts"
+    },
+    {
+      "name": "세상극짱",
+      "subscribers": 117000,
+      "avg_views": 246772,
+      "median_views": 246772,
+      "category": "방송/영상",
+      "subcategory": "해외 드라마",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%82%AC%EB%8A%94%EC%96%98%EA%B8%B0-0/shorts"
+    },
+    {
+      "name": "빻젤 방앗간",
+      "subscribers": 92600,
+      "avg_views": 245050,
+      "median_views": 66032,
+      "category": "취미/덕질",
+      "subcategory": "게임",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EB%B9%BB%EC%A0%A4%EB%B0%A9%EC%95%97%EA%B0%84/shorts"
+    },
+    {
+      "name": "유리한오늘 yulri",
+      "subscribers": 37400,
+      "avg_views": 243274,
+      "median_views": 45577,
+      "category": "푸드/뷰티",
+      "subcategory": "패션/코디",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@yuri._.2ee/shorts"
+    },
+    {
+      "name": "비더스(Behind The Sports)",
+      "subscribers": 58700,
+      "avg_views": 241167,
+      "median_views": 89701,
+      "category": "취미/덕질",
+      "subcategory": "종합 스포츠",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B9%84%EB%8D%94%EC%8A%A4BehindTheSports/shorts"
+    },
+    {
+      "name": "레전드모음zip",
+      "subscribers": 31000,
+      "avg_views": 239042,
+      "median_views": 79184,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EB%A0%88%EC%A0%84%EB%93%9C%EB%AA%A8%EC%9D%8Czip/shorts"
+    },
+    {
+      "name": "성소장 연구소",
+      "subscribers": 19000,
+      "avg_views": 238450,
+      "median_views": 53803,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%84%B1%EC%86%8C%EC%9E%A5/shorts"
+    },
+    {
+      "name": "쓸모한방울",
+      "subscribers": 78400,
+      "avg_views": 238317,
+      "median_views": 108622,
+      "category": "지식/정보",
+      "subcategory": "건강",
+      "format": "AI / 해설형",
+      "channel_url": "https://www.youtube.com/@%EC%93%B8%EB%AA%A8%ED%95%9C%EB%B0%A9%EC%9A%B8/shorts"
+    },
+    {
+      "name": "바디캠온",
+      "subscribers": 16300,
+      "avg_views": 235447,
+      "median_views": 42853,
+      "category": "지식/정보",
+      "subcategory": "사건/범죄",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B0%94%EB%94%94%EC%BA%A0ON%EA%B5%AC%EB%8F%85/shorts"
+    },
+    {
+      "name": "아는멋진형",
+      "subscribers": 46200,
+      "avg_views": 231023,
+      "median_views": 71075,
+      "category": "지식/정보",
+      "subcategory": "재벌 / 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%95%84%EB%8A%94%EB%A9%8B%EC%A7%84%ED%98%95/shorts"
+    },
+    {
+      "name": "미디어몽구",
+      "subscribers": 512000,
+      "avg_views": 230942,
+      "median_views": 225034,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@mediamongu/shorts"
+    },
+    {
+      "name": "백만수무강",
+      "subscribers": 31900,
+      "avg_views": 230176,
+      "median_views": 43825,
+      "category": "지식/정보",
+      "subcategory": "건강 / 동기부여",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EB%B0%B1%EB%A7%8C%EC%88%98%EB%AC%B4%EA%B0%95/shorts"
+    },
+    {
+      "name": "아리랑day",
+      "subscribers": 130000,
+      "avg_views": 229476,
+      "median_views": 87860,
+      "category": "지식/정보",
+      "subcategory": "북한",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@day12/shorts"
+    },
+    {
+      "name": "썰플리",
+      "subscribers": 33700,
+      "avg_views": 227413,
+      "median_views": 169197,
+      "category": "일상/공감",
+      "subcategory": "재밌는 썰 / 연애",
+      "format": "썰형 / AI",
+      "channel_url": "https://www.youtube.com/@%EC%8D%B0%ED%94%8C%EB%A6%AC-j9p8l/shorts"
+    },
+    {
+      "name": "별은니가슴에",
+      "subscribers": 5030,
+      "avg_views": 226935,
+      "median_views": 43716,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/ 근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@PAST-N/shorts"
+    },
+    {
+      "name": "우빛순",
+      "subscribers": 7430,
+      "avg_views": 226534,
+      "median_views": 84812,
+      "category": "취미/덕질",
+      "subcategory": "스포츠/이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9A%B0%EB%B9%9B%EC%88%9C/shorts"
+    },
+    {
+      "name": "또보패션",
+      "subscribers": 117000,
+      "avg_views": 224602,
+      "median_views": 45904,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@ttobo_fashion/shorts"
+    },
+    {
+      "name": "FocuSON",
+      "subscribers": 80600,
+      "avg_views": 224511,
+      "median_views": 85258,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@HOKASON/shorts"
+    },
+    {
+      "name": "오위 ohwi",
+      "subscribers": 6970,
+      "avg_views": 223023,
+      "median_views": 31316,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@ohwi_5/shorts"
+    },
+    {
+      "name": "라이프팩토리",
+      "subscribers": 10700,
+      "avg_views": 221524,
+      "median_views": 116628,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@healthstory963/shorts"
+    },
+    {
+      "name": "일분일초",
+      "subscribers": 442000,
+      "avg_views": 220838,
+      "median_views": 118176,
+      "category": "일상/공감",
+      "subcategory": "가족 일상",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%BC%EB%B6%84%EC%9D%BC%EC%B4%88/shorts"
+    },
+    {
+      "name": "티노",
+      "subscribers": 242000,
+      "avg_views": 218789,
+      "median_views": 63830,
+      "category": "지식/정보",
+      "subcategory": "IT/테크",
+      "format": "촬영 / 리뷰",
+      "channel_url": "https://www.youtube.com/@tino_review/shorts"
+    },
+    {
+      "name": "단즈",
+      "subscribers": 101000,
+      "avg_views": 217245,
+      "median_views": 139536,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@danz_59/shorts"
+    },
+    {
+      "name": "레전드집합소",
+      "subscribers": 13600,
+      "avg_views": 215854,
+      "median_views": 34496,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A0%88%EC%A0%84%EB%93%9C%EC%A7%91%ED%95%A9%EC%86%8C0/shorts"
+    },
+    {
+      "name": "내놔이선생",
+      "subscribers": 42400,
+      "avg_views": 213826,
+      "median_views": 47150,
+      "category": "취미/덕질",
+      "subcategory": "골프",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EC%8A%A4%ED%83%80%EA%B3%A8%ED%94%84STARGOLF/shorts"
+    },
+    {
+      "name": "짬날때 세상이야기",
+      "subscribers": 24000,
+      "avg_views": 212664,
+      "median_views": 56234,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%AC%EC%84%B8/shorts"
+    },
+    {
+      "name": "언니의 파우치",
+      "subscribers": 21900,
+      "avg_views": 212265,
+      "median_views": 24000,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "신기한 물건",
+      "format": "썰형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@언니의파우치-i3p"
+    },
+    {
+      "name": "민주답",
+      "subscribers": 93500,
+      "avg_views": 211864,
+      "median_views": 79968,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@minjudap/shorts"
+    },
+    {
+      "name": "멜로컷",
+      "subscribers": 157000,
+      "avg_views": 209899,
+      "median_views": 120690,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Melodrama_Cut/shorts"
+    },
+    {
+      "name": "월드맵튜브",
+      "subscribers": 146000,
+      "avg_views": 205260,
+      "median_views": 47429,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@worldmaptube/shorts"
+    },
+    {
+      "name": "트로트기자",
+      "subscribers": 55000,
+      "avg_views": 204589,
+      "median_views": 100976,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%8A%B8%EB%A1%9C%ED%8A%B8%EB%B3%84%EA%B8%B0%EC%9E%90/shorts"
+    },
+    {
+      "name": "쏭TMI",
+      "subscribers": 9190,
+      "avg_views": 204290,
+      "median_views": 74074,
+      "category": "취미/덕질",
+      "subcategory": "가수/음악",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%8F%ADTMI/shorts"
+    },
+    {
+      "name": "얼댕",
+      "subscribers": 97100,
+      "avg_views": 204124,
+      "median_views": 154816,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 로블록스",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EC%96%BC%EB%8C%95/shorts"
+    },
+    {
+      "name": "감동메시지",
+      "subscribers": 44000,
+      "avg_views": 202079,
+      "median_views": 82022,
+      "category": "연예/팬덤",
+      "subcategory": "해외 배우",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B0%90%EB%8F%99%EB%A9%94%EC%8B%9C%EC%A7%80/shorts"
+    },
+    {
+      "name": "공의 이면",
+      "subscribers": 18300,
+      "avg_views": 201909,
+      "median_views": 34820,
+      "category": "취미/덕질",
+      "subcategory": "축구/이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B3%B5%EC%9D%98_%EC%9D%B4%EB%A9%B4/shorts"
+    },
+    {
+      "name": "뉴스 인바디(News Inbody)",
+      "subscribers": 4140,
+      "avg_views": 201905,
+      "median_views": 41673,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@News_Inbody/shorts"
+    },
+    {
+      "name": "별밤트로트",
+      "subscribers": 72200,
+      "avg_views": 201735,
+      "median_views": 104876,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B3%84%EB%B0%A4%ED%8A%B8%EB%A1%9C%ED%8A%B8/shorts"
+    },
+    {
+      "name": "K - 꿀꺽",
+      "subscribers": 18900,
+      "avg_views": 201128,
+      "median_views": 103620,
+      "category": "일상/공감",
+      "subcategory": "감동 스토리 / 가족",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%BC%80%EC%9D%B4%EA%BF%80%EA%BA%BD/shorts"
+    },
+    {
+      "name": "쇼츠동물원",
+      "subscribers": 13200,
+      "avg_views": 200908,
+      "median_views": 40858,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%87%BC%EC%B8%A0%EB%8F%99%EB%AC%BC%EC%9B%90-d9o/shorts"
+    },
+    {
+      "name": "깜이슈",
+      "subscribers": 8350,
+      "avg_views": 199330,
+      "median_views": 30558,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B9%9C%EC%9D%B4%EC%8A%88/shorts"
+    },
+    {
+      "name": "어질어질 연예세상",
+      "subscribers": 121000,
+      "avg_views": 197179,
+      "median_views": 51726,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%96%B4%EC%A7%88%EC%96%B4%EC%A7%88%EC%97%B0%EC%98%88%EC%84%B8%EC%83%81/shorts"
+    },
+    {
+      "name": "올포츠 ALLPORTS",
+      "subscribers": 13900,
+      "avg_views": 196828,
+      "median_views": 211596,
+      "category": "취미/덕질",
+      "subcategory": "해외 농구",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%98%AC%ED%8F%AC%EC%B8%A0/shorts"
+    },
+    {
+      "name": "무비어때요",
+      "subscribers": 556,
+      "avg_views": 196442,
+      "median_views": 77310,
+      "category": "연예/팬덤",
+      "subcategory": "영화 명장면",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%AC%B4%EB%B9%84%EC%96%B4%EB%95%8C%EC%9A%94/shorts"
+    },
+    {
+      "name": "아이돌만세",
+      "subscribers": 1970,
+      "avg_views": 195836,
+      "median_views": 41920,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널 / 있지",
+      "format": "해설형 / 짜집기 채널",
+      "channel_url": "https://www.youtube.com/@%EC%95%84%EC%9D%B4%EB%8F%8C%EB%A7%8C%EC%84%B8/shorts"
+    },
+    {
+      "name": "폴리버스",
+      "subscribers": 97900,
+      "avg_views": 195768,
+      "median_views": 101394,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%ED%8F%B4%EB%A6%AC%EB%B2%84%EC%8A%A4/shorts"
+    },
+    {
+      "name": "백세시대 행복채널",
+      "subscribers": 130000,
+      "avg_views": 191801,
+      "median_views": 33924,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B0%B1%EC%84%B8%EC%8B%9C%EB%8C%80%ED%96%89%EB%B3%B5%EC%B1%84%EB%84%90-t8v/shorts"
+    },
+    {
+      "name": "썰킹",
+      "subscribers": 42900,
+      "avg_views": 190435,
+      "median_views": 69876,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EC%8D%B0%ED%82%B9123/shorts"
+    },
+    {
+      "name": "전한길뉴스 1waynews",
+      "subscribers": 756000,
+      "avg_views": 189545,
+      "median_views": 153872,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@1waynews-jhg/shorts"
+    },
+    {
+      "name": "작은방 덕후",
+      "subscribers": 206000,
+      "avg_views": 188252,
+      "median_views": 55734,
+      "category": "취미/덕질",
+      "subcategory": "애니",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9E%91%EB%8D%95/shorts"
+    },
+    {
+      "name": "오늘 뭐 먹지?",
+      "subscribers": 342000,
+      "avg_views": 188078,
+      "median_views": 35283,
+      "category": "푸드/뷰티",
+      "subcategory": "먹방/디저트",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@%EC%98%A4%EB%A8%B9/shorts"
+    },
+    {
+      "name": "유머쇼츠제작소",
+      "subscribers": 34100,
+      "avg_views": 187262,
+      "median_views": 46019,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9C%A0%EB%A8%B8%EC%87%BC%EC%B8%A0%EC%A0%9C%EC%9E%91%EC%86%8C/shorts"
+    },
+    {
+      "name": "어머니는 고양이가 싫다고 하셨어",
+      "subscribers": 11600,
+      "avg_views": 187141,
+      "median_views": 30592,
+      "category": "취미/덕질",
+      "subcategory": "귀여운 동물",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@moms_hate_cat/shorts"
+    },
+    {
+      "name": "자동차 갤러리",
+      "subscribers": 12500,
+      "avg_views": 186067,
+      "median_views": 33443,
+      "category": "취미/덕질",
+      "subcategory": "자동차",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9E%90%EB%8F%99%EC%B0%A8%EA%B0%A4%EB%9F%AC%EB%A6%AC2/shorts"
+    },
+    {
+      "name": "인생갓템",
+      "subscribers": 25400,
+      "avg_views": 181633,
+      "median_views": 34500,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "신기한 물건",
+      "format": "썰형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@lifegodtem"
+    },
+    {
+      "name": "골방극장",
+      "subscribers": 74100,
+      "avg_views": 180132,
+      "median_views": 91326,
+      "category": "취미/덕질",
+      "subcategory": "배구",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@Minding-gg2vd/shorts"
+    },
+    {
+      "name": "BTS NOW",
+      "subscribers": 18700,
+      "avg_views": 179114,
+      "median_views": 43462,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@btsnow2025/shorts"
+    },
+    {
+      "name": "유머실록",
+      "subscribers": 32800,
+      "avg_views": 178876,
+      "median_views": 69229,
+      "category": "일상/공감",
+      "subcategory": "재밌는 썰",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@%EC%9C%A0%EB%A8%B8%EC%8B%A4%EB%A1%9D/shorts"
+    },
+    {
+      "name": "안빼고유진",
+      "subscribers": 14600,
+      "avg_views": 176732,
+      "median_views": 165606,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%95%88%EB%B9%BC%EA%B3%A0%EC%9C%A0%EC%A7%84/shorts"
+    },
+    {
+      "name": "늘지식",
+      "subscribers": 2850,
+      "avg_views": 176341,
+      "median_views": 27175,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A2%8B%EC%95%84%EC%9A%94%EB%8C%93%EA%B8%80%EA%B5%AC%EB%8F%85%EC%B0%9C%EB%BD%95/shorts"
+    },
+    {
+      "name": "연예인PD",
+      "subscribers": 357000,
+      "avg_views": 176329,
+      "median_views": 53202,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%97%B0%EC%98%88%EC%9D%B8PD/shorts"
+    },
+    {
+      "name": "콕콕콕",
+      "subscribers": 69100,
+      "avg_views": 175443,
+      "median_views": 115760,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "커뮤니티 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%BD%95%EC%BD%95%EC%BD%953/shorts"
+    },
+    {
+      "name": "더빙농장",
+      "subscribers": 133000,
+      "avg_views": 175238,
+      "median_views": 81461,
+      "category": "취미/덕질",
+      "subcategory": "동물 더빙",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%8D%94%EB%B9%99%EB%86%8D%EC%9E%A5/shorts"
+    },
+    {
+      "name": "영비모【영화 비하인드 모음】",
+      "subscribers": 26500,
+      "avg_views": 175198,
+      "median_views": 30993,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@moviebts7/shorts"
+    },
+    {
+      "name": "째깍째깍",
+      "subscribers": 27500,
+      "avg_views": 162768,
+      "median_views": 35150,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A7%B8%EA%B9%8D%EC%A7%B8%EA%B9%8D%EC%A7%B8%EA%B9%8D%EC%A7%B8%EA%B9%8D/shorts"
+    },
+    {
+      "name": "오닝oning",
+      "subscribers": 280000,
+      "avg_views": 159113,
+      "median_views": 55998,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영 / 리뷰",
+      "channel_url": "https://www.youtube.com/@%EC%98%A4%EB%8B%9D/shorts"
+    },
+    {
+      "name": "한입만",
+      "subscribers": 3260,
+      "avg_views": 158821,
+      "median_views": 120603,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "소리 없는 쇼츠",
+      "channel_url": "https://www.youtube.com/@one5poon/shorts"
+    },
+    {
+      "name": "꿈스토랑",
+      "subscribers": 83300,
+      "avg_views": 152773,
+      "median_views": 37842,
+      "category": "푸드/뷰티",
+      "subcategory": "먹방/디저트",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@kkumstorang/shorts"
+    },
+    {
+      "name": "세상정보TV",
+      "subscribers": 194000,
+      "avg_views": 152213,
+      "median_views": 66635,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황/ 부동산",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%84%B8%EC%83%81%EC%A0%95%EB%B3%B4TV/shorts"
+    },
+    {
+      "name": "매일바나나",
+      "subscribers": 1170,
+      "avg_views": 147723,
+      "median_views": 28618,
+      "category": "일상/공감",
+      "subcategory": "감동 스토리",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A7%A4%EC%9D%BC%EB%B0%94%EB%82%98%EB%82%98/shorts"
+    },
+    {
+      "name": "별별톡톡",
+      "subscribers": 11000,
+      "avg_views": 146570,
+      "median_views": 56926,
+      "category": "연예/팬덤",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@startalktalks/shorts"
+    },
+    {
+      "name": "몬트쿠키 | 두바이쫀득쿠키 원조🧆",
+      "subscribers": 8750,
+      "avg_views": 146492,
+      "median_views": 116579,
+      "category": "푸드/뷰티",
+      "subcategory": "먹방/디저트",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@mondcookie_official/shorts"
+    },
+    {
+      "name": "짱쇼츠",
+      "subscribers": 34600,
+      "avg_views": 145247,
+      "median_views": 28362,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%A7%B1%EC%87%BC%EC%B8%A0/shorts"
+    },
+    {
+      "name": "1분근황",
+      "subscribers": 6960,
+      "avg_views": 143636,
+      "median_views": 29334,
+      "category": "방송/영상",
+      "subcategory": "예능 레전드",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@all_that_ranking/shorts"
+    },
+    {
+      "name": "아키짱의 한국살이",
+      "subscribers": 55500,
+      "avg_views": 143513,
+      "median_views": 58988,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@celloakitty/shorts"
+    },
+    {
+      "name": "아누누",
+      "subscribers": 519000,
+      "avg_views": 143219,
+      "median_views": 128280,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "촬영",
+      "channel_url": "https://www.youtube.com/@anunu/shorts"
+    },
+    {
+      "name": "짤잉 Zzal ing",
+      "subscribers": 9340,
+      "avg_views": 139727,
+      "median_views": 84513,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@zzal_ing/shorts"
+    },
+    {
+      "name": "네비게이터",
+      "subscribers": 49200,
+      "avg_views": 136364,
+      "median_views": 40466,
+      "category": "지식/정보",
+      "subcategory": "이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%84%A4%EB%B9%84%EA%B2%8C%EC%9D%B4%ED%84%B0navi/shorts"
+    },
+    {
+      "name": "맥가이버",
+      "subscribers": 171000,
+      "avg_views": 135918,
+      "median_views": 72260,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "촬영 / 해설형",
+      "channel_url": "https://www.youtube.com/@%EB%A7%A5%EA%B0%80%EC%9D%B4%EB%B2%84/shorts"
+    },
+    {
+      "name": "이거알까",
+      "subscribers": 28400,
+      "avg_views": 135301,
+      "median_views": 59915,
+      "category": "취미/덕질",
+      "subcategory": "애니 / 귀멸의칼날",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EC%9D%B4%EA%B1%B0%EC%95%8C%EA%B9%8C/shorts"
+    },
+    {
+      "name": "레이디액션",
+      "subscribers": 618000,
+      "avg_views": 134107,
+      "median_views": 49358,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@ladyaction624/shorts"
+    },
+    {
+      "name": "방타니탄이",
+      "subscribers": 842,
+      "avg_views": 133218,
+      "median_views": 66718,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B0%A9%ED%83%80%EB%8B%88%ED%83%84%EC%9D%B4-g9d/shorts"
+    },
+    {
+      "name": "로튜브",
+      "subscribers": 75500,
+      "avg_views": 132779,
+      "median_views": 107268,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 로블록스",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@KOR_Rotube/shorts"
+    },
+    {
+      "name": "우뚜빵과꼬집사",
+      "subscribers": 29600,
+      "avg_views": 131969,
+      "median_views": 37472,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@fablebabatt/shorts"
+    },
+    {
+      "name": "팬유",
+      "subscribers": 19700,
+      "avg_views": 128592,
+      "median_views": 96964,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 발로란트",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%ED%8C%AC%EC%9C%A01/shorts"
+    },
+    {
+      "name": "공포사건이야기042",
+      "subscribers": 3160,
+      "avg_views": 128448,
+      "median_views": 40618,
+      "category": "지식/정보",
+      "subcategory": "사건/범죄",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EA%B3%B5%ED%8F%AC%EC%82%AC%EA%B1%B4%EC%9D%B4%EC%95%BC%EA%B8%B0042/shorts"
+    },
+    {
+      "name": "마나튜브",
+      "subscribers": 6220,
+      "avg_views": 128018,
+      "median_views": 95624,
+      "category": "취미/덕질",
+      "subcategory": "일본 애니",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EB%A7%88%EB%82%98%ED%8A%9C%EB%B8%8C-d4s/shorts"
+    },
+    {
+      "name": "숏스토리",
+      "subscribers": 15300,
+      "avg_views": 126763,
+      "median_views": 32197,
+      "category": "일상/공감",
+      "subcategory": "감동 스토리",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@shotstory-jiho/shorts"
+    },
+    {
+      "name": "크리스털 캐슬",
+      "subscribers": 44300,
+      "avg_views": 124214,
+      "median_views": 95138,
+      "category": "지식/정보",
+      "subcategory": "해외 이슈 이슈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@atcrystalcastle/shorts"
+    },
+    {
+      "name": "썰감자",
+      "subscribers": 242000,
+      "avg_views": 123198,
+      "median_views": 30304,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%8D%B0%EA%B0%90%EC%9E%90/shorts"
+    },
+    {
+      "name": "길거리 미녀들",
+      "subscribers": 72000,
+      "avg_views": 119894,
+      "median_views": 91904,
+      "category": "푸드/뷰티",
+      "subcategory": "패션/코디",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@streetmiin/shorts"
+    },
+    {
+      "name": "장수에 진심인 편",
+      "subscribers": 51100,
+      "avg_views": 116839,
+      "median_views": 34620,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9E%A5%EC%88%98%EC%97%90%EC%A7%84%EC%8B%AC%EC%9D%B8%ED%8E%B8/shorts"
+    },
+    {
+      "name": "넘쥬아",
+      "subscribers": 1650,
+      "avg_views": 112312,
+      "median_views": 27695,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%84%98%EC%A5%AC%EC%95%84-b4y/shorts"
+    },
+    {
+      "name": "1분근황",
+      "subscribers": 69600,
+      "avg_views": 109885,
+      "median_views": 31302,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@all_that_ranking/shorts"
+    },
+    {
+      "name": "맥스랭킹",
+      "subscribers": 31300,
+      "avg_views": 106748,
+      "median_views": 46240,
+      "category": "지식/정보",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹 쇼츠",
+      "channel_url": "https://www.youtube.com/@%EB%A7%A5%EC%8A%A4%EB%9E%AD%ED%82%B9/shorts"
+    },
+    {
+      "name": "살림연구소 오클",
+      "subscribers": 291000,
+      "avg_views": 106239,
+      "median_views": 32073,
+      "category": "지식/정보",
+      "subcategory": "굴팁 / 입시",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@%EC%82%B4%EB%A6%BC%EC%97%B0%EA%B5%AC%EC%86%8C%EC%98%A4%ED%81%B4/shorts"
+    },
+    {
+      "name": "어바웃템",
+      "subscribers": 34500,
+      "avg_views": 105827,
+      "median_views": 22000,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "신기한 물건",
+      "format": "썰형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@어바웃템"
+    },
+    {
+      "name": "소소창고",
+      "subscribers": 72400,
+      "avg_views": 104243,
+      "median_views": 51952,
+      "category": "지식/정보",
+      "subcategory": "건강",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%86%8C%EC%86%8C%EC%B0%BD%EA%B3%A0/shorts"
+    },
+    {
+      "name": "유튜브 건강주치의",
+      "subscribers": 114000,
+      "avg_views": 103854,
+      "median_views": 62918,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "랭킹쇼츠",
+      "channel_url": "https://www.youtube.com/@%EC%9C%A0%ED%8A%9C%EB%B8%8C%EA%B1%B4%EA%B0%95%EC%A3%BC%EC%B9%98%EC%9D%98/shorts"
+    },
+    {
+      "name": "뭐든지",
+      "subscribers": 15300,
+      "avg_views": 101775,
+      "median_views": 63974,
+      "category": "취미/덕질",
+      "subcategory": "격투기",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@dead999-g6v/shorts"
+    },
+    {
+      "name": "미디어박스",
+      "subscribers": 74000,
+      "avg_views": 91470,
+      "median_views": 35863,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%AF%B8%EB%94%94%EC%96%B4%EB%B0%95%EC%8A%A4M/shorts"
+    },
+    {
+      "name": "가요랭킹쇼",
+      "subscribers": 749,
+      "avg_views": 89902,
+      "median_views": 42056,
+      "category": "연예/팬덤",
+      "subcategory": "랭킹/모음",
+      "format": "랭킹쇼츠 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B0%80%EC%9A%94%EB%9E%AD%ED%82%B9%EC%87%BC/shorts"
+    },
+    {
+      "name": "꺄오옷",
+      "subscribers": 7070,
+      "avg_views": 89777,
+      "median_views": 28756,
+      "category": "취미/덕질",
+      "subcategory": "축구",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EA%B3%B5%ED%8F%AC%EC%8A%A4%EB%9F%B0%EC%9D%B4%EC%95%BC%EA%B8%B0/shorts"
+    },
+    {
+      "name": "재미주의",
+      "subscribers": 446000,
+      "avg_views": 89270,
+      "median_views": 31114,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "헤설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@jamjam0615/shorts"
+    },
+    {
+      "name": "버미TV",
+      "subscribers": 258000,
+      "avg_views": 88618,
+      "median_views": 40219,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B2%84%EB%AF%B8TV2/shorts"
+    },
+    {
+      "name": "지식노바",
+      "subscribers": 2910,
+      "avg_views": 87464,
+      "median_views": 32473,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@jisiknova/shorts"
+    },
+    {
+      "name": "빵시기TV",
+      "subscribers": 345000,
+      "avg_views": 86751,
+      "median_views": 64980,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@TV-dv9ig/shorts"
+    },
+    {
+      "name": "꼼수살림",
+      "subscribers": 123000,
+      "avg_views": 86340,
+      "median_views": 20000,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "생활용품 / 꿀템",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@ggomsusalim"
+    },
+    {
+      "name": "1분성장통",
+      "subscribers": 30400,
+      "avg_views": 86189,
+      "median_views": 46725,
+      "category": "지식/정보",
+      "subcategory": "건강",
+      "format": "해설형 / AI",
+      "channel_url": "https://www.youtube.com/@1%EB%B6%84%EC%84%B1%EC%9E%A5%ED%86%B5/shorts"
+    },
+    {
+      "name": "롤꺾마",
+      "subscribers": 22800,
+      "avg_views": 85659,
+      "median_views": 72170,
+      "category": "취미/덕질",
+      "subcategory": "게임 / 롤",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EB%A1%A4%EA%BA%BE%EB%A7%88/shorts"
+    },
+    {
+      "name": "잼한스푼",
+      "subscribers": 711,
+      "avg_views": 85455,
+      "median_views": 43356,
+      "category": "연예/팬덤",
+      "subcategory": "그룹별 팬채널",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9E%BC%ED%95%9C%EC%8A%A4%ED%91%BC/shorts"
+    },
+    {
+      "name": "FailKing",
+      "subscribers": 160000,
+      "avg_views": 81712,
+      "median_views": 30101,
+      "category": "지식/정보",
+      "subcategory": "잡학 상식",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@FailKingFun/shorts"
+    },
+    {
+      "name": "큐떱일기",
+      "subscribers": 13100,
+      "avg_views": 79593,
+      "median_views": 50196,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@qwer_diary/shorts"
+    },
+    {
+      "name": "공황남의 갑자기 떠나는 튀르키예 여행 LEEGAL",
+      "subscribers": 71000,
+      "avg_views": 78375,
+      "median_views": 36170,
+      "category": "일상/공감",
+      "subcategory": "가족 일상",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@leegal/shorts"
+    },
+    {
+      "name": "태기태기 TechTaekE",
+      "subscribers": 23400,
+      "avg_views": 72633,
+      "median_views": 36000,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "키보드",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@Taek_E"
+    },
+    {
+      "name": "리씨네",
+      "subscribers": 451000,
+      "avg_views": 67416,
+      "median_views": 34030,
+      "category": "연예/팬덤",
+      "subcategory": "영화 명장면",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%A6%AC%EC%94%A8%EB%84%A4/shorts"
+    },
+    {
+      "name": "배구스매시",
+      "subscribers": 7680,
+      "avg_views": 66595,
+      "median_views": 37172,
+      "category": "취미/덕질",
+      "subcategory": "배구",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B0%B0%EA%B5%AC%EC%8A%A4%EB%A7%A4%EC%8B%9C/shorts"
+    },
+    {
+      "name": "견생역전",
+      "subscribers": 480000,
+      "avg_views": 65213,
+      "median_views": 57119,
+      "category": "취미/덕질",
+      "subcategory": "귀여운 동물",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@GSYJ/shorts"
+    },
+    {
+      "name": "시간순삭s",
+      "subscribers": 152000,
+      "avg_views": 64828,
+      "median_views": 32173,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@soonsaks/shorts"
+    },
+    {
+      "name": "속깊은인생",
+      "subscribers": 129000,
+      "avg_views": 64732,
+      "median_views": 43438,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "해설형 / AI",
+      "channel_url": "https://www.youtube.com/@%EC%86%8D%EA%B9%8A%EC%9D%80%EC%9D%B8%EC%83%9D/shorts"
+    },
+    {
+      "name": "비하인드숏츠",
+      "subscribers": 8850,
+      "avg_views": 63067,
+      "median_views": 28119,
+      "category": "연예/팬덤",
+      "subcategory": "연예인 이슈/근황",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EB%B9%84%ED%95%98%EC%9D%B8%EB%93%9C%EC%88%8F%EC%B8%A0/shorts"
+    },
+    {
+      "name": "눕고싶다",
+      "subscribers": 5610,
+      "avg_views": 62711,
+      "median_views": 28392,
+      "category": "글로벌/문화",
+      "subcategory": "K-문화 반응",
+      "format": "커뮤니티",
+      "channel_url": "https://www.youtube.com/@%EB%88%95%EA%B3%A0_%EC%8B%B6%EB%8B%A4/shorts"
+    },
+    {
+      "name": "기자수첩",
+      "subscribers": 469000,
+      "avg_views": 62470,
+      "median_views": 40700,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@enter-pd/shorts"
+    },
+    {
+      "name": "웃으면복이와요 smile_bok",
+      "subscribers": 27700,
+      "avg_views": 57645,
+      "median_views": 33636,
+      "category": "일상/공감",
+      "subcategory": "코미디/밈",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@smilebok_1004/shorts"
+    },
+    {
+      "name": "은빛숲길",
+      "subscribers": 134000,
+      "avg_views": 57613,
+      "median_views": 38788,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%9D%80%EB%B9%9B%EC%88%B2%EA%B8%B8/shorts"
+    },
+    {
+      "name": "시니어로드",
+      "subscribers": 110000,
+      "avg_views": 53394,
+      "median_views": 30680,
+      "category": "지식/정보",
+      "subcategory": "연애",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@%EC%8B%9C%EB%8B%88%EC%96%B4%EB%A1%9C%EB%93%9C1004/shorts"
+    },
+    {
+      "name": "밥슨[Spicyking]",
+      "subscribers": 232000,
+      "avg_views": 46876,
+      "median_views": 43884,
+      "category": "푸드/뷰티",
+      "subcategory": "음식 / 먹방",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@Spicyking/shorts"
+    },
+    {
+      "name": "쇼너츠",
+      "subscribers": 6110,
+      "avg_views": 43795,
+      "median_views": 30207,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@shownuts/shorts"
+    },
+    {
+      "name": "정치한줄",
+      "subscribers": 130000,
+      "avg_views": 41895,
+      "median_views": 41895,
+      "category": "지식/정보",
+      "subcategory": "정치",
+      "format": "해설형 / 짜집기 편집",
+      "channel_url": "https://www.youtube.com/@%EC%A0%95%EC%B9%98%ED%95%9C%EC%A4%84s/shorts"
+    },
+    {
+      "name": "쇼츠더하기",
+      "subscribers": 3570,
+      "avg_views": 40037,
+      "median_views": 29192,
+      "category": "연예/팬덤",
+      "subcategory": "드라마 명장면",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@shortsplusplus/shorts"
+    },
+    {
+      "name": "영화보는곰",
+      "subscribers": 3860,
+      "avg_views": 26359,
+      "median_views": 28200,
+      "category": "연예/팬덤",
+      "subcategory": "영화 정보",
+      "format": "짜집기 편집",
+      "channel_url": "https://www.youtube.com/@moviegom2025/shorts"
+    },
+    {
+      "name": "김말티(Malti)",
+      "subscribers": 21400,
+      "avg_views": 23597,
+      "median_views": 27664,
+      "category": "일상/공감",
+      "subcategory": "일상 이슈",
+      "format": "AI",
+      "channel_url": "https://www.youtube.com/@maltilovescooking/shorts"
+    },
+    {
+      "name": "서자매샤핑",
+      "subscribers": 24200,
+      "avg_views": 9520,
+      "median_views": 6500,
+      "category": "쇼핑 쇼츠",
+      "subcategory": "생활용품 / 꿀템",
+      "format": "촬영형",
+      "channel_url": "https://www.youtube.com/@seoyseoapping"
+    }
+  ]
+}

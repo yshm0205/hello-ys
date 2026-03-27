@@ -28,7 +28,7 @@ import {
     ChevronDown,
     LayoutDashboard,
     TestTube,
-    Flame,
+    BarChart3,
     Zap,
     BookOpen,
 } from 'lucide-react';
@@ -77,10 +77,10 @@ const navItems = [
         description: '스타일별 성과 비교',
     },
     {
-        label: '🔥 핫 리스트',
+        label: '채널 리스트',
         href: '/dashboard/hot-list',
-        icon: Flame,
-        description: '터지는 영상 발굴',
+        icon: BarChart3,
+        description: '이달의 추천 채널',
     },
     {
         label: '설정',

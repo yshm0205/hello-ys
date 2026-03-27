@@ -1,22 +1,33 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { HotListContent } from '@/components/dashboard/HotListContent';
+import { ChannelListContent } from '@/components/dashboard/ChannelListContent';
 
-export default async function HotListPage() {
+export default async function ChannelListPage() {
     const supabase = await createClient();
 
-    // 사용자 정보 가져오기
     const { data: { user } } = await supabase.auth.getUser();
 
-    // 비로그인 시 로그인 페이지로 리다이렉트
     if (!user) {
         redirect('/login');
     }
 
+    // 구독 상태 확인
+    let isSubscribed = false;
+    try {
+        const { data } = await supabase
+            .from('subscriptions')
+            .select('status')
+            .eq('user_id', user.id)
+            .single();
+        isSubscribed = data?.status === 'active';
+    } catch {
+        // 구독 정보 없음 → 비수강생
+    }
+
     return (
         <DashboardLayout user={user}>
-            <HotListContent />
+            <ChannelListContent isSubscribed={isSubscribed} />
         </DashboardLayout>
     );
 }
