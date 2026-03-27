@@ -126,60 +126,98 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
     }, [data, categoryFilter, sortBy]);
 
     return (
-        <Stack gap="lg">
-            {/* 헤더 */}
-            <Group justify="space-between" align="flex-end" wrap="wrap">
-                <Group gap="sm" align="center">
-                    <BarChart3 size={24} color="#8b5cf6" />
-                    <Text size="xl" fw={700}>
-                        채널 리스트
-                    </Text>
+        <Stack gap="md">
+            {/* 헤더 카드 */}
+            <Card
+                padding="lg"
+                radius="lg"
+                withBorder
+                style={{ borderColor: '#e5e7eb' }}
+            >
+                <Group justify="space-between" align="center" wrap="wrap" gap="md">
+                    <Stack gap={4}>
+                        <Group gap="sm" align="center">
+                            <BarChart3 size={22} color="#8b5cf6" />
+                            <Text size="lg" fw={700}>
+                                채널 리스트
+                            </Text>
+                        </Group>
+                        <Text size="sm" c="dimmed">
+                            매달 업데이트되는 쇼츠 채널 추천 리스트
+                        </Text>
+                    </Stack>
+                    <Group gap="sm">
+                        <Select
+                            data={AVAILABLE_MONTHS.map((m) => ({ value: m.value, label: m.label }))}
+                            value={month}
+                            onChange={(v) => v && setMonth(v)}
+                            size="sm"
+                            w={150}
+                            allowDeselect={false}
+                            styles={{
+                                input: {
+                                    fontWeight: 600,
+                                    borderColor: '#8b5cf6',
+                                    color: '#8b5cf6',
+                                },
+                            }}
+                        />
+                        {data && (
+                            <Badge
+                                variant="filled"
+                                color="violet"
+                                size="lg"
+                                radius="md"
+                            >
+                                {filtered.length}개
+                            </Badge>
+                        )}
+                    </Group>
                 </Group>
-                <Group gap="md">
-                    <Select
-                        data={AVAILABLE_MONTHS.map((m) => ({ value: m.value, label: m.label }))}
-                        value={month}
-                        onChange={(v) => v && setMonth(v)}
-                        size="sm"
-                        w={160}
-                        allowDeselect={false}
-                    />
-                    {data && (
-                        <Badge variant="light" color="gray" size="lg">
-                            {filtered.length}개 채널
-                        </Badge>
-                    )}
-                </Group>
-            </Group>
+            </Card>
 
             {/* 수강생 전용: 필터 + 정렬 */}
             {isSubscribed && (
-                <Group justify="space-between" wrap="wrap" gap="sm">
-                    {/* 대분류 탭 */}
-                    <Group gap={6}>
-                        {MAIN_CATEGORIES.map((cat) => (
-                            <Button
-                                key={cat}
-                                size="xs"
-                                radius="xl"
-                                variant={categoryFilter === cat ? 'filled' : 'light'}
-                                color="violet"
-                                onClick={() => setCategoryFilter(cat)}
-                            >
-                                {cat}
-                            </Button>
-                        ))}
+                <Card
+                    padding="sm"
+                    radius="md"
+                    style={{ background: '#FAFAFA', border: '1px solid #f0f0f0' }}
+                >
+                    <Group justify="space-between" wrap="wrap" gap="sm">
+                        {/* 대분류 탭 */}
+                        <Group gap={6}>
+                            {MAIN_CATEGORIES.map((cat) => (
+                                <Button
+                                    key={cat}
+                                    size="compact-sm"
+                                    radius="md"
+                                    variant={categoryFilter === cat ? 'filled' : 'default'}
+                                    color="violet"
+                                    onClick={() => setCategoryFilter(cat)}
+                                    styles={{
+                                        root: categoryFilter !== cat ? {
+                                            background: '#fff',
+                                            borderColor: '#e5e7eb',
+                                        } : {},
+                                    }}
+                                >
+                                    {cat}
+                                </Button>
+                            ))}
+                        </Group>
+                        {/* 정렬 */}
+                        <Select
+                            data={SORT_OPTIONS}
+                            value={sortBy}
+                            onChange={(v) => v && setSortBy(v)}
+                            size="xs"
+                            w={160}
+                            allowDeselect={false}
+                            leftSection={<Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>정렬</Text>}
+                            leftSectionWidth={36}
+                        />
                     </Group>
-                    {/* 정렬 */}
-                    <Select
-                        data={SORT_OPTIONS}
-                        value={sortBy}
-                        onChange={(v) => v && setSortBy(v)}
-                        size="xs"
-                        w={160}
-                        allowDeselect={false}
-                    />
-                </Group>
+                </Card>
             )}
 
             {/* 로딩 */}
@@ -231,9 +269,9 @@ function ChannelTable({ channels }: { channels: Channel[] }) {
             withTableBorder
             withColumnBorders={false}
             styles={{
-                table: { fontSize: 14 },
-                th: { background: '#F9FAFB', fontWeight: 600, color: '#374151', padding: '10px 12px' },
-                td: { padding: '10px 12px' },
+                table: { fontSize: 14, borderRadius: 12, overflow: 'hidden' },
+                th: { background: '#F3F0FF', fontWeight: 600, color: '#5b21b6', padding: '12px 14px', fontSize: 13 },
+                td: { padding: '11px 14px' },
             }}
         >
             <Table.Thead>
