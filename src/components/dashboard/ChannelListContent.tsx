@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     Box,
     Text,
@@ -13,8 +13,10 @@ import {
     Card,
     Anchor,
     Button,
+    NumberInput,
+    ActionIcon,
 } from '@mantine/core';
-import { ExternalLink, Lock, BarChart3 } from 'lucide-react';
+import { ExternalLink, Lock, BarChart3, ArrowUp, ArrowDown, ArrowUpDown, X } from 'lucide-react';
 
 // ── 타입 ──
 interface Channel {
@@ -35,25 +37,36 @@ interface ChannelData {
     channels: Channel[];
 }
 
+type SortColumn = 'subscribers' | 'avg_views' | 'median_views';
+type SortDir = 'asc' | 'desc';
+
+interface SortState {
+    column: SortColumn;
+    dir: SortDir;
+}
+
+interface RangeFilter {
+    subsMin: number | '';
+    subsMax: number | '';
+    avgMin: number | '';
+    avgMax: number | '';
+    medianMin: number | '';
+    medianMax: number | '';
+}
+
 // ── 상수 ──
 const AVAILABLE_MONTHS = [
     { value: '2026-02', label: '2026년 2월', file: 'channels_2026_02.json' },
     { value: '2026-01', label: '2026년 1월', file: 'channels_2026_01.json' },
 ];
 
-const MAIN_CATEGORIES = ['전체', '지식/정보', '취미/덕질', '연예/팬덤', '일상/공감', '기타'] as const;
-type CategoryFilter = (typeof MAIN_CATEGORIES)[number];
-
-const MINOR_CATEGORIES = ['푸드/뷰티', '방송/영상', '글로벌/문화', '쇼핑 쇼츠', '음악/댄스'];
-
-const SORT_OPTIONS = [
-    { value: 'avg_views_desc', label: '조회수 높은순' },
-    { value: 'median_desc', label: '중위값 높은순' },
-    { value: 'subs_asc', label: '구독자 적은순' },
-    { value: 'subs_desc', label: '구독자 많은순' },
-];
-
 const FREE_PREVIEW_COUNT = 5;
+
+const EMPTY_FILTER: RangeFilter = {
+    subsMin: '', subsMax: '',
+    avgMin: '', avgMax: '',
+    medianMin: '', medianMax: '',
+};
 
 // ── 포맷 유틸 ──
 function formatCount(n: number): string {
@@ -69,13 +82,17 @@ function formatSubs(n: number): string {
     return n.toLocaleString();
 }
 
+function hasActiveFilter(f: RangeFilter): boolean {
+    return Object.values(f).some((v) => v !== '');
+}
+
 // ── 컴포넌트 ──
 export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) {
     const [month, setMonth] = useState(AVAILABLE_MONTHS[0].value);
     const [data, setData] = useState<ChannelData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('전체');
-    const [sortBy, setSortBy] = useState('avg_views_desc');
+    const [sort, setSort] = useState<SortState>({ column: 'avg_views', dir: 'desc' });
+    const [filter, setFilter] = useState<RangeFilter>(EMPTY_FILTER);
 
     // 월별 데이터 fetch
     useEffect(() => {
@@ -92,38 +109,42 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
             .catch(() => setLoading(false));
     }, [month]);
 
+    // 헤더 클릭 → 정렬 토글
+    const toggleSort = useCallback((col: SortColumn) => {
+        setSort((prev) => ({
+            column: col,
+            dir: prev.column === col && prev.dir === 'desc' ? 'asc' : 'desc',
+        }));
+    }, []);
+
     // 필터 + 정렬
     const filtered = useMemo(() => {
         if (!data) return [];
         let list = data.channels;
 
-        // 대분류 필터
-        if (categoryFilter !== '전체') {
-            if (categoryFilter === '기타') {
-                list = list.filter((c) => MINOR_CATEGORIES.includes(c.category));
-            } else {
-                list = list.filter((c) => c.category === categoryFilter);
-            }
+        // 범위 필터
+        if (isSubscribed && hasActiveFilter(filter)) {
+            list = list.filter((c) => {
+                if (filter.subsMin !== '' && c.subscribers < filter.subsMin) return false;
+                if (filter.subsMax !== '' && c.subscribers > filter.subsMax) return false;
+                if (filter.avgMin !== '' && c.avg_views < filter.avgMin) return false;
+                if (filter.avgMax !== '' && c.avg_views > filter.avgMax) return false;
+                if (filter.medianMin !== '' && c.median_views < filter.medianMin) return false;
+                if (filter.medianMax !== '' && c.median_views > filter.medianMax) return false;
+                return true;
+            });
         }
 
-        // 정렬
-        const sorted = [...list];
-        switch (sortBy) {
-            case 'avg_views_desc':
-                sorted.sort((a, b) => b.avg_views - a.avg_views);
-                break;
-            case 'median_desc':
-                sorted.sort((a, b) => b.median_views - a.median_views);
-                break;
-            case 'subs_asc':
-                sorted.sort((a, b) => a.subscribers - b.subscribers);
-                break;
-            case 'subs_desc':
-                sorted.sort((a, b) => b.subscribers - a.subscribers);
-                break;
-        }
-        return sorted;
-    }, [data, categoryFilter, sortBy]);
+        // 정렬 (stable sort with index fallback)
+        const sorted = list.map((ch, i) => ({ ch, i }));
+        sorted.sort((a, b) => {
+            const diff = sort.dir === 'desc'
+                ? b.ch[sort.column] - a.ch[sort.column]
+                : a.ch[sort.column] - b.ch[sort.column];
+            return diff !== 0 ? diff : a.i - b.i; // stable
+        });
+        return sorted.map((s) => s.ch);
+    }, [data, filter, sort, isSubscribed]);
 
     return (
         <Stack gap="md">
@@ -153,7 +174,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                         </Text>
                     </Group>
 
-                    {/* 컨트롤 줄: 월 + 필터 + 정렬 */}
+                    {/* 컨트롤 줄 */}
                     <Box
                         style={{
                             background: '#FAFAFA',
@@ -162,73 +183,67 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                         }}
                     >
                         <Group justify="space-between" wrap="wrap" gap="sm">
-                            <Group gap="sm" wrap="wrap">
-                                {/* 월 선택 */}
-                                <Select
-                                    data={AVAILABLE_MONTHS.map((m) => ({ value: m.value, label: m.label }))}
-                                    value={month}
-                                    onChange={(v) => v && setMonth(v)}
-                                    size="xs"
-                                    w={140}
-                                    allowDeselect={false}
-                                    styles={{
-                                        input: {
-                                            fontWeight: 600,
-                                            background: '#fff',
-                                        },
-                                    }}
-                                />
+                            {/* 월 선택 */}
+                            <Select
+                                data={AVAILABLE_MONTHS.map((m) => ({ value: m.value, label: m.label }))}
+                                value={month}
+                                onChange={(v) => v && setMonth(v)}
+                                size="xs"
+                                w={140}
+                                allowDeselect={false}
+                                styles={{
+                                    input: {
+                                        fontWeight: 600,
+                                        background: '#fff',
+                                    },
+                                }}
+                            />
 
-                                {/* 대분류 필터 (수강생만) */}
-                                {isSubscribed && (
-                                    <>
-                                        <Box
-                                            style={{
-                                                width: 1,
-                                                height: 24,
-                                                background: '#e0e0e0',
-                                                alignSelf: 'center',
-                                            }}
-                                        />
-                                        <Group gap={5}>
-                                            {MAIN_CATEGORIES.map((cat) => (
-                                                <Button
-                                                    key={cat}
-                                                    size="compact-xs"
-                                                    radius="md"
-                                                    variant={categoryFilter === cat ? 'filled' : 'default'}
-                                                    color="violet"
-                                                    onClick={() => setCategoryFilter(cat)}
-                                                    styles={{
-                                                        root: categoryFilter !== cat ? {
-                                                            background: '#fff',
-                                                            borderColor: '#e5e7eb',
-                                                        } : {},
-                                                    }}
-                                                >
-                                                    {cat}
-                                                </Button>
-                                            ))}
-                                        </Group>
-                                    </>
-                                )}
-                            </Group>
-
-                            {/* 정렬 (수강생만) */}
-                            {isSubscribed && (
-                                <Select
-                                    data={SORT_OPTIONS}
-                                    value={sortBy}
-                                    onChange={(v) => v && setSortBy(v)}
-                                    size="xs"
-                                    w={155}
-                                    allowDeselect={false}
-                                    styles={{
-                                        input: { background: '#fff' },
-                                    }}
-                                />
+                            {/* 필터 초기화 (수강생만) */}
+                            {isSubscribed && hasActiveFilter(filter) && (
+                                <Button
+                                    size="compact-xs"
+                                    variant="subtle"
+                                    color="gray"
+                                    leftSection={<X size={12} />}
+                                    onClick={() => setFilter(EMPTY_FILTER)}
+                                >
+                                    필터 초기화
+                                </Button>
                             )}
                         </Group>
+
+                        {/* 범위 필터 (수강생만) */}
+                        {isSubscribed && (
+                            <Box mt="sm">
+                                <Group gap="md" wrap="wrap">
+                                    <RangeInput
+                                        label="구독자"
+                                        min={filter.subsMin}
+                                        max={filter.subsMax}
+                                        onMinChange={(v) => setFilter((f) => ({ ...f, subsMin: v }))}
+                                        onMaxChange={(v) => setFilter((f) => ({ ...f, subsMax: v }))}
+                                        placeholder="명"
+                                    />
+                                    <RangeInput
+                                        label="평균 조회수"
+                                        min={filter.avgMin}
+                                        max={filter.avgMax}
+                                        onMinChange={(v) => setFilter((f) => ({ ...f, avgMin: v }))}
+                                        onMaxChange={(v) => setFilter((f) => ({ ...f, avgMax: v }))}
+                                        placeholder="회"
+                                    />
+                                    <RangeInput
+                                        label="중위값"
+                                        min={filter.medianMin}
+                                        max={filter.medianMax}
+                                        onMinChange={(v) => setFilter((f) => ({ ...f, medianMin: v }))}
+                                        onMaxChange={(v) => setFilter((f) => ({ ...f, medianMax: v }))}
+                                        placeholder="회"
+                                    />
+                                </Group>
+                            </Box>
+                        )}
                     </Box>
                 </Stack>
             </Card>
@@ -249,6 +264,8 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                     <Box visibleFrom="sm">
                         <ChannelTable
                             channels={isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)}
+                            sort={sort}
+                            onSort={isSubscribed ? toggleSort : undefined}
                         />
                     </Box>
 
@@ -256,8 +273,8 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                     <Box hiddenFrom="sm">
                         <Stack gap="sm">
                             {(isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)).map(
-                                (ch) => (
-                                    <ChannelCard key={ch.name + ch.channel_url} channel={ch} />
+                                (ch, idx) => (
+                                    <ChannelCard key={`${idx}-${ch.channel_url}`} channel={ch} />
                                 )
                             )}
                         </Stack>
@@ -273,8 +290,76 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
     );
 }
 
+// ── 범위 입력 ──
+function RangeInput({
+    label,
+    min,
+    max,
+    onMinChange,
+    onMaxChange,
+    placeholder,
+}: {
+    label: string;
+    min: number | '';
+    max: number | '';
+    onMinChange: (v: number | '') => void;
+    onMaxChange: (v: number | '') => void;
+    placeholder: string;
+}) {
+    return (
+        <Group gap={6} align="end">
+            <Text size="xs" fw={600} c="gray.7" style={{ minWidth: 60 }}>
+                {label}
+            </Text>
+            <NumberInput
+                size="xs"
+                w={100}
+                placeholder={`최소 (${placeholder})`}
+                value={min}
+                onChange={(v) => onMinChange(v === '' ? '' : Number(v))}
+                min={0}
+                thousandSeparator=","
+                hideControls
+                styles={{ input: { background: '#fff', fontSize: 12 } }}
+            />
+            <Text size="xs" c="dimmed">~</Text>
+            <NumberInput
+                size="xs"
+                w={100}
+                placeholder={`최대 (${placeholder})`}
+                value={max}
+                onChange={(v) => onMaxChange(v === '' ? '' : Number(v))}
+                min={0}
+                thousandSeparator=","
+                hideControls
+                styles={{ input: { background: '#fff', fontSize: 12 } }}
+            />
+        </Group>
+    );
+}
+
+// ── 정렬 아이콘 ──
+function SortIcon({ column, sort }: { column: SortColumn; sort: SortState }) {
+    if (sort.column !== column) return <ArrowUpDown size={12} color="#9ca3af" />;
+    return sort.dir === 'desc'
+        ? <ArrowDown size={12} color="#8b5cf6" />
+        : <ArrowUp size={12} color="#8b5cf6" />;
+}
+
 // ── 테이블 (PC) ──
-function ChannelTable({ channels }: { channels: Channel[] }) {
+function ChannelTable({
+    channels,
+    sort,
+    onSort,
+}: {
+    channels: Channel[];
+    sort: SortState;
+    onSort?: (col: SortColumn) => void;
+}) {
+    const sortableStyle = onSort
+        ? { cursor: 'pointer', userSelect: 'none' as const }
+        : {};
+
     return (
         <Table
             striped
@@ -290,16 +375,40 @@ function ChannelTable({ channels }: { channels: Channel[] }) {
             <Table.Thead>
                 <Table.Tr>
                     <Table.Th>채널명</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>구독자</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>평균 조회수</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>중위값</Table.Th>
+                    <Table.Th
+                        style={{ textAlign: 'right', ...sortableStyle }}
+                        onClick={() => onSort?.('subscribers')}
+                    >
+                        <Group gap={4} justify="flex-end" wrap="nowrap">
+                            구독자
+                            {onSort && <SortIcon column="subscribers" sort={sort} />}
+                        </Group>
+                    </Table.Th>
+                    <Table.Th
+                        style={{ textAlign: 'right', ...sortableStyle }}
+                        onClick={() => onSort?.('avg_views')}
+                    >
+                        <Group gap={4} justify="flex-end" wrap="nowrap">
+                            평균 조회수
+                            {onSort && <SortIcon column="avg_views" sort={sort} />}
+                        </Group>
+                    </Table.Th>
+                    <Table.Th
+                        style={{ textAlign: 'right', ...sortableStyle }}
+                        onClick={() => onSort?.('median_views')}
+                    >
+                        <Group gap={4} justify="flex-end" wrap="nowrap">
+                            중위값
+                            {onSort && <SortIcon column="median_views" sort={sort} />}
+                        </Group>
+                    </Table.Th>
                     <Table.Th>소분류</Table.Th>
                     <Table.Th>제작형식</Table.Th>
                 </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-                {channels.map((ch) => (
-                    <Table.Tr key={ch.name + ch.channel_url}>
+                {channels.map((ch, idx) => (
+                    <Table.Tr key={`${idx}-${ch.channel_url}`}>
                         <Table.Td>
                             <Anchor
                                 href={ch.channel_url}
