@@ -60,6 +60,11 @@ const AVAILABLE_MONTHS = [
     { value: '2026-01', label: '2026년 1월', file: 'channels_2026_01.json' },
 ];
 
+const MAIN_CATEGORIES = ['전체', '지식/정보', '취미/덕질', '연예/팬덤', '일상/공감', '기타'] as const;
+type CategoryFilter = (typeof MAIN_CATEGORIES)[number];
+
+const MINOR_CATEGORIES = ['푸드/뷰티', '방송/영상', '글로벌/문화', '쇼핑 쇼츠', '음악/댄스'];
+
 const FREE_PREVIEW_COUNT = 5;
 
 const EMPTY_FILTER: RangeFilter = {
@@ -92,6 +97,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
     const [data, setData] = useState<ChannelData | null>(null);
     const [loading, setLoading] = useState(true);
     const [sort, setSort] = useState<SortState>({ column: 'avg_views', dir: 'desc' });
+    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('전체');
     const [filter, setFilter] = useState<RangeFilter>(EMPTY_FILTER);
 
     // 월별 데이터 fetch
@@ -122,6 +128,15 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
         if (!data) return [];
         let list = data.channels;
 
+        // 대분류 필터
+        if (isSubscribed && categoryFilter !== '전체') {
+            if (categoryFilter === '기타') {
+                list = list.filter((c) => MINOR_CATEGORIES.includes(c.category));
+            } else {
+                list = list.filter((c) => c.category === categoryFilter);
+            }
+        }
+
         // 범위 필터
         if (isSubscribed && hasActiveFilter(filter)) {
             list = list.filter((c) => {
@@ -144,7 +159,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
             return diff !== 0 ? diff : a.i - b.i; // stable
         });
         return sorted.map((s) => s.ch);
-    }, [data, filter, sort, isSubscribed]);
+    }, [data, categoryFilter, filter, sort, isSubscribed]);
 
     return (
         <Stack gap="md">
@@ -183,21 +198,57 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                         }}
                     >
                         <Group justify="space-between" wrap="wrap" gap="sm">
-                            {/* 월 선택 */}
-                            <Select
-                                data={AVAILABLE_MONTHS.map((m) => ({ value: m.value, label: m.label }))}
-                                value={month}
-                                onChange={(v) => v && setMonth(v)}
-                                size="xs"
-                                w={140}
-                                allowDeselect={false}
-                                styles={{
-                                    input: {
-                                        fontWeight: 600,
-                                        background: '#fff',
-                                    },
-                                }}
-                            />
+                            <Group gap="sm" wrap="wrap">
+                                {/* 월 선택 */}
+                                <Select
+                                    data={AVAILABLE_MONTHS.map((m) => ({ value: m.value, label: m.label }))}
+                                    value={month}
+                                    onChange={(v) => v && setMonth(v)}
+                                    size="xs"
+                                    w={140}
+                                    allowDeselect={false}
+                                    styles={{
+                                        input: {
+                                            fontWeight: 600,
+                                            background: '#fff',
+                                        },
+                                    }}
+                                />
+
+                                {/* 대분류 필터 (수강생만) */}
+                                {isSubscribed && (
+                                    <>
+                                        <Box
+                                            style={{
+                                                width: 1,
+                                                height: 24,
+                                                background: '#e0e0e0',
+                                                alignSelf: 'center',
+                                            }}
+                                        />
+                                        <Group gap={5}>
+                                            {MAIN_CATEGORIES.map((cat) => (
+                                                <Button
+                                                    key={cat}
+                                                    size="compact-xs"
+                                                    radius="md"
+                                                    variant={categoryFilter === cat ? 'filled' : 'default'}
+                                                    color="violet"
+                                                    onClick={() => setCategoryFilter(cat)}
+                                                    styles={{
+                                                        root: categoryFilter !== cat ? {
+                                                            background: '#fff',
+                                                            borderColor: '#e5e7eb',
+                                                        } : {},
+                                                    }}
+                                                >
+                                                    {cat}
+                                                </Button>
+                                            ))}
+                                        </Group>
+                                    </>
+                                )}
+                            </Group>
 
                             {/* 필터 초기화 (수강생만) */}
                             {isSubscribed && hasActiveFilter(filter) && (
