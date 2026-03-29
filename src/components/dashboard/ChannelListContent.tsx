@@ -453,6 +453,7 @@ function ChannelTable({
                             {onSort && <SortIcon column="median_views" sort={sort} />}
                         </Group>
                     </Table.Th>
+                    <Table.Th>대분류</Table.Th>
                     <Table.Th>소분류</Table.Th>
                     <Table.Th>제작형식</Table.Th>
                 </Table.Tr>
@@ -481,6 +482,11 @@ function ChannelTable({
                             {formatCount(ch.avg_views)}
                         </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>{formatCount(ch.median_views)}</Table.Td>
+                        <Table.Td>
+                            <Badge variant="light" color="violet" size="sm">
+                                {ch.category}
+                            </Badge>
+                        </Table.Td>
                         <Table.Td>
                             <Badge variant="light" color="gray" size="sm">
                                 {ch.subcategory}
@@ -517,6 +523,9 @@ function ChannelCard({ channel: ch }: { channel: Channel }) {
                 <Text size="xs" c="dimmed">
                     ·
                 </Text>
+                <Badge variant="light" color="violet" size="xs">
+                    {ch.category}
+                </Badge>
                 <Badge variant="light" color="gray" size="xs">
                     {ch.subcategory}
                 </Badge>
