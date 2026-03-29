@@ -48,67 +48,70 @@ interface Chapter {
 
 const CHAPTERS: Chapter[] = [
     {
-        id: 'ch1',
-        title: 'Ch 1. 채널 기획',
+        id: 'ch0',
+        title: 'Part 0. 소개',
         vods: [
-            { id: 'vod_04', title: '채널 기획의 기본', duration: 15, vdoCipherId: 'c478d967ac36483ead7203ea414468dc' },
-            { id: 'vod_05', title: '니치 선택하기', duration: 12, vdoCipherId: '21e19db2a4494c2a90010683607bfc39' },
-            { id: 'vod_06', title: '경쟁 분석', duration: 18, vdoCipherId: 'd8f85c93013949bb888ff8cc3a9ec32b' },
-            { id: 'vod_07', title: '실수 피하기', duration: 10, vdoCipherId: 'a91251514a354df3a74e1bfcb738f048' },
+            { id: 'vod_01', title: '강의 소개', duration: 8 },
+        ],
+    },
+    {
+        id: 'ch1',
+        title: 'Part 1. 채널 기획',
+        vods: [
+            { id: 'vod_02', title: '유튜브 쇼츠의 이해', duration: 12, vdoCipherId: 'c478d967ac36483ead7203ea414468dc' },
+            { id: 'vod_03', title: '채널 기획의 기본', duration: 15, vdoCipherId: '21e19db2a4494c2a90010683607bfc39' },
+            { id: 'vod_04', title: '니치 선택하기', duration: 12, vdoCipherId: 'd8f85c93013949bb888ff8cc3a9ec32b' },
+            { id: 'vod_05', title: '경쟁 채널 분석', duration: 18, vdoCipherId: 'a91251514a354df3a74e1bfcb738f048' },
         ],
     },
     {
         id: 'ch2',
-        title: 'Ch 2. 훅 프레임워크',
-        hasPracticeCta: true,
+        title: 'Part 2. 영상 주제 선정 & 분석',
         vods: [
-            { id: 'vod_08', title: '6 Power Words', duration: 20 },
-            { id: 'vod_09', title: 'Contrast의 원리', duration: 15 },
-            { id: 'vod_10', title: '호기심 Gap 만들기', duration: 18 },
-            { id: 'vod_11', title: '훅 공식 A', duration: 12 },
-            { id: 'vod_12', title: '훅 공식 B', duration: 14 },
-            { id: 'vod_13', title: '아웃라이어 분석', duration: 22 },
-            { id: 'vod_14', title: 'Copy Work 실전', duration: 25 },
-            { id: 'vod_15', title: '훅 실습', duration: 20 },
+            { id: 'vod_06', title: '주제 선정의 원칙', duration: 15 },
+            { id: 'vod_07', title: '레퍼런스 찾기', duration: 12 },
+            { id: 'vod_08', title: '조회수 분석법', duration: 18 },
+            { id: 'vod_09', title: '트렌드 활용하기', duration: 14 },
+            { id: 'vod_10', title: '소재 수집 루틴', duration: 12 },
+            { id: 'vod_11', title: '주제 선정 실습', duration: 20 },
         ],
     },
     {
         id: 'ch3',
-        title: 'Ch 3. 스크립트 작성',
+        title: 'Part 3. 후킹 & 대본 작성',
         hasPracticeCta: true,
         vods: [
-            { id: 'vod_16', title: '스크립트 구조 이해', duration: 15 },
-            { id: 'vod_17', title: '바디 블록 설계', duration: 18 },
-            { id: 'vod_18', title: '전환 기법', duration: 12 },
-            { id: 'vod_19', title: '리훅 전략', duration: 14 },
-            { id: 'vod_20', title: '클로징 작성법', duration: 10 },
-            { id: 'vod_21', title: '톤 & 말투 설정', duration: 16 },
-            { id: 'vod_22', title: '리라이팅 기법', duration: 20 },
-            { id: 'vod_23', title: '실전 스크립트 A', duration: 25 },
-            { id: 'vod_24', title: '실전 스크립트 B', duration: 22 },
-            { id: 'vod_25', title: '스크립트 점검 체크리스트', duration: 15 },
+            { id: 'vod_12', title: '후킹의 기본 원리', duration: 15 },
+            { id: 'vod_13', title: '6 Power Words', duration: 18 },
+            { id: 'vod_14', title: 'Contrast & Gap', duration: 16 },
+            { id: 'vod_15', title: '대본 구조 설계', duration: 18 },
+            { id: 'vod_16', title: '톤 & 말투 설정', duration: 14 },
+            { id: 'vod_17', title: '리라이팅 & 점검', duration: 20 },
         ],
     },
     {
         id: 'ch4',
-        title: 'Ch 4. 소스 확보',
+        title: 'Part 4. 영상 소스 & AI 비주얼',
         vods: [
-            { id: 'vod_26', title: '소스의 역할', duration: 10 },
-            { id: 'vod_27', title: '소스 배치 원칙', duration: 15 },
-            { id: 'vod_28', title: '소스 확보 전략', duration: 18 },
-            { id: 'vod_30', title: '무료 소스 활용', duration: 20 },
-            { id: 'vod_31', title: 'AI 이미지 생성', duration: 22 },
+            { id: 'vod_18', title: '소스의 역할', duration: 10 },
+            { id: 'vod_19', title: '소스 검색 전략', duration: 15 },
+            { id: 'vod_20', title: '소스 검색 프롬프트', duration: 12 },
+            { id: 'vod_21', title: 'AI 사진 생성', duration: 18 },
+            { id: 'vod_22', title: 'AI 영상 생성', duration: 20 },
+            { id: 'vod_23', title: 'AI 비주얼 심화', duration: 22 },
+            { id: 'vod_24', title: 'AI 영상 감독 실습', duration: 25 },
         ],
     },
     {
         id: 'ch5',
-        title: 'Ch 5. 편집',
+        title: 'Part 5. 편집 실전',
         vods: [
-            { id: 'vod_33', title: '편집 기본 원칙', duration: 15 },
-            { id: 'vod_34', title: '편집 워크플로우', duration: 25 },
-            { id: 'vod_35', title: '자막 & 효과', duration: 18 },
-            { id: 'vod_36', title: '최종 점검', duration: 12 },
-            { id: 'vod_42', title: '편집 시연', duration: 30 },
+            { id: 'vod_25', title: '편집 기본 원칙', duration: 15 },
+            { id: 'vod_26', title: '편집 워크플로우', duration: 20 },
+            { id: 'vod_27', title: '자막 작업', duration: 18 },
+            { id: 'vod_28', title: '효과음 & BGM', duration: 15 },
+            { id: 'vod_29', title: '후킹 이미지 & 템플릿', duration: 16 },
+            { id: 'vod_30', title: 'VREW 에이전트 편집', duration: 25 },
         ],
     },
 ];
@@ -120,7 +123,7 @@ const TOTAL_VODS = CHAPTERS.reduce((sum, ch) => sum + ch.vods.length, 0);
 export function LecturesContent() {
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({
-        ch1: true,
+        ch0: true,
     });
     const [isLoading, setIsLoading] = useState(true);
 

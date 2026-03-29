@@ -38,6 +38,12 @@ import {
     ChevronRight,
     List,
     X,
+    Paperclip,
+    FileText,
+    Music,
+    ImageIcon,
+    FolderOpen,
+    ExternalLink,
 } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { CHAPTERS } from './LecturesContent';
@@ -95,6 +101,11 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
     const [isVideoLoading, setIsVideoLoading] = useState(false);
     const [videoError, setVideoError] = useState<string | null>(null);
 
+    // 수업 자료
+    const [materials, setMaterials] = useState<
+        { id: string; title: string; type: string; url: string; file_size: string | null }[]
+    >([]);
+
     // 자동 다음 강의 카운트다운
     const [countdown, setCountdown] = useState<number | null>(null);
 
@@ -130,6 +141,17 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
             countdownTimerRef.current = null;
         }
     }, [vodId, currentVod]);
+
+    // 수업 자료 fetch
+    useEffect(() => {
+        setMaterials([]);
+        fetch(`/api/lectures/materials?vodId=${vodId}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.materials) setMaterials(data.materials);
+            })
+            .catch(() => { /* 무시 */ });
+    }, [vodId]);
 
     // VdoCipher api.js 로드 (한번만)
     useEffect(() => {
@@ -543,6 +565,70 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                 )}
                             </Group>
                         </Card>
+
+                        {/* 수업 자료 */}
+                        {materials.length > 0 && (
+                            <Card padding="lg" radius="lg" withBorder>
+                                <Group gap={8} mb="sm">
+                                    <Paperclip size={18} color="#8b5cf6" />
+                                    <Text fw={600} size="sm" style={{ color: '#111827' }}>
+                                        수업 자료
+                                    </Text>
+                                    <Badge variant="light" color="violet" size="xs">
+                                        {materials.length}
+                                    </Badge>
+                                </Group>
+                                <Stack gap={6}>
+                                    {materials.map((m) => {
+                                        const icon =
+                                            m.type === 'docs' ? <FileText size={16} color="#6b7280" /> :
+                                            m.type === 'audio' ? <Music size={16} color="#6b7280" /> :
+                                            m.type === 'image' ? <ImageIcon size={16} color="#6b7280" /> :
+                                            <FolderOpen size={16} color="#6b7280" />;
+                                        return (
+                                            <Box
+                                                key={m.id}
+                                                component="a"
+                                                href={m.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 10,
+                                                    padding: '8px 12px',
+                                                    borderRadius: 8,
+                                                    textDecoration: 'none',
+                                                    color: '#374151',
+                                                    background: '#f9fafb',
+                                                    border: '1px solid #f3f4f6',
+                                                    transition: 'background 0.15s',
+                                                }}
+                                                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                                                    e.currentTarget.style.background = '#f3f0ff';
+                                                    e.currentTarget.style.borderColor = '#e9e5ff';
+                                                }}
+                                                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                                                    e.currentTarget.style.background = '#f9fafb';
+                                                    e.currentTarget.style.borderColor = '#f3f4f6';
+                                                }}
+                                            >
+                                                {icon}
+                                                <Text size="sm" fw={500} style={{ flex: 1 }}>
+                                                    {m.title}
+                                                </Text>
+                                                {m.file_size && (
+                                                    <Text size="xs" c="gray.4">
+                                                        {m.file_size}
+                                                    </Text>
+                                                )}
+                                                <ExternalLink size={14} color="#9ca3af" />
+                                            </Box>
+                                        );
+                                    })}
+                                </Stack>
+                            </Card>
+                        )}
 
                         {/* 실습 CTA */}
                         {hasPracticeCta && (
