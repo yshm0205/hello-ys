@@ -87,6 +87,21 @@ function formatSubs(n: number): string {
     return n.toLocaleString();
 }
 
+function getCategoryColor(category: string): string {
+    switch (category) {
+        case '지식/정보': return 'blue';
+        case '취미/덕질': return 'teal';
+        case '연예/팬덤': return 'pink';
+        case '일상/공감': return 'yellow';
+        case '푸드/뷰티': return 'orange';
+        case '방송/영상': return 'indigo';
+        case '글로벌/문화': return 'cyan';
+        case '쇼핑 쇼츠': return 'lime';
+        case '음악/댄스': return 'grape';
+        default: return 'gray';
+    }
+}
+
 function hasActiveFilter(f: RangeFilter): boolean {
     return Object.values(f).some((v) => v !== '');
 }
@@ -483,7 +498,7 @@ function ChannelTable({
                         </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>{formatCount(ch.median_views)}</Table.Td>
                         <Table.Td>
-                            <Badge variant="light" color="violet" size="sm">
+                            <Badge variant="light" color={getCategoryColor(ch.category)} size="sm">
                                 {ch.category}
                             </Badge>
                         </Table.Td>
@@ -523,7 +538,7 @@ function ChannelCard({ channel: ch }: { channel: Channel }) {
                 <Text size="xs" c="dimmed">
                     ·
                 </Text>
-                <Badge variant="light" color="violet" size="xs">
+                <Badge variant="light" color={getCategoryColor(ch.category)} size="xs">
                     {ch.category}
                 </Badge>
                 <Badge variant="light" color="gray" size="xs">
