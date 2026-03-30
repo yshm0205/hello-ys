@@ -1075,8 +1075,7 @@ function PainSection() {
         <Stack gap={40} style={{ maxWidth: '400px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
             { src: '/images/reviews/comment_osy.png', caption: '300만원 유료강의보다 낫습니다', alt: '수강생 후기 — 유료강의급' },
-            { src: '/images/reviews/review_4_kakao.png', caption: '드디어 제대로 된 길을 찾았다', alt: '수강생 후기 — 방향 발견' },
-            { src: '/images/reviews/comment_comfort.png', caption: '귀인을 만난 기분입니다', alt: '수강생 후기 — 귀인' },
+            { src: '/images/reviews/review_4_kakao.png', caption: '귀인을 만난 기분입니다', alt: '수강생 후기 — 귀인' },
           ].map((item, i) => (
             <motion.div
               key={`voice-${i}`}
