@@ -136,7 +136,7 @@ function HeroSection() {
               fontWeight: 600, letterSpacing: '0.02em',
               marginBottom: 'clamp(20px, 4vw, 28px)',
             }}>
-              VOD강의 + 매달 트렌드 채널 데이터 + 전자책 + AI 스크립트 도구
+              VOD 강의 59강 + 전자책 + AI 스크립트 자동화 도구 + 월간 트렌드 채널 데이터
             </Text>
 
             {/* 헤드라인 */}
@@ -307,17 +307,17 @@ function PainSection() {
   const pains = [
     {
       num: '01', title: '혼자 영상 만들어봤는데',
-      desc: '6시간 걸려 만들었는데', metric: '조회수 47회',
+      desc: '6시간 넘게 매달려서 올렸더니', metric: '조회수 100회 미만',
       accent: '#ef4444', bg: '#fef2f2', border: '#fecaca',
     },
     {
       num: '02', title: '강의 들어봤는데',
-      desc: '돈만 많이 받고 알맹이는 없고', metric: '"이번 강의는 다르겠지..." (또 결제)',
+      desc: '강의비만 수백만원, 알맹이는 없고', metric: '조회수 100회 미만',
       accent: '#f59e0b', bg: '#fffbeb', border: '#fde68a',
     },
     {
       num: '03', title: 'AI 써봤는데',
-      desc: '쇼츠 공식 모르는 AI', metric: '조회수 안 나옴',
+      desc: '조회수 공식 모르는 AI가 써준 대본', metric: '조회수 100~1,000회',
       accent: '#52525b', bg: '#f4f4f5', border: '#d4d4d8',
     },
   ];
