@@ -1458,14 +1458,14 @@ function WhySpecialSection() {
                 </Group>
               </Box>
               <Box style={{
-                background: '#faf5ff',
+                background: '#8b5cf6',
                 padding: 'clamp(16px, 4vw, 24px)',
                 textAlign: 'center',
-                borderBottom: '1px solid rgba(139,92,246,0.2)',
+                borderBottom: '1px solid #7c3aed',
               }}>
                 <Group gap={6} justify="center" wrap="nowrap">
-                  <Check size={18} color="#8b5cf6" />
-                  <Text fw={700} style={{ fontSize: 'clamp(15px, 4vw, 18px)', color: '#8b5cf6' }}>
+                  <Check size={18} color="#ffffff" />
+                  <Text fw={700} style={{ fontSize: 'clamp(15px, 4vw, 18px)', color: '#ffffff' }}>
                     올인원 패스
                   </Text>
                 </Group>
@@ -1473,15 +1473,17 @@ function WhySpecialSection() {
             </Box>
 
             {/* 비교 행들 */}
-            {comparisonRows.map((row, i) => (
+            {comparisonRows.map((row, i) => {
+              const isPrice = i === 0;
+              return (
               <Box key={i} style={{
                 display: 'grid', gridTemplateColumns: '1fr 1fr',
-                borderBottom: i < comparisonRows.length - 1 ? '1px solid #f4f4f5' : 'none',
+                borderBottom: i < comparisonRows.length - 1 ? '1px solid #e5e7eb' : 'none',
               }}>
                 <Box style={{
                   padding: 'clamp(14px, 3.5vw, 20px) clamp(16px, 4vw, 24px)',
-                  borderRight: '1px solid #f4f4f5',
-                  background: '#ffffff',
+                  borderRight: '1px solid #e5e7eb',
+                  background: '#f9fafb',
                 }}>
                   <Text style={{
                     fontSize: '11px', fontWeight: 600, color: '#a1a1aa',
@@ -1493,13 +1495,14 @@ function WhySpecialSection() {
                   <Text style={{
                     fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa',
                     lineHeight: 1.5,
+                    textDecoration: isPrice ? 'line-through' : 'none',
                   }}>
                     {row.left}
                   </Text>
                 </Box>
                 <Box style={{
                   padding: 'clamp(14px, 3.5vw, 20px) clamp(16px, 4vw, 24px)',
-                  background: '#faf5ff',
+                  background: '#f5f0ff',
                 }}>
                   <Text style={{
                     fontSize: '11px', fontWeight: 600, color: 'rgba(139,92,246,0.5)',
@@ -1509,14 +1512,16 @@ function WhySpecialSection() {
                     {row.label}
                   </Text>
                   <Text fw={700} style={{
-                    fontSize: 'clamp(15px, 3.8vw, 18px)', color: '#18181b',
+                    fontSize: isPrice ? 'clamp(20px, 5vw, 24px)' : 'clamp(15px, 3.8vw, 18px)',
+                    color: isPrice ? '#8b5cf6' : '#18181b',
                     lineHeight: 1.5,
                   }}>
                     {row.right}
                   </Text>
                 </Box>
               </Box>
-            ))}
+              );
+            })}
           </Box>
         </motion.div>
 
