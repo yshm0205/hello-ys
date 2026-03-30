@@ -1331,6 +1331,16 @@ function WhySpecialSection() {
         '실전 편집 : 썰형',
       ],
     },
+    {
+      part: 'Part 6', title: '쇼핑 쇼츠',
+      subtitle: '광고 수익 그 다음 단계',
+      count: 3,
+      vods: [
+        '광고 말고, 진짜 돈 버는 법',
+        '팔리는 상품, 데이터로 고르는 법',
+        '수수료 6%에서 마진 50%로',
+      ],
+    },
   ];
 
   return (
