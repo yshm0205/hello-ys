@@ -1267,10 +1267,70 @@ function WhySpecialSection() {
   ];
 
   const curriculum = [
-    { part: 'Part 1', title: '채널 기획', desc: '니치 선정, 채널 컨셉, 벤치마크 분석' },
-    { part: 'Part 2', title: '촬영 & 편집', desc: '장비, 촬영 기법, 편집 워크플로우' },
-    { part: 'Part 3', title: '스크립트 & AI', desc: '대본 구조, AI 활용, 훅 작성법' },
-    { part: 'Part 4', title: '수익화', desc: '애드센스, 브랜드딜, 채널 매각' },
+    {
+      part: 'Part 1', title: '채널 설계',
+      subtitle: '시작부터 수익 구조를 설계합니다',
+      count: 4,
+      vods: [
+        '주제보다 먼저 정해야 할 한 가지',
+        '양산형 vs 직접 촬영, 뭐가 유리할까?',
+        '레드오션을 블루오션으로 바꾸는 채널 조합법',
+        '내 취향은 빼고, 벤치마크 채널 찾는 법',
+      ],
+    },
+    {
+      part: 'Part 2', title: '소재 발굴',
+      subtitle: '뭘 만들지 고민하는 시간을 줄입니다',
+      count: 6,
+      vods: [
+        '떡상하는 주제의 2가지 공통점',
+        '남들은 모르는 떡상 주제 찾는 법',
+        '소재 찾기 실전 — 쇼핑 채널',
+        '소재 찾기 실전 — 잡학 지식·입시 채널',
+        '소재 찾기 실전 — 해외반응·덕질·취미 채널',
+        '소재 찾는 시간을 절반으로 줄이는 툴 활용법',
+      ],
+    },
+    {
+      part: 'Part 3', title: '스크립트 공식',
+      subtitle: '3초 안에 잡고, 끝까지 보게 만듭니다',
+      count: 6,
+      vods: [
+        '초반 3초를 사로잡는 후킹의 6가지 법칙',
+        '후킹이 무너지는 4가지 패턴',
+        '대본의 뼈대를 잡는 필수 원칙',
+        '끝까지 보게 만드는 본문 작성 4가지 공식',
+        '터진 영상을 내 것으로 만드는 리메이크 전략',
+        'AI 스크립트 프로그램 활용법',
+      ],
+    },
+    {
+      part: 'Part 4', title: 'AI 비주얼',
+      subtitle: '촬영 없이 AI로 소스를 만듭니다',
+      count: 7,
+      vods: [
+        '소스 배치의 기본 — 빈 화면 채우기 전에 알아야 할 것',
+        '유튜브 쇼츠 소스 확보 3가지 전략',
+        '저작권 걱정 없는 공정 사용 소스 찾는 법',
+        'AI로 일관된 이미지를 뽑는 비결',
+        'AI 사진 제작 실전 워크플로우',
+        'AI로 사진을 움직이는 영상으로 변환하는 법',
+        'AI 영상 제작 실전 워크플로우',
+      ],
+    },
+    {
+      part: 'Part 5', title: '편집 마스터',
+      subtitle: '조회수를 만드는 편집 공식',
+      count: 6,
+      vods: [
+        '시청 지속 시간을 올리는 편집 기법',
+        '편집 시간을 반으로 줄이는 워크플로우',
+        '실전 편집 : 잡학 지식형 (상)',
+        '실전 편집 : 잡학 지식형 (하)',
+        '실전 편집 : 커뮤니티형',
+        '실전 편집 : 썰형',
+      ],
+    },
   ];
 
   return (
@@ -1415,7 +1475,7 @@ function WhySpecialSection() {
               },
               panel: {
                 color: '#52525b', fontSize: 'clamp(15px, 3vw, 16px)',
-                lineHeight: 1.7, padding: '0 20px 16px',
+                lineHeight: 1.7, padding: '4px 20px 16px',
               },
             }}
           >
@@ -1429,17 +1489,32 @@ function WhySpecialSection() {
               >
                 <Accordion.Item value={c.title}>
                   <Accordion.Control>
-                    <Group gap={10} wrap="nowrap">
-                      <Text style={{
-                        ...mono, fontSize: '12px', fontWeight: 800,
-                        color: '#8b5cf6', flexShrink: 0,
-                      }}>
-                        {c.part}
-                      </Text>
-                      {c.title}
+                    <Group gap={10} wrap="nowrap" justify="space-between" style={{ width: '100%' }}>
+                      <Group gap={10} wrap="nowrap">
+                        <Text style={{
+                          ...mono, fontSize: '12px', fontWeight: 800,
+                          color: '#8b5cf6', flexShrink: 0,
+                        }}>
+                          {c.part}
+                        </Text>
+                        {c.title}
+                      </Group>
+                      <Badge size="sm" variant="light" color="gray" radius="xl">{c.count}강</Badge>
                     </Group>
                   </Accordion.Control>
-                  <Accordion.Panel>{c.desc}</Accordion.Panel>
+                  <Accordion.Panel>
+                    <Text size="sm" c="dimmed" mb={12}>{c.subtitle}</Text>
+                    <Stack gap={4}>
+                      {c.vods.map((vod, j) => (
+                        <Group key={j} gap={8} wrap="nowrap" align="flex-start">
+                          <Text style={{ ...mono, fontSize: '11px', color: '#a1a1aa', flexShrink: 0, marginTop: '2px' }}>
+                            {String(j + 1).padStart(2, '0')}
+                          </Text>
+                          <Text size="sm" c="gray.7" style={{ lineHeight: 1.5 }}>{vod}</Text>
+                        </Group>
+                      ))}
+                    </Stack>
+                  </Accordion.Panel>
                 </Accordion.Item>
               </motion.div>
             ))}
