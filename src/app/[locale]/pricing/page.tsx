@@ -203,15 +203,15 @@ export default function PricingPage() {
                     fontSize: '16px', color: '#9ca3af',
                     textDecoration: 'line-through',
                   }}>
-                    ₩700,000
+                    ₩599,000
                   </Text>
                   <Group gap="xs" align="baseline">
                     <Text style={{ fontSize: '36px', fontWeight: 800, color: '#8b5cf6' }}>
-                      ₩500,000
+                      ₩499,000
                     </Text>
                   </Group>
                   <Badge variant="light" color="green" size="sm" mt={4}>
-                    얼리버드 30% OFF
+                    런칭 특가
                   </Badge>
                 </Box>
 
@@ -221,8 +221,8 @@ export default function PricingPage() {
                 <List spacing={8} size="sm" center>
                   {[
                     '쇼츠 성장 강의 32강 (기획→촬영→편집→수익화)',
-                    'FlowSpot Pro 6개월 기능 제공',
-                    '6개월 후 Pro 구독 자격',
+                    'FlowSpot Pro 4개월 기능 제공',
+                    '4개월 후 Pro 구독으로 계속 이용 가능',
                   ].map((f, i) => (
                     <List.Item key={i} icon={
                       <ThemeIcon size={20} radius="xl" color="green" variant="light">

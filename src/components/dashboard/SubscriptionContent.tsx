@@ -154,16 +154,16 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                 <Box>
                                     <Title order={4} style={{ color: '#111827' }}>올인원 패스로 시작하기</Title>
                                     <Text size="sm" c="gray.6">
-                                        강의 32강 + AI 스크립트 6개월 + 크레딧 3,000개
+                                        강의 32강 + AI 스크립트 4개월 + 크레딧 3,000개
                                     </Text>
                                 </Box>
                             </Group>
                             <Box>
                                 <Group gap="sm" align="baseline">
                                     <Text style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>
-                                        ₩700,000
+                                        ₩599,000
                                     </Text>
-                                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩500,000</Text>
+                                    <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>₩499,000</Text>
                                 </Group>
                                 <Button
                                     component={Link}

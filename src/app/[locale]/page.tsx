@@ -1159,7 +1159,7 @@ function ProductRevealSection() {
       num: '01',
       title: 'AI 스크립트 프로그램',
       desc: '소재 하나 넣으면 훅 3개, 본문, 완성 스크립트까지. 3분이면 끝.',
-      features: ['FlowSpot', '6개월 이용권'],
+      features: ['FlowSpot', '4개월 이용권'],
       src: '/images/product-ai-script.gif',
       accent: '#8b5cf6',
       featured: true,
@@ -1327,11 +1327,11 @@ function WhySpecialSection() {
   const isMobile = useIsMobile();
 
   const comparisonRows = [
-    { label: '가격', left: '99~160만원', right: '50만원' },
+    { label: '가격', left: '99~160만원', right: '49.9만원' },
     { label: '제공 범위', left: '강의만 제공', right: '강의 + AI + 도구 전부' },
     { label: '수강 기간', left: '100일 (기수제)', right: '4개월 수강' },
     { label: '대본 작성', left: '직접 작성', right: 'AI가 3분 만에 완성' },
-    { label: 'AI 도구', left: '없음', right: '6개월 포함' },
+    { label: 'AI 도구', left: '없음', right: '4개월 포함' },
   ];
 
   const curriculum = [
@@ -1613,7 +1613,7 @@ function HowItWorksSection() {
       qNum: 'Q1', question: '쇼츠, 처음이신가요?',
       label: '입문', color: '#8b5cf6',
       answer: '기획부터 수익화까지 순서대로 알려드립니다.',
-      includes: ['전자책 (기초 가이드)', 'VOD 32강 (순차 학습)', 'AI 스크립트 6개월'],
+      includes: ['전자책 (기초 가이드)', 'VOD 32강 (순차 학습)', 'AI 스크립트 4개월'],
     },
     {
       qNum: 'Q2', question: '하고 있는데 성장이 안 되나요?',
@@ -1824,7 +1824,7 @@ function PackageSection() {
             <Stack gap={0}>
               {[
                 { item: '강의 32강 (기획→촬영→수익화)', value: '₩590,000' },
-                { item: 'AI 스크립트 도구 6개월', value: '₩600,000' },
+                { item: 'AI 스크립트 도구 4개월', value: '₩400,000' },
                 { item: '채널 분석 피드백', value: '₩100,000' },
                 { item: '보너스: 터진 영상 템플릿', value: '₩100,000' },
               ].map((row, i) => (
@@ -1839,11 +1839,11 @@ function PackageSection() {
             <Divider my="xl" color="#d4d4d8" />
             <Stack align="center" gap={4}>
               <Text fw={600} style={{ color: '#71717a', fontSize: 'clamp(15px, 3vw, 16px)', textDecoration: 'line-through', ...mono }}>
-                총 ₩1,390,000
+                총 ₩1,190,000
               </Text>
               <Group gap={12} align="center">
-                <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#18181b', ...mono }}>₩500,000</Text>
-                <Badge color="red" size="md" style={{ fontSize: '13px' }}>64%</Badge>
+                <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#18181b', ...mono }}>₩499,000</Text>
+                <Badge color="red" size="md" style={{ fontSize: '13px' }}>58%</Badge>
               </Group>
             </Stack>
           </Paper>
@@ -1867,8 +1867,8 @@ function PackageSection() {
               </Stack>
               <Text style={{ fontSize: 'clamp(20px, 3vw, 24px)', color: '#a1a1aa', fontWeight: 300 }}>vs</Text>
               <Stack gap={4} align="center">
-                <Text style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a' }}>AI 스크립트 6개월</Text>
-                <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#8b5cf6', ...mono }}>50만원</Text>
+                <Text style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a' }}>AI 스크립트 4개월</Text>
+                <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#8b5cf6', ...mono }}>49.9만원</Text>
               </Stack>
             </Group>
             <Text mt={20} style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#52525b' }}>
@@ -1876,6 +1876,17 @@ function PackageSection() {
               <b style={{ color: '#8b5cf6' }}>24시간 일하는 직원</b>
             </Text>
           </Paper>
+        </motion.div>
+
+        {/* Pro 구독 안내 */}
+        <motion.div {...fadeUp}>
+          <Text ta="center" style={{
+            fontSize: 'clamp(13px, 3.2vw, 14px)',
+            color: '#a1a1aa',
+            marginTop: '24px',
+          }}>
+            4개월 이후에도 월 ₩39,900 Pro 구독으로 강의와 AI 도구를 계속 이용할 수 있습니다.
+          </Text>
         </motion.div>
       </Container>
     </Box>
@@ -1891,7 +1902,7 @@ function FAQSection() {
     { q: 'AI 1도 몰라도 되나요?', a: '네. 버튼 3개만 누르면 됩니다. 원리는 강의에서 알려드려요.' },
     { q: '진짜 수익이 나나요?', a: '전자책 수강생 중 월 700만원 달성자가 있습니다. 실행만 하시면 됩니다.' },
     { q: '환불 되나요?', a: '결제 후 7일 이내, 강의 1강도 수강하지 않은 경우 전액 환불됩니다. 수강을 시작한 경우에도 이러닝 표준약관에 따라 (1강 단가 × 수강 강의 수 + 위약금 10%)를 공제 후 환불됩니다.' },
-    { q: '강의 기간은요?', a: '강의는 4개월 수강, AI 도구는 6개월 이용권입니다.' },
+    { q: '강의 기간은요?', a: '강의와 AI 도구 모두 4개월 이용권입니다. 이후에도 월 ₩39,900 Pro 구독으로 계속 이용할 수 있습니다.' },
     { q: '크레딧을 다 쓰면요?', a: '설정 > 플랜 & 결제에서 크레딧 팩(30개 ₩9,900 / 100개 ₩29,900)을 추가 구매할 수 있습니다.' },
   ];
 
@@ -2052,8 +2063,8 @@ function FloatingCTA() {
       }}>
         <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
           <Stack gap={2}>
-            <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩700,000</Text>
-            <Text style={{ fontSize: '20px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩500,000</Text>
+            <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩599,000</Text>
+            <Text style={{ fontSize: '20px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩499,000</Text>
           </Stack>
           <Button
             component={Link} href="/pricing" size="md" radius="xl"
@@ -2086,8 +2097,8 @@ function FloatingCTA() {
           <Stack gap={12}>
             <Text fw={700} style={{ fontSize: '15px', color: '#18181b' }}>올인원 패스</Text>
             <Stack gap={2}>
-              <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩700,000</Text>
-              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩500,000</Text>
+              <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩599,000</Text>
+              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩499,000</Text>
             </Stack>
             <Button
               component={Link} href="/pricing" size="sm" fullWidth radius="lg"
