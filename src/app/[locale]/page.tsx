@@ -1305,8 +1305,8 @@ function WhySpecialSection() {
       ],
     },
     {
-      part: 'Part 4', title: 'AI 비주얼',
-      subtitle: '촬영 없이 AI로 소스를 만듭니다',
+      part: 'Part 4', title: '소스',
+      subtitle: '다른 사람들은 이렇게 화면을 채웁니다',
       count: 7,
       vods: [
         '소스 배치의 기본 — 빈 화면 채우기 전에 알아야 할 것',
