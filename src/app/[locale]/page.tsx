@@ -324,7 +324,7 @@ function PainSection() {
 
   return (
     <>
-    <Box component="section" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
+    <Box component="section" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 140px) 0' }}>
       <Container size="lg">
         {/* 제목 — 먼 길을 돌아가는 중 */}
         <motion.div {...fadeUp}>
@@ -403,7 +403,7 @@ function PainSection() {
     {/* Todd Brown 위로 + 브릿지 — 보라 틴트 */}
     <Box style={{
       background: 'radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.08) 0%, rgba(139,92,246,0.03) 40%, #faf5ff 70%)',
-      padding: 'clamp(60px, 10vw, 120px) 0',
+      padding: 'clamp(80px, 15vw, 160px) 0',
       position: 'relative',
     }}>
       <Container size="lg">
@@ -519,7 +519,7 @@ function PainSection() {
     {/* 파운더 스토리 — 실패 증거 */}
     <Box style={{
       background: 'linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%)',
-      padding: 'clamp(60px, 10vw, 120px) 0',
+      padding: 'clamp(48px, 8vw, 80px) 0',
       borderTop: '1px solid #e5e7eb',
     }}>
       <Container size="lg">
@@ -593,7 +593,7 @@ function PainSection() {
     {/* 성과 증거 — 전환점 + 스크린샷 */}
     <Box style={{
       background: '#18181b',
-      padding: 'clamp(60px, 10vw, 120px) 0',
+      padding: 'clamp(72px, 12vw, 140px) 0',
     }}>
       <Container size="lg">
         {/* 전환 멘트 */}
@@ -672,9 +672,22 @@ function PainSection() {
               </Box>
             </motion.div>
           ))}
+        </Stack>
 
-          {/* 네이버 클립 — 2개 합산 1,945만원 */}
-          <motion.div
+        {/* 전환: 유튜브 성과 */}
+        <motion.div {...fadeUp} style={{ textAlign: 'center', marginTop: 'clamp(64px, 12vw, 96px)' }}>
+          <Text style={{
+            fontSize: 'clamp(22px, 5.5vw, 28px)',
+            fontWeight: 700, color: 'rgba(255,255,255,0.88)',
+            lineHeight: 1.5,
+          }}>
+            <span style={{ color: '#FF4444', fontWeight: 800 }}>유튜브</span>에서 <span style={{ color: '#a78bfa', fontWeight: 800 }}>성과</span>가 나오기 시작했고
+          </Text>
+        </motion.div>
+
+        {/* 네이버 클립 — 2개 합산 1,945만원 */}
+        <Box style={{ maxWidth: '560px', margin: 'clamp(48px, 8vw, 64px) auto 0' }}>
+        <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -720,12 +733,163 @@ function PainSection() {
               </Box>
             </Stack>
           </motion.div>
-        </Stack>
+        </Box>
+
+        {/* 전환: 네이버뿐만 아니라 */}
+        <motion.div {...fadeUp} style={{ textAlign: 'center', marginTop: 'clamp(64px, 12vw, 96px)' }}>
+          <Text style={{
+            fontSize: 'clamp(22px, 5.5vw, 28px)',
+            fontWeight: 700, color: 'rgba(255,255,255,0.88)',
+            lineHeight: 1.5,
+          }}>
+            <span style={{ color: '#03C75A', fontWeight: 800 }}>네이버</span>뿐만 아니라
+          </Text>
+        </motion.div>
+
+        {/* ── 인스타 릴스 성과 ── */}
+        <motion.div {...fadeUp} style={{
+          marginTop: 'clamp(48px, 8vw, 64px)',
+        }}>
+          <Box style={{
+            background: 'rgba(255,255,255,0.06)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255,255,255,0.08)',
+            overflow: 'hidden',
+            maxWidth: '560px',
+            margin: '0 auto',
+          }}>
+            <Group gap="sm" p="md" pb={0}>
+              <Box style={{
+                width: 28, height: 28, borderRadius: '50%',
+                background: 'linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="white" strokeWidth="2"/>
+                  <circle cx="12" cy="12" r="5" fill="none" stroke="white" strokeWidth="2"/>
+                  <circle cx="17.5" cy="6.5" r="1.5" fill="white"/>
+                </svg>
+              </Box>
+              <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#ffffff' }}>
+                인스타 릴스
+              </Text>
+              <Text style={{ fontSize: 'clamp(13px, 3.2vw, 15px)', fontWeight: 600, color: '#a78bfa' }}>
+                월 800만 조회
+              </Text>
+            </Group>
+            <Box style={{ padding: '12px 16px 16px' }}>
+              <img
+                src="/images/success-instagram-monthly.jpg"
+                alt="인스타 릴스 월 800만 조회"
+                style={{ width: '100%', display: 'block', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}
+              />
+            </Box>
+          </Box>
+        </motion.div>
+
+        {/* 전환: 인스타 성과 확인 */}
+        <motion.div {...fadeUp} style={{ textAlign: 'center', marginTop: 'clamp(64px, 12vw, 96px)' }}>
+          <Text style={{
+            fontSize: 'clamp(22px, 5.5vw, 28px)',
+            fontWeight: 700, color: 'rgba(255,255,255,0.88)',
+            lineHeight: 1.5,
+          }}>
+            <span style={{ color: '#E4405F', fontWeight: 800 }}>인스타</span>에서까지 유의미한 <span style={{ color: '#a78bfa', fontWeight: 800 }}>성과</span>가<br />나오기 시작했습니다.
+          </Text>
+        </motion.div>
+
+        {/* ── 플랫폼 아이콘 + 메시지 ── */}
+        <motion.div {...fadeUp} style={{
+          textAlign: 'center',
+          marginTop: 'clamp(80px, 14vw, 120px)',
+        }}>
+          <Group justify="center" gap="clamp(16px, 4vw, 32px)">
+            {/* YouTube */}
+            <Box style={{ textAlign: 'center' }}>
+              <Box style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 6px',
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#FF0000">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </Box>
+              <Text style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>유튜브</Text>
+            </Box>
+            {/* 네이버 */}
+            <Box style={{ textAlign: 'center' }}>
+              <Box style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 6px',
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#03C75A">
+                  <path d="M16.273 12.845 7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727z"/>
+                </svg>
+              </Box>
+              <Text style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>네이버</Text>
+            </Box>
+            {/* 인스타 */}
+            <Box style={{ textAlign: 'center' }}>
+              <Box style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 6px',
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#E4405F">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                </svg>
+              </Box>
+              <Text style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>인스타</Text>
+            </Box>
+            {/* 다음 */}
+            <Box style={{ textAlign: 'center' }}>
+              <Box style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 6px',
+              }}>
+                <Text style={{ fontSize: '16px', fontWeight: 900, color: '#FF6600' }}>D</Text>
+              </Box>
+              <Text style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>다음</Text>
+            </Box>
+            {/* 틱톡 */}
+            <Box style={{ textAlign: 'center' }}>
+              <Box style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 6px',
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff">
+                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.48V13.4a8.16 8.16 0 005.58 2.17V12.1a4.83 4.83 0 01-3.77-1.84V6.69h3.77z"/>
+                </svg>
+              </Box>
+              <Text style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>틱톡</Text>
+            </Box>
+          </Group>
+
+          <Text ta="center" style={{
+            fontSize: 'clamp(20px, 5.5vw, 28px)',
+            fontWeight: 800, color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.5,
+            marginTop: 'clamp(24px, 5vw, 40px)',
+          }}>
+            유튜브든, 인스타든, 네이버든.
+            <br /><span style={{ color: '#a78bfa', fontWeight: 900 }}>터지는 구조는 같습니다.</span>
+          </Text>
+        </motion.div>
 
         {/* 총 합산 */}
         <motion.div {...fadeUp} style={{
           textAlign: 'center',
-          marginTop: 'clamp(48px, 8vw, 72px)',
+          marginTop: 'clamp(80px, 14vw, 120px)',
         }}>
           <Text style={{
             fontSize: 'clamp(15px, 3.8vw, 17px)',
@@ -988,7 +1152,7 @@ function ProductRevealSection() {
   return (
     <Box component="section" style={{
       background: '#faf5ff',
-      padding: 'clamp(60px, 10vw, 120px) 0',
+      padding: 'clamp(80px, 15vw, 160px) 0',
     }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
@@ -1112,7 +1276,7 @@ function WhySpecialSection() {
   return (
     <Box component="section" style={{
       background: '#ffffff',
-      padding: 'clamp(60px, 10vw, 120px) 0',
+      padding: 'clamp(56px, 10vw, 100px) 0',
       position: 'relative',
     }}>
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
@@ -1313,7 +1477,7 @@ function HowItWorksSection() {
   ];
 
   return (
-    <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(60px, 10vw, 120px) 0' }}>
+    <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 140px) 0' }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
@@ -1475,7 +1639,7 @@ function HowItWorksSection() {
    ═══════════════════════════════════════════════════════════════ */
 function PackageSection() {
   return (
-    <Box component="section" style={{ background: '#fafafa', padding: 'clamp(60px, 10vw, 120px) 0', position: 'relative' }}>
+    <Box component="section" style={{ background: '#fafafa', padding: 'clamp(56px, 10vw, 100px) 0', position: 'relative' }}>
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
@@ -1579,7 +1743,7 @@ function FAQSection() {
   ];
 
   return (
-    <Box component="section" id="faq" style={{ background: '#ffffff', padding: '120px 0' }}>
+    <Box component="section" id="faq" style={{ background: '#ffffff', padding: 'clamp(56px, 10vw, 100px) 0' }}>
       <Container size={640}>
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
@@ -1618,7 +1782,7 @@ function FAQSection() {
 function CTASection() {
   return (
     <Box component="section" style={{
-      background: '#fafafa', padding: '120px 0', position: 'relative', overflow: 'hidden',
+      background: '#fafafa', padding: 'clamp(80px, 15vw, 160px) 0', position: 'relative', overflow: 'hidden',
     }}>
       <Box style={{
         position: 'absolute', top: '50%', left: '50%',
