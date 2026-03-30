@@ -1373,7 +1373,7 @@ function WhySpecialSection() {
       ],
     },
     {
-      part: 'Part 4', title: '소스',
+      part: 'Part 4', title: '영상 소스',
       subtitle: '다른 사람들은 이렇게 화면을 채웁니다',
       count: 7,
       vods: [
