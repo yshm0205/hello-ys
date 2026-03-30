@@ -1420,18 +1420,92 @@ function WhySpecialSection() {
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
+        {/* 커리큘럼 헤딩 */}
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
             <Title order={2} ta="center" style={{
               fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
               color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
             }}>
-              그래서 이게 왜 특별하냐면요
+              구체적으로 뭘 배우냐면요
             </Title>
           </Stack>
         </motion.div>
 
-        {/* 양쪽 비교표 */}
+        {/* 커리큘럼 아코디언 */}
+        <Box style={{ maxWidth: '540px', margin: '0 auto' }}>
+          <Accordion
+            variant="separated"
+            radius="lg"
+            styles={{
+              item: {
+                background: '#ffffff', border: '1px solid #d4d4d8',
+                marginBottom: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+              },
+              control: {
+                color: '#18181b', fontWeight: 700,
+                fontSize: 'clamp(16px, 3.5vw, 18px)', padding: '16px 20px',
+              },
+              panel: {
+                color: '#52525b', fontSize: 'clamp(15px, 3vw, 16px)',
+                lineHeight: 1.7, padding: '4px 20px 16px',
+              },
+            }}
+          >
+            {curriculum.map((c, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08, ease }}
+              >
+                <Accordion.Item value={c.title}>
+                  <Accordion.Control>
+                    <Group gap={10} wrap="nowrap" justify="space-between" style={{ width: '100%' }}>
+                      <Group gap={10} wrap="nowrap">
+                        <Text style={{
+                          ...mono, fontSize: '12px', fontWeight: 800,
+                          color: '#8b5cf6', flexShrink: 0,
+                        }}>
+                          {c.part}
+                        </Text>
+                        {c.title}
+                      </Group>
+                      <Badge size="sm" variant="light" color="gray" radius="xl">{c.count}강</Badge>
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <Text size="sm" c="dimmed" mb={12}>{c.subtitle}</Text>
+                    <Stack gap={4}>
+                      {c.vods.map((vod, j) => (
+                        <Group key={j} gap={8} wrap="nowrap" align="flex-start">
+                          <Text style={{ ...mono, fontSize: '11px', color: '#a1a1aa', flexShrink: 0, marginTop: '2px' }}>
+                            {String(j + 1).padStart(2, '0')}
+                          </Text>
+                          <Text size="sm" c="gray.7" style={{ lineHeight: 1.5 }}>{vod}</Text>
+                        </Group>
+                      ))}
+                    </Stack>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </motion.div>
+            ))}
+          </Accordion>
+        </Box>
+
+        {/* 전환 멘트 → 비교표 */}
+        <motion.div {...fadeUp}>
+          <Text ta="center" style={{
+            fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
+            color: '#18181b', letterSpacing: '-0.02em',
+            marginTop: 'clamp(64px, 12vw, 100px)',
+            marginBottom: 'clamp(32px, 6vw, 48px)',
+          }}>
+            그래서 이게 왜 특별하냐면요
+          </Text>
+        </motion.div>
+
         <motion.div {...fadeUp}>
           <Box style={{
             maxWidth: '720px', margin: '0 auto',
@@ -1524,80 +1598,6 @@ function WhySpecialSection() {
             })}
           </Box>
         </motion.div>
-
-        {/* 전환 멘트 */}
-        <motion.div {...fadeUp}>
-          <Text ta="center" style={{
-            fontSize: 'clamp(18px, 4.5vw, 22px)',
-            fontWeight: 700, color: '#8b5cf6',
-            marginTop: 'clamp(56px, 10vw, 80px)',
-            marginBottom: 'clamp(32px, 6vw, 48px)',
-          }}>
-            그래서 뭘 배우냐고요?
-          </Text>
-        </motion.div>
-
-        {/* 커리큘럼 아코디언 */}
-        <Box style={{ maxWidth: '540px', margin: '0 auto' }}>
-          <Accordion
-            variant="separated"
-            radius="lg"
-            styles={{
-              item: {
-                background: '#ffffff', border: '1px solid #d4d4d8',
-                marginBottom: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-              },
-              control: {
-                color: '#18181b', fontWeight: 700,
-                fontSize: 'clamp(16px, 3.5vw, 18px)', padding: '16px 20px',
-              },
-              panel: {
-                color: '#52525b', fontSize: 'clamp(15px, 3vw, 16px)',
-                lineHeight: 1.7, padding: '4px 20px 16px',
-              },
-            }}
-          >
-            {curriculum.map((c, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08, ease }}
-              >
-                <Accordion.Item value={c.title}>
-                  <Accordion.Control>
-                    <Group gap={10} wrap="nowrap" justify="space-between" style={{ width: '100%' }}>
-                      <Group gap={10} wrap="nowrap">
-                        <Text style={{
-                          ...mono, fontSize: '12px', fontWeight: 800,
-                          color: '#8b5cf6', flexShrink: 0,
-                        }}>
-                          {c.part}
-                        </Text>
-                        {c.title}
-                      </Group>
-                      <Badge size="sm" variant="light" color="gray" radius="xl">{c.count}강</Badge>
-                    </Group>
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    <Text size="sm" c="dimmed" mb={12}>{c.subtitle}</Text>
-                    <Stack gap={4}>
-                      {c.vods.map((vod, j) => (
-                        <Group key={j} gap={8} wrap="nowrap" align="flex-start">
-                          <Text style={{ ...mono, fontSize: '11px', color: '#a1a1aa', flexShrink: 0, marginTop: '2px' }}>
-                            {String(j + 1).padStart(2, '0')}
-                          </Text>
-                          <Text size="sm" c="gray.7" style={{ lineHeight: 1.5 }}>{vod}</Text>
-                        </Group>
-                      ))}
-                    </Stack>
-                  </Accordion.Panel>
-                </Accordion.Item>
-              </motion.div>
-            ))}
-          </Accordion>
-        </Box>
       </Container>
     </Box>
   );
