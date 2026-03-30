@@ -1427,7 +1427,7 @@ function WhySpecialSection() {
               fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
               color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
             }}>
-              구체적으로 뭘 배우냐면요
+              강의는 이렇게 구성되어 있습니다
             </Title>
           </Stack>
         </motion.div>
@@ -1502,7 +1502,7 @@ function WhySpecialSection() {
             marginTop: 'clamp(64px, 12vw, 100px)',
             marginBottom: 'clamp(32px, 6vw, 48px)',
           }}>
-            그래서 이게 왜 특별하냐면요
+            직접 비교해 보세요
           </Text>
         </motion.div>
 
