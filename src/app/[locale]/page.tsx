@@ -1444,7 +1444,7 @@ function WhySpecialSection() {
             >
               <Box style={{
                 background: '#ffffff', border: '1px solid #d4d4d8',
-                borderRadius: '16px', padding: 'clamp(16px, 4vw, 24px)',
+                borderRadius: '16px', padding: 'clamp(20px, 5vw, 28px)',
                 boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
               }}>
                 <Group gap={10} wrap="nowrap" justify="space-between" mb={12}>
@@ -1461,14 +1461,14 @@ function WhySpecialSection() {
                   </Group>
                   <Badge size="sm" variant="light" color="gray" radius="xl">{c.count}강</Badge>
                 </Group>
-                <Text size="sm" c="dimmed" mb={12}>{c.subtitle}</Text>
-                <Stack gap={4}>
+                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 15px)', color: '#71717a', marginBottom: '16px' }}>{c.subtitle}</Text>
+                <Stack gap={8}>
                   {c.vods.map((vod, j) => (
                     <Group key={j} gap={8} wrap="nowrap" align="flex-start">
-                      <Text style={{ ...mono, fontSize: '11px', color: '#a1a1aa', flexShrink: 0, marginTop: '2px' }}>
+                      <Text style={{ ...mono, fontSize: '12px', color: '#a1a1aa', flexShrink: 0, marginTop: '2px' }}>
                         {String(j + 1).padStart(2, '0')}
                       </Text>
-                      <Text size="sm" c="gray.7" style={{ lineHeight: 1.5 }}>{vod}</Text>
+                      <Text style={{ fontSize: 'clamp(14px, 3.5vw, 15px)', color: '#3f3f46', lineHeight: 1.5 }}>{vod}</Text>
                     </Group>
                   ))}
                 </Stack>
