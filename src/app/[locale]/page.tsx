@@ -1485,7 +1485,7 @@ function WhySpecialSection() {
             marginTop: 'clamp(64px, 12vw, 100px)',
             marginBottom: 'clamp(32px, 6vw, 48px)',
           }}>
-            다른 강의와 비교할수록 자신 있습니다
+            비교하면 차이가 보입니다
           </Text>
         </motion.div>
 
