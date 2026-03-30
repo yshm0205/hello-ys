@@ -316,8 +316,8 @@ function PainSection() {
       accent: '#f59e0b', bg: '#fffbeb', border: '#fde68a',
     },
     {
-      num: '03', title: 'AI 써봤는데',
-      desc: '조회수 공식 모르는 AI가 써준 대본', metric: '조회수 100~1,000회',
+      num: '03', title: 'AI가 다 해준다길래',
+      desc: '대본은 뽑아주는데 뭔가 애매하고', metric: '결국 조회수는 100~1,000회',
       accent: '#52525b', bg: '#f4f4f5', border: '#d4d4d8',
     },
   ];
@@ -407,41 +407,84 @@ function PainSection() {
       position: 'relative',
     }}>
       <Container size="lg">
+        {/* Stage 1: 인정 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease }}
+          style={{ textAlign: 'center' }}
+        >
+          <Text ta="center" style={{
+            fontSize: 'clamp(15px, 3.5vw, 19px)',
+            fontWeight: 400, color: '#a1a1aa',
+            letterSpacing: '0.08em',
+            marginBottom: 'clamp(48px, 10vw, 80px)',
+          }}>
+            맞습니다. 쉽지 않습니다.
+          </Text>
+        </motion.div>
+
+        {/* Stage 2: 위로 */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.2, ease }}
+          style={{ textAlign: 'center' }}
+        >
+          <Text ta="center" style={{
+            fontSize: 'clamp(20px, 5.5vw, 30px)',
+            fontWeight: 500, color: '#52525b',
+            lineHeight: 1.6,
+            marginBottom: 'clamp(56px, 12vw, 96px)',
+          }}>
+            하지만 포기하지 않으면,
+            <br />성과와 실력은 <span style={{ color: '#18181b', fontWeight: 800 }}>분명</span> 따라옵니다.
+          </Text>
+        </motion.div>
+
+        {/* Stage 3: 때림 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease }}
+          transition={{ duration: 0.7, delay: 0.4, ease }}
           style={{ textAlign: 'center' }}
         >
           <Text ta="center" style={{
-            fontSize: 'clamp(24px, 6.5vw, 34px)',
-            fontWeight: 600, color: '#52525b', lineHeight: 1.5,
-          }}>
-            실력은 분명
-            <br />올라가고 있을 겁니다.
-          </Text>
-
-          <Text ta="center" style={{
-            fontSize: 'clamp(30px, 8vw, 48px)',
+            fontSize: 'clamp(32px, 9vw, 56px)',
             fontWeight: 900, color: '#18181b',
-            lineHeight: 1.25, letterSpacing: '-0.02em',
-            marginTop: 'clamp(32px, 6vw, 48px)',
+            lineHeight: 1.2, letterSpacing: '-0.03em',
+            marginBottom: 'clamp(64px, 14vw, 112px)',
           }}>
-            다만 그 &lsquo;천천히&rsquo;가
+            다만 그 <span style={{
+              color: '#ef4444',
+              textDecoration: 'underline',
+              textDecorationColor: 'rgba(239,68,68,0.3)',
+              textUnderlineOffset: '6px',
+              textDecorationThickness: '3px',
+            }}>&lsquo;천천히&rsquo;</span>가
             <br />1년이 될 수도, 4년이 될 수도 있습니다.
           </Text>
+        </motion.div>
 
+        {/* Stage 4: 최단거리 훅 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.6, ease }}
+          style={{ textAlign: 'center' }}
+        >
           <Text ta="center" style={{
-            fontSize: 'clamp(26px, 7vw, 38px)',
-            fontWeight: 800, color: '#8b5cf6',
-            lineHeight: 1.3,
-            marginTop: 'clamp(56px, 12vw, 96px)',
-            letterSpacing: '-0.02em',
-            textShadow: '0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(139,92,246,0.1)',
+            fontSize: 'clamp(24px, 6.5vw, 38px)',
+            fontWeight: 700, color: '#8b5cf6',
+            lineHeight: 1.35,
+            textShadow: '0 0 60px rgba(139,92,246,0.2)',
           }}>
-            쇼츠 수익화의 최단거리를
-            <br />모른다면요.
+            <span style={{ fontWeight: 900 }}>쇼츠 수익화의 최단거리</span>를
+            <br /><span style={{ opacity: 0.7 }}>모른다면요.</span>
           </Text>
         </motion.div>
 
