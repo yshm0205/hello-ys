@@ -626,10 +626,10 @@ function PainSection() {
         {/* 성과 카드들 — 체크 + 수익 + 풀 스크린샷 */}
         <Stack gap={48} style={{ maxWidth: '560px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
-            { label: '채널A 게임', amount: '1,567만원', src: '/images/success-ch-b.png' },
-            { label: '채널B 해외반응', amount: '923만원', src: '/images/success-ch-c.png' },
-            { label: '채널C 해외반응', amount: '488만원', src: '/images/success-ch-d.png' },
-            { label: '채널D 지식/정보', amount: '159만원', src: '/images/success-ch-a.png' },
+            { label: '채널A 게임', amount: '1,567만원', views: '5,937만회', src: '/images/success-ch-b.png' },
+            { label: '채널B 해외반응', amount: '923만원', views: '2,375만회', src: '/images/success-ch-c.png' },
+            { label: '채널C 해외반응', amount: '488만원', views: '3,005만회', src: '/images/success-ch-d.png' },
+            { label: '채널D 지식/정보', amount: '159만원', views: '46만회', src: '/images/success-ch-a.png' },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -652,12 +652,20 @@ function PainSection() {
                 }}>
                   {item.label}
                 </Text>
-                <Text style={{
-                  fontSize: 'clamp(20px, 5.5vw, 26px)',
-                  fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
-                }}>
-                  {item.amount}
-                </Text>
+                <Box style={{ marginLeft: 'auto', textAlign: 'right', flexShrink: 0 }}>
+                  <Text style={{
+                    fontSize: 'clamp(20px, 5.5vw, 26px)',
+                    fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
+                  }}>
+                    {item.amount}
+                  </Text>
+                  <Text style={{
+                    fontSize: 'clamp(12px, 3vw, 14px)',
+                    fontWeight: 600, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4,
+                  }}>
+                    조회수 {item.views}
+                  </Text>
+                </Box>
               </Group>
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
@@ -895,15 +903,46 @@ function PainSection() {
             fontSize: 'clamp(15px, 3.8vw, 17px)',
             fontWeight: 600, color: 'rgba(255,255,255,0.4)',
           }}>
-            5개 채널 총 수익
+            5개 채널 총 성과
           </Text>
-          <Text style={{
-            fontSize: 'clamp(32px, 9vw, 48px)',
-            fontWeight: 900, color: '#ffffff',
-            lineHeight: 1.2, marginTop: '6px',
-          }}>
-            5,082만원
-          </Text>
+          <Group justify="center" gap="clamp(24px, 6vw, 48px)" mt={6}>
+            <Box style={{ textAlign: 'center' }}>
+              <Text style={{
+                fontSize: 'clamp(32px, 9vw, 48px)',
+                fontWeight: 900, color: '#ffffff',
+                lineHeight: 1.2,
+              }}>
+                5,082만원
+              </Text>
+              <Text style={{
+                fontSize: 'clamp(12px, 3vw, 14px)',
+                fontWeight: 600, color: 'rgba(255,255,255,0.35)',
+                marginTop: '4px',
+              }}>
+                수익
+              </Text>
+            </Box>
+            <Box style={{
+              width: '1px', height: 'clamp(36px, 8vw, 52px)',
+              background: 'rgba(255,255,255,0.12)',
+            }} />
+            <Box style={{ textAlign: 'center' }}>
+              <Text style={{
+                fontSize: 'clamp(32px, 9vw, 48px)',
+                fontWeight: 900, color: '#ffffff',
+                lineHeight: 1.2,
+              }}>
+                1.1억회
+              </Text>
+              <Text style={{
+                fontSize: 'clamp(12px, 3vw, 14px)',
+                fontWeight: 600, color: 'rgba(255,255,255,0.35)',
+                marginTop: '4px',
+              }}>
+                조회수
+              </Text>
+            </Box>
+          </Group>
           <Text style={{
             fontSize: 'clamp(11px, 2.8vw, 13px)',
             fontWeight: 500, color: 'rgba(255,255,255,0.25)',
@@ -971,7 +1010,7 @@ function PainSection() {
         {/* 수강생 후기 — 성과 인증 */}
         <Stack gap={40} style={{ maxWidth: '400px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
           {[
-            { src: '/images/reviews/review_1_revenue.png', caption: '월 1,356만 수익 달성', alt: '수강생 성과 — 월 1356만 수익' },
+            { src: '/images/reviews/review_1_revenue.png', caption: '월 1,356만 수익', sub: '조회수 7,613만회', alt: '수강생 성과 — 월 1356만 수익' },
             { src: '/images/reviews/review_3_kakao.png', caption: '월 700만 수익', alt: '수강생 성과 — 월 700만 수익' },
             { src: '/images/reviews/review_7_kakao.png', caption: '구독자 1,000명 돌파', alt: '수강생 성과 — 구독자 1000 달성' },
             { src: '/images/reviews/review_6_youtube.png', caption: '조회수 폭발', alt: '수강생 성과 — 조회수 폭발' },
@@ -991,12 +1030,23 @@ function PainSection() {
                 }}>
                   <Check size={15} color="#ffffff" strokeWidth={3} />
                 </Box>
-                <Text style={{
-                  fontSize: 'clamp(20px, 5.5vw, 28px)',
-                  fontWeight: 800, color: 'rgba(255,255,255,0.85)',
-                }}>
-                  {item.caption}
-                </Text>
+                <Box>
+                  <Text style={{
+                    fontSize: 'clamp(20px, 5.5vw, 28px)',
+                    fontWeight: 800, color: 'rgba(255,255,255,0.85)',
+                  }}>
+                    {item.caption}
+                  </Text>
+                  {item.sub && (
+                    <Text style={{
+                      fontSize: 'clamp(13px, 3.2vw, 15px)',
+                      fontWeight: 600, color: 'rgba(255,255,255,0.4)',
+                      marginTop: '2px',
+                    }}>
+                      {item.sub}
+                    </Text>
+                  )}
+                </Box>
               </Group>
               <Box
                 onClick={() => setLightboxSrc(item.src)}
