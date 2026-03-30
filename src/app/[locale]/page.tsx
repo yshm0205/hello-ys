@@ -1107,43 +1107,48 @@ function PainSection() {
 function ProductRevealSection() {
   const items = [
     {
-      tag: '기본기',
-      num: '01',
-      title: '전자책',
-      desc: '500명이 먼저 검증한 쇼츠 원리. 영상 제작 전에 읽으면 시행착오가 절반으로 줄어듭니다.',
-      src: '/images/product-ebook.gif',
-      accent: '#8b5cf6',
-    },
-    {
-      tag: '전 과정',
-      num: '02',
-      title: 'VOD 강의 32강',
-      desc: '채널 기획, 소재 발굴, 스크립트, AI 비주얼, 편집, 수익화까지. 순서대로 따라하면 첫 영상이 나옵니다.',
-      src: '/images/product-vod.gif',
-      accent: '#f59e0b',
-    },
-    {
-      tag: '트렌드',
-      num: '03',
-      title: '월간 채널 추천 리스트',
-      desc: '"뭘 만들지?" 고민 끝. 매달 업데이트되는 벤치마크 채널에서 터지는 소재를 바로 뽑습니다.',
-      src: '/images/product-channel-list.gif',
-      accent: '#22c55e',
-    },
-    {
       tag: 'AI',
-      num: '04',
+      num: '01',
       title: 'AI 스크립트 프로그램',
-      desc: '소재 하나 넣으면 조회수 나오는 구조로 대본이 완성됩니다. 3분이면 끝.',
+      desc: '소재 하나 넣으면 훅 3개, 본문, 완성 스크립트까지. 3분이면 끝.',
+      features: ['FlowSpot', '6개월 이용권'],
       src: '/images/product-ai-script.gif',
       accent: '#8b5cf6',
       featured: true,
     },
     {
+      tag: '데이터',
+      num: '02',
+      title: '월간 채널 추천 리스트',
+      desc: '지금 뜨는 쇼츠 채널 현재 430개+. 매달 업데이트됩니다.',
+      features: ['구독자 수', '평균 조회수', '중위값', '분류', '제작 형식'],
+      src: '/images/product-channel-list.gif',
+      accent: '#22c55e',
+    },
+    {
+      tag: '전 과정',
+      num: '03',
+      title: 'VOD 강의 32강',
+      desc: '전자책이 전체 그림이라면, VOD는 하나하나를 깊이 파고듭니다.',
+      features: ['채널 설계', '소재 발굴', '스크립트 공식', '소스', '편집 마스터', '쇼핑 수익화'],
+      src: '/images/product-vod.gif',
+      accent: '#f59e0b',
+    },
+    {
+      tag: '기본기',
+      num: '04',
+      title: '전자책',
+      desc: '133p. 채널 기획부터 수익화까지 기본기를 먼저 잡고, 강의를 시작합니다.',
+      features: ['채널 기획', '주제 선정', '후킹', '소스', '편집', '수익화'],
+      src: '/images/product-ebook.gif',
+      accent: '#8b5cf6',
+    },
+    {
       tag: '시스템',
       num: '05',
       title: '노션 운영 템플릿',
-      desc: '소재 관리, 편집자 협업, 업로드 일정까지. 혼자서도 채널을 굴리는 운영 시스템.',
+      desc: '영상 관리부터 편집자 협업까지. 혼자 해도, 팀으로 해도 바로 씁니다.',
+      features: ['스크립트 검토', '음성 파일', '편집 체크', '업로드 일정'],
       src: '/images/product-notion.gif',
       accent: '#3b82f6',
     },
@@ -1241,6 +1246,21 @@ function ProductRevealSection() {
                   }}>
                     {item.desc}
                   </Text>
+                  {item.features && (
+                    <Group gap={6} mt={10} wrap="wrap">
+                      {item.features.map((f: string, fi: number) => (
+                        <Badge key={fi} size="xs" variant="light" radius="sm" style={{
+                          background: item.featured ? 'rgba(255,255,255,0.08)' : '#f4f4f5',
+                          color: item.featured ? 'rgba(255,255,255,0.5)' : '#71717a',
+                          border: 'none',
+                          fontWeight: 600,
+                          fontSize: '11px',
+                        }}>
+                          {f}
+                        </Badge>
+                      ))}
+                    </Group>
+                  )}
                 </Box>
               </Box>
             </motion.div>
