@@ -1461,14 +1461,14 @@ function WhySpecialSection() {
                   </Group>
                   <Badge size="sm" variant="light" color="gray" radius="xl">{c.count}강</Badge>
                 </Group>
-                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 15px)', color: '#71717a', marginBottom: '16px' }}>{c.subtitle}</Text>
+                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#52525b', marginBottom: '16px' }}>{c.subtitle}</Text>
                 <Stack gap={8}>
                   {c.vods.map((vod, j) => (
                     <Group key={j} gap={8} wrap="nowrap" align="flex-start">
-                      <Text style={{ ...mono, fontSize: '12px', color: '#a1a1aa', flexShrink: 0, marginTop: '2px' }}>
+                      <Text style={{ ...mono, fontSize: '13px', color: '#8b5cf6', flexShrink: 0, marginTop: '2px' }}>
                         {String(j + 1).padStart(2, '0')}
                       </Text>
-                      <Text style={{ fontSize: 'clamp(14px, 3.5vw, 15px)', color: '#3f3f46', lineHeight: 1.5 }}>{vod}</Text>
+                      <Text style={{ fontSize: 'clamp(15px, 3.8vw, 16px)', color: '#27272a', lineHeight: 1.6 }}>{vod}</Text>
                     </Group>
                   ))}
                 </Stack>
