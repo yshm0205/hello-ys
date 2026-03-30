@@ -220,7 +220,7 @@ export default function PricingPage() {
                 <Text size="xs" c="gray.5">포함:</Text>
                 <List spacing={8} size="sm" center>
                   {[
-                    '쇼츠 성장 강의 59강 (기획→촬영→편집→수익화)',
+                    '쇼츠 성장 강의 32강 (기획→촬영→편집→수익화)',
                     'FlowSpot Pro 6개월 기능 제공',
                     '6개월 후 Pro 구독 자격',
                   ].map((f, i) => (

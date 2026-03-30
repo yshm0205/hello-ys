@@ -306,7 +306,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                             <Box>
                                                 <Title order={4} style={{ color: '#111827' }}>올인원 패스로 시작하기</Title>
                                                 <Text size="sm" c="gray.6">
-                                                    강의 59강 + AI 스크립트 6개월 + 크레딧 3,000개
+                                                    강의 32강 + AI 스크립트 6개월 + 크레딧 3,000개
                                                 </Text>
                                             </Box>
                                         </Group>

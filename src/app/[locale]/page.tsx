@@ -136,7 +136,7 @@ function HeroSection() {
               fontWeight: 600, letterSpacing: '0.02em',
               marginBottom: 'clamp(20px, 4vw, 28px)',
             }}>
-              VOD 강의 59강 + 전자책 + AI 스크립트 자동화 도구 + 월간 트렌드 채널 데이터
+              VOD 강의 32강 + 전자책 + AI 스크립트 자동화 도구 + 월간 트렌드 채널 데이터
             </Text>
 
             {/* 헤드라인 */}
@@ -1110,15 +1110,15 @@ function ProductRevealSection() {
       tag: '기본기',
       num: '01',
       title: '전자책',
-      desc: '쇼츠의 기초 체력을 잡습니다. 반복해서 보며 원리를 체득하는 로드맵.',
+      desc: '500명이 먼저 검증한 쇼츠 원리. 영상 제작 전에 읽으면 시행착오가 절반으로 줄어듭니다.',
       src: '/images/product-ebook.gif',
       accent: '#8b5cf6',
     },
     {
       tag: '전 과정',
       num: '02',
-      title: 'VOD 강의 59강',
-      desc: '채널 기획부터 촬영, AI 생성, 편집, 스크립트까지. 수익화의 전 과정을 익힙니다.',
+      title: 'VOD 강의 32강',
+      desc: '채널 기획, 소재 발굴, 스크립트, AI 비주얼, 편집, 수익화까지. 순서대로 따라하면 첫 영상이 나옵니다.',
       src: '/images/product-vod.gif',
       accent: '#f59e0b',
     },
@@ -1126,7 +1126,7 @@ function ProductRevealSection() {
       tag: '트렌드',
       num: '03',
       title: '월간 채널 추천 리스트',
-      desc: '뭘 만들지 고민 끝. 매달 업데이트되는 트렌드 채널로 소재를 찾습니다.',
+      desc: '"뭘 만들지?" 고민 끝. 매달 업데이트되는 벤치마크 채널에서 터지는 소재를 바로 뽑습니다.',
       src: '/images/product-channel-list.gif',
       accent: '#22c55e',
     },
@@ -1134,7 +1134,7 @@ function ProductRevealSection() {
       tag: 'AI',
       num: '04',
       title: 'AI 스크립트 프로그램',
-      desc: '소재만 넣으면 검증된 구조로 대본이 완성됩니다. 3분이면 끝.',
+      desc: '소재 하나 넣으면 조회수 나오는 구조로 대본이 완성됩니다. 3분이면 끝.',
       src: '/images/product-ai-script.gif',
       accent: '#8b5cf6',
       featured: true,
@@ -1143,7 +1143,7 @@ function ProductRevealSection() {
       tag: '시스템',
       num: '05',
       title: '노션 운영 템플릿',
-      desc: '편집자 협업부터 일정 관리까지. 채널을 지속 성장시키는 운영 시스템.',
+      desc: '소재 관리, 편집자 협업, 업로드 일정까지. 혼자서도 채널을 굴리는 운영 시스템.',
       src: '/images/product-notion.gif',
       accent: '#3b82f6',
     },
@@ -1545,13 +1545,13 @@ function HowItWorksSection() {
       qNum: 'Q1', question: '쇼츠, 처음이신가요?',
       label: '입문', color: '#8b5cf6',
       answer: '기획부터 수익화까지 순서대로 알려드립니다.',
-      includes: ['전자책 (기초 가이드)', 'VOD 59강 (순차 학습)', 'AI 스크립트 6개월'],
+      includes: ['전자책 (기초 가이드)', 'VOD 32강 (순차 학습)', 'AI 스크립트 6개월'],
     },
     {
       qNum: 'Q2', question: '하고 있는데 성장이 안 되나요?',
       label: '성장', color: '#22c55e',
       answer: '터지는 영상에는 공식이 있습니다. 그 공식을 드립니다.',
-      includes: ['채널 리스트 (벤치마크)', 'AI 스크립트 (검증된 구조)', 'VOD 59강 (심화)'],
+      includes: ['채널 리스트 (벤치마크)', 'AI 스크립트 (검증된 구조)', 'VOD 32강 (심화)'],
     },
     {
       qNum: 'Q3', question: '혼자 하려니 지치셨나요?',
@@ -1755,7 +1755,7 @@ function PackageSection() {
             </Text>
             <Stack gap={0}>
               {[
-                { item: '강의 59강 (기획→촬영→수익화)', value: '₩590,000' },
+                { item: '강의 32강 (기획→촬영→수익화)', value: '₩590,000' },
                 { item: 'AI 스크립트 도구 6개월', value: '₩600,000' },
                 { item: '채널 분석 피드백', value: '₩100,000' },
                 { item: '보너스: 터진 영상 템플릿', value: '₩100,000' },
