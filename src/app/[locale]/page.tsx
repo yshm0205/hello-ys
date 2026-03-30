@@ -1421,16 +1421,11 @@ function WhySpecialSection() {
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
-            <Badge size="lg" variant="light" color="violet" radius="xl" style={{
-              padding: '8px 18px', fontSize: '14px',
-            }}>
-              차별화
-            </Badge>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
-              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
+              fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
+              color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
             }}>
-              이 코스가 특별한 이유
+              그래서 이게 왜 특별하냐면요
             </Title>
           </Stack>
         </motion.div>
