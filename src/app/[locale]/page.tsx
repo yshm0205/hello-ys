@@ -1327,10 +1327,13 @@ function WhySpecialSection() {
 
   const comparisonRows = [
     { label: '가격', left: '99~160만원', right: '49.9만원' },
-    { label: '제공 범위', left: '강의만 제공', right: '강의 + AI + 도구 전부' },
-    { label: '수강 기간', left: '100일 (기수제)', right: '4개월 수강' },
-    { label: '대본 작성', left: '직접 작성', right: 'AI가 3분 만에 완성' },
-    { label: 'AI 도구', left: '없음', right: '4개월 포함' },
+    { label: '범위', left: '강의만 제공', right: '강의 + AI 도구 + 전자책' },
+    { label: '수강 기간', left: '100일 (기수제)', right: '4개월 자유 수강' },
+    { label: '커리큘럼', left: '기획~편집 일부만', right: '기획→수익화 전 과정 32강' },
+    { label: '대본', left: '직접 작성', right: 'AI가 3분 만에 완성' },
+    { label: '소재 찾기', left: '직접 리서치', right: 'AI 실시간 리서치 제공' },
+    { label: 'AI 도구', left: '없음', right: '스크립트 생성기 4개월' },
+    { label: '업데이트', left: '촬영 시점 고정', right: 'AI 도구 지속 업데이트' },
   ];
 
   const curriculum = [
