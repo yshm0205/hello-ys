@@ -1331,6 +1331,7 @@ function WhySpecialSection() {
     { label: '수강 기간', left: '100일 (기수제)', right: '4개월 자유 수강' },
     { label: '커리큘럼', left: '기획~편집 일부만', right: '기획→수익화 전 과정 32강' },
     { label: '대본', left: '직접 작성 (1~2시간)', right: 'AI 스크립트 3분 완성' },
+    { label: '트렌드 채널', left: '직접 찾아야 함', right: '매월 트렌드 채널 리스트 제공' },
     { label: '채널 피드백', left: '없음', right: '매월 1:1 채널 리뷰' },
     { label: '업데이트', left: '촬영 시점 고정', right: 'AI 도구 + 강의 지속 업데이트' },
   ];
