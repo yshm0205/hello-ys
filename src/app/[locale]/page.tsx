@@ -662,7 +662,7 @@ function PainSection() {
                   fontSize: 'clamp(20px, 5.5vw, 26px)',
                   fontWeight: 900, color: 'rgba(255,255,255,0.5)', lineHeight: 1.2,
                 }}>
-                  {item.views}
+                  <span style={{ fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, marginRight: '4px' }}>조회수</span>{item.views}
                 </Text>
               </Group>
               <Box style={{
