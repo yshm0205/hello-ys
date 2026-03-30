@@ -1434,7 +1434,7 @@ function WhySpecialSection() {
         {/* 양쪽 비교표 */}
         <motion.div {...fadeUp}>
           <Box style={{
-            maxWidth: '640px', margin: '0 auto',
+            maxWidth: '720px', margin: '0 auto',
             borderRadius: '16px', overflow: 'hidden',
             border: '1px solid #d4d4d8',
             boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
@@ -1445,27 +1445,27 @@ function WhySpecialSection() {
             }}>
               <Box style={{
                 background: '#f4f4f5',
-                padding: 'clamp(14px, 3vw, 20px)',
+                padding: 'clamp(16px, 4vw, 24px)',
                 textAlign: 'center',
                 borderRight: '1px solid #d4d4d8',
                 borderBottom: '1px solid #d4d4d8',
               }}>
                 <Group gap={6} justify="center" wrap="nowrap">
-                  <X size={16} color="#a1a1aa" />
-                  <Text fw={700} style={{ fontSize: 'clamp(14px, 3.5vw, 17px)', color: '#71717a' }}>
+                  <X size={18} color="#a1a1aa" />
+                  <Text fw={700} style={{ fontSize: 'clamp(15px, 4vw, 18px)', color: '#71717a' }}>
                     일반 강의
                   </Text>
                 </Group>
               </Box>
               <Box style={{
                 background: '#faf5ff',
-                padding: 'clamp(14px, 3vw, 20px)',
+                padding: 'clamp(16px, 4vw, 24px)',
                 textAlign: 'center',
                 borderBottom: '1px solid rgba(139,92,246,0.2)',
               }}>
                 <Group gap={6} justify="center" wrap="nowrap">
-                  <Check size={16} color="#8b5cf6" />
-                  <Text fw={700} style={{ fontSize: 'clamp(14px, 3.5vw, 17px)', color: '#8b5cf6' }}>
+                  <Check size={18} color="#8b5cf6" />
+                  <Text fw={700} style={{ fontSize: 'clamp(15px, 4vw, 18px)', color: '#8b5cf6' }}>
                     올인원 패스
                   </Text>
                 </Group>
@@ -1479,7 +1479,7 @@ function WhySpecialSection() {
                 borderBottom: i < comparisonRows.length - 1 ? '1px solid #f4f4f5' : 'none',
               }}>
                 <Box style={{
-                  padding: 'clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 20px)',
+                  padding: 'clamp(14px, 3.5vw, 20px) clamp(16px, 4vw, 24px)',
                   borderRight: '1px solid #f4f4f5',
                   background: '#ffffff',
                 }}>
@@ -1491,15 +1491,15 @@ function WhySpecialSection() {
                     {row.label}
                   </Text>
                   <Text style={{
-                    fontSize: 'clamp(14px, 3.2vw, 16px)', color: '#71717a',
-                    lineHeight: 1.4,
+                    fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa',
+                    lineHeight: 1.5,
                   }}>
                     {row.left}
                   </Text>
                 </Box>
                 <Box style={{
-                  padding: 'clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 20px)',
-                  background: '#ffffff',
+                  padding: 'clamp(14px, 3.5vw, 20px) clamp(16px, 4vw, 24px)',
+                  background: '#faf5ff',
                 }}>
                   <Text style={{
                     fontSize: '11px', fontWeight: 600, color: 'rgba(139,92,246,0.5)',
@@ -1508,9 +1508,9 @@ function WhySpecialSection() {
                   }}>
                     {row.label}
                   </Text>
-                  <Text fw={600} style={{
-                    fontSize: 'clamp(14px, 3.2vw, 16px)', color: '#18181b',
-                    lineHeight: 1.4,
+                  <Text fw={700} style={{
+                    fontSize: 'clamp(15px, 3.8vw, 18px)', color: '#18181b',
+                    lineHeight: 1.5,
                   }}>
                     {row.right}
                   </Text>
