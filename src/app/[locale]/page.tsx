@@ -1239,9 +1239,9 @@ function ProductRevealSection() {
                     {item.title}
                   </Text>
                   <Text style={{
-                    fontSize: 'clamp(14px, 3.5vw, 16px)',
+                    fontSize: 'clamp(15px, 3.8vw, 17px)',
                     fontWeight: 500,
-                    color: item.featured ? 'rgba(255,255,255,0.6)' : '#71717a',
+                    color: item.featured ? 'rgba(255,255,255,0.75)' : '#52525b',
                     lineHeight: 1.6,
                   }}>
                     {item.desc}
@@ -1250,11 +1250,11 @@ function ProductRevealSection() {
                     <Group gap={6} mt={10} wrap="wrap">
                       {item.features.map((f: string, fi: number) => (
                         <Badge key={fi} size="xs" variant="light" radius="sm" style={{
-                          background: item.featured ? 'rgba(255,255,255,0.08)' : '#f4f4f5',
-                          color: item.featured ? 'rgba(255,255,255,0.5)' : '#71717a',
+                          background: item.featured ? 'rgba(255,255,255,0.12)' : '#f0f0f2',
+                          color: item.featured ? 'rgba(255,255,255,0.7)' : '#52525b',
                           border: 'none',
                           fontWeight: 600,
-                          fontSize: '11px',
+                          fontSize: '12px',
                         }}>
                           {f}
                         </Badge>
