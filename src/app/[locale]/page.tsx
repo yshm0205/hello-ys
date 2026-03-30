@@ -646,22 +646,24 @@ function PainSection() {
                 }}>
                   <Check size={16} color="#ffffff" strokeWidth={3} />
                 </Box>
-                <Text style={{
-                  fontSize: 'clamp(15px, 3.8vw, 18px)',
-                  fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.4,
-                }}>
-                  {item.label}
-                </Text>
-                <Box style={{ marginLeft: 'auto', textAlign: 'right', flexShrink: 0 }}>
-                  <Text style={{
-                    fontSize: 'clamp(20px, 5.5vw, 26px)',
-                    fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
-                  }}>
-                    {item.amount}
-                  </Text>
+                <Box>
+                  <Group gap={8} align="baseline" wrap="nowrap">
+                    <Text style={{
+                      fontSize: 'clamp(15px, 3.8vw, 18px)',
+                      fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.4,
+                    }}>
+                      {item.label}
+                    </Text>
+                    <Text style={{
+                      fontSize: 'clamp(20px, 5.5vw, 26px)',
+                      fontWeight: 900, color: '#ffffff', lineHeight: 1.2,
+                    }}>
+                      {item.amount}
+                    </Text>
+                  </Group>
                   <Text style={{
                     fontSize: 'clamp(12px, 3vw, 14px)',
-                    fontWeight: 600, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4,
+                    fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginTop: '2px',
                   }}>
                     조회수 {item.views}
                   </Text>
