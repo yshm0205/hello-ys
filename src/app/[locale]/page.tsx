@@ -1617,16 +1617,11 @@ function HowItWorksSection() {
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
-            <Badge size="lg" variant="light" color="violet" radius="xl" style={{
-              padding: '8px 18px', fontSize: '14px',
-            }}>
-              자가 진단
-            </Badge>
             <Title order={2} ta="center" style={{
-              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
-              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
+              fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
+              color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
             }}>
-              지금 어디에 계신가요?
+              혹시 여러분은 어디서 헤매고 계신가요?
             </Title>
           </Stack>
         </motion.div>
