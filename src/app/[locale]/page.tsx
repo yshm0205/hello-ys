@@ -1827,35 +1827,6 @@ function PackageSection() {
           </Paper>
         </motion.div>
 
-        {/* Employee comparison */}
-        <motion.div {...fadeUp}>
-          <Paper radius="lg" style={{
-            background: '#ffffff', border: '1px solid #d4d4d8',
-            textAlign: 'center', maxWidth: '480px', margin: '40px auto 0',
-            padding: 'clamp(24px, 5vw, 36px)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-          }}>
-            <Text fw={600} style={{ fontSize: 'clamp(15px, 3vw, 17px)', color: '#52525b', marginBottom: '24px' }}>
-              이렇게 생각해보세요
-            </Text>
-            <Group justify="center" gap={24} wrap="wrap">
-              <Stack gap={4} align="center">
-                <Text style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a' }}>스크립트 작가 1명</Text>
-                <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#18181b', ...mono }}>월 200만원</Text>
-              </Stack>
-              <Text style={{ fontSize: 'clamp(20px, 3vw, 24px)', color: '#a1a1aa', fontWeight: 300 }}>vs</Text>
-              <Stack gap={4} align="center">
-                <Text style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#71717a' }}>AI 스크립트 4개월</Text>
-                <Text fw={800} style={{ fontSize: 'clamp(22px, 4vw, 28px)', color: '#8b5cf6', ...mono }}>49.9만원</Text>
-              </Stack>
-            </Group>
-            <Text mt={20} style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#52525b' }}>
-              = <b style={{ color: '#18181b' }}>월 4만원</b> = 커피 10잔 값으로{' '}
-              <b style={{ color: '#8b5cf6' }}>24시간 일하는 직원</b>
-            </Text>
-          </Paper>
-        </motion.div>
-
         {/* Pro 구독 안내 */}
         <motion.div {...fadeUp}>
           <Text ta="center" style={{
