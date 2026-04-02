@@ -1157,7 +1157,9 @@ function ProductRevealSection() {
       tag: 'AI',
       num: '01',
       title: 'AI 스크립트 프로그램',
-      desc: '월 30시간 절약. 대본 1편에 1~2시간 → 3분이면 초안 완성.',
+      timeSave: '월 30시간 절약',
+      desc: '대본 1편에 1~2시간 → 3분이면 초안 완성.',
+      achievement: '이 도구로 네이버 클립 1,945만원 달성',
       features: ['FlowSpot', '4개월 이용권'],
       src: '/images/product-ai-script.gif',
       accent: '#8b5cf6',
@@ -1167,7 +1169,8 @@ function ProductRevealSection() {
       tag: '데이터',
       num: '02',
       title: '월간 채널 추천 리스트',
-      desc: '월 40시간 절약. 뭘 만들지 고민하는 시간, 리스트 하나로 끝.',
+      timeSave: '월 40시간 절약',
+      desc: '뭘 만들지 고민하는 시간, 리스트 하나로 끝.',
       features: ['구독자 수', '평균 조회수', '중위값', '분류', '제작 형식'],
       src: '/images/product-channel-list.gif',
       accent: '#22c55e',
@@ -1176,7 +1179,8 @@ function ProductRevealSection() {
       tag: '전 과정',
       num: '03',
       title: 'VOD 강의 32강',
-      desc: '시행착오 1~4년 → 32강. 기획·제작·편집 노하우를 전부 담았습니다.',
+      timeSave: '시행착오 1~4년 → 32강',
+      desc: '기획·제작·편집 노하우를 전부 담았습니다.',
       features: ['채널 설계', '소재 발굴', '스크립트 공식', '소스', '편집 마스터', '쇼핑 수익화'],
       src: '/images/product-vod.gif',
       accent: '#f59e0b',
@@ -1185,7 +1189,8 @@ function ProductRevealSection() {
       tag: '기본기',
       num: '04',
       title: '전자책',
-      desc: '독학 수개월 → 133p 한 권. 기본기는 여기서 끝냅니다.',
+      timeSave: '독학 수개월 → 133p 한 권',
+      desc: '기본기는 여기서 끝냅니다.',
       features: ['채널 기획', '주제 선정', '후킹', '소스', '편집', '수익화'],
       src: '/images/product-ebook.gif',
       accent: '#8b5cf6',
@@ -1194,7 +1199,8 @@ function ProductRevealSection() {
       tag: '시스템',
       num: '05',
       title: '노션 운영 템플릿',
-      desc: '월 10시간 절약. 직접 만들어 쓰고 있는 운영 시스템 그대로 드립니다.',
+      timeSave: '월 10시간 절약',
+      desc: '직접 만들어 쓰고 있는 운영 시스템 그대로 드립니다.',
       features: ['스크립트 검토', '음성 파일', '편집 체크', '업로드 일정'],
       src: '/images/product-notion.gif',
       accent: '#3b82f6',
@@ -1274,10 +1280,30 @@ function ProductRevealSection() {
                   <Text style={{
                     fontSize: 'clamp(20px, 5vw, 24px)',
                     fontWeight: 800, color: item.featured ? '#ffffff' : '#18181b',
-                    lineHeight: 1.3, marginBottom: '6px',
+                    lineHeight: 1.3, marginBottom: '8px',
                   }}>
                     {item.title}
                   </Text>
+                  {/* 시간 절약 강조 */}
+                  {item.timeSave && (
+                    <Box style={{
+                      display: 'inline-block',
+                      background: item.featured ? 'rgba(139,92,246,0.25)' : '#f0fdf4',
+                      border: item.featured ? '1px solid rgba(139,92,246,0.4)' : '1px solid #bbf7d0',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      marginBottom: '8px',
+                    }}>
+                      <Text style={{
+                        ...mono,
+                        fontSize: 'clamp(14px, 3.5vw, 16px)',
+                        fontWeight: 800,
+                        color: item.featured ? '#a78bfa' : '#16a34a',
+                      }}>
+                        {item.timeSave}
+                      </Text>
+                    </Box>
+                  )}
                   <Text style={{
                     fontSize: 'clamp(15px, 3.8vw, 17px)',
                     fontWeight: 500,
@@ -1286,6 +1312,24 @@ function ProductRevealSection() {
                   }}>
                     {item.desc}
                   </Text>
+                  {/* 성과 뱃지 */}
+                  {item.achievement && (
+                    <Box style={{
+                      display: 'inline-block',
+                      background: '#22c55e',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      marginTop: '10px',
+                    }}>
+                      <Text style={{
+                        fontSize: 'clamp(13px, 3.2vw, 15px)',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                      }}>
+                        {item.achievement}
+                      </Text>
+                    </Box>
+                  )}
                   {item.features && (
                     <Group gap={6} mt={10} wrap="wrap">
                       {item.features.map((f: string, fi: number) => (
