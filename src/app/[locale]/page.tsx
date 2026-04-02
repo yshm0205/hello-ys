@@ -1220,7 +1220,7 @@ function ProductRevealSection() {
               color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.3,
             }}>
               시간이 오래 걸리는 구간을
-              <br />하나씩 줄여주는 구조를 알려드릴게요.
+              <br />하나씩 줄여주는 원초적 인사이트만의 방법을 소개합니다.
             </Title>
           </Stack>
         </motion.div>
