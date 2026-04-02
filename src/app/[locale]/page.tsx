@@ -1351,67 +1351,50 @@ function ProductRevealSection() {
           ))}
         </Stack>
 
-        {/* 총 절약 시간 요약 + 비교 전환 */}
+        {/* 섹션 클로저 — 최단거리 요약 */}
         <motion.div {...fadeUp}>
           <Box style={{
-            maxWidth: '480px', margin: '0 auto',
-            marginTop: 'clamp(48px, 10vw, 72px)',
-            background: '#18181b',
-            borderRadius: '16px',
-            border: 'none',
-            padding: 'clamp(28px, 6vw, 40px)',
             textAlign: 'center',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            marginTop: 'clamp(56px, 12vw, 88px)',
+            padding: '0 16px',
           }}>
             <Text style={{
-              fontSize: 'clamp(13px, 3.2vw, 15px)',
-              fontWeight: 600, color: 'rgba(255,255,255,0.5)',
-              marginBottom: '4px',
+              fontSize: 'clamp(24px, 6.5vw, 36px)',
+              fontWeight: 800,
+              color: '#3f3f46',
+              lineHeight: 1.5,
             }}>
-              매달 줄일 수 있는 시간
+              <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>4</span>년의 시행착오를 앞지르고,
+              <br />
+              매달 <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>80</span>시간을 절약하는 것.
             </Text>
             <Text style={{
-              fontSize: 'clamp(36px, 9vw, 48px)',
-              fontWeight: 900, color: '#ffffff',
-              lineHeight: 1.1,
+              fontSize: 'clamp(28px, 7.5vw, 42px)',
+              fontWeight: 900,
+              color: '#18181b',
+              lineHeight: 1.3,
+              marginTop: 'clamp(12px, 3vw, 20px)',
             }}>
-              <span style={mono}>80</span>시간+
+              그게{' '}
+              <span style={{
+                color: '#8b5cf6',
+                position: 'relative',
+                display: 'inline-block',
+              }}>
+                최단거리
+                <Box component="span" style={{
+                  position: 'absolute',
+                  bottom: '2px',
+                  left: '-2px',
+                  right: '-2px',
+                  height: '8px',
+                  background: 'rgba(139,92,246,0.25)',
+                  borderRadius: '4px',
+                  zIndex: -1,
+                }} />
+              </span>
+              입니다.
             </Text>
-            <Text style={{
-              fontSize: 'clamp(13px, 3.2vw, 15px)',
-              fontWeight: 600, color: '#a78bfa',
-              marginTop: '6px',
-            }}>
-              대본 30h + 소재 리서치 40h + 운영 관리 10h
-            </Text>
-
-            <Box style={{
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              marginTop: 'clamp(16px, 4vw, 24px)',
-              paddingTop: 'clamp(16px, 4vw, 24px)',
-            }}>
-              <Text style={{
-                fontSize: 'clamp(13px, 3.2vw, 15px)',
-                fontWeight: 600, color: 'rgba(255,255,255,0.5)',
-                marginBottom: '4px',
-              }}>
-                한 번에 앞지를 수 있는 시행착오
-              </Text>
-              <Text style={{
-                fontSize: 'clamp(24px, 6vw, 32px)',
-                fontWeight: 900, color: '#ffffff',
-                lineHeight: 1.1,
-              }}>
-                <span style={mono}>1~4</span>년
-              </Text>
-              <Text style={{
-                fontSize: 'clamp(13px, 3.2vw, 15px)',
-                fontWeight: 600, color: '#a78bfa',
-                marginTop: '6px',
-              }}>
-                VOD 32강 + 전자책 133p에 압축
-              </Text>
-            </Box>
           </Box>
         </motion.div>
       </Container>
