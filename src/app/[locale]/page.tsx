@@ -136,7 +136,7 @@ function HeroSection() {
               fontWeight: 600, letterSpacing: '0.02em',
               marginBottom: 'clamp(20px, 4vw, 28px)',
             }}>
-              VOD 강의 32강 + 전자책 + AI 스크립트 자동화 도구 + 월간 트렌드 채널 데이터
+              AI 스크립트 도구 + 월간 트렌드 채널 데이터 + VOD 강의 32강 + 전자책 + 노션 템플릿
             </Text>
 
             {/* 헤드라인 */}
@@ -317,7 +317,7 @@ function PainSection() {
     },
     {
       num: '03', title: 'AI가 다 해준다길래',
-      desc: '대본은 뽑아주는데 뭔가 애매하고', metric: '결국 조회수는 100~1,000회',
+      desc: 'AI가 뽑아준 대로 그대로 올렸는데 결국', metric: '조회수는 100~1,000회',
       accent: '#52525b', bg: '#f4f4f5', border: '#d4d4d8',
     },
   ];
