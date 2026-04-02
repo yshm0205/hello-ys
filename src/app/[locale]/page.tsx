@@ -1350,6 +1350,42 @@ function ProductRevealSection() {
             </motion.div>
           ))}
         </Stack>
+
+        {/* 총 절약 시간 요약 + 비교 전환 */}
+        <motion.div {...fadeUp}>
+          <Box style={{
+            maxWidth: '480px', margin: '0 auto',
+            marginTop: 'clamp(48px, 10vw, 72px)',
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '2px solid #8b5cf6',
+            padding: 'clamp(24px, 5vw, 36px)',
+            textAlign: 'center',
+          }}>
+            <Text style={{
+              fontSize: 'clamp(14px, 3.5vw, 16px)',
+              fontWeight: 600, color: '#52525b',
+              marginBottom: '8px',
+            }}>
+              매달 줄일 수 있는 시간
+            </Text>
+            <Text style={{
+              ...mono,
+              fontSize: 'clamp(36px, 9vw, 48px)',
+              fontWeight: 900, color: '#8b5cf6',
+              lineHeight: 1.1,
+            }}>
+              80시간+
+            </Text>
+            <Text style={{
+              fontSize: 'clamp(13px, 3.2vw, 15px)',
+              fontWeight: 500, color: '#a1a1aa',
+              marginTop: '8px',
+            }}>
+              대본 30h + 소재 리서치 40h + 운영 관리 10h
+            </Text>
+          </Box>
+        </motion.div>
       </Container>
     </Box>
   );
