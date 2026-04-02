@@ -1170,7 +1170,7 @@ function ProductRevealSection() {
       num: '02',
       title: '월간 채널 추천 리스트',
       timeSave: '월 40시간 절약',
-      desc: '뭘 만들지 고민하는 시간, 리스트 하나로 끝. 매달 직접 수집·정리해서 알려드립니다.',
+      desc: '숏폼은 트렌드를 빨리 캐치하는 자가 이깁니다. 잘하는 채널은 뭘 만드는지 직접 수집·정리해서 알려드립니다.',
       features: ['구독자 수', '평균 조회수', '중위값', '분류', '제작 형식'],
       src: '/images/product-channel-list.gif',
       accent: '#22c55e',
