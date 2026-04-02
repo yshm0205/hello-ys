@@ -1364,9 +1364,9 @@ function ProductRevealSection() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
           }}>
             <Text style={{
-              fontSize: 'clamp(14px, 3.5vw, 16px)',
-              fontWeight: 600, color: 'rgba(255,255,255,0.6)',
-              marginBottom: '8px',
+              fontSize: 'clamp(13px, 3.2vw, 15px)',
+              fontWeight: 600, color: 'rgba(255,255,255,0.5)',
+              marginBottom: '4px',
             }}>
               매달 줄일 수 있는 시간
             </Text>
@@ -1380,10 +1380,38 @@ function ProductRevealSection() {
             <Text style={{
               fontSize: 'clamp(13px, 3.2vw, 15px)',
               fontWeight: 600, color: '#a78bfa',
-              marginTop: '8px',
+              marginTop: '6px',
             }}>
               대본 30h + 소재 리서치 40h + 운영 관리 10h
             </Text>
+
+            <Box style={{
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              marginTop: 'clamp(16px, 4vw, 24px)',
+              paddingTop: 'clamp(16px, 4vw, 24px)',
+            }}>
+              <Text style={{
+                fontSize: 'clamp(13px, 3.2vw, 15px)',
+                fontWeight: 600, color: 'rgba(255,255,255,0.5)',
+                marginBottom: '4px',
+              }}>
+                한 번에 앞지를 수 있는 시행착오
+              </Text>
+              <Text style={{
+                fontSize: 'clamp(24px, 6vw, 32px)',
+                fontWeight: 900, color: '#ffffff',
+                lineHeight: 1.1,
+              }}>
+                <span style={mono}>1~4</span>년
+              </Text>
+              <Text style={{
+                fontSize: 'clamp(13px, 3.2vw, 15px)',
+                fontWeight: 600, color: '#a78bfa',
+                marginTop: '6px',
+              }}>
+                VOD 32강 + 전자책 133p에 압축
+              </Text>
+            </Box>
           </Box>
         </motion.div>
       </Container>
