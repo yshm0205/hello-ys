@@ -1351,50 +1351,37 @@ function ProductRevealSection() {
           ))}
         </Stack>
 
-        {/* 섹션 클로저 — 최단거리 요약 */}
+        {/* 시간 절약 팩트 요약 — 2분할 */}
         <motion.div {...fadeUp}>
           <Box style={{
-            textAlign: 'center',
-            marginTop: 'clamp(56px, 12vw, 88px)',
-            padding: '0 16px',
+            maxWidth: '480px', margin: '0 auto',
+            marginTop: 'clamp(48px, 10vw, 72px)',
+            display: 'flex', gap: 'clamp(12px, 3vw, 16px)',
           }}>
-            <Text style={{
-              fontSize: 'clamp(24px, 6.5vw, 36px)',
-              fontWeight: 800,
-              color: '#3f3f46',
-              lineHeight: 1.5,
+            <Box style={{
+              flex: 1, background: '#ffffff', borderRadius: '16px',
+              border: '1px solid #e4e4e7', padding: 'clamp(20px, 4vw, 28px)',
+              textAlign: 'center',
             }}>
-              <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>4</span>년의 시행착오를 앞지르고,
-              <br />
-              매달 <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>80</span>시간을 절약하는 것.
-            </Text>
-            <Text style={{
-              fontSize: 'clamp(28px, 7.5vw, 42px)',
-              fontWeight: 900,
-              color: '#18181b',
-              lineHeight: 1.3,
-              marginTop: 'clamp(12px, 3vw, 20px)',
+              <Text style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 600, color: '#71717a', marginBottom: '4px' }}>
+                매달 절약
+              </Text>
+              <Text style={{ ...mono, fontSize: 'clamp(32px, 8vw, 40px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
+                80<span style={{ fontSize: '0.6em', fontWeight: 700 }}>시간+</span>
+              </Text>
+            </Box>
+            <Box style={{
+              flex: 1, background: '#ffffff', borderRadius: '16px',
+              border: '1px solid #e4e4e7', padding: 'clamp(20px, 4vw, 28px)',
+              textAlign: 'center',
             }}>
-              그게{' '}
-              <span style={{
-                color: '#8b5cf6',
-                position: 'relative',
-                display: 'inline-block',
-              }}>
-                최단거리
-                <Box component="span" style={{
-                  position: 'absolute',
-                  bottom: '2px',
-                  left: '-2px',
-                  right: '-2px',
-                  height: '8px',
-                  background: 'rgba(139,92,246,0.25)',
-                  borderRadius: '4px',
-                  zIndex: -1,
-                }} />
-              </span>
-              입니다.
-            </Text>
+              <Text style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 600, color: '#71717a', marginBottom: '4px' }}>
+                4년의 시행착오를
+              </Text>
+              <Text style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 900, color: '#18181b', lineHeight: 1.1 }}>
+                건너뜁니다
+              </Text>
+            </Box>
           </Box>
         </motion.div>
       </Container>
@@ -1858,11 +1845,39 @@ function PackageSection() {
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
+        {/* 최단거리 클로저 */}
+        <motion.div {...fadeUp}>
+          <Box style={{ textAlign: 'center', marginBottom: 'clamp(48px, 10vw, 72px)' }}>
+            <Text style={{
+              fontSize: 'clamp(24px, 6.5vw, 36px)',
+              fontWeight: 800, color: '#3f3f46', lineHeight: 1.5,
+            }}>
+              <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>4</span>년의 시행착오를 앞지르고,
+              <br />
+              매달 <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>80</span>시간을 절약하는 것.
+            </Text>
+            <Text style={{
+              fontSize: 'clamp(28px, 7.5vw, 42px)',
+              fontWeight: 900, color: '#18181b', lineHeight: 1.3,
+              marginTop: 'clamp(12px, 3vw, 20px)',
+            }}>
+              그게{' '}
+              <span style={{ color: '#8b5cf6', position: 'relative', display: 'inline-block' }}>
+                최단거리
+                <Box component="span" style={{
+                  position: 'absolute', bottom: '2px', left: '-2px', right: '-2px',
+                  height: '8px', background: 'rgba(139,92,246,0.25)',
+                  borderRadius: '4px', zIndex: -1,
+                }} />
+              </span>
+              입니다.
+            </Text>
+          </Box>
+        </motion.div>
+
+        {/* 가격 헤딩 */}
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
-            <Badge size="lg" variant="light" color="cyan" radius="xl" style={{ padding: '8px 18px', fontSize: '14px' }}>
-              가격
-            </Badge>
             <Title order={2} ta="center" style={{
               fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
               color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
