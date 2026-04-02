@@ -1366,8 +1366,8 @@ function ProductRevealSection() {
               <Text style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 600, color: '#71717a', marginBottom: '4px' }}>
                 매달 절약
               </Text>
-              <Text style={{ ...mono, fontSize: 'clamp(32px, 8vw, 40px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
-                80<span style={{ fontSize: '0.6em', fontWeight: 700 }}>시간+</span>
+              <Text style={{ fontSize: 'clamp(36px, 9vw, 44px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
+                80<span style={{ fontSize: '0.55em' }}>시간+</span>
               </Text>
             </Box>
             <Box style={{
@@ -1376,10 +1376,10 @@ function ProductRevealSection() {
               textAlign: 'center',
             }}>
               <Text style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 600, color: '#71717a', marginBottom: '4px' }}>
-                4년의 시행착오를
+                시행착오
               </Text>
-              <Text style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 900, color: '#18181b', lineHeight: 1.1 }}>
-                건너뜁니다
+              <Text style={{ fontSize: 'clamp(36px, 9vw, 44px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
+                4<span style={{ fontSize: '0.55em' }}>년 단축</span>
               </Text>
             </Box>
           </Box>
