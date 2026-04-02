@@ -1371,12 +1371,11 @@ function ProductRevealSection() {
               매달 줄일 수 있는 시간
             </Text>
             <Text style={{
-              ...mono,
               fontSize: 'clamp(36px, 9vw, 48px)',
               fontWeight: 900, color: '#ffffff',
               lineHeight: 1.1,
             }}>
-              80시간+
+              <span style={mono}>80</span>시간+
             </Text>
             <Text style={{
               fontSize: 'clamp(13px, 3.2vw, 15px)',
