@@ -1157,7 +1157,7 @@ function ProductRevealSection() {
       tag: 'AI',
       num: '01',
       title: 'AI 스크립트 프로그램',
-      desc: '소재 하나 넣으면 훅 3개, 본문, 완성 스크립트까지. 3분이면 끝.',
+      desc: '대본 쓰는 데 1~2시간? 소재 하나 넣으면 3분이면 초안이 나옵니다.',
       features: ['FlowSpot', '4개월 이용권'],
       src: '/images/product-ai-script.gif',
       accent: '#8b5cf6',
@@ -1167,7 +1167,7 @@ function ProductRevealSection() {
       tag: '데이터',
       num: '02',
       title: '월간 채널 추천 리스트',
-      desc: '지금 뜨는 쇼츠 채널 현재 430개+. 매달 업데이트됩니다.',
+      desc: '뭘 만들지 고민하는 시간을 줄여줍니다. 지금 뜨는 채널 430개+, 매달 업데이트.',
       features: ['구독자 수', '평균 조회수', '중위값', '분류', '제작 형식'],
       src: '/images/product-channel-list.gif',
       accent: '#22c55e',
@@ -1176,7 +1176,7 @@ function ProductRevealSection() {
       tag: '전 과정',
       num: '03',
       title: 'VOD 강의 32강',
-      desc: '전자책이 전체 그림이라면, VOD는 하나하나를 깊이 파고듭니다.',
+      desc: '4년간 직접 부딪히며 알게 된 기획·제작·편집 노하우를 32강에 전부 담았습니다.',
       features: ['채널 설계', '소재 발굴', '스크립트 공식', '소스', '편집 마스터', '쇼핑 수익화'],
       src: '/images/product-vod.gif',
       accent: '#f59e0b',
@@ -1185,7 +1185,7 @@ function ProductRevealSection() {
       tag: '기본기',
       num: '04',
       title: '전자책',
-      desc: '133p. 채널 기획부터 수익화까지 기본기를 먼저 잡고, 강의를 시작합니다.',
+      desc: '133p. 유튜브·블로그 돌아다니며 배울 기본기, 이 한 권에 다 있습니다.',
       features: ['채널 기획', '주제 선정', '후킹', '소스', '편집', '수익화'],
       src: '/images/product-ebook.gif',
       accent: '#8b5cf6',
@@ -1194,7 +1194,7 @@ function ProductRevealSection() {
       tag: '시스템',
       num: '05',
       title: '노션 운영 템플릿',
-      desc: '영상 관리부터 편집자 협업까지. 혼자 해도, 팀으로 해도 바로 씁니다.',
+      desc: '개인 운영부터 편집자 협업까지. 직접 만들어 쓰고 있는 시스템 그대로 드립니다.',
       features: ['스크립트 검토', '음성 파일', '편집 체크', '업로드 일정'],
       src: '/images/product-notion.gif',
       accent: '#3b82f6',
@@ -1219,16 +1219,9 @@ function ProductRevealSection() {
               fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 900,
               color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.3,
             }}>
-              원리를 체득하고
-              <br />즉시 실행하는 구조입니다.
+              시간이 오래 걸리는 구간을
+              <br />하나씩 줄여주는 구조를 알려드릴게요.
             </Title>
-            <Text ta="center" style={{
-              fontSize: 'clamp(16px, 4vw, 19px)',
-              fontWeight: 600, color: '#71717a',
-              marginTop: '8px',
-            }}>
-              쇼츠 수익화 최단거리 패스를 소개합니다.
-            </Text>
           </Stack>
         </motion.div>
 
