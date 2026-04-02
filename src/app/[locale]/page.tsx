@@ -1376,10 +1376,10 @@ function ProductRevealSection() {
               textAlign: 'center',
             }}>
               <Text style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 600, color: '#71717a', marginBottom: '4px' }}>
-                4년의 시행착오를
+                독학하면 4년
               </Text>
-              <Text style={{ fontSize: 'clamp(28px, 7vw, 36px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
-                건너뜁니다
+              <Text style={{ fontSize: 'clamp(32px, 8vw, 40px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
+                2주면 끝
               </Text>
             </Box>
           </Box>
