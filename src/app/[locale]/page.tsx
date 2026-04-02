@@ -1295,7 +1295,6 @@ function ProductRevealSection() {
                       marginBottom: '8px',
                     }}>
                       <Text style={{
-                        ...mono,
                         fontSize: 'clamp(14px, 3.5vw, 16px)',
                         fontWeight: 800,
                         color: item.featured ? '#a78bfa' : '#16a34a',
@@ -1316,15 +1315,16 @@ function ProductRevealSection() {
                   {item.achievement && (
                     <Box style={{
                       display: 'inline-block',
-                      background: '#22c55e',
+                      background: '#ecfdf5',
+                      border: '1px solid #6ee7b7',
                       borderRadius: '8px',
                       padding: '6px 12px',
                       marginTop: '10px',
                     }}>
                       <Text style={{
-                        fontSize: 'clamp(13px, 3.2vw, 15px)',
-                        fontWeight: 700,
-                        color: '#ffffff',
+                        fontSize: 'clamp(14px, 3.5vw, 16px)',
+                        fontWeight: 800,
+                        color: '#059669',
                       }}>
                         {item.achievement}
                       </Text>
@@ -1356,15 +1356,16 @@ function ProductRevealSection() {
           <Box style={{
             maxWidth: '480px', margin: '0 auto',
             marginTop: 'clamp(48px, 10vw, 72px)',
-            background: '#ffffff',
+            background: '#18181b',
             borderRadius: '16px',
-            border: '2px solid #8b5cf6',
-            padding: 'clamp(24px, 5vw, 36px)',
+            border: 'none',
+            padding: 'clamp(28px, 6vw, 40px)',
             textAlign: 'center',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
           }}>
             <Text style={{
               fontSize: 'clamp(14px, 3.5vw, 16px)',
-              fontWeight: 600, color: '#52525b',
+              fontWeight: 600, color: 'rgba(255,255,255,0.6)',
               marginBottom: '8px',
             }}>
               매달 줄일 수 있는 시간
@@ -1372,14 +1373,14 @@ function ProductRevealSection() {
             <Text style={{
               ...mono,
               fontSize: 'clamp(36px, 9vw, 48px)',
-              fontWeight: 900, color: '#8b5cf6',
+              fontWeight: 900, color: '#ffffff',
               lineHeight: 1.1,
             }}>
               80시간+
             </Text>
             <Text style={{
               fontSize: 'clamp(13px, 3.2vw, 15px)',
-              fontWeight: 500, color: '#a1a1aa',
+              fontWeight: 600, color: '#a78bfa',
               marginTop: '8px',
             }}>
               대본 30h + 소재 리서치 40h + 운영 관리 10h
