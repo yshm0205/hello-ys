@@ -1200,8 +1200,8 @@ function ProductRevealSection() {
       num: '05',
       title: '노션 운영 템플릿',
       timeSave: '월 10시간 절약',
-      desc: '직접 만들어 쓰고 있는 운영 시스템 그대로 드립니다.',
-      features: ['스크립트 검토', '음성 파일', '편집 체크', '업로드 일정'],
+      desc: '조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.',
+      features: ['개인 운영', '편집자 협업', '제작 프로세스', '업로드 일정'],
       src: '/images/product-notion.gif',
       accent: '#3b82f6',
     },
@@ -1366,8 +1366,8 @@ function ProductRevealSection() {
               <Text style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 600, color: '#71717a', marginBottom: '4px' }}>
                 매달 절약
               </Text>
-              <Text style={{ fontSize: 'clamp(36px, 9vw, 44px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
-                80<span style={{ fontSize: '0.55em' }}>시간+</span>
+              <Text style={{ fontSize: 'clamp(36px, 9vw, 44px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+                80<span style={{ fontSize: '0.5em', fontWeight: 700 }}>시간+</span>
               </Text>
             </Box>
             <Box style={{
@@ -1376,10 +1376,10 @@ function ProductRevealSection() {
               textAlign: 'center',
             }}>
               <Text style={{ fontSize: 'clamp(13px, 3vw, 15px)', fontWeight: 600, color: '#71717a', marginBottom: '4px' }}>
-                시행착오
+                4년의 시행착오를
               </Text>
-              <Text style={{ fontSize: 'clamp(36px, 9vw, 44px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
-                4<span style={{ fontSize: '0.55em' }}>년 단축</span>
+              <Text style={{ fontSize: 'clamp(28px, 7vw, 36px)', fontWeight: 900, color: '#8b5cf6', lineHeight: 1.1 }}>
+                건너뜁니다
               </Text>
             </Box>
           </Box>
