@@ -1899,28 +1899,25 @@ function PackageSection() {
             </Text>
             <Stack gap={0}>
               {[
-                { item: '강의 32강 (기획→촬영→수익화)', value: '₩590,000' },
-                { item: 'AI 스크립트 도구 4개월', value: '₩400,000' },
-                { item: '채널 분석 피드백', value: '₩100,000' },
-                { item: '보너스: 터진 영상 템플릿', value: '₩100,000' },
+                { item: '강의 32강 (기획→촬영→수익화)' },
+                { item: 'AI 스크립트 도구 4개월' },
+                { item: '채널 분석 피드백' },
+                { item: '보너스: 터진 영상 템플릿' },
               ].map((row, i) => (
-                <Group key={i} justify="space-between" wrap="nowrap" style={{
+                <Group key={i} gap={8} wrap="nowrap" style={{
                   padding: '12px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
                 }}>
+                  <Text style={{ color: '#8b5cf6', fontSize: '16px', flexShrink: 0 }}>✓</Text>
                   <Text style={{ color: '#3f3f46', fontSize: 'clamp(15px, 3vw, 16px)', lineHeight: 1.3 }}>{row.item}</Text>
-                  <Text fw={600} style={{ color: '#52525b', fontSize: 'clamp(15px, 3vw, 16px)', ...mono, flexShrink: 0, marginLeft: '8px' }}>{row.value}</Text>
                 </Group>
               ))}
             </Stack>
             <Divider my="xl" color="#d4d4d8" />
-            <Stack align="center" gap={4}>
-              <Text fw={600} style={{ color: '#71717a', fontSize: 'clamp(15px, 3vw, 16px)', textDecoration: 'line-through', ...mono }}>
-                총 ₩1,190,000
+            <Stack align="center" gap={2}>
+              <Text style={{ fontSize: 'clamp(14px, 3vw, 15px)', color: '#71717a', textDecoration: 'line-through', ...mono }}>
+                ₩599,000
               </Text>
-              <Group gap={12} align="center">
-                <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#18181b', ...mono }}>₩499,000</Text>
-                <Badge color="red" size="md" style={{ fontSize: '13px' }}>58%</Badge>
-              </Group>
+              <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#8b5cf6', ...mono }}>₩499,000</Text>
             </Stack>
           </Paper>
         </motion.div>
@@ -1950,7 +1947,7 @@ function FAQSection() {
     { q: '이것만 구매하면 바로 성공하나요?', a: '솔직히 말씀드리면, 노력 없이 큰 결과를 기대하시는 분에게는 추천드리지 않습니다. 이 과정은 4년 걸릴 길을 최단거리로 바꿔드릴 뿐, 그 길은 직접 걸으셔야 합니다. 빠르게 실행할 의지가 있는 분이라면 충분히 결과를 만들 수 있습니다.' },
     { q: '어떤 사람에게 맞나요?', a: '쇼츠를 처음 시작하는 분, 올리고 있는데 조회수가 안 나오는 분, 혼자 하다 지치신 분 모두를 고려해서 설계했습니다. 다만 컴퓨터 사용이 미숙하거나 편집을 한 번도 해보지 않으신 분은 기본 세팅과 프로그램까지 함께 익히셔야 하므로 시간이 조금 더 걸릴 수 있습니다.' },
     { q: '올인원 4개월 끝나면 어떻게 되나요?', a: '4개월 후에도 월 ₩39,900 Pro 구독으로 AI 스크립트와 채널 리스트를 계속 이용할 수 있습니다. 강의와 전자책은 4개월 내에 충분히 완주할 수 있는 분량입니다.' },
-    { q: '환불 되나요?', a: '이러닝 표준약관을 따릅니다. 결제 후 7일 이내, 강의를 1강도 수강하지 않은 경우 전액 환불됩니다. 수강을 시작한 경우 (1강 단가 × 수강 강의 수 + 위약금 10%)를 공제 후 환불됩니다.' },
+    { q: '환불 되나요?', a: '이러닝 표준약관을 따릅니다. 결제 후 7일 이내, 강의를 1강도 수강하지 않은 경우 전액 환불됩니다. 수강을 시작한 경우 (1강 단가 × 수강 강의 수 + 위약금 10%)를 공제 후 환불됩니다. 이용기한(4개월) 경과 후에는 환불이 불가합니다.' },
   ];
 
   return (
