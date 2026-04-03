@@ -1397,11 +1397,10 @@ function WhySpecialSection() {
   const isMobile = useIsMobile();
 
   const comparisonRows = [
-    { label: '가격', left: '99~160만원', right: '49.9만원' },
-    { label: '수강 기간', left: '100일 (기수제)', right: '4개월 자유 수강' },
-    { label: '커리큘럼', left: '편집하는 모습만 보여줌', right: '기획→수익화 전 과정 32강' },
-    { label: 'AI 영상 제작', left: '안 다룸', right: 'AI 이미지·영상 프롬프트+워크플로우' },
-    { label: '대본', left: '직접 작성 (1~2시간)', right: 'AI 스크립트 3분 완성' },
+    { label: '가격', left: '99~160만원', right: '₩499,000' },
+    { label: '주제 선정', left: '정해진 주제로 수강생끼리 경쟁', right: '지속가능한 내 채널 주제를 직접 찾는 법' },
+    { label: '커리큘럼', left: '편집 위주', right: '기획→제작→편집→수익화 전 과정 32강' },
+    { label: 'AI 스크립트', left: '제한적 활용', right: '주제 입력만으로 스크립트 자동 생성' },
     { label: '트렌드 채널', left: '직접 찾아야 함', right: '매월 트렌드 채널 리스트 제공' },
   ];
 
