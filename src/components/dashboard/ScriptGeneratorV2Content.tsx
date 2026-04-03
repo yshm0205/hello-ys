@@ -88,7 +88,6 @@ const NICHE_OPTIONS = [
     { value: 'knowledge', label: '잡학지식', desc: '놀라운 사실, 과학 원리', image: '/images/niches/knowledge.png', enabled: true },
     { value: 'seollem', label: '설렘/썰', desc: '연애·썸·고백 등 감성 스토리', image: '/images/niches/seollem.png', enabled: true },
     { value: 'animal', label: '동물/자연', desc: '신기한 동물, 자연 현상', image: null, enabled: false },
-    { value: 'history', label: '역사/문화', desc: '역사 속 놀라운 이야기', image: null, enabled: false },
 ];
 
 const TONE_OPTIONS = [
