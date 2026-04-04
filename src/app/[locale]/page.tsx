@@ -2011,7 +2011,7 @@ function CTASection() {
               내일도 같은 고민을 하게 됩니다
             </Title>
             <Button
-              component={Link} href="/dashboard" size="xl" radius="xl"
+              component={Link} href="/pricing" size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#8b5cf6', fontSize: '17px', fontWeight: 700,
@@ -2019,14 +2019,11 @@ function CTASection() {
                 boxShadow: '0 2px 12px rgba(139,92,246,0.2)',
               }}
             >
-              무료로 시작하기
+              올인원 패스 시작하기
             </Button>
             <Stack align="center" gap={4}>
               <Text size="sm" style={{ color: '#71717a', fontSize: '15px' }}>
-                30크레딧 무료 · 7일 환불 보장
-              </Text>
-              <Text size="sm" style={{ color: '#71717a', fontSize: '15px' }}>
-                문의: hmys0205hmys@gmail.com
+                7일 환불 보장 · 문의: hmys0205hmys@gmail.com
               </Text>
             </Stack>
           </Stack>
