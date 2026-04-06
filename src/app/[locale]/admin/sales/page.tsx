@@ -55,7 +55,7 @@ export default async function AdminSalesPage({
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">
             {t("description")}
           </p>
@@ -80,7 +80,7 @@ export default async function AdminSalesPage({
                   <th className="px-4 py-3 rounded-r-lg">{t("colStatus")}</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-foreground">
                 {purchases && purchases.length > 0 ? (
                   (purchases as unknown as AdminPurchase[]).map((purchase) => (
                     <tr

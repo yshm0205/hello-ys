@@ -144,7 +144,7 @@ export default async function AdminOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h1>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* MRR */}
@@ -154,7 +154,7 @@ export default async function AdminOverviewPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-foreground">
               ${stats.mrr.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -178,7 +178,7 @@ export default async function AdminOverviewPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activeCount}</div>
+            <div className="text-2xl font-bold text-foreground">{stats.activeCount}</div>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               {Number(stats.subscriberGrowth) >= 0 ? (
                 <TrendingUp className="h-3 w-3 text-green-500" />
@@ -200,7 +200,7 @@ export default async function AdminOverviewPage() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{stats.salesToday}</div>
+            <div className="text-2xl font-bold text-foreground">+{stats.salesToday}</div>
             <p className="text-xs text-muted-foreground">{t("salesChange")}</p>
           </CardContent>
         </Card>
@@ -252,7 +252,7 @@ export default async function AdminOverviewPage() {
                   return (
                     <div key={sub.id as string} className="flex items-center">
                       <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none">
+                        <p className="text-sm font-medium leading-none text-foreground">
                           {userInfo?.email ||
                             (sub.user_id as string).substring(0, 15)}
                         </p>
@@ -263,7 +263,7 @@ export default async function AdminOverviewPage() {
                           {new Date(sub.updated_at as string).toLocaleString()}
                         </p>
                       </div>
-                      <div className="ml-auto font-medium">
+                      <div className="ml-auto font-medium text-foreground">
                         {sub.status === "active"
                           ? `$${plan.priceNumber || 19}`
                           : "$0"}
