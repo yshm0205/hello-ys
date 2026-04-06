@@ -1,15 +1,20 @@
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, CreditCard, TrendingDown } from "lucide-react";
+import {
+  DollarSign,
+  Users,
+  CreditCard,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { AdminChart } from "@/components/admin/AdminChart";
 import { getTranslations } from "next-intl/server";
 import { getPlanByVariantId } from "@/lib/lemon/plans";
 
 async function getAdminStats() {
-  // Admin Client 사용 (RLS 우회)
   const supabase = createAdminClient();
 
-  // 활성 구독자 수와 plan_id 조회
+  // Active subscriptions with plan_id
   const { data: activeSubscriptions } = await supabase
     .from("subscriptions")
     .select("plan_id")
@@ -17,16 +22,14 @@ async function getAdminStats() {
 
   const activeCount = activeSubscriptions?.length || 0;
 
-  // MRR 계산 (plan_id 기반 가격 합산)
+  // MRR calculation
   let mrr = 0;
   activeSubscriptions?.forEach((sub) => {
     const plan = getPlanByVariantId(sub.plan_id);
-    // "$29/month" → 29 추출
-    const priceMatch = plan.price.match(/\$(\d+)/);
-    mrr += priceMatch ? parseInt(priceMatch[1]) : 0;
+    mrr += plan.priceNumber || 0;
   });
 
-  // 오늘 판매량 (최근 24시간 내 생성된 구독)
+  // Sales today (last 24h)
   const twentyFourHoursAgo = new Date(
     Date.now() - 24 * 60 * 60 * 1000
   ).toISOString();
@@ -35,47 +38,108 @@ async function getAdminStats() {
     .select("*", { count: "exact", head: true })
     .gte("created_at", twentyFourHoursAgo);
 
-  // 최근 구독 내역 (최신 5건)
+  // Churn rate (last 30 days)
+  const thirtyDaysAgo = new Date(
+    Date.now() - 30 * 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  // Count subscriptions that existed 30 days ago (created before 30 days ago)
+  const { count: totalAtStart } = await supabase
+    .from("subscriptions")
+    .select("*", { count: "exact", head: true })
+    .lte("created_at", thirtyDaysAgo);
+
+  // Count cancellations in last 30 days
+  const { count: cancelledInPeriod } = await supabase
+    .from("subscriptions")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "canceled")
+    .gte("updated_at", thirtyDaysAgo);
+
+  const churnRate =
+    totalAtStart && totalAtStart > 0
+      ? ((cancelledInPeriod || 0) / totalAtStart) * 100
+      : 0;
+
+  // Previous month MRR for comparison
+  const sixtyDaysAgo = new Date(
+    Date.now() - 60 * 24 * 60 * 60 * 1000
+  ).toISOString();
+  const { count: prevActiveCount } = await supabase
+    .from("subscriptions")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "active")
+    .lte("created_at", thirtyDaysAgo);
+
+  const prevMrr = (prevActiveCount || 0) * 19; // approximate
+  const mrrGrowth =
+    prevMrr > 0 ? (((mrr - prevMrr) / prevMrr) * 100).toFixed(1) : "0";
+  const subscriberGrowth =
+    prevActiveCount && prevActiveCount > 0
+      ? (
+          ((activeCount - prevActiveCount) / prevActiveCount) *
+          100
+        ).toFixed(1)
+      : "0";
+
+  // Monthly chart data (last 6 months)
+  const chartData: { name: string; mrr: number }[] = [];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+    const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+    const { count } = await supabase
+      .from("subscriptions")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "active")
+      .lte("created_at", monthEnd.toISOString());
+
+    chartData.push({
+      name: months[date.getMonth()],
+      mrr: (count || 0) * 19, // approximate per-subscriber
+    });
+  }
+
+  // Recent subscriptions with user info
   const { data: recentSubs } = await supabase
     .from("subscriptions")
     .select(
-      `
-      id,
-      status,
-      updated_at,
-      plan_name,
-      user_id
-    `
+      "id, status, updated_at, plan_name, plan_id, user_id, user:users(email, full_name)"
     )
     .order("updated_at", { ascending: false })
     .limit(5);
 
-  // 월별 성장 데이터
-  // 실제 서비스에서는 월별 MRR 스냅샷을 별도 테이블에 저장하는 것이 좋음
-  // 현재는 이번 달 MRR만 표시
-  const currentMonth = new Date().toLocaleString("en", { month: "short" });
-  const chartData = mrr > 0 ? [{ name: currentMonth, mrr }] : [];
-
   return {
-    activeCount: activeCount || 0,
+    activeCount,
     mrr,
     recentSubs: recentSubs || [],
     salesToday: salesToday || 0,
+    churnRate,
+    mrrGrowth,
+    subscriberGrowth,
     chartData,
   };
 }
 
-interface Subscription {
-  id: string;
-  status: string;
-  updated_at: string;
-  plan_name: string;
-  user_id: string;
-}
-
 export default async function AdminOverviewPage() {
-  const { activeCount, mrr, recentSubs, salesToday, chartData } =
-    await getAdminStats();
+  const stats = await getAdminStats();
   const t = await getTranslations("Admin.overview");
 
   return (
@@ -83,17 +147,29 @@ export default async function AdminOverviewPage() {
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* MRR */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("mrr")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${mrr.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">{t("mrrChange")}</p>
+            <div className="text-2xl font-bold">
+              ${stats.mrr.toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              {Number(stats.mrrGrowth) >= 0 ? (
+                <TrendingUp className="h-3 w-3 text-green-500" />
+              ) : (
+                <TrendingDown className="h-3 w-3 text-red-500" />
+              )}
+              {Number(stats.mrrGrowth) >= 0 ? "+" : ""}
+              {stats.mrrGrowth}% {t("mrrChange")}
+            </p>
           </CardContent>
         </Card>
 
+        {/* Active Subscribers */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -102,13 +178,20 @@ export default async function AdminOverviewPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeCount}</div>
-            <p className="text-xs text-muted-foreground">
-              {t("subscribersChange")}
+            <div className="text-2xl font-bold">{stats.activeCount}</div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              {Number(stats.subscriberGrowth) >= 0 ? (
+                <TrendingUp className="h-3 w-3 text-green-500" />
+              ) : (
+                <TrendingDown className="h-3 w-3 text-red-500" />
+              )}
+              {Number(stats.subscriberGrowth) >= 0 ? "+" : ""}
+              {stats.subscriberGrowth}% {t("subscribersChange")}
             </p>
           </CardContent>
         </Card>
 
+        {/* Sales Today */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -117,11 +200,12 @@ export default async function AdminOverviewPage() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{salesToday}</div>
+            <div className="text-2xl font-bold">+{stats.salesToday}</div>
             <p className="text-xs text-muted-foreground">{t("salesChange")}</p>
           </CardContent>
         </Card>
 
+        {/* Churn Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -130,7 +214,17 @@ export default async function AdminOverviewPage() {
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-zinc-500">-%</div>
+            <div
+              className={`text-2xl font-bold ${
+                stats.churnRate > 5
+                  ? "text-red-500"
+                  : stats.churnRate > 0
+                    ? "text-yellow-500"
+                    : "text-green-500"
+              }`}
+            >
+              {stats.churnRate.toFixed(1)}%
+            </div>
             <p className="text-xs text-muted-foreground">{t("churnChange")}</p>
           </CardContent>
         </Card>
@@ -138,7 +232,7 @@ export default async function AdminOverviewPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-4">
-          <AdminChart data={chartData} />
+          <AdminChart data={stats.chartData} />
         </div>
         <Card className="col-span-3">
           <CardHeader>
@@ -146,25 +240,39 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentSubs?.map((sub: Subscription) => (
-                <div key={sub.id} className="flex items-center">
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {sub.user_id.substring(0, 15)}...
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {sub.plan_name} ({sub.status})
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {new Date(sub.updated_at).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="ml-auto font-medium">
-                    {sub.status === "active" ? "+$19.00" : "$0.00"}
-                  </div>
-                </div>
-              ))}
-              {!recentSubs?.length && (
+              {stats.recentSubs?.map(
+                (sub: Record<string, unknown>) => {
+                  const plan = getPlanByVariantId(sub.plan_id as string);
+                  const userArr = sub.user as
+                    | { email: string; full_name: string | null }[]
+                    | null;
+                  const userInfo = Array.isArray(userArr)
+                    ? userArr[0]
+                    : null;
+                  return (
+                    <div key={sub.id as string} className="flex items-center">
+                      <div className="ml-4 space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {userInfo?.email ||
+                            (sub.user_id as string).substring(0, 15)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {(sub.plan_name as string) || plan.name} ({sub.status as string})
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {new Date(sub.updated_at as string).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="ml-auto font-medium">
+                        {sub.status === "active"
+                          ? `$${plan.priceNumber || 19}`
+                          : "$0"}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+              {!stats.recentSubs?.length && (
                 <p className="text-sm text-muted-foreground">
                   {t("noSubscriptions")}
                 </p>
