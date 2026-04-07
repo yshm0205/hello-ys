@@ -21,13 +21,11 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import {
     Bot,
-    Sparkles,
     FolderOpen,
     Settings,
     LogOut,
     ChevronDown,
     LayoutDashboard,
-    TestTube,
     BarChart3,
     Zap,
     BookOpen,
@@ -41,10 +39,22 @@ interface DashboardLayoutProps {
 
 const navItems = [
     {
-        label: '대시보드',
+        label: '홈',
         href: '/dashboard',
         icon: LayoutDashboard,
-        description: '홈, 통계, 빠른 액션',
+        description: '통계, 빠른 액션',
+    },
+    {
+        label: '스크립트 생성',
+        href: '/dashboard/batch',
+        icon: Zap,
+        description: '소재 → 3스크립트 자동 생성',
+    },
+    {
+        label: '보관함',
+        href: '/dashboard/archive',
+        icon: FolderOpen,
+        description: '이전 스크립트 확인',
     },
     {
         label: '강의실',
@@ -53,40 +63,10 @@ const navItems = [
         description: '단계별 학습 + 실습',
     },
     {
-        label: '스크립트 제작',
-        href: '/dashboard/scripts',
-        icon: Sparkles,
-        description: 'AI로 스크립트 만들기',
-    },
-    {
-        label: '스크립트 V2',
-        href: '/dashboard/scripts-v2',
-        icon: Zap,
-        description: '소재 → 3스크립트 자동 생성',
-    },
-    {
-        label: '보관함',
-        href: '/dashboard/archive',
-        icon: FolderOpen,
-        description: '히스토리 + 영상 연결',
-    },
-    {
-        label: '성과 분석',
-        href: '/dashboard/analytics',
-        icon: TestTube,
-        description: '스타일별 성과 비교',
-    },
-    {
-        label: '채널 리스트',
+        label: 'HOT 리스트',
         href: '/dashboard/hot-list',
         icon: BarChart3,
         description: '이달의 추천 채널',
-    },
-    {
-        label: '설정',
-        href: '/settings',
-        icon: Settings,
-        description: '계정 설정',
     },
 ];
 
@@ -241,7 +221,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                             <Group justify="space-between" align="center">
                                 <Group gap={8}>
                                     <Zap size={16} color="#8b5cf6" />
-                                    <Text size="sm" fw={600} style={{ color: '#111827' }}>
+                                    <Text size="sm" fw={600} className="text-foreground">
                                         {credits} 크레딧
                                     </Text>
                                 </Group>

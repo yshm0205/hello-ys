@@ -29,14 +29,12 @@ import { useDisclosure } from '@mantine/hooks';
 import {
     Sparkles,
     CreditCard,
-    Clock,
     ArrowRight,
     Zap,
-    TestTube,
     Pencil,
     Trash2,
-    Loader2,
     BookOpen,
+    FolderOpen,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -58,14 +56,13 @@ interface ProjectItem {
     archetype: string;
 }
 
-// 아키타입 한글 이름
-const ARCHETYPE_NAMES: Record<string, string> = {
-    'APPEARANCE_VS_REALITY': '겉보기 vs 실제',
-    'EXTREME_METRIC_VARIANT': '극단 수치형',
-    'TOOL_FORCE': '도구 위력형',
-    'PHENOMENON_SITE': '현상 현장형',
-    'HIDDEN_SCENE_DAILY': '숨겨진 장면형',
-    'UNKNOWN': '기타',
+// 니치 한글 이름
+const NICHE_LABELS: Record<string, string> = {
+    'knowledge': '지식',
+    'seollem': '설렘',
+    'animal': '동물',
+    'history': '역사',
+    'place': '여행',
 };
 
 // 전체 VOD 수 (강의실 데이터와 동기화)
@@ -174,7 +171,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                 {/* 헤더 + 크레딧 */}
                 <Group justify="space-between" align="flex-start">
                     <Box>
-                        <Title order={2} style={{ color: '#111827' }}>
+                        <Title order={2} className="text-foreground">
                             안녕하세요, {user?.email?.split('@')[0] || 'User'}님!
                         </Title>
                         <Text c="gray.6" mt={4}>
@@ -222,7 +219,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             </Text>
                             <Button
                                 component={Link}
-                                href="/dashboard/scripts"
+                                href="/dashboard/batch"
                                 variant="white"
                                 color="violet"
                                 radius="lg"
@@ -234,7 +231,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         </Stack>
                     </Card>
 
-                    {/* 성공 요인 분석 */}
+                    {/* 보관함 */}
                     <Card
                         padding="xl"
                         radius="xl"
@@ -245,7 +242,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.borderColor = '#60a5fa';
+                            e.currentTarget.style.borderColor = '#8b5cf6';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.transform = 'translateY(0)';
@@ -254,19 +251,21 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     >
                         <Stack gap="sm">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/images/icons/icon-search.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
-                            <Title order={4}>성공 요인 분석</Title>
-                            <Text size="sm" c="gray.6">
-                                내 채널의 데이터와 스크립트를 분석하여 승리 패턴을 찾습니다
+                            <img src="/images/icons/icon-document.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
+                            <Title order={4} className="text-foreground">보관함</Title>
+                            <Text size="sm" className="text-muted-foreground">
+                                이전에 만든 스크립트를 확인하고 관리하세요
                             </Text>
                             <Button
+                                component={Link}
+                                href="/dashboard/archive"
                                 variant="light"
-                                color="blue"
+                                color="violet"
                                 radius="lg"
                                 mt="sm"
-                                leftSection={<TestTube size={18} />}
+                                leftSection={<FolderOpen size={18} />}
                             >
-                                분석실 이동하기
+                                보관함 열기
                             </Button>
                         </Stack>
                     </Card>
@@ -280,7 +279,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                 <BookOpen size={20} />
                             </ThemeIcon>
                             <Box>
-                                <Text fw={600} style={{ color: '#111827' }}>
+                                <Text fw={600} className="text-foreground">
                                     수강 진도
                                 </Text>
                                 <Text size="sm" c="gray.5">
@@ -321,7 +320,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             </Group>
                             <Box>
                                 <Group gap="xs" align="baseline">
-                                    <Title order={3} style={{ color: '#111827' }}>
+                                    <Title order={3} className="text-foreground">
                                         {creditInfo ? creditInfo.credits : 0}
                                     </Title>
                                     <Text size="sm" c="gray.5">크레딧</Text>
@@ -338,7 +337,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                     <Sparkles size={20} />
                                 </ThemeIcon>
                             </Group>
-                            <Title order={3} style={{ color: '#111827' }}>
+                            <Title order={3} className="text-foreground">
                                 {projects.length}개
                             </Title>
                         </Stack>
@@ -353,7 +352,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                 </ThemeIcon>
                             </Group>
                             <Group gap="sm">
-                                <Title order={3} style={{ color: '#111827' }}>
+                                <Title order={3} className="text-foreground">
                                     {creditInfo?.plan_type === 'free' || !creditInfo ? 'Beta' : creditInfo.plan_type}
                                 </Title>
                                 <Badge color="green" variant="light">활성</Badge>
@@ -395,7 +394,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                         <Table.Th>제목</Table.Th>
                                         <Table.Th>생성일</Table.Th>
                                         <Table.Th>버전</Table.Th>
-                                        <Table.Th>스타일</Table.Th>
+                                        <Table.Th>니치</Table.Th>
                                         <Table.Th style={{ width: 100 }}>액션</Table.Th>
                                     </Table.Tr>
                                 </Table.Thead>
@@ -414,8 +413,8 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                                 </Badge>
                                             </Table.Td>
                                             <Table.Td>
-                                                <Badge variant="outline" color="gray">
-                                                    {ARCHETYPE_NAMES[project.archetype] || project.archetype}
+                                                <Badge variant="light" color="violet" size="sm">
+                                                    {NICHE_LABELS[(project as ProjectItem & { niche?: string }).niche || ''] || '지식'}
                                                 </Badge>
                                             </Table.Td>
                                             <Table.Td>
@@ -452,7 +451,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                 </Text>
                                 <Button
                                     component={Link}
-                                    href="/dashboard/scripts"
+                                    href="/dashboard/batch"
                                     variant="light"
                                     color="violet"
                                     mt="md"
@@ -502,7 +501,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     <Text size="sm" c="gray.7">
                         다음 프로젝트를 삭제하시겠습니까?
                     </Text>
-                    <Text fw={600} size="sm" style={{ color: '#111827' }}>
+                    <Text fw={600} size="sm" className="text-foreground">
                         {deleteTargetTitle}
                     </Text>
                     <Text size="xs" c="red.6">
