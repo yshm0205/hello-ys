@@ -221,7 +221,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                             <Group justify="space-between" align="center">
                                 <Group gap={8}>
                                     <Zap size={16} color="#8b5cf6" />
-                                    <Text size="sm" fw={600} className="text-foreground">
+                                    <Text size="sm" fw={600} style={{ color: 'var(--mantine-color-text)' }}>
                                         {credits} 크레딧
                                     </Text>
                                 </Group>

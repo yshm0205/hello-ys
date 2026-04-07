@@ -91,7 +91,7 @@ function AgentProgressMini({ phase }: { phase: 'analyzing' | 'generating' | 'rev
             <Stack gap="md">
                 <Group justify="center" gap="xs">
                     <Brain size={18} color="#8b5cf6" />
-                    <Text fw={600} size="sm" className="text-foreground">
+                    <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>
                         AI 에이전트 팀이 작업 중입니다
                     </Text>
                 </Group>
@@ -178,7 +178,7 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
                 <Group justify="space-between" wrap="nowrap">
                     <Box style={{ flex: 1, minWidth: 0 }}>
                         <Text size="xs" c="gray.5" mb={2}>소재</Text>
-                        <Text size="sm" fw={500} className="text-foreground" lineClamp={2}>{item.material}</Text>
+                        <Text size="sm" fw={500} style={{ color: 'var(--mantine-color-text)' }} lineClamp={2}>{item.material}</Text>
                     </Box>
                     {item.elapsed && (
                         <Badge variant="light" color="gray" size="sm" leftSection={<Clock size={12} />} style={{ flexShrink: 0 }}>
@@ -210,14 +210,15 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
                                         border: '1px solid rgba(139, 92, 246, 0.1)',
                                     }}>
                                         <Text size="xs" fw={600} c="violet" mb={4}>훅</Text>
-                                        <Text size="sm" fw={500} className="text-foreground" style={{ lineHeight: 1.7 }}>
+                                        <Text size="sm" fw={500} style={{ color: 'var(--mantine-color-text)', lineHeight: 1.7 }}>
                                             {script.hook}
                                         </Text>
                                     </Paper>
 
                                     {/* 전체 스크립트 */}
                                     <Paper p="md" radius="md" withBorder>
-                                        <Text size="sm" className="text-foreground" style={{
+                                        <Text size="sm" style={{
+                                            color: 'var(--mantine-color-text)',
                                             lineHeight: 1.8,
                                             whiteSpace: 'pre-wrap',
                                         }}>
@@ -347,7 +348,7 @@ export function BatchGeneratorContent() {
                 <Box>
                     <Group gap="sm" mb={4}>
                         <Zap size={24} color="#8b5cf6" />
-                        <Title order={2} className="text-foreground">스크립트 생성</Title>
+                        <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>스크립트 생성</Title>
                     </Group>
                     <Text size="sm" c="gray.6">
                         소재를 추가하고 한 번에 생성하세요
@@ -356,7 +357,7 @@ export function BatchGeneratorContent() {
 
                 {/* ──── 니치 선택 ──── */}
                 <Box>
-                    <Text fw={600} size="sm" className="text-muted-foreground" mb="sm">채널 니치</Text>
+                    <Text fw={600} size="sm" c="dimmed" mb="sm">채널 니치</Text>
                     <Box style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
@@ -421,7 +422,7 @@ export function BatchGeneratorContent() {
                                         )}
                                     </Box>
                                     <Box style={{ padding: '10px', textAlign: 'center' }}>
-                                        <Text fw={600} size="sm" className="text-foreground" style={{ opacity: opt.enabled ? 1 : 0.5 }}>
+                                        <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)', opacity: opt.enabled ? 1 : 0.5 }}>
                                             {opt.label}
                                         </Text>
                                         <Text size="xs" c="gray.5" mt={2}>{opt.desc}</Text>
@@ -435,7 +436,7 @@ export function BatchGeneratorContent() {
                 {/* ──── 소재 입력 ──── */}
                 <Card padding="lg" radius="lg" withBorder>
                     <Stack gap="md">
-                        <Text fw={600} size="sm" className="text-muted-foreground">소재 입력</Text>
+                        <Text fw={600} size="sm" c="dimmed">소재 입력</Text>
                         <Textarea
                             placeholder="YouTube Shorts 소재를 입력하세요..."
                             minRows={3}
@@ -477,7 +478,7 @@ export function BatchGeneratorContent() {
                             <Group justify="space-between">
                                 <Group gap="sm">
                                     <ListOrdered size={18} color="#8b5cf6" />
-                                    <Text fw={600} size="sm" className="text-foreground">생성 큐</Text>
+                                    <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>생성 큐</Text>
                                     <Badge variant="light" color="violet" size="sm">{queue.length}건</Badge>
                                     {doneCount > 0 && (
                                         <Badge variant="light" color="green" size="sm">{doneCount} 완료</Badge>
@@ -574,7 +575,7 @@ export function BatchGeneratorContent() {
                                                     )}
 
                                                     {/* 소재 텍스트 */}
-                                                    <Text size="sm" lineClamp={1} className="text-foreground" style={{ flex: 1, minWidth: 0 }}>
+                                                    <Text size="sm" lineClamp={1} style={{ color: 'var(--mantine-color-text)', flex: 1, minWidth: 0 }}>
                                                         {item.material}
                                                     </Text>
                                                 </Group>
@@ -640,7 +641,7 @@ export function BatchGeneratorContent() {
                                 <Check size={24} color="#fff" strokeWidth={3} />
                             </Box>
                             <Stack gap={4} align="center">
-                                <Text fw={700} size="lg" className="text-foreground">
+                                <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
                                     {doneCount}건 생성 완료!
                                 </Text>
                                 <Text size="sm" c="gray.6">
@@ -686,7 +687,7 @@ export function BatchGeneratorContent() {
                                 <ListOrdered size={28} color="#8b5cf6" />
                             </Box>
                             <Stack gap={4} align="center">
-                                <Text fw={600} className="text-foreground">아직 큐가 비어있습니다</Text>
+                                <Text fw={600} style={{ color: 'var(--mantine-color-text)' }}>아직 큐가 비어있습니다</Text>
                                 <Text size="sm" c="gray.5">
                                     위에서 소재를 입력하고 &quot;큐에 추가&quot; 버튼을 눌러주세요
                                 </Text>

@@ -142,13 +142,13 @@ function ScriptViewer({ item, onDelete }: { item: ScriptItem; onDelete: (id: str
         <Stack gap="md">
             {/* 소재 정보 */}
             <Box>
-                <Text size="xs" className="text-muted-foreground" mb={4}>소재</Text>
-                <Text size="sm" fw={500} className="text-foreground" style={{ lineHeight: 1.6 }}>
+                <Text size="xs" c="dimmed" mb={4}>소재</Text>
+                <Text size="sm" fw={500} style={{ color: 'var(--mantine-color-text)', lineHeight: 1.6 }}>
                     {item.inputText}
                 </Text>
                 <Group gap="sm" mt="xs">
                     <Badge variant="light" color="violet" size="sm">{getNicheLabel(item)}</Badge>
-                    <Text size="xs" className="text-muted-foreground">{getRelativeDate(item.createdAt)}</Text>
+                    <Text size="xs" c="dimmed">{getRelativeDate(item.createdAt)}</Text>
                 </Group>
             </Box>
 
@@ -176,14 +176,15 @@ function ScriptViewer({ item, onDelete }: { item: ScriptItem; onDelete: (id: str
                                     border: '1px solid rgba(139, 92, 246, 0.1)',
                                 }}>
                                     <Text size="xs" fw={600} c="violet" mb={4}>훅</Text>
-                                    <Text size="sm" fw={500} className="text-foreground" style={{ lineHeight: 1.7 }}>
+                                    <Text size="sm" fw={500} style={{ color: 'var(--mantine-color-text)', lineHeight: 1.7 }}>
                                         {script.hook_preview}
                                     </Text>
                                 </Paper>
 
                                 {/* 전체 스크립트 */}
                                 <Paper p="md" radius="md" withBorder>
-                                    <Text size="sm" className="text-foreground" style={{
+                                    <Text size="sm" style={{
+                                            color: 'var(--mantine-color-text)',
                                         lineHeight: 1.8,
                                         whiteSpace: 'pre-wrap',
                                     }}>
@@ -194,9 +195,9 @@ function ScriptViewer({ item, onDelete }: { item: ScriptItem; onDelete: (id: str
                                 {/* 하단: 자수 + 액션 */}
                                 <Group justify="space-between">
                                     <Group gap="sm">
-                                        <Text size="xs" className="text-muted-foreground" style={mono}>{charCount}자</Text>
-                                        <Text size="xs" className="text-muted-foreground">·</Text>
-                                        <Text size="xs" className="text-muted-foreground" style={mono}>약 {seconds}초</Text>
+                                        <Text size="xs" c="dimmed" style={mono}>{charCount}자</Text>
+                                        <Text size="xs" c="dimmed">·</Text>
+                                        <Text size="xs" c="dimmed" style={mono}>약 {seconds}초</Text>
                                     </Group>
                                     <Group gap="xs">
                                         <CopyButton value={text}>
@@ -327,9 +328,9 @@ export function ArchiveContent() {
                     <Box>
                         <Group gap="sm" mb={4}>
                             <FolderOpen size={24} color="#8b5cf6" />
-                            <Title order={2} className="text-foreground">보관함</Title>
+                            <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>보관함</Title>
                         </Group>
-                        <Text size="sm" className="text-muted-foreground">
+                        <Text size="sm" c="dimmed">
                             생성한 스크립트를 확인하고 관리하세요
                         </Text>
                     </Box>
@@ -365,7 +366,7 @@ export function ArchiveContent() {
                         radius="lg"
                         color="violet"
                     />
-                    <Text size="xs" className="text-muted-foreground" style={mono}>
+                    <Text size="xs" c="dimmed" style={mono}>
                         {filtered.length}개
                     </Text>
                 </Group>
@@ -375,7 +376,7 @@ export function ArchiveContent() {
                     <Card padding="xl" radius="lg" withBorder>
                         <Group justify="center" py="xl" gap="sm">
                             <Loader size="sm" color="violet" />
-                            <Text className="text-muted-foreground">불러오는 중...</Text>
+                            <Text c="dimmed">불러오는 중...</Text>
                         </Group>
                     </Card>
                 )}
@@ -392,10 +393,10 @@ export function ArchiveContent() {
                                 <FolderOpen size={28} color="#8b5cf6" />
                             </Box>
                             <Stack gap={4} align="center">
-                                <Text fw={600} className="text-foreground">
+                                <Text fw={600} style={{ color: 'var(--mantine-color-text)' }}>
                                     {scripts.length === 0 ? '아직 생성한 스크립트가 없습니다' : '검색 결과가 없습니다'}
                                 </Text>
-                                <Text size="sm" className="text-muted-foreground">
+                                <Text size="sm" c="dimmed">
                                     {scripts.length === 0
                                         ? '스크립트를 만들고 자동으로 보관함에 저장됩니다'
                                         : '다른 검색어를 시도해보세요'}
@@ -435,7 +436,7 @@ export function ArchiveContent() {
                             <Stack gap="md">
                                 {groups.map(group => (
                                     <Box key={group.label}>
-                                        <Text size="xs" fw={600} className="text-muted-foreground" mb="xs"
+                                        <Text size="xs" fw={600} c="dimmed" mb="xs"
                                             style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
                                         >
                                             {group.label}
@@ -464,7 +465,7 @@ export function ArchiveContent() {
                                                             transition: 'all 0.15s ease',
                                                         }}
                                                     >
-                                                        <Text size="sm" fw={500} lineClamp={1} className="text-foreground" mb={4}>
+                                                        <Text size="sm" fw={500} lineClamp={1} style={{ color: 'var(--mantine-color-text)' }} mb={4}>
                                                             {item.title}
                                                         </Text>
                                                         <Group gap="sm" wrap="nowrap">
@@ -475,11 +476,11 @@ export function ArchiveContent() {
                                                             >
                                                                 {getNicheLabel(item)}
                                                             </Badge>
-                                                            <Text size="xs" className="text-muted-foreground">
+                                                            <Text size="xs" c="dimmed">
                                                                 {getRelativeDate(item.createdAt)}
                                                             </Text>
                                                             {charCount > 0 && (
-                                                                <Text size="xs" className="text-muted-foreground" style={mono}>
+                                                                <Text size="xs" c="dimmed" style={mono}>
                                                                     {charCount}자
                                                                 </Text>
                                                             )}
@@ -507,7 +508,7 @@ export function ArchiveContent() {
                             ) : (
                                 <Stack align="center" gap="md" py="xl">
                                     <FolderOpen size={40} color="#d1d5db" />
-                                    <Text className="text-muted-foreground">
+                                    <Text c="dimmed">
                                         왼쪽에서 스크립트를 선택하세요
                                     </Text>
                                 </Stack>

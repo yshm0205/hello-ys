@@ -171,7 +171,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                 {/* 헤더 + 크레딧 */}
                 <Group justify="space-between" align="flex-start">
                     <Box>
-                        <Title order={2} className="text-foreground">
+                        <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                             안녕하세요, {user?.email?.split('@')[0] || 'User'}님!
                         </Title>
                         <Text c="gray.6" mt={4}>
@@ -252,8 +252,8 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         <Stack gap="sm">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src="/images/icons/icon-document.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
-                            <Title order={4} className="text-foreground">보관함</Title>
-                            <Text size="sm" className="text-muted-foreground">
+                            <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>보관함</Title>
+                            <Text size="sm" c="dimmed">
                                 이전에 만든 스크립트를 확인하고 관리하세요
                             </Text>
                             <Button
@@ -279,7 +279,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                 <BookOpen size={20} />
                             </ThemeIcon>
                             <Box>
-                                <Text fw={600} className="text-foreground">
+                                <Text fw={600} style={{ color: 'var(--mantine-color-text)' }}>
                                     수강 진도
                                 </Text>
                                 <Text size="sm" c="gray.5">
@@ -320,7 +320,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             </Group>
                             <Box>
                                 <Group gap="xs" align="baseline">
-                                    <Title order={3} className="text-foreground">
+                                    <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
                                         {creditInfo ? creditInfo.credits : 0}
                                     </Title>
                                     <Text size="sm" c="gray.5">크레딧</Text>
@@ -337,7 +337,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                     <Sparkles size={20} />
                                 </ThemeIcon>
                             </Group>
-                            <Title order={3} className="text-foreground">
+                            <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
                                 {projects.length}개
                             </Title>
                         </Stack>
@@ -352,7 +352,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                 </ThemeIcon>
                             </Group>
                             <Group gap="sm">
-                                <Title order={3} className="text-foreground">
+                                <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
                                     {creditInfo?.plan_type === 'free' || !creditInfo ? 'Beta' : creditInfo.plan_type}
                                 </Title>
                                 <Badge color="green" variant="light">활성</Badge>
@@ -501,7 +501,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                     <Text size="sm" c="gray.7">
                         다음 프로젝트를 삭제하시겠습니까?
                     </Text>
-                    <Text fw={600} size="sm" className="text-foreground">
+                    <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>
                         {deleteTargetTitle}
                     </Text>
                     <Text size="xs" c="red.6">

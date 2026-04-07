@@ -88,9 +88,9 @@ export function CreditsContent({ userId }: CreditsContentProps) {
                 <Box>
                     <Group gap="sm" mb="xs">
                         <Coins size={28} color="#8b5cf6" />
-                        <Title order={2} className="text-foreground">크레딧 충전</Title>
+                        <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>크레딧 충전</Title>
                     </Group>
-                    <Text className="text-muted-foreground">크레딧을 충전하고 스크립트를 만들어보세요</Text>
+                    <Text c="dimmed">크레딧을 충전하고 스크립트를 만들어보세요</Text>
                 </Box>
 
                 {/* 현재 상태 */}
@@ -119,7 +119,7 @@ export function CreditsContent({ userId }: CreditsContentProps) {
                                 <Text size="sm" c="gray.6">현재 플랜</Text>
                                 <Crown size={20} color="#8b5cf6" />
                             </Group>
-                            <Title order={2} className="text-foreground">{planLabel}</Title>
+                            <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>{planLabel}</Title>
                             <Group gap="sm">
                                 <Badge variant="light" color="violet">{planType === 'free' ? '무료' : '활성'}</Badge>
                                 {creditInfo?.expires_at && (
@@ -136,7 +136,7 @@ export function CreditsContent({ userId }: CreditsContentProps) {
                 <Box>
                     <Group gap="sm" mb="xs">
                         <Zap size={22} color="#8b5cf6" />
-                        <Title order={3} className="text-foreground">추가 크레딧 팩</Title>
+                        <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>추가 크레딧 팩</Title>
                     </Group>
                     <Text size="sm" c="gray.5" mb="lg">만료 없음 · 구매 즉시 충전 · 모든 사용자 이용 가능</Text>
 
@@ -160,7 +160,7 @@ export function CreditsContent({ userId }: CreditsContentProps) {
                                     <Box>
                                         <Group gap="xs">
                                             <Zap size={18} color="#8b5cf6" />
-                                            <Text fw={700} size="lg" className="text-foreground">
+                                            <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
                                                 {pack.cr.toLocaleString()} 크레딧
                                             </Text>
                                         </Group>
@@ -186,7 +186,7 @@ export function CreditsContent({ userId }: CreditsContentProps) {
 
                 {/* 소모량 안내 */}
                 <Card padding="xl" radius="xl" withBorder>
-                    <Title order={4} mb="md" className="text-foreground">크레딧 사용 안내</Title>
+                    <Title order={4} mb="md" style={{ color: 'var(--mantine-color-text)' }}>크레딧 사용 안내</Title>
                     <Table>
                         <Table.Thead>
                             <Table.Tr>
