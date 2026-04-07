@@ -349,7 +349,7 @@ export function BatchGeneratorContent() {
                         <Zap size={24} color="#8b5cf6" />
                         <Title order={2} className="text-foreground">스크립트 생성</Title>
                     </Group>
-                    <Text size="sm" className="text-muted-foreground">
+                    <Text size="sm" c="gray.6">
                         소재를 추가하고 한 번에 생성하세요
                     </Text>
                 </Box>

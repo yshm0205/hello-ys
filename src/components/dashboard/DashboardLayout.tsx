@@ -101,7 +101,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
             padding="lg"
             styles={{
                 main: {
-                    background: '#F9FAFB',
+                    background: 'var(--mantine-color-body)',
                     minHeight: '100vh',
                     overflowX: 'auto',
                     maxWidth: '100vw',
@@ -111,8 +111,8 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
             {/* 헤더 */}
             <AppShell.Header
                 style={{
-                    background: '#FFFFFF',
-                    borderBottom: '1px solid #E5E7EB',
+                    background: 'var(--mantine-color-body)',
+                    borderBottom: '1px solid var(--mantine-color-default-border)',
                 }}
             >
                 <Group h="100%" px="md" justify="space-between">
@@ -171,8 +171,8 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
             <AppShell.Navbar
                 p="md"
                 style={{
-                    background: '#FFFFFF',
-                    borderRight: '1px solid #E5E7EB',
+                    background: 'var(--mantine-color-body)',
+                    borderRight: '1px solid var(--mantine-color-default-border)',
                 }}
             >
                 <Stack gap="xs">
