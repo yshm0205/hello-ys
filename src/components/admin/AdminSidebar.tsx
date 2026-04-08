@@ -20,7 +20,6 @@ import {
   X,
   ArrowLeft,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -157,8 +156,8 @@ export function AdminSidebar() {
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive(item.href)
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                      : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                      ? "bg-zinc-900 text-white bg-zinc-900 text-white"
+                      : "text-zinc-600 hover:bg-zinc-100"
                   } ${collapsed ? "justify-center" : ""}`}
                   title={collapsed ? t(item.labelKey) : undefined}
                 >
@@ -175,7 +174,7 @@ export function AdminSidebar() {
       <div className="border-t p-3 space-y-2">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors ${
+          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-zinc-500 hover:bg-zinc-100 transition-colors ${
             collapsed ? "justify-center" : ""
           }`}
           title={collapsed ? t("backToDashboard") : undefined}
@@ -183,9 +182,6 @@ export function AdminSidebar() {
           <ArrowLeft className="h-4 w-4" />
           {!collapsed && <span>{t("backToDashboard")}</span>}
         </Link>
-        <div className={`flex ${collapsed ? "justify-center" : "px-3"}`}>
-          <ThemeToggle />
-        </div>
       </div>
     </div>
   );
@@ -214,7 +210,7 @@ export function AdminSidebar() {
       <aside
         className={`
           fixed md:sticky top-0 left-0 z-50 md:z-auto
-          h-screen bg-white dark:bg-zinc-950 border-r
+          h-screen bg-white border-r
           transition-all duration-200
           ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
           ${collapsed ? "w-16" : "w-60"}
