@@ -77,7 +77,7 @@ export default async function CustomerDetailPage({
           <ArrowLeft className="h-4 w-4" />
           {t("title")}
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {t("detailTitle")}
         </h1>
       </div>
@@ -98,7 +98,7 @@ export default async function CustomerDetailPage({
                 />
               )}
               <div>
-                <p className="font-medium">
+                <p className="font-medium text-foreground">
                   {user.full_name || user.email}
                 </p>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -107,7 +107,7 @@ export default async function CustomerDetailPage({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">{t("joinedAt")}</p>
-                <p className="font-medium">
+                <p className="font-medium text-foreground">
                   -
                 </p>
               </div>
@@ -136,11 +136,11 @@ export default async function CustomerDetailPage({
               </div>
               <div>
                 <p className="text-muted-foreground">크레딧 잔액</p>
-                <p className="font-medium">{userPlan?.credits ?? 0}cr</p>
+                <p className="font-medium text-foreground">{userPlan?.credits ?? 0}cr</p>
               </div>
               <div>
                 <p className="text-muted-foreground">만료일</p>
-                <p className="font-medium">
+                <p className="font-medium text-foreground">
                   {userPlan?.expires_at
                     ? new Date(userPlan.expires_at).toLocaleDateString("ko-KR")
                     : "-"}
@@ -173,13 +173,13 @@ export default async function CustomerDetailPage({
                     className="flex items-center justify-between border-b pb-3 last:border-0"
                   >
                     <div>
-                      <p className="text-sm font-medium">{p.order_name}</p>
+                      <p className="text-sm font-medium text-foreground">{p.order_name}</p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(p.created_at).toLocaleString("ko-KR")}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium text-foreground">
                         {p.amount.toLocaleString("ko-KR")}원 (+{p.credits}cr)
                       </p>
                       <Badge

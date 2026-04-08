@@ -24,7 +24,17 @@ interface Material {
   sort_order: number;
 }
 
-export function AddMaterialButton() {
+interface AddMaterialButtonProps {
+  defaultVodId?: string;
+  triggerLabel?: string;
+  triggerVariant?: "default" | "outline" | "ghost" | "secondary";
+}
+
+export function AddMaterialButton({
+  defaultVodId,
+  triggerLabel = "?먮즺 異붽?",
+  triggerVariant = "outline",
+}: AddMaterialButtonProps = {}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -59,7 +69,7 @@ export function AddMaterialButton() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant={triggerVariant} size="sm" aria-label={triggerLabel}>
           <Plus className="h-4 w-4 mr-2" />
           자료 추가
         </Button>
@@ -72,7 +82,15 @@ export function AddMaterialButton() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="vod_id">VOD ID *</Label>
-              <Input id="vod_id" name="vod_id" placeholder="vod_01" required />
+              <Input
+                id="vod_id"
+                name="vod_id"
+                placeholder="vod_01"
+                defaultValue={defaultVodId || ""}
+                readOnly={!!defaultVodId}
+                required
+                className={defaultVodId ? "bg-muted" : undefined}
+              />
             </div>
             <div>
               <Label htmlFor="type">타입 *</Label>

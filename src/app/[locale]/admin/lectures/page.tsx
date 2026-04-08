@@ -12,7 +12,7 @@ import {
   EditMaterialButton,
   DeleteMaterialButton,
 } from "@/components/admin/MaterialForm";
-import { FileText, Image, Music, FolderOpen, Video, Clock } from "lucide-react";
+import { FileText, Image as ImageIcon, Music, FolderOpen, Video, Clock } from "lucide-react";
 
 interface Lecture {
   id: string;
@@ -38,7 +38,7 @@ interface Material {
 
 const typeIcons: Record<string, React.ReactNode> = {
   docs: <FileText className="h-4 w-4 text-blue-500" />,
-  image: <Image className="h-4 w-4 text-green-500" />,
+  image: <ImageIcon className="h-4 w-4 text-green-500" />,
   audio: <Music className="h-4 w-4 text-purple-500" />,
   folder: <FolderOpen className="h-4 w-4 text-yellow-500" />,
 };
@@ -155,6 +155,10 @@ export default async function AdminLecturesPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <AddMaterialButton
+                        defaultVodId={vodId}
+                        triggerVariant="ghost"
+                      />
                       <EditLectureButton lecture={lec} />
                       <DeleteLectureButton lectureId={lec.id} />
                     </div>
@@ -194,7 +198,7 @@ export default async function AdminLecturesPage() {
 
                   {/* 자료 없으면 추가 버튼만 */}
                   {vodMaterials.length === 0 && (
-                    <div className="mt-2 pl-11">
+                    <div className="mt-3 pl-11 flex items-center gap-3">
                       <span className="text-xs text-zinc-400">첨부 자료 없음</span>
                     </div>
                   )}

@@ -46,18 +46,19 @@ import {
     ExternalLink,
 } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
-import { CHAPTERS } from './LecturesContent';
 import { VideoWatermark } from './VideoWatermark';
+import type { LectureCatalogChapter } from '@/lib/lectures/types';
 
 interface LecturePlayerContentProps {
     vodId: string;
     userEmail?: string;
+    chapters?: LectureCatalogChapter[];
 }
 
 // 모든 VOD를 순서대로 펼친 배열 생성
-function getAllVods() {
+function getAllVods(chapters: LectureCatalogChapter[]) {
     const allVods: { id: string; title: string; duration: number; chapterTitle: string; chapterId: string; vdoCipherId?: string }[] = [];
-    for (const ch of CHAPTERS) {
+    for (const ch of chapters) {
         for (const vod of ch.vods) {
             allVods.push({
                 ...vod,
@@ -89,11 +90,11 @@ declare global {
     }
 }
 
-export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentProps) {
+export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlayerContentProps) {
+    const lectureChapters = useMemo(() => chapters?.length ? chapters : [], [chapters]);
     const router = useRouter();
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [positions, setPositions] = useState<Record<string, number>>({});
-    const [isLoading, setIsLoading] = useState(true);
     const [isMarking, setIsMarking] = useState(false);
     const [showList, setShowList] = useState(true);
     const [videoOtp, setVideoOtp] = useState<string | null>(null);
@@ -114,7 +115,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
     const autoCompletedRef = useRef(false);
     const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const allVods = useMemo(() => getAllVods(), []);
+    const allVods = useMemo(() => getAllVods(lectureChapters), [lectureChapters]);
     const currentIndex = allVods.findIndex((v) => v.id === vodId);
     const currentVod = currentIndex >= 0 ? allVods[currentIndex] : null;
     const prevVod = currentIndex > 0 ? allVods[currentIndex - 1] : null;
@@ -206,8 +207,6 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                 }
             } catch {
                 // 에러 시 빈 배열 유지
-            } finally {
-                setIsLoading(false);
             }
         }
         fetchProgress();
@@ -359,7 +358,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
     };
 
     // 현재 챕터에서 실습 CTA가 있는지 확인
-    const currentChapter = CHAPTERS.find((ch) => ch.id === currentVod?.chapterId);
+    const currentChapter = lectureChapters.find((ch) => ch.id === currentVod?.chapterId);
     const hasPracticeCta = currentChapter?.hasPracticeCta || false;
 
     if (!currentVod) {
@@ -714,7 +713,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
 
                         <ScrollArea h={520} type="auto">
                             <Stack gap={0}>
-                                {CHAPTERS.map((chapter) => {
+                                {lectureChapters.map((chapter) => {
                                     const chapterCompleted = chapter.vods.filter((v) =>
                                         completedVods.includes(v.id)
                                     ).length;

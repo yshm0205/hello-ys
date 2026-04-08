@@ -30,6 +30,7 @@ import {
     ArrowRight,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import type { LectureCatalogChapter } from '@/lib/lectures/types';
 
 // ─── 강의 데이터 ───────────────────────────────────────────
 interface Vod {
@@ -120,10 +121,15 @@ const CHAPTERS: Chapter[] = [
 const TOTAL_VODS = CHAPTERS.reduce((sum, ch) => sum + ch.vods.length, 0);
 
 // ─── 컴포넌트 ───────────────────────────────────────────
-export function LecturesContent() {
+interface LecturesContentProps {
+    chapters?: LectureCatalogChapter[];
+}
+
+export function LecturesContent({ chapters }: LecturesContentProps) {
+    const lectureChapters = chapters?.length ? chapters : CHAPTERS;
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({
-        ch0: true,
+        [lectureChapters[0]?.id || 'ch0']: true,
     });
     const [isLoading, setIsLoading] = useState(true);
 
@@ -150,7 +156,8 @@ export function LecturesContent() {
     };
 
     const completedCount = completedVods.length;
-    const progressPercent = TOTAL_VODS > 0 ? Math.round((completedCount / TOTAL_VODS) * 100) : 0;
+    const totalVods = lectureChapters.reduce((sum, ch) => sum + ch.vods.length, 0);
+    const progressPercent = totalVods > 0 ? Math.round((completedCount / totalVods) * 100) : 0;
 
     if (isLoading) {
         return (
@@ -187,7 +194,7 @@ export function LecturesContent() {
                             color="violet"
                             style={{ padding: '8px 16px' }}
                         >
-                            {completedCount}/{TOTAL_VODS}강 완료
+                            {completedCount}/{totalVods}강 완료
                         </Badge>
                     </Group>
 
@@ -212,7 +219,7 @@ export function LecturesContent() {
 
                 {/* 챕터별 아코디언 */}
                 <Stack gap="md">
-                    {CHAPTERS.map((chapter) => {
+                    {lectureChapters.map((chapter) => {
                         const chapterCompleted = chapter.vods.filter((v) =>
                             completedVods.includes(v.id)
                         ).length;
@@ -258,7 +265,7 @@ export function LecturesContent() {
                                     {/* VOD 목록 */}
                                     <Collapse in={isOpen}>
                                         <Stack gap={0}>
-                                            {chapter.vods.map((vod, idx) => {
+                                            {chapter.vods.map((vod) => {
                                                 const isDone = completedVods.includes(vod.id);
                                                 const isReady = !!vod.vdoCipherId;
                                                 const rowContent = (
