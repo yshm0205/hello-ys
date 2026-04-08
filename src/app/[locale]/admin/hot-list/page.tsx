@@ -82,10 +82,22 @@ interface DailyDateSummary {
   count: number;
 }
 
+async function getAvailableMonths() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("hot_channels")
+    .select("month")
+    .neq("month", "")
+    .order("month", { ascending: false });
+
+  return [...new Set((data || []).map((r) => r.month))];
+}
+
 async function getHotChannels(filters?: {
   q?: string;
   page?: number;
   pageSize?: number;
+  month?: string;
 }) {
   const supabase = createAdminClient();
   const page = filters?.page || 1;
@@ -97,6 +109,13 @@ async function getHotChannels(filters?: {
     .from("hot_channels")
     .select("*", { count: "exact" })
     .order("avg_view_count", { ascending: false });
+
+  // 월별 필터 (기본: month가 설정된 채널만)
+  if (filters?.month) {
+    query = query.eq("month", filters.month);
+  } else {
+    query = query.neq("month", "").not("month", "is", null);
+  }
 
   if (filters?.q) {
     query = query.or(
@@ -191,8 +210,8 @@ function formatNumber(value: number | null | undefined) {
 }
 
 function buildQueryString(
-  current: { q?: string; page?: string; date?: string },
-  next: Partial<{ q?: string; page?: string; date?: string }>
+  current: { q?: string; page?: string; date?: string; month?: string },
+  next: Partial<{ q?: string; page?: string; date?: string; month?: string }>
 ) {
   const params = new URLSearchParams();
   const merged = { ...current, ...next };
@@ -200,6 +219,7 @@ function buildQueryString(
   if (merged.q) params.set("q", merged.q);
   if (merged.page) params.set("page", merged.page);
   if (merged.date) params.set("date", merged.date);
+  if (merged.month) params.set("month", merged.month);
 
   return params.toString();
 }
@@ -207,14 +227,17 @@ function buildQueryString(
 export default async function AdminHotListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; date?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; date?: string; month?: string }>;
 }) {
-  const { q, page, date } = await searchParams;
+  const { q, page, date, month } = await searchParams;
   const currentPage = parseInt(page || "1", 10);
   const t = await getTranslations("Admin.hotList");
 
+  const availableMonths = await getAvailableMonths();
+  const selectedMonth = month && availableMonths.includes(month) ? month : availableMonths[0] || "";
+
   const [hotList, dailyDates] = await Promise.all([
-    getHotChannels({ q, page: currentPage }),
+    getHotChannels({ q, page: currentPage, month: selectedMonth }),
     getDailyDates(),
   ]);
 
@@ -294,17 +317,39 @@ export default async function AdminHotListPage({
       <section className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">채널 캐시</h2>
+            <h2 className="text-xl font-semibold text-foreground">채널 리스트</h2>
             <p className="text-sm text-muted-foreground">
-              수집 대상 채널 기본 정보를 검색하고 수정합니다.
+              홈페이지에 노출되는 월별 채널 리스트를 관리합니다.
             </p>
           </div>
           <AdminSearch placeholder="채널명 또는 채널 ID 검색..." />
         </div>
 
+        <div className="flex flex-wrap gap-2">
+          {availableMonths.map((m) => {
+            const mQuery = buildQueryString(
+              { q, page, date: selectedDate || undefined, month: selectedMonth },
+              { month: m, page: "1" }
+            );
+            return (
+              <a
+                key={m}
+                href={`?${mQuery}`}
+                className={`inline-flex items-center rounded-full border px-3 py-1 text-sm transition-colors ${
+                  m === selectedMonth
+                    ? "border-violet-500 bg-violet-500 text-white"
+                    : "border-border bg-background text-foreground hover:bg-muted"
+                }`}
+              >
+                {m}
+              </a>
+            );
+          })}
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>HOT 채널 목록</CardTitle>
+            <CardTitle>{selectedMonth} 채널 목록</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
