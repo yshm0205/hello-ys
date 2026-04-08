@@ -17,7 +17,7 @@ async function getCustomerDetail(userId: string) {
   // 사용자 정보
   const { data: user } = await supabase
     .from("users")
-    .select("id, email, full_name, avatar_url, created_at")
+    .select("id, email, full_name, avatar_url")
     .eq("id", userId)
     .single();
 
@@ -108,7 +108,7 @@ export default async function CustomerDetailPage({
               <div>
                 <p className="text-muted-foreground">{t("joinedAt")}</p>
                 <p className="font-medium">
-                  {new Date(user.created_at).toLocaleDateString("ko-KR")}
+                  -
                 </p>
               </div>
               <div>

@@ -42,7 +42,7 @@ async function getCustomers(filters?: {
   let query = supabase
     .from("user_plans")
     .select(
-      "user_id, credits, plan_type, expires_at, user:users(id, email, full_name, created_at)",
+      "user_id, credits, plan_type, expires_at, user:users(id, email, full_name)",
       { count: "exact" }
     )
     .order("credits", { ascending: false });
@@ -55,7 +55,7 @@ async function getCustomers(filters?: {
 
   const mapped = (data || []).map((item: Record<string, unknown>) => {
     const userArr = item.user as
-      | { id: string; email: string; full_name: string | null; created_at: string }[]
+      | { id: string; email: string; full_name: string | null }[]
       | null;
     const userInfo = Array.isArray(userArr) ? userArr[0] : null;
     return {
@@ -165,9 +165,7 @@ export default async function AdminCustomersPage({
                   {customer.credits}cr
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
-                  {customer.user?.created_at
-                    ? new Date(customer.user.created_at).toLocaleDateString("ko-KR")
-                    : "-"}
+                  -
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {customer.expires_at
