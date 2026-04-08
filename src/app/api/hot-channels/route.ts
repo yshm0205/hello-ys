@@ -1,7 +1,6 @@
 /**
- * 채널 리스트 공개 API
- * GET /api/hot-channels?month=2026-02 - 월별 채널 목록 조회
- * GET /api/hot-channels/months - 사용 가능한 월 목록
+ * 채널 리스트 공개 API (channel_list 테이블)
+ * GET /api/hot-channels?month=2026-02
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -18,16 +17,13 @@ export async function GET(request: NextRequest) {
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
   const month = request.nextUrl.searchParams.get("month");
 
-  // 사용 가능한 월 목록 조회
+  // 사용 가능한 월 목록
   const { data: monthRows } = await supabase
-    .from("hot_channels")
+    .from("channel_list")
     .select("month")
-    .neq("month", "")
     .order("month", { ascending: false });
 
   const months = [...new Set((monthRows || []).map((r) => r.month))];
-
-  // 월 선택: 파라미터 없으면 최신 월
   const selectedMonth = month && months.includes(month) ? month : months[0] || "";
 
   if (!selectedMonth) {
@@ -35,15 +31,12 @@ export async function GET(request: NextRequest) {
   }
 
   const { data, error } = await supabase
-    .from("hot_channels")
-    .select(
-      "channel_id, title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url, updated_at"
-    )
+    .from("channel_list")
+    .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url")
     .eq("month", selectedMonth)
     .order("avg_view_count", { ascending: false });
 
   if (error) {
-    console.error("hot-channels API error:", error);
     return NextResponse.json({ months, month: selectedMonth, channels: [], total: 0 });
   }
 

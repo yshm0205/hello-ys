@@ -22,11 +22,10 @@ import { AdminSearch } from "@/components/admin/AdminSearch";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { HotListTriggerButton } from "@/components/admin/HotListTriggerButton";
 import {
-  AddHotChannelButton,
-  EditHotChannelButton,
-  DeleteHotChannelButton,
   BulkUploadButton,
-} from "@/components/admin/HotTrendForm";
+  EditChannelListButton,
+  DeleteChannelListButton,
+} from "@/components/admin/ChannelListForm";
 import {
   AddHotListDailyButton,
   DeleteHotListDailyButton,
@@ -86,15 +85,27 @@ interface DailyDateSummary {
 async function getAvailableMonths() {
   const supabase = createAdminClient();
   const { data } = await supabase
-    .from("hot_channels")
+    .from("channel_list")
     .select("month")
-    .neq("month", "")
     .order("month", { ascending: false });
 
   return [...new Set((data || []).map((r) => r.month))];
 }
 
-async function getHotChannels(filters?: {
+interface ChannelListItem {
+  id: string;
+  month: string;
+  title: string;
+  subscriber_count: number;
+  avg_view_count: number;
+  median_views: number;
+  category: string;
+  subcategory: string;
+  format: string;
+  channel_url: string;
+}
+
+async function getChannelList(filters?: {
   q?: string;
   page?: number;
   pageSize?: number;
@@ -107,27 +118,24 @@ async function getHotChannels(filters?: {
   const to = from + pageSize - 1;
 
   let query = supabase
-    .from("hot_channels")
+    .from("channel_list")
     .select("*", { count: "exact" })
     .order("avg_view_count", { ascending: false });
 
-  // 월별 필터 (기본: month가 설정된 채널만)
   if (filters?.month) {
     query = query.eq("month", filters.month);
-  } else {
-    query = query.neq("month", "").not("month", "is", null);
   }
 
   if (filters?.q) {
     query = query.or(
-      `title.ilike.%${filters.q}%,channel_id.ilike.%${filters.q}%`
+      `title.ilike.%${filters.q}%,id.ilike.%${filters.q}%`
     );
   }
 
   const { data, count } = await query.range(from, to);
 
   return {
-    data: ((data as HotChannel[]) || []),
+    data: ((data as ChannelListItem[]) || []),
     totalItems: count || 0,
     totalPages: Math.max(1, Math.ceil((count || 0) / pageSize)),
   };
@@ -238,7 +246,7 @@ export default async function AdminHotListPage({
   const selectedMonth = month && availableMonths.includes(month) ? month : availableMonths[0] || "";
 
   const [hotList, dailyDates] = await Promise.all([
-    getHotChannels({ q, page: currentPage, month: selectedMonth }),
+    getChannelList({ q, page: currentPage, month: selectedMonth }),
     getDailyDates(),
   ]);
 
@@ -262,7 +270,6 @@ export default async function AdminHotListPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <BulkUploadButton />
-          <AddHotChannelButton />
           <HotListTriggerButton />
         </div>
       </div>
@@ -359,7 +366,6 @@ export default async function AdminHotListPage({
                 <TableHeader>
                   <TableRow>
                     <TableHead>채널</TableHead>
-                    <TableHead>월</TableHead>
                     <TableHead>대분류</TableHead>
                     <TableHead className="text-right">구독자</TableHead>
                     <TableHead className="text-right">평균 조회수</TableHead>
@@ -369,32 +375,11 @@ export default async function AdminHotListPage({
                 </TableHeader>
                 <TableBody>
                   {hotList.data.map((ch) => (
-                    <TableRow key={ch.channel_id}>
+                    <TableRow key={ch.id}>
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          {ch.thumbnail_url ? (
-                            <img
-                              src={ch.thumbnail_url}
-                              alt=""
-                              className="h-9 w-9 rounded-full border object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full border bg-muted text-xs text-muted-foreground">
-                              CH
-                            </div>
-                          )}
-                          <div>
-                            <div className="font-medium text-foreground">
-                              {ch.title}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {ch.channel_id}
-                            </div>
-                          </div>
+                        <div className="font-medium text-foreground">
+                          {ch.title}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {ch.month || "-"}
                       </TableCell>
                       <TableCell className="text-sm">
                         {ch.category ? (
@@ -412,18 +397,18 @@ export default async function AdminHotListPage({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <EditHotChannelButton
+                          <EditChannelListButton
                             channel={ch as unknown as Record<string, unknown>}
                           />
-                          <DeleteHotChannelButton channelId={ch.channel_id} />
+                          <DeleteChannelListButton id={ch.id} />
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
                   {!hotList.data.length && (
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
-                        채널 데이터가 없습니다. 기존 JSON 데이터를 일괄 등록해주세요.
+                      <TableCell colSpan={6} className="h-24 text-center">
+                        채널 데이터가 없습니다. 일괄 업로드로 등록해주세요.
                       </TableCell>
                     </TableRow>
                   )}
