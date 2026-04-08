@@ -11,16 +11,29 @@ import {
 import { getTranslations } from "next-intl/server";
 import { Flame, Clock, Database } from "lucide-react";
 import { HotListTriggerButton } from "@/components/admin/HotListTriggerButton";
+import {
+  AddHotTrendButton,
+  EditHotTrendButton,
+  DeleteHotTrendButton,
+} from "@/components/admin/HotTrendForm";
+
+interface HotTrend {
+  id: string;
+  keyword: string;
+  category: string | null;
+  score: number;
+  source: string | null;
+  created_at: string;
+}
 
 async function getHotListData() {
   const supabase = createAdminClient();
 
-  // Try to query hot_trends or similar table
   try {
     const { data, count, error } = await supabase
       .from("hot_trends")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
+      .order("score", { ascending: false })
       .limit(50);
 
     if (error) {
@@ -30,7 +43,7 @@ async function getHotListData() {
     const lastCollected = data?.[0]?.created_at || null;
 
     return {
-      data: data || [],
+      data: (data as HotTrend[]) || [],
       totalItems: count || 0,
       tableExists: true,
       lastCollected,
@@ -51,7 +64,10 @@ export default async function AdminHotListPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
-        <HotListTriggerButton />
+        <div className="flex gap-2">
+          {hotList.tableExists && <AddHotTrendButton />}
+          <HotListTriggerButton />
+        </div>
       </div>
 
       {/* Stats */}
@@ -66,7 +82,7 @@ export default async function AdminHotListPage() {
           <CardContent>
             <div className="text-lg font-bold">
               {hotList.lastCollected
-                ? new Date(hotList.lastCollected).toLocaleString()
+                ? new Date(hotList.lastCollected).toLocaleString("ko-KR")
                 : "-"}
             </div>
           </CardContent>
@@ -107,11 +123,10 @@ export default async function AdminHotListPage() {
               <Flame className="h-12 w-12 text-muted-foreground" />
               <div>
                 <h3 className="text-lg font-semibold">
-                  HOT trends table not found
+                  hot_trends 테이블이 없습니다
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Create the <code>hot_trends</code> table in Supabase to enable
-                  HOT list management.
+                  Supabase에서 아래 SQL을 실행해주세요.
                 </p>
                 <pre className="mt-4 p-4 bg-zinc-100 dark:bg-zinc-900 rounded-md text-xs text-left overflow-x-auto max-w-lg mx-auto">
 {`CREATE TABLE hot_trends (
@@ -141,35 +156,38 @@ export default async function AdminHotListPage() {
                     <TableHead>{t("keyword")}</TableHead>
                     <TableHead>{t("category")}</TableHead>
                     <TableHead className="text-right">{t("score")}</TableHead>
+                    <TableHead>소스</TableHead>
                     <TableHead>{t("date")}</TableHead>
+                    <TableHead className="w-[100px]">관리</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {hotList.data.map(
-                    (item: {
-                      id: string;
-                      keyword: string;
-                      category: string;
-                      score: number;
-                      created_at: string;
-                    }) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">
-                          {item.keyword}
-                        </TableCell>
-                        <TableCell>{item.category || "-"}</TableCell>
-                        <TableCell className="text-right">
-                          {item.score}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {new Date(item.created_at).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )}
+                  {hotList.data.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">
+                        {item.keyword}
+                      </TableCell>
+                      <TableCell>{item.category || "-"}</TableCell>
+                      <TableCell className="text-right">
+                        {item.score}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {item.source || "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(item.created_at).toLocaleDateString("ko-KR")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <EditHotTrendButton trend={item} />
+                          <DeleteHotTrendButton trendId={item.id} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                   {!hotList.data.length && (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
+                      <TableCell colSpan={6} className="h-24 text-center">
                         {t("noData")}
                       </TableCell>
                     </TableRow>

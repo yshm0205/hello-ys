@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import {
   Card,
   CardContent,
@@ -11,15 +11,15 @@ import { getTranslations } from "next-intl/server";
 import { AdminSearch } from "@/components/admin/AdminSearch";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 
-interface AdminPurchase {
+interface TossPayment {
   id: string;
   created_at: string;
-  product_name: string;
-  variant_name?: string;
+  order_name: string;
+  order_id: string;
   amount: number;
-  currency: string;
+  credits: number;
   status: string;
-  users: {
+  user: {
     email: string;
   } | null;
 }
@@ -36,20 +36,28 @@ export default async function AdminSalesPage({
   const to = from + pageSize - 1;
 
   const t = await getTranslations("Admin.sales");
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
-  // Fetch all purchases with user email and count
   let query = supabase
-    .from("purchases")
-    .select("*, users(email)", { count: "exact" })
+    .from("toss_payments")
+    .select("*, user:users(email)", { count: "exact" })
     .order("created_at", { ascending: false });
 
   if (q) {
-    query = query.or(`product_name.ilike.%${q}%,users.email.ilike.%${q}%`);
+    query = query.or(`order_name.ilike.%${q}%,order_id.ilike.%${q}%`);
   }
 
-  const { data: purchases, count } = await query.range(from, to);
+  const { data: payments, count } = await query.range(from, to);
   const totalPages = Math.ceil((count || 0) / pageSize);
+
+  // 통계
+  const { data: allPayments } = await supabase
+    .from("toss_payments")
+    .select("amount, credits");
+
+  const totalRevenue = allPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+  const totalCredits = allPayments?.reduce((sum, p) => sum + p.credits, 0) || 0;
+  const totalCount = allPayments?.length || 0;
 
   return (
     <div className="space-y-6">
@@ -60,7 +68,35 @@ export default async function AdminSalesPage({
             {t("description")}
           </p>
         </div>
-        <AdminSearch placeholder="Search product or email..." />
+        <AdminSearch placeholder="주문명 또는 주문번호 검색..." />
+      </div>
+
+      {/* 통계 카드 */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">총 매출</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalRevenue.toLocaleString("ko-KR")}원</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">총 판매 크레딧</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalCredits.toLocaleString()}cr</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">총 거래 건수</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalCount}건</div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -76,40 +112,41 @@ export default async function AdminSalesPage({
                   <th className="px-4 py-3 rounded-l-lg">{t("colDate")}</th>
                   <th className="px-4 py-3">{t("colCustomer")}</th>
                   <th className="px-4 py-3">{t("colProduct")}</th>
+                  <th className="px-4 py-3">크레딧</th>
                   <th className="px-4 py-3">{t("colAmount")}</th>
                   <th className="px-4 py-3 rounded-r-lg">{t("colStatus")}</th>
                 </tr>
               </thead>
               <tbody className="text-foreground">
-                {purchases && purchases.length > 0 ? (
-                  (purchases as unknown as AdminPurchase[]).map((purchase) => (
+                {payments && payments.length > 0 ? (
+                  (payments as unknown as TossPayment[]).map((payment) => (
                     <tr
-                      key={purchase.id}
+                      key={payment.id}
                       className="bg-white dark:bg-zinc-900 border-b dark:border-zinc-800"
                     >
                       <td className="px-4 py-3">
-                        {new Date(purchase.created_at).toLocaleDateString()}
+                        {new Date(payment.created_at).toLocaleDateString("ko-KR")}
                       </td>
                       <td className="px-4 py-3">
-                        {purchase.users?.email || "Unknown"}
+                        {payment.user?.email || "-"}
                       </td>
                       <td className="px-4 py-3 font-medium">
-                        {purchase.product_name}
-                        {purchase.variant_name && (
-                          <span className="block text-xs text-zinc-500">
-                            {purchase.variant_name}
-                          </span>
-                        )}
+                        {payment.order_name}
+                        <span className="block text-xs text-zinc-500">
+                          {payment.order_id}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
-                        {(purchase.amount / 100).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: purchase.currency || "USD",
-                        })}
+                        +{payment.credits}cr
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="outline" className="capitalize">
-                          {purchase.status}
+                        {payment.amount.toLocaleString("ko-KR")}원
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge
+                          variant={payment.status === "DONE" ? "default" : "secondary"}
+                        >
+                          {payment.status}
                         </Badge>
                       </td>
                     </tr>
@@ -117,10 +154,10 @@ export default async function AdminSalesPage({
                 ) : (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-4 py-8 text-center text-zinc-500"
                     >
-                      No sales found.
+                      결제 내역이 없습니다.
                     </td>
                   </tr>
                 )}

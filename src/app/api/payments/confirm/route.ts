@@ -109,6 +109,17 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // 6. 결제 기록 저장
+        await adminClient.from("toss_payments").insert({
+            user_id: user.id,
+            payment_key: paymentKey,
+            order_id: orderId,
+            order_name: `FlowSpot 크레딧 ${pack.credits}개`,
+            amount,
+            credits: pack.credits,
+            status: tossData.status || "DONE",
+        });
+
         return NextResponse.json({
             success: true,
             credits: updated.credits,

@@ -11,74 +11,53 @@ import {
 } from "@/components/ui/table";
 import { getTranslations } from "next-intl/server";
 
-interface WebhookEvent {
+interface PaymentLog {
   id: string;
-  event_id: string;
-  event_type: string;
-  payload: Record<string, unknown>;
-  status: "pending" | "processed" | "failed";
-  error_message: string | null;
+  payment_key: string;
+  order_id: string;
+  order_name: string;
+  amount: number;
+  credits: number;
+  status: string;
   created_at: string;
+  user: { email: string } | null;
 }
 
-async function getWebhookEvents(): Promise<WebhookEvent[]> {
-  // Admin Client 사용 (RLS 우회)
+async function getPaymentLogs(): Promise<PaymentLog[]> {
   const supabase = createAdminClient();
 
-  const { data: events } = await supabase
-    .from("lemon_webhook_events")
-    .select("*")
+  const { data } = await supabase
+    .from("toss_payments")
+    .select("*, user:users(email)")
     .order("created_at", { ascending: false })
     .limit(50);
 
-  return events || [];
+  return (data as unknown as PaymentLog[]) || [];
 }
 
-function getStatusVariant(
-  status: string
-): "default" | "secondary" | "destructive" {
-  switch (status) {
-    case "processed":
-      return "default";
-    case "failed":
-      return "destructive";
-    default:
-      return "secondary";
-  }
-}
-
-function getEventBadgeColor(eventType: string): string {
-  if (eventType.includes("created")) return "bg-green-100 text-green-800";
-  if (eventType.includes("updated")) return "bg-blue-100 text-blue-800";
-  if (eventType.includes("cancelled") || eventType.includes("failed"))
-    return "bg-red-100 text-red-800";
-  if (eventType.includes("success")) return "bg-emerald-100 text-emerald-800";
-  return "bg-zinc-100 text-zinc-800";
-}
-
-export default async function AdminWebhooksPage() {
-  const events = await getWebhookEvents();
+export default async function AdminPaymentLogsPage() {
+  const logs = await getPaymentLogs();
   const t = await getTranslations("Admin.webhooks");
 
   const stats = {
-    total: events.length,
-    processed: events.filter((e) => e.status === "processed").length,
-    failed: events.filter((e) => e.status === "failed").length,
-    pending: events.filter((e) => e.status === "pending").length,
+    total: logs.length,
+    done: logs.filter((l) => l.status === "DONE").length,
+    totalAmount: logs.reduce((sum, l) => sum + l.amount, 0),
+    totalCredits: logs.reduce((sum, l) => sum + l.credits, 0),
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("description")}</p>
+        <h1 className="text-3xl font-bold tracking-tight">결제 로그</h1>
+        <p className="text-muted-foreground">토스페이먼츠 결제 처리 내역</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("total")}</CardTitle>
+            <CardTitle className="text-sm font-medium">전체 건수</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -86,88 +65,87 @@ export default async function AdminWebhooksPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("processed")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">성공</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {stats.processed}
+              {stats.done}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("failed")}</CardTitle>
+            <CardTitle className="text-sm font-medium">총 금액</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {stats.failed}
+            <div className="text-2xl font-bold">
+              {stats.totalAmount.toLocaleString("ko-KR")}원
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("pending")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">총 크레딧</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {stats.pending}
+            <div className="text-2xl font-bold text-violet-600">
+              {stats.totalCredits.toLocaleString()}cr
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Events Table */}
+      {/* Logs Table */}
       <Card>
         <CardHeader>
-          <CardTitle>{t("recentEvents")}</CardTitle>
+          <CardTitle>최근 결제 로그 (50건)</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("eventType")}</TableHead>
-                <TableHead>{t("status")}</TableHead>
-                <TableHead>{t("eventId")}</TableHead>
-                <TableHead>{t("time")}</TableHead>
-                <TableHead>{t("error")}</TableHead>
+                <TableHead>시간</TableHead>
+                <TableHead>사용자</TableHead>
+                <TableHead>주문</TableHead>
+                <TableHead className="text-right">금액</TableHead>
+                <TableHead className="text-right">크레딧</TableHead>
+                <TableHead>상태</TableHead>
+                <TableHead>결제키</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event) => (
-                <TableRow key={event.id}>
-                  <TableCell>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getEventBadgeColor(
-                        event.event_type
-                      )}`}
-                    >
-                      {event.event_type}
-                    </span>
+              {logs.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                    {new Date(log.created_at).toLocaleString("ko-KR")}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {log.user?.email || "-"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusVariant(event.status)}>
-                      {event.status}
+                    <div className="text-sm font-medium">{log.order_name}</div>
+                    <div className="text-xs text-muted-foreground">{log.order_id}</div>
+                  </TableCell>
+                  <TableCell className="text-right text-sm">
+                    {log.amount.toLocaleString("ko-KR")}원
+                  </TableCell>
+                  <TableCell className="text-right text-sm">
+                    +{log.credits}cr
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={log.status === "DONE" ? "default" : "destructive"}>
+                      {log.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">
-                    {event.event_id.substring(0, 20)}...
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(event.created_at).toLocaleString()}
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate text-sm text-red-600">
-                    {event.error_message || "-"}
+                    {log.payment_key.substring(0, 20)}...
                   </TableCell>
                 </TableRow>
               ))}
-              {events.length === 0 && (
+              {logs.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    {t("noEvents")}
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    결제 로그가 없습니다.
                   </TableCell>
                 </TableRow>
               )}

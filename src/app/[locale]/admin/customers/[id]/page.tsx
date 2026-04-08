@@ -3,45 +3,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, ExternalLink } from "lucide-react";
-import { getPlanByVariantId } from "@/lib/lemon/plans";
+import { ArrowLeft } from "lucide-react";
 
-async function getCustomerDetail(subscriptionId: string) {
+const planLabels: Record<string, string> = {
+  free: "무료",
+  pro: "Pro",
+  allinone: "올인원",
+};
+
+async function getCustomerDetail(userId: string) {
   const supabase = createAdminClient();
 
-  // Get subscription with user info
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select(
-      "*, user:users(id, email, full_name, avatar_url, created_at)"
-    )
-    .eq("id", subscriptionId)
+  // 사용자 정보
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, email, full_name, avatar_url, created_at")
+    .eq("id", userId)
     .single();
 
-  if (!subscription) return null;
+  if (!user) return null;
 
-  const userId = subscription.user_id;
-
-  // Get user's credit info
+  // 크레딧/플랜 정보
   const { data: userPlan } = await supabase
     .from("user_plans")
     .select("credits, plan_type, expires_at")
     .eq("user_id", userId)
     .single();
 
-  // Get user's purchase history
-  const { data: purchases } = await supabase
-    .from("purchases")
+  // 토스 결제 내역
+  const { data: payments } = await supabase
+    .from("toss_payments")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(10);
 
-  return {
-    subscription,
-    userPlan,
-    purchases: purchases || [],
-  };
+  return { user, userPlan, payments: payments || [] };
 }
 
 export default async function CustomerDetailPage({
@@ -63,20 +60,12 @@ export default async function CustomerDetailPage({
           <ArrowLeft className="h-4 w-4" />
           {t("title")}
         </Link>
-        <p className="text-muted-foreground">Customer not found.</p>
+        <p className="text-muted-foreground">사용자를 찾을 수 없습니다.</p>
       </div>
     );
   }
 
-  const { subscription, userPlan, purchases } = detail;
-  const user = subscription.user as {
-    id: string;
-    email: string;
-    full_name: string | null;
-    avatar_url: string | null;
-    created_at: string;
-  };
-  const plan = getPlanByVariantId(subscription.plan_id);
+  const { user, userPlan, payments } = detail;
 
   return (
     <div className="space-y-6">
@@ -94,7 +83,7 @@ export default async function CustomerDetailPage({
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile */}
+        {/* 프로필 */}
         <Card>
           <CardHeader>
             <CardTitle>{t("profile")}</CardTitle>
@@ -119,95 +108,63 @@ export default async function CustomerDetailPage({
               <div>
                 <p className="text-muted-foreground">{t("joinedAt")}</p>
                 <p className="font-medium">
-                  {new Date(user.created_at).toLocaleDateString()}
+                  {new Date(user.created_at).toLocaleDateString("ko-KR")}
                 </p>
               </div>
               <div>
                 <p className="text-muted-foreground">{t("creditBalance")}</p>
                 <p className="font-medium">
-                  {userPlan?.credits ?? 0} credits ({userPlan?.plan_type || "free"})
+                  {userPlan?.credits ?? 0}cr
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Subscription Info */}
+        {/* 플랜 정보 */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              {t("subscriptionInfo")}
-              {subscription.lemon_customer_id && (
-                <a
-                  href={`https://app.lemonsqueezy.com/customers/${subscription.lemon_customer_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-normal text-blue-500 hover:underline flex items-center gap-1"
-                >
-                  LemonSqueezy <ExternalLink className="h-3 w-3" />
-                </a>
-              )}
-            </CardTitle>
+            <CardTitle>플랜 정보</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground">{t("status")}</p>
-                <Badge
-                  variant={
-                    subscription.status === "active" ? "default" : "secondary"
-                  }
-                >
-                  {subscription.status}
+                <p className="text-muted-foreground">플랜</p>
+                <Badge variant={userPlan?.plan_type === "free" ? "secondary" : "default"}>
+                  {planLabels[userPlan?.plan_type || "free"] || userPlan?.plan_type}
                 </Badge>
               </div>
               <div>
-                <p className="text-muted-foreground">{t("currentPlan")}</p>
-                <p className="font-medium">
-                  {subscription.plan_name || plan.name}
-                </p>
+                <p className="text-muted-foreground">크레딧 잔액</p>
+                <p className="font-medium">{userPlan?.credits ?? 0}cr</p>
               </div>
               <div>
-                <p className="text-muted-foreground">{t("startDate")}</p>
+                <p className="text-muted-foreground">만료일</p>
                 <p className="font-medium">
-                  {subscription.created_at
-                    ? new Date(subscription.created_at).toLocaleDateString()
+                  {userPlan?.expires_at
+                    ? new Date(userPlan.expires_at).toLocaleDateString("ko-KR")
                     : "-"}
                 </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">{t("periodEnd")}</p>
-                <p className="font-medium">
-                  {subscription.current_period_end
-                    ? new Date(
-                        subscription.current_period_end
-                      ).toLocaleDateString()
-                    : "-"}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">{t("amount")}</p>
-                <p className="font-medium">{plan.price}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Purchase History */}
+      {/* 결제 내역 */}
       <Card>
         <CardHeader>
-          <CardTitle>{t("creditHistory")}</CardTitle>
+          <CardTitle>결제 내역</CardTitle>
         </CardHeader>
         <CardContent>
-          {purchases.length > 0 ? (
+          {payments.length > 0 ? (
             <div className="space-y-3">
-              {purchases.map(
+              {payments.map(
                 (p: {
                   id: string;
-                  product_name: string;
+                  order_name: string;
                   amount: number;
-                  currency: string;
+                  credits: number;
                   status: string;
                   created_at: string;
                 }) => (
@@ -216,19 +173,17 @@ export default async function CustomerDetailPage({
                     className="flex items-center justify-between border-b pb-3 last:border-0"
                   >
                     <div>
-                      <p className="text-sm font-medium">{p.product_name}</p>
+                      <p className="text-sm font-medium">{p.order_name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(p.created_at).toLocaleString()}
+                        {new Date(p.created_at).toLocaleString("ko-KR")}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">
-                        {(p.amount / 100).toLocaleString()} {p.currency}
+                        {p.amount.toLocaleString("ko-KR")}원 (+{p.credits}cr)
                       </p>
                       <Badge
-                        variant={
-                          p.status === "completed" ? "default" : "secondary"
-                        }
+                        variant={p.status === "DONE" ? "default" : "secondary"}
                         className="text-xs"
                       >
                         {p.status}
@@ -239,7 +194,7 @@ export default async function CustomerDetailPage({
               )}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">{t("noHistory")}</p>
+            <p className="text-sm text-muted-foreground">결제 내역이 없습니다.</p>
           )}
         </CardContent>
       </Card>
