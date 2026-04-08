@@ -43,33 +43,35 @@ async function getCreditUsers(filters?: {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // Get user_plans joined with users
+  // 1. user_plans 조회
   let query = supabase
     .from("user_plans")
-    .select("user_id, credits, plan_type, expires_at, user:users!user_plans_user_id_public_users_fkey(id, email, full_name)", {
-      count: "exact",
-    })
+    .select("user_id, credits, plan_type, expires_at", { count: "exact" })
     .order("credits", { ascending: false });
 
   if (filters?.planType && filters.planType !== "all") {
     query = query.eq("plan_type", filters.planType);
   }
 
-  const { data, count } = await query.range(from, to);
+  const { data: plans, count } = await query.range(from, to);
 
-  // Filter by search query on the client side (email search)
-  // Supabase join returns user as array
-  const mappedData = (data || []).map((item: Record<string, unknown>) => {
-    const userArr = item.user as
-      | { id: string; email: string; full_name: string | null }[]
-      | null;
-    const userInfo = Array.isArray(userArr) ? userArr[0] : null;
+  // 2. users 별도 조회
+  const userIds = (plans || []).map((p: Record<string, unknown>) => p.user_id as string);
+  const { data: users } = userIds.length > 0
+    ? await supabase.from("users").select("id, email, full_name").in("id", userIds)
+    : { data: [] };
+
+  const userMap = new Map((users || []).map((u: Record<string, unknown>) => [u.id as string, u]));
+
+  const mappedData = (plans || []).map((item: Record<string, unknown>) => {
+    const userId = item.user_id as string;
+    const userInfo = userMap.get(userId) as { id: string; email: string; full_name: string | null } | undefined;
     return {
-      user_id: item.user_id as string,
+      user_id: userId,
       credits: item.credits as number,
       plan_type: item.plan_type as string,
       expires_at: item.expires_at as string | null,
-      user: userInfo,
+      user: userInfo || null,
     };
   });
 
