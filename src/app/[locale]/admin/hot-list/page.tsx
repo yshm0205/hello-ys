@@ -25,6 +25,7 @@ import {
   AddHotChannelButton,
   EditHotChannelButton,
   DeleteHotChannelButton,
+  BulkUploadButton,
 } from "@/components/admin/HotTrendForm";
 import {
   AddHotListDailyButton,
@@ -260,6 +261,7 @@ export default async function AdminHotListPage({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <BulkUploadButton />
           <AddHotChannelButton />
           <HotListTriggerButton />
         </div>
