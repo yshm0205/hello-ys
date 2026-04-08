@@ -282,9 +282,9 @@ export function DeleteHotChannelButton({ channelId }: { channelId: string }) {
 }
 
 /**
- * 일괄 업로드 — 엑셀 붙여넣기 또는 CSV/TSV 파일
+ * 일괄 업로드 — 엑셀(.xlsx) 파일, CSV, 또는 붙여넣기
  *
- * 컬럼 순서: 채널명 \t 구독자 \t 평균조회수 \t 중위조회수 \t 대분류 \t 소분류 \t 제작형식 \t 채널URL
+ * 컬럼 순서: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL
  * 첫 줄이 헤더면 자동 스킵
  */
 export function BulkUploadButton() {
@@ -296,15 +296,27 @@ export function BulkUploadButton() {
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  // 월 선택 옵션 생성 (최근 6개월)
+  const monthOptions = (() => {
+    const opts: { value: string; label: string }[] = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const label = `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
+      opts.push({ value: val, label });
+    }
+    return opts;
+  })();
+
   function parseRows(raw: string) {
     const lines = raw.trim().split("\n").filter(Boolean);
     if (!lines.length) return [];
 
-    // 탭 또는 쉼표 구분 자동 감지
     const sep = lines[0].includes("\t") ? "\t" : ",";
     const rows = lines.map((line) => line.split(sep).map((c) => c.trim()));
 
-    // 첫 줄이 헤더인지 판단 (숫자가 아닌 값이 2번째 컬럼에 있으면 헤더)
+    // 첫 줄이 헤더인지 판단
     const first = rows[0];
     if (first && isNaN(Number(first[1]?.replace(/,/g, "")))) {
       rows.shift();
@@ -313,18 +325,34 @@ export function BulkUploadButton() {
     return rows;
   }
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setText((ev.target?.result as string) || "");
-    };
-    reader.readAsText(file);
+
+    const ext = file.name.split(".").pop()?.toLowerCase();
+
+    if (ext === "xlsx" || ext === "xls") {
+      // 엑셀 파일 처리
+      const XLSX = (await import("xlsx")).default;
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows: string[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+      // 탭 구분 텍스트로 변환
+      const tsv = rows.map((r) => r.join("\t")).join("\n");
+      setText(tsv);
+    } else {
+      // CSV/TSV/TXT
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setText((ev.target?.result as string) || "");
+      };
+      reader.readAsText(file);
+    }
   }
 
   async function handleSubmit() {
-    if (!month) return alert("월을 입력해주세요 (예: 2026-04)");
+    if (!month) return alert("월을 선택해주세요");
     const rows = parseRows(text);
     if (!rows.length) return alert("데이터가 없습니다");
 
@@ -334,7 +362,6 @@ export function BulkUploadButton() {
     let fail = 0;
     const errors: string[] = [];
 
-    // 10개씩 batch
     for (let i = 0; i < rows.length; i += 10) {
       const batch = rows.slice(i, i + 10);
       const promises = batch.map(async (cols) => {
@@ -390,21 +417,31 @@ export function BulkUploadButton() {
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="bulk_month">월 *</Label>
-            <Input
-              id="bulk_month"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              placeholder="2026-04"
-            />
+            <Label>월 선택 *</Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {monthOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setMonth(opt.value)}
+                  className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                    month === opt.value
+                      ? "border-violet-500 bg-violet-500 text-white"
+                      : "border-border bg-background text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>
-            <Label>엑셀/CSV 파일 선택</Label>
+            <Label>엑셀(.xlsx) / CSV 파일</Label>
             <Input
               ref={fileRef}
               type="file"
-              accept=".csv,.tsv,.txt"
+              accept=".xlsx,.xls,.csv,.tsv,.txt"
               onChange={handleFile}
               className="mt-1"
             />
@@ -421,7 +458,7 @@ export function BulkUploadButton() {
               id="bulk_text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://www.youtube.com/@제로비ZeroB/shorts\n셀럽뿅감독\t66300\t4759535\t3342953\t연예/팬덤\t그룹별 팬채널\t짜집기 편집\thttps://...`}
+              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://...\n셀럽뿅감독\t66300\t4759535\t3342953\t연예/팬덤\t그룹별 팬채널\t짜집기 편집\thttps://...`}
               rows={8}
               className="font-mono text-xs"
             />
@@ -445,8 +482,8 @@ export function BulkUploadButton() {
             </div>
           )}
 
-          <Button onClick={handleSubmit} disabled={loading || !text} className="w-full">
-            {loading ? "업로드 중..." : "일괄 등록"}
+          <Button onClick={handleSubmit} disabled={loading || !text || !month} className="w-full">
+            {loading ? "업로드 중..." : `${month || "월 선택 후"} 일괄 등록`}
           </Button>
         </div>
       </DialogContent>
