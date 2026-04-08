@@ -125,9 +125,9 @@ export default async function AdminHotListPage({
                   <TableRow key={ch.channel_id as string}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {ch.thumbnail_url && (
+                        {typeof ch.thumbnail_url === "string" && ch.thumbnail_url && (
                           <img
-                            src={ch.thumbnail_url as string}
+                            src={ch.thumbnail_url}
                             alt=""
                             className="w-8 h-8 rounded-full"
                           />
