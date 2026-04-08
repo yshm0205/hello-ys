@@ -79,7 +79,7 @@ async function getAdminStats() {
   // 최근 결제 내역
   const { data: recentPayments } = await supabase
     .from("toss_payments")
-    .select("id, order_name, amount, credits, created_at, user_id, user:users(email)")
+    .select("id, order_name, amount, credits, created_at, user_id, user:users!toss_payments_user_id_public_users_fkey(email)")
     .order("created_at", { ascending: false })
     .limit(5);
 

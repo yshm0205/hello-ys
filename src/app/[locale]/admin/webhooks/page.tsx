@@ -28,7 +28,7 @@ async function getPaymentLogs(): Promise<PaymentLog[]> {
 
   const { data } = await supabase
     .from("toss_payments")
-    .select("*, user:users(email)")
+    .select("*, user:users!toss_payments_user_id_public_users_fkey(email)")
     .order("created_at", { ascending: false })
     .limit(50);
 

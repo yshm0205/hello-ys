@@ -41,7 +41,7 @@ async function getCustomers(filters?: {
   let query = supabase
     .from("user_plans")
     .select(
-      "user_id, credits, plan_type, expires_at, user:users(id, email, full_name)",
+      "user_id, credits, plan_type, expires_at, user:users!user_plans_user_id_public_users_fkey(id, email, full_name)",
       { count: "exact" }
     )
     .order("credits", { ascending: false });

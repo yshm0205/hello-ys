@@ -40,7 +40,7 @@ export default async function AdminSalesPage({
 
   let query = supabase
     .from("toss_payments")
-    .select("*, user:users(email)", { count: "exact" })
+    .select("*, user:users!toss_payments_user_id_public_users_fkey(email)", { count: "exact" })
     .order("created_at", { ascending: false });
 
   if (q) {
