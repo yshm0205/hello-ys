@@ -14,19 +14,7 @@ import {
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-interface HotTrend {
-  id: string;
-  category: string;
-  title: string;
-  channel_name: string | null;
-  video_url: string | null;
-  thumbnail_url: string | null;
-  view_count: number;
-  is_active: boolean;
-  sort_order: number;
-}
-
-export function AddHotTrendButton() {
+export function AddHotChannelButton() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -37,14 +25,13 @@ export function AddHotTrendButton() {
 
     const formData = new FormData(e.currentTarget);
     const body = {
+      channel_id: formData.get("channel_id"),
       title: formData.get("title"),
-      category: formData.get("category") || "",
-      channel_name: formData.get("channel_name") || null,
-      video_url: formData.get("video_url") || null,
       thumbnail_url: formData.get("thumbnail_url") || null,
-      view_count: parseInt(formData.get("view_count") as string) || 0,
-      is_active: formData.get("is_active") === "true",
-      sort_order: parseInt(formData.get("sort_order") as string) || 0,
+      subscriber_count: parseInt(formData.get("subscriber_count") as string) || 0,
+      video_count: parseInt(formData.get("video_count") as string) || 0,
+      total_view_count: parseInt(formData.get("total_view_count") as string) || 0,
+      avg_view_count: parseInt(formData.get("avg_view_count") as string) || 0,
     };
 
     const res = await fetch("/api/admin/hot-trends", {
@@ -65,52 +52,44 @@ export function AddHotTrendButton() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
-          항목 추가
+          채널 추가
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>HOT 트렌드 추가</DialogTitle>
+          <DialogTitle>핫 채널 추가</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title">제목 *</Label>
-            <Input id="title" name="title" required />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="category">카테고리 *</Label>
-              <Input id="category" name="category" placeholder="예: 건강, IT, 재테크..." required />
-            </div>
-            <div>
-              <Label htmlFor="channel_name">채널명</Label>
-              <Input id="channel_name" name="channel_name" />
-            </div>
+            <Label htmlFor="channel_id">채널 ID *</Label>
+            <Input id="channel_id" name="channel_id" placeholder="UC..." required />
           </div>
           <div>
-            <Label htmlFor="video_url">영상 URL</Label>
-            <Input id="video_url" name="video_url" placeholder="https://youtube.com/..." />
+            <Label htmlFor="title">채널명 *</Label>
+            <Input id="title" name="title" required />
           </div>
           <div>
             <Label htmlFor="thumbnail_url">썸네일 URL</Label>
             <Input id="thumbnail_url" name="thumbnail_url" placeholder="https://..." />
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="view_count">조회수</Label>
-              <Input id="view_count" name="view_count" type="number" defaultValue="0" />
+              <Label htmlFor="subscriber_count">구독자 수</Label>
+              <Input id="subscriber_count" name="subscriber_count" type="number" defaultValue="0" />
             </div>
             <div>
-              <Label htmlFor="sort_order">순서</Label>
-              <Input id="sort_order" name="sort_order" type="number" defaultValue="0" />
+              <Label htmlFor="video_count">영상 수</Label>
+              <Input id="video_count" name="video_count" type="number" defaultValue="0" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="avg_view_count">평균 조회수</Label>
+              <Input id="avg_view_count" name="avg_view_count" type="number" defaultValue="0" />
             </div>
             <div>
-              <Label htmlFor="is_active">상태</Label>
-              <select name="is_active" defaultValue="true"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
-                <option value="true">활성</option>
-                <option value="false">비활성</option>
-              </select>
+              <Label htmlFor="total_view_count">총 조회수</Label>
+              <Input id="total_view_count" name="total_view_count" type="number" defaultValue="0" />
             </div>
           </div>
           <Button type="submit" disabled={loading} className="w-full">
@@ -122,7 +101,7 @@ export function AddHotTrendButton() {
   );
 }
 
-export function EditHotTrendButton({ trend }: { trend: HotTrend }) {
+export function EditHotChannelButton({ channel }: { channel: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -133,15 +112,13 @@ export function EditHotTrendButton({ trend }: { trend: HotTrend }) {
 
     const formData = new FormData(e.currentTarget);
     const body = {
-      id: trend.id,
+      channel_id: channel.channel_id,
       title: formData.get("title"),
-      category: formData.get("category") || "",
-      channel_name: formData.get("channel_name") || null,
-      video_url: formData.get("video_url") || null,
       thumbnail_url: formData.get("thumbnail_url") || null,
-      view_count: parseInt(formData.get("view_count") as string) || 0,
-      is_active: formData.get("is_active") === "true",
-      sort_order: parseInt(formData.get("sort_order") as string) || 0,
+      subscriber_count: parseInt(formData.get("subscriber_count") as string) || 0,
+      video_count: parseInt(formData.get("video_count") as string) || 0,
+      total_view_count: parseInt(formData.get("total_view_count") as string) || 0,
+      avg_view_count: parseInt(formData.get("avg_view_count") as string) || 0,
     };
 
     const res = await fetch("/api/admin/hot-trends", {
@@ -166,47 +143,39 @@ export function EditHotTrendButton({ trend }: { trend: HotTrend }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>항목 수정</DialogTitle>
+          <DialogTitle>채널 수정</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title">제목 *</Label>
-            <Input id="title" name="title" defaultValue={trend.title} required />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="category">카테고리</Label>
-              <Input id="category" name="category" defaultValue={trend.category || ""} />
-            </div>
-            <div>
-              <Label htmlFor="channel_name">채널명</Label>
-              <Input id="channel_name" name="channel_name" defaultValue={trend.channel_name || ""} />
-            </div>
+            <Label>채널 ID</Label>
+            <Input value={channel.channel_id as string} disabled />
           </div>
           <div>
-            <Label htmlFor="video_url">영상 URL</Label>
-            <Input id="video_url" name="video_url" defaultValue={trend.video_url || ""} />
+            <Label htmlFor="title">채널명</Label>
+            <Input id="title" name="title" defaultValue={channel.title as string} required />
           </div>
           <div>
             <Label htmlFor="thumbnail_url">썸네일 URL</Label>
-            <Input id="thumbnail_url" name="thumbnail_url" defaultValue={trend.thumbnail_url || ""} />
+            <Input id="thumbnail_url" name="thumbnail_url" defaultValue={(channel.thumbnail_url as string) || ""} />
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="view_count">조회수</Label>
-              <Input id="view_count" name="view_count" type="number" defaultValue={trend.view_count} />
+              <Label htmlFor="subscriber_count">구독자 수</Label>
+              <Input id="subscriber_count" name="subscriber_count" type="number" defaultValue={(channel.subscriber_count as number) || 0} />
             </div>
             <div>
-              <Label htmlFor="sort_order">순서</Label>
-              <Input id="sort_order" name="sort_order" type="number" defaultValue={trend.sort_order} />
+              <Label htmlFor="video_count">영상 수</Label>
+              <Input id="video_count" name="video_count" type="number" defaultValue={(channel.video_count as number) || 0} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="avg_view_count">평균 조회수</Label>
+              <Input id="avg_view_count" name="avg_view_count" type="number" defaultValue={(channel.avg_view_count as number) || 0} />
             </div>
             <div>
-              <Label htmlFor="is_active">상태</Label>
-              <select name="is_active" defaultValue={String(trend.is_active)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
-                <option value="true">활성</option>
-                <option value="false">비활성</option>
-              </select>
+              <Label htmlFor="total_view_count">총 조회수</Label>
+              <Input id="total_view_count" name="total_view_count" type="number" defaultValue={(channel.total_view_count as number) || 0} />
             </div>
           </div>
           <Button type="submit" disabled={loading} className="w-full">
@@ -218,7 +187,7 @@ export function EditHotTrendButton({ trend }: { trend: HotTrend }) {
   );
 }
 
-export function DeleteHotTrendButton({ trendId }: { trendId: string }) {
+export function DeleteHotChannelButton({ channelId }: { channelId: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -226,7 +195,7 @@ export function DeleteHotTrendButton({ trendId }: { trendId: string }) {
     if (!confirm("정말 삭제하시겠습니까?")) return;
     setLoading(true);
 
-    const res = await fetch(`/api/admin/hot-trends?id=${trendId}`, {
+    const res = await fetch(`/api/admin/hot-trends?id=${channelId}`, {
       method: "DELETE",
     });
 

@@ -11,86 +11,62 @@ async function checkAdmin() {
     return user;
 }
 
-// POST: 채널 추가
+// POST: 자료 추가
 export async function POST(request: NextRequest) {
     const admin = await checkAdmin();
     if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await request.json();
-    const { channel_id, title, thumbnail_url, subscriber_count, video_count, total_view_count, avg_view_count } = body;
+    const { vod_id, title, type, url, file_size, sort_order } = body;
 
-    if (!channel_id || !title) {
-        return NextResponse.json({ error: "채널 ID와 채널명은 필수입니다." }, { status: 400 });
+    if (!vod_id || !title || !type || !url) {
+        return NextResponse.json({ error: "vod_id, 제목, 타입, URL은 필수입니다." }, { status: 400 });
     }
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
-        .from("hot_channels")
-        .upsert({
-            channel_id,
-            title,
-            thumbnail_url: thumbnail_url || null,
-            subscriber_count: subscriber_count || 0,
-            video_count: video_count || 0,
-            total_view_count: total_view_count || 0,
-            avg_view_count: avg_view_count || 0,
-            updated_at: new Date().toISOString(),
-        }, { onConflict: "channel_id" })
+        .from("lecture_materials")
+        .insert({ vod_id, title, type, url, file_size: file_size || null, sort_order: sort_order ?? 0 })
         .select()
         .single();
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, data });
 }
 
-// PUT: 채널 수정
+// PUT: 자료 수정
 export async function PUT(request: NextRequest) {
     const admin = await checkAdmin();
     if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await request.json();
-    const { channel_id, ...updates } = body;
-
-    if (!channel_id) {
-        return NextResponse.json({ error: "채널 ID가 필요합니다." }, { status: 400 });
-    }
+    const { id, ...updates } = body;
+    if (!id) return NextResponse.json({ error: "ID가 필요합니다." }, { status: 400 });
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
-        .from("hot_channels")
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq("channel_id", channel_id)
+        .from("lecture_materials")
+        .update(updates)
+        .eq("id", id)
         .select()
         .single();
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, data });
 }
 
-// DELETE: 채널 삭제
+// DELETE: 자료 삭제
 export async function DELETE(request: NextRequest) {
     const admin = await checkAdmin();
     if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-
-    if (!id) {
-        return NextResponse.json({ error: "채널 ID가 필요합니다." }, { status: 400 });
-    }
+    if (!id) return NextResponse.json({ error: "ID가 필요합니다." }, { status: 400 });
 
     const supabase = createAdminClient();
-    const { error } = await supabase.from("hot_channels").delete().eq("channel_id", id);
+    const { error } = await supabase.from("lecture_materials").delete().eq("id", id);
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
 }

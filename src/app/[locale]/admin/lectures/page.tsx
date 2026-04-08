@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/utils/supabase/admin";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -17,6 +18,11 @@ import {
   EditLectureButton,
   DeleteLectureButton,
 } from "@/components/admin/LectureForm";
+import {
+  AddMaterialButton,
+  EditMaterialButton,
+  DeleteMaterialButton,
+} from "@/components/admin/MaterialForm";
 
 interface Lecture {
   id: string;
@@ -31,15 +37,25 @@ interface Lecture {
   created_at: string;
 }
 
+interface Material {
+  id: string;
+  vod_id: string;
+  title: string;
+  type: string;
+  url: string;
+  file_size: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
 async function getLectures(filters?: {
   q?: string;
   status?: string;
   page?: number;
-  pageSize?: number;
 }) {
   const supabase = createAdminClient();
   const page = filters?.page || 1;
-  const pageSize = filters?.pageSize || 20;
+  const pageSize = 20;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -58,16 +74,23 @@ async function getLectures(filters?: {
     query = query.or(`vod_title.ilike.%${filters.q}%,part_title.ilike.%${filters.q}%`);
   }
 
-  const { data, count, error } = await query.range(from, to);
-
-  if (error) {
-    console.error("Lectures query error:", error.message);
-  }
+  const { data, count } = await query.range(from, to);
 
   return {
     data: (data as Lecture[]) || [],
     totalPages: Math.ceil((count || 0) / pageSize),
   };
+}
+
+async function getMaterials() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("lecture_materials")
+    .select("*")
+    .order("vod_id", { ascending: true })
+    .order("sort_order", { ascending: true });
+
+  return (data as Material[]) || [];
 }
 
 export default async function AdminLecturesPage({
@@ -79,7 +102,10 @@ export default async function AdminLecturesPage({
   const currentPage = parseInt(page || "1");
   const t = await getTranslations("Admin.lectures");
 
-  const lectures = await getLectures({ q, status, page: currentPage });
+  const [lectures, materials] = await Promise.all([
+    getLectures({ q, status, page: currentPage }),
+    getMaterials(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -91,6 +117,7 @@ export default async function AdminLecturesPage({
         <AddLectureButton />
       </div>
 
+      {/* 강의 목록 */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <AdminSearch placeholder="강의 제목 검색..." />
         <AdminFilter
@@ -162,10 +189,61 @@ export default async function AdminLecturesPage({
           </TableBody>
         </Table>
       </div>
-      <AdminPagination
-        currentPage={currentPage}
-        totalPages={lectures.totalPages}
-      />
+      <AdminPagination currentPage={currentPage} totalPages={lectures.totalPages} />
+
+      {/* 강의 자료 관리 */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>강의 자료 ({materials.length}개)</CardTitle>
+          <AddMaterialButton />
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-md">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>VOD</TableHead>
+                  <TableHead>제목</TableHead>
+                  <TableHead>타입</TableHead>
+                  <TableHead>크기</TableHead>
+                  <TableHead>URL</TableHead>
+                  <TableHead className="w-[80px]">관리</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {materials.map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="font-medium text-sm">{m.vod_id}</TableCell>
+                    <TableCell className="text-sm">{m.title}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{m.type}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{m.file_size || "-"}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
+                      <a href={m.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        {m.url.slice(0, 40)}...
+                      </a>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <EditMaterialButton material={m} />
+                        <DeleteMaterialButton materialId={m.id} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {!materials.length && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-16 text-center">
+                      자료가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

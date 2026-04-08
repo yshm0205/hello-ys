@@ -8,63 +8,62 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { getTranslations } from "next-intl/server";
-import { Flame, Database, Eye } from "lucide-react";
+import { Flame, Database, Users } from "lucide-react";
+import { AdminSearch } from "@/components/admin/AdminSearch";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 import { HotListTriggerButton } from "@/components/admin/HotListTriggerButton";
 import {
-  AddHotTrendButton,
-  EditHotTrendButton,
-  DeleteHotTrendButton,
+  AddHotChannelButton,
+  EditHotChannelButton,
+  DeleteHotChannelButton,
 } from "@/components/admin/HotTrendForm";
 
-interface HotTrend {
-  id: string;
-  category: string;
-  title: string;
-  channel_name: string | null;
-  video_url: string | null;
-  thumbnail_url: string | null;
-  view_count: number;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-}
-
-async function getHotListData() {
+async function getHotChannels(filters?: { q?: string; page?: number; pageSize?: number }) {
   const supabase = createAdminClient();
+  const page = filters?.page || 1;
+  const pageSize = filters?.pageSize || 20;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  const { data, count, error } = await supabase
-    .from("hot_trends")
+  let query = supabase
+    .from("hot_channels")
     .select("*", { count: "exact" })
-    .order("sort_order", { ascending: true })
-    .limit(50);
+    .order("avg_view_count", { ascending: false });
 
-  if (error) {
-    console.error("hot_trends query error:", error.message);
+  if (filters?.q) {
+    query = query.or(`title.ilike.%${filters.q}%,channel_id.ilike.%${filters.q}%`);
   }
 
+  const { data, count } = await query.range(from, to);
+
   return {
-    data: (data as HotTrend[]) || [],
+    data: data || [],
     totalItems: count || 0,
+    totalPages: Math.ceil((count || 0) / pageSize),
   };
 }
 
-export default async function AdminHotListPage() {
+export default async function AdminHotListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const { q, page } = await searchParams;
+  const currentPage = parseInt(page || "1");
   const t = await getTranslations("Admin.hotList");
-  const hotList = await getHotListData();
 
-  const activeCount = hotList.data.filter((d) => d.is_active).length;
+  const hotList = await getHotChannels({ q, page: currentPage });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("description")}</p>
+          <p className="text-muted-foreground">핫 채널 데이터 관리</p>
         </div>
         <div className="flex gap-2">
-          <AddHotTrendButton />
+          <AddHotChannelButton />
           <HotListTriggerButton />
         </div>
       </div>
@@ -73,79 +72,93 @@ export default async function AdminHotListPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">전체 항목</CardTitle>
+            <CardTitle className="text-sm font-medium">전체 채널</CardTitle>
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{hotList.totalItems}</div>
+            <div className="text-2xl font-bold">{hotList.totalItems.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">활성 항목</CardTitle>
+            <CardTitle className="text-sm font-medium">현재 페이지</CardTitle>
             <Flame className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{activeCount}</div>
+            <div className="text-2xl font-bold">{currentPage} / {hotList.totalPages}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">총 조회수</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">표시 중</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {hotList.data.reduce((sum, d) => sum + d.view_count, 0).toLocaleString()}
-            </div>
+            <div className="text-2xl font-bold">{hotList.data.length}개</div>
           </CardContent>
         </Card>
       </div>
 
+      <AdminSearch placeholder="채널명 또는 채널 ID 검색..." />
+
       {/* Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>{t("collectedData")}</CardTitle>
+          <CardTitle>핫 채널 목록</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="border rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[60px]">순서</TableHead>
-                  <TableHead>제목</TableHead>
-                  <TableHead>카테고리</TableHead>
                   <TableHead>채널</TableHead>
-                  <TableHead className="text-right">조회수</TableHead>
-                  <TableHead>상태</TableHead>
-                  <TableHead className="w-[100px]">관리</TableHead>
+                  <TableHead className="text-right">구독자</TableHead>
+                  <TableHead className="text-right">영상 수</TableHead>
+                  <TableHead className="text-right">평균 조회수</TableHead>
+                  <TableHead className="text-right">총 조회수</TableHead>
+                  <TableHead>갱신일</TableHead>
+                  <TableHead className="w-[80px]">관리</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {hotList.data.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="text-center text-muted-foreground">
-                      {item.sort_order}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {item.title}
-                    </TableCell>
-                    <TableCell>{item.category || "-"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {item.channel_name || "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {item.view_count.toLocaleString()}
-                    </TableCell>
+                {hotList.data.map((ch: Record<string, unknown>) => (
+                  <TableRow key={ch.channel_id as string}>
                     <TableCell>
-                      <Badge variant={item.is_active ? "default" : "secondary"}>
-                        {item.is_active ? "활성" : "비활성"}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {ch.thumbnail_url && (
+                          <img
+                            src={ch.thumbnail_url as string}
+                            alt=""
+                            className="w-8 h-8 rounded-full"
+                          />
+                        )}
+                        <div>
+                          <div className="font-medium text-sm">{ch.title as string}</div>
+                          <div className="text-xs text-muted-foreground">{ch.channel_id as string}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-sm">
+                      {((ch.subscriber_count as number) || 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right text-sm">
+                      {((ch.video_count as number) || 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right text-sm font-medium">
+                      {((ch.avg_view_count as number) || 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right text-sm">
+                      {((ch.total_view_count as number) || 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {ch.updated_at
+                        ? new Date(ch.updated_at as string).toLocaleDateString("ko-KR")
+                        : "-"}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <EditHotTrendButton trend={item} />
-                        <DeleteHotTrendButton trendId={item.id} />
+                        <EditHotChannelButton channel={ch as Record<string, unknown>} />
+                        <DeleteHotChannelButton channelId={ch.channel_id as string} />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -153,7 +166,7 @@ export default async function AdminHotListPage() {
                 {!hotList.data.length && (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center">
-                      {t("noData")}
+                      채널 데이터가 없습니다.
                     </TableCell>
                   </TableRow>
                 )}
@@ -162,6 +175,7 @@ export default async function AdminHotListPage() {
           </div>
         </CardContent>
       </Card>
+      <AdminPagination currentPage={currentPage} totalPages={hotList.totalPages} />
     </div>
   );
 }
