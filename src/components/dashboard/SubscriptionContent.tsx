@@ -86,7 +86,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                 <Box>
                     <Group gap="sm" mb="xs">
                         <Crown size={28} color="#8b5cf6" />
-                        <Title order={2} style={{ color: '#111827' }}>
+                        <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                             플랜 관리
                         </Title>
                     </Group>
@@ -128,7 +128,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                 <Zap size={20} color="#8b5cf6" />
                             </Group>
                             <Group gap="xs" align="baseline">
-                                <Title order={2} style={{ color: '#111827' }}>
+                                <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                                     {creditInfo ? creditInfo.credits : 0}
                                 </Title>
                                 <Text size="sm" c="gray.5">크레딧</Text>
@@ -152,7 +152,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                             <Group gap="md">
                                 <Package size={32} color="#8b5cf6" />
                                 <Box>
-                                    <Title order={4} style={{ color: '#111827' }}>올인원 패스로 시작하기</Title>
+                                    <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>올인원 패스로 시작하기</Title>
                                     <Text size="sm" c="gray.6">
                                         강의 32강 + AI 스크립트 4개월 + 크레딧 3,000개
                                     </Text>
@@ -185,7 +185,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                             <Group gap="md">
                                 <Zap size={32} color="#8b5cf6" />
                                 <Box>
-                                    <Title order={4} style={{ color: '#111827' }}>Pro 구독으로 계속 이용하기</Title>
+                                    <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>Pro 구독으로 계속 이용하기</Title>
                                     <Text size="sm" c="gray.6">
                                         수강생 전용 — 월 500 크레딧 + 모든 기능
                                     </Text>
@@ -209,7 +209,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                     <Box>
                         <Group gap="sm" mb="lg">
                             <Coins size={24} color="#8b5cf6" />
-                            <Title order={4} style={{ color: '#111827' }}>크레딧 추가 구매</Title>
+                            <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>크레딧 추가 구매</Title>
                         </Group>
                         <Text size="xs" c="gray.5" mb={4}>만료 없음 · 구매 즉시 충전</Text>
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
@@ -228,7 +228,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                     <Group justify="space-between">
                                         <Box>
                                             <Group gap="xs">
-                                                <Text fw={600} size="lg" style={{ color: '#111827' }}>{pack.cr.toLocaleString()} 크레딧</Text>
+                                                <Text fw={600} size="lg" style={{ color: 'var(--mantine-color-text)' }}>{pack.cr.toLocaleString()} 크레딧</Text>
                                                 {pack.popular && <Badge size="xs" color="green" variant="light">인기</Badge>}
                                             </Group>
                                             <Text size="xs" c="gray.5">cr당 {pack.per}</Text>

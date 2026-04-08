@@ -419,7 +419,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                             <Badge variant="light" color="violet" size="sm" mb={8}>
                                 {currentVod.chapterTitle}
                             </Badge>
-                            <Title order={3} style={{ color: '#111827' }}>
+                            <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
                                 {currentVod.title}
                             </Title>
                             <Group gap="sm" mt={4}>
@@ -571,7 +571,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                             <Card padding="lg" radius="lg" withBorder>
                                 <Group gap={8} mb="sm">
                                     <Paperclip size={18} color="#8b5cf6" />
-                                    <Text fw={600} size="sm" style={{ color: '#111827' }}>
+                                    <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>
                                         수업 자료
                                     </Text>
                                     <Badge variant="light" color="violet" size="xs">
@@ -599,7 +599,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                                     padding: '8px 12px',
                                                     borderRadius: 8,
                                                     textDecoration: 'none',
-                                                    color: '#374151',
+                                                    color: 'var(--mantine-color-text)',
                                                     background: '#f9fafb',
                                                     border: '1px solid #f3f4f6',
                                                     transition: 'background 0.15s',
@@ -642,7 +642,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                     </Box>
                                     <Button
                                         component={Link}
-                                        href="/dashboard/scripts-v2"
+                                        href="/dashboard/batch"
                                         variant="white"
                                         color="violet"
                                         radius="lg"
@@ -703,7 +703,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                         {/* 패널 헤더 */}
                         <Box p="md" style={{ borderBottom: '1px solid #f3f4f6' }}>
                             <Group justify="space-between">
-                                <Text fw={600} size="sm" style={{ color: '#111827' }}>
+                                <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>
                                     강의 목록
                                 </Text>
                                 <Badge variant="light" color="violet" size="sm">
@@ -739,7 +739,7 @@ export function LecturePlayerContent({ vodId, userEmail }: LecturePlayerContentP
                                                         ) : (
                                                             <ChevronRight size={14} color="#6b7280" />
                                                         )}
-                                                        <Text fw={600} size="xs" style={{ color: '#374151' }}>
+                                                        <Text fw={600} size="xs" style={{ color: 'var(--mantine-color-text)' }}>
                                                             {chapter.title}
                                                         </Text>
                                                     </Group>

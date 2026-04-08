@@ -467,6 +467,22 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
 
     const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
 
+    // 인증 헬퍼
+    const getAuthHeaders = async (): Promise<Record<string, string>> => {
+        try {
+            const { createClient } = await import('@/utils/supabase/client');
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                return {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                };
+            }
+        } catch { /* fallback */ }
+        return { 'Content-Type': 'application/json' };
+    };
+
     // 0단계: 리서치 수행
     const handleResearch = async () => {
         if (!inputScript.trim() || inputScript.length < 10) {
@@ -483,9 +499,10 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
         setSelectedHookIndex(null);
 
         try {
+            const headers = await getAuthHeaders();
             const response = await fetch(`${RENDER_API_URL}/api/research`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     topic: inputScript,
                     user_id: user?.email || 'guest',
@@ -523,13 +540,14 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
         setEditedScript('');
 
         try {
+            const headers = await getAuthHeaders();
             const response = await fetch(`${RENDER_API_URL}/api/generate-hooks`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     reference_script: inputScript,
                     user_id: user?.email || 'guest',
-                    research_result: researchResult?.research_text || null,  // 리서치 결과만 전달
+                    research_result: researchResult?.research_text || null,
                 }),
             });
 
@@ -572,9 +590,10 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
             // 원래 선택한 훅 텍스트 저장 (나중에 화면에 표시용)
             setSelectedHookText(selectedHook.hook_text);
 
+            const headers = await getAuthHeaders();
             const response = await fetch(`${RENDER_API_URL}/api/generate-full-script`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     selected_hook: selectedHook.hook_text,
                     topic: hooksResult.topic,
@@ -681,7 +700,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                     <Box>
                         <Group gap="sm" mb="xs">
                             <Brain size={24} color="#8b5cf6" />
-                            <Title order={2} style={{ color: '#111827', fontSize: '1.5rem' }}>
+                            <Title order={2} style={{ color: 'var(--mantine-color-text)', fontSize: '1.5rem' }}>
                                 스크립트 에디터
                             </Title>
                         </Group>

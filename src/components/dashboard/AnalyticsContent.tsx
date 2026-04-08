@@ -292,7 +292,7 @@ export function AnalyticsContent() {
                     <Box>
                         <Group gap="sm">
                             <TestTube size={28} color="#8b5cf6" />
-                            <Title order={2} style={{ color: '#111827' }}>
+                            <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                                 🧪 성과/트렌드 분석실
                             </Title>
                         </Group>

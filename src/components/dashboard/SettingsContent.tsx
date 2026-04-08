@@ -98,7 +98,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
             <Stack gap="xl">
                 {/* 헤더 */}
                 <Box>
-                    <Title order={2} style={{ color: '#111827' }}>
+                    <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                         설정
                     </Title>
                     <Text c="gray.6" mt={4}>
@@ -128,7 +128,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                             {user?.email?.[0]?.toUpperCase() || 'U'}
                                         </Avatar>
                                         <Box>
-                                            <Title order={4} style={{ color: '#111827' }}>
+                                            <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>
                                                 {user?.email?.split('@')[0] || 'User'}
                                             </Title>
                                             <Text size="sm" c="gray.5">
@@ -280,7 +280,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                             <Zap size={20} color="#8b5cf6" />
                                         </Group>
                                         <Group gap="xs" align="baseline">
-                                            <Title order={2} style={{ color: '#111827' }}>
+                                            <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                                                 {creditInfo ? creditInfo.credits : 0}
                                             </Title>
                                             <Text size="sm" c="gray.5">크레딧</Text>
@@ -304,7 +304,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                         <Group gap="md">
                                             <Package size={32} color="#8b5cf6" />
                                             <Box>
-                                                <Title order={4} style={{ color: '#111827' }}>올인원 패스로 시작하기</Title>
+                                                <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>올인원 패스로 시작하기</Title>
                                                 <Text size="sm" c="gray.6">
                                                     강의 32강 + AI 스크립트 4개월 + 크레딧 3,000개
                                                 </Text>
@@ -334,7 +334,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                 <Box>
                                     <Group gap="sm" mb="lg">
                                         <Coins size={24} color="#8b5cf6" />
-                                        <Title order={4} style={{ color: '#111827' }}>크레딧 추가 구매</Title>
+                                        <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>크레딧 추가 구매</Title>
                                     </Group>
                                     <Text size="xs" c="gray.5" mb={4}>만료 없음 · 구매 즉시 충전</Text>
                                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
@@ -353,7 +353,7 @@ export function SettingsContent({ user, subscription }: SettingsContentProps) {
                                                 <Group justify="space-between">
                                                     <Box>
                                                         <Group gap="xs">
-                                                            <Text fw={600} size="lg" style={{ color: '#111827' }}>{pack.cr.toLocaleString()} 크레딧</Text>
+                                                            <Text fw={600} size="lg" style={{ color: 'var(--mantine-color-text)' }}>{pack.cr.toLocaleString()} 크레딧</Text>
                                                             {pack.popular && <Badge size="xs" color="green" variant="light">인기</Badge>}
                                                         </Group>
                                                         <Text size="xs" c="gray.5">cr당 {pack.per}</Text>

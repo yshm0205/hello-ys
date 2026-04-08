@@ -110,7 +110,7 @@ export function HistoryContent() {
                 {/* 헤더 */}
                 <Group justify="space-between">
                     <Box>
-                        <Title order={2} style={{ color: '#111827' }}>
+                        <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                             📂 내 스크립트 보관함
                         </Title>
                         <Text c="gray.6" mt={4}>
@@ -119,7 +119,7 @@ export function HistoryContent() {
                     </Box>
                     <Button
                         component={Link}
-                        href="/dashboard/scripts"
+                        href="/dashboard/batch"
                         leftSection={<Plus size={18} />}
                         style={{
                             background: '#8b5cf6',

@@ -172,7 +172,7 @@ export function LecturesContent() {
                         <Box>
                             <Group gap="sm" mb={4}>
                                 <BookOpen size={24} color="#8b5cf6" />
-                                <Title order={2} style={{ color: '#111827' }}>
+                                <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
                                     강의실
                                 </Title>
                             </Group>
@@ -234,7 +234,7 @@ export function LecturesContent() {
                                                 ) : (
                                                     <ChevronRight size={20} color="#6b7280" />
                                                 )}
-                                                <Text fw={600} size="md" style={{ color: '#111827' }}>
+                                                <Text fw={600} size="md" style={{ color: 'var(--mantine-color-text)' }}>
                                                     {chapter.title}
                                                 </Text>
                                                 <Badge
@@ -347,7 +347,7 @@ export function LecturesContent() {
                                 {chapter.hasPracticeCta && (
                                     <UnstyledButton
                                         component={Link}
-                                        href="/dashboard/scripts-v2"
+                                        href="/dashboard/batch"
                                         style={{
                                             display: 'block',
                                             width: '100%',

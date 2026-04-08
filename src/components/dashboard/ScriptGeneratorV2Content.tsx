@@ -255,6 +255,22 @@ interface Props {
     user?: { email?: string };
 }
 
+// ============ 인증 헬퍼 ============
+async function getAuthHeaders(): Promise<Record<string, string>> {
+    try {
+        const { createClient } = await import('@/utils/supabase/client');
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
+            };
+        }
+    } catch { /* fallback */ }
+    return { 'Content-Type': 'application/json' };
+}
+
 // ============ 백그라운드 생성 (컴포넌트 수명과 무관) ============
 const RENDER_API_URL_BG = 'https://script-generator-api-civ5.onrender.com';
 
@@ -281,9 +297,10 @@ async function runBackgroundResearch(params: {
     user_id: string;
 }): Promise<ResearchResult | null> {
     try {
+        const headers = await getAuthHeaders();
         const response = await fetch(`${RENDER_API_URL_BG}/api/research`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(params),
         });
 
@@ -309,9 +326,10 @@ async function runBackgroundGeneration(params: {
     tone: string;
 }): Promise<V2Result | null> {
     try {
+        const headers = await getAuthHeaders();
         const response = await fetch(`${RENDER_API_URL_BG}/api/v2/generate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(params),
         });
 
@@ -651,7 +669,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                         <Group gap="sm" mb="xs" justify="space-between">
                             <Group gap="sm">
                                 <Zap size={24} color="#8b5cf6" />
-                                <Title order={2} style={{ color: '#111827', fontSize: '1.5rem' }}>
+                                <Title order={2} style={{ color: 'var(--mantine-color-text)', fontSize: '1.5rem' }}>
                                     스크립트 V2
                                 </Title>
                                 <Badge variant="light" color="violet" size="sm">NEW</Badge>
