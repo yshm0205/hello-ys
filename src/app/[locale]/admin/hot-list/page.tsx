@@ -40,6 +40,12 @@ interface HotChannel {
   video_count: number;
   total_view_count: number;
   avg_view_count: number;
+  median_views: number;
+  category: string;
+  subcategory: string;
+  format: string;
+  channel_url: string;
+  month: string;
   updated_at: string | null;
 }
 
@@ -306,11 +312,11 @@ export default async function AdminHotListPage({
                 <TableHeader>
                   <TableRow>
                     <TableHead>채널</TableHead>
+                    <TableHead>월</TableHead>
+                    <TableHead>대분류</TableHead>
                     <TableHead className="text-right">구독자</TableHead>
-                    <TableHead className="text-right">영상 수</TableHead>
                     <TableHead className="text-right">평균 조회수</TableHead>
-                    <TableHead className="text-right">총 조회수</TableHead>
-                    <TableHead>갱신일</TableHead>
+                    <TableHead className="text-right">중위 조회수</TableHead>
                     <TableHead className="w-[120px]">관리</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -340,22 +346,22 @@ export default async function AdminHotListPage({
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right text-sm">
-                        {formatNumber(ch.subscriber_count)}
+                      <TableCell className="text-sm">
+                        {ch.month || "-"}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {ch.category ? (
+                          <Badge variant="secondary">{ch.category}</Badge>
+                        ) : "-"}
                       </TableCell>
                       <TableCell className="text-right text-sm">
-                        {formatNumber(ch.video_count)}
+                        {formatNumber(ch.subscriber_count)}
                       </TableCell>
                       <TableCell className="text-right text-sm font-medium">
                         {formatNumber(ch.avg_view_count)}
                       </TableCell>
                       <TableCell className="text-right text-sm">
-                        {formatNumber(ch.total_view_count)}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {ch.updated_at
-                          ? new Date(ch.updated_at).toLocaleDateString("ko-KR")
-                          : "-"}
+                        {formatNumber(ch.median_views)}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -370,7 +376,7 @@ export default async function AdminHotListPage({
                   {!hotList.data.length && (
                     <TableRow>
                       <TableCell colSpan={7} className="h-24 text-center">
-                        채널 데이터가 없습니다.
+                        채널 데이터가 없습니다. 기존 JSON 데이터를 일괄 등록해주세요.
                       </TableCell>
                     </TableRow>
                   )}

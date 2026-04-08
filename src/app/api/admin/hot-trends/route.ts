@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await request.json();
-    const { channel_id, title, thumbnail_url, subscriber_count, video_count, total_view_count, avg_view_count } = body;
+    const { channel_id, title, thumbnail_url, subscriber_count, video_count, total_view_count, avg_view_count, median_views, category, subcategory, format, channel_url, month } = body;
 
     if (!channel_id || !title) {
         return NextResponse.json({ error: "채널 ID와 채널명은 필수입니다." }, { status: 400 });
@@ -34,6 +34,12 @@ export async function POST(request: NextRequest) {
             video_count: video_count || 0,
             total_view_count: total_view_count || 0,
             avg_view_count: avg_view_count || 0,
+            median_views: median_views || 0,
+            category: category || "",
+            subcategory: subcategory || "",
+            format: format || "",
+            channel_url: channel_url || "",
+            month: month || "",
             updated_at: new Date().toISOString(),
         }, { onConflict: "channel_id" })
         .select()

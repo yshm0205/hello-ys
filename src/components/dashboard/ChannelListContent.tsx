@@ -55,10 +55,6 @@ interface RangeFilter {
 }
 
 // ── 상수 ──
-const AVAILABLE_MONTHS = [
-    { value: '2026-02', label: '2026년 2월', file: 'channels_2026_02.json' },
-    { value: '2026-01', label: '2026년 1월', file: 'channels_2026_01.json' },
-];
 
 const MAIN_CATEGORIES = ['전체', '지식/정보', '취미/덕질', '연예/팬덤', '일상/공감', '기타'] as const;
 type CategoryFilter = (typeof MAIN_CATEGORIES)[number];
@@ -108,23 +104,29 @@ function hasActiveFilter(f: RangeFilter): boolean {
 
 // ── 컴포넌트 ──
 export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) {
-    const [month, setMonth] = useState(AVAILABLE_MONTHS[0].value);
+    const [months, setMonths] = useState<string[]>([]);
+    const [month, setMonth] = useState('');
     const [data, setData] = useState<ChannelData | null>(null);
     const [loading, setLoading] = useState(true);
     const [sort, setSort] = useState<SortState>({ column: 'avg_views', dir: 'desc' });
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('전체');
     const [filter, setFilter] = useState<RangeFilter>(EMPTY_FILTER);
 
-    // 월별 데이터 fetch
+    // Supabase 데이터 fetch (월별)
     useEffect(() => {
-        const info = AVAILABLE_MONTHS.find((m) => m.value === month);
-        if (!info) return;
-
         setLoading(true);
-        fetch(`/data/${info.file}`)
+        const url = month ? `/api/hot-channels?month=${month}` : '/api/hot-channels';
+        fetch(url)
             .then((r) => r.json())
-            .then((d: ChannelData) => {
-                setData(d);
+            .then((d: { months: string[]; month: string; channels: Channel[]; total: number }) => {
+                setMonths(d.months || []);
+                if (!month && d.month) setMonth(d.month);
+                setData({
+                    month: d.month || '',
+                    updated_at: '',
+                    total: d.total,
+                    channels: d.channels,
+                });
                 setLoading(false);
             })
             .catch(() => setLoading(false));
@@ -216,7 +218,10 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                             <Group gap="sm" wrap="wrap">
                                 {/* 월 선택 */}
                                 <Select
-                                    data={AVAILABLE_MONTHS.map((m) => ({ value: m.value, label: m.label }))}
+                                    data={months.map((m) => {
+                                        const [y, mo] = m.split('-');
+                                        return { value: m, label: `${y}년 ${parseInt(mo)}월` };
+                                    })}
                                     value={month}
                                     onChange={(v) => v && setMonth(v)}
                                     size="xs"
