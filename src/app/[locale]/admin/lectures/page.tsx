@@ -102,7 +102,7 @@ export default async function AdminLecturesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t("title")}</h1>
-          <p className="text-zinc-500 mt-1">
+          <p className="mt-1 text-zinc-500 dark:text-zinc-400">
             {lectures.length}개 VOD · {Math.floor(totalDuration / 60)}시간 {totalDuration % 60}분 · 공개 {publishedCount}개 · 자료 {materials.length}개
           </p>
         </div>
@@ -138,7 +138,7 @@ export default async function AdminLecturesPage() {
                       </div>
                       <div>
                         <div className="font-medium text-zinc-900 dark:text-zinc-100">{lec.vod_title}</div>
-                        <div className="flex items-center gap-2 mt-0.5 text-xs text-zinc-500">
+                        <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                           <Clock className="h-3 w-3" />
                           <span>{lec.duration_minutes}분</span>
                           {lec.video_url ? (
@@ -178,11 +178,11 @@ export default async function AdminLecturesPage() {
                               href={m.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-zinc-700 dark:text-zinc-300 hover:text-violet-600 hover:underline"
+                              className="text-zinc-700 dark:text-zinc-300 hover:text-violet-600 dark:hover:text-violet-300 hover:underline"
                             >
                               {m.title}
                             </a>
-                            <span className="text-zinc-400 text-xs">
+                            <span className="text-xs text-zinc-400 dark:text-zinc-500">
                               {typeLabels[m.type] || m.type}
                               {m.file_size && ` · ${m.file_size}`}
                             </span>
@@ -199,6 +199,7 @@ export default async function AdminLecturesPage() {
                   {/* 자료 없으면 추가 버튼만 */}
                   {vodMaterials.length === 0 && (
                     <div className="mt-3 pl-11 flex items-center gap-3">
+                      <AddMaterialButton defaultVodId={vodId} triggerVariant="outline" />
                       <span className="text-xs text-zinc-400">첨부 자료 없음</span>
                     </div>
                   )}
@@ -211,7 +212,7 @@ export default async function AdminLecturesPage() {
 
       {lectures.length === 0 && (
         <Card>
-          <CardContent className="py-12 text-center text-zinc-500">
+          <CardContent className="py-12 text-center text-zinc-500 dark:text-zinc-400">
             {t("noLectures")}
           </CardContent>
         </Card>

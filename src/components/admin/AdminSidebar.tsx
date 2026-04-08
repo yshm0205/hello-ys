@@ -158,7 +158,7 @@ export function AdminSidebar() {
                   className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive(item.href)
                       ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                      : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                      : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white"
                   } ${collapsed ? "justify-center" : ""}`}
                   title={collapsed ? t(item.labelKey) : undefined}
                 >
@@ -175,7 +175,7 @@ export function AdminSidebar() {
       <div className="border-t p-3 space-y-2">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors ${
+          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors ${
             collapsed ? "justify-center" : ""
           }`}
           title={collapsed ? t("backToDashboard") : undefined}
