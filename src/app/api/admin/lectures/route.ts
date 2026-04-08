@@ -17,22 +17,24 @@ export async function POST(request: NextRequest) {
     if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await request.json();
-    const { title, description, video_url, thumbnail_url, status, order_index } = body;
+    const { part_number, part_title, vod_number, vod_title, duration_minutes, video_url, is_published, sort_order } = body;
 
-    if (!title) {
-        return NextResponse.json({ error: "제목은 필수입니다." }, { status: 400 });
+    if (!vod_title) {
+        return NextResponse.json({ error: "VOD 제목은 필수입니다." }, { status: 400 });
     }
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from("lectures")
         .insert({
-            title,
-            description: description || null,
+            part_number: part_number || 1,
+            part_title: part_title || "",
+            vod_number: vod_number || 1,
+            vod_title,
+            duration_minutes: duration_minutes || 0,
             video_url: video_url || null,
-            thumbnail_url: thumbnail_url || null,
-            status: status || "draft",
-            order_index: order_index ?? 0,
+            is_published: is_published ?? false,
+            sort_order: sort_order ?? 0,
         })
         .select()
         .single();

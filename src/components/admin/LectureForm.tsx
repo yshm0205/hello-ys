@@ -11,24 +11,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Lecture {
   id: string;
-  title: string;
-  description: string | null;
+  part_number: number;
+  part_title: string;
+  vod_number: number;
+  vod_title: string;
+  duration_minutes: number;
   video_url: string | null;
-  thumbnail_url: string | null;
-  status: string;
-  order_index: number;
+  is_published: boolean;
+  sort_order: number;
 }
 
 export function AddLectureButton() {
@@ -42,12 +37,14 @@ export function AddLectureButton() {
 
     const formData = new FormData(e.currentTarget);
     const body = {
-      title: formData.get("title"),
-      description: formData.get("description") || null,
+      part_number: parseInt(formData.get("part_number") as string) || 1,
+      part_title: formData.get("part_title") || "",
+      vod_number: parseInt(formData.get("vod_number") as string) || 1,
+      vod_title: formData.get("vod_title") || "",
+      duration_minutes: parseInt(formData.get("duration_minutes") as string) || 0,
       video_url: formData.get("video_url") || null,
-      thumbnail_url: formData.get("thumbnail_url") || null,
-      status: formData.get("status") || "draft",
-      order_index: parseInt(formData.get("order_index") as string) || 0,
+      is_published: formData.get("is_published") === "true",
+      sort_order: parseInt(formData.get("sort_order") as string) || 0,
     };
 
     const res = await fetch("/api/admin/lectures", {
@@ -76,39 +73,46 @@ export function AddLectureButton() {
           <DialogTitle>새 강의 추가</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="title">제목 *</Label>
-            <Input id="title" name="title" required />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="part_number">파트 번호</Label>
+              <Input id="part_number" name="part_number" type="number" defaultValue="1" required />
+            </div>
+            <div>
+              <Label htmlFor="part_title">파트 제목</Label>
+              <Input id="part_title" name="part_title" required />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="description">설명</Label>
-            <Input id="description" name="description" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="vod_number">VOD 번호</Label>
+              <Input id="vod_number" name="vod_number" type="number" defaultValue="1" required />
+            </div>
+            <div>
+              <Label htmlFor="vod_title">VOD 제목 *</Label>
+              <Input id="vod_title" name="vod_title" required />
+            </div>
           </div>
           <div>
             <Label htmlFor="video_url">영상 URL (VdoCipher 등)</Label>
             <Input id="video_url" name="video_url" placeholder="https://..." />
           </div>
-          <div>
-            <Label htmlFor="thumbnail_url">썸네일 URL</Label>
-            <Input id="thumbnail_url" name="thumbnail_url" placeholder="https://..." />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="status">상태</Label>
-              <Select name="status" defaultValue="draft">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">초안</SelectItem>
-                  <SelectItem value="published">공개</SelectItem>
-                  <SelectItem value="hidden">숨김</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="duration_minutes">길이(분)</Label>
+              <Input id="duration_minutes" name="duration_minutes" type="number" defaultValue="0" />
             </div>
             <div>
-              <Label htmlFor="order_index">순서</Label>
-              <Input id="order_index" name="order_index" type="number" defaultValue="0" />
+              <Label htmlFor="sort_order">순서</Label>
+              <Input id="sort_order" name="sort_order" type="number" defaultValue="0" />
+            </div>
+            <div>
+              <Label htmlFor="is_published">공개 여부</Label>
+              <select name="is_published" defaultValue="false"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+                <option value="false">비공개</option>
+                <option value="true">공개</option>
+              </select>
             </div>
           </div>
           <Button type="submit" disabled={loading} className="w-full">
@@ -132,12 +136,14 @@ export function EditLectureButton({ lecture }: { lecture: Lecture }) {
     const formData = new FormData(e.currentTarget);
     const body = {
       id: lecture.id,
-      title: formData.get("title"),
-      description: formData.get("description") || null,
+      part_number: parseInt(formData.get("part_number") as string) || 1,
+      part_title: formData.get("part_title") || "",
+      vod_number: parseInt(formData.get("vod_number") as string) || 1,
+      vod_title: formData.get("vod_title") || "",
+      duration_minutes: parseInt(formData.get("duration_minutes") as string) || 0,
       video_url: formData.get("video_url") || null,
-      thumbnail_url: formData.get("thumbnail_url") || null,
-      status: formData.get("status"),
-      order_index: parseInt(formData.get("order_index") as string) || 0,
+      is_published: formData.get("is_published") === "true",
+      sort_order: parseInt(formData.get("sort_order") as string) || 0,
     };
 
     const res = await fetch("/api/admin/lectures", {
@@ -165,39 +171,46 @@ export function EditLectureButton({ lecture }: { lecture: Lecture }) {
           <DialogTitle>강의 수정</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="title">제목 *</Label>
-            <Input id="title" name="title" defaultValue={lecture.title} required />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="part_number">파트 번호</Label>
+              <Input id="part_number" name="part_number" type="number" defaultValue={lecture.part_number} required />
+            </div>
+            <div>
+              <Label htmlFor="part_title">파트 제목</Label>
+              <Input id="part_title" name="part_title" defaultValue={lecture.part_title} required />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="description">설명</Label>
-            <Input id="description" name="description" defaultValue={lecture.description || ""} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="vod_number">VOD 번호</Label>
+              <Input id="vod_number" name="vod_number" type="number" defaultValue={lecture.vod_number} required />
+            </div>
+            <div>
+              <Label htmlFor="vod_title">VOD 제목 *</Label>
+              <Input id="vod_title" name="vod_title" defaultValue={lecture.vod_title} required />
+            </div>
           </div>
           <div>
             <Label htmlFor="video_url">영상 URL</Label>
             <Input id="video_url" name="video_url" defaultValue={lecture.video_url || ""} />
           </div>
-          <div>
-            <Label htmlFor="thumbnail_url">썸네일 URL</Label>
-            <Input id="thumbnail_url" name="thumbnail_url" defaultValue={lecture.thumbnail_url || ""} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="status">상태</Label>
-              <Select name="status" defaultValue={lecture.status}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">초안</SelectItem>
-                  <SelectItem value="published">공개</SelectItem>
-                  <SelectItem value="hidden">숨김</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="duration_minutes">길이(분)</Label>
+              <Input id="duration_minutes" name="duration_minutes" type="number" defaultValue={lecture.duration_minutes} />
             </div>
             <div>
-              <Label htmlFor="order_index">순서</Label>
-              <Input id="order_index" name="order_index" type="number" defaultValue={lecture.order_index} />
+              <Label htmlFor="sort_order">순서</Label>
+              <Input id="sort_order" name="sort_order" type="number" defaultValue={lecture.sort_order} />
+            </div>
+            <div>
+              <Label htmlFor="is_published">공개 여부</Label>
+              <select name="is_published" defaultValue={String(lecture.is_published)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+                <option value="false">비공개</option>
+                <option value="true">공개</option>
+              </select>
             </div>
           </div>
           <Button type="submit" disabled={loading} className="w-full">

@@ -17,20 +17,24 @@ export async function POST(request: NextRequest) {
     if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await request.json();
-    const { keyword, category, score } = body;
+    const { title, category, channel_name, video_url, thumbnail_url, view_count, is_active, sort_order } = body;
 
-    if (!keyword) {
-        return NextResponse.json({ error: "키워드는 필수입니다." }, { status: 400 });
+    if (!title || !category) {
+        return NextResponse.json({ error: "제목과 카테고리는 필수입니다." }, { status: 400 });
     }
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from("hot_trends")
         .insert({
-            keyword,
-            category: category || null,
-            score: score ?? 0,
-            source: "manual",
+            title,
+            category,
+            channel_name: channel_name || null,
+            video_url: video_url || null,
+            thumbnail_url: thumbnail_url || null,
+            view_count: view_count || 0,
+            is_active: is_active ?? true,
+            sort_order: sort_order ?? 0,
         })
         .select()
         .single();
@@ -57,7 +61,7 @@ export async function PUT(request: NextRequest) {
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from("hot_trends")
-        .update(updates)
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
         .single();
