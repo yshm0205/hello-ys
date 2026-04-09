@@ -15,17 +15,15 @@ export async function POST(request: Request) {
         const supabase = await createClient();
         const { data: { user: authUser } } = await supabase.auth.getUser();
 
-        // [임시] 로그인 체크 비활성화 - 나중에 원복 필요
-        // if (!authUser) {
-        //     return NextResponse.json(
-        //         { error: "로그인이 필요합니다." },
-        //         { status: 401 }
-        //     );
-        // }
+        if (!authUser) {
+            return NextResponse.json(
+                { error: "로그인이 필요합니다." },
+                { status: 401 }
+            );
+        }
 
-        // 게스트 사용자 처리
-        const user = authUser || { id: "guest_user" };
-        const isGuest = !authUser;
+        const user = authUser;
+        const isGuest = false;
 
         // 2. 구독 상태 확인 (선택적) - 게스트는 스킵
         let subscription = null;
@@ -61,6 +59,13 @@ export async function POST(request: Request) {
             );
         }
 
+        if (reference_script.length > 5000) {
+            return NextResponse.json(
+                { error: "입력이 너무 깁니다. 5000자 이하로 입력해주세요." },
+                { status: 400 }
+            );
+        }
+
         // 4. Render Python API 호출 (타임아웃 120초 - Render cold start 대비)
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 120000); // 120초
@@ -70,6 +75,7 @@ export async function POST(request: Request) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    ...(process.env.API_SECRET_KEY && { "X-Api-Key": process.env.API_SECRET_KEY }),
                 },
                 body: JSON.stringify({
                     reference_script,

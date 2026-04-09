@@ -16,16 +16,15 @@ import { saveVideoSnapshots, cleanupOldSnapshots } from '@/lib/youtube/video-sna
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Cron 인증 확인 (테스트 중 임시 비활성화)
+// Cron 인증 확인
 function verifyCronSecret(request: NextRequest): boolean {
-    // TODO: 배포 후 다시 활성화
-    // const authHeader = request.headers.get('authorization');
-    // const cronSecret = process.env.CRON_SECRET;
-    // if (cronSecret && authHeader === `Bearer ${cronSecret}`) return true;
-    // return false;
-
-    // 테스트용 임시 허용
-    return true;
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret) {
+        console.warn('[Cron] CRON_SECRET not set — rejecting request');
+        return false;
+    }
+    return authHeader === `Bearer ${cronSecret}`;
 }
 
 export async function GET(request: NextRequest) {
@@ -183,7 +182,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('[Cron] hot-collect error:', error);
         return NextResponse.json(
-            { error: 'Collection failed', details: String(error) },
+            { error: 'Collection failed' },
             { status: 500 }
         );
     }
