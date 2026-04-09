@@ -64,7 +64,7 @@ export default async function AdminSalesPage({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2">
+          <p className="text-zinc-500 mt-2">
             {t("description")}
           </p>
         </div>
@@ -107,7 +107,7 @@ export default async function AdminSalesPage({
         <CardContent>
           <div className="relative overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-800">
+              <thead className="text-xs text-zinc-500 uppercase bg-zinc-50">
                 <tr>
                   <th className="px-4 py-3 rounded-l-lg">{t("colDate")}</th>
                   <th className="px-4 py-3">{t("colCustomer")}</th>
@@ -122,7 +122,7 @@ export default async function AdminSalesPage({
                   (payments as unknown as TossPayment[]).map((payment) => (
                     <tr
                       key={payment.id}
-                      className="bg-white dark:bg-zinc-900 border-b dark:border-zinc-800"
+                      className="bg-white border-b"
                     >
                       <td className="px-4 py-3">
                         {new Date(payment.created_at).toLocaleDateString("ko-KR")}

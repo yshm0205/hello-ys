@@ -20,7 +20,6 @@ import {
   X,
   ArrowLeft,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -157,8 +156,8 @@ export function AdminSidebar() {
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive(item.href)
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                      : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white"
+                      ? "bg-zinc-900 text-white"
+                      : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
                   } ${collapsed ? "justify-center" : ""}`}
                   title={collapsed ? t(item.labelKey) : undefined}
                 >
@@ -175,7 +174,7 @@ export function AdminSidebar() {
       <div className="border-t p-3 space-y-2">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors ${
+          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors ${
             collapsed ? "justify-center" : ""
           }`}
           title={collapsed ? t("backToDashboard") : undefined}
@@ -184,7 +183,7 @@ export function AdminSidebar() {
           {!collapsed && <span>{t("backToDashboard")}</span>}
         </Link>
         <div className={`flex ${collapsed ? "justify-center" : "px-3"}`}>
-          <ThemeToggle />
+          <span className="text-xs text-zinc-400">v1.0</span>
         </div>
       </div>
     </div>
@@ -214,7 +213,7 @@ export function AdminSidebar() {
       <aside
         className={`
           fixed md:sticky top-0 left-0 z-50 md:z-auto
-          h-screen bg-white dark:bg-zinc-950 border-r
+          h-screen bg-white border-r border-zinc-200
           transition-all duration-200
           ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
           ${collapsed ? "w-16" : "w-60"}

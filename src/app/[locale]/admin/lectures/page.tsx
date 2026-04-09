@@ -101,8 +101,8 @@ export default async function AdminLecturesPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t("title")}</h1>
-          <p className="mt-1 text-zinc-500 dark:text-zinc-400">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">{t("title")}</h1>
+          <p className="mt-1 text-zinc-500">
             {lectures.length}개 VOD · {Math.floor(totalDuration / 60)}시간 {totalDuration % 60}분 · 공개 {publishedCount}개 · 자료 {materials.length}개
           </p>
         </div>
@@ -113,7 +113,7 @@ export default async function AdminLecturesPage() {
       {Array.from(partGroups.entries()).map(([partNum, group]) => (
         <Card key={partNum}>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-zinc-900 dark:text-zinc-100">
+            <CardTitle className="text-lg text-zinc-900">
               Part {partNum}. {group.title}
               <Badge variant="outline" className="ml-2 font-normal">
                 {group.lectures.length}개 VOD
@@ -128,17 +128,17 @@ export default async function AdminLecturesPage() {
               return (
                 <div
                   key={lec.id}
-                  className="border rounded-lg p-4 bg-white dark:bg-zinc-900"
+                  className="border rounded-lg p-4 bg-white"
                 >
                   {/* VOD 헤더 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 text-sm font-bold">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-sm font-bold">
                         {lec.vod_number}
                       </div>
                       <div>
-                        <div className="font-medium text-zinc-900 dark:text-zinc-100">{lec.vod_title}</div>
-                        <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <div className="font-medium text-zinc-900">{lec.vod_title}</div>
+                        <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-500">
                           <Clock className="h-3 w-3" />
                           <span>{lec.duration_minutes}분</span>
                           {lec.video_url ? (
@@ -170,7 +170,7 @@ export default async function AdminLecturesPage() {
                       {vodMaterials.map((m) => (
                         <div
                           key={m.id}
-                          className="flex items-center justify-between py-1.5 px-3 rounded bg-zinc-50 dark:bg-zinc-800 text-sm"
+                          className="flex items-center justify-between py-1.5 px-3 rounded bg-zinc-50 text-sm"
                         >
                           <div className="flex items-center gap-2">
                             {typeIcons[m.type] || <FileText className="h-4 w-4" />}
@@ -178,11 +178,11 @@ export default async function AdminLecturesPage() {
                               href={m.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-zinc-700 dark:text-zinc-300 hover:text-violet-600 dark:hover:text-violet-300 hover:underline"
+                              className="text-zinc-700 hover:text-violet-600 hover:underline"
                             >
                               {m.title}
                             </a>
-                            <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                            <span className="text-xs text-zinc-400">
                               {typeLabels[m.type] || m.type}
                               {m.file_size && ` · ${m.file_size}`}
                             </span>
@@ -212,7 +212,7 @@ export default async function AdminLecturesPage() {
 
       {lectures.length === 0 && (
         <Card>
-          <CardContent className="py-12 text-center text-zinc-500 dark:text-zinc-400">
+          <CardContent className="py-12 text-center text-zinc-500">
             {t("noLectures")}
           </CardContent>
         </Card>

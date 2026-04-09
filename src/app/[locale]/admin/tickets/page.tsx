@@ -119,7 +119,7 @@ export default async function AdminTicketsPage({
                   </TableCell>
                   <TableCell>
                     <span
-                      className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-500/15 dark:text-blue-200"
+                      className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800"
                     >
                       {ticket.category
                         ? ct(

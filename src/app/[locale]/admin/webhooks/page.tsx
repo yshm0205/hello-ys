@@ -68,7 +68,7 @@ export default async function AdminPaymentLogsPage() {
             <CardTitle className="text-sm font-medium">성공</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-2xl font-bold text-green-600">
               {stats.done}
             </div>
           </CardContent>
@@ -88,7 +88,7 @@ export default async function AdminPaymentLogsPage() {
             <CardTitle className="text-sm font-medium">총 크레딧</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+            <div className="text-2xl font-bold text-violet-600">
               {stats.totalCredits.toLocaleString()}cr
             </div>
           </CardContent>

@@ -120,50 +120,51 @@
 /* Admin: force light mode even when .dark is on html */
 .admin-light,
 .admin-light * {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
-  color-scheme: light;
+  --background: oklch(1 0 0) !important;
+  --foreground: oklch(0.141 0.005 285.823) !important;
+  --card: oklch(1 0 0) !important;
+  --card-foreground: oklch(0.141 0.005 285.823) !important;
+  --popover: oklch(1 0 0) !important;
+  --popover-foreground: oklch(0.141 0.005 285.823) !important;
+  --primary: oklch(0.21 0.006 285.885) !important;
+  --primary-foreground: oklch(0.985 0 0) !important;
+  --secondary: oklch(0.967 0.001 286.375) !important;
+  --secondary-foreground: oklch(0.21 0.006 285.885) !important;
+  --muted: oklch(0.967 0.001 286.375) !important;
+  --muted-foreground: oklch(0.552 0.016 285.938) !important;
+  --accent: oklch(0.967 0.001 286.375) !important;
+  --accent-foreground: oklch(0.21 0.006 285.885) !important;
+  --destructive: oklch(0.577 0.245 27.325) !important;
+  --border: oklch(0.92 0.004 286.32) !important;
+  --input: oklch(0.92 0.004 286.32) !important;
+  --ring: oklch(0.705 0.015 286.067) !important;
+  --sidebar: oklch(0.985 0 0) !important;
+  --sidebar-foreground: oklch(0.141 0.005 285.823) !important;
+  --sidebar-border: oklch(0.92 0.004 286.32) !important;
+  color-scheme: light !important;
 }
 
-/* Admin dialogs render in portal (outside .admin-light), force light too */
+/* Admin dialogs/selects render in portal (outside .admin-light) */
 [data-slot="dialog-overlay"],
 [data-slot="dialog-content"],
 [data-slot="dialog-content"] *,
 [role="listbox"],
 [role="listbox"] * {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  color-scheme: light;
+  --background: oklch(1 0 0) !important;
+  --foreground: oklch(0.141 0.005 285.823) !important;
+  --popover: oklch(1 0 0) !important;
+  --popover-foreground: oklch(0.141 0.005 285.823) !important;
+  --primary: oklch(0.21 0.006 285.885) !important;
+  --primary-foreground: oklch(0.985 0 0) !important;
+  --secondary: oklch(0.967 0.001 286.375) !important;
+  --secondary-foreground: oklch(0.21 0.006 285.885) !important;
+  --muted: oklch(0.967 0.001 286.375) !important;
+  --muted-foreground: oklch(0.552 0.016 285.938) !important;
+  --accent: oklch(0.967 0.001 286.375) !important;
+  --accent-foreground: oklch(0.21 0.006 285.885) !important;
+  --border: oklch(0.92 0.004 286.32) !important;
+  --input: oklch(0.92 0.004 286.32) !important;
+  color-scheme: light !important;
 }
 
 @layer base {
