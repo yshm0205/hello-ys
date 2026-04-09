@@ -75,21 +75,32 @@ export async function PUT(request: NextRequest) {
   return NextResponse.json({ success: true, data });
 }
 
-// DELETE: 채널 삭제
+// DELETE: 채널 삭제 (개별 id 또는 월별 month)
 export async function DELETE(request: NextRequest) {
   const admin = await checkAdmin();
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  const month = searchParams.get("month");
 
-  if (!id) {
-    return NextResponse.json({ error: "ID가 필요합니다." }, { status: 400 });
+  if (!id && !month) {
+    return NextResponse.json({ error: "ID 또는 월(month)이 필요합니다." }, { status: 400 });
   }
 
   const supabase = createAdminClient();
-  const { error } = await supabase.from("channel_list").delete().eq("id", id);
 
+  if (month) {
+    // 월별 일괄 삭제
+    const { error } = await supabase.from("channel_list").delete().eq("month", month);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ success: true, deleted: "month", month });
+  }
+
+  // 개별 삭제
+  const { error } = await supabase.from("channel_list").delete().eq("id", id);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

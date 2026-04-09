@@ -19,8 +19,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil, Trash2, Upload } from "lucide-react";
+import { Pencil, Trash2, Upload, CalendarX2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+// ── 월별 일괄 삭제 ──
+export function DeleteMonthButton({ month }: { month: string }) {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleDelete() {
+    if (!month) return;
+    if (!confirm(`[${month}] 월의 모든 채널 데이터를 삭제합니다.\n정말 삭제하시겠습니까?`)) return;
+    setLoading(true);
+
+    const res = await fetch(`/api/admin/channel-list?month=${encodeURIComponent(month)}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "삭제 실패");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <Button
+      variant="outline"
+      onClick={handleDelete}
+      disabled={loading || !month}
+      className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+    >
+      <CalendarX2 className="h-4 w-4 mr-2" />
+      {loading ? "삭제 중..." : `${month} 전체 삭제`}
+    </Button>
+  );
+}
 
 // 월 옵션 (최근 12개월)
 function getMonthOptions() {
@@ -306,7 +342,7 @@ export function BulkUploadButton() {
           )}
 
           {result && (
-            <div className={`rounded-md p-3 text-sm ${result.fail ? "bg-yellow-50 border border-yellow-200" : "bg-green-50 border border-green-200"}`}>
+            <div className={`rounded-md p-3 text-sm ${result.fail ? "bg-yellow-50 border border-yellow-200 text-yellow-900" : "bg-green-50 border border-green-200 text-green-900"}`}>
               <p>성공: {result.success}개 / 실패: {result.fail}개</p>
               {result.errors.length > 0 && (
                 <ul className="mt-1 text-xs text-red-600 list-disc pl-4">

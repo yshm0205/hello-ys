@@ -25,6 +25,7 @@ import {
   BulkUploadButton,
   EditChannelListButton,
   DeleteChannelListButton,
+  DeleteMonthButton,
 } from "@/components/admin/ChannelListForm";
 import {
   AddHotListDailyButton,
@@ -334,7 +335,7 @@ export default async function AdminHotListPage({
           <AdminSearch placeholder="채널명 또는 채널 ID 검색..." />
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {availableMonths.map((m) => {
             const mQuery = buildQueryString(
               { q, page, date: selectedDate || undefined, month: selectedMonth },
@@ -354,6 +355,9 @@ export default async function AdminHotListPage({
               </a>
             );
           })}
+          {selectedMonth && (
+            <DeleteMonthButton month={selectedMonth} />
+          )}
         </div>
 
         <Card>
