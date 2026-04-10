@@ -13,7 +13,7 @@ export default async function BatchPage() {
 
     return (
         <DashboardLayout user={user}>
-            <BatchGeneratorContent user={user} />
+            <BatchGeneratorContent />
         </DashboardLayout>
     );
 }

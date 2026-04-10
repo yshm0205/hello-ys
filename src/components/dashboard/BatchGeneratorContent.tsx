@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 /**
  * 배치 스크립트 생성기
@@ -19,7 +19,6 @@ import {
     Badge,
     Box,
     ActionIcon,
-    Tooltip,
     Progress,
     Paper,
     CopyButton,
@@ -51,6 +50,24 @@ interface QueueItem {
     scripts?: Array<{ hook: string; full_script: string }>;
     error?: string;
     elapsed?: number;
+}
+
+interface RemoteBatchJobItem {
+    id: string;
+    material: string;
+    status: 'queued' | 'processing' | 'done' | 'error' | 'cancelled';
+    phase?: 'analyzing' | 'generating' | 'reviewing' | null;
+    scripts?: Array<{ hook: string; full_script: string }> | null;
+    error?: string | null;
+    elapsed?: number | null;
+}
+
+interface RemoteBatchJob {
+    id: string;
+    niche: string;
+    status: 'draft' | 'running' | 'paused' | 'completed' | 'failed';
+    lastError?: string | null;
+    items: RemoteBatchJobItem[];
 }
 
 // ============ 니치 (V2 에셋 재사용) ============
@@ -264,226 +281,208 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
 
 // ============ 메인 컴포넌트 ============
 
-export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
+export function BatchGeneratorContent() {
     const [niche, setNiche] = useState('knowledge');
     const [materialInput, setMaterialInput] = useState('');
     const [queue, setQueue] = useState<QueueItem[]>([]);
-    const [isRunning, setIsRunning] = useState(false);
+    const [jobId, setJobId] = useState<string | null>(null);
+    const [jobStatus, setJobStatus] = useState<'draft' | 'running' | 'paused' | 'completed' | 'failed' | null>(null);
     const [selectedResult, setSelectedResult] = useState<string | null>(null);
     const [credits, setCredits] = useState<number | null>(null);
     const [creditError, setCreditError] = useState<string | null>(null);
     const creditsRef = useRef<number | null>(null);
-
-    // 크레딧 조회
-    useEffect(() => {
-        async function fetchCredits() {
-            try {
-                const res = await fetch('/api/credits');
-                if (res.ok) {
-                    const data = await res.json();
-                    const cr = data.credits ?? null;
-                    setCredits(cr);
-                    creditsRef.current = cr;
-                }
-            } catch { /* ignore */ }
-        }
-        fetchCredits();
-    }, []);
-
+    const processLockRef = useRef(false);
     const MAX_QUEUE = 10;
-    const queueRef = useRef<QueueItem[]>([]);
-    // queue 변경 시 ref도 동기화
-    useEffect(() => { queueRef.current = queue; }, [queue]);
 
-    const addToQueue = useCallback(() => {
-        if (!materialInput.trim()) return;
-        setQueue(prev => {
-            if (prev.length >= MAX_QUEUE) return prev;
-            return [...prev, {
-                id: Date.now().toString(),
-                material: materialInput.trim(),
-                status: 'waiting',
-            }];
-        });
-        setMaterialInput('');
-    }, [materialInput]);
+    const applyJob = useCallback((job: RemoteBatchJob | null) => {
+        if (!job) {
+            setJobId(null);
+            setJobStatus(null);
+            setQueue([]);
+            return;
+        }
 
-    const removeFromQueue = useCallback((id: string) => {
-        setQueue(prev => prev.filter(item => item.id !== id));
+        setJobId(job.id);
+        setJobStatus(job.status);
+        setNiche(job.niche || 'knowledge');
+        setQueue(job.items.map((item) => ({
+            id: item.id,
+            material: item.material,
+            status:
+                item.status === 'queued'
+                    ? 'waiting'
+                    : item.status === 'processing'
+                        ? 'generating'
+                        : item.status === 'done'
+                            ? 'done'
+                            : 'error',
+            phase: item.phase ?? undefined,
+            scripts: item.scripts ?? undefined,
+            error: item.error ?? undefined,
+            elapsed: item.elapsed ?? undefined,
+        })));
+
+        if (job.status === 'paused' && job.lastError) {
+            setCreditError(job.lastError);
+        } else if (!job.lastError) {
+            setCreditError(null);
+        }
     }, []);
 
-    // 크레딧 차감 (서버 기준 — ref로 최신 값 추적)
-    const deductCredits = async (cost: number): Promise<boolean> => {
-        if (creditsRef.current !== null && creditsRef.current < cost) {
-            setCreditError(`크레딧이 부족합니다. (필요: ${cost}cr, 보유: ${creditsRef.current}cr)`);
-            return false;
-        }
+    const fetchCredits = useCallback(async () => {
         try {
-            const res = await fetch('/api/credits/deduct', {
+            const res = await fetch('/api/credits');
+            if (!res.ok) return;
+            const data = await res.json();
+            const nextCredits = data.credits ?? null;
+            setCredits(nextCredits);
+            creditsRef.current = nextCredits;
+        } catch {
+            // ignore
+        }
+    }, []);
+
+    const fetchCurrentJob = useCallback(async () => {
+        try {
+            const res = await fetch('/api/batch-jobs/current', { cache: 'no-store' });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setCreditError(data.error || '배치 큐를 불러오지 못했습니다.');
+                return null;
+            }
+
+            const job = (data.job ?? null) as RemoteBatchJob | null;
+            applyJob(job);
+            return job;
+        } catch {
+            setCreditError('배치 큐를 불러오지 못했습니다.');
+            return null;
+        }
+    }, [applyJob]);
+
+    const processNext = useCallback(async (targetJobId?: string) => {
+        const activeJobId = targetJobId ?? jobId;
+        if (!activeJobId || processLockRef.current) return null;
+
+        processLockRef.current = true;
+
+        try {
+            const res = await fetch(`/api/batch-jobs/${activeJobId}/process`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'generate_skip' }),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (typeof data.credits === 'number') {
+                setCredits(data.credits);
+                creditsRef.current = data.credits;
+            }
+
+            if (data.job) {
+                applyJob(data.job as RemoteBatchJob);
+            } else {
+                await fetchCurrentJob();
+            }
+
+            if (!res.ok) {
+                setCreditError(data.error || '배치 생성에 실패했습니다.');
+                return null;
+            }
+
+            if (data.job?.status !== 'paused') {
+                setCreditError(null);
+            }
+
+            return (data.job ?? null) as RemoteBatchJob | null;
+        } catch {
+            setCreditError('배치 생성 서버 연결에 실패했습니다.');
+            return null;
+        } finally {
+            processLockRef.current = false;
+        }
+    }, [applyJob, fetchCurrentJob, jobId]);
+
+    useEffect(() => {
+        void fetchCredits();
+        void fetchCurrentJob();
+    }, [fetchCredits, fetchCurrentJob]);
+
+    useEffect(() => {
+        if (!jobId || jobStatus !== 'running') return;
+
+        const tick = async () => {
+            const job = await fetchCurrentJob();
+            if (!job || job.status !== 'running') return;
+
+            const hasProcessing = job.items.some((item) => item.status === 'processing');
+            const hasQueued = job.items.some((item) => item.status === 'queued');
+
+            if (!hasProcessing && hasQueued) {
+                await processNext(job.id);
+            }
+        };
+
+        void tick();
+        const intervalId = window.setInterval(() => {
+            void tick();
+        }, 4000);
+
+        return () => window.clearInterval(intervalId);
+    }, [fetchCurrentJob, jobId, jobStatus, processNext]);
+
+    const addToQueue = useCallback(async () => {
+        const material = materialInput.trim();
+        if (!material) return;
+
+        try {
+            const res = await fetch('/api/batch-jobs/current', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ material, niche }),
             });
             const data = await res.json();
-            if (!res.ok || !data.success) {
-                setCreditError(data.error || '크레딧 차감 실패');
-                return false;
+
+            if (!res.ok) {
+                setCreditError(data.error || '큐에 추가하지 못했습니다.');
+                return;
             }
-            setCredits(data.credits);
-            creditsRef.current = data.credits;
-            return true;
+
+            applyJob((data.job ?? null) as RemoteBatchJob | null);
+            setMaterialInput('');
+            setCreditError(null);
         } catch {
-            setCreditError('크레딧 서버 연결 실패');
-            return false;
+            setCreditError('큐에 추가하지 못했습니다.');
         }
-    };
+    }, [applyJob, materialInput, niche]);
 
-    // 순차 생성: Render API /api/v2/generate 호출
-    // queueRef로 최신 큐를 읽어서 진행 중 추가된 아이템도 처리
-    const startGeneration = useCallback(async () => {
-        const RENDER_API = 'https://script-generator-api-civ5.onrender.com';
-        const DELAY_BETWEEN = 5000;
-        setIsRunning(true);
-        setCreditError(null);
-
-        // 인증 헤더
-        let headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const removeFromQueue = useCallback(async (id: string) => {
         try {
-            const { createClient } = await import('@/utils/supabase/client');
-            const supabase = createClient();
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.access_token) {
-                headers['Authorization'] = `Bearer ${session.access_token}`;
-            }
-        } catch { /* fallback */ }
+            const res = await fetch(`/api/batch-jobs/items/${id}`, { method: 'DELETE' });
+            const data = await res.json();
 
-        const userId = user?.email || 'guest';
-        let isFirst = true;
-        const processed = new Set<string>();
-
-        // 큐에서 다음 waiting 아이템을 찾는 함수 (ref로 최신 상태 읽기)
-        const findNextWaiting = () => queueRef.current.find(q => q.status === 'waiting' && !processed.has(q.id));
-
-        let next = findNextWaiting();
-        while (next) {
-            const itemId = next.id;
-            const material = next.material;
-            processed.add(itemId);
-
-            // 첫 번째 이후: 5초 대기
-            if (!isFirst) {
-                await new Promise(r => setTimeout(r, DELAY_BETWEEN));
-            }
-            isFirst = false;
-
-            // 크레딧 차감
-            const ok = await deductCredits(10);
-            if (!ok) {
-                setQueue(prev => prev.map(q =>
-                    q.status === 'waiting' ? { ...q, status: 'error' as const, error: '크레딧 부족' } : q
-                ));
-                break;
+            if (!res.ok) {
+                setCreditError(data.error || '큐 항목을 삭제하지 못했습니다.');
+                return;
             }
 
-            const startTime = Date.now();
-
-            // Phase: analyzing
-            setQueue(prev => prev.map(q =>
-                q.id === itemId ? { ...q, status: 'generating' as const, phase: 'analyzing' as const } : q
-            ));
-
-            // Phase 전환 타이머 (UI용)
-            const phaseTimers: NodeJS.Timeout[] = [];
-            phaseTimers.push(setTimeout(() => {
-                setQueue(prev => prev.map(q =>
-                    q.id === itemId && q.status === 'generating' ? { ...q, phase: 'generating' as const } : q
-                ));
-            }, 15000));
-            phaseTimers.push(setTimeout(() => {
-                setQueue(prev => prev.map(q =>
-                    q.id === itemId && q.status === 'generating' ? { ...q, phase: 'reviewing' as const } : q
-                ));
-            }, 50000));
-
-            try {
-                const response = await fetch(`${RENDER_API}/api/v2/generate`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({
-                        material,
-                        niche,
-                        user_id: userId,
-                        research_text: '',
-                        tone: '',
-                    }),
-                });
-
-                phaseTimers.forEach(clearTimeout);
-                const elapsed = Math.round((Date.now() - startTime) / 1000);
-
-                if (!response.ok) {
-                    throw new Error(`API 오류 (${response.status})`);
-                }
-
-                const data = await response.json();
-                if (!data.success || !data.scripts?.length) {
-                    throw new Error(data.error || '스크립트 생성 실패');
-                }
-
-                // 보관함 저장
-                try {
-                    await fetch('/api/scripts/save', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            input_text: material,
-                            niche,
-                            tone: '',
-                            scripts: data.scripts.map((s: { hook?: string; final?: string }) => ({
-                                hook_preview: s.hook || '',
-                                full_script: s.final || '',
-                                archetype: 'V2_PIPELINE',
-                            })),
-                        }),
-                    });
-                } catch { /* 저장 실패해도 결과 반환 */ }
-
-                setQueue(prev => prev.map(q =>
-                    q.id === itemId ? {
-                        ...q,
-                        status: 'done' as const,
-                        phase: undefined,
-                        elapsed,
-                        scripts: data.scripts.map((s: { hook?: string; final?: string }) => ({
-                            hook: s.hook || '',
-                            full_script: s.final || '',
-                        })),
-                    } : q
-                ));
-                setSelectedResult(itemId);
-            } catch (err) {
-                phaseTimers.forEach(clearTimeout);
-                setQueue(prev => prev.map(q =>
-                    q.id === itemId ? {
-                        ...q,
-                        status: 'error' as const,
-                        phase: undefined,
-                        error: err instanceof Error ? err.message : '알 수 없는 오류',
-                    } : q
-                ));
-            }
-
-            // 다음 waiting 아이템 찾기 (진행 중 추가된 것도 포함)
-            next = findNextWaiting();
+            applyJob((data.job ?? null) as RemoteBatchJob | null);
+        } catch {
+            setCreditError('큐 항목을 삭제하지 못했습니다.');
         }
+    }, [applyJob]);
 
-        setIsRunning(false);
-    }, [niche, user]);
+    const startGeneration = useCallback(async () => {
+        if (!jobId) return;
+        setCreditError(null);
+        await processNext(jobId);
+    }, [jobId, processNext]);
 
     const waitingCount = queue.filter(q => q.status === 'waiting').length;
     const doneCount = queue.filter(q => q.status === 'done').length;
     const generatingItem = queue.find(q => q.status === 'generating');
     const selectedItem = queue.find(q => q.id === selectedResult);
+    const isRunning = jobStatus === 'running' || queue.some((item) => item.status === 'generating');
 
     return (
         <Container size="md" py="lg">
@@ -751,7 +750,7 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                                                             {isActive ? '접기' : '보기'}
                                                         </Text>
                                                     )}
-                                                    {item.status === 'waiting' && !isRunning && (
+                                                    {(item.status === 'waiting' || item.status === 'error') && !isRunning && (
                                                         <ActionIcon variant="subtle" color="red" size="sm"
                                                             onClick={(e) => { e.stopPropagation(); removeFromQueue(item.id); }}
                                                         >
@@ -819,9 +818,17 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                                     variant="subtle"
                                     color="gray"
                                     radius="lg"
-                                    onClick={() => {
+                                    onClick={async () => {
+                                        if (jobId) {
+                                            try {
+                                                await fetch(`/api/batch-jobs/${jobId}/reset`, { method: 'POST' });
+                                            } catch { /* ignore */ }
+                                        }
                                         setQueue([]);
+                                        setJobId(null);
+                                        setJobStatus(null);
                                         setSelectedResult(null);
+                                        setCreditError(null);
                                     }}
                                 >
                                     새로 만들기
