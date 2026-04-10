@@ -93,9 +93,9 @@ export async function POST(
             last_error: null,
         });
 
-        // Render에 비동기 처리 요청 (handoff timeout 15초)
+        // Render에 비동기 처리 요청 (handoff timeout 60초 — cold start 대비)
         const handoffController = new AbortController();
-        const handoffTimeout = setTimeout(() => handoffController.abort(), 15000);
+        const handoffTimeout = setTimeout(() => handoffController.abort(), 60000);
         let handoffOk = false;
 
         try {
