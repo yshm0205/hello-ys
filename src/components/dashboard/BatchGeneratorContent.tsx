@@ -285,55 +285,117 @@ export function BatchGeneratorContent() {
         setQueue(prev => prev.filter(item => item.id !== id));
     }, []);
 
-    // 데모: 순차 생성 (3페이즈 시뮬레이션)
+    // 순차 생성: Render API /api/v2/generate 호출
     const startGeneration = useCallback(async () => {
+        const RENDER_API = 'https://script-generator-api-civ5.onrender.com';
         setIsRunning(true);
+
+        // 인증 헤더
+        let headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        try {
+            const { createClient } = await import('@/utils/supabase/client');
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+        } catch { /* fallback */ }
 
         for (let i = 0; i < queue.length; i++) {
             if (queue[i].status !== 'waiting') continue;
+            const itemId = queue[i].id;
+            const material = queue[i].material;
+            const startTime = Date.now();
 
+            // Phase: analyzing
             setQueue(prev => prev.map((q, idx) =>
                 idx === i ? { ...q, status: 'generating' as const, phase: 'analyzing' as const } : q
             ));
-            await new Promise(r => setTimeout(r, 1500));
 
-            setQueue(prev => prev.map((q, idx) =>
-                idx === i ? { ...q, phase: 'generating' as const } : q
-            ));
-            await new Promise(r => setTimeout(r, 1500));
+            // Phase 전환 타이머 (UI용)
+            const phaseTimers: NodeJS.Timeout[] = [];
+            phaseTimers.push(setTimeout(() => {
+                setQueue(prev => prev.map((q) =>
+                    q.id === itemId && q.status === 'generating' ? { ...q, phase: 'generating' as const } : q
+                ));
+            }, 15000));
+            phaseTimers.push(setTimeout(() => {
+                setQueue(prev => prev.map((q) =>
+                    q.id === itemId && q.status === 'generating' ? { ...q, phase: 'reviewing' as const } : q
+                ));
+            }, 50000));
 
-            setQueue(prev => prev.map((q, idx) =>
-                idx === i ? { ...q, phase: 'reviewing' as const } : q
-            ));
-            await new Promise(r => setTimeout(r, 1000));
+            try {
+                const response = await fetch(`${RENDER_API}/api/v2/generate`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        material,
+                        niche,
+                        user_id: 'batch',
+                        research_text: '',
+                        tone: '',
+                    }),
+                });
 
-            setQueue(prev => prev.map((q, idx) =>
-                idx === i ? {
-                    ...q,
-                    status: 'done' as const,
-                    phase: undefined,
-                    elapsed: 40 + Math.floor(Math.random() * 25),
-                    scripts: [
-                        {
-                            hook: `"${q.material.slice(0, 30)}에 대해 NASA가 공개한 사진 한 장이 전 세계를 뒤흔들었습니다"`,
-                            full_script: `${q.material}에 대한 놀라운 사실이 있습니다.\n\n2024년, 한 연구팀이 이 현상을 처음으로 관측하는 데 성공했는데요.\n\n기존에 알려진 것과 완전히 다른 결과가 나왔습니다.\n\n연구팀은 3년간의 데이터를 분석한 결과, 이전 이론이 틀렸다는 것을 증명했습니다.\n\n가장 충격적인 건, 이 발견이 우리 일상에도 직접적인 영향을 미친다는 겁니다.\n\n전문가들은 앞으로 10년 안에 관련 기술이 상용화될 것으로 보고 있습니다.`,
-                        },
-                        {
-                            hook: `"${q.material.slice(0, 30)}... 과학자들이 10년 넘게 숨겨온 사실이 드러났습니다"`,
-                            full_script: `여러분, ${q.material} 들어보신 적 있으신가요?\n\n대부분의 사람들은 이걸 단순한 현상이라고 생각하지만, 실제로는 훨씬 복잡한 메커니즘이 숨어 있습니다.\n\n2023년 네이처에 실린 논문에 따르면, 이 현상의 원인은 지금까지 알려진 것과 정반대였습니다.\n\n쉽게 말해서, 우리가 상식이라고 믿어왔던 게 완전히 틀렸던 겁니다.\n\n더 놀라운 건, 이미 몇몇 기업들이 이 원리를 활용해 새로운 제품을 개발하고 있다는 사실입니다.`,
-                        },
-                        {
-                            hook: `"${q.material.slice(0, 30)}의 비밀... 알고 나면 세상이 다르게 보입니다"`,
-                            full_script: `이것 하나만 알면 ${q.material}을 완전히 다른 시각으로 볼 수 있습니다.\n\n보통 사람들은 표면적인 부분만 보고 지나치는데, 그 안에는 놀라운 과학적 원리가 숨어 있거든요.\n\n핵심은 바로 이겁니다.\n\n겉으로 보이는 현상과 실제 작동 원리가 완전히 다릅니다.\n\n이걸 처음 발견한 건 MIT 연구팀이었는데요, 발표 당시 학계에서 큰 논란이 일었습니다.\n\n하지만 이후 반복 실험에서 같은 결과가 나오면서, 지금은 정설로 받아들여지고 있습니다.`,
-                        },
-                    ],
-                } : q
-            ));
-            setSelectedResult(queue[i].id);
+                phaseTimers.forEach(clearTimeout);
+                const elapsed = Math.round((Date.now() - startTime) / 1000);
+
+                if (!response.ok) {
+                    throw new Error(`API 오류 (${response.status})`);
+                }
+
+                const data = await response.json();
+                if (!data.success || !data.scripts?.length) {
+                    throw new Error(data.error || '스크립트 생성 실패');
+                }
+
+                // 저장
+                try {
+                    await fetch('/api/scripts/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            input_text: material,
+                            niche,
+                            tone: '',
+                            scripts: data.scripts.map((s: { hook?: string; final?: string }) => ({
+                                hook_preview: s.hook || '',
+                                full_script: s.final || '',
+                                archetype: 'V2_PIPELINE',
+                            })),
+                        }),
+                    });
+                } catch { /* 저장 실패해도 결과 반환 */ }
+
+                setQueue(prev => prev.map((q) =>
+                    q.id === itemId ? {
+                        ...q,
+                        status: 'done' as const,
+                        phase: undefined,
+                        elapsed,
+                        scripts: data.scripts.map((s: { hook?: string; final?: string }) => ({
+                            hook: s.hook || '',
+                            full_script: s.final || '',
+                        })),
+                    } : q
+                ));
+                setSelectedResult(itemId);
+            } catch (err) {
+                phaseTimers.forEach(clearTimeout);
+                setQueue(prev => prev.map((q) =>
+                    q.id === itemId ? {
+                        ...q,
+                        status: 'error' as const,
+                        phase: undefined,
+                        error: err instanceof Error ? err.message : '알 수 없는 오류',
+                    } : q
+                ));
+            }
         }
 
         setIsRunning(false);
-    }, [queue]);
+    }, [queue, niche]);
 
     const waitingCount = queue.filter(q => q.status === 'waiting').length;
     const doneCount = queue.filter(q => q.status === 'done').length;
