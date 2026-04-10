@@ -6,7 +6,7 @@
  * - 리서치 기반 UX: Writesonic 자동 저장 + 탭형 결과 + 컴팩트 큐
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
     Container,
     Title,
@@ -264,20 +264,66 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
 
 // ============ 메인 컴포넌트 ============
 
-export function BatchGeneratorContent() {
+export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
     const [niche, setNiche] = useState('knowledge');
     const [materialInput, setMaterialInput] = useState('');
     const [queue, setQueue] = useState<QueueItem[]>([]);
     const [isRunning, setIsRunning] = useState(false);
     const [selectedResult, setSelectedResult] = useState<string | null>(null);
+    const [credits, setCredits] = useState<number | null>(null);
+    const [creditError, setCreditError] = useState<string | null>(null);
+
+    // 크레딧 조회
+    useEffect(() => {
+        async function fetchCredits() {
+            try {
+                const res = await fetch('/api/credits');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCredits(data.credits ?? null);
+                }
+            } catch { /* ignore */ }
+        }
+        fetchCredits();
+    }, []);
+
+    // 크레딧 차감 (아이템 시작 전 호출)
+    const deductCredits = async (cost: number): Promise<boolean> => {
+        if (credits !== null && credits < cost) {
+            setCreditError(`크레딧이 부족합니다. (필요: ${cost}cr, 보유: ${credits}cr)`);
+            return false;
+        }
+        try {
+            const res = await fetch('/api/credits/deduct', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'generate_skip' }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                setCreditError(data.error || '크레딧 차감 실패');
+                return false;
+            }
+            setCredits(data.credits);
+            return true;
+        } catch {
+            setCreditError('크레딧 서버 연결 실패');
+            return false;
+        }
+    };
+
+    const MAX_QUEUE = 10;
 
     const addToQueue = useCallback(() => {
         if (!materialInput.trim()) return;
-        setQueue(prev => [...prev, {
-            id: Date.now().toString(),
-            material: materialInput.trim(),
-            status: 'waiting',
-        }]);
+        setQueue(prev => {
+            if (prev.length >= MAX_QUEUE) return prev;
+            return [...prev, {
+                id: Date.now().toString(),
+                material: materialInput.trim(),
+                status: 'waiting',
+            }];
+        });
         setMaterialInput('');
     }, [materialInput]);
 
@@ -288,7 +334,9 @@ export function BatchGeneratorContent() {
     // 순차 생성: Render API /api/v2/generate 호출
     const startGeneration = useCallback(async () => {
         const RENDER_API = 'https://script-generator-api-civ5.onrender.com';
+        const DELAY_BETWEEN = 5000; // 아이템 사이 5초 대기
         setIsRunning(true);
+        setCreditError(null);
 
         // 인증 헤더
         let headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -301,10 +349,29 @@ export function BatchGeneratorContent() {
             }
         } catch { /* fallback */ }
 
+        let isFirst = true;
+
         for (let i = 0; i < queue.length; i++) {
             if (queue[i].status !== 'waiting') continue;
             const itemId = queue[i].id;
             const material = queue[i].material;
+
+            // 첫 번째 이후: 5초 대기
+            if (!isFirst) {
+                await new Promise(r => setTimeout(r, DELAY_BETWEEN));
+            }
+            isFirst = false;
+
+            // 크레딧 차감 (각 아이템 시작 전)
+            const ok = await deductCredits(10);
+            if (!ok) {
+                // 나머지 큐 전부 중단
+                setQueue(prev => prev.map(q =>
+                    q.status === 'waiting' ? { ...q, status: 'error' as const, error: '크레딧 부족' } : q
+                ));
+                break;
+            }
+
             const startTime = Date.now();
 
             // Phase: analyzing
@@ -516,7 +583,8 @@ export function BatchGeneratorContent() {
                         />
                         <Group justify="space-between">
                             <Text size="xs" c="gray.5">
-                                여러 소재를 큐에 넣을 수 있습니다
+                                최대 {MAX_QUEUE}개까지 큐에 넣을 수 있습니다 (1개당 10cr)
+                                {credits !== null && ` · 보유: ${credits}cr`}
                             </Text>
                             <Button
                                 leftSection={<Plus size={16} />}
@@ -524,9 +592,9 @@ export function BatchGeneratorContent() {
                                 color="violet"
                                 radius="lg"
                                 onClick={addToQueue}
-                                disabled={!materialInput.trim()}
+                                disabled={!materialInput.trim() || queue.length >= MAX_QUEUE}
                             >
-                                큐에 추가
+                                큐에 추가 ({queue.length}/{MAX_QUEUE})
                             </Button>
                         </Group>
                     </Stack>
@@ -568,6 +636,16 @@ export function BatchGeneratorContent() {
                                     </Badge>
                                 )}
                             </Group>
+
+                            {/* 크레딧 에러 */}
+                            {creditError && (
+                                <Paper p="sm" radius="md" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                    <Group gap="sm">
+                                        <AlertCircle size={16} color="#ef4444" />
+                                        <Text size="sm" c="red.6">{creditError}</Text>
+                                    </Group>
+                                </Paper>
+                            )}
 
                             {/* 진행률 */}
                             {isRunning && queue.length > 1 && (
