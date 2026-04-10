@@ -6,7 +6,7 @@
  * - 리서치 기반 UX: Writesonic 자동 저장 + 탭형 결과 + 컴팩트 큐
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
     Container,
     Title,
@@ -272,6 +272,7 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
     const [selectedResult, setSelectedResult] = useState<string | null>(null);
     const [credits, setCredits] = useState<number | null>(null);
     const [creditError, setCreditError] = useState<string | null>(null);
+    const creditsRef = useRef<number | null>(null);
 
     // 크레딧 조회
     useEffect(() => {
@@ -280,39 +281,19 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                 const res = await fetch('/api/credits');
                 if (res.ok) {
                     const data = await res.json();
-                    setCredits(data.credits ?? null);
+                    const cr = data.credits ?? null;
+                    setCredits(cr);
+                    creditsRef.current = cr;
                 }
             } catch { /* ignore */ }
         }
         fetchCredits();
     }, []);
 
-    // 크레딧 차감 (아이템 시작 전 호출)
-    const deductCredits = async (cost: number): Promise<boolean> => {
-        if (credits !== null && credits < cost) {
-            setCreditError(`크레딧이 부족합니다. (필요: ${cost}cr, 보유: ${credits}cr)`);
-            return false;
-        }
-        try {
-            const res = await fetch('/api/credits/deduct', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'generate_skip' }),
-            });
-            const data = await res.json();
-            if (!res.ok || !data.success) {
-                setCreditError(data.error || '크레딧 차감 실패');
-                return false;
-            }
-            setCredits(data.credits);
-            return true;
-        } catch {
-            setCreditError('크레딧 서버 연결 실패');
-            return false;
-        }
-    };
-
     const MAX_QUEUE = 10;
+    const queueRef = useRef<QueueItem[]>([]);
+    // queue 변경 시 ref도 동기화
+    useEffect(() => { queueRef.current = queue; }, [queue]);
 
     const addToQueue = useCallback(() => {
         if (!materialInput.trim()) return;
@@ -331,10 +312,37 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
         setQueue(prev => prev.filter(item => item.id !== id));
     }, []);
 
+    // 크레딧 차감 (서버 기준 — ref로 최신 값 추적)
+    const deductCredits = async (cost: number): Promise<boolean> => {
+        if (creditsRef.current !== null && creditsRef.current < cost) {
+            setCreditError(`크레딧이 부족합니다. (필요: ${cost}cr, 보유: ${creditsRef.current}cr)`);
+            return false;
+        }
+        try {
+            const res = await fetch('/api/credits/deduct', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'generate_skip' }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                setCreditError(data.error || '크레딧 차감 실패');
+                return false;
+            }
+            setCredits(data.credits);
+            creditsRef.current = data.credits;
+            return true;
+        } catch {
+            setCreditError('크레딧 서버 연결 실패');
+            return false;
+        }
+    };
+
     // 순차 생성: Render API /api/v2/generate 호출
+    // queueRef로 최신 큐를 읽어서 진행 중 추가된 아이템도 처리
     const startGeneration = useCallback(async () => {
         const RENDER_API = 'https://script-generator-api-civ5.onrender.com';
-        const DELAY_BETWEEN = 5000; // 아이템 사이 5초 대기
+        const DELAY_BETWEEN = 5000;
         setIsRunning(true);
         setCreditError(null);
 
@@ -349,12 +357,18 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
             }
         } catch { /* fallback */ }
 
+        const userId = user?.email || 'guest';
         let isFirst = true;
+        const processed = new Set<string>();
 
-        for (let i = 0; i < queue.length; i++) {
-            if (queue[i].status !== 'waiting') continue;
-            const itemId = queue[i].id;
-            const material = queue[i].material;
+        // 큐에서 다음 waiting 아이템을 찾는 함수 (ref로 최신 상태 읽기)
+        const findNextWaiting = () => queueRef.current.find(q => q.status === 'waiting' && !processed.has(q.id));
+
+        let next = findNextWaiting();
+        while (next) {
+            const itemId = next.id;
+            const material = next.material;
+            processed.add(itemId);
 
             // 첫 번째 이후: 5초 대기
             if (!isFirst) {
@@ -362,10 +376,9 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
             }
             isFirst = false;
 
-            // 크레딧 차감 (각 아이템 시작 전)
+            // 크레딧 차감
             const ok = await deductCredits(10);
             if (!ok) {
-                // 나머지 큐 전부 중단
                 setQueue(prev => prev.map(q =>
                     q.status === 'waiting' ? { ...q, status: 'error' as const, error: '크레딧 부족' } : q
                 ));
@@ -375,19 +388,19 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
             const startTime = Date.now();
 
             // Phase: analyzing
-            setQueue(prev => prev.map((q, idx) =>
-                idx === i ? { ...q, status: 'generating' as const, phase: 'analyzing' as const } : q
+            setQueue(prev => prev.map(q =>
+                q.id === itemId ? { ...q, status: 'generating' as const, phase: 'analyzing' as const } : q
             ));
 
             // Phase 전환 타이머 (UI용)
             const phaseTimers: NodeJS.Timeout[] = [];
             phaseTimers.push(setTimeout(() => {
-                setQueue(prev => prev.map((q) =>
+                setQueue(prev => prev.map(q =>
                     q.id === itemId && q.status === 'generating' ? { ...q, phase: 'generating' as const } : q
                 ));
             }, 15000));
             phaseTimers.push(setTimeout(() => {
-                setQueue(prev => prev.map((q) =>
+                setQueue(prev => prev.map(q =>
                     q.id === itemId && q.status === 'generating' ? { ...q, phase: 'reviewing' as const } : q
                 ));
             }, 50000));
@@ -399,7 +412,7 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                     body: JSON.stringify({
                         material,
                         niche,
-                        user_id: 'batch',
+                        user_id: userId,
                         research_text: '',
                         tone: '',
                     }),
@@ -417,7 +430,7 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                     throw new Error(data.error || '스크립트 생성 실패');
                 }
 
-                // 저장
+                // 보관함 저장
                 try {
                     await fetch('/api/scripts/save', {
                         method: 'POST',
@@ -435,7 +448,7 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                     });
                 } catch { /* 저장 실패해도 결과 반환 */ }
 
-                setQueue(prev => prev.map((q) =>
+                setQueue(prev => prev.map(q =>
                     q.id === itemId ? {
                         ...q,
                         status: 'done' as const,
@@ -450,7 +463,7 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                 setSelectedResult(itemId);
             } catch (err) {
                 phaseTimers.forEach(clearTimeout);
-                setQueue(prev => prev.map((q) =>
+                setQueue(prev => prev.map(q =>
                     q.id === itemId ? {
                         ...q,
                         status: 'error' as const,
@@ -459,10 +472,13 @@ export function BatchGeneratorContent({ user }: { user?: { email?: string } }) {
                     } : q
                 ));
             }
+
+            // 다음 waiting 아이템 찾기 (진행 중 추가된 것도 포함)
+            next = findNextWaiting();
         }
 
         setIsRunning(false);
-    }, [queue, niche]);
+    }, [niche, user]);
 
     const waitingCount = queue.filter(q => q.status === 'waiting').length;
     const doneCount = queue.filter(q => q.status === 'done').length;
