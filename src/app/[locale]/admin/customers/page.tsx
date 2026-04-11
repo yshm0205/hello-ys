@@ -1,4 +1,9 @@
-import { createAdminClient } from "@/utils/supabase/admin";
+import { getTranslations } from "next-intl/server";
+
+import { AdminFilter } from "@/components/admin/AdminFilter";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSearch } from "@/components/admin/AdminSearch";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -7,83 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { getTranslations } from "next-intl/server";
-import { AdminSearch } from "@/components/admin/AdminSearch";
-import { AdminFilter } from "@/components/admin/AdminFilter";
-import { AdminPagination } from "@/components/admin/AdminPagination";
 import { Link } from "@/i18n/routing";
-
-interface Customer {
-  user_id: string;
-  credits: number;
-  plan_type: string;
-  expires_at: string | null;
-  user: {
-    id: string;
-    email: string;
-    full_name: string | null;
-  } | null;
-}
-
-async function getCustomers(filters?: {
-  q?: string;
-  planType?: string;
-  page?: number;
-  pageSize?: number;
-}): Promise<{ data: Customer[]; totalPages: number }> {
-  const supabase = createAdminClient();
-  const page = filters?.page || 1;
-  const pageSize = filters?.pageSize || 10;
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  // 1. user_plans 조회
-  let query = supabase
-    .from("user_plans")
-    .select("user_id, credits, plan_type, expires_at", { count: "exact" })
-    .order("credits", { ascending: false });
-
-  if (filters?.planType && filters.planType !== "all") {
-    query = query.eq("plan_type", filters.planType);
-  }
-
-  const { data: plans, count } = await query.range(from, to);
-
-  // 2. user_ids로 users 별도 조회
-  const userIds = (plans || []).map((p: Record<string, unknown>) => p.user_id as string);
-  const { data: users } = userIds.length > 0
-    ? await supabase.from("users").select("id, email, full_name").in("id", userIds)
-    : { data: [] };
-
-  const userMap = new Map((users || []).map((u: Record<string, unknown>) => [u.id as string, u]));
-
-  // 3. 합치기
-  const mapped = (plans || []).map((item: Record<string, unknown>) => {
-    const userId = item.user_id as string;
-    const userInfo = userMap.get(userId) as { id: string; email: string; full_name: string | null } | undefined;
-    return {
-      user_id: userId,
-      credits: item.credits as number,
-      plan_type: item.plan_type as string,
-      expires_at: item.expires_at as string | null,
-      user: userInfo || null,
-    };
-  });
-
-  let filtered = mapped;
-  if (filters?.q) {
-    const q = filters.q.toLowerCase();
-    filtered = filtered.filter((item) =>
-      item.user?.email?.toLowerCase().includes(q)
-    );
-  }
-
-  return {
-    data: filtered,
-    totalPages: Math.ceil((count || 0) / pageSize),
-  };
-}
+import { getPaginatedUserPlans } from "@/lib/admin/user-plans";
 
 const planLabels: Record<string, string> = {
   free: "무료",
@@ -91,30 +21,37 @@ const planLabels: Record<string, string> = {
   allinone: "올인원",
 };
 
+function formatDate(value: string | null | undefined) {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString("ko-KR");
+}
+
 export default async function AdminCustomersPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; planType?: string; page?: string }>;
 }) {
   const { q, planType, page } = await searchParams;
-  const currentPage = parseInt(page || "1");
-  const { data: customers, totalPages } = await getCustomers({
+  const currentPage = parseInt(page || "1", 10);
+  const t = await getTranslations("Admin.customers");
+
+  const { data: customers, totalPages } = await getPaginatedUserPlans({
     q,
     planType,
     page: currentPage,
+    pageSize: 10,
   });
-  const t = await getTranslations("Admin.customers");
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         <AdminSearch placeholder="이메일 검색..." />
         <AdminFilter
           name="planType"
@@ -127,7 +64,7 @@ export default async function AdminCustomersPage({
         />
       </div>
 
-      <div className="border rounded-md">
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -146,7 +83,7 @@ export default async function AdminCustomersPage({
                     href={`/admin/customers/${customer.user_id}`}
                     className="hover:underline"
                   >
-                    <div className="font-medium">{customer.user?.email}</div>
+                    <div className="font-medium">{customer.user?.email || customer.user_id}</div>
                     <div className="text-xs text-muted-foreground">
                       {customer.user?.full_name || ""}
                     </div>
@@ -154,13 +91,7 @@ export default async function AdminCustomersPage({
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={
-                      customer.plan_type === "allinone"
-                        ? "default"
-                        : customer.plan_type === "pro"
-                          ? "default"
-                          : "secondary"
-                    }
+                    variant={customer.plan_type === "free" ? "secondary" : "default"}
                   >
                     {planLabels[customer.plan_type] || customer.plan_type}
                   </Badge>
@@ -168,13 +99,11 @@ export default async function AdminCustomersPage({
                 <TableCell className="text-right font-medium">
                   {customer.credits}cr
                 </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  -
+                <TableCell className="text-sm text-muted-foreground">
+                  {formatDate(customer.user?.created_at)}
                 </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {customer.expires_at
-                    ? new Date(customer.expires_at).toLocaleDateString("ko-KR")
-                    : "-"}
+                <TableCell className="text-sm text-muted-foreground">
+                  {formatDate(customer.expires_at)}
                 </TableCell>
               </TableRow>
             ))}
@@ -188,6 +117,7 @@ export default async function AdminCustomersPage({
           </TableBody>
         </Table>
       </div>
+
       <AdminPagination currentPage={currentPage} totalPages={totalPages} />
     </div>
   );

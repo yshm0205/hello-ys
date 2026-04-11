@@ -11,6 +11,7 @@ type CustomerUser = {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  created_at: string | null;
 };
 
 type CustomerPlan = {
@@ -106,7 +107,7 @@ async function getCustomerDetail(userId: string): Promise<CustomerDetail | null>
 
   const { data: user } = await supabase
     .from("users")
-    .select("id, email, full_name, avatar_url")
+    .select("id, email, full_name, avatar_url, created_at")
     .eq("id", userId)
     .single();
 
@@ -270,7 +271,7 @@ export default async function CustomerDetailPage({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">{t("joinedAt")}</p>
-                <p className="font-medium text-foreground">-</p>
+                <p className="font-medium text-foreground">{formatDate(user.created_at)}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">{t("creditBalance")}</p>

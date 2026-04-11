@@ -1,4 +1,11 @@
-import { createAdminClient } from "@/utils/supabase/admin";
+import { Coins, TrendingUp, Users } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
+import { CreditAdjustDialog } from "@/components/admin/CreditAdjustDialog";
+import { AdminFilter } from "@/components/admin/AdminFilter";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSearch } from "@/components/admin/AdminSearch";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -8,85 +15,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { getTranslations } from "next-intl/server";
-import { AdminSearch } from "@/components/admin/AdminSearch";
-import { AdminPagination } from "@/components/admin/AdminPagination";
-import { AdminFilter } from "@/components/admin/AdminFilter";
-import { Coins, TrendingUp, TrendingDown, Users } from "lucide-react";
-import { CreditAdjustDialog } from "@/components/admin/CreditAdjustDialog";
+import { getPaginatedUserPlans } from "@/lib/admin/user-plans";
+import { createAdminClient } from "@/utils/supabase/admin";
+
+const planLabels: Record<string, string> = {
+  free: "무료",
+  pro: "Pro",
+  allinone: "올인원",
+};
 
 async function getCreditStats() {
   const supabase = createAdminClient();
 
-  // Get all user plans for aggregate stats
-  const { data: allPlans } = await supabase
-    .from("user_plans")
-    .select("credits, plan_type, user_id");
+  const [{ data: allPlans }, { data: ledgerRows, error: ledgerError }, { data: purchases }] =
+    await Promise.all([
+      supabase.from("user_plans").select("credits, user_id"),
+      supabase.from("credit_transactions").select("amount"),
+      supabase.from("toss_payments").select("credits, status").eq("status", "DONE"),
+    ]);
 
   const totalUsers = allPlans?.length || 0;
-  const totalRemaining = allPlans?.reduce((sum, p) => sum + (p.credits || 0), 0) || 0;
+  const totalRemaining = allPlans?.reduce((sum, plan) => sum + (plan.credits || 0), 0) || 0;
   const avgPerUser = totalUsers > 0 ? Math.round(totalRemaining / totalUsers) : 0;
 
-  return { totalUsers, totalRemaining, avgPerUser };
-}
-
-async function getCreditUsers(filters?: {
-  q?: string;
-  planType?: string;
-  page?: number;
-  pageSize?: number;
-}) {
-  const supabase = createAdminClient();
-  const page = filters?.page || 1;
-  const pageSize = filters?.pageSize || 15;
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  // 1. user_plans 조회
-  let query = supabase
-    .from("user_plans")
-    .select("user_id, credits, plan_type, expires_at", { count: "exact" })
-    .order("credits", { ascending: false });
-
-  if (filters?.planType && filters.planType !== "all") {
-    query = query.eq("plan_type", filters.planType);
-  }
-
-  const { data: plans, count } = await query.range(from, to);
-
-  // 2. users 별도 조회
-  const userIds = (plans || []).map((p: Record<string, unknown>) => p.user_id as string);
-  const { data: users } = userIds.length > 0
-    ? await supabase.from("users").select("id, email, full_name").in("id", userIds)
-    : { data: [] };
-
-  const userMap = new Map((users || []).map((u: Record<string, unknown>) => [u.id as string, u]));
-
-  const mappedData = (plans || []).map((item: Record<string, unknown>) => {
-    const userId = item.user_id as string;
-    const userInfo = userMap.get(userId) as { id: string; email: string; full_name: string | null } | undefined;
-    return {
-      user_id: userId,
-      credits: item.credits as number,
-      plan_type: item.plan_type as string,
-      expires_at: item.expires_at as string | null,
-      user: userInfo || null,
-    };
-  });
-
-  let filteredData = mappedData;
-
-  if (filters?.q) {
-    const q = filters.q.toLowerCase();
-    filteredData = filteredData.filter(
-      (item) => item.user?.email?.toLowerCase().includes(q)
-    );
-  }
+  const ledgerIssued = ledgerError
+    ? 0
+    : (ledgerRows || []).reduce(
+        (sum, row) => sum + (row.amount > 0 ? row.amount : 0),
+        0,
+      );
+  const purchasedIssued = (purchases || []).reduce(
+    (sum, row) => sum + (row.credits || 0),
+    0,
+  );
 
   return {
-    data: filteredData,
-    totalPages: Math.ceil((count || 0) / pageSize),
+    totalUsers,
+    totalRemaining,
+    avgPerUser,
+    totalIssued: ledgerIssued > 0 ? ledgerIssued : purchasedIssued,
+    totalIssuedSource: ledgerIssued > 0 ? "credit_transactions 기준" : "toss_payments 기준",
   };
 }
 
@@ -96,17 +64,17 @@ export default async function AdminCreditsPage({
   searchParams: Promise<{ q?: string; planType?: string; page?: string }>;
 }) {
   const { q, planType, page } = await searchParams;
-  const currentPage = parseInt(page || "1");
+  const currentPage = parseInt(page || "1", 10);
   const t = await getTranslations("Admin.credits");
 
   const [stats, users] = await Promise.all([
     getCreditStats(),
-    getCreditUsers({ q, planType, page: currentPage }),
+    getPaginatedUserPlans({ q, planType, page: currentPage, pageSize: 15 }),
   ]);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
@@ -114,7 +82,6 @@ export default async function AdminCreditsPage({
         <CreditAdjustDialog />
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -154,21 +121,20 @@ export default async function AdminCreditsPage({
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-muted-foreground">-</div>
+            <div className="text-2xl font-bold">{stats.totalIssued.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              Requires credit_transactions table
+              {stats.totalIssuedSource}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* User Credits Table */}
       <Card>
         <CardHeader>
           <CardTitle>{t("transactionHistory")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <AdminSearch placeholder="Search user email..." />
             <AdminFilter
               name="planType"
@@ -181,7 +147,7 @@ export default async function AdminCreditsPage({
             />
           </div>
 
-          <div className="border rounded-md">
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -205,15 +171,9 @@ export default async function AdminCreditsPage({
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={
-                          item.plan_type === "allinone"
-                            ? "default"
-                            : item.plan_type === "pro"
-                              ? "default"
-                              : "secondary"
-                        }
+                        variant={item.plan_type === "free" ? "secondary" : "default"}
                       >
-                        {item.plan_type}
+                        {planLabels[item.plan_type] || item.plan_type}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">
@@ -231,6 +191,7 @@ export default async function AdminCreditsPage({
               </TableBody>
             </Table>
           </div>
+
           <AdminPagination
             currentPage={currentPage}
             totalPages={users.totalPages}

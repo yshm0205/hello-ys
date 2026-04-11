@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { AdminSearch } from "@/components/admin/AdminSearch";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { VideoThumbnail } from "@/components/admin/VideoThumbnail";
 import { HotListTriggerButton } from "@/components/admin/HotListTriggerButton";
 import {
   BulkUploadButton,
@@ -95,6 +96,7 @@ async function getAvailableMonths() {
 
 interface ChannelListItem {
   id: string;
+  channel_id: string | null;
   month: string;
   title: string;
   subscriber_count: number;
@@ -129,7 +131,7 @@ async function getChannelList(filters?: {
 
   if (filters?.q) {
     query = query.or(
-      `title.ilike.%${filters.q}%,id.ilike.%${filters.q}%`
+      `title.ilike.%${filters.q}%,channel_id.ilike.%${filters.q}%`
     );
   }
 
@@ -516,17 +518,10 @@ export default async function AdminHotListPage({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-start gap-3">
-                          {entry.video?.thumbnail_url ? (
-                            <img
-                              src={entry.video.thumbnail_url}
-                              alt=""
-                              className="h-12 w-16 rounded-md border object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-12 w-16 items-center justify-center rounded-md border bg-muted text-xs text-muted-foreground">
-                              VIDEO
-                            </div>
-                          )}
+                          <VideoThumbnail
+                            src={entry.video?.thumbnail_url}
+                            videoId={entry.video?.video_id || entry.video_id}
+                          />
                           <div className="space-y-1">
                             <div className="font-medium text-foreground">
                               {entry.video?.title || entry.video_id}

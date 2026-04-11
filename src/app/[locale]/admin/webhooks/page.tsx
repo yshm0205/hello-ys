@@ -1,6 +1,5 @@
-import { createAdminClient } from "@/utils/supabase/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,9 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getTranslations } from "next-intl/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 
-interface PaymentLog {
+type PaymentLog = {
   id: string;
   payment_key: string;
   order_id: string;
@@ -21,7 +20,7 @@ interface PaymentLog {
   status: string;
   created_at: string;
   user: { email: string } | null;
-}
+};
 
 async function getPaymentLogs(): Promise<PaymentLog[]> {
   const supabase = createAdminClient();
@@ -32,28 +31,28 @@ async function getPaymentLogs(): Promise<PaymentLog[]> {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  return (data as unknown as PaymentLog[]) || [];
+  return (data as PaymentLog[]) || [];
 }
 
 export default async function AdminPaymentLogsPage() {
   const logs = await getPaymentLogs();
-  await getTranslations("Admin.webhooks");
 
   const stats = {
     total: logs.length,
-    done: logs.filter((l) => l.status === "DONE").length,
-    totalAmount: logs.reduce((sum, l) => sum + l.amount, 0),
-    totalCredits: logs.reduce((sum, l) => sum + l.credits, 0),
+    done: logs.filter((log) => log.status === "DONE").length,
+    totalAmount: logs.reduce((sum, log) => sum + (log.amount || 0), 0),
+    totalCredits: logs.reduce((sum, log) => sum + (log.credits || 0), 0),
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">결제 로그</h1>
-        <p className="text-muted-foreground">토스페이먼츠 결제 처리 내역</p>
+        <p className="text-muted-foreground">
+          토스 결제 확인 API를 통해 저장된 최근 결제 처리 이력입니다.
+        </p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -75,7 +74,7 @@ export default async function AdminPaymentLogsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">총 금액</CardTitle>
+            <CardTitle className="text-sm font-medium">총 결제액</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -85,7 +84,7 @@ export default async function AdminPaymentLogsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">총 크레딧</CardTitle>
+            <CardTitle className="text-sm font-medium">총 충전 크레딧</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-violet-600">
@@ -95,10 +94,9 @@ export default async function AdminPaymentLogsPage() {
         </Card>
       </div>
 
-      {/* Logs Table */}
       <Card>
         <CardHeader>
-          <CardTitle>최근 결제 로그 (50건)</CardTitle>
+          <CardTitle>최근 결제 처리 로그 (50건)</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -116,7 +114,7 @@ export default async function AdminPaymentLogsPage() {
             <TableBody>
               {logs.map((log) => (
                 <TableRow key={log.id}>
-                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                     {new Date(log.created_at).toLocaleString("ko-KR")}
                   </TableCell>
                   <TableCell className="text-sm">
@@ -133,16 +131,16 @@ export default async function AdminPaymentLogsPage() {
                     +{log.credits}cr
                   </TableCell>
                   <TableCell>
-                    <Badge variant={log.status === "DONE" ? "default" : "destructive"}>
+                    <Badge variant={log.status === "DONE" ? "default" : "secondary"}>
                       {log.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">
-                    {log.payment_key.substring(0, 20)}...
+                    {log.payment_key.slice(0, 20)}...
                   </TableCell>
                 </TableRow>
               ))}
-              {logs.length === 0 && (
+              {!logs.length && (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
                     결제 로그가 없습니다.

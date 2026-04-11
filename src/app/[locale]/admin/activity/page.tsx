@@ -1,4 +1,9 @@
-import { createAdminClient } from "@/utils/supabase/admin";
+import { Activity, Coins, FileText, UserPlus } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSearch } from "@/components/admin/AdminSearch";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -8,11 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { getTranslations } from "next-intl/server";
-import { AdminSearch } from "@/components/admin/AdminSearch";
-import { AdminPagination } from "@/components/admin/AdminPagination";
-import { Activity, FileText, Coins, UserPlus } from "lucide-react";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 async function getActivityStats() {
   const supabase = createAdminClient();
@@ -20,18 +21,61 @@ async function getActivityStats() {
   today.setHours(0, 0, 0, 0);
   const todayISO = today.toISOString();
 
-  // New users today
-  const { count: newUsersToday } = await supabase
-    .from("users")
-    .select("*", { count: "exact", head: true })
-    .gte("created_at", todayISO);
+  const [
+    { count: newUsersToday },
+    { count: totalUsers },
+    { count: scriptsToday },
+    { data: scriptUsers },
+    { data: paymentUsers },
+    { data: completedLectureUsers },
+    { data: batchUsers },
+    { data: creditUsageRows, error: creditUsageError },
+  ] = await Promise.all([
+    supabase.from("users").select("id", { count: "exact", head: true }).gte("created_at", todayISO),
+    supabase.from("users").select("id", { count: "exact", head: true }),
+    supabase
+      .from("script_generations")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", todayISO),
+    supabase
+      .from("script_generations")
+      .select("user_id")
+      .gte("created_at", todayISO),
+    supabase
+      .from("toss_payments")
+      .select("user_id")
+      .gte("created_at", todayISO),
+    supabase
+      .from("lecture_progress")
+      .select("user_id")
+      .gte("completed_at", todayISO),
+    supabase
+      .from("batch_job_items")
+      .select("user_id")
+      .gte("created_at", todayISO),
+    supabase
+      .from("credit_transactions")
+      .select("amount")
+      .lt("amount", 0)
+      .gte("created_at", todayISO),
+  ]);
 
-  // Total users
-  const { count: totalUsers } = await supabase
-    .from("users")
-    .select("*", { count: "exact", head: true });
+  const activeUserIds = new Set<string>();
+
+  for (const row of scriptUsers || []) activeUserIds.add(row.user_id);
+  for (const row of paymentUsers || []) activeUserIds.add(row.user_id);
+  for (const row of completedLectureUsers || []) activeUserIds.add(row.user_id);
+  for (const row of batchUsers || []) activeUserIds.add(row.user_id);
+
+  const creditsUsedToday = creditUsageError
+    ? null
+    : (creditUsageRows || []).reduce((sum, row) => sum + Math.abs(row.amount || 0), 0);
 
   return {
+    dau: activeUserIds.size,
+    scriptsToday: scriptsToday || 0,
+    creditsUsedToday,
+    creditsSource: creditUsageError ? "credit ledger 미설정" : "credit_transactions 기준",
     newUsersToday: newUsersToday || 0,
     totalUsers: totalUsers || 0,
   };
@@ -60,26 +104,23 @@ async function getUserList(filters?: {
   }
 
   const { data: users, count } = await query.range(from, to);
+  const userIds = (users || []).map((user) => user.id);
 
-  // Get credit info for each user
-  const userIds = (users || []).map((u) => u.id);
-  const { data: plans } = await supabase
-    .from("user_plans")
-    .select("user_id, credits, plan_type")
-    .in("user_id", userIds.length > 0 ? userIds : ["__none__"]);
+  const { data: plans } = userIds.length
+    ? await supabase
+        .from("user_plans")
+        .select("user_id, credits, plan_type")
+        .in("user_id", userIds)
+    : { data: [] };
 
-  const planMap = new Map(
-    (plans || []).map((p) => [p.user_id, p])
-  );
-
-  const enrichedUsers = (users || []).map((u) => ({
-    ...u,
-    plan: planMap.get(u.id) || null,
-  }));
+  const planMap = new Map((plans || []).map((plan) => [plan.user_id, plan]));
 
   return {
-    data: enrichedUsers,
-    totalPages: Math.ceil((count || 0) / pageSize),
+    data: (users || []).map((user) => ({
+      ...user,
+      plan: planMap.get(user.id) || null,
+    })),
+    totalPages: Math.max(1, Math.ceil((count || 0) / pageSize)),
   };
 }
 
@@ -89,7 +130,7 @@ export default async function AdminActivityPage({
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   const { q, page } = await searchParams;
-  const currentPage = parseInt(page || "1");
+  const currentPage = parseInt(page || "1", 10);
   const t = await getTranslations("Admin.activity");
 
   const [stats, users] = await Promise.all([
@@ -104,7 +145,6 @@ export default async function AdminActivityPage({
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -112,8 +152,10 @@ export default async function AdminActivityPage({
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-muted-foreground">-</div>
-            <p className="text-xs text-muted-foreground">{t("dauDesc")}</p>
+            <div className="text-2xl font-bold">{stats.dau}</div>
+            <p className="text-xs text-muted-foreground">
+              오늘 스크립트/결제/강의완료/배치 활동 사용자
+            </p>
           </CardContent>
         </Card>
 
@@ -125,8 +167,10 @@ export default async function AdminActivityPage({
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-muted-foreground">-</div>
-            <p className="text-xs text-muted-foreground">{t("scriptsDesc")}</p>
+            <div className="text-2xl font-bold">{stats.scriptsToday}</div>
+            <p className="text-xs text-muted-foreground">
+              script_generations 기준
+            </p>
           </CardContent>
         </Card>
 
@@ -138,8 +182,10 @@ export default async function AdminActivityPage({
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-muted-foreground">-</div>
-            <p className="text-xs text-muted-foreground">{t("creditsDesc")}</p>
+            <div className="text-2xl font-bold">
+              {stats.creditsUsedToday === null ? "-" : stats.creditsUsedToday}
+            </div>
+            <p className="text-xs text-muted-foreground">{stats.creditsSource}</p>
           </CardContent>
         </Card>
 
@@ -159,7 +205,6 @@ export default async function AdminActivityPage({
         </Card>
       </div>
 
-      {/* User List */}
       <Card>
         <CardHeader>
           <CardTitle>{t("userList")}</CardTitle>
@@ -167,7 +212,7 @@ export default async function AdminActivityPage({
         <CardContent className="space-y-4">
           <AdminSearch placeholder="Search email..." />
 
-          <div className="border rounded-md">
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -194,8 +239,8 @@ export default async function AdminActivityPage({
                     <TableCell className="text-right font-medium">
                       {user.plan?.credits ?? "-"}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {new Date(user.created_at).toLocaleDateString()}
+                    <TableCell className="text-sm text-muted-foreground">
+                      {new Date(user.created_at).toLocaleDateString("ko-KR")}
                     </TableCell>
                   </TableRow>
                 ))}

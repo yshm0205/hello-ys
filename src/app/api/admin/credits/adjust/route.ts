@@ -1,15 +1,11 @@
-/**
- * Admin Credit Adjust API
- * 관리자가 특정 사용자의 크레딧을 수동 조정
- */
-
-import { createClient } from "@/utils/supabase/server";
-import { createAdminClient } from "@/utils/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
+
+import { recordCreditTransaction } from "@/lib/credits/server";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    // Admin check
     const supabase = await createClient();
     const {
       data: { user },
@@ -27,16 +23,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, amount, reason } = body;
 
-    if (!email || !amount || !reason) {
+    if (!email || typeof amount !== "number" || !reason) {
       return NextResponse.json(
         { error: "email, amount, reason are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const adminClient = createAdminClient();
 
-    // Find user by email
     const { data: targetUser } = await adminClient
       .from("users")
       .select("id")
@@ -46,11 +41,10 @@ export async function POST(request: NextRequest) {
     if (!targetUser) {
       return NextResponse.json(
         { error: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    // Get current credits
     const { data: userPlan } = await adminClient
       .from("user_plans")
       .select("credits")
@@ -60,13 +54,14 @@ export async function POST(request: NextRequest) {
     if (!userPlan) {
       return NextResponse.json(
         { error: "User plan not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    const newCredits = Math.max(0, userPlan.credits + amount);
+    const previousCredits = userPlan.credits;
+    const newCredits = Math.max(0, previousCredits + amount);
+    const appliedAdjustment = newCredits - previousCredits;
 
-    // Update credits
     const { error: updateError } = await adminClient
       .from("user_plans")
       .update({ credits: newCredits })
@@ -75,23 +70,38 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       return NextResponse.json(
         { error: "Failed to update credits" },
-        { status: 500 }
+        { status: 500 },
       );
+    }
+
+    if (appliedAdjustment !== 0) {
+      await recordCreditTransaction({
+        userId: targetUser.id,
+        type: appliedAdjustment > 0 ? "manual_add" : "manual_deduct",
+        amount: appliedAdjustment,
+        balanceAfter: newCredits,
+        description: "admin credit adjustment",
+        adminNote: reason,
+        metadata: {
+          adminEmail: user.email,
+          requestedAmount: amount,
+        },
+      });
     }
 
     return NextResponse.json({
       success: true,
       email,
-      previousCredits: userPlan.credits,
+      previousCredits,
       newCredits,
-      adjustment: amount,
+      adjustment: appliedAdjustment,
       reason,
     });
   } catch (error) {
     console.error("[Admin Credit Adjust] Error:", error);
     return NextResponse.json(
       { error: "Server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
