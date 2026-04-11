@@ -1,6 +1,10 @@
-import { createAdminClient } from "@/utils/supabase/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarDays, Database, Users } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSearch } from "@/components/admin/AdminSearch";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,90 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getTranslations } from "next-intl/server";
-import {
-  Flame,
-  Database,
-  Users,
-  CalendarDays,
-  Trophy,
-  TrendingUp,
-} from "lucide-react";
-import { AdminSearch } from "@/components/admin/AdminSearch";
-import { AdminPagination } from "@/components/admin/AdminPagination";
-import { VideoThumbnail } from "@/components/admin/VideoThumbnail";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { HotListTriggerButton } from "@/components/admin/HotListTriggerButton";
 import {
   BulkUploadButton,
-  EditChannelListButton,
   DeleteChannelListButton,
   DeleteMonthButton,
+  EditChannelListButton,
 } from "@/components/admin/ChannelListForm";
-import {
-  AddHotListDailyButton,
-  DeleteHotListDailyButton,
-  EditHotListDailyButton,
-} from "@/components/admin/HotListDailyForm";
-
-interface HotChannel {
-  channel_id: string;
-  title: string;
-  thumbnail_url: string | null;
-  subscriber_count: number;
-  video_count: number;
-  total_view_count: number;
-  avg_view_count: number;
-  median_views: number;
-  category: string;
-  subcategory: string;
-  format: string;
-  channel_url: string;
-  month: string;
-  updated_at: string | null;
-}
-
-interface HotVideo {
-  video_id: string;
-  channel_id: string | null;
-  title: string;
-  thumbnail_url: string | null;
-}
-
-interface HotListDailyRecord {
-  id: string;
-  date: string;
-  video_id: string;
-  rank: number | null;
-  view_count: number;
-  subscriber_count: number;
-  avg_channel_views: number;
-  contribution_rate: number;
-  performance_rate: number;
-  view_velocity: number;
-  engagement_rate: number;
-  score: number;
-  reason_flags: string[] | null;
-}
-
-interface EnrichedHotListDailyRecord extends HotListDailyRecord {
-  video: HotVideo | null;
-  channel: HotChannel | null;
-}
-
-interface DailyDateSummary {
-  date: string;
-  count: number;
-}
-
-async function getAvailableMonths() {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("channel_list")
-    .select("month")
-    .order("month", { ascending: false });
-
-  return [...new Set((data || []).map((r) => r.month))];
-}
 
 interface ChannelListItem {
   id: string;
@@ -106,6 +34,16 @@ interface ChannelListItem {
   subcategory: string;
   format: string;
   channel_url: string;
+}
+
+async function getAvailableMonths() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("channel_list")
+    .select("month")
+    .order("month", { ascending: false });
+
+  return [...new Set((data || []).map((row) => row.month))];
 }
 
 async function getChannelList(filters?: {
@@ -130,91 +68,16 @@ async function getChannelList(filters?: {
   }
 
   if (filters?.q) {
-    query = query.or(
-      `title.ilike.%${filters.q}%,channel_id.ilike.%${filters.q}%`
-    );
+    query = query.or(`title.ilike.%${filters.q}%,channel_id.ilike.%${filters.q}%`);
   }
 
   const { data, count } = await query.range(from, to);
 
   return {
-    data: ((data as ChannelListItem[]) || []),
+    data: (data as ChannelListItem[]) || [],
     totalItems: count || 0,
     totalPages: Math.max(1, Math.ceil((count || 0) / pageSize)),
   };
-}
-
-async function getDailyDates() {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("hot_list_daily")
-    .select("date")
-    .order("date", { ascending: false });
-
-  const counts = new Map<string, number>();
-  for (const row of data || []) {
-    counts.set(row.date, (counts.get(row.date) || 0) + 1);
-  }
-
-  return Array.from(counts.entries()).map(([date, count]) => ({
-    date,
-    count,
-  })) as DailyDateSummary[];
-}
-
-async function getDailyEntries(date: string | null) {
-  if (!date) {
-    return [] as EnrichedHotListDailyRecord[];
-  }
-
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("hot_list_daily")
-    .select("*")
-    .eq("date", date)
-    .order("rank", { ascending: true })
-    .limit(100);
-
-  const rows = ((data as HotListDailyRecord[]) || []);
-  const videoIds = rows.map((row) => row.video_id);
-
-  const { data: videosData } = videoIds.length
-    ? await supabase
-        .from("hot_videos")
-        .select("video_id, channel_id, title, thumbnail_url")
-        .in("video_id", videoIds)
-    : { data: [] };
-
-  const videos = (videosData || []) as HotVideo[];
-  const videoMap = new Map(videos.map((video) => [video.video_id, video]));
-
-  const channelIds = Array.from(
-    new Set(videos.map((video) => video.channel_id).filter(Boolean))
-  ) as string[];
-
-  const { data: channelsData } = channelIds.length
-    ? await supabase
-        .from("hot_channels")
-        .select(
-          "channel_id, title, thumbnail_url, subscriber_count, video_count, total_view_count, avg_view_count, updated_at"
-        )
-        .in("channel_id", channelIds)
-    : { data: [] };
-
-  const channels = (channelsData || []) as HotChannel[];
-  const channelMap = new Map(channels.map((channel) => [channel.channel_id, channel]));
-
-  return rows.map((row) => {
-    const video = videoMap.get(row.video_id) || null;
-    const channel = video?.channel_id ? channelMap.get(video.channel_id) || null : null;
-
-    return {
-      ...row,
-      reason_flags: Array.isArray(row.reason_flags) ? row.reason_flags : [],
-      video,
-      channel,
-    };
-  });
 }
 
 function formatNumber(value: number | null | undefined) {
@@ -222,15 +85,14 @@ function formatNumber(value: number | null | undefined) {
 }
 
 function buildQueryString(
-  current: { q?: string; page?: string; date?: string; month?: string },
-  next: Partial<{ q?: string; page?: string; date?: string; month?: string }>
+  current: { q?: string; page?: string; month?: string },
+  next: Partial<{ q?: string; page?: string; month?: string }>,
 ) {
   const params = new URLSearchParams();
   const merged = { ...current, ...next };
 
   if (merged.q) params.set("q", merged.q);
   if (merged.page) params.set("page", merged.page);
-  if (merged.date) params.set("date", merged.date);
   if (merged.month) params.set("month", merged.month);
 
   return params.toString();
@@ -239,26 +101,21 @@ function buildQueryString(
 export default async function AdminHotListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; date?: string; month?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; month?: string }>;
 }) {
-  const { q, page, date, month } = await searchParams;
+  const { q, page, month } = await searchParams;
   const currentPage = parseInt(page || "1", 10);
   const t = await getTranslations("Admin.hotList");
 
   const availableMonths = await getAvailableMonths();
-  const selectedMonth = month && availableMonths.includes(month) ? month : availableMonths[0] || "";
+  const selectedMonth =
+    month && availableMonths.includes(month) ? month : availableMonths[0] || "";
 
-  const [hotList, dailyDates] = await Promise.all([
-    getChannelList({ q, page: currentPage, month: selectedMonth }),
-    getDailyDates(),
-  ]);
-
-  const selectedDate =
-    date && dailyDates.some((item) => item.date === date)
-      ? date
-      : dailyDates[0]?.date || null;
-  const dailyEntries = await getDailyEntries(selectedDate);
-  const latestDate = dailyDates[0]?.date || null;
+  const hotList = await getChannelList({
+    q,
+    page: currentPage,
+    month: selectedMonth,
+  });
 
   return (
     <div className="space-y-8">
@@ -268,7 +125,7 @@ export default async function AdminHotListPage({
             {t("title")}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            채널 캐시와 홈페이지용 날짜별 HOT 랭킹을 함께 관리합니다.
+            수강생에게 노출되는 월별 채널 리스트를 관리합니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -277,7 +134,7 @@ export default async function AdminHotListPage({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">전체 채널</CardTitle>
@@ -302,25 +159,13 @@ export default async function AdminHotListPage({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">수집 날짜</CardTitle>
+            <CardTitle className="text-sm font-medium">월 데이터</CardTitle>
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dailyDates.length}</div>
+            <div className="text-2xl font-bold">{availableMonths.length}</div>
             <p className="text-xs text-muted-foreground">
-              최신 {latestDate || "-"}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">선택 날짜 랭킹</CardTitle>
-            <Flame className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dailyEntries.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {selectedDate || "데이터 없음"}
+              최신 {availableMonths[0] || "-"}
             </p>
           </CardContent>
         </Card>
@@ -331,35 +176,34 @@ export default async function AdminHotListPage({
           <div>
             <h2 className="text-xl font-semibold text-foreground">채널 리스트</h2>
             <p className="text-sm text-muted-foreground">
-              홈페이지에 노출되는 월별 채널 리스트를 관리합니다.
+              월별 벤치마크 채널 목록과 노출 지표를 관리합니다.
             </p>
           </div>
           <AdminSearch placeholder="채널명 또는 채널 ID 검색..." />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {availableMonths.map((m) => {
-            const mQuery = buildQueryString(
-              { q, page, date: selectedDate || undefined, month: selectedMonth },
-              { month: m, page: "1" }
+          {availableMonths.map((entryMonth) => {
+            const query = buildQueryString(
+              { q, page, month: selectedMonth },
+              { month: entryMonth, page: "1" },
             );
+
             return (
               <a
-                key={m}
-                href={`?${mQuery}`}
+                key={entryMonth}
+                href={`?${query}`}
                 className={`inline-flex items-center rounded-full border px-3 py-1 text-sm transition-colors ${
-                  m === selectedMonth
+                  entryMonth === selectedMonth
                     ? "border-violet-500 bg-violet-500 text-white"
                     : "border-border bg-background text-foreground hover:bg-muted"
                 }`}
               >
-                {m}
+                {entryMonth}
               </a>
             );
           })}
-          {selectedMonth && (
-            <DeleteMonthButton month={selectedMonth} />
-          )}
+          {selectedMonth && <DeleteMonthButton month={selectedMonth} />}
         </div>
 
         <Card>
@@ -372,7 +216,7 @@ export default async function AdminHotListPage({
                 <TableHeader>
                   <TableRow>
                     <TableHead>채널</TableHead>
-                    <TableHead>대분류</TableHead>
+                    <TableHead>카테고리</TableHead>
                     <TableHead className="text-right">구독자</TableHead>
                     <TableHead className="text-right">평균 조회수</TableHead>
                     <TableHead className="text-right">중위 조회수</TableHead>
@@ -380,33 +224,38 @@ export default async function AdminHotListPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {hotList.data.map((ch) => (
-                    <TableRow key={ch.id}>
+                  {hotList.data.map((channel) => (
+                    <TableRow key={channel.id}>
                       <TableCell>
-                        <div className="font-medium text-foreground">
-                          {ch.title}
-                        </div>
+                        <div className="font-medium text-foreground">{channel.title}</div>
+                        {channel.channel_id && (
+                          <div className="text-xs text-muted-foreground">
+                            {channel.channel_id}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {ch.category ? (
-                          <Badge variant="secondary">{ch.category}</Badge>
-                        ) : "-"}
+                        {channel.category ? (
+                          <Badge variant="secondary">{channel.category}</Badge>
+                        ) : (
+                          "-"
+                        )}
                       </TableCell>
                       <TableCell className="text-right text-sm">
-                        {formatNumber(ch.subscriber_count)}
+                        {formatNumber(channel.subscriber_count)}
                       </TableCell>
                       <TableCell className="text-right text-sm font-medium">
-                        {formatNumber(ch.avg_view_count)}
+                        {formatNumber(channel.avg_view_count)}
                       </TableCell>
                       <TableCell className="text-right text-sm">
-                        {formatNumber(ch.median_views)}
+                        {formatNumber(channel.median_views)}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <EditChannelListButton
-                            channel={ch as unknown as Record<string, unknown>}
+                            channel={channel as unknown as Record<string, unknown>}
                           />
-                          <DeleteChannelListButton id={ch.id} />
+                          <DeleteChannelListButton id={channel.id} />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -414,7 +263,7 @@ export default async function AdminHotListPage({
                   {!hotList.data.length && (
                     <TableRow>
                       <TableCell colSpan={6} className="h-24 text-center">
-                        채널 데이터가 없습니다. 일괄 업로드로 등록해주세요.
+                        채널 데이터가 없습니다. 엑셀 업로드로 등록해 주세요.
                       </TableCell>
                     </TableRow>
                   )}
@@ -423,163 +272,11 @@ export default async function AdminHotListPage({
             </div>
           </CardContent>
         </Card>
+
         <AdminPagination
           currentPage={currentPage}
           totalPages={hotList.totalPages}
         />
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">
-              일별 HOT 랭킹 관리
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              홈페이지에 노출되는 날짜별 영상 순위를 직접 확인하고 수정합니다.
-            </p>
-          </div>
-          <AddHotListDailyButton defaultDate={selectedDate || latestDate || ""} />
-        </div>
-
-        <Card>
-          <CardHeader className="gap-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-1">
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-violet-500" />
-                  {selectedDate
-                    ? `${selectedDate} 랭킹`
-                    : "수집된 랭킹 데이터가 없습니다"}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  최근 수집일을 클릭하면 해당 일자의 랭킹과 지표를 바로 수정할 수 있습니다.
-                </p>
-              </div>
-              {selectedDate && (
-                <Badge variant="secondary" className="w-fit">
-                  {dailyEntries.length}개 영상
-                </Badge>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {dailyDates.slice(0, 14).map((item) => {
-                const query = buildQueryString(
-                  { q, page, date: selectedDate || undefined },
-                  { date: item.date }
-                );
-
-                return (
-                  <a
-                    key={item.date}
-                    href={`?${query}`}
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors ${
-                      item.date === selectedDate
-                        ? "border-violet-500 bg-violet-500 text-white"
-                        : "border-border bg-background text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <span>{item.date}</span>
-                    <span
-                      className={`rounded-full px-1.5 py-0.5 text-xs ${
-                        item.date === selectedDate
-                          ? "bg-white/20 text-white"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {item.count}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px]">순위</TableHead>
-                    <TableHead>영상</TableHead>
-                    <TableHead className="text-right">조회수</TableHead>
-                    <TableHead className="text-right">성과율</TableHead>
-                    <TableHead className="text-right">속도</TableHead>
-                    <TableHead className="text-right">점수</TableHead>
-                    <TableHead className="w-[140px]">관리</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dailyEntries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell>
-                        <div className="font-semibold text-foreground">
-                          #{entry.rank || "-"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-start gap-3">
-                          <VideoThumbnail
-                            src={entry.video?.thumbnail_url}
-                            videoId={entry.video?.video_id || entry.video_id}
-                          />
-                          <div className="space-y-1">
-                            <div className="font-medium text-foreground">
-                              {entry.video?.title || entry.video_id}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {entry.channel?.title || "채널 미매핑"}
-                            </div>
-                            {!!entry.reason_flags?.length && (
-                              <div className="flex flex-wrap gap-1">
-                                {entry.reason_flags.slice(0, 3).map((flag) => (
-                                  <Badge
-                                    key={`${entry.id}-${flag}`}
-                                    variant="outline"
-                                    className="text-[10px]"
-                                  >
-                                    {flag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right text-sm">
-                        {formatNumber(entry.view_count)}
-                      </TableCell>
-                      <TableCell className="text-right text-sm">
-                        <div className="inline-flex items-center gap-1">
-                          <TrendingUp className="h-3.5 w-3.5 text-violet-500" />
-                          {entry.performance_rate.toFixed(1)}%
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right text-sm">
-                        {formatNumber(entry.view_velocity)}/h
-                      </TableCell>
-                      <TableCell className="text-right text-sm font-medium">
-                        {entry.score.toFixed(1)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <EditHotListDailyButton entry={entry} />
-                          <DeleteHotListDailyButton id={entry.id} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {!dailyEntries.length && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
-                        선택한 날짜의 HOT 랭킹 데이터가 없습니다.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
       </section>
     </div>
   );
