@@ -14,15 +14,14 @@ This project intentionally keeps only a small subset of tables readable with the
 - Used by: [src/app/api/hot-list/route.ts](/C:/Users/duj05/Desktop/hello-ys-temp/src/app/api/hot-list/route.ts), [src/app/api/hot-list/trends/route.ts](/C:/Users/duj05/Desktop/hello-ys-temp/src/app/api/hot-list/trends/route.ts)
 - Reason to keep public: public hot-list responses need channel title and metadata
 
-## Not intended to be public-write
+## Internal-only tables
 
 ### `video_snapshots`
 - Current role: internal daily snapshot storage for hot-video calculations
 - Used by: [src/lib/youtube/video-snapshot.ts](/C:/Users/duj05/Desktop/hello-ys-temp/src/lib/youtube/video-snapshot.ts)
 - Allowed access policy:
-  - `service_role` write only
-  - public read only if a real public endpoint starts using it
-- Current decision: keep public write blocked; public read should be treated as optional and removable unless a concrete read path is added
+  - `service_role` read/write only
+- Current decision: public read is not needed and should stay blocked unless a concrete public endpoint is added later
 
 ## Protected user data
 

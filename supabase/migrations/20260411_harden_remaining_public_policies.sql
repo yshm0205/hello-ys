@@ -3,6 +3,7 @@
 
 drop policy if exists "Allow admin full access on credit_transactions" on public.credit_transactions;
 drop policy if exists "Allow admin full access on hot_trends" on public.hot_trends;
+drop policy if exists "Anyone can read video_snapshots" on public.video_snapshots;
 
 drop policy if exists "Service can insert video_snapshots" on public.video_snapshots;
 drop policy if exists "Service can update video_snapshots" on public.video_snapshots;
