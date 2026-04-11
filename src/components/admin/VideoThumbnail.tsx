@@ -19,8 +19,15 @@ export function VideoThumbnail({
   alt = "",
   className = "h-12 w-16 rounded-md border object-cover",
 }: VideoThumbnailProps) {
+  const preferredSrc = useMemo(() => {
+    if (videoId) {
+      return buildFallback(videoId);
+    }
+
+    return src || null;
+  }, [src, videoId]);
   const fallbackSrc = useMemo(() => buildFallback(videoId), [videoId]);
-  const [currentSrc, setCurrentSrc] = useState(src || fallbackSrc || "");
+  const [currentSrc, setCurrentSrc] = useState(preferredSrc || "");
   const [hasFailed, setHasFailed] = useState(false);
 
   if (!currentSrc || hasFailed) {
