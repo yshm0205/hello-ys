@@ -89,7 +89,12 @@ function verifyWebhookSignature(
 ): boolean {
   const hmac = crypto.createHmac("sha256", secret);
   const digest = hmac.update(payload).digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+  const signatureBuffer = Buffer.from(signature.trim(), "utf8");
+  const digestBuffer = Buffer.from(digest, "utf8");
+  if (signatureBuffer.length !== digestBuffer.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(signatureBuffer, digestBuffer);
 }
 
 export async function POST(req: NextRequest) {
@@ -303,15 +308,17 @@ export async function POST(req: NextRequest) {
       .from("lemon_webhook_events")
       .update({ status: "processed", processed_at: new Date().toISOString() })
       .eq("event_id", eventId);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Webhook Error:", err);
+    const errorMessage =
+      err instanceof Error ? err.message : "Unknown error";
     // 에러 발생 시 처리 실패 표시
     await supabase
       .from("lemon_webhook_events")
       .update({
         status: "failed",
         processed_at: new Date().toISOString(),
-        error_message: err.message || "Unknown error",
+        error_message: errorMessage,
       })
       .eq("event_id", eventId);
 

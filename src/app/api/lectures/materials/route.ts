@@ -10,17 +10,18 @@ export async function GET(request: NextRequest) {
         }
 
         const vodId = request.nextUrl.searchParams.get("vodId");
-
-        let query = supabase
-            .from("lecture_materials")
-            .select("id, vod_id, title, type, url, file_size, sort_order")
-            .order("sort_order", { ascending: true });
-
-        if (vodId) {
-            query = query.eq("vod_id", vodId);
+        if (!vodId) {
+            return NextResponse.json({ error: "vodId required" }, { status: 400 });
+        }
+        if (!/^vod_\d{2}$/.test(vodId)) {
+            return NextResponse.json({ error: "Invalid vodId" }, { status: 400 });
         }
 
-        const { data, error } = await query;
+        const { data, error } = await supabase
+            .from("lecture_materials")
+            .select("id, vod_id, title, type, url, file_size, sort_order")
+            .eq("vod_id", vodId)
+            .order("sort_order", { ascending: true });
 
         if (error) {
             console.error("[Materials API] DB Error:", error);

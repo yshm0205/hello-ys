@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { getPublishedLectureVideoByVodId } from "@/lib/lectures/server";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -10,12 +11,20 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const videoId = body.videoId;
-        if (!videoId || typeof videoId !== "string") {
-            return NextResponse.json({ error: "videoId required" }, { status: 400 });
+        const vodId = body.vodId;
+        if (!vodId || typeof vodId !== "string") {
+            return NextResponse.json({ error: "vodId required" }, { status: 400 });
+        }
+        if (!/^vod_\d{2}$/.test(vodId)) {
+            return NextResponse.json({ error: "Invalid vodId" }, { status: 400 });
         }
 
-        const res = await fetch(`https://dev.vdocipher.com/api/videos/${videoId}/otp`, {
+        const lectureVideo = await getPublishedLectureVideoByVodId(vodId);
+        if (!lectureVideo) {
+            return NextResponse.json({ error: "Lecture video not found" }, { status: 404 });
+        }
+
+        const res = await fetch(`https://dev.vdocipher.com/api/videos/${lectureVideo.videoId}/otp`, {
             method: "POST",
             headers: {
                 "Authorization": `Apisecret ${process.env.VDOCIPHER_API_SECRET}`,

@@ -2,7 +2,7 @@ export interface LectureCatalogVod {
   id: string;
   title: string;
   duration: number;
-  vdoCipherId?: string;
+  isPlayable?: boolean;
 }
 
 export interface LectureCatalogChapter {

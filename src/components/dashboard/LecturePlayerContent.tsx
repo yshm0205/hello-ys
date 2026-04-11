@@ -57,7 +57,7 @@ interface LecturePlayerContentProps {
 
 // 모든 VOD를 순서대로 펼친 배열 생성
 function getAllVods(chapters: LectureCatalogChapter[]) {
-    const allVods: { id: string; title: string; duration: number; chapterTitle: string; chapterId: string; vdoCipherId?: string }[] = [];
+    const allVods: { id: string; title: string; duration: number; chapterTitle: string; chapterId: string; isPlayable?: boolean }[] = [];
     for (const ch of chapters) {
         for (const vod of ch.vods) {
             allVods.push({
@@ -169,14 +169,13 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
         setPlaybackInfo(null);
         setVideoError(null);
 
-        const vdoCipherId = currentVod?.vdoCipherId;
-        if (!vdoCipherId) return;
+        if (!currentVod?.isPlayable) return;
 
         setIsVideoLoading(true);
         fetch('/api/lectures/otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ videoId: vdoCipherId }),
+            body: JSON.stringify({ vodId }),
         })
             .then((res) => res.json())
             .then((data) => {
@@ -193,7 +192,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
             .finally(() => {
                 setIsVideoLoading(false);
             });
-    }, [vodId, currentVod?.vdoCipherId]);
+    }, [vodId, currentVod?.isPlayable]);
 
     // 수강 진도 불러오기 (completedVods + positions)
     useEffect(() => {
@@ -443,7 +442,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                     background: '#000',
                                 }}
                             >
-                                {currentVod.vdoCipherId ? (
+                                {currentVod.isPlayable ? (
                                     isVideoLoading ? (
                                         <div
                                             style={{
@@ -754,7 +753,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                                     {chapter.vods.map((vod) => {
                                                         const isDone = completedVods.includes(vod.id);
                                                         const isCurrent = vod.id === vodId;
-                                                        const isReady = !!vod.vdoCipherId;
+                                                        const isReady = !!vod.isPlayable;
 
                                                         const rowInner = (
                                                             <Group gap={8} wrap="nowrap">

@@ -1,12 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
+import { NextResponse } from 'next/server';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const YOUTUBE_OAUTH_STATE_COOKIE = 'youtube_oauth_state';
 
 // 프로덕션 URL (Vercel에서는 origin 감지 안 됨)
 const PRODUCTION_REDIRECT_URI = 'https://flowspot-kr.vercel.app/api/youtube/callback';
 
 // YouTube OAuth 시작 - 사용자를 Google 로그인 페이지로 리다이렉트
-export async function GET(request: NextRequest) {
+export async function GET() {
     if (!GOOGLE_CLIENT_ID) {
         return NextResponse.json({ error: 'GOOGLE_CLIENT_ID not configured' }, { status: 500 });
     }
@@ -28,8 +30,17 @@ export async function GET(request: NextRequest) {
     authUrl.searchParams.set('access_type', 'offline');
     authUrl.searchParams.set('prompt', 'consent');
 
-    // 콜백에서 사용할 redirect URI를 state에 저장
-    authUrl.searchParams.set('state', Buffer.from(redirectUri).toString('base64'));
+    const state = crypto.randomUUID();
+    authUrl.searchParams.set('state', state);
 
-    return NextResponse.redirect(authUrl.toString());
+    const response = NextResponse.redirect(authUrl.toString());
+    response.cookies.set(YOUTUBE_OAUTH_STATE_COOKIE, state, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 10,
+        path: '/',
+    });
+
+    return response;
 }

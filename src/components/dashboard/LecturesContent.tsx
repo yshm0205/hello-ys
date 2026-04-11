@@ -37,7 +37,7 @@ interface Vod {
     id: string;
     title: string;
     duration: number; // 분
-    vdoCipherId?: string;
+    isPlayable?: boolean;
 }
 
 interface Chapter {
@@ -59,10 +59,10 @@ const CHAPTERS: Chapter[] = [
         id: 'ch1',
         title: 'Part 1. 채널 기획',
         vods: [
-            { id: 'vod_02', title: '주제보다 먼저 정해야 할 한 가지', duration: 12, vdoCipherId: 'c478d967ac36483ead7203ea414468dc' },
-            { id: 'vod_03', title: '양산형 vs 직접 촬영, 어떻게 만들 것인가?', duration: 15, vdoCipherId: '21e19db2a4494c2a90010683607bfc39' },
-            { id: 'vod_04', title: '레드오션도 블루오션으로 바꾸는 채널 조합법', duration: 12, vdoCipherId: 'd8f85c93013949bb888ff8cc3a9ec32b' },
-            { id: 'vod_05', title: '내 취향은 빼고, 벤치마크 채널 찾는 법', duration: 18, vdoCipherId: 'a91251514a354df3a74e1bfcb738f048' },
+            { id: 'vod_02', title: '주제보다 먼저 정해야 할 한 가지', duration: 12, isPlayable: true },
+            { id: 'vod_03', title: '양산형 vs 직접 촬영, 어떻게 만들 것인가?', duration: 15, isPlayable: true },
+            { id: 'vod_04', title: '레드오션도 블루오션으로 바꾸는 채널 조합법', duration: 12, isPlayable: true },
+            { id: 'vod_05', title: '내 취향은 빼고, 벤치마크 채널 찾는 법', duration: 18, isPlayable: true },
         ],
     },
     {
@@ -293,7 +293,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                         <Stack gap={0}>
                                             {chapter.vods.map((vod) => {
                                                 const isDone = completedVods.includes(vod.id);
-                                                const isReady = !!vod.vdoCipherId;
+                                                const isReady = !!vod.isPlayable;
                                                 const rowContent = (
                                                     <Group justify="space-between">
                                                         <Group gap="sm">

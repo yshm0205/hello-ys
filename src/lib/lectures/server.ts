@@ -18,6 +18,17 @@ interface LectureRow {
   sort_order: number;
 }
 
+export interface PublishedLectureVideo {
+  id: string;
+  title: string;
+  durationMinutes: number;
+  videoId: string;
+}
+
+export function buildLectureVodId(vodNumber: number): string {
+  return `vod_${String(vodNumber).padStart(2, "0")}`;
+}
+
 function extractVdoCipherId(videoUrl: string | null): string | undefined {
   if (!videoUrl) return undefined;
 
@@ -76,12 +87,43 @@ export async function getPublishedLectureChapters(): Promise<LectureCatalogChapt
     }
 
     chapters.get(lecture.part_number)!.vods.push({
-      id: `vod_${String(lecture.vod_number).padStart(2, "0")}`,
+      id: buildLectureVodId(lecture.vod_number),
       title: lecture.vod_title,
       duration: lecture.duration_minutes || 0,
-      vdoCipherId: extractVdoCipherId(lecture.video_url),
+      isPlayable: Boolean(extractVdoCipherId(lecture.video_url)),
     });
   }
 
   return Array.from(chapters.values());
+}
+
+export async function getPublishedLectureVideoByVodId(
+  vodId: string,
+): Promise<PublishedLectureVideo | null> {
+  noStore();
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("lectures")
+    .select("id, vod_number, vod_title, duration_minutes, video_url, is_published")
+    .eq("is_published", true)
+    .order("vod_number", { ascending: true });
+
+  if (error) {
+    console.error("[Lecture Catalog] Failed to resolve video by vodId:", error);
+    return null;
+  }
+
+  const lecture = (data || []).find((row) => buildLectureVodId(row.vod_number) === vodId);
+  if (!lecture) return null;
+
+  const videoId = extractVdoCipherId(lecture.video_url);
+  if (!videoId) return null;
+
+  return {
+    id: vodId,
+    title: lecture.vod_title,
+    durationMinutes: lecture.duration_minutes || 0,
+    videoId,
+  };
 }
