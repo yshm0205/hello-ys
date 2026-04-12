@@ -220,6 +220,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             <Button
                                 component={Link}
                                 href="/dashboard/batch"
+                                prefetch={false}
                                 variant="white"
                                 color="violet"
                                 radius="lg"
@@ -259,6 +260,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             <Button
                                 component={Link}
                                 href="/dashboard/archive"
+                                prefetch={false}
                                 variant="light"
                                 color="violet"
                                 radius="lg"
@@ -290,6 +292,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         <Button
                             component={Link}
                             href="/dashboard/lectures"
+                            prefetch={false}
                             variant="light"
                             color="violet"
                             radius="lg"
@@ -372,6 +375,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                         <Button
                             component={Link}
                             href="/dashboard/archive"
+                            prefetch={false}
                             variant="subtle"
                             size="sm"
                         >
@@ -425,6 +429,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                                             color="blue"
                                                             component={Link}
                                                             href={`/dashboard/archive?id=${project.id}`}
+                                                            prefetch={false}
                                                         >
                                                             <Pencil size={16} />
                                                         </ActionIcon>
@@ -452,6 +457,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                                 <Button
                                     component={Link}
                                     href="/dashboard/batch"
+                                    prefetch={false}
                                     variant="light"
                                     color="violet"
                                     mt="md"
