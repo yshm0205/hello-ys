@@ -646,14 +646,14 @@ export function BatchGeneratorContent() {
                     </Box>
                 </Box>
 
-                {/* ──── 소재 입력 ──── */}
+                {/* ──── 소재 입력 + 생성 큐 (통합) ──── */}
                 <Card padding="lg" radius="lg" withBorder>
                     <Stack gap="md">
-                        <Text fw={600} size="sm" c="dimmed">소재 입력</Text>
+                        {/* 소재 입력 — 항상 상단 */}
                         <Textarea
                             placeholder="YouTube Shorts 소재를 입력하세요..."
-                            minRows={3}
-                            maxRows={6}
+                            minRows={2}
+                            maxRows={5}
                             autosize
                             value={materialInput}
                             onChange={(e) => setMaterialInput(e.currentTarget.value)}
@@ -667,80 +667,75 @@ export function BatchGeneratorContent() {
                         />
                         <Group justify="space-between">
                             <Text size="xs" c="gray.5">
-                                최대 {MAX_QUEUE}개까지 큐에 넣을 수 있습니다 (1개당 10cr)
-                                {credits !== null && ` · 보유: ${credits}cr`}
+                                1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}
                             </Text>
-                            <Button
-                                leftSection={<Plus size={16} />}
-                                variant="light"
-                                color="violet"
-                                radius="lg"
-                                onClick={addToQueue}
-                                disabled={!materialInput.trim() || queue.length >= MAX_QUEUE}
-                            >
-                                큐에 추가 ({queue.length}/{MAX_QUEUE})
-                            </Button>
-                        </Group>
-                    </Stack>
-                </Card>
-
-                {/* ──── 생성 큐 (컴팩트) ──── */}
-                {queue.length > 0 && (
-                    <Card padding="lg" radius="lg" withBorder>
-                        <Stack gap="md">
-                            {/* 큐 헤더 */}
-                            <Group justify="space-between">
-                                <Group gap="sm">
-                                    <ListOrdered size={18} color="#8b5cf6" />
-                                    <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>생성 큐</Text>
-                                    <Badge variant="light" color="violet" size="sm">{queue.length}건</Badge>
-                                    {doneCount > 0 && (
-                                        <Badge variant="light" color="green" size="sm">{doneCount} 완료</Badge>
-                                    )}
-                                </Group>
+                            <Group gap="xs">
+                                <Button
+                                    leftSection={<Plus size={16} />}
+                                    variant="light"
+                                    color="violet"
+                                    radius="lg"
+                                    size="sm"
+                                    onClick={addToQueue}
+                                    disabled={!materialInput.trim() || queue.length >= MAX_QUEUE}
+                                >
+                                    추가 ({queue.length}/{MAX_QUEUE})
+                                </Button>
                                 {!isRunning && waitingCount > 0 && (
-                                    <Group gap="xs">
-                                        <Text size="xs" c="gray.5" style={mono}>
-                                            {waitingCount} × 10cr = {waitingCount * 10}cr
-                                        </Text>
-                                        <Button
-                                            leftSection={<Play size={16} />}
-                                            color="violet"
-                                            radius="lg"
-                                            size="sm"
-                                            onClick={startGeneration}
-                                        >
-                                            생성 시작
-                                        </Button>
-                                    </Group>
-                                )}
-                                {isRunning && (
-                                    <Badge variant="light" color="orange" size="md" leftSection={<Clock size={14} />}>
-                                        {doneCount}/{queue.length} 진행 중
-                                    </Badge>
+                                    <Button
+                                        leftSection={<Play size={16} />}
+                                        color="violet"
+                                        radius="lg"
+                                        size="sm"
+                                        onClick={startGeneration}
+                                    >
+                                        생성 시작 ({waitingCount * 10}cr)
+                                    </Button>
                                 )}
                             </Group>
+                        </Group>
 
-                            {/* 크레딧 에러 */}
-                            {creditError && (
-                                <Paper p="sm" radius="md" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                    <Group gap="sm">
-                                        <AlertCircle size={16} color="#ef4444" />
-                                        <Text size="sm" c="red.6">{creditError}</Text>
+                        {/* 큐 헤더 + 상태 */}
+                        {queue.length > 0 && (
+                            <>
+                                <Box style={{ borderTop: '1px solid var(--mantine-color-default-border)', paddingTop: 12 }}>
+                                    <Group justify="space-between">
+                                        <Group gap="sm">
+                                            <ListOrdered size={16} color="#8b5cf6" />
+                                            <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>큐</Text>
+                                            <Badge variant="light" color="violet" size="sm">{queue.length}건</Badge>
+                                            {doneCount > 0 && (
+                                                <Badge variant="light" color="green" size="sm">{doneCount} 완료</Badge>
+                                            )}
+                                        </Group>
+                                        {isRunning && (
+                                            <Badge variant="light" color="orange" size="md" leftSection={<Clock size={14} />}>
+                                                {doneCount}/{queue.length} 진행 중
+                                            </Badge>
+                                        )}
                                     </Group>
-                                </Paper>
-                            )}
+                                </Box>
 
-                            {/* 진행률 */}
-                            {isRunning && queue.length > 1 && (
-                                <Progress
-                                    value={(doneCount / queue.length) * 100}
-                                    color="violet"
-                                    radius="xl"
-                                    size="sm"
-                                    animated
-                                />
-                            )}
+                                {/* 크레딧 에러 */}
+                                {creditError && (
+                                    <Paper p="sm" radius="md" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                        <Group gap="sm">
+                                            <AlertCircle size={16} color="#ef4444" />
+                                            <Text size="sm" c="red.6">{creditError}</Text>
+                                        </Group>
+                                    </Paper>
+                                )}
+
+                                {/* 진행률 */}
+                                {isRunning && queue.length > 1 && (
+                                    <Progress
+                                        value={(doneCount / queue.length) * 100}
+                                        color="violet"
+                                        radius="xl"
+                                        size="sm"
+                                        animated
+                                    />
+                                )}
 
                             {/* 큐 아이템 목록 — 컴팩트 한줄 리스트 */}
                             <Stack gap={4}>
@@ -845,9 +840,10 @@ export function BatchGeneratorContent() {
                                     );
                                 })}
                             </Stack>
-                        </Stack>
-                    </Card>
-                )}
+                            </>
+                        )}
+                    </Stack>
+                </Card>
 
                 {/* ──── 생성 중: 에이전트 진행 표시 ──── */}
                 {generatingItem && generatingItem.phase && (
@@ -861,45 +857,37 @@ export function BatchGeneratorContent() {
 
                 {/* ──── 전체 완료 배너 ──── */}
                 {queue.length > 0 && !isRunning && waitingCount === 0 && doneCount > 0 && !selectedResult && (
-                    <Card
-                        padding="xl"
-                        radius="lg"
-                        style={{
-                            background: 'rgba(34, 197, 94, 0.04)',
-                            border: '1px solid rgba(34, 197, 94, 0.2)',
-                        }}
-                    >
-                        <Stack align="center" gap="md">
-                            <Box style={{
-                                width: 48, height: 48, borderRadius: '50%',
-                                background: '#22c55e', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center',
-                            }}>
-                                <Check size={24} color="#fff" strokeWidth={3} />
-                            </Box>
-                            <Stack gap={4} align="center">
-                                <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
-                                    {doneCount}건 생성 완료!
-                                </Text>
-                                <Text size="sm" c="gray.6">
-                                    자동 저장되었습니다. 큐에서 결과를 확인하거나 보관함에서 볼 수 있습니다.
-                                </Text>
-                            </Stack>
+                    <Paper p="md" radius="md" style={{ background: 'rgba(34, 197, 94, 0.04)', border: '1px solid rgba(34, 197, 94, 0.15)' }}>
+                        <Group justify="space-between">
                             <Group gap="sm">
+                                <Box style={{
+                                    width: 28, height: 28, borderRadius: '50%',
+                                    background: '#22c55e', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <Check size={14} color="#fff" strokeWidth={3} />
+                                </Box>
+                                <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>
+                                    {doneCount}건 완료 · 보관함에 저장됨
+                                </Text>
+                            </Group>
+                            <Group gap="xs">
                                 <Button
                                     component={Link}
                                     href="/dashboard/archive"
                                     variant="light"
                                     color="violet"
                                     radius="lg"
-                                    leftSection={<FolderOpen size={16} />}
+                                    size="xs"
+                                    leftSection={<FolderOpen size={14} />}
                                 >
-                                    보관함에서 보기
+                                    보관함
                                 </Button>
                                 <Button
                                     variant="subtle"
                                     color="gray"
                                     radius="lg"
+                                    size="xs"
                                     onClick={async () => {
                                         if (jobId) {
                                             try {
@@ -913,32 +901,11 @@ export function BatchGeneratorContent() {
                                         setCreditError(null);
                                     }}
                                 >
-                                    새로 만들기
+                                    초기화
                                 </Button>
                             </Group>
-                        </Stack>
-                    </Card>
-                )}
-
-                {/* ──── 빈 상태 ──── */}
-                {queue.length === 0 && (
-                    <Card padding="xl" radius="lg" withBorder>
-                        <Stack align="center" gap="md" py="xl">
-                            <Box style={{
-                                width: 64, height: 64, borderRadius: '50%',
-                                background: 'rgba(139, 92, 246, 0.08)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                                <ListOrdered size={28} color="#8b5cf6" />
-                            </Box>
-                            <Stack gap={4} align="center">
-                                <Text fw={600} style={{ color: 'var(--mantine-color-text)' }}>아직 큐가 비어있습니다</Text>
-                                <Text size="sm" c="gray.5">
-                                    위에서 소재를 입력하고 &quot;큐에 추가&quot; 버튼을 눌러주세요
-                                </Text>
-                            </Stack>
-                        </Stack>
-                    </Card>
+                        </Group>
+                    </Paper>
                 )}
 
                 {/* CSS */}
