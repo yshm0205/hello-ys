@@ -37,6 +37,7 @@ import {
     ArrowRight,
     Brain,
     FolderOpen,
+    RotateCcw,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -515,6 +516,28 @@ export function BatchGeneratorContent() {
         }
     }, [applyJob]);
 
+    const retryItem = useCallback(async (id: string) => {
+        try {
+            setCreditError(null);
+            const res = await fetch(`/api/batch-jobs/items/${id}/retry`, { method: 'POST' });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setCreditError(data.error || '재시도에 실패했습니다.');
+                return;
+            }
+
+            applyJob((data.job ?? null) as RemoteBatchJob | null);
+
+            // 재시도 후 자동으로 처리 시작
+            if (data.job?.id) {
+                setTimeout(() => processNext(data.job.id), 500);
+            }
+        } catch {
+            setCreditError('재시도에 실패했습니다.');
+        }
+    }, [applyJob, processNext]);
+
     const startGeneration = useCallback(async () => {
         if (!jobId) return;
         setCreditError(null);
@@ -792,6 +815,17 @@ export function BatchGeneratorContent() {
                                                         <Text size="xs" c="violet" fw={500}>
                                                             {isActive ? '접기' : '보기'}
                                                         </Text>
+                                                    )}
+                                                    {item.status === 'error' && (
+                                                        <Text size="xs" c="red.5">실패 · 환불됨</Text>
+                                                    )}
+                                                    {item.status === 'error' && !isRunning && (
+                                                        <ActionIcon variant="subtle" color="violet" size="sm"
+                                                            onClick={(e) => { e.stopPropagation(); retryItem(item.id); }}
+                                                            title="재시도"
+                                                        >
+                                                            <RotateCcw size={14} />
+                                                        </ActionIcon>
                                                     )}
                                                     {(item.status === 'waiting' || item.status === 'error') && !isRunning && (
                                                         <ActionIcon variant="subtle" color="red" size="sm"
