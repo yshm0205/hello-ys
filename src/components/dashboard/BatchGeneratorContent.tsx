@@ -51,6 +51,7 @@ interface QueueItem {
     scripts?: Array<{ hook: string; full_script: string }>;
     error?: string;
     elapsed?: number;
+    creditsRefunded?: number;
 }
 
 interface RemoteBatchJobItem {
@@ -61,6 +62,7 @@ interface RemoteBatchJobItem {
     scripts?: Array<{ hook: string; full_script: string }> | null;
     error?: string | null;
     elapsed?: number | null;
+    creditsRefunded?: number;
 }
 
 interface RemoteBatchJob {
@@ -322,6 +324,7 @@ export function BatchGeneratorContent() {
             scripts: item.scripts ?? undefined,
             error: item.error ?? undefined,
             elapsed: item.elapsed ?? undefined,
+            creditsRefunded: item.creditsRefunded ?? 0,
         })));
 
         if (job.status === 'paused' && job.lastError) {
@@ -817,7 +820,9 @@ export function BatchGeneratorContent() {
                                                         </Text>
                                                     )}
                                                     {item.status === 'error' && (
-                                                        <Text size="xs" c="red.5">실패 · 환불됨</Text>
+                                                        <Text size="xs" c={item.creditsRefunded ? "green.6" : "red.5"}>
+                                                            {item.creditsRefunded ? `실패 · ${item.creditsRefunded}cr 환불됨` : '실패 · 환불 대기'}
+                                                        </Text>
                                                     )}
                                                     {item.status === 'error' && !isRunning && (
                                                         <ActionIcon variant="subtle" color="violet" size="sm"
