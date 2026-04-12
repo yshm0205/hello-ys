@@ -549,9 +549,22 @@ export function BatchGeneratorContent() {
 
     const waitingCount = queue.filter(q => q.status === 'waiting').length;
     const doneCount = queue.filter(q => q.status === 'done').length;
+    const errorCount = queue.filter(q => q.status === 'error').length;
     const generatingItem = queue.find(q => q.status === 'generating');
     const selectedItem = queue.find(q => q.id === selectedResult);
     const isRunning = jobStatus === 'running' || queue.some((item) => item.status === 'generating');
+    const hiddenDoneCount = Math.max(0, doneCount - 3);
+
+    // 표시할 큐: done은 최근 3개만, 나머지 전부
+    const visibleQueue = (() => {
+        const nonDone = queue.filter(q => q.status !== 'done');
+        const doneItems = queue.filter(q => q.status === 'done');
+        const recentDone = doneItems.slice(-3); // 마지막 3개 = 최근 3개
+        return [...nonDone, ...recentDone].sort((a, b) => {
+            // 원래 queue 순서 유지
+            return queue.indexOf(a) - queue.indexOf(b);
+        });
+    })();
 
     return (
         <Container size="md" py="lg">
@@ -739,7 +752,12 @@ export function BatchGeneratorContent() {
 
                             {/* 큐 아이템 목록 — 컴팩트 한줄 리스트 */}
                             <Stack gap={4}>
-                                {queue.map((item, index) => {
+                                {hiddenDoneCount > 0 && (
+                                    <Text size="xs" c="gray.5" ta="center" py={4}>
+                                        + {hiddenDoneCount}건 완료 (보관함에 저장됨)
+                                    </Text>
+                                )}
+                                {visibleQueue.map((item, index) => {
                                     const isActive = selectedResult === item.id && item.status === 'done';
                                     return (
                                         <Paper
