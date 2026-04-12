@@ -700,8 +700,11 @@ export function BatchGeneratorContent() {
                             }}
                         />
                         <Group justify="space-between">
-                            <Text size="xs" c="gray.5">
-                                1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}
+                            <Text size="xs" c={materialInput.trim().length > 0 && materialInput.trim().length < 10 ? "red.5" : "gray.5"}>
+                                {materialInput.trim().length > 0 && materialInput.trim().length < 10
+                                    ? `소재를 10자 이상 입력해 주세요 (현재 ${materialInput.trim().length}자)`
+                                    : <>1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}</>
+                                }
                             </Text>
                             <Group gap="xs">
                                 <Button
@@ -711,7 +714,7 @@ export function BatchGeneratorContent() {
                                     radius="lg"
                                     size="sm"
                                     onClick={addToQueue}
-                                    disabled={!materialInput.trim() || queue.length >= MAX_QUEUE}
+                                    disabled={!materialInput.trim() || materialInput.trim().length < 10 || queue.length >= MAX_QUEUE}
                                 >
                                     추가 ({queue.length}/{MAX_QUEUE})
                                 </Button>
