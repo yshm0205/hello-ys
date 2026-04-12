@@ -155,83 +155,73 @@ export function DashboardContent({
                 {/* 액션 카드 2개 - Streamlit 스타일 */}
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                     {/* 새 프로젝트 */}
-                    <Card
-                        padding="xl"
-                        radius="xl"
-                        style={{
-                            background: '#8b5cf6',
-                            border: 'none',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                        }}
-                    >
-                        <Stack gap="sm">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/images/icons/icon-magic.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
-                            <Title order={4} c="white">새 프로젝트 만들기</Title>
-                            <Text size="sm" c="white" opacity={0.8}>
-                                아이디어만 있으면 3가지 버전의 스크립트가 뚝딱!
-                            </Text>
-                            <Button
-                                component={Link}
-                                href="/dashboard/batch"
-                                prefetch={false}
-                                variant="white"
-                                color="violet"
-                                radius="lg"
-                                mt="sm"
-                                rightSection={<ArrowRight size={18} />}
-                            >
-                                프로젝트 시작하기
-                            </Button>
-                        </Stack>
-                    </Card>
+                    <Link href="/dashboard/batch" prefetch={false} style={{ textDecoration: 'none' }}>
+                        <Card
+                            padding="xl"
+                            radius="xl"
+                            style={{
+                                background: '#8b5cf6',
+                                border: 'none',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s',
+                                height: '100%',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <Stack gap="sm">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src="/images/icons/icon-magic.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
+                                <Title order={4} c="white">새 프로젝트 만들기</Title>
+                                <Text size="sm" c="white" opacity={0.8}>
+                                    아이디어만 있으면 3가지 버전의 스크립트가 뚝딱!
+                                </Text>
+                                <Group mt="sm" gap="xs">
+                                    <Text c="white" fw={600} size="sm">프로젝트 시작하기</Text>
+                                    <ArrowRight size={18} color="white" />
+                                </Group>
+                            </Stack>
+                        </Card>
+                    </Link>
 
                     {/* 보관함 */}
-                    <Card
-                        padding="xl"
-                        radius="xl"
-                        withBorder
-                        style={{
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.borderColor = '#8b5cf6';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.borderColor = '';
-                        }}
-                    >
-                        <Stack gap="sm">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/images/icons/icon-document.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
-                            <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>보관함</Title>
-                            <Text size="sm" c="dimmed">
-                                이전에 만든 스크립트를 확인하고 관리하세요
-                            </Text>
-                            <Button
-                                component={Link}
-                                href="/dashboard/archive"
-                                prefetch={false}
-                                variant="light"
-                                color="violet"
-                                radius="lg"
-                                mt="sm"
-                                leftSection={<FolderOpen size={18} />}
-                            >
-                                보관함 열기
-                            </Button>
-                        </Stack>
-                    </Card>
+                    <Link href="/dashboard/archive" prefetch={false} style={{ textDecoration: 'none' }}>
+                        <Card
+                            padding="xl"
+                            radius="xl"
+                            withBorder
+                            style={{
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                height: '100%',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                                e.currentTarget.style.borderColor = '#8b5cf6';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.borderColor = '';
+                            }}
+                        >
+                            <Stack gap="sm">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src="/images/icons/icon-document.png" alt="" width={48} height={48} style={{ objectFit: 'contain' }} />
+                                <Title order={4} style={{ color: 'var(--mantine-color-text)' }}>보관함</Title>
+                                <Text size="sm" c="dimmed">
+                                    이전에 만든 스크립트를 확인하고 관리하세요
+                                </Text>
+                                <Group mt="sm" gap="xs">
+                                    <FolderOpen size={18} color="#8b5cf6" />
+                                    <Text c="violet" fw={600} size="sm">보관함 열기</Text>
+                                </Group>
+                            </Stack>
+                        </Card>
+                    </Link>
                 </SimpleGrid>
 
                 {/* 수강 진도 카드 */}
