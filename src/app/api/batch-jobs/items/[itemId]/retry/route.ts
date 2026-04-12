@@ -51,6 +51,12 @@ export async function POST(
                         refund_processed_at: new Date().toISOString(),
                     })
                     .eq("id", item.id);
+            } else {
+                // 환불 실패 → retry 차단, error 상태 유지
+                return NextResponse.json(
+                    { error: "이전 실패 건의 환불 처리에 실패했습니다. 잠시 후 다시 시도해 주세요." },
+                    { status: 409 },
+                );
             }
         }
 
