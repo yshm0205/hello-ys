@@ -40,6 +40,7 @@ import {
     RotateCcw,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
 
 // ============ 타입 ============
 
@@ -285,15 +286,17 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
 // ============ 메인 컴포넌트 ============
 
 export function BatchGeneratorContent() {
+    const { initialCredits } = useDashboardShell();
     const [niche, setNiche] = useState('knowledge');
     const [materialInput, setMaterialInput] = useState('');
     const [queue, setQueue] = useState<QueueItem[]>([]);
     const [jobId, setJobId] = useState<string | null>(null);
     const [jobStatus, setJobStatus] = useState<'draft' | 'running' | 'paused' | 'completed' | 'failed' | null>(null);
     const [selectedResult, setSelectedResult] = useState<string | null>(null);
-    const [credits, setCredits] = useState<number | null>(null);
+    const [credits, setCredits] = useState<number | null>(initialCredits);
     const [creditError, setCreditError] = useState<string | null>(null);
-    const creditsRef = useRef<number | null>(null);
+    const jobIdRef = useRef<string | null>(null);
+    const creditsRef = useRef<number | null>(initialCredits);
     const processLockRef = useRef(false);
     const pollingRef = useRef<number | null>(null);
     const MAX_QUEUE = 10;
@@ -334,18 +337,13 @@ export function BatchGeneratorContent() {
         }
     }, []);
 
-    const fetchCredits = useCallback(async () => {
-        try {
-            const res = await fetch('/api/credits');
-            if (!res.ok) return;
-            const data = await res.json();
-            const nextCredits = data.credits ?? null;
-            setCredits(nextCredits);
-            creditsRef.current = nextCredits;
-        } catch {
-            // ignore
+    useEffect(() => {
+        if (initialCredits === null) return;
+        setCredits((prev) => prev ?? initialCredits);
+        if (creditsRef.current === null) {
+            creditsRef.current = initialCredits;
         }
-    }, []);
+    }, [initialCredits]);
 
     const fetchCurrentJob = useCallback(async () => {
         try {
@@ -366,8 +364,12 @@ export function BatchGeneratorContent() {
         }
     }, [applyJob]);
 
+    useEffect(() => {
+        jobIdRef.current = jobId;
+    }, [jobId]);
+
     const processNext = useCallback(async (targetJobId?: string) => {
-        const activeJobId = targetJobId ?? jobId;
+        const activeJobId = targetJobId ?? jobIdRef.current;
         if (!activeJobId || processLockRef.current) return null;
 
         processLockRef.current = true;
@@ -406,12 +408,23 @@ export function BatchGeneratorContent() {
         } finally {
             processLockRef.current = false;
         }
-    }, [applyJob, fetchCurrentJob, jobId]);
+    }, [applyJob, fetchCurrentJob]);
 
     useEffect(() => {
-        void fetchCredits();
-        void fetchCurrentJob();
-    }, [fetchCredits, fetchCurrentJob]);
+        async function initializeBatchPage() {
+            const job = await fetchCurrentJob();
+            if (!job || job.status !== 'running') return;
+
+            const hasProcessing = job.items.some((item) => item.status === 'processing');
+            const hasQueued = job.items.some((item) => item.status === 'queued');
+
+            if (!hasProcessing && hasQueued) {
+                await processNext(job.id);
+            }
+        }
+
+        void initializeBatchPage();
+    }, [fetchCurrentJob, processNext]);
 
     useEffect(() => {
         if (!jobId || jobStatus !== 'running') {
@@ -447,7 +460,6 @@ export function BatchGeneratorContent() {
             stopPolling();
             if (document.visibilityState !== 'visible') return;
 
-            void tick();
             pollingRef.current = window.setInterval(() => {
                 void tick();
             }, 5000);
@@ -456,6 +468,7 @@ export function BatchGeneratorContent() {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 startPolling();
+                void tick();
                 return;
             }
             stopPolling();
@@ -570,7 +583,6 @@ export function BatchGeneratorContent() {
 
     const waitingCount = queue.filter(q => q.status === 'waiting').length;
     const doneCount = queue.filter(q => q.status === 'done').length;
-    const errorCount = queue.filter(q => q.status === 'error').length;
     const generatingItem = queue.find(q => q.status === 'generating');
     const selectedItem = queue.find(q => q.id === selectedResult);
     const isRunning = jobStatus === 'running' || queue.some((item) => item.status === 'generating');

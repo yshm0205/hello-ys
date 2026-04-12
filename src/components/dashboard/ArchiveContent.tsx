@@ -337,6 +337,7 @@ export function ArchiveContent() {
                     <Button
                         component={Link}
                         href="/dashboard/batch"
+                        prefetch={false}
                         leftSection={<Plus size={16} />}
                         color="violet"
                         radius="lg"
@@ -406,6 +407,7 @@ export function ArchiveContent() {
                                 <Button
                                     component={Link}
                                     href="/dashboard/batch"
+                                    prefetch={false}
                                     leftSection={<Zap size={16} />}
                                     color="violet"
                                     radius="lg"

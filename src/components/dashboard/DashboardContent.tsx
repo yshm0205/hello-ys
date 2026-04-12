@@ -5,7 +5,7 @@
  * DB 연동: Supabase에서 최근 프로젝트 조회
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
     Container,
     Title,
@@ -37,14 +37,17 @@ import {
     FolderOpen,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
 
 interface DashboardContentProps {
     user?: { email?: string };
-    subscription?: {
-        plan_name?: string;
-        status?: string;
-        current_period_end?: string;
+    creditInfo?: {
+        credits: number;
+        plan_type: string;
+        expires_at: string | null;
     } | null;
+    initialProjects?: ProjectItem[];
+    initialCompletedVodCount?: number;
 }
 
 // 프로젝트 타입 정의
@@ -54,6 +57,7 @@ interface ProjectItem {
     createdAt: string;
     versions: number;
     archetype: string;
+    niche?: string | null;
 }
 
 // 니치 한글 이름
@@ -68,67 +72,24 @@ const NICHE_LABELS: Record<string, string> = {
 // 전체 VOD 수 (강의실 데이터와 동기화)
 const TOTAL_LECTURE_VODS = 32;
 
-export function DashboardContent({ user, subscription }: DashboardContentProps) {
+export function DashboardContent({
+    user,
+    creditInfo,
+    initialProjects = [],
+    initialCompletedVodCount = 0,
+}: DashboardContentProps) {
+    const { creditInfo: shellCreditInfo } = useDashboardShell();
+    const resolvedCreditInfo = creditInfo ?? shellCreditInfo;
     // 프로젝트 데이터 상태
-    const [projects, setProjects] = useState<ProjectItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [projects, setProjects] = useState<ProjectItem[]>(initialProjects);
+    const isLoading = false;
     // 수강 진도 상태
-    const [completedVodCount, setCompletedVodCount] = useState(0);
-    // 크레딧 상태
-    const [creditInfo, setCreditInfo] = useState<{ credits: number; plan_type: string; expires_at: string | null } | null>(null);
+    const [completedVodCount] = useState(initialCompletedVodCount);
     // 삭제 모달 상태
     const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
     const [deleteTargetTitle, setDeleteTargetTitle] = useState<string>('');
     const [isDeleting, setIsDeleting] = useState(false);
-
-    // DB에서 최근 프로젝트 + 수강 진도 + 크레딧 불러오기
-    useEffect(() => {
-        async function fetchProjects() {
-            try {
-                setIsLoading(true);
-                const response = await fetch('/api/scripts/history');
-                const data = await response.json();
-
-                if (data.success) {
-                    // 최근 5개만 표시
-                    setProjects(data.scripts.slice(0, 5));
-                }
-            } catch {
-                // 에러 시 빈 배열
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        async function fetchLectureProgress() {
-            try {
-                const res = await fetch('/api/lectures/progress');
-                const data = await res.json();
-                if (data.success) {
-                    setCompletedVodCount((data.completedVods || []).length);
-                }
-            } catch {
-                // 에러 시 0 유지
-            }
-        }
-
-        async function fetchCredits() {
-            try {
-                const res = await fetch('/api/credits');
-                if (res.ok) {
-                    const data = await res.json();
-                    setCreditInfo(data);
-                }
-            } catch {
-                // 에러 시 무시
-            }
-        }
-
-        fetchProjects();
-        fetchLectureProgress();
-        fetchCredits();
-    }, []);
 
     // 삭제 확인 모달 열기
     const handleDeleteClick = (project: ProjectItem) => {
@@ -324,7 +285,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             <Box>
                                 <Group gap="xs" align="baseline">
                                     <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
-                                        {creditInfo ? creditInfo.credits : 0}
+                                        {resolvedCreditInfo ? resolvedCreditInfo.credits : 0}
                                     </Title>
                                     <Text size="sm" c="gray.5">크레딧</Text>
                                 </Group>
@@ -356,7 +317,7 @@ export function DashboardContent({ user, subscription }: DashboardContentProps) 
                             </Group>
                             <Group gap="sm">
                                 <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
-                                    {creditInfo?.plan_type === 'free' || !creditInfo ? 'Beta' : creditInfo.plan_type}
+                                    {resolvedCreditInfo?.plan_type === 'free' || !resolvedCreditInfo ? 'Beta' : resolvedCreditInfo.plan_type}
                                 </Title>
                                 <Badge color="green" variant="light">활성</Badge>
                             </Group>

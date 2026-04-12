@@ -18,8 +18,29 @@ export default async function DashboardGroupLayout({
     redirect('/login');
   }
 
+  let initialCreditInfo: {
+    credits: number;
+    plan_type: string;
+    expires_at: string | null;
+  } | null = null;
+
+  try {
+    const { data } = await supabase
+      .from('user_plans')
+      .select('credits, plan_type, expires_at')
+      .eq('user_id', user.id)
+      .single();
+
+    initialCreditInfo = data;
+  } catch {
+    // Ignore missing plan rows and fall back to null.
+  }
+
   return (
-    <DashboardLayout user={{ email: user.email ?? undefined }}>
+    <DashboardLayout
+      user={{ email: user.email ?? undefined }}
+      initialCreditInfo={initialCreditInfo}
+    >
       {children}
     </DashboardLayout>
   );

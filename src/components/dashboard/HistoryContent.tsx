@@ -120,6 +120,7 @@ export function HistoryContent() {
                     <Button
                         component={Link}
                         href="/dashboard/batch"
+                        prefetch={false}
                         leftSection={<Plus size={18} />}
                         style={{
                             background: '#8b5cf6',

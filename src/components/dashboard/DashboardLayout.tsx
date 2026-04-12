@@ -5,7 +5,7 @@
  * 사이드바 네비게이션 + 헤더
  */
 
-import { ReactNode, useState, useEffect } from 'react';
+import { createContext, ReactNode, useContext } from 'react';
 import {
     AppShell,
     Burger,
@@ -35,6 +35,29 @@ import { Link, usePathname } from '@/i18n/routing';
 interface DashboardLayoutProps {
     children: ReactNode;
     user?: { email?: string };
+    initialCreditInfo?: {
+        credits: number;
+        plan_type: string;
+        expires_at: string | null;
+    } | null;
+}
+
+interface DashboardShellContextValue {
+    creditInfo: {
+        credits: number;
+        plan_type: string;
+        expires_at: string | null;
+    } | null;
+    initialCredits: number | null;
+}
+
+const DashboardShellContext = createContext<DashboardShellContextValue>({
+    creditInfo: null,
+    initialCredits: null,
+});
+
+export function useDashboardShell() {
+    return useContext(DashboardShellContext);
 }
 
 const navItems = [
@@ -70,44 +93,35 @@ const navItems = [
     },
 ];
 
-export function DashboardLayout({ children, user }: DashboardLayoutProps) {
+export function DashboardLayout({ children, user, initialCreditInfo = null }: DashboardLayoutProps) {
     const [opened, { toggle }] = useDisclosure();
     const pathname = usePathname();
-    const [credits, setCredits] = useState<number | null>(null);
-
-    useEffect(() => {
-        async function fetchCredits() {
-            try {
-                const res = await fetch('/api/credits');
-                if (res.ok) {
-                    const data = await res.json();
-                    setCredits(data.credits);
-                }
-            } catch {
-                // 무시
-            }
-        }
-        fetchCredits();
-    }, []);
+    const credits = initialCreditInfo?.credits ?? null;
 
     return (
-        <AppShell
-            header={{ height: 60 }}
-            navbar={{
-                width: 280,
-                breakpoint: 'sm',
-                collapsed: { mobile: !opened },
-            }}
-            padding="lg"
-            styles={{
-                main: {
-                    background: 'var(--mantine-color-body)',
-                    minHeight: '100vh',
-                    overflowX: 'auto',
-                    maxWidth: '100vw',
-                },
+        <DashboardShellContext.Provider
+            value={{
+                creditInfo: initialCreditInfo,
+                initialCredits: credits,
             }}
         >
+            <AppShell
+                header={{ height: 60 }}
+                navbar={{
+                    width: 280,
+                    breakpoint: 'sm',
+                    collapsed: { mobile: !opened },
+                }}
+                padding="lg"
+                styles={{
+                    main: {
+                        background: 'var(--mantine-color-body)',
+                        minHeight: '100vh',
+                        overflowX: 'auto',
+                        maxWidth: '100vw',
+                    },
+                }}
+            >
             {/* 헤더 */}
             <AppShell.Header
                 style={{
@@ -251,9 +265,10 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
             </AppShell.Navbar>
 
             {/* 메인 콘텐츠 */}
-            <AppShell.Main>
-                {children}
-            </AppShell.Main>
-        </AppShell>
+                <AppShell.Main>
+                    {children}
+                </AppShell.Main>
+            </AppShell>
+        </DashboardShellContext.Provider>
     );
 }

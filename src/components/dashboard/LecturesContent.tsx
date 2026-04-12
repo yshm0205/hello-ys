@@ -339,6 +339,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                         key={vod.id}
                                                         component={Link}
                                                         href={`/dashboard/lectures/${vod.id}`}
+                                                        prefetch={false}
                                                         style={{
                                                             display: 'block',
                                                             width: '100%',
@@ -381,6 +382,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                     <UnstyledButton
                                         component={Link}
                                         href="/dashboard/batch"
+                                        prefetch={false}
                                         style={{
                                             display: 'block',
                                             width: '100%',

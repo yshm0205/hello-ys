@@ -370,6 +370,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                     <Button
                         component={Link}
                         href="/dashboard/lectures"
+                        prefetch={false}
                         variant="light"
                         color="violet"
                         leftSection={<ArrowLeft size={16} />}
@@ -388,6 +389,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                 <Button
                     component={Link}
                     href="/dashboard/lectures"
+                    prefetch={false}
                     variant="subtle"
                     color="gray"
                     size="sm"
@@ -641,6 +643,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                     <Button
                                         component={Link}
                                         href="/dashboard/batch"
+                                        prefetch={false}
                                         variant="white"
                                         color="violet"
                                         radius="lg"
@@ -658,6 +661,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                 <Button
                                     component={Link}
                                     href={`/dashboard/lectures/${prevVod.id}`}
+                                    prefetch={false}
                                     variant="light" color="gray" radius="lg"
                                     leftSection={<ArrowLeft size={16} />}
                                 >
@@ -671,6 +675,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                 <Button
                                     component={Link}
                                     href={`/dashboard/lectures/${nextVod.id}`}
+                                    prefetch={false}
                                     variant="light" color="violet" radius="lg"
                                     rightSection={<ArrowRight size={16} />}
                                 >
@@ -812,6 +817,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                                                 key={vod.id}
                                                                 component={Link}
                                                                 href={`/dashboard/lectures/${vod.id}`}
+                                                                prefetch={false}
                                                                 style={{
                                                                     display: 'block',
                                                                     width: '100%',
