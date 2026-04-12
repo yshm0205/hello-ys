@@ -292,6 +292,7 @@ export function BatchGeneratorContent() {
     const [creditError, setCreditError] = useState<string | null>(null);
     const creditsRef = useRef<number | null>(null);
     const processLockRef = useRef(false);
+    const pollingRef = useRef<number | null>(null);
     const MAX_QUEUE = 10;
 
     const applyJob = useCallback((job: RemoteBatchJob | null) => {
@@ -409,9 +410,17 @@ export function BatchGeneratorContent() {
     }, [fetchCredits, fetchCurrentJob]);
 
     useEffect(() => {
-        if (!jobId || jobStatus !== 'running') return;
+        if (!jobId || jobStatus !== 'running') {
+            if (pollingRef.current) {
+                window.clearInterval(pollingRef.current);
+                pollingRef.current = null;
+            }
+            return;
+        }
 
         const tick = async () => {
+            if (document.visibilityState !== 'visible') return;
+
             const job = await fetchCurrentJob();
             if (!job || job.status !== 'running') return;
 
@@ -423,12 +432,46 @@ export function BatchGeneratorContent() {
             }
         };
 
-        void tick();
-        const intervalId = window.setInterval(() => {
-            void tick();
-        }, 4000);
+        const stopPolling = () => {
+            if (pollingRef.current) {
+                window.clearInterval(pollingRef.current);
+                pollingRef.current = null;
+            }
+        };
 
-        return () => window.clearInterval(intervalId);
+        const startPolling = () => {
+            stopPolling();
+            if (document.visibilityState !== 'visible') return;
+
+            void tick();
+            pollingRef.current = window.setInterval(() => {
+                void tick();
+            }, 5000);
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                startPolling();
+                return;
+            }
+            stopPolling();
+        };
+
+        const handleFocus = () => {
+            if (document.visibilityState === 'visible') {
+                void tick();
+            }
+        };
+
+        startPolling();
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+            stopPolling();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleFocus);
+        };
     }, [fetchCurrentJob, jobId, jobStatus, processNext]);
 
     const addToQueue = useCallback(async () => {

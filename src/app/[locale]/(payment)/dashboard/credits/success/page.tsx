@@ -40,10 +40,10 @@ export default function PaymentSuccessPage() {
                 if (data.success) {
                     setStatus('success');
                     setAddedCredits(data.added);
-                    setMessage(`${data.added}cr 충전 완료! (잔여: ${data.credits}cr)`);
+                    setMessage(`${data.added}cr 충전 완료! (보유: ${data.credits}cr)`);
                 } else {
                     setStatus('error');
-                    setMessage(data.error || '결제 승인에 실패했습니다.');
+                    setMessage(data.error || '결제 확인에 실패했습니다.');
                 }
             } catch {
                 setStatus('error');
@@ -73,7 +73,7 @@ export default function PaymentSuccessPage() {
                                 충전 완료!
                             </Title>
                             <Text size="lg" c="gray.7" ta="center">
-                                {addedCredits.toLocaleString()} 크레딧이 추가되었습니다
+                                {addedCredits.toLocaleString()} 크레딧이 추가되었습니다.
                             </Text>
                             <Text size="sm" c="gray.5" ta="center">{message}</Text>
                             <Group mt="md">

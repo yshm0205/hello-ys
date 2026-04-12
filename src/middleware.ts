@@ -4,10 +4,25 @@ import { routing } from "@/i18n/routing";
 import { NextRequest } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
+const PUBLIC_SESSION_SKIP_PATHS = new Set(["/", "/pricing"]);
+
+function normalizePathname(pathname: string) {
+  const segments = pathname.split("/");
+  const locale = segments[1];
+  const localizedPath = routing.locales.includes(locale as (typeof routing.locales)[number])
+    ? `/${segments.slice(2).join("/")}`
+    : pathname;
+  const normalizedPath = localizedPath === "/" ? "/" : localizedPath.replace(/\/+$/, "");
+  return normalizedPath || "/";
+}
 
 export async function middleware(request: NextRequest) {
   // 1. Run next-intl middleware to handle locale redirects and get the base response
   const response = intlMiddleware(request);
+
+  if (PUBLIC_SESSION_SKIP_PATHS.has(normalizePathname(request.nextUrl.pathname))) {
+    return response;
+  }
 
   // 2. Run Supabase session update (copies cookies to response)
   const supabaseResponse = await updateSession(request, response);

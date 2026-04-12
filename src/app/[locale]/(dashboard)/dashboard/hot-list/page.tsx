@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ChannelListContent } from '@/components/dashboard/ChannelListContent';
 
 export default async function ChannelListPage() {
@@ -25,9 +24,5 @@ export default async function ChannelListPage() {
         // 구독 정보 없음 → 비수강생
     }
 
-    return (
-        <DashboardLayout user={user}>
-            <ChannelListContent isSubscribed={isSubscribed} />
-        </DashboardLayout>
-    );
+    return <ChannelListContent isSubscribed={isSubscribed} />;
 }

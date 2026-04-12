@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
 
 export default async function DashboardPage() {
@@ -30,15 +29,13 @@ export default async function DashboardPage() {
   const mockSubscription = subscription || {
     plan_name: 'Free Plan',
     status: 'active',
-    current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    current_period_end: undefined,
   };
 
   return (
-    <DashboardLayout user={user}>
-      <DashboardContent
-        user={user}
-        subscription={mockSubscription}
-      />
-    </DashboardLayout>
+    <DashboardContent
+      user={user}
+      subscription={mockSubscription}
+    />
   );
 }

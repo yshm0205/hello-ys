@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { LecturePlayerContent } from '@/components/dashboard/LecturePlayerContent';
 import { getPublishedLectureChapters } from '@/lib/lectures/server';
 
@@ -27,12 +26,10 @@ export default async function LecturePage({ params }: LecturePageProps) {
     }
 
     return (
-        <DashboardLayout user={user}>
-            <LecturePlayerContent
-                vodId={vodId}
-                userEmail={user.email}
-                chapters={chapters}
-            />
-        </DashboardLayout>
+        <LecturePlayerContent
+            vodId={vodId}
+            userEmail={user.email}
+            chapters={chapters}
+        />
     );
 }
