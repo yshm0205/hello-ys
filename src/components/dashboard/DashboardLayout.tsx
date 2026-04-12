@@ -185,6 +185,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                                 key={item.href}
                                 component={Link}
                                 href={item.href}
+                                prefetch={false}
                                 label={item.label}
                                 description={item.description}
                                 leftSection={<item.icon size={20} color={isActive ? '#8b5cf6' : '#6b7280'} />}
