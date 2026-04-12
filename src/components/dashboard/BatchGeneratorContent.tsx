@@ -482,6 +482,12 @@ export function BatchGeneratorContent() {
         const material = materialInput.trim();
         if (!material) return;
 
+        // 낙관적 UI: 즉시 큐에 추가
+        const tempId = `temp_${Date.now()}`;
+        setQueue(prev => [...prev, { id: tempId, material, status: 'waiting' as const }]);
+        setMaterialInput('');
+        setCreditError(null);
+
         try {
             const res = await fetch('/api/batch-jobs/current', {
                 method: 'POST',
@@ -491,14 +497,17 @@ export function BatchGeneratorContent() {
             const data = await res.json();
 
             if (!res.ok) {
+                // 실패 시 롤백
+                setQueue(prev => prev.filter(q => q.id !== tempId));
+                setMaterialInput(material);
                 setCreditError(data.error || '큐에 추가하지 못했습니다.');
                 return;
             }
 
             applyJob((data.job ?? null) as RemoteBatchJob | null);
-            setMaterialInput('');
-            setCreditError(null);
         } catch {
+            setQueue(prev => prev.filter(q => q.id !== tempId));
+            setMaterialInput(material);
             setCreditError('큐에 추가하지 못했습니다.');
         }
     }, [applyJob, materialInput, niche]);
@@ -544,6 +553,18 @@ export function BatchGeneratorContent() {
     const startGeneration = useCallback(async () => {
         if (!jobId) return;
         setCreditError(null);
+
+        // 즉시 UI 전환: 첫 번째 waiting → generating 표시
+        setJobStatus('running');
+        setQueue(prev => {
+            const idx = prev.findIndex(q => q.status === 'waiting');
+            if (idx === -1) return prev;
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], status: 'generating', phase: 'analyzing' };
+            return updated;
+        });
+
+        // 백그라운드에서 실제 process (6~7초 걸려도 UI는 이미 전환됨)
         await processNext(jobId);
     }, [jobId, processNext]);
 
