@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createBatchAdminClient, loadBatchJobById, recoverStaleProcessing, toBatchJobPayload, updateBatchJobCounts } from "@/lib/batch-jobs/server";
-import { deductUserCredits } from "@/lib/credits/server";
+import { deductUserCredits, refundUserCredits } from "@/lib/credits/server";
 
 const RENDER_API_URL = process.env.SCRIPT_GENERATOR_API_URL || "https://script-generator-api-civ5.onrender.com";
 
@@ -37,18 +37,47 @@ export async function POST(
             });
         }
 
+        // 환불 안 된 에러 아이템 처리 (Render 파이프라인 에러 시)
+        for (const item of state.items) {
+            if (
+                item.status === "error" &&
+                item.credits_deducted > 0 &&
+                !item.refund_processed_at
+            ) {
+                const refundRef = `batch_item_${item.id}_attempt_${item.attempt_count}`;
+                const refund = await refundUserCredits(
+                    user.id,
+                    item.credits_deducted,
+                    refundRef,
+                    item.error_code || "pipeline_error",
+                );
+                if (refund.success) {
+                    await admin
+                        .from("batch_job_items")
+                        .update({
+                            credits_refunded: item.credits_deducted,
+                            refund_processed_at: new Date().toISOString(),
+                        })
+                        .eq("id", item.id);
+                }
+            }
+        }
+
         // 다음 queued 아이템 찾기
         const nextItem = state.items.find((item) => item.status === "queued");
         if (!nextItem) {
-            const completed = await updateBatchJobCounts(admin, state.job.id, {
-                status: "completed",
+            // error 아이템이 남아있으면 paused (재시도 가능하도록), 없으면 completed
+            const hasErrors = state.items.some((item) => item.status === "error");
+            const finalStatus = hasErrors ? "paused" : "completed";
+            const finished = await updateBatchJobCounts(admin, state.job.id, {
+                status: finalStatus,
                 current_item_id: null,
                 finished_at: new Date().toISOString(),
-                last_error: null,
+                last_error: hasErrors ? "일부 항목이 실패했습니다. 재시도할 수 있습니다." : null,
             });
             return NextResponse.json({
                 success: true,
-                job: toBatchJobPayload(completed.job, completed.items),
+                job: toBatchJobPayload(finished.job, finished.items),
             });
         }
 
@@ -71,17 +100,22 @@ export async function POST(
             );
         }
 
-        // DB: 아이템을 processing으로 마킹
+        // DB: 아이템을 processing으로 마킹 + attempt_count 증가
         const startedAt = new Date().toISOString();
+        const newAttempt = (nextItem.attempt_count || 0) + 1;
         await admin
             .from("batch_job_items")
             .update({
                 status: "processing",
                 phase: "analyzing",
                 credits_deducted: creditResult.deducted,
+                credits_refunded: 0,
+                refund_processed_at: null,
+                attempt_count: newAttempt,
                 started_at: startedAt,
                 updated_at: startedAt,
                 error: null,
+                error_code: null,
             })
             .eq("id", nextItem.id);
 
@@ -127,9 +161,18 @@ export async function POST(
             }
         } catch (error) {
             clearTimeout(handoffTimeout);
-            // Render 연결/응답 실패 → 아이템 에러 처리
+            // Render 연결/응답 실패 → 아이템 에러 처리 + 크레딧 환불
             const failedAt = new Date().toISOString();
             const errMsg = error instanceof Error ? error.message : "Render 서버 연결 실패";
+            const errorCode = errMsg.includes("abort") ? "handoff_timeout" : "handoff_failed";
+
+            // 크레딧 환불
+            const refundResult = await refundUserCredits(
+                user.id,
+                creditResult.deducted,
+                `batch_item_${nextItem.id}_attempt_${newAttempt}`,
+                errorCode,
+            );
 
             await admin
                 .from("batch_job_items")
@@ -139,6 +182,9 @@ export async function POST(
                     updated_at: failedAt,
                     finished_at: failedAt,
                     error: errMsg,
+                    error_code: errorCode,
+                    credits_refunded: refundResult.success ? creditResult.deducted : 0,
+                    refund_processed_at: refundResult.success ? failedAt : null,
                 })
                 .eq("id", nextItem.id);
 
@@ -151,7 +197,7 @@ export async function POST(
                 {
                     success: false,
                     error: errMsg,
-                    credits: creditResult.credits,
+                    credits: refundResult.credits ?? creditResult.credits,
                     job: toBatchJobPayload(errored.job, errored.items),
                 },
                 { status: 500 },

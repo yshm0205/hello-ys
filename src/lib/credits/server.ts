@@ -143,3 +143,37 @@ export async function deductUserCredits(
     message: `${cost}cr 사용 (보유: ${updated.credits}cr)`,
   };
 }
+
+/**
+ * 크레딧 환불 — DB function(refund_batch_item)으로 원자적 처리
+ * FOR UPDATE 행 잠금 + 중복 체크 + 잔액 복구 + transaction 기록이 한 트랜잭션
+ */
+export async function refundUserCredits(
+  userId: string,
+  amount: number,
+  referenceId: string,
+  reason: string,
+): Promise<{ success: boolean; credits?: number }> {
+  const adminClient = createAdminClient();
+
+  const { data, error } = await adminClient.rpc("refund_batch_item", {
+    p_reference_id: referenceId,
+    p_user_id: userId,
+    p_amount: amount,
+    p_reason: reason,
+  });
+
+  if (error) {
+    console.error("[Credits] refund_batch_item RPC failed:", error);
+    return { success: false };
+  }
+
+  const result = data as { success: boolean; credits?: number; reason?: string };
+
+  if (!result.success) {
+    console.warn(`[Credits] Refund rejected: ${result.reason} (ref=${referenceId})`);
+    return { success: false };
+  }
+
+  return { success: true, credits: result.credits };
+}

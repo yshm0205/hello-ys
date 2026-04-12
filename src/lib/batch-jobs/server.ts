@@ -35,8 +35,12 @@ export interface BatchJobItemRow {
     phase: BatchJobPhase;
     scripts: Array<{ hook: string; full_script: string }> | null;
     error: string | null;
+    error_code: string | null;
     elapsed: number | null;
     credits_deducted: number;
+    credits_refunded: number;
+    refund_processed_at: string | null;
+    attempt_count: number;
     started_at: string | null;
     finished_at: string | null;
     created_at: string;
@@ -65,7 +69,9 @@ export interface BatchJobItemPayload {
     phase: BatchJobPhase;
     scripts: Array<{ hook: string; full_script: string }> | null;
     error: string | null;
+    errorCode: string | null;
     elapsed: number | null;
+    creditsRefunded: number;
     sortOrder: number;
     startedAt: string | null;
     finishedAt: string | null;
@@ -358,7 +364,9 @@ export function toBatchJobPayload(job: BatchJobRow, items: BatchJobItemRow[]): B
             phase: item.phase,
             scripts: item.scripts,
             error: item.error,
+            errorCode: item.error_code,
             elapsed: item.elapsed,
+            creditsRefunded: item.credits_refunded,
             sortOrder: item.sort_order,
             startedAt: item.started_at,
             finishedAt: item.finished_at,
