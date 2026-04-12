@@ -695,6 +695,16 @@ export function BatchGeneratorContent() {
                             </Group>
                         </Group>
 
+                        {/* 크레딧 에러 — 큐 유무와 무관하게 항상 표시 */}
+                        {creditError && (
+                            <Paper p="sm" radius="md" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                <Group gap="sm">
+                                    <AlertCircle size={16} color="#ef4444" />
+                                    <Text size="sm" c="red.6">{creditError}</Text>
+                                </Group>
+                            </Paper>
+                        )}
+
                         {/* 큐 헤더 + 상태 */}
                         {queue.length > 0 && (
                             <>
@@ -715,16 +725,6 @@ export function BatchGeneratorContent() {
                                         )}
                                     </Group>
                                 </Box>
-
-                                {/* 크레딧 에러 */}
-                                {creditError && (
-                                    <Paper p="sm" radius="md" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                        <Group gap="sm">
-                                            <AlertCircle size={16} color="#ef4444" />
-                                            <Text size="sm" c="red.6">{creditError}</Text>
-                                        </Group>
-                                    </Paper>
-                                )}
 
                                 {/* 진행률 */}
                                 {isRunning && queue.length > 1 && (
