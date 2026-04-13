@@ -12,7 +12,7 @@ export function useTossPay() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const requestPayment = useCallback(async (planType: string, amount: number) => {
+    const requestPayment = useCallback(async (planType: string) => {
         setLoading(true);
         setError(null);
 
@@ -20,7 +20,7 @@ export function useTossPay() {
             const res = await fetch('/api/tosspay/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ planType, amount }),
+                body: JSON.stringify({ planType }),
             });
 
             const data = await res.json();

@@ -2,56 +2,124 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Container, Card, Stack, Title, Text, Button, Loader, Group } from '@mantine/core';
-import { CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import {
+    Button,
+    Card,
+    Container,
+    Group,
+    Loader,
+    Stack,
+    Text,
+    Title,
+} from '@mantine/core';
+import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
+
 import { Link } from '@/i18n/routing';
+
+type PaymentStatus = 'loading' | 'success' | 'error';
+
+const TOSSPAY_PENDING_STATUSES = new Set(['PENDING', 'PAY_PENDING', 'IN_PROGRESS']);
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
-    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+    const [status, setStatus] = useState<PaymentStatus>('loading');
     const [message, setMessage] = useState('');
     const [addedCredits, setAddedCredits] = useState(0);
 
     useEffect(() => {
-        async function confirmPayment() {
-            const paymentKey = searchParams.get('paymentKey');
-            const orderId = searchParams.get('orderId');
-            const amount = searchParams.get('amount');
+        let cancelled = false;
+        let timer: ReturnType<typeof setTimeout> | null = null;
 
-            if (!paymentKey || !orderId || !amount) {
-                setStatus('error');
-                setMessage('결제 정보가 올바르지 않습니다.');
-                return;
-            }
-
+        async function confirmTossPayments(paymentKey: string, orderId: string, amount: number) {
             try {
                 const res = await fetch('/api/payments/confirm', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        paymentKey,
-                        orderId,
-                        amount: Number(amount),
-                    }),
+                    body: JSON.stringify({ paymentKey, orderId, amount }),
                 });
 
                 const data = await res.json();
+                if (cancelled) return;
 
                 if (data.success) {
                     setStatus('success');
                     setAddedCredits(data.added);
                     setMessage(`${data.added}cr 충전 완료! (보유: ${data.credits}cr)`);
-                } else {
-                    setStatus('error');
-                    setMessage(data.error || '결제 확인에 실패했습니다.');
+                    return;
                 }
+
+                setStatus('error');
+                setMessage(data.error || '결제 확인에 실패했습니다.');
             } catch {
+                if (cancelled) return;
                 setStatus('error');
                 setMessage('서버 연결에 실패했습니다.');
             }
         }
 
-        confirmPayment();
+        async function pollTossPayStatus(orderNo: string, attempt = 0) {
+            try {
+                const res = await fetch(`/api/tosspay/status?orderNo=${encodeURIComponent(orderNo)}`, {
+                    cache: 'no-store',
+                });
+                const data = await res.json();
+                if (cancelled) return;
+
+                if (!res.ok) {
+                    setStatus('error');
+                    setMessage(data.error || '결제 상태를 확인하지 못했습니다.');
+                    return;
+                }
+
+                if (data.status === 'DONE') {
+                    setStatus('success');
+                    setAddedCredits(data.addedCredits || 0);
+                    setMessage(`${data.orderName || '프로그램'} 결제가 완료되었습니다.`);
+                    return;
+                }
+
+                if (TOSSPAY_PENDING_STATUSES.has(data.status) && attempt < 15) {
+                    setMessage('결제 승인 완료를 확인하는 중입니다...');
+                    timer = setTimeout(() => {
+                        void pollTossPayStatus(orderNo, attempt + 1);
+                    }, 2000);
+                    return;
+                }
+
+                setStatus('error');
+                setMessage(
+                    data.status && TOSSPAY_PENDING_STATUSES.has(data.status)
+                        ? '결제 승인 확인이 지연되고 있습니다. 잠시 후 다시 확인해 주세요.'
+                        : `결제가 완료되지 않았습니다. 현재 상태: ${data.status || 'UNKNOWN'}`,
+                );
+            } catch {
+                if (cancelled) return;
+                setStatus('error');
+                setMessage('결제 상태를 확인하지 못했습니다.');
+            }
+        }
+
+        const paymentKey = searchParams.get('paymentKey');
+        const orderId = searchParams.get('orderId');
+        const amount = searchParams.get('amount');
+        const orderNo = searchParams.get('orderNo');
+
+        if (paymentKey && orderId && amount) {
+            void confirmTossPayments(paymentKey, orderId, Number(amount));
+        } else if (orderNo) {
+            void pollTossPayStatus(orderNo);
+        } else {
+            timer = setTimeout(() => {
+                if (cancelled) return;
+                setStatus('error');
+                setMessage('결제 정보가 올바르지 않습니다.');
+            }, 0);
+        }
+
+        return () => {
+            cancelled = true;
+            if (timer) clearTimeout(timer);
+        };
     }, [searchParams]);
 
     return (
@@ -61,8 +129,10 @@ export default function PaymentSuccessPage() {
                     {status === 'loading' && (
                         <>
                             <Loader color="violet" size="lg" />
-                            <Title order={3} ta="center">결제를 확인하고 있어요...</Title>
-                            <Text c="gray.6" ta="center">잠시만 기다려주세요</Text>
+                            <Title order={3} ta="center">결제를 확인하고 있습니다...</Title>
+                            <Text c="gray.6" ta="center">
+                                {message || '잠시만 기다려 주세요'}
+                            </Text>
                         </>
                     )}
 
@@ -70,23 +140,30 @@ export default function PaymentSuccessPage() {
                         <>
                             <CheckCircle size={64} color="#22c55e" />
                             <Title order={2} ta="center" style={{ color: '#111827' }}>
-                                충전 완료!
+                                결제 완료
                             </Title>
                             <Text size="lg" c="gray.7" ta="center">
-                                {addedCredits.toLocaleString()} 크레딧이 추가되었습니다.
+                                {addedCredits > 0
+                                    ? `${addedCredits.toLocaleString()} 크레딧이 반영되었습니다.`
+                                    : '결제가 정상적으로 완료되었습니다.'}
                             </Text>
                             <Text size="sm" c="gray.5" ta="center">{message}</Text>
                             <Group mt="md">
                                 <Button
-                                    component={Link} href="/dashboard/credits"
-                                    variant="light" color="violet" radius="lg"
+                                    component={Link}
+                                    href="/dashboard/credits"
+                                    variant="light"
+                                    color="violet"
+                                    radius="lg"
                                     leftSection={<ArrowLeft size={16} />}
                                 >
                                     크레딧 페이지로
                                 </Button>
                                 <Button
-                                    component={Link} href="/dashboard/scripts-v2"
-                                    color="violet" radius="lg"
+                                    component={Link}
+                                    href="/dashboard/scripts-v2"
+                                    color="violet"
+                                    radius="lg"
                                     style={{ background: '#8b5cf6' }}
                                 >
                                     스크립트 만들기
@@ -99,15 +176,19 @@ export default function PaymentSuccessPage() {
                         <>
                             <AlertCircle size={64} color="#ef4444" />
                             <Title order={2} ta="center" style={{ color: '#111827' }}>
-                                충전 실패
+                                결제 확인 실패
                             </Title>
                             <Text c="gray.6" ta="center">{message}</Text>
                             <Text size="sm" c="gray.5" ta="center">
-                                문제가 계속되면 hmys0205hmys@gmail.com으로 문의해주세요
+                                문제가 계속되면 hmys0205hmys@gmail.com으로 문의해 주세요.
                             </Text>
                             <Button
-                                component={Link} href="/dashboard/credits"
-                                variant="light" color="violet" radius="lg" mt="md"
+                                component={Link}
+                                href="/dashboard/credits"
+                                variant="light"
+                                color="violet"
+                                radius="lg"
+                                mt="md"
                                 leftSection={<ArrowLeft size={16} />}
                             >
                                 크레딧 페이지로 돌아가기
