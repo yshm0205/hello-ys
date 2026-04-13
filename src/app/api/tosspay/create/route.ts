@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
       order_id: orderId,
       order_name: `FlowSpot ${plan.name}`,
       amount: plan.amount,
+      credits: plan.credits,
       status: "PENDING",
       metadata: { planType, payToken: tossData.payToken },
     });

@@ -1,6 +1,6 @@
 export const TOSSPAY_PLAN_CONFIG = {
   allinone: {
-    amount: 99000,
+    amount: 490000,
     credits: 160,
     months: 4,
     creditsPerMonth: 40,

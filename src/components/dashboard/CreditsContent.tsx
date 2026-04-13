@@ -26,6 +26,7 @@ import {
     Zap,
 } from 'lucide-react';
 
+import { TOSSPAY_PLAN_CONFIG } from '@/lib/tosspay/config';
 import { useTossPay } from '@/hooks/useTossPay';
 import { useTossPayment } from '@/hooks/useTossPayment';
 
@@ -55,6 +56,7 @@ const usageGuide = [
 ];
 
 export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps) {
+    const tossPayTestPlan = TOSSPAY_PLAN_CONFIG.allinone;
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
     const { requestPayment, loading: paymentLoading } = useTossPayment(userId);
     const {
@@ -224,7 +226,8 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                 <Text size="sm" c="dimmed">
                                     `TOSSPAY_API_KEY`와 `tosspay create → callback → success`
                                     경로를 실제 결제로 검증합니다. 올인원 4개월 프로그램 기준
-                                    99,000원 결제 페이지를 엽니다.
+                                    {` ${tossPayTestPlan.amount.toLocaleString()}원 `}
+                                    결제 페이지를 엽니다.
                                 </Text>
                                 {tossPayError && (
                                     <Text size="sm" c="red.6" mt="xs">
