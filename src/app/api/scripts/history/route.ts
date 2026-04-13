@@ -53,7 +53,7 @@ export async function GET() {
             title: item.input_text?.substring(0, 30) + "..." || "제목 없음",
             inputText: item.input_text || "",
             scripts: item.scripts || [],
-            createdAt: new Date(item.created_at).toLocaleString("ko-KR"),
+            createdAt: item.created_at,
             archetype: item.scripts?.[0]?.archetype || "UNKNOWN",
             versions: item.scripts?.length || 0,
             niche: item.niche || null,
