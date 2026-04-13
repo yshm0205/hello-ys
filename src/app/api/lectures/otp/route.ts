@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { getPublishedLectureVideoByVodId } from "@/lib/lectures/server";
+import { isActiveAccessPlan } from "@/lib/plans/config";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -8,6 +9,16 @@ export async function POST(request: Request) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { data: plan } = await supabase
+            .from("user_plans")
+            .select("plan_type, expires_at")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
+            return NextResponse.json({ error: "Lecture access requires an active program." }, { status: 403 });
         }
 
         const body = await request.json();

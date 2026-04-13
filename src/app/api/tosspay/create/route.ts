@@ -89,9 +89,17 @@ export async function POST(request: NextRequest) {
       order_id: orderId,
       order_name: `FlowSpot ${plan.name}`,
       amount: plan.amount,
-      credits: plan.credits,
+      credits: plan.initialCredits,
       status: "PENDING",
-      metadata: { planType, payToken: tossData.payToken },
+      metadata: {
+        planType,
+        payToken: tossData.payToken,
+        paymentKind: plan.paymentKind,
+        userPlanType: plan.userPlanType,
+        initialCredits: plan.initialCredits,
+        monthlyCredits: plan.monthlyCredits,
+        months: plan.months,
+      },
     });
 
     if (insertError) {

@@ -23,7 +23,9 @@ export async function GET() {
         // user_plans 테이블에서 크레딧 정보 조회
         const { data, error } = await supabase
             .from("user_plans")
-            .select("credits, plan_type, expires_at")
+            .select(
+                "credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at",
+            )
             .eq("user_id", user.id)
             .single();
 
@@ -37,14 +39,18 @@ export async function GET() {
                     plan_type: "free",
                     credits: 30,
                 })
-                .select("credits, plan_type, expires_at")
+                .select(
+                    "credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at",
+                )
                 .single();
 
             if (createError || !created) {
                 // 이미 다른 요청에서 생성됨 → 재조회
                 const { data: retry } = await supabase
                     .from("user_plans")
-                    .select("credits, plan_type, expires_at")
+                    .select(
+                        "credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at",
+                    )
                     .eq("user_id", user.id)
                     .single();
 
@@ -56,6 +62,10 @@ export async function GET() {
                     credits: 30,
                     plan_type: "free",
                     expires_at: null,
+                    monthly_credit_amount: 0,
+                    monthly_credit_total_cycles: null,
+                    monthly_credit_granted_cycles: 0,
+                    next_credit_at: null,
                 });
             }
 
@@ -63,6 +73,10 @@ export async function GET() {
                 credits: created.credits,
                 plan_type: created.plan_type,
                 expires_at: created.expires_at,
+                monthly_credit_amount: created.monthly_credit_amount ?? 0,
+                monthly_credit_total_cycles: created.monthly_credit_total_cycles ?? null,
+                monthly_credit_granted_cycles: created.monthly_credit_granted_cycles ?? 0,
+                next_credit_at: created.next_credit_at ?? null,
             });
         }
 
@@ -70,6 +84,10 @@ export async function GET() {
             credits: data.credits,
             plan_type: data.plan_type,
             expires_at: data.expires_at,
+            monthly_credit_amount: data.monthly_credit_amount ?? 0,
+            monthly_credit_total_cycles: data.monthly_credit_total_cycles ?? null,
+            monthly_credit_granted_cycles: data.monthly_credit_granted_cycles ?? 0,
+            next_credit_at: data.next_credit_at ?? null,
         });
 
     } catch (error) {

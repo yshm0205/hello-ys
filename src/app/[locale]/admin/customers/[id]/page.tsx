@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@/i18n/routing";
+import { getPlanLabel, PLAN_TYPE } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 type CustomerUser = {
@@ -18,6 +19,10 @@ type CustomerPlan = {
   credits: number;
   plan_type: string;
   expires_at: string | null;
+  monthly_credit_amount: number | null;
+  monthly_credit_total_cycles: number | null;
+  monthly_credit_granted_cycles: number | null;
+  next_credit_at: string | null;
 } | null;
 
 type CustomerPayment = {
@@ -74,12 +79,6 @@ type CustomerDetail = {
   lectureStats: CustomerLectureStats;
 };
 
-const planLabels: Record<string, string> = {
-  free: "무료",
-  pro: "Pro",
-  allinone: "올인원",
-};
-
 function buildLectureVodId(vodNumber: number): string {
   return `vod_${String(vodNumber).padStart(2, "0")}`;
 }
@@ -115,7 +114,9 @@ async function getCustomerDetail(userId: string): Promise<CustomerDetail | null>
 
   const { data: userPlan } = await supabase
     .from("user_plans")
-    .select("credits, plan_type, expires_at")
+    .select(
+      "credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at",
+    )
     .eq("user_id", userId)
     .single();
 
@@ -152,7 +153,10 @@ async function getCustomerDetail(userId: string): Promise<CustomerDetail | null>
       const watchedSecondsRaw = Math.max(0, Math.round(row.last_position || 0));
       const maxSeconds = durationMinutes > 0 ? durationMinutes * 60 : watchedSecondsRaw;
       const watchedSeconds = row.completed_at ? maxSeconds : Math.min(watchedSecondsRaw, maxSeconds);
-      const watchedMinutes = Math.min(durationMinutes || Math.ceil(watchedSeconds / 60), Math.ceil(watchedSeconds / 60));
+      const watchedMinutes = Math.min(
+        durationMinutes || Math.ceil(watchedSeconds / 60),
+        Math.ceil(watchedSeconds / 60),
+      );
       const progressPercent =
         durationMinutes > 0
           ? Math.min(100, Math.round((watchedSeconds / (durationMinutes * 60)) * 100))
@@ -283,14 +287,14 @@ export default async function CustomerDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>플랜 정보</CardTitle>
+            <CardTitle>이용권 정보</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground">플랜</p>
-                <Badge variant={userPlan?.plan_type === "free" ? "secondary" : "default"}>
-                  {planLabels[userPlan?.plan_type || "free"] || userPlan?.plan_type}
+                <p className="text-muted-foreground">이용권</p>
+                <Badge variant={userPlan?.plan_type === PLAN_TYPE.FREE ? "secondary" : "default"}>
+                  {getPlanLabel(userPlan?.plan_type || PLAN_TYPE.FREE)}
                 </Badge>
               </div>
               <div>
@@ -300,9 +304,26 @@ export default async function CustomerDetailPage({
               <div>
                 <p className="text-muted-foreground">만료일</p>
                 <p className="font-medium text-foreground">
-                  {userPlan?.expires_at
-                    ? new Date(userPlan.expires_at).toLocaleDateString("ko-KR")
-                    : "-"}
+                  {userPlan?.expires_at ? formatDate(userPlan.expires_at) : "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">월 지급 크레딧</p>
+                <p className="font-medium text-foreground">
+                  {(userPlan?.monthly_credit_amount ?? 0).toLocaleString()}cr
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">지급 진행</p>
+                <p className="font-medium text-foreground">
+                  {userPlan?.monthly_credit_granted_cycles ?? 0}/
+                  {userPlan?.monthly_credit_total_cycles ?? 0}회
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">다음 지급일</p>
+                <p className="font-medium text-foreground">
+                  {formatDate(userPlan?.next_credit_at)}
                 </p>
               </div>
             </div>
@@ -358,10 +379,7 @@ export default async function CustomerDetailPage({
           {lectureStats.items.length > 0 ? (
             <div className="space-y-3">
               {lectureStats.items.map((item) => (
-                <div
-                  key={item.vodId}
-                  className="rounded-lg border p-4"
-                >
+                <div key={item.vodId} className="rounded-lg border p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -406,7 +424,7 @@ export default async function CustomerDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>결제 내역</CardTitle>
+          <CardTitle>결제 이력</CardTitle>
         </CardHeader>
         <CardContent>
           {payments.length > 0 ? (
@@ -437,7 +455,7 @@ export default async function CustomerDetailPage({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">결제 내역이 없습니다.</p>
+            <p className="text-sm text-muted-foreground">결제 이력이 없습니다.</p>
           )}
         </CardContent>
       </Card>

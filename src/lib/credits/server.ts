@@ -1,3 +1,4 @@
+import { isActiveAccessPlan } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export const CREDIT_COSTS = {
@@ -84,21 +85,20 @@ export async function deductUserCredits(
     return {
       success: false,
       status: 403,
-      error: "사용자 플랜 정보를 찾을 수 없습니다.",
+      error: "?ъ슜???뚮옖 ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎.",
     };
   }
 
-  if (plan.expires_at && ["pro", "allinone"].includes(plan.plan_type)) {
-    const now = new Date();
-    const expiresAt = new Date(plan.expires_at);
-
-    if (now > expiresAt) {
-      return {
-        success: false,
-        status: 403,
-        error: "이용권이 만료되었습니다.",
-      };
-    }
+  if (
+    plan.expires_at &&
+    plan.plan_type !== "free" &&
+    !isActiveAccessPlan(plan.plan_type, plan.expires_at)
+  ) {
+    return {
+      success: false,
+      status: 403,
+      error: "?댁슜沅뚯씠 留뚮즺?섏뿀?듬땲??",
+    };
   }
 
   if (plan.credits < cost) {
@@ -106,7 +106,7 @@ export async function deductUserCredits(
       success: false,
       status: 403,
       credits: plan.credits,
-      error: `크레딧이 부족합니다. (필요: ${cost}cr, 보유: ${plan.credits}cr)`,
+      error: `?щ젅?㏃씠 遺議깊빀?덈떎. (?꾩슂: ${cost}cr, 蹂댁쑀: ${plan.credits}cr)`,
     };
   }
 
@@ -122,7 +122,7 @@ export async function deductUserCredits(
     return {
       success: false,
       status: 409,
-      error: "동시 요청 충돌이 발생했습니다. 다시 시도해 주세요.",
+      error: "?숈떆 ?붿껌 異⑸룎??諛쒖깮?덉뒿?덈떎. ?ㅼ떆 ?쒕룄??二쇱꽭??",
     };
   }
 
@@ -140,14 +140,10 @@ export async function deductUserCredits(
     status: 200,
     credits: updated.credits,
     deducted: cost,
-    message: `${cost}cr 사용 (보유: ${updated.credits}cr)`,
+    message: `${cost}cr ?ъ슜 (蹂댁쑀: ${updated.credits}cr)`,
   };
 }
 
-/**
- * 크레딧 환불 — DB function(refund_batch_item)으로 원자적 처리
- * FOR UPDATE 행 잠금 + 중복 체크 + 잔액 복구 + transaction 기록이 한 트랜잭션
- */
 export async function refundUserCredits(
   userId: string,
   amount: number,

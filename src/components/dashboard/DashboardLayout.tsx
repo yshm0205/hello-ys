@@ -39,6 +39,10 @@ interface DashboardLayoutProps {
         credits: number;
         plan_type: string;
         expires_at: string | null;
+        monthly_credit_amount?: number | null;
+        monthly_credit_total_cycles?: number | null;
+        monthly_credit_granted_cycles?: number | null;
+        next_credit_at?: string | null;
     } | null;
 }
 
@@ -47,6 +51,10 @@ interface DashboardShellContextValue {
         credits: number;
         plan_type: string;
         expires_at: string | null;
+        monthly_credit_amount?: number | null;
+        monthly_credit_total_cycles?: number | null;
+        monthly_credit_granted_cycles?: number | null;
+        next_credit_at?: string | null;
     } | null;
     initialCredits: number | null;
 }

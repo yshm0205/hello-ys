@@ -5,9 +5,13 @@ import {
   Users,
   CreditCard,
   TrendingUp,
+  Eye,
+  MousePointerClick,
+  Clock3,
 } from "lucide-react";
 import { AdminChart } from "@/components/admin/AdminChart";
 import { getTranslations } from "next-intl/server";
+import { PAID_PLAN_TYPES } from "@/lib/plans/config";
 
 async function getAdminStats() {
   const supabase = createAdminClient();
@@ -21,7 +25,7 @@ async function getAdminStats() {
   const { count: paidUsers } = await supabase
     .from("user_plans")
     .select("*", { count: "exact", head: true })
-    .in("plan_type", ["pro", "allinone"]);
+    .in("plan_type", [...PAID_PLAN_TYPES]);
 
   // 오늘 매출 (toss_payments)
   const todayStart = new Date();
@@ -95,8 +99,38 @@ async function getAdminStats() {
   };
 }
 
+async function getMarketingStats() {
+  const supabase = createAdminClient();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const { data: sessions } = await supabase
+    .from("marketing_sessions")
+    .select("duration_seconds, pricing_views, cta_clicks, referrer, first_path, first_seen_at")
+    .gte("first_seen_at", todayStart.toISOString())
+    .order("first_seen_at", { ascending: false })
+    .limit(50);
+
+  const rows = sessions || [];
+  const totalSessions = rows.length;
+  const pricingSessions = rows.filter((row) => (row.pricing_views || 0) > 0).length;
+  const ctaClicks = rows.reduce((sum, row) => sum + (row.cta_clicks || 0), 0);
+  const avgDurationSeconds = totalSessions
+    ? Math.round(rows.reduce((sum, row) => sum + (row.duration_seconds || 0), 0) / totalSessions)
+    : 0;
+
+  return {
+    totalSessions,
+    pricingSessions,
+    ctaClicks,
+    avgDurationSeconds,
+    recentSessions: rows.slice(0, 5),
+  };
+}
+
 export default async function AdminOverviewPage() {
   const stats = await getAdminStats();
+  const marketing = await getMarketingStats();
   const t = await getTranslations("Admin.overview");
 
   return (
@@ -167,6 +201,52 @@ export default async function AdminOverviewPage() {
         </Card>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">오늘 랜딩 세션</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">{marketing.totalSessions}</div>
+            <p className="text-xs text-muted-foreground">랜딩/가격 페이지 방문 세션</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">오늘 가격 진입</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">{marketing.pricingSessions}</div>
+            <p className="text-xs text-muted-foreground">pricing 페이지까지 이동한 세션</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">평균 체류시간</CardTitle>
+            <Clock3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">{marketing.avgDurationSeconds}초</div>
+            <p className="text-xs text-muted-foreground">오늘 랜딩/가격 평균</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">CTA 클릭</CardTitle>
+            <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">{marketing.ctaClicks}</div>
+            <p className="text-xs text-muted-foreground">pricing/login 이동 클릭 수</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-4">
           <AdminChart data={stats.chartData} />
@@ -212,6 +292,39 @@ export default async function AdminOverviewPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>최근 랜딩 세션</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {marketing.recentSessions.map((session, index) => (
+              <div key={`${session.first_seen_at}-${index}`} className="flex items-center gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {session.first_path || "/"}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {session.referrer || "direct"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {new Date(session.first_seen_at as string).toLocaleString("ko-KR")}
+                  </p>
+                </div>
+                <div className="text-right text-xs text-muted-foreground">
+                  <div>{session.duration_seconds || 0}초</div>
+                  <div>pricing {session.pricing_views || 0}</div>
+                  <div>cta {session.cta_clicks || 0}</div>
+                </div>
+              </div>
+            ))}
+            {!marketing.recentSessions.length && (
+              <p className="text-sm text-muted-foreground">아직 수집된 랜딩 세션이 없습니다.</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

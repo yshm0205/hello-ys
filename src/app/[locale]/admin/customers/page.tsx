@@ -14,12 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Link } from "@/i18n/routing";
 import { getPaginatedUserPlans } from "@/lib/admin/user-plans";
-
-const planLabels: Record<string, string> = {
-  free: "무료",
-  pro: "Pro",
-  allinone: "올인원",
-};
+import { getPlanLabel, PLAN_TYPE } from "@/lib/plans/config";
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "-";
@@ -55,11 +50,13 @@ export default async function AdminCustomersPage({
         <AdminSearch placeholder="이메일 검색..." />
         <AdminFilter
           name="planType"
-          placeholder="전체 플랜"
+          placeholder="전체 이용권"
           options={[
-            { label: "무료", value: "free" },
-            { label: "Pro", value: "pro" },
-            { label: "올인원", value: "allinone" },
+            { label: "무료", value: PLAN_TYPE.FREE },
+            { label: "4개월 프로그램", value: PLAN_TYPE.STUDENT_4M },
+            { label: "월 구독", value: PLAN_TYPE.SUBSCRIBER_MONTHLY },
+            { label: "구 올인원", value: PLAN_TYPE.LEGACY_ALLINONE },
+            { label: "구 Pro", value: PLAN_TYPE.LEGACY_PRO },
           ]}
         />
       </div>
@@ -69,7 +66,7 @@ export default async function AdminCustomersPage({
           <TableHeader>
             <TableRow>
               <TableHead>{t("customer")}</TableHead>
-              <TableHead>플랜</TableHead>
+              <TableHead>이용권</TableHead>
               <TableHead className="text-right">크레딧</TableHead>
               <TableHead>가입일</TableHead>
               <TableHead>만료일</TableHead>
@@ -91,9 +88,9 @@ export default async function AdminCustomersPage({
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={customer.plan_type === "free" ? "secondary" : "default"}
+                    variant={customer.plan_type === PLAN_TYPE.FREE ? "secondary" : "default"}
                   >
-                    {planLabels[customer.plan_type] || customer.plan_type}
+                    {getPlanLabel(customer.plan_type)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right font-medium">

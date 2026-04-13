@@ -26,7 +26,14 @@ import {
     Zap,
 } from 'lucide-react';
 
-import { TOSSPAY_PLAN_CONFIG } from '@/lib/tosspay/config';
+import {
+    getPlanCreditDisplayCap,
+    getPlanLabel,
+    isInitialProgramPlan,
+    isMonthlySubscriberPlan,
+    isPaidPlanType,
+    TOSSPAY_PLAN_CONFIG,
+} from '@/lib/plans/config';
 import { useTossPay } from '@/hooks/useTossPay';
 import { useTossPayment } from '@/hooks/useTossPayment';
 
@@ -34,6 +41,10 @@ interface CreditInfo {
     credits: number;
     plan_type: string;
     expires_at: string | null;
+    monthly_credit_amount?: number | null;
+    monthly_credit_total_cycles?: number | null;
+    monthly_credit_granted_cycles?: number | null;
+    next_credit_at?: string | null;
 }
 
 interface CreditsContentProps {
@@ -44,16 +55,25 @@ interface CreditsContentProps {
 const packs = [
     { cr: 100, price: '₩14,900', per: '₩149', popular: false },
     { cr: 300, price: '₩34,900', per: '₩116', popular: false },
-    { cr: 500, price: '₩54,900', per: '₩110', popular: true },
-    { cr: 1000, price: '₩99,900', per: '₩100', popular: false },
+    { cr: 500, price: '₩54,900', per: '₩109', popular: true },
+    { cr: 1000, price: '₩99,900', per: '₩99', popular: false },
 ];
 
 const usageGuide = [
     { action: '리서치', cost: 3, icon: <Search size={16} />, desc: '소재 기반 리서치와 구조 분석' },
-    { action: '전체 생성', cost: 10, icon: <Sparkles size={16} />, desc: '리서치 포함 스크립트 3개 생성' },
-    { action: '스킵 생성', cost: 7, icon: <SkipForward size={16} />, desc: '리서치 없이 스크립트 3개 생성' },
-    { action: '리라이트', cost: 2, icon: <RefreshCw size={16} />, desc: '기존 스크립트 말투와 표현 수정' },
+    { action: '전체 생성', cost: 10, icon: <Sparkles size={16} />, desc: '리서치 포함 스크립트 생성' },
+    { action: '스킵 생성', cost: 7, icon: <SkipForward size={16} />, desc: '리서치 없이 바로 스크립트 생성' },
+    { action: '리라이트', cost: 2, icon: <RefreshCw size={16} />, desc: '기존 스크립트의 말투와 표현 수정' },
 ];
+
+function formatDate(value?: string | null) {
+    if (!value) return '-';
+    return new Date(value).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+}
 
 export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps) {
     const tossPayTestPlan = TOSSPAY_PLAN_CONFIG.allinone;
@@ -81,10 +101,16 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
     }, []);
 
     const planType = creditInfo?.plan_type || 'free';
-    const planLabel =
-        planType === 'pro' ? 'Pro' : planType === 'allinone' ? '올인원 패스' : '무료 체험';
-    const maxCredits = planType === 'pro' ? 500 : planType === 'allinone' ? 3000 : 30;
     const credits = creditInfo?.credits ?? 0;
+    const displayPlanLabel = getPlanLabel(planType);
+    const displayMaxCredits = getPlanCreditDisplayCap(planType);
+    const isPaid = isPaidPlanType(planType);
+    const isInitialProgram = isInitialProgramPlan(planType);
+    const isMonthlySubscriber = isMonthlySubscriberPlan(planType);
+    const monthlyAmount = creditInfo?.monthly_credit_amount ?? 0;
+    const grantedCycles = creditInfo?.monthly_credit_granted_cycles ?? 0;
+    const totalCycles = creditInfo?.monthly_credit_total_cycles ?? null;
+    const nextCreditAt = creditInfo?.next_credit_at ?? null;
 
     return (
         <Container size="xl" py="md">
@@ -93,10 +119,12 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                     <Group gap="sm" mb="xs">
                         <Coins size={28} color="#8b5cf6" />
                         <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
-                            크레딧 충전
+                            크레딧 관리
                         </Title>
                     </Group>
-                    <Text c="dimmed">남은 크레딧을 확인하고 필요한 만큼 바로 충전할 수 있습니다.</Text>
+                    <Text c="dimmed">
+                        현재 이용권 상태와 보유 크레딧을 확인하고, 부족하면 바로 추가 충전할 수 있습니다.
+                    </Text>
                 </Box>
 
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
@@ -108,7 +136,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                 <Text size="sm" c="white" opacity={0.7}>cr</Text>
                             </Group>
                             <Progress
-                                value={Math.min((credits / maxCredits) * 100, 100)}
+                                value={Math.min((credits / displayMaxCredits) * 100, 100)}
                                 color="white"
                                 size="sm"
                                 radius="xl"
@@ -120,11 +148,11 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                     <Card padding="xl" radius="xl" withBorder>
                         <Stack gap="sm">
                             <Group justify="space-between">
-                                <Text size="sm" c="gray.6">현재 플랜</Text>
+                                <Text size="sm" c="gray.6">현재 이용권</Text>
                                 <Crown size={20} color="#8b5cf6" />
                             </Group>
                             <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
-                                {planLabel}
+                                {displayPlanLabel}
                             </Title>
                             <Group gap="sm">
                                 <Badge variant="light" color="violet">
@@ -132,86 +160,146 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                 </Badge>
                                 {creditInfo?.expires_at && (
                                     <Text size="xs" c="gray.5">
-                                        만료: {new Date(creditInfo.expires_at).toLocaleDateString('ko-KR')}
+                                        만료: {formatDate(creditInfo.expires_at)}
                                     </Text>
                                 )}
                             </Group>
+                            {isInitialProgram && (
+                                <Stack gap={2}>
+                                    <Text size="xs" c="gray.5">
+                                        매달 {monthlyAmount.toLocaleString()}cr 지급
+                                    </Text>
+                                    {totalCycles !== null && (
+                                        <Text size="xs" c="gray.5">
+                                            {grantedCycles}/{totalCycles}회 지급됨
+                                        </Text>
+                                    )}
+                                    {nextCreditAt && (
+                                        <Text size="xs" c="gray.5">
+                                            다음 지급: {formatDate(nextCreditAt)}
+                                        </Text>
+                                    )}
+                                </Stack>
+                            )}
+                            {isMonthlySubscriber && monthlyAmount > 0 && (
+                                <Text size="xs" c="gray.5">
+                                    매달 {monthlyAmount.toLocaleString()}cr 자동 지급
+                                </Text>
+                            )}
                         </Stack>
                     </Card>
                 </SimpleGrid>
 
-                <Box>
-                    <Group gap="sm" mb="xs">
-                        <Zap size={22} color="#8b5cf6" />
-                        <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
-                            추가 크레딧 구매
-                        </Title>
-                    </Group>
-                    <Text size="sm" c="gray.5" mb="lg">
-                        결제 즉시 충전되며, 별도 만료 없이 바로 사용할 수 있습니다.
-                    </Text>
-
-                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                        {packs.map((pack) => (
-                            <Card
-                                key={pack.cr}
-                                padding="lg"
-                                radius="xl"
-                                style={
-                                    pack.popular
-                                        ? {
-                                            border: '2px solid #8b5cf6',
-                                            position: 'relative',
-                                            overflow: 'visible',
-                                        }
-                                        : { border: '1px solid #e5e7eb' }
-                                }
-                            >
-                                {pack.popular && (
-                                    <Badge
-                                        size="sm"
-                                        color="violet"
-                                        variant="filled"
-                                        style={{
-                                            position: 'absolute',
-                                            top: -10,
-                                            left: '50%',
-                                            transform: 'translateX(-50%)',
-                                        }}
-                                    >
-                                        인기
-                                    </Badge>
-                                )}
-                                <Group justify="space-between" align="center">
-                                    <Box>
-                                        <Group gap="xs">
-                                            <Zap size={18} color="#8b5cf6" />
-                                            <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
-                                                {pack.cr.toLocaleString()} 크레딧
-                                            </Text>
-                                        </Group>
-                                        <Text size="xs" c="gray.5" mt={2}>cr당 {pack.per}</Text>
-                                    </Box>
-                                    <Box ta="right">
-                                        <Text fw={800} size="xl" style={{ color: '#8b5cf6' }}>{pack.price}</Text>
-                                        <Button
-                                            size="xs"
-                                            radius="lg"
-                                            mt={4}
-                                            variant={pack.popular ? 'filled' : 'light'}
-                                            color="violet"
-                                            style={pack.popular ? { background: '#8b5cf6' } : undefined}
-                                            loading={paymentLoading}
-                                            onClick={() => requestPayment(pack.cr)}
-                                        >
-                                            구매하기
-                                        </Button>
-                                    </Box>
+                {!isPaid && (
+                    <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
+                        <Group justify="space-between" align="center" wrap="wrap" gap="lg">
+                            <Box maw={560}>
+                                <Group gap="xs" mb="xs">
+                                    <Crown size={18} color="#8b5cf6" />
+                                    <Text fw={700} style={{ color: 'var(--mantine-color-text)' }}>
+                                        4개월 프로그램 신청
+                                    </Text>
                                 </Group>
-                            </Card>
-                        ))}
-                    </SimpleGrid>
-                </Box>
+                                <Text size="sm" c="dimmed">
+                                    강의 4개월 이용권 + 프로그램 4개월 + 매달 400cr 지급.
+                                </Text>
+                                <Text size="sm" c="dimmed" mt={4}>
+                                    결제 직후 400cr 지급, 이후 매달 400cr씩 총 4회 지급됩니다.
+                                </Text>
+                            </Box>
+                            <Box>
+                                <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>
+                                    {tossPayTestPlan.amount.toLocaleString()}원
+                                </Text>
+                                <Button
+                                    component="a"
+                                    href="/pricing"
+                                    color="violet"
+                                    radius="lg"
+                                    mt="xs"
+                                    fullWidth
+                                >
+                                    프로그램 신청하기
+                                </Button>
+                            </Box>
+                        </Group>
+                    </Card>
+                )}
+
+                {planType !== 'free' && (
+                    <Box>
+                        <Group gap="sm" mb="xs">
+                            <Zap size={22} color="#8b5cf6" />
+                            <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
+                                추가 크레딧 충전
+                            </Title>
+                        </Group>
+                        <Text size="sm" c="gray.5" mb="lg">
+                            충전한 크레딧은 즉시 반영되며, 이용권과 별도로 누적 사용됩니다.
+                        </Text>
+
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                            {packs.map((pack) => (
+                                <Card
+                                    key={pack.cr}
+                                    padding="lg"
+                                    radius="xl"
+                                    style={
+                                        pack.popular
+                                            ? {
+                                                border: '2px solid #8b5cf6',
+                                                position: 'relative',
+                                                overflow: 'visible',
+                                            }
+                                            : { border: '1px solid #e5e7eb' }
+                                    }
+                                >
+                                    {pack.popular && (
+                                        <Badge
+                                            size="sm"
+                                            color="violet"
+                                            variant="filled"
+                                            style={{
+                                                position: 'absolute',
+                                                top: -10,
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                            }}
+                                        >
+                                            인기
+                                        </Badge>
+                                    )}
+                                    <Group justify="space-between" align="center">
+                                        <Box>
+                                            <Group gap="xs">
+                                                <Zap size={18} color="#8b5cf6" />
+                                                <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
+                                                    {pack.cr.toLocaleString()} 크레딧
+                                                </Text>
+                                            </Group>
+                                            <Text size="xs" c="gray.5" mt={2}>cr당 {pack.per}</Text>
+                                        </Box>
+                                        <Box ta="right">
+                                            <Text fw={800} size="xl" style={{ color: '#8b5cf6' }}>{pack.price}</Text>
+                                            <Button
+                                                size="xs"
+                                                radius="lg"
+                                                mt={4}
+                                                variant={pack.popular ? 'filled' : 'light'}
+                                                color="violet"
+                                                style={pack.popular ? { background: '#8b5cf6' } : undefined}
+                                                loading={paymentLoading}
+                                                onClick={() => requestPayment(pack.cr)}
+                                            >
+                                                구매하기
+                                            </Button>
+                                        </Box>
+                                    </Group>
+                                </Card>
+                            ))}
+                        </SimpleGrid>
+                    </Box>
+                )}
 
                 {isAdmin && (
                     <Card padding="lg" radius="xl" withBorder>
@@ -224,10 +312,8 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     </Text>
                                 </Group>
                                 <Text size="sm" c="dimmed">
-                                    `TOSSPAY_API_KEY`와 `tosspay create → callback → success`
-                                    경로를 실제 결제로 검증합니다. 올인원 4개월 프로그램 기준
-                                    {` ${tossPayTestPlan.amount.toLocaleString()}원 `}
-                                    결제 페이지를 엽니다.
+                                    `TOSSPAY_API_KEY`와 TossPay 생성/콜백/성공 페이지 흐름을 실제 결제로 검증합니다.
+                                    4개월 프로그램 기준 {tossPayTestPlan.amount.toLocaleString()}원 결제 페이지를 엽니다.
                                 </Text>
                                 {tossPayError && (
                                     <Text size="sm" c="red.6" mt="xs">

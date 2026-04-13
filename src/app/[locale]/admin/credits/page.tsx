@@ -16,13 +16,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getPaginatedUserPlans } from "@/lib/admin/user-plans";
+import { getPlanLabel, PLAN_TYPE } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
-
-const planLabels: Record<string, string> = {
-  free: "무료",
-  pro: "Pro",
-  allinone: "올인원",
-};
 
 async function getCreditStats() {
   const supabase = createAdminClient();
@@ -40,14 +35,8 @@ async function getCreditStats() {
 
   const ledgerIssued = ledgerError
     ? 0
-    : (ledgerRows || []).reduce(
-        (sum, row) => sum + (row.amount > 0 ? row.amount : 0),
-        0,
-      );
-  const purchasedIssued = (purchases || []).reduce(
-    (sum, row) => sum + (row.credits || 0),
-    0,
-  );
+    : (ledgerRows || []).reduce((sum, row) => sum + (row.amount > 0 ? row.amount : 0), 0);
+  const purchasedIssued = (purchases || []).reduce((sum, row) => sum + (row.credits || 0), 0);
 
   return {
     totalUsers,
@@ -140,9 +129,11 @@ export default async function AdminCreditsPage({
               name="planType"
               placeholder="All Plans"
               options={[
-                { label: "Free", value: "free" },
-                { label: "Pro", value: "pro" },
-                { label: "All-in-One", value: "allinone" },
+                { label: "Free", value: PLAN_TYPE.FREE },
+                { label: "4-Month Program", value: PLAN_TYPE.STUDENT_4M },
+                { label: "Monthly Subscription", value: PLAN_TYPE.SUBSCRIBER_MONTHLY },
+                { label: "Legacy All-in-One", value: PLAN_TYPE.LEGACY_ALLINONE },
+                { label: "Legacy Pro", value: PLAN_TYPE.LEGACY_PRO },
               ]}
             />
           </div>
@@ -171,9 +162,9 @@ export default async function AdminCreditsPage({
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={item.plan_type === "free" ? "secondary" : "default"}
+                        variant={item.plan_type === PLAN_TYPE.FREE ? "secondary" : "default"}
                       >
-                        {planLabels[item.plan_type] || item.plan_type}
+                        {getPlanLabel(item.plan_type)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">

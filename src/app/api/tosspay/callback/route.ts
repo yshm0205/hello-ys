@@ -4,10 +4,6 @@ import { recordCreditTransaction } from "@/lib/credits/server";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 
-/**
- * TossPay V2 callback.
- * autoExecute=true, so TossPay calls this endpoint after payment completes.
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -81,59 +77,79 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ code: 0 });
     }
 
+    const { data: processingRows, error: processingError } = await admin
+      .from("toss_payments")
+      .update({
+        status: "PROCESSING",
+        payment_key: payToken,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("order_id", orderNo)
+      .in("status", ["PENDING", "PAY_PENDING", "IN_PROGRESS", "CREDIT_GRANT_FAILED"])
+      .select("order_id");
+
+    if (processingError) {
+      console.error("[TossPay Callback] Failed to acquire processing lock:", processingError);
+      return NextResponse.json({ code: 0 });
+    }
+
+    if (!processingRows?.length) {
+      return NextResponse.json({ code: 0 });
+    }
+
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + config.months);
 
-    const { data: plan } = await admin
+    const nextCreditAt = new Date();
+    nextCreditAt.setMonth(nextCreditAt.getMonth() + 1);
+
+    const { data: currentPlan } = await admin
       .from("user_plans")
       .select("credits")
       .eq("user_id", payment.user_id)
-      .single();
+      .maybeSingle();
 
-    const currentCredits = plan?.credits || 0;
-    const newCredits = currentCredits + config.credits;
-    let creditGrantMode: "full" | "credits_only" = "full";
+    const currentCredits = currentPlan?.credits || 0;
+    const newCredits = currentCredits + config.initialCredits;
 
-    const { error: planUpdateError } = await admin
+    const { error: planUpsertError } = await admin
       .from("user_plans")
-      .update({
-        plan_type: planType,
-        credits: newCredits,
-        expires_at: expiresAt.toISOString(),
-      })
-      .eq("user_id", payment.user_id);
-
-    if (planUpdateError) {
-      console.warn("[TossPay Callback] Full plan update failed, retrying credits-only:", planUpdateError);
-
-      const { error: creditOnlyError } = await admin
-        .from("user_plans")
-        .update({
+      .upsert(
+        {
+          user_id: payment.user_id,
+          plan_type: config.userPlanType,
           credits: newCredits,
+          expires_at: expiresAt.toISOString(),
+          monthly_credit_amount: config.monthlyCredits,
+          monthly_credit_total_cycles: config.months,
+          monthly_credit_granted_cycles: 1,
+          next_credit_at: nextCreditAt.toISOString(),
+        },
+        { onConflict: "user_id" },
+      );
+
+    if (planUpsertError) {
+      console.error("[TossPay Callback] Plan upsert failed:", planUpsertError);
+      await admin
+        .from("toss_payments")
+        .update({
+          status: "CREDIT_GRANT_FAILED",
+          payment_key: payToken,
+          credits: config.initialCredits,
+          metadata: {
+            ...(payment.metadata || {}),
+            payToken,
+            planType,
+            userPlanType: config.userPlanType,
+            paymentKind: config.paymentKind,
+            initialCredits: config.initialCredits,
+            monthlyCredits: config.monthlyCredits,
+            months: config.months,
+          },
+          updated_at: new Date().toISOString(),
         })
-        .eq("user_id", payment.user_id);
-
-      if (creditOnlyError) {
-        console.error("[TossPay Callback] Credits-only fallback failed:", creditOnlyError);
-        await admin
-          .from("toss_payments")
-          .update({
-            status: "CREDIT_GRANT_FAILED",
-            payment_key: payToken,
-            credits: config.credits,
-            metadata: {
-              ...(payment.metadata || {}),
-              payToken,
-              planType,
-              creditGrantMode: "failed",
-            },
-            updated_at: new Date().toISOString(),
-          })
-          .eq("order_id", orderNo);
-        return NextResponse.json({ code: 0 });
-      }
-
-      creditGrantMode = "credits_only";
+        .eq("order_id", orderNo);
+      return NextResponse.json({ code: 0 });
     }
 
     await admin
@@ -141,12 +157,16 @@ export async function POST(request: NextRequest) {
       .update({
         status: "DONE",
         payment_key: payToken,
-        credits: config.credits,
+        credits: config.initialCredits,
         metadata: {
           ...(payment.metadata || {}),
           payToken,
           planType,
-          creditGrantMode,
+          userPlanType: config.userPlanType,
+          paymentKind: config.paymentKind,
+          initialCredits: config.initialCredits,
+          monthlyCredits: config.monthlyCredits,
+          months: config.months,
         },
         updated_at: new Date().toISOString(),
       })
@@ -155,17 +175,27 @@ export async function POST(request: NextRequest) {
     await recordCreditTransaction({
       userId: payment.user_id,
       type: "charge",
-      amount: config.credits,
+      amount: config.initialCredits,
       balanceAfter: newCredits,
-      description: `tosspay charge: ${planType} (${config.months} months)`,
+      description: `initial program payment: ${config.name}`,
       referenceId: orderNo,
-      metadata: { provider: "tosspay", planType, payToken, amount },
+      metadata: {
+        provider: "tosspay",
+        planType,
+        userPlanType: config.userPlanType,
+        paymentKind: config.paymentKind,
+        payToken,
+        amount,
+        initialCredits: config.initialCredits,
+        monthlyCredits: config.monthlyCredits,
+      },
     });
 
     console.log("[TossPay Callback] Success:", {
       orderNo,
       planType,
-      credits: config.credits,
+      userPlanType: config.userPlanType,
+      initialCredits: config.initialCredits,
     });
 
     return NextResponse.json({ code: 0 });

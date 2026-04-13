@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       orderId: payment.order_id,
       orderName: payment.order_name,
       amount: payment.amount,
-      addedCredits: payment.credits || plan?.credits || 0,
+      addedCredits: payment.credits || plan?.initialCredits || 0,
       planType,
       updatedAt: payment.updated_at,
     });

@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
+import { getPlanLabel } from '@/lib/plans/config';
 
 interface DashboardContentProps {
     user?: { email?: string };
@@ -307,7 +308,7 @@ export function DashboardContent({
                             </Group>
                             <Group gap="sm">
                                 <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
-                                    {resolvedCreditInfo?.plan_type === 'free' || !resolvedCreditInfo ? 'Beta' : resolvedCreditInfo.plan_type}
+                                    {resolvedCreditInfo?.plan_type ? getPlanLabel(resolvedCreditInfo.plan_type) : 'Beta'}
                                 </Title>
                                 <Badge color="green" variant="light">활성</Badge>
                             </Group>
