@@ -1,4 +1,5 @@
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -28,19 +29,7 @@ export default async function DashboardGroupLayout({
     next_credit_at?: string | null;
   } | null = null;
 
-  try {
-    const { data } = await supabase
-      .from('user_plans')
-      .select(
-        'credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at',
-      )
-      .eq('user_id', user.id)
-      .single();
-
-    initialCreditInfo = data;
-  } catch {
-    // Ignore missing plan rows and fall back to null.
-  }
+  initialCreditInfo = await getEffectiveCreditInfo(user.id);
 
   return (
     <DashboardLayout

@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { isActiveAccessPlan } from "@/lib/plans/config";
+import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -10,11 +11,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { data: plan } = await supabase
-            .from("user_plans")
-            .select("plan_type, expires_at")
-            .eq("user_id", user.id)
-            .maybeSingle();
+        const plan = await getEffectiveCreditInfo(user.id);
 
         if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
             return NextResponse.json({ error: "Lecture access requires an active program." }, { status: 403 });

@@ -51,6 +51,17 @@ export async function GET(request: NextRequest) {
       .lte("next_credit_at", now.toISOString());
 
     if (error) {
+      if ((error as { code?: string }).code === "42703") {
+        console.warn("[Cron] Monthly credit fields missing - skipping until migration is applied");
+        return NextResponse.json({
+          success: true,
+          checked: 0,
+          granted: 0,
+          skipped: 0,
+          failures: [],
+          migrationPending: true,
+        });
+      }
       console.error("[Cron] Failed to load due plans:", error);
       return NextResponse.json({ error: "Failed to load plans" }, { status: 500 });
     }

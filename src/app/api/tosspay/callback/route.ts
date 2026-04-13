@@ -10,6 +10,73 @@ type ExistingUserPlanRow = {
   next_credit_at: string | null;
 };
 
+function isLegacySchemaError(error: unknown) {
+  const code = (error as { code?: string } | null)?.code;
+  return code === "42703" || code === "23514";
+}
+
+async function applyLegacyProgramCreditsOnly(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  creditsToAdd: number,
+): Promise<{ success: true; credits: number } | { success: false; error: unknown }> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data: currentPlan, error: loadError } = await admin
+      .from("user_plans")
+      .select("credits")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (loadError) {
+      return { success: false, error: loadError };
+    }
+
+    const currentCredits = currentPlan?.credits || 0;
+    const nextCredits = currentCredits + creditsToAdd;
+
+    if (!currentPlan) {
+      const { data: inserted, error: insertError } = await admin
+        .from("user_plans")
+        .insert({
+          user_id: userId,
+          plan_type: "free",
+          credits: nextCredits,
+        })
+        .select("credits")
+        .single();
+
+      if (!insertError && inserted) {
+        return { success: true, credits: inserted.credits };
+      }
+
+      if ((insertError as { code?: string } | null)?.code === "23505") {
+        continue;
+      }
+
+      return { success: false, error: insertError };
+    }
+
+    const { data: updated, error: updateError } = await admin
+      .from("user_plans")
+      .update({ credits: nextCredits })
+      .eq("user_id", userId)
+      .eq("credits", currentCredits)
+      .select("credits")
+      .single();
+
+    if (updated) {
+      return { success: true, credits: updated.credits };
+    }
+
+    const updateErrorCode = (updateError as { code?: string } | null)?.code;
+    if (updateError && updateErrorCode !== "PGRST116") {
+      return { success: false, error: updateError };
+    }
+  }
+
+  return { success: false, error: new Error("concurrent_legacy_credit_update") };
+}
+
 async function applyInitialProgramPlan(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
@@ -208,6 +275,69 @@ export async function POST(request: NextRequest) {
 
     if (!planGrantResult.success) {
       console.error("[TossPay Callback] Plan grant failed:", planGrantResult.error);
+
+      if (isLegacySchemaError(planGrantResult.error)) {
+        const legacyGrantResult = await applyLegacyProgramCreditsOnly(
+          admin,
+          payment.user_id,
+          config.initialCredits,
+        );
+
+        if (legacyGrantResult.success) {
+          await admin
+            .from("toss_payments")
+            .update({
+              status: "DONE",
+              payment_key: payToken,
+              credits: config.initialCredits,
+              metadata: {
+                ...(payment.metadata || {}),
+                payToken,
+                planType,
+                userPlanType: config.userPlanType,
+                paymentKind: config.paymentKind,
+                initialCredits: config.initialCredits,
+                monthlyCredits: config.monthlyCredits,
+                months: config.months,
+                fallbackMode: "legacy_schema",
+                accessExpiresAt: expiresAt.toISOString(),
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .eq("order_id", orderNo);
+
+          await recordCreditTransaction({
+            userId: payment.user_id,
+            type: "charge",
+            amount: config.initialCredits,
+            balanceAfter: legacyGrantResult.credits,
+            description: `initial program payment (legacy fallback): ${config.name}`,
+            referenceId: orderNo,
+            metadata: {
+              provider: "tosspay",
+              planType,
+              userPlanType: config.userPlanType,
+              paymentKind: config.paymentKind,
+              payToken,
+              amount,
+              initialCredits: config.initialCredits,
+              monthlyCredits: config.monthlyCredits,
+              fallbackMode: "legacy_schema",
+            },
+          });
+
+          console.warn("[TossPay Callback] Completed with legacy schema fallback:", {
+            orderNo,
+            planType,
+            credits: legacyGrantResult.credits,
+          });
+
+          return NextResponse.json({ code: 0 });
+        }
+
+        console.error("[TossPay Callback] Legacy fallback failed:", legacyGrantResult.error);
+      }
+
       await admin
         .from("toss_payments")
         .update({

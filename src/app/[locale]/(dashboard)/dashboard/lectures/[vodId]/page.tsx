@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { LecturePlayerContent } from '@/components/dashboard/LecturePlayerContent';
 import { getPublishedLectureChapters } from '@/lib/lectures/server';
 import { isActiveAccessPlan } from '@/lib/plans/config';
+import { getEffectiveCreditInfo } from '@/lib/plans/server';
 
 interface LecturePageProps {
     params: Promise<{ vodId: string }>;
@@ -17,11 +18,7 @@ export default async function LecturePage({ params }: LecturePageProps) {
         redirect('/login');
     }
 
-    const { data: plan } = await supabase
-        .from('user_plans')
-        .select('plan_type, expires_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
+    const plan = await getEffectiveCreditInfo(user.id);
 
     if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
         redirect('/pricing');

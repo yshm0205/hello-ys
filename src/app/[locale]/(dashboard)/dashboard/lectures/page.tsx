@@ -1,6 +1,7 @@
 import { LecturesContent } from '@/components/dashboard/LecturesContent';
 import { getPublishedLectureChapters } from '@/lib/lectures/server';
 import { isActiveAccessPlan } from '@/lib/plans/config';
+import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -12,11 +13,7 @@ export default async function LecturesPage() {
         redirect('/login');
     }
 
-    const { data: plan } = await supabase
-        .from('user_plans')
-        .select('plan_type, expires_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
+    const plan = await getEffectiveCreditInfo(user.id);
 
     if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
         redirect('/pricing');

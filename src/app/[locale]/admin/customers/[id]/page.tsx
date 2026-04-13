@@ -120,6 +120,26 @@ async function getCustomerDetail(userId: string): Promise<CustomerDetail | null>
     .eq("user_id", userId)
     .single();
 
+  let resolvedUserPlan = userPlan as CustomerPlan;
+
+  if (!resolvedUserPlan) {
+    const { data: legacyUserPlan } = await supabase
+      .from("user_plans")
+      .select("credits, plan_type, expires_at")
+      .eq("user_id", userId)
+      .single();
+
+    resolvedUserPlan = legacyUserPlan
+      ? ({
+          ...legacyUserPlan,
+          monthly_credit_amount: null,
+          monthly_credit_total_cycles: null,
+          monthly_credit_granted_cycles: null,
+          next_credit_at: null,
+        } as CustomerPlan)
+      : null;
+  }
+
   const { data: payments } = await supabase
     .from("toss_payments")
     .select("id, order_name, amount, credits, status, created_at")
@@ -191,7 +211,7 @@ async function getCustomerDetail(userId: string): Promise<CustomerDetail | null>
 
   return {
     user: user as CustomerUser,
-    userPlan: (userPlan as CustomerPlan) ?? null,
+    userPlan: resolvedUserPlan,
     payments: (payments || []) as CustomerPayment[],
     lectureStats: {
       startedCount: items.length,
