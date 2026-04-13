@@ -141,15 +141,17 @@ export function DashboardContent({
                         </Text>
                     </Box>
 
-                    {/* Beta 배지 */}
+                    {/* 플랜 배지 */}
                     <Badge
                         size="xl"
                         radius="lg"
                         variant="light"
-                        color="violet"
+                        color={resolvedCreditInfo?.plan_type && !['free', 'expired'].includes(resolvedCreditInfo.plan_type) ? 'violet' : 'gray'}
                         style={{ padding: '12px 20px', fontSize: 14 }}
                     >
-                        Beta 무료 체험 중
+                        {resolvedCreditInfo?.plan_type && resolvedCreditInfo.plan_type !== 'free'
+                            ? getPlanLabel(resolvedCreditInfo.plan_type)
+                            : 'Beta 무료 체험 중'}
                     </Badge>
                 </Group>
 
