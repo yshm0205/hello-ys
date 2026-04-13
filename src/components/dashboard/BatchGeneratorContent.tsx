@@ -582,7 +582,9 @@ export function BatchGeneratorContent() {
     }, [jobId, processNext]);
 
     const waitingCount = queue.filter(q => q.status === 'waiting').length;
+    const errorCount = queue.filter(q => q.status === 'error').length;
     const doneCount = queue.filter(q => q.status === 'done').length;
+    const activeSlotCount = queue.filter(q => q.status !== 'done').length; // done 제외 슬롯
     const generatingItem = queue.find(q => q.status === 'generating');
     const selectedItem = queue.find(q => q.id === selectedResult);
     const isRunning = jobStatus === 'running' || queue.some((item) => item.status === 'generating');
@@ -726,9 +728,9 @@ export function BatchGeneratorContent() {
                                     radius="lg"
                                     size="sm"
                                     onClick={addToQueue}
-                                    disabled={!materialInput.trim() || materialInput.trim().length < 10 || queue.length >= MAX_QUEUE}
+                                    disabled={!materialInput.trim() || materialInput.trim().length < 10 || activeSlotCount >= MAX_QUEUE}
                                 >
-                                    추가 ({queue.length}/{MAX_QUEUE})
+                                    추가 ({activeSlotCount}/{MAX_QUEUE})
                                 </Button>
                                 {!isRunning && waitingCount > 0 && (
                                     <Button

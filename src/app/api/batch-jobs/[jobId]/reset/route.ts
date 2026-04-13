@@ -46,11 +46,11 @@ export async function POST(
             if (st in counts) counts[st]++;
         }
 
-        // job을 completed로 닫기
+        // job을 failed로 닫기 (active 조회에서 빠지도록)
         const { error } = await admin
             .from("batch_jobs")
             .update({
-                status: "completed",
+                status: "failed",
                 current_item_id: null,
                 finished_at: now,
                 updated_at: now,
@@ -62,7 +62,7 @@ export async function POST(
             })
             .eq("id", jobId)
             .eq("user_id", user.id)
-            .in("status", ["draft", "running", "paused"]);
+            .in("status", ["draft", "running", "paused", "completed"]);
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });

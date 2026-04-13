@@ -196,7 +196,8 @@ export async function enqueueBatchJobItem(
     userId: string,
     material: string,
 ): Promise<{ job: BatchJobRow; items: BatchJobItemRow[] }> {
-    const activeCount = items.filter((item) => item.status !== "cancelled").length;
+    // done/cancelled 제외한 활성 슬롯만 카운트 (완료된 건 슬롯 차지 안 함)
+    const activeCount = items.filter((item) => item.status !== "cancelled" && item.status !== "done").length;
 
     if (activeCount >= MAX_BATCH_ITEMS) {
         throw new Error(`큐는 최대 ${MAX_BATCH_ITEMS}개까지 담을 수 있습니다.`);
