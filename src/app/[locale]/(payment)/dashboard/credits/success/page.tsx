@@ -18,7 +18,7 @@ import { Link } from '@/i18n/routing';
 
 type PaymentStatus = 'loading' | 'success' | 'error';
 
-const TOSSPAY_PENDING_STATUSES = new Set(['PENDING', 'PAY_PENDING', 'IN_PROGRESS']);
+const TOSSPAY_PENDING_STATUSES = new Set(['PENDING', 'PAY_PENDING', 'IN_PROGRESS', 'PROCESSING']);
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();

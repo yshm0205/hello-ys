@@ -29,6 +29,8 @@ import {
 import {
     getPlanCreditDisplayCap,
     getPlanLabel,
+    isActiveAccessPlan,
+    isExpiredPaidPlan,
     isInitialProgramPlan,
     isMonthlySubscriberPlan,
     isPaidPlanType,
@@ -104,13 +106,16 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
     const credits = creditInfo?.credits ?? 0;
     const displayPlanLabel = getPlanLabel(planType);
     const displayMaxCredits = getPlanCreditDisplayCap(planType);
-    const isPaid = isPaidPlanType(planType);
+    const hasPaidPlan = isPaidPlanType(planType);
+    const hasActiveAccess = isActiveAccessPlan(planType, creditInfo?.expires_at);
+    const isExpiredPaid = isExpiredPaidPlan(planType, creditInfo?.expires_at);
     const isInitialProgram = isInitialProgramPlan(planType);
     const isMonthlySubscriber = isMonthlySubscriberPlan(planType);
     const monthlyAmount = creditInfo?.monthly_credit_amount ?? 0;
     const grantedCycles = creditInfo?.monthly_credit_granted_cycles ?? 0;
     const totalCycles = creditInfo?.monthly_credit_total_cycles ?? null;
     const nextCreditAt = creditInfo?.next_credit_at ?? null;
+    const statusLabel = hasActiveAccess ? '활성' : isExpiredPaid ? '만료' : '무료';
 
     return (
         <Container size="xl" py="md">
@@ -156,7 +161,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                             </Title>
                             <Group gap="sm">
                                 <Badge variant="light" color="violet">
-                                    {planType === 'free' ? '무료' : '활성'}
+                                    {statusLabel}
                                 </Badge>
                                 {creditInfo?.expires_at && (
                                     <Text size="xs" c="gray.5">
@@ -164,7 +169,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     </Text>
                                 )}
                             </Group>
-                            {isInitialProgram && (
+                            {hasActiveAccess && isInitialProgram && (
                                 <Stack gap={2}>
                                     <Text size="xs" c="gray.5">
                                         매달 {monthlyAmount.toLocaleString()}cr 지급
@@ -181,7 +186,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     )}
                                 </Stack>
                             )}
-                            {isMonthlySubscriber && monthlyAmount > 0 && (
+                            {hasActiveAccess && isMonthlySubscriber && monthlyAmount > 0 && (
                                 <Text size="xs" c="gray.5">
                                     매달 {monthlyAmount.toLocaleString()}cr 자동 지급
                                 </Text>
@@ -190,7 +195,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                     </Card>
                 </SimpleGrid>
 
-                {!isPaid && (
+                {!hasPaidPlan && (
                     <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
                         <Group justify="space-between" align="center" wrap="wrap" gap="lg">
                             <Box maw={560}>
@@ -226,7 +231,24 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                     </Card>
                 )}
 
-                {planType !== 'free' && (
+                {isExpiredPaid && (
+                    <Card padding="xl" radius="xl" style={{ border: '2px solid #f59e0b' }}>
+                        <Stack gap="xs">
+                            <Group gap="xs">
+                                <Crown size={18} color="#f59e0b" />
+                                <Text fw={700} style={{ color: 'var(--mantine-color-text)' }}>
+                                    이용권이 만료되었습니다
+                                </Text>
+                            </Group>
+                            <Text size="sm" c="dimmed">
+                                현재는 강의와 프로그램 접근이 닫혀 있습니다. 월 구독 상품이 열리기 전까지는
+                                추가 크레딧 충전도 제한됩니다.
+                            </Text>
+                        </Stack>
+                    </Card>
+                )}
+
+                {hasActiveAccess && (
                     <Box>
                         <Group gap="sm" mb="xs">
                             <Zap size={22} color="#8b5cf6" />

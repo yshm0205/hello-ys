@@ -27,6 +27,8 @@ import { Link } from '@/i18n/routing';
 import {
     getPlanCreditDisplayCap,
     getPlanLabel,
+    isActiveAccessPlan,
+    isExpiredPaidPlan,
     isInitialProgramPlan,
     isMonthlySubscriberPlan,
     isPaidPlanType,
@@ -80,11 +82,14 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
     }, []);
 
     const planType = creditInfo?.plan_type || 'free';
-    const isPaid = isPaidPlanType(planType);
+    const hasPaidPlan = isPaidPlanType(planType);
+    const hasActiveAccess = isActiveAccessPlan(planType, creditInfo?.expires_at);
+    const isExpiredPaid = isExpiredPaidPlan(planType, creditInfo?.expires_at);
     const isInitialProgram = isInitialProgramPlan(planType);
     const isMonthlySubscriber = isMonthlySubscriberPlan(planType);
     const planLabel = getPlanLabel(planType);
     const maxCredits = getPlanCreditDisplayCap(planType);
+    const statusLabel = hasActiveAccess ? '활성' : isExpiredPaid ? '만료' : '무료';
 
     return (
         <Container size="xl" py="md">
@@ -108,7 +113,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                             <Title order={2} c="white">{planLabel}</Title>
                             <Group gap="sm">
                                 <Badge variant="white" style={{ color: '#8b5cf6' }}>
-                                    {isPaid ? '활성' : '무료'}
+                                    {statusLabel}
                                 </Badge>
                                 {creditInfo?.expires_at && (
                                     <Text size="sm" c="white" opacity={0.8}>
@@ -116,7 +121,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                     </Text>
                                 )}
                             </Group>
-                            {isInitialProgram && (
+                            {hasActiveAccess && isInitialProgram && (
                                 <>
                                     <Text size="xs" c="white" opacity={0.8}>
                                         매달 {(creditInfo?.monthly_credit_amount ?? 0).toLocaleString()}cr 지급
@@ -132,7 +137,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                     )}
                                 </>
                             )}
-                            {isMonthlySubscriber && (
+                            {hasActiveAccess && isMonthlySubscriber && (
                                 <Text size="xs" c="white" opacity={0.8}>
                                     매달 {(creditInfo?.monthly_credit_amount ?? 0).toLocaleString()}cr 자동 지급
                                 </Text>
@@ -162,7 +167,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                     </Card>
                 </SimpleGrid>
 
-                {!isPaid && (
+                {!hasPaidPlan && (
                     <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
                         <Group justify="space-between" align="center" wrap="wrap" gap="lg">
                             <Group gap="md">
@@ -195,7 +200,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                     </Card>
                 )}
 
-                {planType === 'expired' && (
+                {isExpiredPaid && (
                     <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
                         <Group justify="space-between" align="center" wrap="wrap" gap="lg">
                             <Box>

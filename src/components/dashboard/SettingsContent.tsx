@@ -36,6 +36,8 @@ import { useTossPayment } from '@/hooks/useTossPayment';
 import {
     getPlanCreditDisplayCap,
     getPlanLabel,
+    isActiveAccessPlan,
+    isExpiredPaidPlan,
     isInitialProgramPlan,
     isMonthlySubscriberPlan,
     isPaidPlanType,
@@ -101,12 +103,15 @@ export function SettingsContent({ user }: SettingsContentProps) {
     }, []);
 
     const planType = creditInfo?.plan_type || 'free';
-    const isPaid = isPaidPlanType(planType);
+    const hasPaidPlan = isPaidPlanType(planType);
+    const hasActiveAccess = isActiveAccessPlan(planType, creditInfo?.expires_at);
+    const isExpiredPaid = isExpiredPaidPlan(planType, creditInfo?.expires_at);
     const isInitialProgram = isInitialProgramPlan(planType);
     const isMonthlySubscriber = isMonthlySubscriberPlan(planType);
     const planLabel = getPlanLabel(planType);
     const maxCredits = getPlanCreditDisplayCap(planType);
     const planConfig = TOSSPAY_PLAN_CONFIG.allinone;
+    const statusLabel = hasActiveAccess ? '활성' : isExpiredPaid ? '만료' : '무료';
 
     return (
         <Container size="md" py="md">
@@ -224,7 +229,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                         <Title order={2} c="white">{planLabel}</Title>
                                         <Group gap="sm">
                                             <Badge variant="white" style={{ color: '#8b5cf6' }}>
-                                                {isPaid ? '활성' : '무료'}
+                                                {statusLabel}
                                             </Badge>
                                             {creditInfo?.expires_at && (
                                                 <Text size="sm" c="white" opacity={0.8}>
@@ -232,7 +237,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                                 </Text>
                                             )}
                                         </Group>
-                                        {isInitialProgram && (
+                                        {hasActiveAccess && isInitialProgram && (
                                             <>
                                                 <Text size="xs" c="white" opacity={0.8}>
                                                     매달 {(creditInfo?.monthly_credit_amount ?? 0).toLocaleString()}cr 지급
@@ -248,7 +253,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                                 )}
                                             </>
                                         )}
-                                        {isMonthlySubscriber && (
+                                        {hasActiveAccess && isMonthlySubscriber && (
                                             <Text size="xs" c="white" opacity={0.8}>
                                                 매달 {(creditInfo?.monthly_credit_amount ?? 0).toLocaleString()}cr 자동 지급
                                             </Text>
@@ -278,7 +283,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                 </Card>
                             </SimpleGrid>
 
-                            {!isPaid && (
+                            {!hasPaidPlan && (
                                 <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6' }}>
                                     <Group justify="space-between" align="center" wrap="wrap" gap="lg">
                                         <Group gap="md">
@@ -311,7 +316,20 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                 </Card>
                             )}
 
-                            {planType !== 'free' && (
+                            {isExpiredPaid && (
+                                <Alert
+                                    icon={<AlertCircle size={18} />}
+                                    title="이용권이 만료되었습니다"
+                                    color="orange"
+                                    radius="lg"
+                                    variant="light"
+                                >
+                                    현재는 강의와 프로그램 접근이 닫혀 있습니다. 월 구독 상품이 열리기 전까지는
+                                    추가 크레딧 충전도 제한됩니다.
+                                </Alert>
+                            )}
+
+                            {hasActiveAccess && (
                                 <Box>
                                     <Group gap="sm" mb="lg">
                                         <Coins size={24} color="#8b5cf6" />

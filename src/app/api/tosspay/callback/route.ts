@@ -4,6 +4,101 @@ import { recordCreditTransaction } from "@/lib/credits/server";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 
+type ExistingUserPlanRow = {
+  credits: number;
+  monthly_credit_granted_cycles: number | null;
+  next_credit_at: string | null;
+};
+
+async function applyInitialProgramPlan(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  config: (typeof TOSSPAY_PLAN_CONFIG)[keyof typeof TOSSPAY_PLAN_CONFIG],
+  expiresAtIso: string,
+  nextCreditAtIso: string,
+): Promise<{ success: true; credits: number } | { success: false; error: unknown }> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data: currentPlan, error: loadError } = await admin
+      .from("user_plans")
+      .select("credits, monthly_credit_granted_cycles, next_credit_at")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (loadError) {
+      return { success: false, error: loadError };
+    }
+
+    const planRow = currentPlan as ExistingUserPlanRow | null;
+    const nextCredits = (planRow?.credits || 0) + config.initialCredits;
+
+    if (!planRow) {
+      const { data: inserted, error: insertError } = await admin
+        .from("user_plans")
+        .insert({
+          user_id: userId,
+          plan_type: config.userPlanType,
+          credits: nextCredits,
+          expires_at: expiresAtIso,
+          monthly_credit_amount: config.monthlyCredits,
+          monthly_credit_total_cycles: config.months,
+          monthly_credit_granted_cycles: 1,
+          next_credit_at: nextCreditAtIso,
+        })
+        .select("credits")
+        .single();
+
+      if (!insertError && inserted) {
+        return { success: true, credits: inserted.credits };
+      }
+
+      if ((insertError as { code?: string } | null)?.code === "23505") {
+        continue;
+      }
+
+      return { success: false, error: insertError };
+    }
+
+    let updateQuery = admin
+      .from("user_plans")
+      .update({
+        plan_type: config.userPlanType,
+        credits: nextCredits,
+        expires_at: expiresAtIso,
+        monthly_credit_amount: config.monthlyCredits,
+        monthly_credit_total_cycles: config.months,
+        monthly_credit_granted_cycles: 1,
+        next_credit_at: nextCreditAtIso,
+      })
+      .eq("user_id", userId)
+      .eq("credits", planRow.credits);
+
+    updateQuery =
+      planRow.monthly_credit_granted_cycles === null
+        ? updateQuery.is("monthly_credit_granted_cycles", null)
+        : updateQuery.eq(
+            "monthly_credit_granted_cycles",
+            planRow.monthly_credit_granted_cycles,
+          );
+
+    updateQuery = planRow.next_credit_at
+      ? updateQuery.eq("next_credit_at", planRow.next_credit_at)
+      : updateQuery.is("next_credit_at", null);
+
+    const { data: updated, error: updateError } = await updateQuery.select("credits").single();
+
+    if (updated) {
+      return { success: true, credits: updated.credits };
+    }
+
+    const updateErrorCode = (updateError as { code?: string } | null)?.code;
+    if (updateError && updateErrorCode !== "PGRST116") {
+      return { success: false, error: updateError };
+    }
+  }
+
+  return { success: false, error: new Error("concurrent_plan_update") };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -103,33 +198,16 @@ export async function POST(request: NextRequest) {
     const nextCreditAt = new Date();
     nextCreditAt.setMonth(nextCreditAt.getMonth() + 1);
 
-    const { data: currentPlan } = await admin
-      .from("user_plans")
-      .select("credits")
-      .eq("user_id", payment.user_id)
-      .maybeSingle();
+    const planGrantResult = await applyInitialProgramPlan(
+      admin,
+      payment.user_id,
+      config,
+      expiresAt.toISOString(),
+      nextCreditAt.toISOString(),
+    );
 
-    const currentCredits = currentPlan?.credits || 0;
-    const newCredits = currentCredits + config.initialCredits;
-
-    const { error: planUpsertError } = await admin
-      .from("user_plans")
-      .upsert(
-        {
-          user_id: payment.user_id,
-          plan_type: config.userPlanType,
-          credits: newCredits,
-          expires_at: expiresAt.toISOString(),
-          monthly_credit_amount: config.monthlyCredits,
-          monthly_credit_total_cycles: config.months,
-          monthly_credit_granted_cycles: 1,
-          next_credit_at: nextCreditAt.toISOString(),
-        },
-        { onConflict: "user_id" },
-      );
-
-    if (planUpsertError) {
-      console.error("[TossPay Callback] Plan upsert failed:", planUpsertError);
+    if (!planGrantResult.success) {
+      console.error("[TossPay Callback] Plan grant failed:", planGrantResult.error);
       await admin
         .from("toss_payments")
         .update({
@@ -151,6 +229,8 @@ export async function POST(request: NextRequest) {
         .eq("order_id", orderNo);
       return NextResponse.json({ code: 0 });
     }
+
+    const newCredits = planGrantResult.credits;
 
     await admin
       .from("toss_payments")

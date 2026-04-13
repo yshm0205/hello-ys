@@ -58,6 +58,14 @@ export function isPaidPlanType(planType?: string | null) {
   return Boolean(planType && PAID_PLAN_TYPES.includes(planType as (typeof PAID_PLAN_TYPES)[number]));
 }
 
+export function isActivePaidPlan(planType?: string | null, expiresAt?: string | null) {
+  return isPaidPlanType(planType) && isActiveAccessPlan(planType, expiresAt);
+}
+
+export function isExpiredPaidPlan(planType?: string | null, expiresAt?: string | null) {
+  return isPaidPlanType(planType) && !isActiveAccessPlan(planType, expiresAt);
+}
+
 export function isInitialProgramPlan(planType?: string | null) {
   return planType === PLAN_TYPE.STUDENT_4M || planType === PLAN_TYPE.LEGACY_ALLINONE;
 }
