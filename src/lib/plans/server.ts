@@ -103,7 +103,19 @@ export async function getEffectiveCreditInfo(userId: string): Promise<EffectiveC
     .maybeSingle();
 
   if (!fullResult.error && fullResult.data) {
-    return normalizePlanInfo(fullResult.data as FullPlanRow);
+    const fullPlan = normalizePlanInfo(fullResult.data as FullPlanRow);
+
+    if (fullPlan?.plan_type === PLAN_TYPE.FREE) {
+      const fallback = await getProgramPaymentFallback(userId);
+      if (fallback) {
+        return {
+          ...fallback,
+          credits: fullPlan.credits,
+        };
+      }
+    }
+
+    return fullPlan;
   }
 
   const isMissingMonthlyColumns =
