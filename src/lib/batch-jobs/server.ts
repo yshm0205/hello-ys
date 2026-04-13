@@ -77,7 +77,7 @@ export interface BatchJobItemPayload {
     finishedAt: string | null;
 }
 
-const ACTIVE_JOB_STATUSES: BatchJobStatus[] = ["draft", "running", "paused"];
+const ACTIVE_JOB_STATUSES: BatchJobStatus[] = ["draft", "running", "paused", "completed"];
 
 export function createBatchAdminClient() {
     return createAdminClient();
