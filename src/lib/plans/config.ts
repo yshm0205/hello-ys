@@ -78,7 +78,7 @@ export function getPlanLabel(planType?: string | null) {
   switch (planType) {
     case PLAN_TYPE.STUDENT_4M:
     case PLAN_TYPE.LEGACY_ALLINONE:
-      return "4개월 프로그램";
+      return "올인원 패스";
     case PLAN_TYPE.SUBSCRIBER_MONTHLY:
     case PLAN_TYPE.LEGACY_PRO:
       return "월 구독";

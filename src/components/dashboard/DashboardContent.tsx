@@ -314,6 +314,11 @@ export function DashboardContent({
                                 </Title>
                                 <Badge color="green" variant="light">활성</Badge>
                             </Group>
+                            {resolvedCreditInfo?.expires_at && (
+                                <Text size="xs" c="gray.5">
+                                    {new Date(resolvedCreditInfo.expires_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}까지
+                                </Text>
+                            )}
                         </Stack>
                     </Card>
                 </SimpleGrid>
