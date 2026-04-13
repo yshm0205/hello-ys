@@ -92,7 +92,7 @@ function getRelativeDate(dateStr: string): string {
     if (diffMin < 1) return '방금 전';
     if (diffMin < 60) return `${diffMin}분 전`;
     if (diffHour < 24) return `${diffHour}시간 전`;
-    return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function getDateGroup(dateStr: string): string {
