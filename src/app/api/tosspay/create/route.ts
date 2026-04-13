@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     const tossData: TossPayCreateResponse = await tossRes.json();
 
-    if (tossData.code !== 0 || !tossData.checkoutPage) {
+    if (tossData.code !== 0 || !tossData.checkoutPage || !tossData.payToken) {
       console.error("[TossPay] Create failed:", tossData);
       return NextResponse.json(
         { error: tossData.msg || "결제 생성에 실패했습니다." },
@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
 
     const { error: insertError } = await admin.from("toss_payments").insert({
       user_id: user.id,
+      payment_key: tossData.payToken,
       order_id: orderId,
       order_name: `FlowSpot ${plan.name}`,
       amount: plan.amount,
