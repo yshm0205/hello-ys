@@ -92,8 +92,9 @@ export async function POST(request: NextRequest) {
 
     const currentCredits = plan?.credits || 0;
     const newCredits = currentCredits + config.credits;
+    let creditGrantMode: "full" | "credits_only" = "full";
 
-    await admin
+    const { error: planUpdateError } = await admin
       .from("user_plans")
       .update({
         plan_type: planType,
@@ -102,12 +103,51 @@ export async function POST(request: NextRequest) {
       })
       .eq("user_id", payment.user_id);
 
+    if (planUpdateError) {
+      console.warn("[TossPay Callback] Full plan update failed, retrying credits-only:", planUpdateError);
+
+      const { error: creditOnlyError } = await admin
+        .from("user_plans")
+        .update({
+          credits: newCredits,
+        })
+        .eq("user_id", payment.user_id);
+
+      if (creditOnlyError) {
+        console.error("[TossPay Callback] Credits-only fallback failed:", creditOnlyError);
+        await admin
+          .from("toss_payments")
+          .update({
+            status: "CREDIT_GRANT_FAILED",
+            payment_key: payToken,
+            credits: config.credits,
+            metadata: {
+              ...(payment.metadata || {}),
+              payToken,
+              planType,
+              creditGrantMode: "failed",
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .eq("order_id", orderNo);
+        return NextResponse.json({ code: 0 });
+      }
+
+      creditGrantMode = "credits_only";
+    }
+
     await admin
       .from("toss_payments")
       .update({
         status: "DONE",
         payment_key: payToken,
         credits: config.credits,
+        metadata: {
+          ...(payment.metadata || {}),
+          payToken,
+          planType,
+          creditGrantMode,
+        },
         updated_at: new Date().toISOString(),
       })
       .eq("order_id", orderNo);
