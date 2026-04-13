@@ -141,7 +141,7 @@ export async function POST(
                 },
                 body: JSON.stringify({
                     material: nextItem.material,
-                    niche: state.job.niche,
+                    niche: nextItem.niche || state.job.niche,
                     tone: "",
                     job_id: state.job.id,
                     item_id: nextItem.id,

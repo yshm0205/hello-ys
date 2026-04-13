@@ -34,6 +34,7 @@ export interface BatchJobItemRow {
     status: BatchJobItemStatus;
     phase: BatchJobPhase;
     scripts: Array<{ hook: string; full_script: string }> | null;
+    niche: string;
     error: string | null;
     error_code: string | null;
     elapsed: number | null;
@@ -68,6 +69,7 @@ export interface BatchJobItemPayload {
     status: BatchJobItemStatus;
     phase: BatchJobPhase;
     scripts: Array<{ hook: string; full_script: string }> | null;
+    niche: string;
     error: string | null;
     errorCode: string | null;
     elapsed: number | null;
@@ -195,6 +197,7 @@ export async function enqueueBatchJobItem(
     items: BatchJobItemRow[],
     userId: string,
     material: string,
+    niche: string = "knowledge",
 ): Promise<{ job: BatchJobRow; items: BatchJobItemRow[] }> {
     // done/cancelled 제외한 활성 슬롯만 카운트 (완료된 건 슬롯 차지 안 함)
     const activeCount = items.filter((item) => item.status !== "cancelled" && item.status !== "done").length;
@@ -211,6 +214,7 @@ export async function enqueueBatchJobItem(
         user_id: userId,
         sort_order: nextOrder,
         material,
+        niche,
         status: "queued",
         created_at: now,
         updated_at: now,
@@ -361,6 +365,7 @@ export function toBatchJobPayload(job: BatchJobRow, items: BatchJobItemRow[]): B
         items: items.map((item) => ({
             id: item.id,
             material: item.material,
+            niche: item.niche,
             status: item.status,
             phase: item.phase,
             scripts: item.scripts,

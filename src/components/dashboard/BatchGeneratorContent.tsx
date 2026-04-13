@@ -47,6 +47,7 @@ import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
 interface QueueItem {
     id: string;
     material: string;
+    niche?: string;
     status: 'waiting' | 'generating' | 'done' | 'error';
     phase?: 'analyzing' | 'generating' | 'reviewing';
     scripts?: Array<{ hook: string; full_script: string }>;
@@ -58,6 +59,7 @@ interface QueueItem {
 interface RemoteBatchJobItem {
     id: string;
     material: string;
+    niche?: string;
     status: 'queued' | 'processing' | 'done' | 'error' | 'cancelled';
     phase?: 'analyzing' | 'generating' | 'reviewing' | null;
     scripts?: Array<{ hook: string; full_script: string }> | null;
@@ -311,10 +313,11 @@ export function BatchGeneratorContent() {
 
         setJobId(job.id);
         setJobStatus(job.status);
-        setNiche(job.niche || 'knowledge');
+        // niche는 사용자 선택 유지 (item 단위 niche이므로 job.niche로 덮어쓰지 않음)
         setQueue(job.items.map((item) => ({
             id: item.id,
             material: item.material,
+            niche: item.niche,
             status:
                 item.status === 'queued'
                     ? 'waiting'
@@ -497,7 +500,7 @@ export function BatchGeneratorContent() {
 
         // 낙관적 UI: 즉시 큐에 추가
         const tempId = `temp_${Date.now()}`;
-        setQueue(prev => [...prev, { id: tempId, material, status: 'waiting' as const }]);
+        setQueue(prev => [...prev, { id: tempId, material, niche, status: 'waiting' as const }]);
         setMaterialInput('');
         setCreditError(null);
 

@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         let loaded = await getOrCreateActiveBatchJob(admin, user.id, niche);
         loaded = await recoverStaleProcessing(admin, loaded.job, loaded.items);
 
-        const updated = await enqueueBatchJobItem(admin, loaded.job, loaded.items, user.id, material);
+        const updated = await enqueueBatchJobItem(admin, loaded.job, loaded.items, user.id, material, niche);
 
         return NextResponse.json({
             success: true,
