@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
-import { getPlanLabel } from '@/lib/plans/config';
+import { getPlanLabel, isActiveAccessPlan } from '@/lib/plans/config';
 
 interface DashboardContentProps {
     user?: { email?: string };
@@ -146,12 +146,14 @@ export function DashboardContent({
                         size="xl"
                         radius="lg"
                         variant="light"
-                        color={resolvedCreditInfo?.plan_type && !['free', 'expired'].includes(resolvedCreditInfo.plan_type) ? 'violet' : 'gray'}
+                        color={isActiveAccessPlan(resolvedCreditInfo?.plan_type, resolvedCreditInfo?.expires_at) ? 'violet' : 'gray'}
                         style={{ padding: '12px 20px', fontSize: 14 }}
                     >
-                        {resolvedCreditInfo?.plan_type && resolvedCreditInfo.plan_type !== 'free'
-                            ? getPlanLabel(resolvedCreditInfo.plan_type)
-                            : 'Beta 무료 체험 중'}
+                        {isActiveAccessPlan(resolvedCreditInfo?.plan_type, resolvedCreditInfo?.expires_at)
+                            ? getPlanLabel(resolvedCreditInfo?.plan_type)
+                            : resolvedCreditInfo?.plan_type === 'expired' || (resolvedCreditInfo?.expires_at && new Date(resolvedCreditInfo.expires_at) < new Date())
+                                ? '만료'
+                                : 'Beta 무료 체험 중'}
                     </Badge>
                 </Group>
 
@@ -312,7 +314,12 @@ export function DashboardContent({
                                 <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
                                     {resolvedCreditInfo?.plan_type ? getPlanLabel(resolvedCreditInfo.plan_type) : 'Beta'}
                                 </Title>
-                                <Badge color="green" variant="light">활성</Badge>
+                                {isActiveAccessPlan(resolvedCreditInfo?.plan_type, resolvedCreditInfo?.expires_at)
+                                    ? <Badge color="green" variant="light">활성</Badge>
+                                    : resolvedCreditInfo?.plan_type === 'expired' || (resolvedCreditInfo?.expires_at && new Date(resolvedCreditInfo.expires_at) < new Date())
+                                        ? <Badge color="red" variant="light">만료</Badge>
+                                        : <Badge color="gray" variant="light">무료</Badge>
+                                }
                             </Group>
                             {resolvedCreditInfo?.expires_at && (
                                 <Text size="xs" c="gray.5">
