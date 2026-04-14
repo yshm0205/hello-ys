@@ -8,15 +8,13 @@
 
 import { useCallback, useState } from 'react';
 import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk';
+import { CREDIT_TOPUP_PACKS } from '@/lib/plans/config';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || '';
 
-const PACK_AMOUNTS: Record<number, number> = {
-    100: 14900,
-    300: 34900,
-    500: 54900,
-    1000: 99900,
-};
+const PACK_AMOUNTS = Object.fromEntries(
+    CREDIT_TOPUP_PACKS.map((pack) => [pack.credits, pack.amount]),
+) as Record<number, number>;
 
 export function useTossPayment(customerKey: string | undefined) {
     const [loading, setLoading] = useState(false);

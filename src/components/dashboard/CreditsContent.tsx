@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 
 import {
+    CREDIT_TOPUP_PACKS,
     getPlanCreditDisplayCap,
     getPlanLabel,
     isActiveAccessPlan,
@@ -54,12 +55,12 @@ interface CreditsContentProps {
     isAdmin?: boolean;
 }
 
-const packs = [
-    { cr: 100, price: '₩14,900', per: '₩149', popular: false },
-    { cr: 300, price: '₩34,900', per: '₩116', popular: false },
-    { cr: 500, price: '₩54,900', per: '₩109', popular: true },
-    { cr: 1000, price: '₩99,900', per: '₩99', popular: false },
-];
+const packs = CREDIT_TOPUP_PACKS.map((pack) => ({
+    ...pack,
+    priceLabel: `₩${pack.amount.toLocaleString()}`,
+    unitLabel: `10회당 ₩${Math.round((pack.amount / (pack.credits / 10))).toLocaleString()}`,
+    generationLabel: `${(pack.credits / 10).toLocaleString()}회 생성 분량`,
+}));
 
 const usageGuide = [
     { action: '리서치', cost: 3, icon: <Search size={16} />, desc: '소재 기반 리서치와 구조 분석' },
@@ -128,7 +129,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                         </Title>
                     </Group>
                     <Text c="dimmed">
-                        현재 이용권 상태와 보유 크레딧을 확인하고, 부족하면 바로 추가 충전할 수 있습니다.
+                        올인원 패스 상태와 보유 크레딧을 확인하고, 부족하면 추가 토큰을 구매할 수 있습니다.
                     </Text>
                 </Box>
 
@@ -217,15 +218,20 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     {tossPayTestPlan.amount.toLocaleString()}원
                                 </Text>
                                 <Button
-                                    component="a"
-                                    href="/pricing"
                                     color="violet"
                                     radius="lg"
                                     mt="xs"
                                     fullWidth
+                                    loading={tossPayLoading}
+                                    onClick={() => requestTossPay('allinone')}
                                 >
-                                    프로그램 신청하기
+                                    올인원 패스 결제하기
                                 </Button>
+                                {tossPayError && (
+                                    <Text size="xs" c="red.6" mt="xs">
+                                        {tossPayError}
+                                    </Text>
+                                )}
                             </Box>
                         </Group>
                     </Card>
@@ -257,13 +263,13 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                             </Title>
                         </Group>
                         <Text size="sm" c="gray.5" mb="lg">
-                            충전한 크레딧은 즉시 반영되며, 이용권과 별도로 누적 사용됩니다.
+                            추가 토큰은 올인원 패스 기본 제공분보다 비싼 단가로 책정됩니다. 급할 때만 보충하는 용도입니다.
                         </Text>
 
                         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                             {packs.map((pack) => (
                                 <Card
-                                    key={pack.cr}
+                                    key={pack.credits}
                                     padding="lg"
                                     radius="xl"
                                     style={
@@ -296,13 +302,14 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                             <Group gap="xs">
                                                 <Zap size={18} color="#8b5cf6" />
                                                 <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
-                                                    {pack.cr.toLocaleString()} 크레딧
+                                                    {pack.credits.toLocaleString()} 크레딧
                                                 </Text>
                                             </Group>
-                                            <Text size="xs" c="gray.5" mt={2}>cr당 {pack.per}</Text>
+                                            <Text size="xs" c="gray.5" mt={2}>{pack.generationLabel}</Text>
+                                            <Text size="xs" c="gray.5">{pack.unitLabel}</Text>
                                         </Box>
                                         <Box ta="right">
-                                            <Text fw={800} size="xl" style={{ color: '#8b5cf6' }}>{pack.price}</Text>
+                                            <Text fw={800} size="xl" style={{ color: '#8b5cf6' }}>{pack.priceLabel}</Text>
                                             <Button
                                                 size="xs"
                                                 radius="lg"
@@ -311,7 +318,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                                 color="violet"
                                                 style={pack.popular ? { background: '#8b5cf6' } : undefined}
                                                 loading={paymentLoading}
-                                                onClick={() => requestPayment(pack.cr)}
+                                                onClick={() => requestPayment(pack.credits)}
                                             >
                                                 구매하기
                                             </Button>

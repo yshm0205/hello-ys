@@ -23,11 +23,15 @@ import {
 import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LandingHeader } from '@/components/landing/LandingHeader';
+import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
 const mono = { fontFamily: 'var(--font-geist-mono), ui-monospace, monospace' };
+const primaryProgram = TOSSPAY_PLAN_CONFIG.allinone;
+const monthlySubscription = MONTHLY_SUBSCRIPTION_PREVIEW;
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -163,7 +167,7 @@ function HeroSection() {
 
             {/* CTA 버튼 */}
             <Button
-              component={Link} href="/dashboard" size="xl" radius="xl"
+              component={Link} href="/pricing" size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#ffffff', color: '#18181b',
@@ -172,7 +176,7 @@ function HeroSection() {
                 boxShadow: '0 2px 12px rgba(255,255,255,0.15)',
               }}
             >
-              무료로 시작하기
+              올인원 패스 신청하기
             </Button>
           </Stack>
         </Box>
@@ -1397,7 +1401,7 @@ function WhySpecialSection() {
   const isMobile = useIsMobile();
 
   const comparisonRows = [
-    { label: '가격', left: '99~160만원', right: '₩499,000' },
+    { label: '가격', left: '99~160만원', right: `₩${primaryProgram.amount.toLocaleString()}` },
     { label: '주제 선정', left: '정해진 주제로 수강생끼리 경쟁', right: '지속가능한 내 채널 주제를 직접 찾는 법' },
     { label: '커리큘럼', left: '편집 위주', right: '기획→제작→편집→수익화 전 과정 38강' },
     { label: 'AI 스크립트', left: '제한적 활용', right: '주제 입력만으로 스크립트 자동 생성' },
@@ -1837,14 +1841,14 @@ function HowItWorksSection() {
               <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
             </Text>
             <Button
-              component={Link} href="/dashboard" size="lg" radius="xl"
+              component={Link} href="/pricing" size="lg" radius="xl"
               style={{
                 background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
                 padding: '14px 40px', height: 'auto', border: 'none',
                 boxShadow: '0 2px 12px rgba(139,92,246,0.2)',
               }}
             >
-              무료로 시작하기
+              올인원 패스 신청하기
             </Button>
           </Stack>
         </motion.div>
@@ -1934,9 +1938,11 @@ function PackageSection() {
             <Divider my="xl" color="#d4d4d8" />
             <Stack align="center" gap={2}>
               <Text style={{ fontSize: 'clamp(14px, 3vw, 15px)', color: '#71717a', textDecoration: 'line-through', ...mono }}>
-                ₩599,000
+                ₩{primaryProgram.listAmount.toLocaleString()}
               </Text>
-              <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#8b5cf6', ...mono }}>₩499,000</Text>
+              <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#8b5cf6', ...mono }}>
+                ₩{primaryProgram.amount.toLocaleString()}
+              </Text>
             </Stack>
           </Paper>
         </motion.div>
@@ -1948,7 +1954,7 @@ function PackageSection() {
             color: '#a1a1aa',
             marginTop: '24px',
           }}>
-            4개월 이후에도 월 ₩39,900 Pro 구독으로 강의와 AI 도구를 계속 이용할 수 있습니다.
+            4개월 종료 후에는 월 ₩{monthlySubscription.amount.toLocaleString()} 구독 상품이 열릴 예정입니다.
           </Text>
         </motion.div>
       </Container>
@@ -1965,7 +1971,7 @@ function FAQSection() {
     { q: 'AI 1도 몰라도 되나요?', a: '네, 전혀 몰라도 괜찮습니다. 소재만 입력하면 AI가 스크립트를 자동으로 만들어줍니다. 사용법도 강의에서 처음부터 알려드리니까 걱정 마세요.' },
     { q: '이것만 구매하면 바로 성공하나요?', a: '솔직히 말씀드리면, 노력 없이 큰 결과를 기대하시는 분에게는 추천드리지 않습니다. 이 과정은 4년 걸릴 길을 최단거리로 바꿔드릴 뿐, 그 길은 직접 걸으셔야 합니다. 빠르게 실행할 의지가 있는 분이라면 충분히 결과를 만들 수 있습니다.' },
     { q: '어떤 사람에게 맞나요?', a: '쇼츠를 처음 시작하는 분, 올리고 있는데 조회수가 안 나오는 분, 혼자 하다 지치신 분 모두를 고려해서 설계했습니다. 다만 컴퓨터 사용이 미숙하거나 편집을 한 번도 해보지 않으신 분은 기본 세팅과 프로그램까지 함께 익히셔야 하므로 시간이 조금 더 걸릴 수 있습니다.' },
-    { q: '올인원 4개월 끝나면 어떻게 되나요?', a: '4개월 후에도 월 ₩39,900 Pro 구독으로 AI 스크립트와 채널 리스트를 계속 이용할 수 있습니다. 강의와 전자책은 4개월 내에 충분히 완주할 수 있는 분량입니다.' },
+    { q: '올인원 4개월 끝나면 어떻게 되나요?', a: `4개월 종료 후에는 월 ₩${monthlySubscription.amount.toLocaleString()} 구독 상품을 열 예정입니다. 그 전까지는 강의와 프로그램, 매달 400cr 지급 기준으로 이용하시면 됩니다.` },
     { q: '환불 되나요?', a: '이러닝 표준약관을 따릅니다. 결제 후 7일 이내, 강의를 1강도 수강하지 않은 경우 전액 환불됩니다. 수강을 시작한 경우 (1강 단가 × 수강 강의 수 + 위약금 10%)를 공제 후 환불됩니다. 이용기한(4개월) 경과 후에는 환불이 불가합니다.' },
   ];
 
@@ -2123,8 +2129,12 @@ function FloatingCTA() {
       }}>
         <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
           <Stack gap={2}>
-            <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩599,000</Text>
-            <Text style={{ fontSize: '20px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩499,000</Text>
+            <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>
+              ₩{primaryProgram.listAmount.toLocaleString()}
+            </Text>
+            <Text style={{ fontSize: '20px', fontWeight: 800, color: '#8b5cf6', ...mono }}>
+              ₩{primaryProgram.amount.toLocaleString()}
+            </Text>
           </Stack>
           <Button
             component={Link} href="/pricing" size="md" radius="xl"
@@ -2157,8 +2167,12 @@ function FloatingCTA() {
           <Stack gap={12}>
             <Text fw={700} style={{ fontSize: '15px', color: '#18181b' }}>올인원 패스</Text>
             <Stack gap={2}>
-              <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>₩599,000</Text>
-              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6', ...mono }}>₩499,000</Text>
+              <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>
+                ₩{primaryProgram.listAmount.toLocaleString()}
+              </Text>
+              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6', ...mono }}>
+                ₩{primaryProgram.amount.toLocaleString()}
+              </Text>
             </Stack>
             <Button
               component={Link} href="/pricing" size="sm" fullWidth radius="lg"
@@ -2170,7 +2184,7 @@ function FloatingCTA() {
               신청하기
             </Button>
             <Text size="xs" ta="center" style={{ color: '#71717a', fontSize: '11px' }}>
-              무료 체험 30크레딧 포함
+              4개월 이용권 · 매달 400cr × 4회
             </Text>
           </Stack>
         </Paper>
@@ -2186,6 +2200,7 @@ function FloatingCTA() {
 export default function LandingPage() {
   return (
     <main style={{ background: '#ffffff' }}>
+      <MarketingTracker pageType="landing" />
       <LandingHeader />
       <HeroSection />
       <PainSection />

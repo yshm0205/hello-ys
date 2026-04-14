@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { recordCreditTransaction } from "@/lib/credits/server";
+import { CREDIT_TOPUP_PACKS } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
-
-const CREDIT_PACKS: Record<number, { credits: number; price: number }> = {
-  100: { credits: 100, price: 14900 },
-  300: { credits: 300, price: 34900 },
-  500: { credits: 500, price: 54900 },
-  1000: { credits: 1000, price: 99900 },
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const pack = Object.values(CREDIT_PACKS).find((candidate) => candidate.price === amount);
+    const pack = CREDIT_TOPUP_PACKS.find((candidate) => candidate.amount === amount);
     if (!pack) {
       return NextResponse.json(
         { success: false, error: `유효하지 않은 결제 금액입니다: ${amount}` },

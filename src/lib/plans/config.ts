@@ -27,6 +27,7 @@ export const TOSSPAY_PLAN_CONFIG = {
   allinone: {
     paymentKind: "initial_program",
     userPlanType: PLAN_TYPE.STUDENT_4M,
+    listAmount: 590000,
     amount: 490000,
     initialCredits: 400,
     monthlyCredits: 400,
@@ -34,6 +35,19 @@ export const TOSSPAY_PLAN_CONFIG = {
     totalCredits: 1600,
     name: "4개월 프로그램",
   },
+} as const;
+
+export const CREDIT_TOPUP_PACKS = [
+  { credits: 100, amount: 19900, popular: false },
+  { credits: 300, amount: 49000, popular: false },
+  { credits: 500, amount: 79000, popular: true },
+  { credits: 1000, amount: 149000, popular: false },
+] as const;
+
+export const MONTHLY_SUBSCRIPTION_PREVIEW = {
+  amount: 69000,
+  monthlyCredits: 400,
+  name: "월 구독",
 } as const;
 
 export type TossPayPlanType = keyof typeof TOSSPAY_PLAN_CONFIG;
