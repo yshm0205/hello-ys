@@ -23,7 +23,6 @@ import {
 } from '@mantine/core';
 import { Check, Coins, Crown, Lock } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import {
   CREDIT_TOPUP_PACKS,
   MONTHLY_SUBSCRIPTION_PREVIEW,
@@ -36,7 +35,6 @@ export default function PricingPage() {
 
   return (
     <Box style={{ background: '#fff', minHeight: '100vh' }}>
-      <MarketingTracker pageType="pricing" />
       <Container size="xl" py={80}>
         <Stack gap={48}>
           {/* ── 헤더 ── */}

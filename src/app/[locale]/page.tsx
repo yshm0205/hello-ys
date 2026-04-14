@@ -23,7 +23,6 @@ import {
 import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LandingHeader } from '@/components/landing/LandingHeader';
-import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
 
@@ -2200,7 +2199,6 @@ function FloatingCTA() {
 export default function LandingPage() {
   return (
     <main style={{ background: '#ffffff' }}>
-      <MarketingTracker pageType="landing" />
       <LandingHeader />
       <HeroSection />
       <PainSection />
