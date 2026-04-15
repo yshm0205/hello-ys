@@ -221,9 +221,6 @@ export function AllInOneCheckoutContent({
                                     '전자책',
                                     '노션 운영 템플릿',
                                     '프로그램 4개월 참여',
-                                    `결제 직후 ${plan.initialCredits.toLocaleString()}cr 지급 (생성 ${monthlyGenerationCount}회 분량)`,
-                                    `총 ${plan.totalCredits.toLocaleString()}cr 제공 (생성 ${totalGenerationCount}회 분량)`,
-                                    '성공 후 바로 대시보드와 강의 접근 가능',
                                 ].map((item) => (
                                     <List.Item
                                         key={item}
