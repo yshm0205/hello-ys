@@ -166,7 +166,7 @@ function HeroSection() {
 
             {/* CTA 버튼 */}
             <Button
-              component={Link} href="/pricing" size="xl" radius="xl"
+              component={Link} href="/checkout/allinone" size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#ffffff', color: '#18181b',
@@ -1840,7 +1840,7 @@ function HowItWorksSection() {
               <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
             </Text>
             <Button
-              component={Link} href="/pricing" size="lg" radius="xl"
+              component={Link} href="/checkout/allinone" size="lg" radius="xl"
               style={{
                 background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
                 padding: '14px 40px', height: 'auto', border: 'none',
@@ -2035,7 +2035,7 @@ function CTASection() {
               내일도 같은 고민을 하게 됩니다
             </Title>
             <Button
-              component={Link} href="/pricing" size="xl" radius="xl"
+              component={Link} href="/checkout/allinone" size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#8b5cf6', fontSize: '17px', fontWeight: 700,
@@ -2136,7 +2136,7 @@ function FloatingCTA() {
             </Text>
           </Stack>
           <Button
-            component={Link} href="/pricing" size="md" radius="xl"
+            component={Link} href="/checkout/allinone" size="md" radius="xl"
             style={{
               background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
               boxShadow: '0 2px 8px rgba(139,92,246,0.2)',
@@ -2174,7 +2174,7 @@ function FloatingCTA() {
               </Text>
             </Stack>
             <Button
-              component={Link} href="/pricing" size="sm" fullWidth radius="lg"
+              component={Link} href="/checkout/allinone" size="sm" fullWidth radius="lg"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
                 boxShadow: '0 2px 8px rgba(139,92,246,0.15)',
