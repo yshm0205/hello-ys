@@ -103,6 +103,7 @@ const AGENT_TEAM = [
 ];
 
 const mono = { fontFamily: 'var(--font-geist-mono), ui-monospace, monospace' };
+const RECENT_COMPLETED_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 // ============ 에이전트 진행 표시 ============
 
@@ -316,6 +317,11 @@ export function BatchGeneratorContent() {
     const pollingRef = useRef<number | null>(null);
     const MAX_QUEUE = 10;
 
+    const isRecentCompleted = useCallback((item: QueueItem) => {
+        if (item.status !== 'done' || !item.finishedAt) return false;
+        return Date.now() - new Date(item.finishedAt).getTime() < RECENT_COMPLETED_WINDOW_MS;
+    }, []);
+
     const toQueueItem = useCallback((item: RemoteBatchJobItem): QueueItem => ({
         id: item.id,
         material: item.material,
@@ -340,7 +346,7 @@ export function BatchGeneratorContent() {
         const deduped = new Map<string, QueueItem>();
 
         for (const item of items) {
-            if (item.status !== 'done') continue;
+            if (!isRecentCompleted(item)) continue;
 
             const existing = deduped.get(item.id);
             if (!existing) {
@@ -362,7 +368,7 @@ export function BatchGeneratorContent() {
                 return bFinished - aFinished;
             })
             .slice(0, 3);
-    }, []);
+    }, [isRecentCompleted]);
 
     const applyBatchState = useCallback((job: RemoteBatchJob | null, serverRecentCompleted?: RemoteBatchJobItem[] | null) => {
         const mappedItems = job ? job.items.map(toQueueItem) : [];
@@ -650,6 +656,18 @@ export function BatchGeneratorContent() {
             setSelectedResult(null);
         }
     }, [recentCompleted, selectedResult]);
+
+    useEffect(() => {
+        if (recentCompleted.length === 0) return;
+
+        const prune = () => {
+            setRecentCompleted((prev) => prev.filter(isRecentCompleted));
+        };
+
+        prune();
+        const timer = window.setInterval(prune, 60 * 1000);
+        return () => window.clearInterval(timer);
+    }, [isRecentCompleted, recentCompleted.length]);
 
     return (
         <Container size="md" py="lg">

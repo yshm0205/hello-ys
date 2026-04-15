@@ -129,9 +129,26 @@ export async function loadActiveBatchJob(
         throw error;
     }
 
+    const loadedItems = (items ?? []) as BatchJobItemRow[];
+    const hasRemainingWork = loadedItems.some((item) => ["queued", "processing", "error"].includes(item.status));
+
+    if (job.status === "paused" && !hasRemainingWork) {
+        await admin
+            .from("batch_jobs")
+            .update({
+                status: "completed",
+                current_item_id: null,
+                last_error: null,
+                finished_at: job.finished_at ?? new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .eq("id", job.id);
+        return null;
+    }
+
     return {
         job: job as BatchJobRow,
-        items: (items ?? []) as BatchJobItemRow[],
+        items: loadedItems,
     };
 }
 
@@ -289,6 +306,16 @@ export async function removeBatchJobItem(
     if (updated.items.length === 0 && updated.job.status !== "running") {
         await admin.from("batch_jobs").delete().eq("id", item.job_id);
         return { job: null, items: [] };
+    }
+
+    const hasRemainingWork = updated.items.some((it) => ["queued", "processing", "error"].includes(it.status));
+    if (updated.job.status === "paused" && !hasRemainingWork) {
+        return updateBatchJobCounts(admin, item.job_id, {
+            status: "completed",
+            current_item_id: null,
+            last_error: null,
+            finished_at: updated.job.finished_at ?? new Date().toISOString(),
+        });
     }
 
     return updated;
