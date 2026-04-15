@@ -161,6 +161,34 @@ export function AllInOneCheckoutContent({
                                     </Text>
                                 </Stack>
 
+                                <Card padding="md" radius="lg" withBorder style={{ background: '#f8f5ff' }}>
+                                    <Stack gap="sm">
+                                        <Text fw={700} size="sm" style={{ color: '#111827' }}>
+                                            이 패키지 하나로 줄어드는 것
+                                        </Text>
+                                        <List spacing={8} size="sm" center>
+                                            {[
+                                                '주제 선정에 쓰는 시간',
+                                                '스크립트 초안에 쓰는 시간',
+                                                '트렌드 채널을 찾는 시간',
+                                                '기획부터 수익화까지 따로 배우는 시행착오',
+                                            ].map((item) => (
+                                                <List.Item
+                                                    key={item}
+                                                    icon={(
+                                                        <ThemeIcon size={20} radius="xl" color="violet" variant="light">
+                                                            <Check size={12} />
+                                                        </ThemeIcon>
+                                                    )}
+                                                    style={{ color: '#374151' }}
+                                                >
+                                                    {item}
+                                                </List.Item>
+                                            ))}
+                                        </List>
+                                    </Stack>
+                                </Card>
+
                                 <Card padding="md" radius="lg" withBorder>
                                     <Stack gap="md">
                                         <Group gap="xs">
