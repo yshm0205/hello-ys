@@ -303,7 +303,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                             </Text>
                                             <Button
                                                 component={Link}
-                                                href="/pricing"
+                                                href="/checkout/allinone"
                                                 color="violet"
                                                 radius="lg"
                                                 mt="xs"

@@ -123,7 +123,7 @@ export default function PricingPage() {
                 </List>
 
                 <Button
-                  component={Link} href="/dashboard/credits?checkout=allinone"
+                  component={Link} href="/checkout/allinone"
                   radius="lg" fullWidth
                   style={{
                     height: 48, fontSize: '16px',

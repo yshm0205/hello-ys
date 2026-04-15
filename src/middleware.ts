@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 const PUBLIC_SESSION_SKIP_PATHS = new Set(["/", "/pricing"]);
-const PROTECTED_PATH_PREFIXES = ["/dashboard", "/settings", "/subscription", "/admin"];
+const PROTECTED_PATH_PREFIXES = ["/dashboard", "/settings", "/subscription", "/admin", "/checkout"];
 
 function normalizePathname(pathname: string) {
   const segments = pathname.split("/");

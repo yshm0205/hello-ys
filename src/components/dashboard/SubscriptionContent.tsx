@@ -187,7 +187,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                 </Text>
                                 <Button
                                     component={Link}
-                                    href="/pricing"
+                                    href="/checkout/allinone"
                                     color="violet"
                                     radius="lg"
                                     mt="xs"
