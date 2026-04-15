@@ -438,17 +438,24 @@ export function BatchGeneratorContent() {
             return;
         }
 
+        let tickRunning = false;
         const tick = async () => {
             if (document.visibilityState !== 'visible') return;
+            if (tickRunning) return;
+            tickRunning = true;
 
-            const job = await fetchCurrentJob();
-            if (!job || job.status !== 'running') return;
+            try {
+                const job = await fetchCurrentJob();
+                if (!job || job.status !== 'running') return;
 
-            const hasProcessing = job.items.some((item) => item.status === 'processing');
-            const hasQueued = job.items.some((item) => item.status === 'queued');
+                const hasProcessing = job.items.some((item) => item.status === 'processing');
+                const hasQueued = job.items.some((item) => item.status === 'queued');
 
-            if (!hasProcessing && hasQueued) {
-                await processNext(job.id);
+                if (!hasProcessing && hasQueued) {
+                    await processNext(job.id);
+                }
+            } finally {
+                tickRunning = false;
             }
         };
 
