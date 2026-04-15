@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         autoExecute: true,
         resultCallback: `${origin}/api/tosspay/callback`,
         retUrl: `${origin}/ko/dashboard/credits/success?orderNo=${orderId}&planType=${planType}`,
-        retCancelUrl: `${origin}/ko/dashboard/credits/fail`,
+        retCancelUrl: `${origin}/ko`,
         callbackVersion: "V2",
       }),
     });
