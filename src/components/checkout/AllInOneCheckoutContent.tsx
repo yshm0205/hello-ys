@@ -210,7 +210,7 @@ export function AllInOneCheckoutContent({
                             <Group gap="xs">
                                 <Crown size={18} color="#8b5cf6" />
                                 <Text fw={700} style={{ color: '#111827' }}>
-                                    결제 후 바로 열리는 것
+                                    포함 항목
                                 </Text>
                             </Group>
                             <List spacing={10} size="sm" center>
