@@ -28,7 +28,7 @@ export const TOSSPAY_PLAN_CONFIG = {
     paymentKind: "initial_program",
     userPlanType: PLAN_TYPE.STUDENT_4M,
     listAmount: 590000,
-    amount: 490000,
+    amount: 499000,
     initialCredits: 400,
     monthlyCredits: 400,
     months: 4,
