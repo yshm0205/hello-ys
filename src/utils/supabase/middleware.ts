@@ -17,7 +17,7 @@ export async function updateSession(
     supabaseUrl === "https://your-project-id.supabase.co"
   ) {
     // Return response without refreshing session cookies
-    return response;
+    return { response, user: null };
   }
 
   try {
@@ -40,11 +40,13 @@ export async function updateSession(
 
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
-    await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    return response;
+    return { response, user };
   } catch (e) {
     console.error("Supabase middleware warning:", e);
-    return response;
+    return { response, user: null };
   }
 }

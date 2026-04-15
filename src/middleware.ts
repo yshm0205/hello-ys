@@ -2,9 +2,11 @@ import { updateSession } from "@/utils/supabase/middleware";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 const PUBLIC_SESSION_SKIP_PATHS = new Set(["/", "/pricing"]);
+const PROTECTED_PATH_PREFIXES = ["/dashboard", "/settings", "/subscription", "/admin"];
 
 function normalizePathname(pathname: string) {
   const segments = pathname.split("/");
@@ -16,16 +18,44 @@ function normalizePathname(pathname: string) {
   return normalizedPath || "/";
 }
 
+function getRequestLocale(pathname: string) {
+  const locale = pathname.split("/")[1];
+  return routing.locales.includes(locale as (typeof routing.locales)[number])
+    ? locale
+    : routing.defaultLocale;
+}
+
+function isProtectedPath(pathname: string) {
+  return PROTECTED_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 export async function middleware(request: NextRequest) {
   // 1. Run next-intl middleware to handle locale redirects and get the base response
   const response = intlMiddleware(request);
+  const normalizedPath = normalizePathname(request.nextUrl.pathname);
 
-  if (PUBLIC_SESSION_SKIP_PATHS.has(normalizePathname(request.nextUrl.pathname))) {
+  if (PUBLIC_SESSION_SKIP_PATHS.has(normalizedPath)) {
     return response;
   }
 
   // 2. Run Supabase session update (copies cookies to response)
-  const supabaseResponse = await updateSession(request, response);
+  const { response: supabaseResponse, user } = await updateSession(request, response);
+
+  if (!user && isProtectedPath(normalizedPath)) {
+    const locale = getRequestLocale(request.nextUrl.pathname);
+    const redirectTarget = `${normalizedPath}${request.nextUrl.search}`;
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    loginUrl.searchParams.set("redirect", redirectTarget);
+
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie);
+    });
+
+    return redirectResponse;
+  }
 
   // 3. Simple Route Protection (Mockup logic, real protection involves checking session in updateSession or here)
   // For strict middleware protection, we usually check supabase.auth.getUser() inside updateSession and redirect if needed.

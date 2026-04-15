@@ -3,13 +3,21 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { LoginContent } from './LoginContent';
 
-export default async function LoginPage() {
-    // 이미 로그인된 사용자는 대시보드로 리다이렉트
+interface LoginPageProps {
+    searchParams: Promise<{ redirect?: string }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    const params = await searchParams;
+    const redirectTarget =
+        params.redirect && params.redirect.startsWith('/') && !params.redirect.startsWith('//')
+            ? params.redirect
+            : '/dashboard';
 
     if (user) {
-        redirect('/dashboard');
+        redirect(redirectTarget);
     }
 
     return (

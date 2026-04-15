@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Badge,
     Box,
@@ -15,6 +15,7 @@ import {
     Text,
     Title,
 } from '@mantine/core';
+import { useSearchParams } from 'next/navigation';
 import {
     Coins,
     Crown,
@@ -81,6 +82,8 @@ function formatDate(value?: string | null) {
 export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps) {
     const tossPayTestPlan = TOSSPAY_PLAN_CONFIG.allinone;
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+    const autoCheckoutTriggeredRef = useRef(false);
+    const searchParams = useSearchParams();
     const { requestPayment, loading: paymentLoading } = useTossPayment(userId);
     const {
         requestPayment: requestTossPay,
@@ -102,6 +105,23 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
 
         fetchCredits();
     }, []);
+
+    useEffect(() => {
+        if (!creditInfo) return;
+
+        const checkoutTarget = searchParams.get('checkout');
+        if (checkoutTarget !== 'allinone' || autoCheckoutTriggeredRef.current) return;
+
+        autoCheckoutTriggeredRef.current = true;
+
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.delete('checkout');
+        window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+
+        if (!isPaidPlanType(creditInfo.plan_type)) {
+            void requestTossPay('allinone');
+        }
+    }, [creditInfo, requestTossPay, searchParams]);
 
     const planType = creditInfo?.plan_type || 'free';
     const credits = creditInfo?.credits ?? 0;
