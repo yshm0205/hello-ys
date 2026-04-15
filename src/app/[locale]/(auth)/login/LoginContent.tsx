@@ -53,11 +53,11 @@ export function LoginContent() {
       }
       // If successful, redirect happens server-side, loading stays true
     } catch (error) {
-      // Next.js redirect()??NEXT_REDIRECT ?먮윭瑜?throw ???닿굔 ?뺤긽 ?숈옉?대?濡?臾댁떆
+      // Next.js redirect()는 NEXT_REDIRECT 에러를 던지는 방식이라 정상 흐름으로 취급한다.
       if (error && typeof error === 'object' && 'digest' in error &&
           typeof (error as { digest: string }).digest === 'string' &&
           (error as { digest: string }).digest.includes('NEXT_REDIRECT')) return;
-      setMessage({ type: 'error', text: 'Google 濡쒓렇?몄뿉 ?ㅽ뙣?덉뒿?덈떎. ?ㅼ떆 ?쒕룄?댁＜?몄슂.' });
+      setMessage({ type: 'error', text: 'Google 로그인에 실패했습니다. 다시 시도해주세요.' });
       setIsGoogleLoading(false);
     }
   };
@@ -65,7 +65,7 @@ export function LoginContent() {
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
-      setMessage({ type: 'error', text: '?좏슚???대찓?쇱쓣 ?낅젰?댁＜?몄슂.' });
+      setMessage({ type: 'error', text: '유효한 이메일을 입력해주세요.' });
       return;
     }
 
@@ -77,7 +77,7 @@ export function LoginContent() {
     if (res?.error) {
       setMessage({ type: 'error', text: res.error });
     } else {
-      setMessage({ type: 'success', text: '?대찓?쇱쓣 ?뺤씤?댁＜?몄슂! 濡쒓렇??留곹겕瑜?蹂대깉?듬땲??' });
+      setMessage({ type: 'success', text: '이메일을 확인해주세요. 로그인 링크를 보냈습니다.' });
       setEmail('');
     }
     setIsLoading(false);
@@ -86,11 +86,11 @@ export function LoginContent() {
   const handleEmailPasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
-      setMessage({ type: 'error', text: '?좏슚???대찓?쇱쓣 ?낅젰?댁＜?몄슂.' });
+      setMessage({ type: 'error', text: '유효한 이메일을 입력해주세요.' });
       return;
     }
     if (!password) {
-      setMessage({ type: 'error', text: '鍮꾨?踰덊샇瑜??낅젰?댁＜?몄슂.' });
+      setMessage({ type: 'error', text: '비밀번호를 입력해주세요.' });
       return;
     }
 
@@ -100,13 +100,13 @@ export function LoginContent() {
     try {
       const res = await loginWithEmailPassword(email, password, redirectTarget);
       if (res?.error) {
-        setMessage({ type: 'error', text: '?대찓???먮뒗 鍮꾨?踰덊샇媛 ?щ컮瑜댁? ?딆뒿?덈떎.' });
+        setMessage({ type: 'error', text: '이메일 또는 비밀번호가 올바르지 않습니다.' });
       }
     } catch (error) {
       if (error && typeof error === 'object' && 'digest' in error &&
           typeof (error as { digest: string }).digest === 'string' &&
           (error as { digest: string }).digest.includes('NEXT_REDIRECT')) return;
-      setMessage({ type: 'error', text: '濡쒓렇?몄뿉 ?ㅽ뙣?덉뒿?덈떎. ?ㅼ떆 ?쒕룄?댁＜?몄슂.' });
+      setMessage({ type: 'error', text: '로그인에 실패했습니다. 다시 시도해주세요.' });
     }
     setIsPasswordLoading(false);
   };
@@ -239,14 +239,14 @@ export function LoginContent() {
 
             {/* ?쎄? ?숈쓽 */}
             <Text size="xs" c="gray.6" ta="center">
-              怨꾩냽?섎㈃{' '}
+              계속하면{' '}
               <Text
                 component={Link}
                 href="/terms"
                 inherit
                 style={{ color: '#a78bfa', textDecoration: 'underline' }}
               >
-                ?댁슜?쎄?
+                이용약관
               </Text>
               {' '}및{' '}
               <Text
@@ -255,9 +255,9 @@ export function LoginContent() {
                 inherit
                 style={{ color: '#a78bfa', textDecoration: 'underline' }}
               >
-                媛쒖씤?뺣낫泥섎━諛⑹묠
+                개인정보처리방침
               </Text>
-              ???숈쓽?섎뒗 寃껋쑝濡?媛꾩＜?⑸땲??
+              에 동의하는 것으로 간주합니다.
             </Text>
 
             <Divider
@@ -289,7 +289,7 @@ export function LoginContent() {
 
               <TextInput
                 type="password"
-                placeholder="鍮꾨?踰덊샇"
+                placeholder="비밀번호"
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
                 size="lg"
@@ -318,7 +318,7 @@ export function LoginContent() {
                   border: 'none',
                 }}
               >
-                濡쒓렇??
+                로그인
               </Button>
 
               <Button
@@ -356,7 +356,7 @@ export function LoginContent() {
                 c="gray.5"
                 style={{ textDecoration: 'none' }}
               >
-                ???덉쑝濡??뚯븘媛湲?
+                홈으로 돌아가기
               </Text>
             </Text>
           </Stack>
