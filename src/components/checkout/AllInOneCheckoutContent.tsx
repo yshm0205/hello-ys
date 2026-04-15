@@ -215,7 +215,11 @@ export function AllInOneCheckoutContent({
                             </Group>
                             <List spacing={10} size="sm" center>
                                 {[
-                                    '강의 4개월 이용권',
+                                    'VOD 강의 32강',
+                                    'AI 스크립트 도구 4개월 이용',
+                                    '월간 트렌드 채널 데이터',
+                                    '전자책',
+                                    '노션 운영 템플릿',
                                     '프로그램 4개월 참여',
                                     `결제 직후 ${plan.initialCredits.toLocaleString()}cr 지급 (생성 ${monthlyGenerationCount}회 분량)`,
                                     `총 ${plan.totalCredits.toLocaleString()}cr 제공 (생성 ${totalGenerationCount}회 분량)`,
