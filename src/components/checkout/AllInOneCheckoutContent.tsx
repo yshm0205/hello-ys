@@ -23,7 +23,6 @@ import { AlertCircle, Check, ChevronLeft, Crown, ShieldCheck } from 'lucide-reac
 import { Link } from '@/i18n/routing';
 import {
     TOSSPAY_PLAN_CONFIG,
-    getPlanLabel,
     isActiveAccessPlan,
     isInitialProgramPlan,
     isMonthlySubscriberPlan,
@@ -64,7 +63,6 @@ export function AllInOneCheckoutContent({
     const monthlyGenerationCount = Math.floor(plan.monthlyCredits / 10);
     const totalGenerationCount = Math.floor(plan.totalCredits / 10);
     const hasActiveAccess = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
-    const activePlanLabel = getPlanLabel(creditInfo?.plan_type);
     const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
     const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
     const [confirmedUsagePolicy, setConfirmedUsagePolicy] = useState(false);
@@ -78,12 +76,12 @@ export function AllInOneCheckoutContent({
                     <Group justify="space-between" align="center">
                         <Button
                             component={Link}
-                            href="/pricing"
+                            href="/"
                             variant="subtle"
                             color="gray"
                             leftSection={<ChevronLeft size={16} />}
                         >
-                            가격 페이지로
+                            홈으로
                         </Button>
                         {userEmail && (
                             <Text size="sm" c="gray.6">
@@ -110,10 +108,10 @@ export function AllInOneCheckoutContent({
                             radius="xl"
                             variant="light"
                             icon={<ShieldCheck size={18} />}
-                            title="이미 활성 이용권이 있습니다"
+                            title="이미 올인원 패스를 이용 중입니다"
                         >
-                            현재 플랜은 {activePlanLabel}이고, 만료일은 {formatDate(creditInfo?.expires_at)}입니다.
-                            {isInitialProgram && ' 아직 올인원 패스가 살아 있으므로 중복 결제는 막는 편이 안전합니다.'}
+                            이용 기간은 {formatDate(creditInfo?.expires_at)}까지입니다.
+                            {isInitialProgram && ' 이용권이 만료되기 전에는 중복 결제가 제한됩니다.'}
                             {isMonthlySubscriber && ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
                         </Alert>
                     ) : (
