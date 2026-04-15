@@ -108,6 +108,14 @@ export async function loadActiveBatchJob(
 
     if (!job) return null;
 
+    // completed job은 1시간 지나면 자동 만료 (다음 방문 시 깨끗한 상태)
+    if (job.status === "completed" && job.finished_at) {
+        const elapsed = Date.now() - new Date(job.finished_at).getTime();
+        if (elapsed > 60 * 60 * 1000) {
+            return null;
+        }
+    }
+
     const { data: items, error } = await admin
         .from("batch_job_items")
         .select("*")
