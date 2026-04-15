@@ -58,6 +58,8 @@ export function AllInOneCheckoutContent({
 }: AllInOneCheckoutContentProps) {
     const { requestPayment, loading, error } = useTossPay();
     const plan = TOSSPAY_PLAN_CONFIG.allinone;
+    const monthlyGenerationCount = Math.floor(plan.monthlyCredits / 10);
+    const totalGenerationCount = Math.floor(plan.totalCredits / 10);
     const hasActiveAccess = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
     const activePlanLabel = getPlanLabel(creditInfo?.plan_type);
     const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
@@ -119,7 +121,7 @@ export function AllInOneCheckoutContent({
                                         </Text>
                                     </Group>
                                     <Text size="sm" c="gray.6">
-                                        강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달 {plan.monthlyCredits.toLocaleString()}cr 지급
+                                        강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달 {plan.monthlyCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
                                     </Text>
                                 </Box>
 
@@ -133,7 +135,7 @@ export function AllInOneCheckoutContent({
                                         </Title>
                                     </Box>
                                     <Badge color="violet" variant="light">
-                                        총 {plan.totalCredits.toLocaleString()}cr 설계
+                                        총 {plan.totalCredits.toLocaleString()}cr · 생성 {totalGenerationCount}회 분량
                                     </Badge>
                                 </Group>
 
@@ -141,10 +143,13 @@ export function AllInOneCheckoutContent({
 
                                 <Stack gap={6}>
                                     <Text size="sm" c="gray.6">
-                                        결제 직후 {plan.initialCredits.toLocaleString()}cr 지급
+                                        결제 직후 {plan.initialCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
                                     </Text>
                                     <Text size="sm" c="gray.6">
                                         이후 매달 {plan.monthlyCredits.toLocaleString()}cr씩 총 {plan.months}회 지급
+                                    </Text>
+                                    <Text size="sm" c="gray.6">
+                                        총 {plan.totalCredits.toLocaleString()}cr 제공 (생성 {totalGenerationCount}회 분량)
                                     </Text>
                                 </Stack>
 
@@ -179,8 +184,8 @@ export function AllInOneCheckoutContent({
                                 {[
                                     '강의 4개월 이용권',
                                     '프로그램 4개월 참여',
-                                    `결제 직후 ${plan.initialCredits.toLocaleString()}cr 지급`,
-                                    `이후 매달 ${plan.monthlyCredits.toLocaleString()}cr씩 추가 지급`,
+                                    `결제 직후 ${plan.initialCredits.toLocaleString()}cr 지급 (생성 ${monthlyGenerationCount}회 분량)`,
+                                    `총 ${plan.totalCredits.toLocaleString()}cr 제공 (생성 ${totalGenerationCount}회 분량)`,
                                     '성공 후 바로 대시보드와 강의 접근 가능',
                                 ].map((item) => (
                                     <List.Item
