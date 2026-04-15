@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
+
 import {
     Alert,
     Badge,
     Box,
     Button,
     Card,
+    Checkbox,
     Container,
     Divider,
     Group,
@@ -64,6 +67,9 @@ export function AllInOneCheckoutContent({
     const activePlanLabel = getPlanLabel(creditInfo?.plan_type);
     const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
     const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
+    const [confirmedUsagePolicy, setConfirmedUsagePolicy] = useState(false);
+    const [confirmedNoticePolicy, setConfirmedNoticePolicy] = useState(false);
+    const canCheckout = confirmedUsagePolicy && confirmedNoticePolicy;
 
     return (
         <Box style={{ minHeight: '100vh', background: '#fafafa' }}>
@@ -94,7 +100,7 @@ export function AllInOneCheckoutContent({
                             올인원 패스 결제
                         </Title>
                         <Text c="gray.6">
-                            로그인은 끝났습니다. 이 화면에서 상품 내용을 확인하고 결제를 진행하면 됩니다.
+                            로그인한 상태입니다. 아래에서 상품 내용을 확인하고 결제를 진행하면 됩니다.
                         </Text>
                     </Stack>
 
@@ -108,7 +114,7 @@ export function AllInOneCheckoutContent({
                         >
                             현재 플랜은 {activePlanLabel}이고, 만료일은 {formatDate(creditInfo?.expires_at)}입니다.
                             {isInitialProgram && ' 아직 올인원 패스가 살아 있으므로 중복 결제는 막는 편이 안전합니다.'}
-                            {isMonthlySubscriber && ' 월 구독 상태에서도 추가 토큰은 대시보드에서 별도로 구매할 수 있습니다.'}
+                            {isMonthlySubscriber && ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
                         </Alert>
                     ) : (
                         <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6', background: '#fff' }}>
@@ -121,7 +127,9 @@ export function AllInOneCheckoutContent({
                                         </Text>
                                     </Group>
                                     <Text size="sm" c="gray.6">
-                                        강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달 {plan.monthlyCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
+                                        강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달 {plan.monthlyCredits.toLocaleString()}cr 지급
+                                        {' '}(
+                                        생성 {monthlyGenerationCount}회 분량)
                                     </Text>
                                 </Box>
 
@@ -153,15 +161,40 @@ export function AllInOneCheckoutContent({
                                     </Text>
                                 </Stack>
 
+                                <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
+                                    <Stack gap="sm">
+                                        <Text fw={700} size="sm" style={{ color: '#111827' }}>
+                                            필수 확인
+                                        </Text>
+                                        <Checkbox
+                                            checked={confirmedUsagePolicy}
+                                            onChange={(event) => setConfirmedUsagePolicy(event.currentTarget.checked)}
+                                            label="이용 기간은 결제 즉시 시작되며, 강의 및 프로그램 이용 기간이 4개월임을 확인했습니다."
+                                        />
+                                        <Checkbox
+                                            checked={confirmedNoticePolicy}
+                                            onChange={(event) => setConfirmedNoticePolicy(event.currentTarget.checked)}
+                                            label="계정 공유 금지, 자료 외부 공유 금지 및 환불 규정을 확인했습니다."
+                                        />
+                                    </Stack>
+                                </Card>
+
                                 <Button
                                     color="violet"
                                     radius="lg"
                                     size="lg"
+                                    disabled={!canCheckout}
                                     loading={loading}
                                     onClick={() => requestPayment('allinone')}
                                 >
                                     결제창 열기
                                 </Button>
+
+                                {!canCheckout && (
+                                    <Text size="xs" c="gray.5">
+                                        결제 전에 필수 확인 항목에 모두 동의해 주세요.
+                                    </Text>
+                                )}
 
                                 {error && (
                                     <Alert color="red" radius="lg" variant="light" icon={<AlertCircle size={18} />}>
@@ -190,11 +223,11 @@ export function AllInOneCheckoutContent({
                                 ].map((item) => (
                                     <List.Item
                                         key={item}
-                                        icon={
+                                        icon={(
                                             <ThemeIcon size={20} radius="xl" color="green" variant="light">
                                                 <Check size={12} />
                                             </ThemeIcon>
-                                        }
+                                        )}
                                         style={{ color: '#374151' }}
                                     >
                                         {item}
@@ -205,7 +238,7 @@ export function AllInOneCheckoutContent({
                     </Card>
 
                     <Text size="xs" c="gray.5" ta="center">
-                        결제 문제나 계정 연결 이슈가 생기면 hmys0205hmys@gmail.com 으로 문의하면 됩니다.
+                        결제 문제나 계정 연결 이슈가 있으면 hmys0205hmys@gmail.com 으로 문의해 주세요.
                     </Text>
                 </Stack>
             </Container>
