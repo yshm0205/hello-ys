@@ -2,6 +2,8 @@ import { createAdminClient } from "@/utils/supabase/admin";
 
 export const MAX_BATCH_ITEMS = 10;
 export const BATCH_PROCESSING_STALE_MS = 10 * 60 * 1000;
+export const RECENT_COMPLETED_WINDOW_MS = 2 * 60 * 60 * 1000;
+export const RECENT_COMPLETED_LIMIT = 3;
 
 export type BatchJobStatus = "draft" | "running" | "paused" | "completed" | "failed";
 export type BatchJobItemStatus = "queued" | "processing" | "done" | "error" | "cancelled";
@@ -79,18 +81,27 @@ export interface BatchJobItemPayload {
     finishedAt: string | null;
 }
 
-const ACTIVE_JOB_STATUSES: BatchJobStatus[] = ["draft", "running", "paused", "completed"];
+export interface BatchCurrentViewPayload {
+    job: BatchJobPayload | null;
+    recentCompleted: BatchJobItemPayload[];
+}
+
+const IN_PROGRESS_JOB_STATUSES: BatchJobStatus[] = ["draft", "running", "paused"];
 
 export function createBatchAdminClient() {
     return createAdminClient();
 }
 
-export async function getCurrentActiveBatchJob(userId: string): Promise<BatchJobPayload | null> {
+export async function getCurrentBatchView(userId: string): Promise<BatchCurrentViewPayload> {
     const admin = createBatchAdminClient();
     const loaded = await loadActiveBatchJob(admin, userId);
-    if (!loaded) return null;
-    const recovered = await recoverStaleProcessing(admin, loaded.job, loaded.items);
-    return toBatchJobPayload(recovered.job, recovered.items);
+    const recovered = loaded ? await recoverStaleProcessing(admin, loaded.job, loaded.items) : null;
+    const recentCompleted = await loadRecentCompletedItems(admin, userId);
+
+    return {
+        job: recovered ? toBatchJobPayload(recovered.job, recovered.items) : null,
+        recentCompleted: recentCompleted.map(toBatchJobItemPayload),
+    };
 }
 
 export async function loadActiveBatchJob(
@@ -101,20 +112,12 @@ export async function loadActiveBatchJob(
         .from("batch_jobs")
         .select("*")
         .eq("user_id", userId)
-        .in("status", ACTIVE_JOB_STATUSES)
+        .in("status", IN_PROGRESS_JOB_STATUSES)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
     if (!job) return null;
-
-    // completed job은 1시간 지나면 자동 만료 (다음 방문 시 깨끗한 상태)
-    if (job.status === "completed" && job.finished_at) {
-        const elapsed = Date.now() - new Date(job.finished_at).getTime();
-        if (elapsed > 60 * 60 * 1000) {
-            return null;
-        }
-    }
 
     const { data: items, error } = await admin
         .from("batch_job_items")
@@ -130,6 +133,28 @@ export async function loadActiveBatchJob(
         job: job as BatchJobRow,
         items: (items ?? []) as BatchJobItemRow[],
     };
+}
+
+export async function loadRecentCompletedItems(
+    admin: ReturnType<typeof createAdminClient>,
+    userId: string,
+): Promise<BatchJobItemRow[]> {
+    const threshold = new Date(Date.now() - RECENT_COMPLETED_WINDOW_MS).toISOString();
+
+    const { data: items, error } = await admin
+        .from("batch_job_items")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("status", "done")
+        .gte("finished_at", threshold)
+        .order("finished_at", { ascending: false })
+        .limit(RECENT_COMPLETED_LIMIT);
+
+    if (error) {
+        throw error;
+    }
+
+    return (items ?? []) as BatchJobItemRow[];
 }
 
 export async function loadBatchJobById(
@@ -173,17 +198,7 @@ export async function getOrCreateActiveBatchJob(
 ): Promise<{ job: BatchJobRow; items: BatchJobItemRow[] }> {
     const existing = await loadActiveBatchJob(admin, userId);
     if (existing) {
-        // completed job은 재사용하지 않고 새 job 생성 (데이터는 그대로 유지)
-        if (existing.job.status === "completed") {
-            // completed 상태 유지, finished_at을 과거로 밀어서 active 조회에서 제외
-            await admin
-                .from("batch_jobs")
-                .update({ finished_at: new Date(0).toISOString(), updated_at: new Date().toISOString() })
-                .eq("id", existing.job.id);
-            // 아래로 빠져서 새 job 생성
-        } else {
-            return existing;
-        }
+        return existing;
     }
 
     const now = new Date().toISOString();
@@ -217,11 +232,10 @@ export async function enqueueBatchJobItem(
     material: string,
     niche: string = "knowledge",
 ): Promise<{ job: BatchJobRow; items: BatchJobItemRow[] }> {
-    // done/cancelled 제외한 활성 슬롯만 카운트 (완료된 건 슬롯 차지 안 함)
     const activeCount = items.filter((item) => item.status !== "cancelled" && item.status !== "done").length;
 
     if (activeCount >= MAX_BATCH_ITEMS) {
-        throw new Error(`큐는 최대 ${MAX_BATCH_ITEMS}개까지 담을 수 있습니다.`);
+        throw new Error(`큐는 최대 ${MAX_BATCH_ITEMS}개까지 넣을 수 있습니다.`);
     }
 
     const nextOrder = items.length > 0 ? Math.max(...items.map((item) => item.sort_order)) + 1 : 1;
@@ -313,7 +327,7 @@ export async function recoverStaleProcessing(
         .update({
             status: "paused",
             current_item_id: null,
-            last_error: "새로고침 또는 연결 끊김으로 중단된 작업을 복구했습니다.",
+            last_error: "브라우저나 연결 문제로 중단된 작업을 복구했습니다.",
             updated_at: timestamp,
         })
         .eq("id", job.id);
@@ -367,6 +381,24 @@ export async function updateBatchJobCounts(
     };
 }
 
+export function toBatchJobItemPayload(item: BatchJobItemRow): BatchJobItemPayload {
+    return {
+        id: item.id,
+        material: item.material,
+        niche: item.niche,
+        status: item.status,
+        phase: item.phase,
+        scripts: item.scripts,
+        error: item.error,
+        errorCode: item.error_code,
+        elapsed: item.elapsed,
+        creditsRefunded: item.credits_refunded,
+        sortOrder: item.sort_order,
+        startedAt: item.started_at,
+        finishedAt: item.finished_at,
+    };
+}
+
 export function toBatchJobPayload(job: BatchJobRow, items: BatchJobItemRow[]): BatchJobPayload {
     return {
         id: job.id,
@@ -380,20 +412,6 @@ export function toBatchJobPayload(job: BatchJobRow, items: BatchJobItemRow[]): B
         errorCount: job.error_count,
         startedAt: job.started_at,
         finishedAt: job.finished_at,
-        items: items.map((item) => ({
-            id: item.id,
-            material: item.material,
-            niche: item.niche,
-            status: item.status,
-            phase: item.phase,
-            scripts: item.scripts,
-            error: item.error,
-            errorCode: item.error_code,
-            elapsed: item.elapsed,
-            creditsRefunded: item.credits_refunded,
-            sortOrder: item.sort_order,
-            startedAt: item.started_at,
-            finishedAt: item.finished_at,
-        })),
+        items: items.map(toBatchJobItemPayload),
     };
 }

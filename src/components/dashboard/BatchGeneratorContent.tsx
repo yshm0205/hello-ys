@@ -54,6 +54,7 @@ interface QueueItem {
     error?: string;
     elapsed?: number;
     creditsRefunded?: number;
+    finishedAt?: string;
 }
 
 interface RemoteBatchJobItem {
@@ -66,6 +67,8 @@ interface RemoteBatchJobItem {
     error?: string | null;
     elapsed?: number | null;
     creditsRefunded?: number;
+    sortOrder?: number;
+    finishedAt?: string | null;
 }
 
 interface RemoteBatchJob {
@@ -74,6 +77,13 @@ interface RemoteBatchJob {
     status: 'draft' | 'running' | 'paused' | 'completed' | 'failed';
     lastError?: string | null;
     items: RemoteBatchJobItem[];
+    totalCount: number;
+    doneCount: number;
+}
+
+interface RemoteBatchCurrentResponse {
+    job: RemoteBatchJob | null;
+    recentCompleted?: RemoteBatchJobItem[] | null;
 }
 
 // ============ 니치 (V2 에셋 재사용) ============
@@ -292,8 +302,11 @@ export function BatchGeneratorContent() {
     const [niche, setNiche] = useState('knowledge');
     const [materialInput, setMaterialInput] = useState('');
     const [queue, setQueue] = useState<QueueItem[]>([]);
+    const [recentCompleted, setRecentCompleted] = useState<QueueItem[]>([]);
     const [jobId, setJobId] = useState<string | null>(null);
     const [jobStatus, setJobStatus] = useState<'draft' | 'running' | 'paused' | 'completed' | 'failed' | null>(null);
+    const [currentTotalCount, setCurrentTotalCount] = useState(0);
+    const [currentDoneCount, setCurrentDoneCount] = useState(0);
     const [selectedResult, setSelectedResult] = useState<string | null>(null);
     const [credits, setCredits] = useState<number | null>(initialCredits);
     const [creditError, setCreditError] = useState<string | null>(null);
@@ -303,42 +316,76 @@ export function BatchGeneratorContent() {
     const pollingRef = useRef<number | null>(null);
     const MAX_QUEUE = 10;
 
-    const applyJob = useCallback((job: RemoteBatchJob | null) => {
-        if (!job) {
-            setJobId(null);
-            setJobStatus(null);
-            setQueue([]);
-            return;
+    const toQueueItem = useCallback((item: RemoteBatchJobItem): QueueItem => ({
+        id: item.id,
+        material: item.material,
+        niche: item.niche,
+        status:
+            item.status === 'queued'
+                ? 'waiting'
+                : item.status === 'processing'
+                    ? 'generating'
+                    : item.status === 'done'
+                        ? 'done'
+                        : 'error',
+        phase: item.phase ?? undefined,
+        scripts: item.scripts ?? undefined,
+        error: item.error ?? undefined,
+        elapsed: item.elapsed ?? undefined,
+        creditsRefunded: item.creditsRefunded ?? 0,
+        finishedAt: item.finishedAt ?? undefined,
+    }), []);
+
+    const mergeRecentCompleted = useCallback((items: QueueItem[]) => {
+        const deduped = new Map<string, QueueItem>();
+
+        for (const item of items) {
+            if (item.status !== 'done') continue;
+
+            const existing = deduped.get(item.id);
+            if (!existing) {
+                deduped.set(item.id, item);
+                continue;
+            }
+
+            const existingFinished = existing.finishedAt ? new Date(existing.finishedAt).getTime() : 0;
+            const nextFinished = item.finishedAt ? new Date(item.finishedAt).getTime() : 0;
+            if (nextFinished >= existingFinished) {
+                deduped.set(item.id, item);
+            }
         }
 
-        setJobId(job.id);
-        setJobStatus(job.status);
-        // niche는 사용자 선택 유지 (item 단위 niche이므로 job.niche로 덮어쓰지 않음)
-        setQueue(job.items.map((item) => ({
-            id: item.id,
-            material: item.material,
-            niche: item.niche,
-            status:
-                item.status === 'queued'
-                    ? 'waiting'
-                    : item.status === 'processing'
-                        ? 'generating'
-                        : item.status === 'done'
-                            ? 'done'
-                            : 'error',
-            phase: item.phase ?? undefined,
-            scripts: item.scripts ?? undefined,
-            error: item.error ?? undefined,
-            elapsed: item.elapsed ?? undefined,
-            creditsRefunded: item.creditsRefunded ?? 0,
-        })));
+        return Array.from(deduped.values())
+            .sort((a, b) => {
+                const aFinished = a.finishedAt ? new Date(a.finishedAt).getTime() : 0;
+                const bFinished = b.finishedAt ? new Date(b.finishedAt).getTime() : 0;
+                return bFinished - aFinished;
+            })
+            .slice(0, 3);
+    }, []);
 
-        if (job.status === 'paused' && job.lastError) {
+    const applyBatchState = useCallback((job: RemoteBatchJob | null, serverRecentCompleted?: RemoteBatchJobItem[] | null) => {
+        const mappedItems = job ? job.items.map(toQueueItem) : [];
+        const activeItems = mappedItems.filter((item) => item.status !== 'done');
+        const doneItems = mappedItems.filter((item) => item.status === 'done');
+        const nextRecentCompleted = (serverRecentCompleted ?? []).map(toQueueItem).filter((item) => item.status === 'done');
+
+        setJobId(job?.id ?? null);
+        setJobStatus(job?.status ?? null);
+        setCurrentTotalCount(job?.totalCount ?? 0);
+        setCurrentDoneCount(job?.doneCount ?? 0);
+        setQueue(activeItems);
+        setRecentCompleted((prev) => mergeRecentCompleted([
+            ...doneItems,
+            ...(serverRecentCompleted ? nextRecentCompleted : prev),
+        ]));
+
+        if (job?.status === 'paused' && job.lastError) {
             setCreditError(job.lastError);
-        } else if (!job.lastError) {
+        } else if (!job?.lastError) {
             setCreditError(null);
         }
-    }, []);
+    }, [mergeRecentCompleted, toQueueItem]);
 
     useEffect(() => {
         if (initialCredits === null) return;
@@ -351,7 +398,7 @@ export function BatchGeneratorContent() {
     const fetchCurrentJob = useCallback(async () => {
         try {
             const res = await fetch('/api/batch-jobs/current', { cache: 'no-store' });
-            const data = await res.json();
+            const data = await res.json() as RemoteBatchCurrentResponse & { error?: string };
 
             if (!res.ok) {
                 setCreditError(data.error || '배치 큐를 불러오지 못했습니다.');
@@ -359,13 +406,13 @@ export function BatchGeneratorContent() {
             }
 
             const job = (data.job ?? null) as RemoteBatchJob | null;
-            applyJob(job);
+            applyBatchState(job, data.recentCompleted ?? []);
             return job;
         } catch {
             setCreditError('배치 큐를 불러오지 못했습니다.');
             return null;
         }
-    }, [applyJob]);
+    }, [applyBatchState]);
 
     useEffect(() => {
         jobIdRef.current = jobId;
@@ -382,7 +429,7 @@ export function BatchGeneratorContent() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             });
-            const data = await res.json().catch(() => ({}));
+            const data = await res.json().catch(() => ({})) as RemoteBatchCurrentResponse & { credits?: number; error?: string };
 
             if (typeof data.credits === 'number') {
                 setCredits(data.credits);
@@ -390,7 +437,7 @@ export function BatchGeneratorContent() {
             }
 
             if (data.job) {
-                applyJob(data.job as RemoteBatchJob);
+                applyBatchState(data.job as RemoteBatchJob, data.recentCompleted ?? undefined);
             } else {
                 await fetchCurrentJob();
             }
@@ -411,7 +458,7 @@ export function BatchGeneratorContent() {
         } finally {
             processLockRef.current = false;
         }
-    }, [applyJob, fetchCurrentJob]);
+    }, [applyBatchState, fetchCurrentJob]);
 
     useEffect(() => {
         async function initializeBatchPage() {
@@ -517,7 +564,7 @@ export function BatchGeneratorContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ material, niche }),
             });
-            const data = await res.json();
+            const data = await res.json() as RemoteBatchCurrentResponse & { error?: string };
 
             if (!res.ok) {
                 // 실패 시 롤백
@@ -527,13 +574,13 @@ export function BatchGeneratorContent() {
                 return;
             }
 
-            applyJob((data.job ?? null) as RemoteBatchJob | null);
+            applyBatchState((data.job ?? null) as RemoteBatchJob | null, data.recentCompleted ?? []);
         } catch {
             setQueue(prev => prev.filter(q => q.id !== tempId));
             setMaterialInput(material);
             setCreditError('큐에 추가하지 못했습니다.');
         }
-    }, [applyJob, materialInput, niche]);
+    }, [applyBatchState, materialInput, niche]);
 
     const removeFromQueue = useCallback(async (id: string) => {
         try {
@@ -545,11 +592,11 @@ export function BatchGeneratorContent() {
                 return;
             }
 
-            applyJob((data.job ?? null) as RemoteBatchJob | null);
+            applyBatchState((data.job ?? null) as RemoteBatchJob | null);
         } catch {
             setCreditError('큐 항목을 삭제하지 못했습니다.');
         }
-    }, [applyJob]);
+    }, [applyBatchState]);
 
     const retryItem = useCallback(async (id: string) => {
         try {
@@ -562,7 +609,7 @@ export function BatchGeneratorContent() {
                 return;
             }
 
-            applyJob((data.job ?? null) as RemoteBatchJob | null);
+            applyBatchState((data.job ?? null) as RemoteBatchJob | null);
 
             // 재시도 후 자동으로 처리 시작
             if (data.job?.id) {
@@ -571,7 +618,7 @@ export function BatchGeneratorContent() {
         } catch {
             setCreditError('재시도에 실패했습니다.');
         }
-    }, [applyJob, processNext]);
+    }, [applyBatchState, processNext]);
 
     const startGeneration = useCallback(async () => {
         if (!jobId) return;
@@ -592,24 +639,17 @@ export function BatchGeneratorContent() {
     }, [jobId, processNext]);
 
     const waitingCount = queue.filter(q => q.status === 'waiting').length;
-    const errorCount = queue.filter(q => q.status === 'error').length;
-    const doneCount = queue.filter(q => q.status === 'done').length;
-    const activeSlotCount = queue.filter(q => q.status !== 'done').length; // done 제외 슬롯
+    const recentCompletedCount = recentCompleted.length;
+    const activeSlotCount = queue.length;
     const generatingItem = queue.find(q => q.status === 'generating');
-    const selectedItem = queue.find(q => q.id === selectedResult);
+    const selectedItem = recentCompleted.find(q => q.id === selectedResult);
     const isRunning = jobStatus === 'running' || queue.some((item) => item.status === 'generating');
-    const hiddenDoneCount = Math.max(0, doneCount - 3);
 
-    // 표시할 큐: done은 최근 3개만, 나머지 전부
-    const visibleQueue = (() => {
-        const nonDone = queue.filter(q => q.status !== 'done');
-        const doneItems = queue.filter(q => q.status === 'done');
-        const recentDone = doneItems.slice(-3); // 마지막 3개 = 최근 3개
-        return [...nonDone, ...recentDone].sort((a, b) => {
-            // 원래 queue 순서 유지
-            return queue.indexOf(a) - queue.indexOf(b);
-        });
-    })();
+    useEffect(() => {
+        if (selectedResult && !recentCompleted.some((item) => item.id === selectedResult)) {
+            setSelectedResult(null);
+        }
+    }, [recentCompleted, selectedResult]);
 
     return (
         <Container size="md" py="lg">
@@ -766,31 +806,30 @@ export function BatchGeneratorContent() {
                             </Paper>
                         )}
 
-                        {/* 큐 헤더 + 상태 */}
+                        {/* 현재 작업 큐 */}
                         {queue.length > 0 && (
                             <>
                                 <Box style={{ borderTop: '1px solid var(--mantine-color-default-border)', paddingTop: 12 }}>
                                     <Group justify="space-between">
                                         <Group gap="sm">
                                             <ListOrdered size={16} color="#8b5cf6" />
-                                            <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>큐</Text>
+                                            <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>현재 큐</Text>
                                             <Badge variant="light" color="violet" size="sm">{queue.length}건</Badge>
-                                            {doneCount > 0 && (
-                                                <Badge variant="light" color="green" size="sm">{doneCount} 완료</Badge>
+                                            {currentDoneCount > 0 && (
+                                                <Badge variant="light" color="green" size="sm">{currentDoneCount} 완료</Badge>
                                             )}
                                         </Group>
-                                        {isRunning && (
+                                        {isRunning && currentTotalCount > 0 && (
                                             <Badge variant="light" color="orange" size="md" leftSection={<Clock size={14} />}>
-                                                {doneCount}/{queue.length} 진행 중
+                                                {currentDoneCount}/{currentTotalCount} 진행 중
                                             </Badge>
                                         )}
                                     </Group>
                                 </Box>
 
-                                {/* 진행률 */}
-                                {isRunning && queue.length > 1 && (
+                                {isRunning && currentTotalCount > 1 && (
                                     <Progress
-                                        value={(doneCount / queue.length) * 100}
+                                        value={(currentDoneCount / currentTotalCount) * 100}
                                         color="violet"
                                         radius="xl"
                                         size="sm"
@@ -798,44 +837,28 @@ export function BatchGeneratorContent() {
                                     />
                                 )}
 
-                            {/* 큐 아이템 목록 — 컴팩트 한줄 리스트 */}
-                            <Stack gap={4}>
-                                {hiddenDoneCount > 0 && (
-                                    <Text size="xs" c="gray.5" ta="center" py={4}>
-                                        + {hiddenDoneCount}건 완료 (보관함에 저장됨)
-                                    </Text>
-                                )}
-                                {visibleQueue.map((item, index) => {
-                                    const isActive = selectedResult === item.id && item.status === 'done';
-                                    return (
+                                <Stack gap={4}>
+                                    {queue.map((item, index) => (
                                         <Paper
                                             key={item.id}
                                             p="xs"
                                             radius="md"
-                                            onClick={() => item.status === 'done' && setSelectedResult(isActive ? null : item.id)}
                                             style={{
-                                                cursor: item.status === 'done' ? 'pointer' : 'default',
-                                                border: isActive
-                                                    ? '1.5px solid #8b5cf6'
-                                                    : item.status === 'generating'
-                                                        ? '1.5px solid rgba(139, 92, 246, 0.3)'
-                                                        : '1.5px solid transparent',
-                                                background: isActive
-                                                    ? 'rgba(139, 92, 246, 0.04)'
-                                                    : item.status === 'generating'
-                                                        ? 'rgba(139, 92, 246, 0.02)'
-                                                        : 'transparent',
+                                                border: item.status === 'generating'
+                                                    ? '1.5px solid rgba(139, 92, 246, 0.3)'
+                                                    : '1.5px solid transparent',
+                                                background: item.status === 'generating'
+                                                    ? 'rgba(139, 92, 246, 0.02)'
+                                                    : 'transparent',
                                                 transition: 'all 0.15s ease',
                                             }}
                                         >
                                             <Group justify="space-between" wrap="nowrap" gap="sm">
                                                 <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-                                                    {/* 번호 */}
                                                     <Text size="xs" c="gray.4" style={{ ...mono, flexShrink: 0, width: 20, textAlign: 'right' }}>
                                                         {String(index + 1).padStart(2, '0')}
                                                     </Text>
 
-                                                    {/* 상태 아이콘 */}
                                                     {item.status === 'waiting' && (
                                                         <Box style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #d1d5db', flexShrink: 0 }} />
                                                     )}
@@ -846,38 +869,19 @@ export function BatchGeneratorContent() {
                                                             animation: 'spin 1s linear infinite', flexShrink: 0,
                                                         }} />
                                                     )}
-                                                    {item.status === 'done' && (
-                                                        <Box style={{
-                                                            width: 18, height: 18, borderRadius: '50%',
-                                                            background: '#22c55e', display: 'flex',
-                                                            alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                                        }}>
-                                                            <Check size={10} color="#fff" strokeWidth={3} />
-                                                        </Box>
-                                                    )}
                                                     {item.status === 'error' && (
                                                         <AlertCircle size={18} color="#ef4444" style={{ flexShrink: 0 }} />
                                                     )}
 
-                                                    {/* 소재 텍스트 */}
                                                     <Text size="sm" lineClamp={1} style={{ color: 'var(--mantine-color-text)', flex: 1, minWidth: 0 }}>
                                                         {item.material}
                                                     </Text>
                                                 </Group>
 
-                                                {/* 우측 액션 */}
                                                 <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
                                                     {item.status === 'generating' && item.phase && (
                                                         <Text size="xs" c="violet" fw={500}>
                                                             {item.phase === 'analyzing' ? '분석 중' : item.phase === 'generating' ? '생성 중' : '검수 중'}
-                                                        </Text>
-                                                    )}
-                                                    {item.status === 'done' && item.elapsed && (
-                                                        <Text size="xs" c="gray.5" style={mono}>{item.elapsed}초</Text>
-                                                    )}
-                                                    {item.status === 'done' && (
-                                                        <Text size="xs" c="violet" fw={500}>
-                                                            {isActive ? '접기' : '보기'}
                                                         </Text>
                                                     )}
                                                     {item.status === 'error' && (
@@ -886,16 +890,22 @@ export function BatchGeneratorContent() {
                                                         </Text>
                                                     )}
                                                     {item.status === 'error' && !isRunning && (
-                                                        <ActionIcon variant="subtle" color="violet" size="sm"
-                                                            onClick={(e) => { e.stopPropagation(); retryItem(item.id); }}
+                                                        <ActionIcon
+                                                            variant="subtle"
+                                                            color="violet"
+                                                            size="sm"
+                                                            onClick={() => retryItem(item.id)}
                                                             title="재시도"
                                                         >
                                                             <RotateCcw size={14} />
                                                         </ActionIcon>
                                                     )}
                                                     {(item.status === 'waiting' || item.status === 'error') && !isRunning && (
-                                                        <ActionIcon variant="subtle" color="red" size="sm"
-                                                            onClick={(e) => { e.stopPropagation(); removeFromQueue(item.id); }}
+                                                        <ActionIcon
+                                                            variant="subtle"
+                                                            color="red"
+                                                            size="sm"
+                                                            onClick={() => removeFromQueue(item.id)}
                                                         >
                                                             <Trash2 size={14} />
                                                         </ActionIcon>
@@ -903,9 +913,84 @@ export function BatchGeneratorContent() {
                                                 </Group>
                                             </Group>
                                         </Paper>
-                                    );
-                                })}
-                            </Stack>
+                                    ))}
+                                </Stack>
+                            </>
+                        )}
+
+                        {/* 최근 완료 */}
+                        {recentCompletedCount > 0 && (
+                            <>
+                                <Box style={{ borderTop: '1px solid var(--mantine-color-default-border)', paddingTop: 12 }}>
+                                    <Group justify="space-between">
+                                        <Group gap="sm">
+                                            <Check size={16} color="#22c55e" />
+                                            <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>최근 완료</Text>
+                                            <Badge variant="light" color="green" size="sm">{recentCompletedCount}건</Badge>
+                                        </Group>
+                                        <Button
+                                            component={Link}
+                                            href="/dashboard/archive"
+                                            variant="subtle"
+                                            color="violet"
+                                            radius="lg"
+                                            size="xs"
+                                            leftSection={<FolderOpen size={14} />}
+                                        >
+                                            보관함
+                                        </Button>
+                                    </Group>
+                                    <Text size="xs" c="gray.5" mt={6}>
+                                        최근 완료는 2시간 동안 최대 3건까지 표시됩니다.
+                                    </Text>
+                                </Box>
+
+                                <Stack gap={4}>
+                                    {recentCompleted.map((item, index) => {
+                                        const isActive = selectedResult === item.id;
+                                        return (
+                                            <Paper
+                                                key={item.id}
+                                                p="xs"
+                                                radius="md"
+                                                onClick={() => setSelectedResult(isActive ? null : item.id)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    border: isActive ? '1.5px solid #8b5cf6' : '1.5px solid transparent',
+                                                    background: isActive ? 'rgba(139, 92, 246, 0.04)' : 'rgba(34, 197, 94, 0.03)',
+                                                    transition: 'all 0.15s ease',
+                                                }}
+                                            >
+                                                <Group justify="space-between" wrap="nowrap" gap="sm">
+                                                    <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+                                                        <Text size="xs" c="gray.4" style={{ ...mono, flexShrink: 0, width: 20, textAlign: 'right' }}>
+                                                            {String(index + 1).padStart(2, '0')}
+                                                        </Text>
+                                                        <Box style={{
+                                                            width: 18, height: 18, borderRadius: '50%',
+                                                            background: '#22c55e', display: 'flex',
+                                                            alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                        }}>
+                                                            <Check size={10} color="#fff" strokeWidth={3} />
+                                                        </Box>
+                                                        <Text size="sm" lineClamp={1} style={{ color: 'var(--mantine-color-text)', flex: 1, minWidth: 0 }}>
+                                                            {item.material}
+                                                        </Text>
+                                                    </Group>
+
+                                                    <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+                                                        {item.elapsed && (
+                                                            <Text size="xs" c="gray.5" style={mono}>{item.elapsed}초</Text>
+                                                        )}
+                                                        <Text size="xs" c="violet" fw={500}>
+                                                            {isActive ? '접기' : '보기'}
+                                                        </Text>
+                                                    </Group>
+                                                </Group>
+                                            </Paper>
+                                        );
+                                    })}
+                                </Stack>
                             </>
                         )}
                     </Stack>
@@ -922,7 +1007,7 @@ export function BatchGeneratorContent() {
                 )}
 
                 {/* ──── 전체 완료 배너 ──── */}
-                {queue.length > 0 && !isRunning && waitingCount === 0 && doneCount > 0 && !selectedResult && (
+                {jobStatus === 'completed' && currentDoneCount > 0 && !selectedResult && (
                     <Paper p="md" radius="md" style={{ background: 'rgba(34, 197, 94, 0.04)', border: '1px solid rgba(34, 197, 94, 0.15)' }}>
                         <Group justify="space-between">
                             <Group gap="sm">
@@ -934,42 +1019,20 @@ export function BatchGeneratorContent() {
                                     <Check size={14} color="#fff" strokeWidth={3} />
                                 </Box>
                                 <Text fw={600} size="sm" style={{ color: 'var(--mantine-color-text)' }}>
-                                    {doneCount}건 완료 · 보관함에 저장됨
+                                    {currentDoneCount}건 완료 · 최근 완료에서 바로 확인할 수 있습니다
                                 </Text>
                             </Group>
-                            <Group gap="xs">
-                                <Button
-                                    component={Link}
-                                    href="/dashboard/archive"
-                                    variant="light"
-                                    color="violet"
-                                    radius="lg"
-                                    size="xs"
-                                    leftSection={<FolderOpen size={14} />}
-                                >
-                                    보관함
-                                </Button>
-                                <Button
-                                    variant="subtle"
-                                    color="gray"
-                                    radius="lg"
-                                    size="xs"
-                                    onClick={async () => {
-                                        if (jobId) {
-                                            try {
-                                                await fetch(`/api/batch-jobs/${jobId}/reset`, { method: 'POST' });
-                                            } catch { /* ignore */ }
-                                        }
-                                        setQueue([]);
-                                        setJobId(null);
-                                        setJobStatus(null);
-                                        setSelectedResult(null);
-                                        setCreditError(null);
-                                    }}
-                                >
-                                    초기화
-                                </Button>
-                            </Group>
+                            <Button
+                                component={Link}
+                                href="/dashboard/archive"
+                                variant="light"
+                                color="violet"
+                                radius="lg"
+                                size="xs"
+                                leftSection={<FolderOpen size={14} />}
+                            >
+                                보관함
+                            </Button>
                         </Group>
                     </Paper>
                 )}

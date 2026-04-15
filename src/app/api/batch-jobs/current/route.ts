@@ -3,9 +3,11 @@ import { createClient } from "@/utils/supabase/server";
 import {
     createBatchAdminClient,
     enqueueBatchJobItem,
-    getCurrentActiveBatchJob,
+    getCurrentBatchView,
     getOrCreateActiveBatchJob,
+    loadRecentCompletedItems,
     recoverStaleProcessing,
+    toBatchJobItemPayload,
     toBatchJobPayload,
 } from "@/lib/batch-jobs/server";
 
@@ -18,8 +20,8 @@ export async function GET() {
             return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
         }
 
-        const job = await getCurrentActiveBatchJob(user.id);
-        return NextResponse.json({ success: true, job });
+        const current = await getCurrentBatchView(user.id);
+        return NextResponse.json({ success: true, ...current });
     } catch (error) {
         console.error("[Batch Jobs Current API] GET Error:", error);
         return NextResponse.json({ error: "배치 큐를 불러오지 못했습니다." }, { status: 500 });
@@ -48,10 +50,12 @@ export async function POST(request: NextRequest) {
         loaded = await recoverStaleProcessing(admin, loaded.job, loaded.items);
 
         const updated = await enqueueBatchJobItem(admin, loaded.job, loaded.items, user.id, material, niche);
+        const recentCompleted = await loadRecentCompletedItems(admin, user.id);
 
         return NextResponse.json({
             success: true,
             job: toBatchJobPayload(updated.job, updated.items),
+            recentCompleted: recentCompleted.map(toBatchJobItemPayload),
         });
     } catch (error) {
         console.error("[Batch Jobs Current API] POST Error:", error);
