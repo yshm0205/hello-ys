@@ -161,6 +161,39 @@ export function AllInOneCheckoutContent({
                                     </Text>
                                 </Stack>
 
+                                <Card padding="md" radius="lg" withBorder>
+                                    <Stack gap="md">
+                                        <Group gap="xs">
+                                            <Crown size={18} color="#8b5cf6" />
+                                            <Text fw={700} style={{ color: '#111827' }}>
+                                                포함 항목
+                                            </Text>
+                                        </Group>
+                                        <List spacing={10} size="sm" center>
+                                            {[
+                                                'VOD 강의 32강',
+                                                'AI 스크립트 도구 4개월 이용',
+                                                '월간 트렌드 채널 데이터',
+                                                '전자책',
+                                                '노션 운영 템플릿',
+                                                '프로그램 4개월 참여',
+                                            ].map((item) => (
+                                                <List.Item
+                                                    key={item}
+                                                    icon={(
+                                                        <ThemeIcon size={20} radius="xl" color="green" variant="light">
+                                                            <Check size={12} />
+                                                        </ThemeIcon>
+                                                    )}
+                                                    style={{ color: '#374151' }}
+                                                >
+                                                    {item}
+                                                </List.Item>
+                                            ))}
+                                        </List>
+                                    </Stack>
+                                </Card>
+
                                 <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
                                     <Stack gap="sm">
                                         <Text fw={700} size="sm" style={{ color: '#111827' }}>
@@ -204,39 +237,6 @@ export function AllInOneCheckoutContent({
                             </Stack>
                         </Card>
                     )}
-
-                    <Card padding="xl" radius="xl" withBorder>
-                        <Stack gap="md">
-                            <Group gap="xs">
-                                <Crown size={18} color="#8b5cf6" />
-                                <Text fw={700} style={{ color: '#111827' }}>
-                                    포함 항목
-                                </Text>
-                            </Group>
-                            <List spacing={10} size="sm" center>
-                                {[
-                                    'VOD 강의 32강',
-                                    'AI 스크립트 도구 4개월 이용',
-                                    '월간 트렌드 채널 데이터',
-                                    '전자책',
-                                    '노션 운영 템플릿',
-                                    '프로그램 4개월 참여',
-                                ].map((item) => (
-                                    <List.Item
-                                        key={item}
-                                        icon={(
-                                            <ThemeIcon size={20} radius="xl" color="green" variant="light">
-                                                <Check size={12} />
-                                            </ThemeIcon>
-                                        )}
-                                        style={{ color: '#374151' }}
-                                    >
-                                        {item}
-                                    </List.Item>
-                                ))}
-                            </List>
-                        </Stack>
-                    </Card>
 
                     <Text size="xs" c="gray.5" ta="center">
                         결제 문제나 계정 연결 이슈가 있으면 hmys0205hmys@gmail.com 으로 문의해 주세요.
