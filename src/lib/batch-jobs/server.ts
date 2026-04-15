@@ -173,7 +173,16 @@ export async function getOrCreateActiveBatchJob(
 ): Promise<{ job: BatchJobRow; items: BatchJobItemRow[] }> {
     const existing = await loadActiveBatchJob(admin, userId);
     if (existing) {
-        return existing;
+        // completed job에 새 소재 추가하면 → 기존 job 닫고 새로 만들기
+        if (existing.job.status === "completed") {
+            await admin
+                .from("batch_jobs")
+                .update({ status: "failed", updated_at: new Date().toISOString() })
+                .eq("id", existing.job.id);
+            // 아래로 빠져서 새 job 생성
+        } else {
+            return existing;
+        }
     }
 
     const now = new Date().toISOString();
