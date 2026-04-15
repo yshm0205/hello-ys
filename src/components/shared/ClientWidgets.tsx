@@ -8,10 +8,19 @@ const CookieConsent = dynamic(
   { ssr: false }
 );
 
+const KakaoChatButton = dynamic(
+  () =>
+    import("@/components/shared/KakaoChatButton").then(
+      (mod) => mod.KakaoChatButton
+    ),
+  { ssr: false }
+);
+
 export function ClientWidgets() {
   return (
     <>
       <CookieConsent />
+      <KakaoChatButton />
     </>
   );
 }
