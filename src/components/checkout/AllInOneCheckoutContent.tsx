@@ -149,46 +149,6 @@ export function AllInOneCheckoutContent({
 
                                 <Divider />
 
-                                <Stack gap={6}>
-                                    <Text size="sm" c="gray.6">
-                                        결제 직후 {plan.initialCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
-                                    </Text>
-                                    <Text size="sm" c="gray.6">
-                                        이후 매달 {plan.monthlyCredits.toLocaleString()}cr씩 총 {plan.months}회 지급
-                                    </Text>
-                                    <Text size="sm" c="gray.6">
-                                        총 {plan.totalCredits.toLocaleString()}cr 제공 (생성 {totalGenerationCount}회 분량)
-                                    </Text>
-                                </Stack>
-
-                                <Card padding="md" radius="lg" withBorder style={{ background: '#f8f5ff' }}>
-                                    <Stack gap="sm">
-                                        <Text fw={700} size="sm" style={{ color: '#111827' }}>
-                                            이 패키지 하나로 줄어드는 것
-                                        </Text>
-                                        <List spacing={8} size="sm" center>
-                                            {[
-                                                '주제 선정에 쓰는 시간',
-                                                '스크립트 초안에 쓰는 시간',
-                                                '트렌드 채널을 찾는 시간',
-                                                '기획부터 수익화까지 따로 배우는 시행착오',
-                                            ].map((item) => (
-                                                <List.Item
-                                                    key={item}
-                                                    icon={(
-                                                        <ThemeIcon size={20} radius="xl" color="violet" variant="light">
-                                                            <Check size={12} />
-                                                        </ThemeIcon>
-                                                    )}
-                                                    style={{ color: '#374151' }}
-                                                >
-                                                    {item}
-                                                </List.Item>
-                                            ))}
-                                        </List>
-                                    </Stack>
-                                </Card>
-
                                 <Card padding="md" radius="lg" withBorder>
                                     <Stack gap="md">
                                         <Group gap="xs">
@@ -219,6 +179,17 @@ export function AllInOneCheckoutContent({
                                                 </List.Item>
                                             ))}
                                         </List>
+                                        <Stack gap={6}>
+                                            <Text size="sm" c="gray.6">
+                                                결제 직후 {plan.initialCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
+                                            </Text>
+                                            <Text size="sm" c="gray.6">
+                                                이후 매달 {plan.monthlyCredits.toLocaleString()}cr씩 총 {plan.months}회 지급
+                                            </Text>
+                                            <Text size="sm" c="gray.6">
+                                                총 {plan.totalCredits.toLocaleString()}cr 제공 (생성 {totalGenerationCount}회 분량)
+                                            </Text>
+                                        </Stack>
                                     </Stack>
                                 </Card>
 
