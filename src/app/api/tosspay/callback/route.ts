@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { recordCreditTransaction } from "@/lib/credits/server";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
-import { sendPaymentCompleteAlimtalk } from "@/services/notifications/alimtalk";
+import { sendPaymentCompleteEmail } from "@/services/email/actions";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 type ExistingUserPlanRow = {
@@ -11,38 +11,40 @@ type ExistingUserPlanRow = {
   next_credit_at: string | null;
 };
 
-function getSiteOrigin() {
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://flowspot-kr.vercel.app";
-}
-
-async function notifyPaymentComplete(
-  payment: { metadata?: Record<string, unknown> | null; amount: number },
+async function notifyPaymentCompleteByEmail(
+  payment: {
+    metadata?: Record<string, unknown> | null;
+    amount: number;
+  },
   grantedCredits: number,
 ) {
-  const origin = getSiteOrigin();
+  const buyerEmail =
+    typeof payment.metadata?.buyerEmail === "string"
+      ? payment.metadata.buyerEmail
+      : "";
+  const buyerName =
+    typeof payment.metadata?.buyerName === "string"
+      ? payment.metadata.buyerName
+      : "";
+
+  if (!buyerEmail) {
+    console.warn("[TossPay Callback] Payment complete email skipped: missing_email");
+    return;
+  }
 
   try {
-    const result = await sendPaymentCompleteAlimtalk({
-      buyerName:
-        typeof payment.metadata?.buyerName === "string"
-          ? payment.metadata.buyerName
-          : null,
-      buyerPhone:
-        typeof payment.metadata?.buyerPhone === "string"
-          ? payment.metadata.buyerPhone
-          : null,
+    const result = await sendPaymentCompleteEmail({
+      email: buyerEmail,
+      userName: buyerName || buyerEmail.split("@")[0] || "수강생",
       amount: payment.amount,
       grantedCredits,
-      dashboardUrl: `${origin}/ko/dashboard`,
-      lecturesUrl: `${origin}/ko/dashboard/lectures`,
-      scriptsUrl: `${origin}/ko/dashboard/scripts-v2`,
     });
 
-    if (!result.success && result.skipped) {
-      console.warn("[TossPay Callback] Alimtalk skipped:", result.reason);
+    if (result.error) {
+      console.error("[TossPay Callback] Payment complete email failed:", result.error);
     }
   } catch (error) {
-    console.error("[TossPay Callback] Alimtalk failed:", error);
+    console.error("[TossPay Callback] Payment complete email failed:", error);
   }
 }
 
@@ -362,7 +364,7 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          await notifyPaymentComplete(payment, config.initialCredits);
+          await notifyPaymentCompleteByEmail(payment, config.initialCredits);
 
           console.warn("[TossPay Callback] Completed with legacy schema fallback:", {
             orderNo,
@@ -439,7 +441,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await notifyPaymentComplete(payment, config.initialCredits);
+    await notifyPaymentCompleteByEmail(payment, config.initialCredits);
 
     console.log("[TossPay Callback] Success:", {
       orderNo,

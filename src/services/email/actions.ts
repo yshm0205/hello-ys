@@ -1,7 +1,8 @@
 "use server";
 
-import { resend } from "@/lib/resend/client";
 import WelcomeEmail from "@/components/emails/WelcomeEmail";
+import PaymentCompleteEmail from "@/components/emails/PaymentCompleteEmail";
+import { resend } from "@/lib/resend/client";
 
 interface SendWelcomeEmailParams {
   email: string;
@@ -10,19 +11,40 @@ interface SendWelcomeEmailParams {
   locale?: "en" | "ko";
 }
 
+interface SendPaymentCompleteEmailParams {
+  email: string;
+  userName: string;
+  amount: number;
+  grantedCredits: number;
+}
+
+function getBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://flowspot-kr.vercel.app"
+  );
+}
+
+function getKakaoChannelUrl() {
+  return (
+    process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL ||
+    "https://pf.kakao.com/_klhfn/chat"
+  );
+}
+
 export async function sendWelcomeEmail({
   email,
   userName,
   planName = "Basic",
   locale = "en",
 }: SendWelcomeEmailParams) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
   const dashboardUrl = `${baseUrl}/${locale}/dashboard`;
 
-  // 제목 다국어 처리
   const subjects = {
-    en: "Welcome to Global SaaS! 🎉",
-    ko: "Global SaaS에 오신 것을 환영해요! 🎉",
+    en: "Welcome to FlowSpot",
+    ko: "FlowSpot에 오신 것을 환영합니다",
   };
 
   try {
@@ -47,5 +69,42 @@ export async function sendWelcomeEmail({
   } catch (error) {
     console.error("Email Sending Failed:", error);
     return { error: "Failed to send email" };
+  }
+}
+
+export async function sendPaymentCompleteEmail({
+  email,
+  userName,
+  amount,
+  grantedCredits,
+}: SendPaymentCompleteEmailParams) {
+  const baseUrl = getBaseUrl();
+  const locale = "ko";
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "noreply@resend.dev",
+      to: [email],
+      subject: "[FlowSpot] 결제가 완료되었습니다",
+      react: PaymentCompleteEmail({
+        userName,
+        amount: `₩${amount.toLocaleString()}`,
+        grantedCredits: `${grantedCredits.toLocaleString()}cr`,
+        dashboardUrl: `${baseUrl}/${locale}/dashboard`,
+        lecturesUrl: `${baseUrl}/${locale}/dashboard/lectures`,
+        scriptsUrl: `${baseUrl}/${locale}/dashboard/scripts-v2`,
+        kakaoChannelUrl: getKakaoChannelUrl(),
+      }),
+    });
+
+    if (error) {
+      console.error("Payment Complete Email Error:", error);
+      return { error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Payment Complete Email Failed:", error);
+    return { error: "Failed to send payment complete email" };
   }
 }
