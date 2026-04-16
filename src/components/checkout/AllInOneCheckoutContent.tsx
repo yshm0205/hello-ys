@@ -15,6 +15,7 @@ import {
     List,
     Stack,
     Text,
+    TextInput,
     ThemeIcon,
     Title,
 } from '@mantine/core';
@@ -54,6 +55,17 @@ function formatDate(value?: string | null) {
     });
 }
 
+function normalizePhone(value: string) {
+    return value.replace(/\D/g, '');
+}
+
+function formatPhoneInput(value: string) {
+    const digits = normalizePhone(value).slice(0, 11);
+    if (digits.length < 4) return digits;
+    if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
 export function AllInOneCheckoutContent({
     userEmail,
     creditInfo,
@@ -65,9 +77,19 @@ export function AllInOneCheckoutContent({
     const hasActiveAccess = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
     const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
     const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
+    const [buyerName, setBuyerName] = useState('');
+    const [buyerPhone, setBuyerPhone] = useState('');
     const [confirmedUsagePolicy, setConfirmedUsagePolicy] = useState(false);
     const [confirmedNoticePolicy, setConfirmedNoticePolicy] = useState(false);
-    const canCheckout = confirmedUsagePolicy && confirmedNoticePolicy;
+    const normalizedBuyerName = buyerName.trim();
+    const normalizedBuyerPhone = normalizePhone(buyerPhone);
+    const hasValidBuyerName = normalizedBuyerName.length >= 2;
+    const hasValidBuyerPhone = /^01\d{8,9}$/.test(normalizedBuyerPhone);
+    const canCheckout =
+        confirmedUsagePolicy &&
+        confirmedNoticePolicy &&
+        hasValidBuyerName &&
+        hasValidBuyerPhone;
 
     return (
         <Box style={{ minHeight: '100vh', background: '#fafafa' }}>
@@ -194,6 +216,31 @@ export function AllInOneCheckoutContent({
                                 <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
                                     <Stack gap="sm">
                                         <Text fw={700} size="sm" style={{ color: '#111827' }}>
+                                            참가자 정보
+                                        </Text>
+                                        <TextInput
+                                            label="이름"
+                                            placeholder="이하민"
+                                            value={buyerName}
+                                            onChange={(event) => setBuyerName(event.currentTarget.value)}
+                                            required
+                                        />
+                                        <TextInput
+                                            label="휴대폰 번호"
+                                            placeholder="010-1234-5678"
+                                            value={buyerPhone}
+                                            onChange={(event) => setBuyerPhone(formatPhoneInput(event.currentTarget.value))}
+                                            required
+                                        />
+                                        <Text size="xs" c="gray.5">
+                                            결제 완료 후 안내 메시지를 받을 연락처입니다.
+                                        </Text>
+                                    </Stack>
+                                </Card>
+
+                                <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
+                                    <Stack gap="sm">
+                                        <Text fw={700} size="sm" style={{ color: '#111827' }}>
                                             필수 확인
                                         </Text>
                                         <Checkbox
@@ -215,14 +262,18 @@ export function AllInOneCheckoutContent({
                                     size="lg"
                                     disabled={!canCheckout}
                                     loading={loading}
-                                    onClick={() => requestPayment('allinone')}
+                                    onClick={() => requestPayment('allinone', {
+                                        buyerName: normalizedBuyerName,
+                                        buyerPhone: normalizedBuyerPhone,
+                                        buyerEmail: userEmail,
+                                    })}
                                 >
                                     결제창 열기
                                 </Button>
 
                                 {!canCheckout && (
                                     <Text size="xs" c="gray.5">
-                                        결제 전에 필수 확인 항목에 모두 동의해 주세요.
+                                        이름, 휴대폰 번호, 필수 확인 항목을 모두 입력해 주세요.
                                     </Text>
                                 )}
 

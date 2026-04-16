@@ -8,11 +8,17 @@
 
 import { useCallback, useState } from 'react';
 
+interface TossPayBuyerInfo {
+    buyerName: string;
+    buyerPhone: string;
+    buyerEmail?: string;
+}
+
 export function useTossPay() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const requestPayment = useCallback(async (planType: string) => {
+    const requestPayment = useCallback(async (planType: string, buyerInfo?: TossPayBuyerInfo) => {
         setLoading(true);
         setError(null);
 
@@ -20,7 +26,7 @@ export function useTossPay() {
             const res = await fetch('/api/tosspay/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ planType }),
+                body: JSON.stringify({ planType, ...buyerInfo }),
             });
 
             const data = await res.json();

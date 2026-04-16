@@ -17,6 +17,14 @@ interface TossPayCreateResponse {
   checkoutPage?: string;
 }
 
+function normalizeBuyerName(value?: string) {
+  return (value || "").trim();
+}
+
+function normalizeBuyerPhone(value?: string) {
+  return (value || "").replace(/\D/g, "");
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -39,11 +47,39 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { planType } = body as { planType?: string };
+    const {
+      planType,
+      buyerName: rawBuyerName,
+      buyerPhone: rawBuyerPhone,
+      buyerEmail: rawBuyerEmail,
+    } = body as {
+      planType?: string;
+      buyerName?: string;
+      buyerPhone?: string;
+      buyerEmail?: string;
+    };
 
     if (!planType || !isTossPayPlanType(planType)) {
       return NextResponse.json(
         { error: "지원하지 않는 플랜입니다." },
+        { status: 400 },
+      );
+    }
+
+    const buyerName = normalizeBuyerName(rawBuyerName);
+    const buyerPhone = normalizeBuyerPhone(rawBuyerPhone);
+    const buyerEmail = (rawBuyerEmail || user.email || "").trim();
+
+    if (buyerName.length < 2) {
+      return NextResponse.json(
+        { error: "이름을 2자 이상 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    if (!/^01\d{8,9}$/.test(buyerPhone)) {
+      return NextResponse.json(
+        { error: "휴대폰 번호를 올바르게 입력해 주세요." },
         { status: 400 },
       );
     }
@@ -94,6 +130,9 @@ export async function POST(request: NextRequest) {
       metadata: {
         planType,
         payToken: tossData.payToken,
+        buyerName,
+        buyerPhone,
+        buyerEmail,
         paymentKind: plan.paymentKind,
         userPlanType: plan.userPlanType,
         initialCredits: plan.initialCredits,
