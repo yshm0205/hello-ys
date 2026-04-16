@@ -11,21 +11,32 @@ type ExistingUserPlanRow = {
   next_credit_at: string | null;
 };
 
+type PaymentRow = {
+  user_id: string;
+  amount: number;
+  status: string;
+  metadata?: Record<string, unknown> | null;
+};
+
 async function notifyPaymentCompleteByEmail(
-  payment: {
-    metadata?: Record<string, unknown> | null;
-    amount: number;
-  },
+  admin: ReturnType<typeof createAdminClient>,
+  payment: PaymentRow,
   grantedCredits: number,
 ) {
-  const buyerEmail =
+  let buyerEmail =
     typeof payment.metadata?.buyerEmail === "string"
       ? payment.metadata.buyerEmail
       : "";
-  const buyerName =
-    typeof payment.metadata?.buyerName === "string"
-      ? payment.metadata.buyerName
-      : "";
+
+  if (!buyerEmail) {
+    const { data, error } = await admin.auth.admin.getUserById(payment.user_id);
+
+    if (error) {
+      console.error("[TossPay Callback] Failed to resolve email from auth:", error);
+    } else {
+      buyerEmail = data.user?.email || "";
+    }
+  }
 
   if (!buyerEmail) {
     console.warn("[TossPay Callback] Payment complete email skipped: missing_email");
@@ -35,7 +46,7 @@ async function notifyPaymentCompleteByEmail(
   try {
     const result = await sendPaymentCompleteEmail({
       email: buyerEmail,
-      userName: buyerName || buyerEmail.split("@")[0] || "수강생",
+      userName: buyerEmail.split("@")[0] || "수강생",
       amount: payment.amount,
       grantedCredits,
     });
@@ -189,7 +200,9 @@ async function applyInitialProgramPlan(
       ? updateQuery.eq("next_credit_at", planRow.next_credit_at)
       : updateQuery.is("next_credit_at", null);
 
-    const { data: updated, error: updateError } = await updateQuery.select("credits").single();
+    const { data: updated, error: updateError } = await updateQuery
+      .select("credits")
+      .single();
 
     if (updated) {
       return { success: true, credits: updated.credits };
@@ -266,7 +279,8 @@ export async function POST(request: NextRequest) {
       typeof payment.metadata?.planType === "string"
         ? payment.metadata.planType
         : "allinone";
-    const config = TOSSPAY_PLAN_CONFIG[planType as keyof typeof TOSSPAY_PLAN_CONFIG];
+    const config =
+      TOSSPAY_PLAN_CONFIG[planType as keyof typeof TOSSPAY_PLAN_CONFIG];
 
     if (!config) {
       console.error("[TossPay Callback] Unknown plan:", planType);
@@ -285,11 +299,19 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq("order_id", orderNo)
-      .in("status", ["PENDING", "PAY_PENDING", "IN_PROGRESS", "CREDIT_GRANT_FAILED"])
+      .in("status", [
+        "PENDING",
+        "PAY_PENDING",
+        "IN_PROGRESS",
+        "CREDIT_GRANT_FAILED",
+      ])
       .select("order_id");
 
     if (processingError) {
-      console.error("[TossPay Callback] Failed to acquire processing lock:", processingError);
+      console.error(
+        "[TossPay Callback] Failed to acquire processing lock:",
+        processingError,
+      );
       return NextResponse.json({ code: 0 });
     }
 
@@ -364,7 +386,11 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          await notifyPaymentCompleteByEmail(payment, config.initialCredits);
+          await notifyPaymentCompleteByEmail(
+            admin,
+            payment as PaymentRow,
+            config.initialCredits,
+          );
 
           console.warn("[TossPay Callback] Completed with legacy schema fallback:", {
             orderNo,
@@ -375,7 +401,10 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ code: 0 });
         }
 
-        console.error("[TossPay Callback] Legacy fallback failed:", legacyGrantResult.error);
+        console.error(
+          "[TossPay Callback] Legacy fallback failed:",
+          legacyGrantResult.error,
+        );
       }
 
       await admin
@@ -441,7 +470,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await notifyPaymentCompleteByEmail(payment, config.initialCredits);
+    await notifyPaymentCompleteByEmail(
+      admin,
+      payment as PaymentRow,
+      config.initialCredits,
+    );
 
     console.log("[TossPay Callback] Success:", {
       orderNo,

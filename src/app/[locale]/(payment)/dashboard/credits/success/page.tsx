@@ -44,7 +44,7 @@ export default function PaymentSuccessPage() {
                 if (data.success) {
                     setStatus('success');
                     setAddedCredits(data.added);
-                    setMessage(`${data.added}cr 충전 완료! (보유: ${data.credits}cr)`);
+                    setMessage(`${data.added}cr 충전이 완료되었습니다. (보유: ${data.credits}cr)`);
                     return;
                 }
 
@@ -74,12 +74,12 @@ export default function PaymentSuccessPage() {
                 if (data.status === 'DONE') {
                     setStatus('success');
                     setAddedCredits(data.addedCredits || 0);
-                    setMessage(`${data.orderName || '프로그램'} 결제가 완료되었습니다.`);
+                    setMessage(`${data.orderName || '올인원 패스'} 결제가 완료되었습니다.`);
                     return;
                 }
 
                 if (TOSSPAY_PENDING_STATUSES.has(data.status) && attempt < 15) {
-                    setMessage('결제 승인 완료를 확인하는 중입니다...');
+                    setMessage('결제 확인 완료를 확인하는 중입니다...');
                     timer = setTimeout(() => {
                         void pollTossPayStatus(orderNo, attempt + 1);
                     }, 2000);
@@ -89,7 +89,7 @@ export default function PaymentSuccessPage() {
                 setStatus('error');
                 setMessage(
                     data.status && TOSSPAY_PENDING_STATUSES.has(data.status)
-                        ? '결제 승인 확인이 지연되고 있습니다. 잠시 후 다시 확인해 주세요.'
+                        ? '결제 확인이 지연되고 있습니다. 잠시 후 다시 확인해 주세요.'
                         : `결제가 완료되지 않았습니다. 현재 상태: ${data.status || 'UNKNOWN'}`,
                 );
             } catch {
@@ -129,9 +129,11 @@ export default function PaymentSuccessPage() {
                     {status === 'loading' && (
                         <>
                             <Loader color="violet" size="lg" />
-                            <Title order={3} ta="center">결제를 확인하고 있습니다...</Title>
+                            <Title order={3} ta="center">
+                                결제를 확인하고 있습니다...
+                            </Title>
                             <Text c="gray.6" ta="center">
-                                {message || '잠시만 기다려 주세요'}
+                                {message || '잠시만 기다려 주세요.'}
                             </Text>
                         </>
                     )}
@@ -144,20 +146,22 @@ export default function PaymentSuccessPage() {
                             </Title>
                             <Text size="lg" c="gray.7" ta="center">
                                 {addedCredits > 0
-                                    ? `${addedCredits.toLocaleString()} 크레딧이 반영되었습니다.`
+                                    ? `${addedCredits.toLocaleString()}cr가 반영되었습니다.`
                                     : '결제가 정상적으로 완료되었습니다.'}
                             </Text>
-                            <Text size="sm" c="gray.5" ta="center">{message}</Text>
+                            <Text size="sm" c="gray.5" ta="center">
+                                {message}
+                            </Text>
                             <Group mt="md">
                                 <Button
                                     component={Link}
-                                    href="/dashboard/credits"
+                                    href="/dashboard/lectures"
                                     variant="light"
                                     color="violet"
                                     radius="lg"
                                     leftSection={<ArrowLeft size={16} />}
                                 >
-                                    크레딧 페이지로
+                                    강의 보러가기
                                 </Button>
                                 <Button
                                     component={Link}
@@ -166,7 +170,7 @@ export default function PaymentSuccessPage() {
                                     radius="lg"
                                     style={{ background: '#8b5cf6' }}
                                 >
-                                    스크립트 만들기
+                                    스크립트 제작하러가기
                                 </Button>
                             </Group>
                         </>
@@ -178,20 +182,22 @@ export default function PaymentSuccessPage() {
                             <Title order={2} ta="center" style={{ color: '#111827' }}>
                                 결제 확인 실패
                             </Title>
-                            <Text c="gray.6" ta="center">{message}</Text>
+                            <Text c="gray.6" ta="center">
+                                {message}
+                            </Text>
                             <Text size="sm" c="gray.5" ta="center">
                                 문제가 계속되면 hmys0205hmys@gmail.com으로 문의해 주세요.
                             </Text>
                             <Button
                                 component={Link}
-                                href="/dashboard/credits"
+                                href="/"
                                 variant="light"
                                 color="violet"
                                 radius="lg"
                                 mt="md"
                                 leftSection={<ArrowLeft size={16} />}
                             >
-                                크레딧 페이지로 돌아가기
+                                홈으로 돌아가기
                             </Button>
                         </>
                     )}

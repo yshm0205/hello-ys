@@ -1,7 +1,7 @@
 "use server";
 
-import WelcomeEmail from "@/components/emails/WelcomeEmail";
 import PaymentCompleteEmail from "@/components/emails/PaymentCompleteEmail";
+import WelcomeEmail from "@/components/emails/WelcomeEmail";
 import { resend } from "@/lib/resend/client";
 
 interface SendWelcomeEmailParams {
@@ -33,6 +33,10 @@ function getKakaoChannelUrl() {
   );
 }
 
+function getFromEmail() {
+  return process.env.RESEND_FROM_EMAIL || "FlowSpot <onboarding@resend.dev>";
+}
+
 export async function sendWelcomeEmail({
   email,
   userName,
@@ -44,12 +48,12 @@ export async function sendWelcomeEmail({
 
   const subjects = {
     en: "Welcome to FlowSpot",
-    ko: "FlowSpot에 오신 것을 환영합니다",
+    ko: "FlowSpot 가입을 환영합니다",
   };
 
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "noreply@resend.dev",
+      from: getFromEmail(),
       to: [email],
       subject: subjects[locale],
       react: WelcomeEmail({
@@ -83,7 +87,7 @@ export async function sendPaymentCompleteEmail({
 
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "noreply@resend.dev",
+      from: getFromEmail(),
       to: [email],
       subject: "[FlowSpot] 결제가 완료되었습니다",
       react: PaymentCompleteEmail({

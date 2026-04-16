@@ -15,21 +15,20 @@ import {
     List,
     Stack,
     Text,
-    TextInput,
     ThemeIcon,
     Title,
 } from '@mantine/core';
 import { AlertCircle, Check, ChevronLeft, Crown, ShieldCheck } from 'lucide-react';
 
+import { useTossPay } from '@/hooks/useTossPay';
 import { Link } from '@/i18n/routing';
 import {
-    TOSSPAY_PLAN_CONFIG,
     isActiveAccessPlan,
     isInitialProgramPlan,
     isMonthlySubscriberPlan,
+    TOSSPAY_PLAN_CONFIG,
     type AppPlanType,
 } from '@/lib/plans/config';
-import { useTossPay } from '@/hooks/useTossPay';
 
 interface CheckoutCreditInfo {
     credits: number;
@@ -55,17 +54,6 @@ function formatDate(value?: string | null) {
     });
 }
 
-function normalizePhone(value: string) {
-    return value.replace(/\D/g, '');
-}
-
-function formatPhoneInput(value: string) {
-    const digits = normalizePhone(value).slice(0, 11);
-    if (digits.length < 4) return digits;
-    if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-}
-
 export function AllInOneCheckoutContent({
     userEmail,
     creditInfo,
@@ -77,19 +65,9 @@ export function AllInOneCheckoutContent({
     const hasActiveAccess = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
     const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
     const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
-    const [buyerName, setBuyerName] = useState('');
-    const [buyerPhone, setBuyerPhone] = useState('');
     const [confirmedUsagePolicy, setConfirmedUsagePolicy] = useState(false);
     const [confirmedNoticePolicy, setConfirmedNoticePolicy] = useState(false);
-    const normalizedBuyerName = buyerName.trim();
-    const normalizedBuyerPhone = normalizePhone(buyerPhone);
-    const hasValidBuyerName = normalizedBuyerName.length >= 2;
-    const hasValidBuyerPhone = /^01\d{8,9}$/.test(normalizedBuyerPhone);
-    const canCheckout =
-        confirmedUsagePolicy &&
-        confirmedNoticePolicy &&
-        hasValidBuyerName &&
-        hasValidBuyerPhone;
+    const canCheckout = confirmedUsagePolicy && confirmedNoticePolicy;
 
     return (
         <Box style={{ minHeight: '100vh', background: '#fafafa' }}>
@@ -120,7 +98,7 @@ export function AllInOneCheckoutContent({
                             올인원 패스 결제
                         </Title>
                         <Text c="gray.6">
-                            로그인한 상태입니다. 아래에서 상품 내용을 확인하고 결제를 진행하면 됩니다.
+                            상품 구성과 이용 조건을 확인한 뒤 결제를 진행해 주세요.
                         </Text>
                     </Stack>
 
@@ -134,10 +112,14 @@ export function AllInOneCheckoutContent({
                         >
                             이용 기간은 {formatDate(creditInfo?.expires_at)}까지입니다.
                             {isInitialProgram && ' 이용권이 만료되기 전에는 중복 결제가 제한됩니다.'}
-                            {isMonthlySubscriber && ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
+                            {isMonthlySubscriber && ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도 구매할 수 있습니다.'}
                         </Alert>
                     ) : (
-                        <Card padding="xl" radius="xl" style={{ border: '2px solid #8b5cf6', background: '#fff' }}>
+                        <Card
+                            padding="xl"
+                            radius="xl"
+                            style={{ border: '2px solid #8b5cf6', background: '#fff' }}
+                        >
                             <Stack gap="lg">
                                 <Box>
                                     <Group gap="xs" mb={6}>
@@ -147,9 +129,9 @@ export function AllInOneCheckoutContent({
                                         </Text>
                                     </Group>
                                     <Text size="sm" c="gray.6">
-                                        강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달 {plan.monthlyCredits.toLocaleString()}cr 지급
-                                        {' '}(
-                                        생성 {monthlyGenerationCount}회 분량)
+                                        강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달{' '}
+                                        {plan.monthlyCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회
+                                        분량)
                                     </Text>
                                 </Box>
 
@@ -188,11 +170,11 @@ export function AllInOneCheckoutContent({
                                             ].map((item) => (
                                                 <List.Item
                                                     key={item}
-                                                    icon={(
+                                                    icon={
                                                         <ThemeIcon size={20} radius="xl" color="green" variant="light">
                                                             <Check size={12} />
                                                         </ThemeIcon>
-                                                    )}
+                                                    }
                                                     style={{ color: '#374151' }}
                                                 >
                                                     {item}
@@ -201,40 +183,18 @@ export function AllInOneCheckoutContent({
                                         </List>
                                         <Stack gap={6}>
                                             <Text size="sm" c="gray.6">
-                                                결제 직후 {plan.initialCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
+                                                결제 직후 {plan.initialCredits.toLocaleString()}cr 지급 (생성{' '}
+                                                {monthlyGenerationCount}회 분량)
                                             </Text>
                                             <Text size="sm" c="gray.6">
-                                                이후 매달 {plan.monthlyCredits.toLocaleString()}cr씩 총 {plan.months}회 지급
+                                                이후 매달 {plan.monthlyCredits.toLocaleString()}cr씩 총 {plan.months}회
+                                                지급
                                             </Text>
                                             <Text size="sm" c="gray.6">
-                                                총 {plan.totalCredits.toLocaleString()}cr 제공 (생성 {totalGenerationCount}회 분량)
+                                                총 {plan.totalCredits.toLocaleString()}cr 제공 (생성{' '}
+                                                {totalGenerationCount}회 분량)
                                             </Text>
                                         </Stack>
-                                    </Stack>
-                                </Card>
-
-                                <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
-                                    <Stack gap="sm">
-                                        <Text fw={700} size="sm" style={{ color: '#111827' }}>
-                                            참가자 정보
-                                        </Text>
-                                        <TextInput
-                                            label="이름"
-                                            placeholder="이하민"
-                                            value={buyerName}
-                                            onChange={(event) => setBuyerName(event.currentTarget.value)}
-                                            required
-                                        />
-                                        <TextInput
-                                            label="휴대폰 번호"
-                                            placeholder="010-1234-5678"
-                                            value={buyerPhone}
-                                            onChange={(event) => setBuyerPhone(formatPhoneInput(event.currentTarget.value))}
-                                            required
-                                        />
-                                        <Text size="xs" c="gray.5">
-                                            결제 완료 후 안내 메시지를 받을 연락처입니다.
-                                        </Text>
                                     </Stack>
                                 </Card>
 
@@ -262,18 +222,18 @@ export function AllInOneCheckoutContent({
                                     size="lg"
                                     disabled={!canCheckout}
                                     loading={loading}
-                                    onClick={() => requestPayment('allinone', {
-                                        buyerName: normalizedBuyerName,
-                                        buyerPhone: normalizedBuyerPhone,
-                                        buyerEmail: userEmail,
-                                    })}
+                                    onClick={() =>
+                                        requestPayment('allinone', {
+                                            buyerEmail: userEmail,
+                                        })
+                                    }
                                 >
                                     결제창 열기
                                 </Button>
 
                                 {!canCheckout && (
                                     <Text size="xs" c="gray.5">
-                                        이름, 휴대폰 번호, 필수 확인 항목을 모두 입력해 주세요.
+                                        필수 확인 항목을 모두 체크해 주세요.
                                     </Text>
                                 )}
 
@@ -287,7 +247,7 @@ export function AllInOneCheckoutContent({
                     )}
 
                     <Text size="xs" c="gray.5" ta="center">
-                        결제 문제나 계정 연결 이슈가 있으면 hmys0205hmys@gmail.com 으로 문의해 주세요.
+                        결제 문제나 계정 이슈가 있으면 hmys0205hmys@gmail.com 으로 문의해 주세요.
                     </Text>
                 </Stack>
             </Container>

@@ -5,11 +5,11 @@ import {
   Head,
   Heading,
   Html,
+  Hr,
   Preview,
   Section,
-  Text,
   Tailwind,
-  Hr,
+  Text,
 } from "@react-email/components";
 import * as React from "react";
 
@@ -35,70 +35,69 @@ export const PaymentCompleteEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>FlowSpot 결제가 완료되었습니다. 강의실과 스크립트 제작을 바로 시작해 보세요.</Preview>
+      <Preview>FlowSpot 결제가 완료되었습니다. 강의와 스크립트 제작을 바로 시작해 보세요.</Preview>
       <Tailwind>
-        <Body className="bg-gray-100 my-auto mx-auto font-sans">
-          <Container className="bg-white rounded-lg my-[40px] mx-auto p-[32px] max-w-[560px] shadow-lg">
-            <Section className="text-center mb-[24px]">
+        <Body className="mx-auto my-auto bg-gray-100 font-sans">
+          <Container className="mx-auto my-[40px] max-w-[560px] rounded-lg bg-white p-[32px] shadow-lg">
+            <Section className="mb-[24px] text-center">
               <Text className="text-2xl font-bold text-gray-900">FlowSpot</Text>
             </Section>
 
-            <Heading className="text-gray-900 text-[28px] font-bold text-center p-0 my-[24px] mx-0">
+            <Heading className="mx-0 my-[24px] p-0 text-center text-[28px] font-bold text-gray-900">
               결제가 완료되었습니다
             </Heading>
 
-            <Text className="text-gray-700 text-[16px] leading-[28px]">
+            <Text className="text-[16px] leading-[28px] text-gray-700">
               {userName}님, 올인원 패스 결제가 정상적으로 완료되었습니다.
             </Text>
 
-            <Text className="text-gray-700 text-[16px] leading-[28px]">
-              결제 금액은 <strong>{amount}</strong>이며, 지금 바로 <strong>{grantedCredits}</strong>가 지급되었습니다.
+            <Text className="text-[16px] leading-[28px] text-gray-700">
+              결제 금액은 <strong>{amount}</strong>이며, 지급 즉시 <strong>{grantedCredits}</strong>가
+              반영되었습니다.
             </Text>
 
-            <Section className="bg-violet-50 rounded-lg p-4 my-[24px]">
-              <Text className="text-violet-900 text-[14px] m-0">
-                지금 바로 시작할 수 있는 것
-              </Text>
-              <Text className="text-violet-700 text-[14px] mt-[8px] mb-0">
-                강의실 이용, 스크립트 제작, 대시보드 확인
+            <Section className="my-[24px] rounded-lg bg-violet-50 p-4">
+              <Text className="m-0 text-[14px] text-violet-900">지금 바로 시작할 수 있는 것</Text>
+              <Text className="mb-0 mt-[8px] text-[14px] text-violet-700">
+                강의 보기, 스크립트 제작 시작, 대시보드 확인
               </Text>
             </Section>
 
-            <Section className="text-center my-[28px]">
+            <Section className="my-[28px] text-center">
               <Button
-                className="bg-[#111827] rounded-lg text-white text-[14px] font-semibold no-underline text-center px-6 py-4 mr-2 mb-2"
+                className="mb-2 mr-2 rounded-lg bg-[#111827] px-6 py-4 text-center text-[14px] font-semibold text-white no-underline"
                 href={lecturesUrl}
               >
                 강의실 바로가기
               </Button>
               <Button
-                className="bg-[#7c3aed] rounded-lg text-white text-[14px] font-semibold no-underline text-center px-6 py-4 mb-2"
+                className="mb-2 rounded-lg bg-[#7c3aed] px-6 py-4 text-center text-[14px] font-semibold text-white no-underline"
                 href={scriptsUrl}
               >
                 스크립트 제작 시작
               </Button>
             </Section>
 
-            <Section className="text-center my-[12px]">
+            <Section className="my-[12px] text-center">
               <Button
-                className="bg-white border border-solid border-[#d1d5db] rounded-lg text-[#111827] text-[14px] font-semibold no-underline text-center px-6 py-4 mr-2 mb-2"
+                className="mb-2 mr-2 rounded-lg border border-solid border-[#d1d5db] bg-white px-6 py-4 text-center text-[14px] font-semibold text-[#111827] no-underline"
                 href={dashboardUrl}
               >
                 대시보드
               </Button>
               <Button
-                className="bg-[#FEE500] rounded-lg text-[#3C1E1E] text-[14px] font-semibold no-underline text-center px-6 py-4 mb-2"
+                className="mb-2 rounded-lg bg-[#FEE500] px-6 py-4 text-center text-[14px] font-semibold text-[#3C1E1E] no-underline"
                 href={kakaoChannelUrl}
               >
                 카카오톡 채널 문의
               </Button>
             </Section>
 
-            <Hr className="border-gray-200 my-[24px]" />
+            <Hr className="my-[24px] border-gray-200" />
 
-            <Text className="text-gray-600 text-[14px] leading-[24px]">
-              이용 기간은 결제 즉시 시작됩니다. 강의 및 프로그램 이용 기간은 4개월이며,
-              크레딧은 매달 400cr씩 총 4회 지급됩니다.
+            <Text className="text-[14px] leading-[24px] text-gray-600">
+              이용 기간은 결제 즉시 시작됩니다. 강의 및 프로그램 이용 기간은 4개월이며, 크레딧은
+              매달 400cr씩 총 4회 지급됩니다.
             </Text>
           </Container>
         </Body>
