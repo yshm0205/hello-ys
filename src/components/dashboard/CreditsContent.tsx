@@ -82,6 +82,8 @@ function formatDate(value?: string | null) {
 export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps) {
     const tossPayTestPlan = TOSSPAY_PLAN_CONFIG.allinone;
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+    const [testEmailLoading, setTestEmailLoading] = useState(false);
+    const [testEmailMessage, setTestEmailMessage] = useState<string | null>(null);
     const autoCheckoutTriggeredRef = useRef(false);
     const searchParams = useSearchParams();
     const { requestPayment, loading: paymentLoading } = useTossPayment(userId);
@@ -90,6 +92,29 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
         loading: tossPayLoading,
         error: tossPayError,
     } = useTossPay();
+
+    async function sendTestPaymentEmail() {
+        setTestEmailLoading(true);
+        setTestEmailMessage(null);
+
+        try {
+            const res = await fetch('/api/admin/test-payment-email', {
+                method: 'POST',
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setTestEmailMessage(data.error || '테스트 메일 발송에 실패했습니다.');
+                return;
+            }
+
+            setTestEmailMessage(`${data.email}로 결제 완료 테스트 메일을 보냈습니다.`);
+        } catch {
+            setTestEmailMessage('테스트 메일 발송에 실패했습니다.');
+        } finally {
+            setTestEmailLoading(false);
+        }
+    }
 
     useEffect(() => {
         async function fetchCredits() {
@@ -377,6 +402,38 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                 onClick={() => requestTossPay('allinone')}
                             >
                                 토스페이 테스트 결제
+                            </Button>
+                        </Group>
+                    </Card>
+                )}
+
+                {isAdmin && (
+                    <Card padding="lg" radius="xl" withBorder>
+                        <Group justify="space-between" align="flex-start" gap="md">
+                            <Box maw={560}>
+                                <Group gap="xs" mb="xs">
+                                    <FlaskConical size={18} color="#8b5cf6" />
+                                    <Text fw={700} style={{ color: 'var(--mantine-color-text)' }}>
+                                        결제 완료 이메일 테스트
+                                    </Text>
+                                </Group>
+                                <Text size="sm" c="dimmed">
+                                    실결제 없이 현재 로그인한 관리자 계정 이메일로 결제 완료 메일만 발송합니다.
+                                </Text>
+                                {testEmailMessage && (
+                                    <Text size="sm" c={testEmailMessage.includes('실패') ? 'red.6' : 'teal.6'} mt="xs">
+                                        {testEmailMessage}
+                                    </Text>
+                                )}
+                            </Box>
+                            <Button
+                                variant="light"
+                                color="violet"
+                                radius="lg"
+                                loading={testEmailLoading}
+                                onClick={sendTestPaymentEmail}
+                            >
+                                테스트 메일 보내기
                             </Button>
                         </Group>
                     </Card>
