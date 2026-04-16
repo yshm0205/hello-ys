@@ -17,25 +17,21 @@ interface PaymentCompleteEmailProps {
   userName: string;
   amount: string;
   grantedCredits: string;
-  dashboardUrl: string;
   lecturesUrl: string;
   scriptsUrl: string;
-  kakaoChannelUrl: string;
 }
 
 export const PaymentCompleteEmail = ({
   userName,
   amount,
   grantedCredits,
-  dashboardUrl,
   lecturesUrl,
   scriptsUrl,
-  kakaoChannelUrl,
 }: PaymentCompleteEmailProps) => {
   return (
     <Html>
       <Head />
-      <Preview>FlowSpot 결제가 완료되었습니다. 강의와 스크립트 제작을 바로 시작해 보세요.</Preview>
+      <Preview>올인원 패스 결제가 완료되었습니다. 강의와 스크립트 제작을 바로 시작할 수 있습니다.</Preview>
       <Tailwind>
         <Body className="mx-auto my-auto bg-gray-100 font-sans">
           <Container className="mx-auto my-[40px] max-w-[560px] rounded-lg bg-white p-[32px] shadow-lg">
@@ -52,14 +48,16 @@ export const PaymentCompleteEmail = ({
             </Text>
 
             <Text className="text-[16px] leading-[28px] text-gray-700">
-              결제 금액은 <strong>{amount}</strong>이며, 지급 즉시 <strong>{grantedCredits}</strong>가
+              결제 금액은 <strong>{amount}</strong>이며, 지금 <strong>{grantedCredits}</strong>가
               반영되었습니다.
             </Text>
 
             <Section className="my-[24px] rounded-lg bg-violet-50 p-4">
-              <Text className="m-0 text-[14px] text-violet-900">지금 바로 시작할 수 있는 것</Text>
+              <Text className="m-0 text-[14px] font-semibold text-violet-900">
+                바로 시작할 수 있는 메뉴
+              </Text>
               <Text className="mb-0 mt-[8px] text-[14px] text-violet-700">
-                강의 보기, 스크립트 제작 시작, 대시보드 확인
+                강의실에서 학습을 시작하거나, 스크립트 제작 화면으로 바로 이동할 수 있습니다.
               </Text>
             </Section>
 
@@ -68,28 +66,13 @@ export const PaymentCompleteEmail = ({
                 className="mb-2 mr-2 rounded-lg bg-[#111827] px-6 py-4 text-center text-[14px] font-semibold text-white no-underline"
                 href={lecturesUrl}
               >
-                강의실 바로가기
+                강의 보러가기
               </Button>
               <Button
                 className="mb-2 rounded-lg bg-[#7c3aed] px-6 py-4 text-center text-[14px] font-semibold text-white no-underline"
                 href={scriptsUrl}
               >
-                스크립트 제작 시작
-              </Button>
-            </Section>
-
-            <Section className="my-[12px] text-center">
-              <Button
-                className="mb-2 mr-2 rounded-lg border border-solid border-[#d1d5db] bg-white px-6 py-4 text-center text-[14px] font-semibold text-[#111827] no-underline"
-                href={dashboardUrl}
-              >
-                대시보드
-              </Button>
-              <Button
-                className="mb-2 rounded-lg bg-[#FEE500] px-6 py-4 text-center text-[14px] font-semibold text-[#3C1E1E] no-underline"
-                href={kakaoChannelUrl}
-              >
-                카카오톡 채널 문의
+                스크립트 제작하러가기
               </Button>
             </Section>
 

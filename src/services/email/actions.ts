@@ -26,13 +26,6 @@ function getBaseUrl() {
   );
 }
 
-function getKakaoChannelUrl() {
-  return (
-    process.env.NEXT_PUBLIC_KAKAO_CHANNEL_URL ||
-    "https://pf.kakao.com/_klhfn/chat"
-  );
-}
-
 function getFromEmail() {
   return process.env.RESEND_FROM_EMAIL || "FlowSpot <onboarding@resend.dev>";
 }
@@ -89,15 +82,13 @@ export async function sendPaymentCompleteEmail({
     const { data, error } = await resend.emails.send({
       from: getFromEmail(),
       to: [email],
-      subject: "[FlowSpot] 결제가 완료되었습니다",
+      subject: "[FlowSpot] 올인원 패스 결제가 완료되었습니다",
       react: PaymentCompleteEmail({
         userName,
         amount: `₩${amount.toLocaleString()}`,
         grantedCredits: `${grantedCredits.toLocaleString()}cr`,
-        dashboardUrl: `${baseUrl}/${locale}/dashboard`,
         lecturesUrl: `${baseUrl}/${locale}/dashboard/lectures`,
         scriptsUrl: `${baseUrl}/${locale}/dashboard/scripts-v2`,
-        kakaoChannelUrl: getKakaoChannelUrl(),
       }),
     });
 
