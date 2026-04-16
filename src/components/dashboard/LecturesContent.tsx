@@ -28,6 +28,7 @@ import {
     Clock,
     BookOpen,
     ArrowRight,
+    Paperclip,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { LectureCatalogChapter } from '@/lib/lectures/types';
@@ -38,6 +39,7 @@ interface Vod {
     title: string;
     duration: number; // 분
     isPlayable?: boolean;
+    hasMaterials?: boolean;
 }
 
 interface Chapter {
@@ -319,6 +321,13 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                             </Text>
                                                         </Group>
                                                         <Group gap="xs">
+                                                            {vod.hasMaterials && (
+                                                                <Paperclip
+                                                                    size={13}
+                                                                    color="#8b5cf6"
+                                                                    aria-label="수업 자료 있음"
+                                                                />
+                                                            )}
                                                             {!isReady ? (
                                                                 <Badge variant="light" color="gray" size="xs">
                                                                     준비 중

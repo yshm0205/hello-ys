@@ -3,6 +3,7 @@ export interface LectureCatalogVod {
   title: string;
   duration: number;
   isPlayable?: boolean;
+  hasMaterials?: boolean;
 }
 
 export interface LectureCatalogChapter {

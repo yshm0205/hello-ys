@@ -59,24 +59,31 @@ function shouldShowPracticeCta(partNumber: number) {
 export async function getPublishedLectureChapters(): Promise<LectureCatalogChapter[]> {
   noStore();
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("lectures")
-    .select(
-      "id, part_number, part_title, vod_number, vod_title, duration_minutes, video_url, is_published, sort_order"
-    )
-    .eq("is_published", true)
-    .order("part_number", { ascending: true })
-    .order("sort_order", { ascending: true })
-    .order("vod_number", { ascending: true });
+  const [lectureResult, materialResult] = await Promise.all([
+    supabase
+      .from("lectures")
+      .select(
+        "id, part_number, part_title, vod_number, vod_title, duration_minutes, video_url, is_published, sort_order"
+      )
+      .eq("is_published", true)
+      .order("part_number", { ascending: true })
+      .order("sort_order", { ascending: true })
+      .order("vod_number", { ascending: true }),
+    supabase.from("lecture_materials").select("vod_id"),
+  ]);
 
-  if (error) {
-    console.error("[Lecture Catalog] Failed to load lectures:", error);
+  if (lectureResult.error) {
+    console.error("[Lecture Catalog] Failed to load lectures:", lectureResult.error);
     return [];
   }
 
+  const vodsWithMaterials = new Set<string>(
+    ((materialResult.data || []) as { vod_id: string }[]).map((m) => m.vod_id)
+  );
+
   const chapters = new Map<number, LectureCatalogChapter>();
 
-  for (const lecture of (data || []) as LectureRow[]) {
+  for (const lecture of (lectureResult.data || []) as LectureRow[]) {
     if (!chapters.has(lecture.part_number)) {
       chapters.set(lecture.part_number, {
         id: `part_${lecture.part_number}`,
@@ -86,11 +93,13 @@ export async function getPublishedLectureChapters(): Promise<LectureCatalogChapt
       });
     }
 
+    const vodId = buildLectureVodId(lecture.vod_number);
     chapters.get(lecture.part_number)!.vods.push({
-      id: buildLectureVodId(lecture.vod_number),
+      id: vodId,
       title: lecture.vod_title,
       duration: lecture.duration_minutes || 0,
       isPlayable: Boolean(extractVdoCipherId(lecture.video_url)),
+      hasMaterials: vodsWithMaterials.has(vodId),
     });
   }
 
