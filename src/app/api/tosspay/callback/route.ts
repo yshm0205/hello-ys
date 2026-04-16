@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { recordCreditTransaction } from "@/lib/credits/server";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
+import { sendPaymentCompleteAlimtalk } from "@/services/notifications/alimtalk";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 type ExistingUserPlanRow = {
@@ -9,6 +10,41 @@ type ExistingUserPlanRow = {
   monthly_credit_granted_cycles: number | null;
   next_credit_at: string | null;
 };
+
+function getSiteOrigin() {
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://flowspot-kr.vercel.app";
+}
+
+async function notifyPaymentComplete(
+  payment: { metadata?: Record<string, unknown> | null; amount: number },
+  grantedCredits: number,
+) {
+  const origin = getSiteOrigin();
+
+  try {
+    const result = await sendPaymentCompleteAlimtalk({
+      buyerName:
+        typeof payment.metadata?.buyerName === "string"
+          ? payment.metadata.buyerName
+          : null,
+      buyerPhone:
+        typeof payment.metadata?.buyerPhone === "string"
+          ? payment.metadata.buyerPhone
+          : null,
+      amount: payment.amount,
+      grantedCredits,
+      dashboardUrl: `${origin}/ko/dashboard`,
+      lecturesUrl: `${origin}/ko/dashboard/lectures`,
+      scriptsUrl: `${origin}/ko/dashboard/scripts-v2`,
+    });
+
+    if (!result.success && result.skipped) {
+      console.warn("[TossPay Callback] Alimtalk skipped:", result.reason);
+    }
+  } catch (error) {
+    console.error("[TossPay Callback] Alimtalk failed:", error);
+  }
+}
 
 function isLegacySchemaError(error: unknown) {
   const code = (error as { code?: string } | null)?.code;
@@ -326,6 +362,8 @@ export async function POST(request: NextRequest) {
             },
           });
 
+          await notifyPaymentComplete(payment, config.initialCredits);
+
           console.warn("[TossPay Callback] Completed with legacy schema fallback:", {
             orderNo,
             planType,
@@ -400,6 +438,8 @@ export async function POST(request: NextRequest) {
         monthlyCredits: config.monthlyCredits,
       },
     });
+
+    await notifyPaymentComplete(payment, config.initialCredits);
 
     console.log("[TossPay Callback] Success:", {
       orderNo,
