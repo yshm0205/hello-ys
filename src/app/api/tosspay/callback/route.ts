@@ -196,7 +196,6 @@ async function applyInitialProgramPlan(
         next_credit_at: nextCreditAtIso,
       })
       .eq("user_id", userId)
-      .eq("credits", planRow.credits)
       .eq("subscription_credits", planRow.subscription_credits ?? 0)
       .eq("purchased_credits", planRow.purchased_credits ?? 0);
 

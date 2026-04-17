@@ -315,8 +315,14 @@ export async function updateCreditPlanBalances(
       .from("user_plans")
       .update(payload)
       .eq("user_id", input.userId)
-      .eq("credits", input.current.credits)
       .eq("plan_type", input.current.planType);
+
+    // Legacy `credits` can drift from bucket totals on migrated rows.
+    // For bucket-aware plans, lock on the bucket columns and heal `credits`
+    // via the update payload instead of treating the stale aggregate as a conflict.
+    if (!input.current.hasBuckets) {
+      updateQuery = updateQuery.eq("credits", input.current.credits);
+    }
 
     updateQuery = input.current.expiresAt
       ? updateQuery.eq("expires_at", input.current.expiresAt)

@@ -111,7 +111,6 @@ export async function GET(request: NextRequest) {
           next_credit_at: nextCreditAt?.toISOString() ?? null,
         })
         .eq("user_id", plan.user_id)
-        .eq("credits", plan.credits)
         .eq("subscription_credits", previousSubscriptionCredits)
         .eq("purchased_credits", purchasedCredits)
         .eq("monthly_credit_granted_cycles", plan.monthly_credit_granted_cycles)
