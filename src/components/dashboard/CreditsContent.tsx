@@ -43,6 +43,8 @@ import { useTossPayment } from '@/hooks/useTossPayment';
 
 interface CreditInfo {
     credits: number;
+    subscription_credits?: number | null;
+    purchased_credits?: number | null;
     plan_type: string;
     expires_at: string | null;
     monthly_credit_amount?: number | null;
@@ -59,15 +61,35 @@ interface CreditsContentProps {
 const packs = CREDIT_TOPUP_PACKS.map((pack) => ({
     ...pack,
     priceLabel: `₩${pack.amount.toLocaleString()}`,
-    unitLabel: `10회당 ₩${Math.round((pack.amount / (pack.credits / 10))).toLocaleString()}`,
-    generationLabel: `${(pack.credits / 10).toLocaleString()}회 생성 분량`,
+    unitLabel: `10cr당 ₩${Math.round(pack.amount / (pack.credits / 10)).toLocaleString()}`,
+    generationLabel: `생성 ${(pack.credits / 10).toLocaleString()}회 분량`,
 }));
 
 const usageGuide = [
-    { action: '리서치', cost: 3, icon: <Search size={16} />, desc: '소재 기반 리서치와 구조 분석' },
-    { action: '전체 생성', cost: 10, icon: <Sparkles size={16} />, desc: '리서치 포함 스크립트 생성' },
-    { action: '스킵 생성', cost: 7, icon: <SkipForward size={16} />, desc: '리서치 없이 바로 스크립트 생성' },
-    { action: '리라이트', cost: 2, icon: <RefreshCw size={16} />, desc: '기존 스크립트의 말투와 표현 수정' },
+    {
+        action: '리서치',
+        cost: 3,
+        icon: <Search size={16} />,
+        desc: '주제 기반 리서치와 구조 분석',
+    },
+    {
+        action: '전체 생성',
+        cost: 10,
+        icon: <Sparkles size={16} />,
+        desc: '리서치를 포함한 전체 스크립트 생성',
+    },
+    {
+        action: '스킵 생성',
+        cost: 7,
+        icon: <SkipForward size={16} />,
+        desc: '리서치 없이 바로 스크립트 생성',
+    },
+    {
+        action: '리라이트',
+        cost: 2,
+        icon: <RefreshCw size={16} />,
+        desc: '기존 스크립트의 말투와 표현 수정',
+    },
 ];
 
 function formatDate(value?: string | null) {
@@ -150,6 +172,9 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
 
     const planType = creditInfo?.plan_type || 'free';
     const credits = creditInfo?.credits ?? 0;
+    const subscriptionCredits = creditInfo?.subscription_credits ?? 0;
+    const purchasedCredits =
+        creditInfo?.purchased_credits ?? Math.max(0, credits - subscriptionCredits);
     const displayPlanLabel = getPlanLabel(planType);
     const displayMaxCredits = getPlanCreditDisplayCap(planType);
     const hasPaidPlan = isPaidPlanType(planType);
@@ -162,6 +187,9 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
     const totalCycles = creditInfo?.monthly_credit_total_cycles ?? null;
     const nextCreditAt = creditInfo?.next_credit_at ?? null;
     const statusLabel = hasActiveAccess ? '활성' : isExpiredPaid ? '만료' : '무료';
+    const isEmailError =
+        !!testEmailMessage &&
+        (testEmailMessage.includes('실패') || testEmailMessage.toLowerCase().includes('fail'));
 
     return (
         <Container size="xl" py="md">
@@ -174,7 +202,8 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                         </Title>
                     </Group>
                     <Text c="dimmed">
-                        올인원 패스 상태와 보유 크레딧을 확인하고, 부족하면 추가 토큰을 구매할 수 있습니다.
+                        사용 중인 플랜 상태와 보유 크레딧을 확인하고, 부족한 경우 추가 크레딧을
+                        구매할 수 있습니다.
                     </Text>
                 </Box>
 
@@ -193,6 +222,36 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                 radius="xl"
                                 style={{ opacity: 0.5 }}
                             />
+                            <Stack gap={4}>
+                                <Group justify="space-between" gap="xs">
+                                    <Text size="xs" c="white" opacity={0.8}>
+                                        이번 달 구독 크레딧
+                                    </Text>
+                                    <Text size="xs" c="white" fw={600}>
+                                        {subscriptionCredits.toLocaleString()}cr
+                                    </Text>
+                                </Group>
+                                <Group justify="space-between" gap="xs">
+                                    <Text size="xs" c="white" opacity={0.8}>
+                                        추가 구매 크레딧
+                                    </Text>
+                                    <Text size="xs" c="white" fw={600}>
+                                        {purchasedCredits.toLocaleString()}cr
+                                    </Text>
+                                </Group>
+                            </Stack>
+                            {(subscriptionCredits > 0 || purchasedCredits > 0) && (
+                                <Stack gap={2}>
+                                    <Text size="xs" c="white" opacity={0.72}>
+                                        구독 크레딧은 월별로 갱신되고, 추가 구매 크레딧은 누적
+                                        보존됩니다.
+                                    </Text>
+                                    <Text size="xs" c="white" opacity={0.72}>
+                                        사용 시 이번 달 구독 크레딧이 먼저 차감되고, 부족한 경우
+                                        추가 구매 크레딧이 차감됩니다.
+                                    </Text>
+                                </Stack>
+                            )}
                         </Stack>
                     </Card>
 
@@ -211,7 +270,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                 </Badge>
                                 {creditInfo?.expires_at && (
                                     <Text size="xs" c="gray.5">
-                                        만료: {formatDate(creditInfo.expires_at)}
+                                        만료일: {formatDate(creditInfo.expires_at)}
                                     </Text>
                                 )}
                             </Group>
@@ -227,7 +286,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     )}
                                     {nextCreditAt && (
                                         <Text size="xs" c="gray.5">
-                                            다음 지급: {formatDate(nextCreditAt)}
+                                            다음 지급일: {formatDate(nextCreditAt)}
                                         </Text>
                                     )}
                                 </Stack>
@@ -252,7 +311,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     </Text>
                                 </Group>
                                 <Text size="sm" c="dimmed">
-                                    강의 4개월 이용권 + 프로그램 4개월 + 매달 400cr 지급.
+                                    강의 4개월 이용권 + 프로그램 4개월 + 매달 400cr 지급
                                 </Text>
                                 <Text size="sm" c="dimmed" mt={4}>
                                     결제 직후 400cr 지급, 이후 매달 400cr씩 총 4회 지급됩니다.
@@ -260,7 +319,7 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                             </Box>
                             <Box>
                                 <Text fw={700} size="xl" style={{ color: '#8b5cf6' }}>
-                                    {tossPayTestPlan.amount.toLocaleString()}원
+                                    ₩{tossPayTestPlan.amount.toLocaleString()}
                                 </Text>
                                 <Button
                                     color="violet"
@@ -288,92 +347,91 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                             <Group gap="xs">
                                 <Crown size={18} color="#f59e0b" />
                                 <Text fw={700} style={{ color: 'var(--mantine-color-text)' }}>
-                                    이용권이 만료되었습니다
+                                    이용권이 만료되었습니다.
                                 </Text>
                             </Group>
                             <Text size="sm" c="dimmed">
-                                현재는 강의와 프로그램 접근이 닫혀 있습니다. 월 구독 상품이 열리기 전까지는
-                                추가 크레딧 충전도 제한됩니다.
+                                현재는 강의와 프로그램 접근이 제한되어 있습니다. 다만 추가 구매
+                                크레딧이 남아 있다면 스크립트 생성은 계속 사용할 수 있습니다.
                             </Text>
                         </Stack>
                     </Card>
                 )}
 
-                {hasActiveAccess && (
-                    <Box>
-                        <Group gap="sm" mb="xs">
-                            <Zap size={22} color="#8b5cf6" />
-                            <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
-                                추가 크레딧 충전
-                            </Title>
-                        </Group>
-                        <Text size="sm" c="gray.5" mb="lg">
-                            추가 토큰은 올인원 패스 기본 제공분보다 비싼 단가로 책정됩니다. 급할 때만 보충하는 용도입니다.
-                        </Text>
+                <Box>
+                    <Group gap="sm" mb="xs">
+                        <Zap size={22} color="#8b5cf6" />
+                        <Title order={3} style={{ color: 'var(--mantine-color-text)' }}>
+                            추가 크레딧 구매
+                        </Title>
+                    </Group>
+                    <Text size="sm" c="gray.5" mb="lg">
+                        추가 구매 크레딧은 누적 보존됩니다. 구독 포함 크레딧보다 높은 단가로
+                        책정되며, 급하게 더 필요한 경우에만 보충하는 용도입니다.
+                    </Text>
 
-                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                            {packs.map((pack) => (
-                                <Card
-                                    key={pack.credits}
-                                    padding="lg"
-                                    radius="xl"
-                                    style={
-                                        pack.popular
-                                            ? {
-                                                border: '2px solid #8b5cf6',
-                                                position: 'relative',
-                                                overflow: 'visible',
-                                            }
-                                            : { border: '1px solid #e5e7eb' }
-                                    }
-                                >
-                                    {pack.popular && (
-                                        <Badge
-                                            size="sm"
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                        {packs.map((pack) => (
+                            <Card
+                                key={pack.credits}
+                                padding="lg"
+                                radius="xl"
+                                style={
+                                    pack.popular
+                                        ? {
+                                            border: '2px solid #8b5cf6',
+                                            position: 'relative',
+                                            overflow: 'visible',
+                                        }
+                                        : { border: '1px solid #e5e7eb' }
+                                }
+                            >
+                                {pack.popular && (
+                                    <Badge
+                                        size="sm"
+                                        color="violet"
+                                        variant="filled"
+                                        style={{
+                                            position: 'absolute',
+                                            top: -10,
+                                            left: '50%',
+                                            transform: 'translateX(-50%)',
+                                        }}
+                                    >
+                                        인기
+                                    </Badge>
+                                )}
+                                <Group justify="space-between" align="center">
+                                    <Box>
+                                        <Group gap="xs">
+                                            <Zap size={18} color="#8b5cf6" />
+                                            <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
+                                                {pack.credits.toLocaleString()} 크레딧
+                                            </Text>
+                                        </Group>
+                                        <Text size="xs" c="gray.5" mt={2}>{pack.generationLabel}</Text>
+                                        <Text size="xs" c="gray.5">{pack.unitLabel}</Text>
+                                    </Box>
+                                    <Box ta="right">
+                                        <Text fw={800} size="xl" style={{ color: '#8b5cf6' }}>{pack.priceLabel}</Text>
+                                        <Button
+                                            size="xs"
+                                            radius="lg"
+                                            mt={4}
+                                            variant={pack.popular ? 'filled' : 'light'}
                                             color="violet"
-                                            variant="filled"
-                                            style={{
-                                                position: 'absolute',
-                                                top: -10,
-                                                left: '50%',
-                                                transform: 'translateX(-50%)',
-                                            }}
+                                            style={pack.popular ? { background: '#8b5cf6' } : undefined}
+                                            loading={paymentLoading}
+                                            onClick={() => requestPayment(pack.credits)}
                                         >
-                                            인기
-                                        </Badge>
-                                    )}
-                                    <Group justify="space-between" align="center">
-                                        <Box>
-                                            <Group gap="xs">
-                                                <Zap size={18} color="#8b5cf6" />
-                                                <Text fw={700} size="lg" style={{ color: 'var(--mantine-color-text)' }}>
-                                                    {pack.credits.toLocaleString()} 크레딧
-                                                </Text>
-                                            </Group>
-                                            <Text size="xs" c="gray.5" mt={2}>{pack.generationLabel}</Text>
-                                            <Text size="xs" c="gray.5">{pack.unitLabel}</Text>
-                                        </Box>
-                                        <Box ta="right">
-                                            <Text fw={800} size="xl" style={{ color: '#8b5cf6' }}>{pack.priceLabel}</Text>
-                                            <Button
-                                                size="xs"
-                                                radius="lg"
-                                                mt={4}
-                                                variant={pack.popular ? 'filled' : 'light'}
-                                                color="violet"
-                                                style={pack.popular ? { background: '#8b5cf6' } : undefined}
-                                                loading={paymentLoading}
-                                                onClick={() => requestPayment(pack.credits)}
-                                            >
-                                                구매하기
-                                            </Button>
-                                        </Box>
-                                    </Group>
-                                </Card>
-                            ))}
-                        </SimpleGrid>
-                    </Box>
-                )}
+                                            구매하기
+                                        </Button>
+                                    </Box>
+                                </Group>
+                            </Card>
+                        ))}
+                    </SimpleGrid>
+                </Box>
 
                 {isAdmin && (
                     <Card padding="lg" radius="xl" withBorder>
@@ -386,8 +444,9 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     </Text>
                                 </Group>
                                 <Text size="sm" c="dimmed">
-                                    `TOSSPAY_API_KEY`와 TossPay 생성/콜백/성공 페이지 흐름을 실제 결제로 검증합니다.
-                                    4개월 프로그램 기준 {tossPayTestPlan.amount.toLocaleString()}원 결제 페이지를 엽니다.
+                                    `TOSSPAY_API_KEY`로 TossPay 생성, 콜백, 성공 페이지 흐름을
+                                    실제 결제로 검증합니다. 4개월 프로그램 기준{' '}
+                                    ₩{tossPayTestPlan.amount.toLocaleString()} 결제 페이지를 엽니다.
                                 </Text>
                                 {tossPayError && (
                                     <Text size="sm" c="red.6" mt="xs">
@@ -418,10 +477,11 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                                     </Text>
                                 </Group>
                                 <Text size="sm" c="dimmed">
-                                    실결제 없이 현재 로그인한 관리자 계정 이메일로 결제 완료 메일만 발송합니다.
+                                    실결제 없이 현재 로그인한 관리자 계정 이메일로 결제 완료 메일만
+                                    발송합니다.
                                 </Text>
                                 {testEmailMessage && (
-                                    <Text size="sm" c={testEmailMessage.includes('실패') ? 'red.6' : 'teal.6'} mt="xs">
+                                    <Text size="sm" c={isEmailError ? 'red.6' : 'teal.6'} mt="xs">
                                         {testEmailMessage}
                                     </Text>
                                 )}

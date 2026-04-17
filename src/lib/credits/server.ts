@@ -17,6 +17,15 @@ export type CreditTransactionType =
   | "manual_add"
   | "manual_deduct";
 
+export type CreditPlanSnapshot = {
+  credits: number;
+  subscriptionCredits: number;
+  purchasedCredits: number;
+  planType: string;
+  expiresAt: string | null;
+  hasBuckets: boolean;
+};
+
 type CreditResult =
   | { success: true; status: number; credits: number; deducted: number; message: string }
   | { success: false; status: number; credits?: number; deducted?: number; error: string };
@@ -31,6 +40,80 @@ type CreditTransactionInput = {
   referenceId?: string | null;
   metadata?: Record<string, unknown> | null;
 };
+
+type CreditPlanRow = {
+  credits?: number | null;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
+  plan_type?: string | null;
+  expires_at?: string | null;
+};
+
+type CreditBalanceUpdateInput = {
+  userId: string;
+  current: CreditPlanSnapshot | null;
+  subscriptionCredits: number;
+  purchasedCredits: number;
+  planType?: string;
+  expiresAt?: string | null;
+  extra?: Record<string, unknown>;
+};
+
+type CreditBalanceUpdateResult =
+  | { success: true; plan: CreditPlanSnapshot }
+  | { success: false; error: unknown };
+
+type DeductCreditOptions = {
+  referenceId?: string | null;
+  metadata?: Record<string, unknown> | null;
+  description?: string;
+};
+
+const FULL_PLAN_SELECT =
+  "credits, subscription_credits, purchased_credits, plan_type, expires_at";
+const LEGACY_PLAN_SELECT = "credits, plan_type, expires_at";
+
+function normalizeCreditPlan(
+  row: CreditPlanRow | null | undefined,
+  hasBuckets: boolean,
+): CreditPlanSnapshot | null {
+  if (!row) return null;
+
+  const credits = row.credits ?? 0;
+  const subscriptionCredits = hasBuckets ? Math.max(0, row.subscription_credits ?? 0) : 0;
+  const purchasedCredits = hasBuckets
+    ? Math.max(0, row.purchased_credits ?? 0)
+    : Math.max(0, credits);
+
+  return {
+    credits: subscriptionCredits + purchasedCredits,
+    subscriptionCredits,
+    purchasedCredits,
+    planType: row.plan_type ?? "free",
+    expiresAt: row.expires_at ?? null,
+    hasBuckets,
+  };
+}
+
+function createWritePayload(
+  snapshot: CreditPlanSnapshot | null,
+  input: Omit<CreditBalanceUpdateInput, "userId" | "current">,
+) {
+  const payload: Record<string, unknown> = {
+    credits: input.subscriptionCredits + input.purchasedCredits,
+    plan_type: input.planType ?? snapshot?.planType ?? "free",
+    expires_at:
+      input.expiresAt === undefined ? snapshot?.expiresAt ?? null : input.expiresAt,
+    ...(input.extra || {}),
+  };
+
+  if (snapshot?.hasBuckets ?? true) {
+    payload.subscription_credits = input.subscriptionCredits;
+    payload.purchased_credits = input.purchasedCredits;
+  }
+
+  return payload;
+}
 
 export async function recordCreditTransaction({
   userId,
@@ -59,9 +142,152 @@ export async function recordCreditTransaction({
   }
 }
 
+export async function loadCreditPlanSnapshot(
+  adminClient: ReturnType<typeof createAdminClient>,
+  userId: string,
+): Promise<CreditPlanSnapshot | null> {
+  const fullResult = await adminClient
+    .from("user_plans")
+    .select(FULL_PLAN_SELECT)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!fullResult.error) {
+    return normalizeCreditPlan(fullResult.data as CreditPlanRow | null, true);
+  }
+
+  const isMissingBucketColumns =
+    (fullResult.error as { code?: string } | null)?.code === "42703";
+
+  if (!isMissingBucketColumns) {
+    console.error("[Credits] Failed to load credit plan:", fullResult.error);
+    return null;
+  }
+
+  const legacyResult = await adminClient
+    .from("user_plans")
+    .select(LEGACY_PLAN_SELECT)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (legacyResult.error) {
+    console.error("[Credits] Failed to load legacy credit plan:", legacyResult.error);
+    return null;
+  }
+
+  return normalizeCreditPlan(legacyResult.data as CreditPlanRow | null, false);
+}
+
+export async function updateCreditPlanBalances(
+  adminClient: ReturnType<typeof createAdminClient>,
+  input: CreditBalanceUpdateInput,
+): Promise<CreditBalanceUpdateResult> {
+  const nextSubscriptionCredits = Math.max(0, input.subscriptionCredits);
+  const nextPurchasedCredits = Math.max(0, input.purchasedCredits);
+  const nextPlanType = input.planType ?? input.current?.planType ?? "free";
+  const nextExpiresAt =
+    input.expiresAt === undefined ? input.current?.expiresAt ?? null : input.expiresAt;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const payload = createWritePayload(input.current, {
+      subscriptionCredits: nextSubscriptionCredits,
+      purchasedCredits: nextPurchasedCredits,
+      planType: nextPlanType,
+      expiresAt: nextExpiresAt,
+      extra: input.extra,
+    });
+
+    if (!input.current) {
+      const { data, error } = await adminClient
+        .from("user_plans")
+        .insert({
+          user_id: input.userId,
+          ...payload,
+        })
+        .select(FULL_PLAN_SELECT)
+        .single();
+
+      if (!error && data) {
+        return {
+          success: true,
+          plan: normalizeCreditPlan(data as CreditPlanRow, true)!,
+        };
+      }
+
+      const errorCode = (error as { code?: string } | null)?.code;
+      if (errorCode === "23505") {
+        input.current = await loadCreditPlanSnapshot(adminClient, input.userId);
+        continue;
+      }
+
+      if (errorCode === "42703") {
+        const { data: legacyData, error: legacyError } = await adminClient
+          .from("user_plans")
+          .insert({
+            user_id: input.userId,
+            credits: nextSubscriptionCredits + nextPurchasedCredits,
+            plan_type: nextPlanType,
+            expires_at: nextExpiresAt,
+            ...(input.extra || {}),
+          })
+          .select(LEGACY_PLAN_SELECT)
+          .single();
+
+        if (!legacyError && legacyData) {
+          return {
+            success: true,
+            plan: normalizeCreditPlan(legacyData as CreditPlanRow, false)!,
+          };
+        }
+
+        return { success: false, error: legacyError };
+      }
+
+      return { success: false, error };
+    }
+
+    let updateQuery = adminClient
+      .from("user_plans")
+      .update(payload)
+      .eq("user_id", input.userId)
+      .eq("credits", input.current.credits)
+      .eq("plan_type", input.current.planType);
+
+    updateQuery = input.current.expiresAt
+      ? updateQuery.eq("expires_at", input.current.expiresAt)
+      : updateQuery.is("expires_at", null);
+
+    if (input.current.hasBuckets) {
+      updateQuery = updateQuery
+        .eq("subscription_credits", input.current.subscriptionCredits)
+        .eq("purchased_credits", input.current.purchasedCredits);
+    }
+
+    const selectColumns = input.current.hasBuckets ? FULL_PLAN_SELECT : LEGACY_PLAN_SELECT;
+    const { data, error } = await updateQuery.select(selectColumns).single();
+
+    if (!error && data) {
+      return {
+        success: true,
+        plan: normalizeCreditPlan(data as CreditPlanRow, input.current.hasBuckets)!,
+      };
+    }
+
+    const errorCode = (error as { code?: string } | null)?.code;
+    if (errorCode && errorCode !== "PGRST116") {
+      return { success: false, error };
+    }
+
+    input.current = await loadCreditPlanSnapshot(adminClient, input.userId);
+  }
+
+  return { success: false, error: new Error("concurrent_credit_update") };
+}
+
 export async function deductUserCredits(
   userId: string,
   action: CreditAction,
+  options: DeductCreditOptions = {},
 ): Promise<CreditResult> {
   const cost = CREDIT_COSTS[action];
 
@@ -74,14 +300,9 @@ export async function deductUserCredits(
   }
 
   const adminClient = createAdminClient();
+  const plan = await loadCreditPlanSnapshot(adminClient, userId);
 
-  const { data: plan, error: planError } = await adminClient
-    .from("user_plans")
-    .select("credits, plan_type, expires_at")
-    .eq("user_id", userId)
-    .single();
-
-  if (planError || !plan) {
+  if (!plan) {
     return {
       success: false,
       status: 403,
@@ -89,11 +310,14 @@ export async function deductUserCredits(
     };
   }
 
-  if (
-    plan.expires_at &&
-    plan.plan_type !== "free" &&
-    !isActiveAccessPlan(plan.plan_type, plan.expires_at)
-  ) {
+  const hasActivePlanAccess =
+    !plan.expiresAt ||
+    plan.planType === "free" ||
+    isActiveAccessPlan(plan.planType, plan.expiresAt);
+  const availableSubscriptionCredits = hasActivePlanAccess ? plan.subscriptionCredits : 0;
+  const totalAvailableCredits = availableSubscriptionCredits + plan.purchasedCredits;
+
+  if (!hasActivePlanAccess && plan.planType !== "free" && plan.purchasedCredits <= 0) {
     return {
       success: false,
       status: 403,
@@ -101,24 +325,28 @@ export async function deductUserCredits(
     };
   }
 
-  if (plan.credits < cost) {
+  if (totalAvailableCredits < cost) {
     return {
       success: false,
       status: 403,
-      credits: plan.credits,
-      error: `크레딧이 부족합니다. (필요: ${cost}cr, 보유: ${plan.credits}cr)`,
+      credits: totalAvailableCredits,
+      error: `크레딧이 부족합니다. (필요: ${cost}cr, 보유: ${totalAvailableCredits}cr)`,
     };
   }
 
-  const { data: updated, error: updateError } = await adminClient
-    .from("user_plans")
-    .update({ credits: plan.credits - cost })
-    .eq("user_id", userId)
-    .eq("credits", plan.credits)
-    .select("credits")
-    .single();
+  const deductedFromSubscription = Math.min(availableSubscriptionCredits, cost);
+  const deductedFromPurchased = cost - deductedFromSubscription;
 
-  if (updateError || !updated) {
+  const updateResult = await updateCreditPlanBalances(adminClient, {
+    userId,
+    current: plan,
+    subscriptionCredits: hasActivePlanAccess
+      ? plan.subscriptionCredits - deductedFromSubscription
+      : 0,
+    purchasedCredits: plan.purchasedCredits - deductedFromPurchased,
+  });
+
+  if (!updateResult.success) {
     return {
       success: false,
       status: 409,
@@ -130,17 +358,26 @@ export async function deductUserCredits(
     userId,
     type: "usage",
     amount: -cost,
-    balanceAfter: updated.credits,
-    description: `credit usage: ${action}`,
-    metadata: { action, cost },
+    balanceAfter: updateResult.plan.credits,
+    description: options.description ?? `credit usage: ${action}`,
+    referenceId: options.referenceId ?? null,
+    metadata: {
+      action,
+      cost,
+      subscriptionDeducted: deductedFromSubscription,
+      purchasedDeducted: deductedFromPurchased,
+      subscriptionCreditsAfter: updateResult.plan.subscriptionCredits,
+      purchasedCreditsAfter: updateResult.plan.purchasedCredits,
+      ...(options.metadata || {}),
+    },
   });
 
   return {
     success: true,
     status: 200,
-    credits: updated.credits,
+    credits: updateResult.plan.credits,
     deducted: cost,
-    message: `${cost}cr 사용 (보유: ${updated.credits}cr)`,
+    message: `${cost}cr 사용 (보유: ${updateResult.plan.credits}cr)`,
   };
 }
 

@@ -24,6 +24,8 @@ function addOneMonth(base: Date) {
 type DuePlanRow = {
   user_id: string;
   credits: number;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
   plan_type: string;
   expires_at: string | null;
   monthly_credit_amount: number;
@@ -44,7 +46,7 @@ export async function GET(request: NextRequest) {
     const { data: rows, error } = await admin
       .from("user_plans")
       .select(
-        "user_id, credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at",
+        "user_id, credits, subscription_credits, purchased_credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at",
       )
       .gt("monthly_credit_amount", 0)
       .not("next_credit_at", "is", null)
@@ -89,7 +91,10 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      const newCredits = plan.credits + plan.monthly_credit_amount;
+      const previousSubscriptionCredits = plan.subscription_credits ?? 0;
+      const purchasedCredits = plan.purchased_credits ?? 0;
+      const newSubscriptionCredits = plan.monthly_credit_amount;
+      const newCredits = newSubscriptionCredits + purchasedCredits;
       const newGrantedCycles = plan.monthly_credit_granted_cycles + 1;
       const hasMoreCycles =
         plan.monthly_credit_total_cycles === null ||
@@ -100,11 +105,15 @@ export async function GET(request: NextRequest) {
         .from("user_plans")
         .update({
           credits: newCredits,
+          subscription_credits: newSubscriptionCredits,
+          purchased_credits: purchasedCredits,
           monthly_credit_granted_cycles: newGrantedCycles,
           next_credit_at: nextCreditAt?.toISOString() ?? null,
         })
         .eq("user_id", plan.user_id)
         .eq("credits", plan.credits)
+        .eq("subscription_credits", previousSubscriptionCredits)
+        .eq("purchased_credits", purchasedCredits)
         .eq("monthly_credit_granted_cycles", plan.monthly_credit_granted_cycles)
         .eq("next_credit_at", plan.next_credit_at)
         .select("credits")
@@ -118,17 +127,38 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      const referenceId = `monthly_credit:${plan.user_id}:${newGrantedCycles}`;
+
+      if (previousSubscriptionCredits > 0) {
+        await recordCreditTransaction({
+          userId: plan.user_id,
+          type: "manual_deduct",
+          amount: -previousSubscriptionCredits,
+          balanceAfter: purchasedCredits,
+          description: `expired subscription credits: ${plan.plan_type}`,
+          referenceId,
+          metadata: {
+            planType: plan.plan_type,
+            grantCycle: newGrantedCycles,
+            totalCycles: plan.monthly_credit_total_cycles,
+            expiredSubscriptionCredits: previousSubscriptionCredits,
+          },
+        });
+      }
+
       await recordCreditTransaction({
         userId: plan.user_id,
         type: "manual_add",
         amount: plan.monthly_credit_amount,
         balanceAfter: updated.credits,
-        description: `monthly credit grant: ${plan.plan_type}`,
-        referenceId: `monthly_credit:${plan.user_id}:${newGrantedCycles}`,
+        description: `monthly subscription credit reset: ${plan.plan_type}`,
+        referenceId,
         metadata: {
           planType: plan.plan_type,
           grantCycle: newGrantedCycles,
           totalCycles: plan.monthly_credit_total_cycles,
+          grantedSubscriptionCredits: plan.monthly_credit_amount,
+          purchasedCreditsRemaining: purchasedCredits,
         },
       });
 

@@ -1,12 +1,15 @@
 import {
   PLAN_TYPE,
   TOSSPAY_PLAN_CONFIG,
+  isActiveAccessPlan,
   type AppPlanType,
 } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export type EffectiveCreditInfo = {
   credits: number;
+  subscription_credits: number;
+  purchased_credits: number;
   plan_type: AppPlanType | string;
   expires_at: string | null;
   monthly_credit_amount: number;
@@ -17,6 +20,8 @@ export type EffectiveCreditInfo = {
 
 type FullPlanRow = {
   credits: number;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
   plan_type: string;
   expires_at: string | null;
   monthly_credit_amount?: number | null;
@@ -32,7 +37,7 @@ type LegacyPlanRow = {
 };
 
 const FULL_PLAN_SELECT =
-  "credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at";
+  "credits, subscription_credits, purchased_credits, plan_type, expires_at, monthly_credit_amount, monthly_credit_total_cycles, monthly_credit_granted_cycles, next_credit_at";
 const LEGACY_PLAN_SELECT = "credits, plan_type, expires_at";
 
 function addMonths(iso: string, months: number) {
@@ -43,6 +48,8 @@ function addMonths(iso: string, months: number) {
 
 type PartialEffectiveCreditInfo = {
   credits?: number | null;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
   plan_type?: string | null;
   expires_at?: string | null;
   monthly_credit_amount?: number | null;
@@ -53,8 +60,13 @@ type PartialEffectiveCreditInfo = {
 
 function normalizePlanInfo(plan: PartialEffectiveCreditInfo | null | undefined): EffectiveCreditInfo | null {
   if (!plan) return null;
+  const subscriptionCredits = plan.subscription_credits ?? 0;
+  const purchasedCredits =
+    plan.purchased_credits ?? Math.max(0, (plan.credits ?? 0) - subscriptionCredits);
   return {
-    credits: plan.credits ?? 0,
+    credits: subscriptionCredits + purchasedCredits,
+    subscription_credits: subscriptionCredits,
+    purchased_credits: purchasedCredits,
     plan_type: plan.plan_type ?? PLAN_TYPE.FREE,
     expires_at: plan.expires_at ?? null,
     monthly_credit_amount: plan.monthly_credit_amount ?? 0,
@@ -62,6 +74,23 @@ function normalizePlanInfo(plan: PartialEffectiveCreditInfo | null | undefined):
     monthly_credit_granted_cycles: plan.monthly_credit_granted_cycles ?? 0,
     next_credit_at: plan.next_credit_at ?? null,
   };
+}
+
+function normalizeRequestedPath(requestedPath?: string | null) {
+  if (!requestedPath) return null;
+
+  try {
+    const { pathname, search, hash } = new URL(requestedPath, "http://localhost");
+    const normalizedPathname = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
+    return `${normalizedPathname || "/"}${search}${hash}`;
+  } catch {
+    const [pathnameWithSearch = "/", hash = ""] = requestedPath.split("#", 2);
+    const [pathname = "/", search = ""] = pathnameWithSearch.split("?", 2);
+    const normalizedPathname = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
+    const normalizedSearch = search ? `?${search}` : "";
+    const normalizedHash = hash ? `#${hash}` : "";
+    return `${normalizedPathname || "/"}${normalizedSearch}${normalizedHash}`;
+  }
 }
 
 async function getProgramPaymentFallback(userId: string): Promise<EffectiveCreditInfo | null> {
@@ -84,6 +113,8 @@ async function getProgramPaymentFallback(userId: string): Promise<EffectiveCredi
 
   return {
     credits: payment.credits ?? 0,
+    subscription_credits: payment.credits ?? 0,
+    purchased_credits: 0,
     plan_type: PLAN_TYPE.STUDENT_4M,
     expires_at: addMonths(payment.updated_at, config.months),
     monthly_credit_amount: config.monthlyCredits,
@@ -111,6 +142,8 @@ export async function getEffectiveCreditInfo(userId: string): Promise<EffectiveC
         return {
           ...fallback,
           credits: fullPlan.credits,
+          subscription_credits: fullPlan.subscription_credits,
+          purchased_credits: fullPlan.purchased_credits,
         };
       }
     }
@@ -146,8 +179,35 @@ export async function getEffectiveCreditInfo(userId: string): Promise<EffectiveC
     return {
       ...fallback,
       credits: legacyPlan.credits,
+      subscription_credits: fallback.subscription_credits,
+      purchased_credits: legacyPlan.credits,
     };
   }
 
   return legacyPlan;
+}
+
+export async function resolvePostLoginRedirectPath(
+  userId: string,
+  requestedPath?: string | null
+): Promise<string> {
+  const normalizedRequestedPath = normalizeRequestedPath(requestedPath);
+  const requestedPathname = normalizedRequestedPath
+    ? normalizedRequestedPath.split("?")[0]?.split("#")[0] ?? normalizedRequestedPath
+    : null;
+
+  if (requestedPathname && requestedPathname !== "/dashboard") {
+    return normalizedRequestedPath!;
+  }
+
+  const creditInfo = await getEffectiveCreditInfo(userId);
+  const defaultPath = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at)
+    ? "/dashboard"
+    : "/checkout/allinone";
+
+  if (defaultPath === "/dashboard" && normalizedRequestedPath) {
+    return normalizedRequestedPath;
+  }
+
+  return defaultPath;
 }

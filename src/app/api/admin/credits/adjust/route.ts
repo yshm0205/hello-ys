@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { recordCreditTransaction } from "@/lib/credits/server";
+import {
+  loadCreditPlanSnapshot,
+  recordCreditTransaction,
+  updateCreditPlanBalances,
+} from "@/lib/credits/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -45,11 +49,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: userPlan } = await adminClient
-      .from("user_plans")
-      .select("credits")
-      .eq("user_id", targetUser.id)
-      .single();
+    const userPlan = await loadCreditPlanSnapshot(adminClient, targetUser.id);
 
     if (!userPlan) {
       return NextResponse.json(
@@ -59,20 +59,38 @@ export async function POST(request: NextRequest) {
     }
 
     const previousCredits = userPlan.credits;
-    const newCredits = Math.max(0, previousCredits + amount);
-    const appliedAdjustment = newCredits - previousCredits;
+    const deductionFromPurchased = amount < 0 ? Math.min(userPlan.purchasedCredits, -amount) : 0;
+    const remainingDeduction = amount < 0 ? -amount - deductionFromPurchased : 0;
+    const deductionFromSubscription =
+      amount < 0 ? Math.min(userPlan.subscriptionCredits, remainingDeduction) : 0;
 
-    const { error: updateError } = await adminClient
-      .from("user_plans")
-      .update({ credits: newCredits })
-      .eq("user_id", targetUser.id);
+    const nextPurchasedCredits =
+      amount >= 0
+        ? userPlan.purchasedCredits + amount
+        : userPlan.purchasedCredits - deductionFromPurchased;
+    const nextSubscriptionCredits =
+      amount >= 0
+        ? userPlan.subscriptionCredits
+        : userPlan.subscriptionCredits - deductionFromSubscription;
 
-    if (updateError) {
+    const updateResult = await updateCreditPlanBalances(adminClient, {
+      userId: targetUser.id,
+      current: userPlan,
+      subscriptionCredits: nextSubscriptionCredits,
+      purchasedCredits: nextPurchasedCredits,
+      planType: userPlan.planType,
+      expiresAt: userPlan.expiresAt,
+    });
+
+    if (!updateResult.success) {
       return NextResponse.json(
         { error: "Failed to update credits" },
         { status: 500 },
       );
     }
+
+    const newCredits = updateResult.plan.credits;
+    const appliedAdjustment = newCredits - previousCredits;
 
     if (appliedAdjustment !== 0) {
       await recordCreditTransaction({
@@ -85,6 +103,10 @@ export async function POST(request: NextRequest) {
         metadata: {
           adminEmail: user.email,
           requestedAmount: amount,
+          purchasedAdjusted:
+            amount >= 0 ? amount : -deductionFromPurchased,
+          subscriptionAdjusted:
+            amount >= 0 ? 0 : -deductionFromSubscription,
         },
       });
     }

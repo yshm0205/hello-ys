@@ -82,7 +82,16 @@ export async function POST(
         }
 
         // 크레딧 차감
-        const creditResult = await deductUserCredits(user.id, "generate_batch");
+        const newAttempt = (nextItem.attempt_count || 0) + 1;
+        const creditReferenceId = `batch_item_${nextItem.id}_attempt_${newAttempt}`;
+        const creditResult = await deductUserCredits(user.id, "generate_batch", {
+            referenceId: creditReferenceId,
+            metadata: {
+                jobId: state.job.id,
+                itemId: nextItem.id,
+                attempt: newAttempt,
+            },
+        });
         if (!creditResult.success) {
             const paused = await updateBatchJobCounts(admin, state.job.id, {
                 status: "paused",
@@ -102,7 +111,6 @@ export async function POST(
 
         // DB: 아이템을 processing으로 마킹 + attempt_count 증가
         const startedAt = new Date().toISOString();
-        const newAttempt = (nextItem.attempt_count || 0) + 1;
         await admin
             .from("batch_job_items")
             .update({
@@ -170,7 +178,7 @@ export async function POST(
             const refundResult = await refundUserCredits(
                 user.id,
                 creditResult.deducted,
-                `batch_item_${nextItem.id}_attempt_${newAttempt}`,
+                creditReferenceId,
                 errorCode,
             );
 

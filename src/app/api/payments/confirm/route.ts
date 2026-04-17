@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { recordCreditTransaction } from "@/lib/credits/server";
+import {
+  loadCreditPlanSnapshot,
+  recordCreditTransaction,
+  updateCreditPlanBalances,
+} from "@/lib/credits/server";
 import { CREDIT_TOPUP_PACKS } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
@@ -36,7 +40,7 @@ export async function POST(request: NextRequest) {
     const pack = CREDIT_TOPUP_PACKS.find((candidate) => candidate.amount === amount);
     if (!pack) {
       return NextResponse.json(
-        { success: false, error: `유효하지 않은 결제 금액입니다: ${amount}` },
+        { success: false, error: `유효하지 않은 결제 금액입니다. ${amount}` },
         { status: 400 },
       );
     }
@@ -71,26 +75,23 @@ export async function POST(request: NextRequest) {
     }
 
     const adminClient = createAdminClient();
-    const { data: plan } = await supabase
-      .from("user_plans")
-      .select("credits")
-      .eq("user_id", user.id)
-      .single();
+    const currentPlan = await loadCreditPlanSnapshot(adminClient, user.id);
+    const updateResult = await updateCreditPlanBalances(adminClient, {
+      userId: user.id,
+      current: currentPlan,
+      subscriptionCredits: currentPlan?.subscriptionCredits || 0,
+      purchasedCredits: (currentPlan?.purchasedCredits || 0) + pack.credits,
+      planType: currentPlan?.planType || "free",
+      expiresAt: currentPlan?.expiresAt ?? null,
+    });
 
-    const currentCredits = plan?.credits || 0;
-
-    const { data: updated, error: updateError } = await adminClient
-      .from("user_plans")
-      .update({ credits: currentCredits + pack.credits })
-      .eq("user_id", user.id)
-      .eq("credits", currentCredits)
-      .select("credits")
-      .single();
-
-    if (updateError || !updated) {
-      console.error("[Payments Confirm] Credit update failed:", updateError);
+    if (!updateResult.success) {
+      console.error("[Payments Confirm] Credit update failed:", updateResult.error);
       return NextResponse.json(
-        { success: false, error: "크레딧 충전 중 충돌이 발생했습니다. 다시 시도해 주세요." },
+        {
+          success: false,
+          error: "크레딧 충전 중 충돌이 발생했습니다. 다시 시도해 주세요.",
+        },
         { status: 409 },
       );
     }
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       payment_key: paymentKey,
       order_id: orderId,
-      order_name: `FlowSpot 크레딧 ${pack.credits}개`,
+      order_name: `FlowSpot 크레딧 ${pack.credits}cr`,
       amount,
       credits: pack.credits,
       status: tossData.status || "DONE",
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       type: "charge",
       amount: pack.credits,
-      balanceAfter: updated.credits,
+      balanceAfter: updateResult.plan.credits,
       description: `toss payment charge (${pack.credits}cr)`,
       referenceId: orderId,
       metadata: {
@@ -117,12 +118,14 @@ export async function POST(request: NextRequest) {
         paymentKey,
         amount,
         credits: pack.credits,
+        purchasedGranted: pack.credits,
+        subscriptionGranted: 0,
       },
     });
 
     return NextResponse.json({
       success: true,
-      credits: updated.credits,
+      credits: updateResult.plan.credits,
       added: pack.credits,
       orderId: tossData.orderId,
     });

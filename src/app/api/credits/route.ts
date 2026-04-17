@@ -28,8 +28,10 @@ export async function GET() {
           user_id: user.id,
           plan_type: "free",
           credits: 30,
+          purchased_credits: 30,
+          subscription_credits: 0,
         })
-        .select("credits, plan_type, expires_at")
+        .select("credits, purchased_credits, subscription_credits, plan_type, expires_at")
         .single();
 
       if (createError || !created) {
@@ -41,6 +43,8 @@ export async function GET() {
 
         return NextResponse.json({
           credits: 30,
+          subscription_credits: 0,
+          purchased_credits: 30,
           plan_type: "free",
           expires_at: null,
           monthly_credit_amount: 0,
@@ -52,6 +56,8 @@ export async function GET() {
 
       return NextResponse.json({
         credits: created.credits,
+        subscription_credits: created.subscription_credits ?? 0,
+        purchased_credits: created.purchased_credits ?? created.credits,
         plan_type: created.plan_type,
         expires_at: created.expires_at,
         monthly_credit_amount: 0,

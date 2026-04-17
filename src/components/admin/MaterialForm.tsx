@@ -32,7 +32,7 @@ interface AddMaterialButtonProps {
 
 export function AddMaterialButton({
   defaultVodId,
-  triggerLabel = "?먮즺 異붽?",
+  triggerLabel = "자료 추가",
   triggerVariant = "outline",
 }: AddMaterialButtonProps = {}) {
   const [open, setOpen] = useState(false);
@@ -94,8 +94,11 @@ export function AddMaterialButton({
             </div>
             <div>
               <Label htmlFor="type">타입 *</Label>
-              <select name="type" required
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+              <select
+                name="type"
+                required
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              >
                 <option value="docs">문서</option>
                 <option value="image">이미지</option>
                 <option value="audio">오디오</option>
@@ -182,8 +185,11 @@ export function EditMaterialButton({ material }: { material: Material }) {
             </div>
             <div>
               <Label htmlFor="type">타입</Label>
-              <select name="type" defaultValue={material.type}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+              <select
+                name="type"
+                defaultValue={material.type}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              >
                 <option value="docs">문서</option>
                 <option value="image">이미지</option>
                 <option value="audio">오디오</option>
@@ -210,7 +216,7 @@ export function EditMaterialButton({ material }: { material: Material }) {
             </div>
           </div>
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "저장 중..." : "저장"}
+            {loading ? "수정 중..." : "수정"}
           </Button>
         </form>
       </DialogContent>

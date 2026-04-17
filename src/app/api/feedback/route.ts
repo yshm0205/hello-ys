@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+import { getResendClient } from "@/lib/resend/client";
 import { createClient } from "@/utils/supabase/server";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
+    const resend = getResendClient();
+    if (!resend) {
+      return NextResponse.json({ error: "Email service is not configured." }, { status: 503 });
+    }
+
     const { message } = await request.json();
 
     if (!message || typeof message !== "string" || message.trim().length < 5) {

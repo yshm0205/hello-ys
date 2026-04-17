@@ -1,12 +1,13 @@
 "use server";
 
+import { resolvePostLoginRedirectPath } from "@/lib/plans/server";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
 function sanitizeNextPath(nextPath?: string | null) {
   if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
-    return "/dashboard";
+    return null;
   }
 
   return nextPath;
@@ -20,11 +21,14 @@ export async function loginWithGoogle(nextPath?: string) {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
   const next = sanitizeNextPath(nextPath);
+  const callbackUrl = next
+    ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${origin}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      redirectTo: callbackUrl,
     },
   });
 
@@ -46,12 +50,15 @@ export async function loginWithMagicLink(email: string, nextPath?: string) {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
   const next = sanitizeNextPath(nextPath);
+  const callbackUrl = next
+    ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${origin}/auth/callback`;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       // Allows the user to be redirected to the dashboard after clicking the link
-      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: callbackUrl,
     },
   });
 
@@ -74,7 +81,7 @@ export async function loginWithEmailPassword(
   const supabase = await createClient();
   const next = sanitizeNextPath(nextPath);
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -84,7 +91,12 @@ export async function loginWithEmailPassword(
     return { error: error.message };
   }
 
-  redirect(`/ko${next}`);
+  if (!data.user) {
+    return { error: "로그인 세션을 확인할 수 없습니다." };
+  }
+
+  const redirectPath = await resolvePostLoginRedirectPath(data.user.id, next);
+  redirect(`/ko${redirectPath}`);
 }
 
 /**

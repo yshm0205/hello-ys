@@ -1,11 +1,5 @@
 'use client';
 
-/**
- * 토스페이먼츠 결제 요청 훅
- * - widgets().requestPaymentWindow() 방식 (결제위젯 연동 키 gck 사용)
- * - successUrl/failUrl로 리다이렉트
- */
-
 import { useCallback, useState } from 'react';
 import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk';
 import { CREDIT_TOPUP_PACKS } from '@/lib/plans/config';
@@ -33,7 +27,7 @@ export function useTossPayment(customerKey: string | undefined) {
 
             await widgets.requestPaymentWindow({
                 orderId,
-                orderName: `FlowSpot 크레딧 ${packCr}개`,
+                orderName: `FlowSpot 크레딧 충전 ${packCr}cr`,
                 amount: { currency: 'KRW', value: amount },
                 successUrl: `${origin}/dashboard/credits/success`,
                 failUrl: `${origin}/dashboard/credits/fail`,

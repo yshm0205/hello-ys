@@ -2,7 +2,7 @@
 
 import PaymentCompleteEmail from "@/components/emails/PaymentCompleteEmail";
 import WelcomeEmail from "@/components/emails/WelcomeEmail";
-import { resend } from "@/lib/resend/client";
+import { getResendClient } from "@/lib/resend/client";
 
 interface SendWelcomeEmailParams {
   email: string;
@@ -36,6 +36,11 @@ export async function sendWelcomeEmail({
   planName = "Basic",
   locale = "en",
 }: SendWelcomeEmailParams) {
+  const resend = getResendClient();
+  if (!resend) {
+    return { error: "Email service is not configured." };
+  }
+
   const baseUrl = getBaseUrl();
   const dashboardUrl = `${baseUrl}/${locale}/dashboard`;
 
@@ -75,6 +80,11 @@ export async function sendPaymentCompleteEmail({
   amount,
   grantedCredits,
 }: SendPaymentCompleteEmailParams) {
+  const resend = getResendClient();
+  if (!resend) {
+    return { error: "Email service is not configured." };
+  }
+
   const baseUrl = getBaseUrl();
   const locale = "ko";
 

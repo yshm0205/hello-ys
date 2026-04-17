@@ -7,6 +7,8 @@ import { createAdminClient } from "@/utils/supabase/admin";
 
 type ExistingUserPlanRow = {
   credits: number;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
   monthly_credit_granted_cycles: number | null;
   next_credit_at: string | null;
 };
@@ -46,7 +48,7 @@ async function notifyPaymentCompleteByEmail(
   try {
     const result = await sendPaymentCompleteEmail({
       email: buyerEmail,
-      userName: buyerEmail.split("@")[0] || "수강생",
+      userName: buyerEmail.split("@")[0] || "고객님",
       amount: payment.amount,
       grantedCredits,
     });
@@ -136,7 +138,9 @@ async function applyInitialProgramPlan(
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const { data: currentPlan, error: loadError } = await admin
       .from("user_plans")
-      .select("credits, monthly_credit_granted_cycles, next_credit_at")
+      .select(
+        "credits, subscription_credits, purchased_credits, monthly_credit_granted_cycles, next_credit_at",
+      )
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -145,7 +149,9 @@ async function applyInitialProgramPlan(
     }
 
     const planRow = currentPlan as ExistingUserPlanRow | null;
-    const nextCredits = (planRow?.credits || 0) + config.initialCredits;
+    const nextSubscriptionCredits = config.initialCredits;
+    const nextPurchasedCredits = planRow?.purchased_credits || 0;
+    const nextCredits = nextSubscriptionCredits + nextPurchasedCredits;
 
     if (!planRow) {
       const { data: inserted, error: insertError } = await admin
@@ -154,6 +160,8 @@ async function applyInitialProgramPlan(
           user_id: userId,
           plan_type: config.userPlanType,
           credits: nextCredits,
+          subscription_credits: nextSubscriptionCredits,
+          purchased_credits: nextPurchasedCredits,
           expires_at: expiresAtIso,
           monthly_credit_amount: config.monthlyCredits,
           monthly_credit_total_cycles: config.months,
@@ -179,6 +187,8 @@ async function applyInitialProgramPlan(
       .update({
         plan_type: config.userPlanType,
         credits: nextCredits,
+        subscription_credits: nextSubscriptionCredits,
+        purchased_credits: nextPurchasedCredits,
         expires_at: expiresAtIso,
         monthly_credit_amount: config.monthlyCredits,
         monthly_credit_total_cycles: config.months,
@@ -186,7 +196,9 @@ async function applyInitialProgramPlan(
         next_credit_at: nextCreditAtIso,
       })
       .eq("user_id", userId)
-      .eq("credits", planRow.credits);
+      .eq("credits", planRow.credits)
+      .eq("subscription_credits", planRow.subscription_credits ?? 0)
+      .eq("purchased_credits", planRow.purchased_credits ?? 0);
 
     updateQuery =
       planRow.monthly_credit_granted_cycles === null
@@ -299,12 +311,7 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq("order_id", orderNo)
-      .in("status", [
-        "PENDING",
-        "PAY_PENDING",
-        "IN_PROGRESS",
-        "CREDIT_GRANT_FAILED",
-      ])
+      .in("status", ["PENDING", "PAY_PENDING", "IN_PROGRESS", "CREDIT_GRANT_FAILED"])
       .select("order_id");
 
     if (processingError) {
@@ -382,6 +389,8 @@ export async function POST(request: NextRequest) {
               amount,
               initialCredits: config.initialCredits,
               monthlyCredits: config.monthlyCredits,
+              subscriptionGranted: config.initialCredits,
+              purchasedGranted: 0,
               fallbackMode: "legacy_schema",
             },
           });
@@ -426,6 +435,7 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq("order_id", orderNo);
+
       return NextResponse.json({ code: 0 });
     }
 
@@ -467,14 +477,12 @@ export async function POST(request: NextRequest) {
         amount,
         initialCredits: config.initialCredits,
         monthlyCredits: config.monthlyCredits,
+        subscriptionGranted: config.initialCredits,
+        purchasedGranted: 0,
       },
     });
 
-    await notifyPaymentCompleteByEmail(
-      admin,
-      payment as PaymentRow,
-      config.initialCredits,
-    );
+    await notifyPaymentCompleteByEmail(admin, payment as PaymentRow, config.initialCredits);
 
     console.log("[TossPay Callback] Success:", {
       orderNo,

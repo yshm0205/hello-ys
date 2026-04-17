@@ -1,8 +1,8 @@
 ﻿'use client';
 
 /**
- * 濡쒓렇???섏씠吏 ?대씪?댁뼵??而댄룷?뚰듃
- * ?ㅽ겕 ?뚮쭏, 以묒븰 ?뺣젹 移대뱶
+ * 로그인 페이지 클라이언트 컴포넌트
+ * 다크 테마, 중앙 정렬 카드 레이아웃
  */
 
 import { useState } from 'react';
@@ -123,7 +123,7 @@ export function LoginContent() {
         overflow: 'hidden',
       }}
     >
-      {/* 諛곌꼍 洹몃━??*/}
+      {/* 배경 그리드 */}
       <Box
         style={{
           position: 'absolute',
@@ -136,7 +136,7 @@ export function LoginContent() {
         }}
       />
 
-      {/* 湲濡쒖슦 ?④낵 */}
+      {/* 글로우 효과 */}
       <Box
         style={{
           position: 'absolute',
@@ -151,7 +151,7 @@ export function LoginContent() {
       />
 
       <Container size="xs" style={{ position: 'relative', zIndex: 1 }}>
-        {/* 濡쒕큸 ?대?吏 */}
+        {/* 로봇 이미지 */}
         <Box mb="lg" style={{ display: 'flex', justifyContent: 'center' }}>
           <Image
             src="/images/robot-login-dark.png"
@@ -172,7 +172,7 @@ export function LoginContent() {
           }}
         >
           <Stack gap="lg">
-            {/* 濡쒓퀬 */}
+            {/* 로고 */}
             <Stack align="center" gap="sm">
               <Group gap="sm">
                 <Bot size={32} color="#a78bfa" />
@@ -190,7 +190,7 @@ export function LoginContent() {
               </Group>
             </Stack>
 
-            {/* ??댄? */}
+            {/* 타이틀 */}
             <Stack align="center" gap={4}>
               <Title order={3} c="white">
                 {t('welcomeBack')}
@@ -200,7 +200,7 @@ export function LoginContent() {
               </Text>
             </Stack>
 
-            {/* Google 濡쒓렇??*/}
+            {/* Google 로그인 */}
             <Button
               size="lg"
               radius="lg"
@@ -237,7 +237,7 @@ export function LoginContent() {
               {t('googleLogin')}
             </Button>
 
-            {/* ?쎄? ?숈쓽 */}
+            {/* 약관 동의 */}
             <Text size="xs" c="gray.6" ta="center">
               계속하면{' '}
               <Text
@@ -266,7 +266,7 @@ export function LoginContent() {
               color="dark.5"
             />
 
-            {/* ?대찓??+ 鍮꾨?踰덊샇 / 留ㅼ쭅 留곹겕 */}
+            {/* 이메일 + 비밀번호 / 매직 링크 */}
             <Stack gap="md">
               <TextInput
                 placeholder="you@example.com"
@@ -336,7 +336,7 @@ export function LoginContent() {
               </Button>
             </Stack>
 
-            {/* 硫붿떆吏 */}
+            {/* 메시지 */}
             {message && (
               <Alert
                 icon={message.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
@@ -348,7 +348,7 @@ export function LoginContent() {
               </Alert>
             )}
 
-            {/* ?덉쑝濡?*/}
+            {/* 홈으로 */}
             <Text size="sm" ta="center">
               <Text
                 component={Link}

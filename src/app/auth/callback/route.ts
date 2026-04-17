@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolvePostLoginRedirectPath } from "@/lib/plans/server";
 import { createClient } from "@/utils/supabase/server";
 import { routing } from "@/i18n/routing";
 import { sendWelcomeEmail } from "@/services/email/actions";
@@ -16,10 +17,7 @@ export async function GET(request: Request) {
   const locale = (localeCookie || routing.defaultLocale) as "en" | "ko";
 
   // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get("next") ?? "/dashboard";
-
-  // Ensure the redirect path is localized
-  const localizedNext = `/${locale}${next.startsWith("/") ? next : `/${next}`}`;
+  const next = searchParams.get("next");
 
   // Magic Link는 code 파라미터를 사용
   if (code) {
@@ -33,6 +31,8 @@ export async function GET(request: Request) {
 
     if (!error && data?.user) {
       const user = data.user;
+      const redirectPath = await resolvePostLoginRedirectPath(user.id, next);
+      const localizedNext = `/${locale}${redirectPath.startsWith("/") ? redirectPath : `/${redirectPath}`}`;
 
       // 신규 사용자 감지: created_at이 10초 이내면 신규
       const createdAt = new Date(user.created_at);
