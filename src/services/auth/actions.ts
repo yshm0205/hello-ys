@@ -29,6 +29,9 @@ export async function loginWithGoogle(nextPath?: string) {
     provider: "google",
     options: {
       redirectTo: callbackUrl,
+      queryParams: {
+        prompt: "select_account",
+      },
     },
   });
 
