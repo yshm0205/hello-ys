@@ -295,6 +295,7 @@ const bgResearch: BgResearchState = { promise: null, done: false, result: null }
 async function runBackgroundResearch(params: {
     topic: string;
     user_id: string;
+    niche: string;
 }): Promise<ResearchResult | null> {
     try {
         const headers = await getAuthHeaders();
@@ -540,6 +541,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         bgResearch.promise = runBackgroundResearch({
             topic: material,
             user_id: user?.email || 'guest',
+            niche: selectedNiche || 'knowledge',
         });
         bgResearch.done = false;
         bgResearch.result = null;
@@ -582,7 +584,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
             material,
             user_id: user?.email || 'guest',
             research_text: researchResult?.research_text || '',
-            niche: selectedNiche || '',
+            niche: selectedNiche || 'knowledge',
             tone,
         };
 
