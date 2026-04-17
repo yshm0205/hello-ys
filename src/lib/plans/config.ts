@@ -112,6 +112,6 @@ export function getPlanCreditDisplayCap(planType?: string | null) {
     case PLAN_TYPE.LEGACY_PRO:
       return TOSSPAY_PLAN_CONFIG.allinone.monthlyCredits;
     default:
-      return 30;
+      return 0;
   }
 }

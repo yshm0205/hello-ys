@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -54,6 +56,7 @@ export async function POST(request: NextRequest) {
     const buyerEmail = (rawBuyerEmail || user.email || "").trim();
     const plan = TOSSPAY_PLAN_CONFIG[planType];
     const orderId = `flowspot_${user.id.slice(0, 8)}_${Date.now()}`;
+    const callbackSecret = randomUUID();
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL || "https://flowspot-kr.vercel.app";
 
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
         amountTaxFree: 0,
         productDesc: `FlowSpot ${plan.name}`,
         autoExecute: true,
-        resultCallback: `${origin}/api/tosspay/callback`,
+        resultCallback: `${origin}/api/tosspay/callback?cb=${callbackSecret}`,
         retUrl: `${origin}/ko/dashboard/credits/success?orderNo=${orderId}&planType=${planType}`,
         retCancelUrl: `${origin}/ko`,
         callbackVersion: "V2",
@@ -97,6 +100,7 @@ export async function POST(request: NextRequest) {
       status: "PENDING",
       metadata: {
         planType,
+        callbackSecret,
         payToken: tossData.payToken,
         buyerEmail,
         paymentKind: plan.paymentKind,

@@ -73,6 +73,63 @@ const FULL_PLAN_SELECT =
   "credits, subscription_credits, purchased_credits, plan_type, expires_at";
 const LEGACY_PLAN_SELECT = "credits, plan_type, expires_at";
 
+async function createDefaultCreditPlanSnapshot(
+  adminClient: ReturnType<typeof createAdminClient>,
+  userId: string,
+): Promise<CreditPlanSnapshot | null> {
+  const payload = {
+    user_id: userId,
+    credits: 0,
+    subscription_credits: 0,
+    purchased_credits: 0,
+    plan_type: "free",
+    expires_at: null,
+  };
+
+  const fullInsert = await adminClient
+    .from("user_plans")
+    .insert(payload)
+    .select(FULL_PLAN_SELECT)
+    .single();
+
+  if (!fullInsert.error && fullInsert.data) {
+    return normalizeCreditPlan(fullInsert.data as CreditPlanRow, true);
+  }
+
+  const fullErrorCode = (fullInsert.error as { code?: string } | null)?.code;
+  if (fullErrorCode === "23505") {
+    return loadCreditPlanSnapshot(adminClient, userId);
+  }
+
+  if (fullErrorCode === "42703") {
+    const legacyInsert = await adminClient
+      .from("user_plans")
+      .insert({
+        user_id: userId,
+        credits: 0,
+        plan_type: "free",
+        expires_at: null,
+      })
+      .select(LEGACY_PLAN_SELECT)
+      .single();
+
+    if (!legacyInsert.error && legacyInsert.data) {
+      return normalizeCreditPlan(legacyInsert.data as CreditPlanRow, false);
+    }
+
+    const legacyErrorCode = (legacyInsert.error as { code?: string } | null)?.code;
+    if (legacyErrorCode === "23505") {
+      return loadCreditPlanSnapshot(adminClient, userId);
+    }
+
+    console.error("[Credits] Failed to create legacy default credit plan:", legacyInsert.error);
+    return null;
+  }
+
+  console.error("[Credits] Failed to create default credit plan:", fullInsert.error);
+  return null;
+}
+
 function normalizeCreditPlan(
   row: CreditPlanRow | null | undefined,
   hasBuckets: boolean,
@@ -153,6 +210,10 @@ export async function loadCreditPlanSnapshot(
     .maybeSingle();
 
   if (!fullResult.error) {
+    if (!fullResult.data) {
+      return createDefaultCreditPlanSnapshot(adminClient, userId);
+    }
+
     return normalizeCreditPlan(fullResult.data as CreditPlanRow | null, true);
   }
 
@@ -173,6 +234,10 @@ export async function loadCreditPlanSnapshot(
   if (legacyResult.error) {
     console.error("[Credits] Failed to load legacy credit plan:", legacyResult.error);
     return null;
+  }
+
+  if (!legacyResult.data) {
+    return createDefaultCreditPlanSnapshot(adminClient, userId);
   }
 
   return normalizeCreditPlan(legacyResult.data as CreditPlanRow | null, false);

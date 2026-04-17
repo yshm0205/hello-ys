@@ -231,6 +231,7 @@ async function applyInitialProgramPlan(
 
 export async function POST(request: NextRequest) {
   try {
+    const callbackSecret = request.nextUrl.searchParams.get("cb") || "";
     const body = await request.json().catch(() => ({}));
     const { orderNo, payToken, status, amount } = body as {
       orderNo?: string;
@@ -254,6 +255,31 @@ export async function POST(request: NextRequest) {
 
     if (!payment) {
       console.error("[TossPay Callback] Order not found:", orderNo);
+      return NextResponse.json({ code: 0 });
+    }
+
+    const expectedCallbackSecret =
+      typeof payment.metadata?.callbackSecret === "string"
+        ? payment.metadata.callbackSecret
+        : "";
+
+    if (!expectedCallbackSecret || callbackSecret !== expectedCallbackSecret) {
+      console.error("[TossPay Callback] Invalid callback secret:", {
+        orderNo,
+        hasExpectedSecret: Boolean(expectedCallbackSecret),
+      });
+      return NextResponse.json({ code: 0 });
+    }
+
+    const expectedPayToken =
+      typeof payment.metadata?.payToken === "string"
+        ? payment.metadata.payToken
+        : typeof payment.payment_key === "string"
+          ? payment.payment_key
+          : "";
+
+    if (expectedPayToken && payToken !== expectedPayToken) {
+      console.error("[TossPay Callback] payToken mismatch:", { orderNo });
       return NextResponse.json({ code: 0 });
     }
 

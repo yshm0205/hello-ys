@@ -20,8 +20,6 @@ import {
     Box,
     Alert,
     CopyButton,
-    ActionIcon,
-    Tooltip,
     Transition,
     Loader,
     Modal,
@@ -69,6 +67,7 @@ interface V2Result {
     scripts: ScriptItem[];
     token_usage: { total_input: number; total_output: number; calls: number };
     timings: { research: number; analysis: number; hooks: number; scripts: number; total: number };
+    credits?: number;
     error?: string;
 }
 
@@ -76,6 +75,7 @@ interface ResearchResult {
     success: boolean;
     research_text: string;
     sources: string[];
+    credits?: number;
     error?: string;
 }
 
@@ -272,7 +272,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 }
 
 // ============ 백그라운드 생성 (컴포넌트 수명과 무관) ============
-const RENDER_API_URL_BG = 'https://script-generator-api-civ5.onrender.com';
+const RENDER_API_URL_BG = '';
 
 interface BgGenerationState {
     promise: Promise<V2Result | null> | null;
@@ -298,13 +298,13 @@ async function runBackgroundResearch(params: {
 }): Promise<ResearchResult | null> {
     try {
         const headers = await getAuthHeaders();
-        const response = await fetch(`${RENDER_API_URL_BG}/api/research`, {
+        const response = await fetch(`${RENDER_API_URL_BG}/api/script-generator/v2/research`, {
             method: 'POST',
             headers,
             body: JSON.stringify(params),
         });
 
-        const data = await response.json();
+        const data: ResearchResult = await response.json();
         if (!response.ok || !data.success) throw new Error(data.error || '리서치 실패');
 
         bgResearch.done = true;
@@ -314,7 +314,7 @@ async function runBackgroundResearch(params: {
         console.error('[BackgroundResearch] 실패:', err);
         bgResearch.done = true;
         bgResearch.result = null;
-        return null;
+        throw err;
     }
 }
 
@@ -327,7 +327,7 @@ async function runBackgroundGeneration(params: {
 }): Promise<V2Result | null> {
     try {
         const headers = await getAuthHeaders();
-        const response = await fetch(`${RENDER_API_URL_BG}/api/v2/generate`, {
+        const response = await fetch(`${RENDER_API_URL_BG}/api/script-generator/v2/generate`, {
             method: 'POST',
             headers,
             body: JSON.stringify(params),
@@ -359,7 +359,7 @@ async function runBackgroundGeneration(params: {
         console.error('[BackgroundGeneration] 실패:', err);
         bgGeneration.done = true;
         bgGeneration.result = null;
-        return null;
+        throw err;
     }
 }
 
@@ -409,8 +409,6 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     const hookSelectionRef = useRef<HTMLDivElement>(null);
     const searchParams = useSearchParams();
 
-    const RENDER_API_URL = 'https://script-generator-api-civ5.onrender.com';
-
     // 보관함에서 "V2에서 열기" → ?edit=<id> 로 진입 시 데이터 복원
     useEffect(() => {
         const editId = searchParams.get('edit');
@@ -457,7 +455,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         }
 
         loadScript();
-    }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [searchParams]);
 
     // 현재 위저드 스텝
     const currentStep: WizardStep = result ? 3 : (researchResult || isGenerating) ? 2 : 1;
@@ -515,38 +513,12 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
 
     // ====== Step 1 → 리서치 ======
-    // 크레딧 차감 헬퍼 — 성공 시 true, 실패 시 false + 모달 표시
-    const deductCredits = async (action: string, cost: number): Promise<boolean> => {
-        // 프론트 사전 체크 → 부족 시 모달
+    const ensureAvailableCredits = (cost: number): boolean => {
         if (creditInfo && creditInfo.credits < cost) {
             setCreditModal({ open: true, needed: cost });
             return false;
         }
-
-        try {
-            const res = await fetch('/api/credits/deduct', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action }),
-            });
-            const data = await res.json();
-
-            if (!res.ok || !data.success) {
-                // 서버에서도 부족 판정 → 모달
-                if (res.status === 403 && data.error?.includes('부족')) {
-                    setCreditModal({ open: true, needed: cost });
-                } else {
-                    setError(data.error || '크레딧 차감에 실패했습니다.');
-                }
-                return false;
-            }
-
-            setCreditInfo(prev => prev ? { ...prev, credits: data.credits } : prev);
-            return true;
-        } catch {
-            setError('크레딧 서버에 연결할 수 없습니다.');
-            return false;
-        }
+        return true;
     };
 
     const handleResearch = async () => {
@@ -557,9 +529,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
         setError(null);
 
-        // 크레딧 사전 차감 (3cr)
-        const ok = await deductCredits('research', 3);
-        if (!ok) return;
+        if (!ensureAvailableCredits(3)) return;
 
         setIsResearching(true);
         setResearchResult(null);
@@ -581,9 +551,16 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                 throw new Error('리서치에 실패했습니다.');
             }
 
+            if (typeof data.credits === 'number') {
+                setCreditInfo(prev => prev ? { ...prev, credits: data.credits ?? prev.credits } : prev);
+            }
             setResearchResult(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : '리서치에 실패했습니다.');
+            const message = err instanceof Error ? err.message : '리서치에 실패했습니다.';
+            if (message.includes('크레딧') || message.includes('이용권')) {
+                setCreditModal({ open: true, needed: 3 });
+            }
+            setError(message);
         } finally {
             setIsResearching(false);
         }
@@ -593,9 +570,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     const handleGenerate = async () => {
         setError(null);
 
-        // 크레딧 사전 차감: 리서치 했으면 7cr, 안 했으면 7cr (리서치에서 이미 3cr 차감)
-        const ok = await deductCredits('generate_skip', 7);
-        if (!ok) return;
+        if (!ensureAvailableCredits(7)) return;
 
         setIsGenerating(true);
         setResult(null);
@@ -624,11 +599,18 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                 throw new Error('스크립트 생성에 실패했습니다.');
             }
 
+            if (typeof data.credits === 'number') {
+                setCreditInfo(prev => prev ? { ...prev, credits: data.credits ?? prev.credits } : prev);
+            }
             setResult(data);
             setGenPhase('done');
             setSaveMessage({ type: 'success', text: '보관함에 자동 저장되었습니다!' });
         } catch (err) {
-            setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+            const message = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+            if (message.includes('크레딧') || message.includes('이용권')) {
+                setCreditModal({ open: true, needed: 7 });
+            }
+            setError(message);
             setGenPhase('idle');
         } finally {
             setIsGenerating(false);

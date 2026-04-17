@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http: https://*.vdocipher.com",
-              "connect-src 'self' https://*.supabase.co https://script-generator-api-civ5.onrender.com https://vercel.live wss://*.supabase.co https://*.vdocipher.com",
+              "connect-src 'self' https://*.supabase.co https://vercel.live wss://*.supabase.co https://*.vdocipher.com",
               "frame-src 'self' https://js.tosspayments.com https://player.vdocipher.com",
               "media-src 'self' https://player.vdocipher.com https://*.vdocipher.com",
             ].join("; "),

@@ -1,9 +1,10 @@
-import { createClient } from '@/utils/supabase/server';
-import { ScriptGeneratorContent } from '@/components/dashboard/ScriptGeneratorContent';
+import { redirect } from 'next/navigation';
 
-export default async function ScriptGeneratorPage() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+interface ScriptGeneratorPageProps {
+    params: Promise<{ locale: string }>;
+}
 
-    return <ScriptGeneratorContent user={user || undefined} />;
+export default async function ScriptGeneratorPage({ params }: ScriptGeneratorPageProps) {
+    const { locale } = await params;
+    redirect(`/${locale}/dashboard/scripts-v2`);
 }

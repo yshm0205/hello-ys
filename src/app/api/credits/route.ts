@@ -27,8 +27,8 @@ export async function GET() {
         .insert({
           user_id: user.id,
           plan_type: "free",
-          credits: 30,
-          purchased_credits: 30,
+          credits: 0,
+          purchased_credits: 0,
           subscription_credits: 0,
         })
         .select("credits, purchased_credits, subscription_credits, plan_type, expires_at")
@@ -42,9 +42,9 @@ export async function GET() {
         }
 
         return NextResponse.json({
-          credits: 30,
+          credits: 0,
           subscription_credits: 0,
-          purchased_credits: 30,
+          purchased_credits: 0,
           plan_type: "free",
           expires_at: null,
           monthly_credit_amount: 0,
@@ -57,7 +57,7 @@ export async function GET() {
       return NextResponse.json({
         credits: created.credits,
         subscription_credits: created.subscription_credits ?? 0,
-        purchased_credits: created.purchased_credits ?? created.credits,
+        purchased_credits: created.purchased_credits ?? 0,
         plan_type: created.plan_type,
         expires_at: created.expires_at,
         monthly_credit_amount: 0,
