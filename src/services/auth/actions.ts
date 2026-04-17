@@ -76,7 +76,8 @@ export async function loginWithMagicLink(email: string, nextPath?: string) {
 export async function loginWithEmailPassword(
   email: string,
   password: string,
-  nextPath?: string
+  nextPath?: string,
+  locale?: string
 ) {
   const supabase = await createClient();
   const next = sanitizeNextPath(nextPath);
@@ -96,7 +97,8 @@ export async function loginWithEmailPassword(
   }
 
   const redirectPath = await resolvePostLoginRedirectPath(data.user.id, next);
-  redirect(`/ko${redirectPath}`);
+  const nextLocale = locale === "en" ? "en" : "ko";
+  redirect(`/${nextLocale}${redirectPath}`);
 }
 
 /**

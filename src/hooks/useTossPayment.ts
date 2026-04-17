@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk';
+import { ANONYMOUS, loadTossPayments } from '@tosspayments/tosspayments-sdk';
+
 import { CREDIT_TOPUP_PACKS } from '@/lib/plans/config';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || '';
@@ -19,18 +20,28 @@ export function useTossPayment(customerKey: string | undefined) {
 
         setLoading(true);
         try {
+            const orderResponse = await fetch('/api/payments/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pack: packCr }),
+            });
+            const orderData = await orderResponse.json();
+
+            if (!orderResponse.ok || !orderData.success) {
+                throw new Error(orderData.error || '결제 주문 생성에 실패했습니다.');
+            }
+
             const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
             const widgets = tossPayments.widgets({ customerKey: customerKey || ANONYMOUS });
-
-            const orderId = `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
             const origin = window.location.origin;
+            const currentLocale = window.location.pathname.split('/')[1] === 'en' ? 'en' : 'ko';
 
             await widgets.requestPaymentWindow({
-                orderId,
-                orderName: `FlowSpot 크레딧 충전 ${packCr}cr`,
+                orderId: orderData.orderId,
+                orderName: orderData.orderName,
                 amount: { currency: 'KRW', value: amount },
-                successUrl: `${origin}/dashboard/credits/success`,
-                failUrl: `${origin}/dashboard/credits/fail`,
+                successUrl: `${origin}/${currentLocale}/dashboard/credits/success`,
+                failUrl: `${origin}/${currentLocale}/dashboard/credits/fail`,
             });
         } catch (err: unknown) {
             const errMsg = err instanceof Error ? err.message : String(err);

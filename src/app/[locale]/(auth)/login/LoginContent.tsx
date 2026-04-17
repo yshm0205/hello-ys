@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { useLocale } from 'next-intl';
 import {
   Box,
   Container,
@@ -28,6 +29,7 @@ import { loginWithGoogle, loginWithMagicLink, loginWithEmailPassword } from '@/s
 
 export function LoginContent() {
   const t = useTranslations('Auth');
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +100,7 @@ export function LoginContent() {
     setMessage(null);
 
     try {
-      const res = await loginWithEmailPassword(email, password, redirectTarget);
+      const res = await loginWithEmailPassword(email, password, redirectTarget, locale);
       if (res?.error) {
         setMessage({ type: 'error', text: '이메일 또는 비밀번호가 올바르지 않습니다.' });
       }
