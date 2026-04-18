@@ -1162,7 +1162,7 @@ function ProductRevealSection() {
       title: 'AI 스크립트 프로그램',
       timeSave: '월 30시간 절약',
       desc: '대본 1편에 1~2시간 → 3분이면 초안 완성.',
-      achievement: '이 도구로 네이버 클립 1,945만원 달성',
+
       features: ['FlowSpot', '4개월 이용권'],
       src: '/images/product-ai-script.gif',
       accent: '#8b5cf6',
