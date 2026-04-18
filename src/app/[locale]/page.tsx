@@ -139,7 +139,7 @@ function HeroSection() {
               fontWeight: 600, letterSpacing: '0.02em',
               marginBottom: 'clamp(20px, 4vw, 28px)',
             }}>
-              AI 스크립트 도구 + 월간 트렌드 채널 데이터 + VOD 강의 32강 + 전자책 + 노션 템플릿
+              AI 스크립트 도구 + 월간 트렌드 채널 데이터 + VOD 강의 40강 + 전자책 + 노션 템플릿
             </Text>
 
             {/* 헤드라인 */}
@@ -1181,8 +1181,8 @@ function ProductRevealSection() {
     {
       tag: '전 과정',
       num: '03',
-      title: 'VOD 강의 32강',
-      timeSave: '시행착오 1~4년 → 32강',
+      title: 'VOD 강의 40강',
+      timeSave: '시행착오 1~4년 → 40강',
       desc: '기획·제작·편집 노하우를 전부 담았습니다.',
       features: ['채널 설계', '소재 발굴', '스크립트 공식', '소스', '편집 마스터', '쇼핑 수익화'],
       src: '/images/product-vod.gif',
@@ -1402,7 +1402,7 @@ function WhySpecialSection() {
   const comparisonRows = [
     { label: '가격', left: '99~160만원', right: `₩${primaryProgram.amount.toLocaleString()}` },
     { label: '주제 선정', left: '정해진 주제로 수강생끼리 경쟁', right: '지속가능한 내 채널 주제를 직접 찾는 법' },
-    { label: '커리큘럼', left: '편집 위주', right: '기획→제작→편집→수익화 전 과정 38강' },
+    { label: '커리큘럼', left: '편집 위주', right: '기획→제작→편집→수익화 전 과정 40강' },
     { label: 'AI 스크립트', left: '제한적 활용', right: '주제 입력만으로 스크립트 자동 생성' },
     { label: '트렌드 채널', left: '직접 찾아야 함', right: '매월 트렌드 채널 리스트 제공' },
   ];
@@ -1688,13 +1688,13 @@ function HowItWorksSection() {
       qNum: 'Q1', question: '쇼츠, 처음이신가요?',
       label: '입문', color: '#8b5cf6',
       answer: '기획부터 수익화까지 순서대로 알려드립니다.',
-      includes: ['전자책 (기초 가이드)', 'VOD 32강 (순차 학습)', 'AI 스크립트 4개월'],
+      includes: ['전자책 (기초 가이드)', 'VOD 40강 (순차 학습)', 'AI 스크립트 4개월'],
     },
     {
       qNum: 'Q2', question: '하고 있는데 성장이 안 되나요?',
       label: '성장', color: '#22c55e',
       answer: '터지는 영상에는 공식이 있습니다. 그 공식을 드립니다.',
-      includes: ['채널 리스트 (벤치마크)', 'AI 스크립트 (검증된 구조)', 'VOD 32강 (심화)'],
+      includes: ['채널 리스트 (벤치마크)', 'AI 스크립트 (검증된 구조)', 'VOD 40강 (심화)'],
     },
     {
       qNum: 'Q3', question: '혼자 하려니 지치셨나요?',
@@ -1921,7 +1921,7 @@ function PackageSection() {
             </Text>
             <Stack gap={0}>
               {[
-                { item: '강의 32강 (기획→촬영→수익화)' },
+                { item: '강의 40강 (기획→촬영→수익화)' },
                 { item: 'AI 스크립트 도구 4개월' },
                 { item: '채널 분석 피드백' },
                 { item: '보너스: 터진 영상 템플릿' },

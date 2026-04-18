@@ -161,7 +161,7 @@ export function AllInOneCheckoutContent({
                                         </Group>
                                         <List spacing={10} size="sm" center>
                                             {[
-                                                'VOD 강의 32강',
+                                                'VOD 강의 40강',
                                                 'AI 스크립트 도구 4개월 이용',
                                                 '월간 트렌드 채널 데이터',
                                                 '전자책',

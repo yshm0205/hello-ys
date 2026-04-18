@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}));
   const topic = typeof body.topic === "string" ? body.topic.trim() : "";
+  const niche =
+    typeof body.niche === "string" && body.niche.trim().length > 0
+      ? body.niche.trim().toLowerCase()
+      : "knowledge";
 
   if (topic.length < 5) {
     return NextResponse.json(
@@ -33,6 +37,7 @@ export async function POST(request: NextRequest) {
     referenceId,
     metadata: {
       source: "v2_research_route",
+      niche,
     },
   });
 
@@ -51,6 +56,7 @@ export async function POST(request: NextRequest) {
     const data = await postToScriptGenerator<Record<string, unknown>>("/api/research", {
       topic,
       user_id: user.id,
+      niche,
     });
 
     return NextResponse.json({
