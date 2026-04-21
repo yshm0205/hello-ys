@@ -1714,7 +1714,7 @@ function WhySpecialSection() {
               marginTop: 72, fontSize: 'clamp(18px, 4.5vw, 24px)',
               fontWeight: 700, color: '#8b5cf6',
               lineHeight: 1.7, letterSpacing: '-0.5px',
-              padding: '0 20px',
+              padding: '0 20px', textAlign: 'center',
             }}>
               원초적 인사이트는 플랫폼 수수료와 광고비를 걷어내고,<br />
               그 비용을 강의와 도구에 직접 담았습니다.
