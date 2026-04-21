@@ -5,13 +5,12 @@
  * Refined Editorial: zinc neutrals, monospace data accents, intentional violet
  */
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Title,
   Text,
   Button,
-  type ButtonProps,
   Group,
   Stack,
   Box,
@@ -22,42 +21,16 @@ import {
   Divider,
 } from '@mantine/core';
 import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
-import { Link, useRouter } from '@/i18n/routing';
+import { Link } from '@/i18n/routing';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
-import { createClient } from '@/utils/supabase/client';
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
 const mono = { fontFamily: 'var(--font-geist-mono), ui-monospace, monospace' };
 const primaryProgram = TOSSPAY_PLAN_CONFIG.allinone;
 const monthlySubscription = MONTHLY_SUBSCRIPTION_PREVIEW;
-const CHECKOUT_PATH = '/checkout/allinone';
-const LOGIN_CHECKOUT_REDIRECT_PATH = '/login?redirect=/checkout/allinone';
-
-let cachedLandingCtaHref: string | null = null;
-let landingCtaHrefPromise: Promise<string> | null = null;
-
-async function resolveLandingCtaHref() {
-  if (cachedLandingCtaHref) {
-    return cachedLandingCtaHref;
-  }
-
-  if (!landingCtaHrefPromise) {
-    const supabase = createClient();
-    landingCtaHrefPromise = supabase.auth
-      .getSession()
-      .then(({ data }) => (data.session ? CHECKOUT_PATH : LOGIN_CHECKOUT_REDIRECT_PATH))
-      .catch(() => LOGIN_CHECKOUT_REDIRECT_PATH)
-      .then((href) => {
-        cachedLandingCtaHref = href;
-        return href;
-      });
-  }
-
-  return landingCtaHrefPromise;
-}
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -107,27 +80,6 @@ function useIsMobile(bp = 768) {
     return () => window.removeEventListener('resize', c);
   }, [bp]);
   return m;
-}
-
-function CheckoutCtaButton({
-  children,
-  ...props
-}: Omit<ButtonProps, 'component'> & { children: ReactNode }) {
-  const [href, setHref] = useState(cachedLandingCtaHref ?? LOGIN_CHECKOUT_REDIRECT_PATH);
-  const router = useRouter();
-
-  useEffect(() => {
-    router.prefetch(CHECKOUT_PATH);
-    router.prefetch('/login');
-
-    void resolveLandingCtaHref().then(setHref);
-  }, [router]);
-
-  return (
-    <Button component={Link} href={href} {...props}>
-      {children}
-    </Button>
-  );
 }
 
 
@@ -213,8 +165,9 @@ function HeroSection() {
             </Title>
 
             {/* CTA 버튼 */}
-            <CheckoutCtaButton
-              size="xl" radius="xl"
+            <Button
+              id="hero-cta"
+              component={Link} href="/checkout/allinone" size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#ffffff', color: '#18181b',
@@ -224,7 +177,7 @@ function HeroSection() {
               }}
             >
               올인원 패스 신청하기
-            </CheckoutCtaButton>
+            </Button>
           </Stack>
         </Box>
       </motion.div>
@@ -1203,20 +1156,7 @@ function PainSection() {
    섹션 3: ProductReveal — 최단거리의 정체 (강의 + AI 소개)
    ═══════════════════════════════════════════════════════════════ */
 function ProductRevealSection() {
-  type ProductRevealItem = {
-    tag: string;
-    num: string;
-    title: string;
-    timeSave?: string;
-    desc: string;
-    features?: string[];
-    src: string;
-    accent: string;
-    featured?: boolean;
-    achievement?: string;
-  };
-
-  const items: ProductRevealItem[] = [
+  const items = [
     {
       tag: 'AI',
       num: '01',
@@ -1375,25 +1315,6 @@ function ProductRevealSection() {
                   }}>
                     {item.desc}
                   </Text>
-                  {/* 성과 뱃지 */}
-                  {item.achievement && (
-                    <Box style={{
-                      display: 'inline-block',
-                      background: '#ecfdf5',
-                      border: '1px solid #6ee7b7',
-                      borderRadius: '8px',
-                      padding: '6px 12px',
-                      marginTop: '10px',
-                    }}>
-                      <Text style={{
-                        fontSize: 'clamp(14px, 3.5vw, 16px)',
-                        fontWeight: 800,
-                        color: '#059669',
-                      }}>
-                        {item.achievement}
-                      </Text>
-                    </Box>
-                  )}
                   {item.features && (
                     <Group gap={6} mt={10} wrap="wrap">
                       {item.features.map((f: string, fi: number) => (
@@ -1900,8 +1821,8 @@ function HowItWorksSection() {
               어떤 단계든,{' '}
               <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
             </Text>
-            <CheckoutCtaButton
-              size="lg" radius="xl"
+            <Button
+              component={Link} href="/checkout/allinone" size="lg" radius="xl"
               style={{
                 background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
                 padding: '14px 40px', height: 'auto', border: 'none',
@@ -1909,7 +1830,7 @@ function HowItWorksSection() {
               }}
             >
               올인원 패스 신청하기
-            </CheckoutCtaButton>
+            </Button>
           </Stack>
         </motion.div>
       </Container>
@@ -2095,8 +2016,8 @@ function CTASection() {
               <br />
               내일도 같은 고민을 하게 됩니다
             </Title>
-            <CheckoutCtaButton
-              size="xl" radius="xl"
+            <Button
+              component={Link} href="/checkout/allinone" size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#8b5cf6', fontSize: '17px', fontWeight: 700,
@@ -2105,7 +2026,7 @@ function CTASection() {
               }}
             >
               올인원 패스 시작하기
-            </CheckoutCtaButton>
+            </Button>
             <Stack align="center" gap={4}>
               <Text size="sm" style={{ color: '#71717a', fontSize: '15px' }}>
                 7일 환불 보장 · 문의: hmys0205hmys@gmail.com
@@ -2163,16 +2084,34 @@ function Footer() {
 function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsVisible(window.scrollY > 600);
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
-    window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
+
+    // 히어로 CTA가 화면에서 사라지면 FloatingCTA 표시
+    const heroCta = document.getElementById('hero-cta');
+    if (!heroCta) {
+      // fallback: 히어로 CTA 없으면 스크롤 기반
+      const handleScroll = () => setIsVisible(window.scrollY > 400);
+      window.addEventListener('scroll', handleScroll);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(heroCta);
+
     return () => {
-      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
+      observer.disconnect();
     };
   }, []);
 
@@ -2183,29 +2122,80 @@ function FloatingCTA() {
       <Box style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000,
         background: '#ffffff', borderTop: '1px solid #d4d4d8',
-        padding: '12px 16px',
-        paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
-        boxShadow: '0 -2px 16px rgba(0,0,0,0.06)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        boxShadow: '0 -2px 16px rgba(0,0,0,0.08)',
       }}>
-        <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
-          <Stack gap={2}>
-            <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>
-              ₩{primaryProgram.listAmount.toLocaleString()}
-            </Text>
-            <Text style={{ fontSize: '20px', fontWeight: 800, color: '#8b5cf6', ...mono }}>
-              ₩{primaryProgram.amount.toLocaleString()}
-            </Text>
-          </Stack>
-          <CheckoutCtaButton
-            size="md" radius="xl"
-            style={{
-              background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(139,92,246,0.2)',
-            }}
-          >
-            신청하기
-          </CheckoutCtaButton>
-        </Group>
+        {/* 펼침 영역 */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease }}
+              style={{ overflow: 'hidden' }}
+            >
+              <Box style={{
+                padding: '16px 16px 0',
+                borderBottom: '1px solid #f4f4f5',
+              }}>
+                <Stack gap={8}>
+                  {[
+                    { label: '총 금액', value: `₩${primaryProgram.amount.toLocaleString()} (${Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}% 할인)` },
+                    { label: '구성', value: 'VOD 40강 + 전자책 133p' },
+                    { label: '이용기간', value: '4개월 올인원' },
+                    { label: '크레딧', value: '매달 400cr × 4회' },
+                    { label: '환불', value: '7일 이내 전액 환불' },
+                  ].map((item) => (
+                    <Group key={item.label} justify="space-between" wrap="nowrap">
+                      <Text style={{ fontSize: '13px', color: '#71717a' }}>{item.label}</Text>
+                      <Text style={{ fontSize: '13px', fontWeight: 700, color: '#27272a' }}>{item.value}</Text>
+                    </Group>
+                  ))}
+                </Stack>
+                <Box style={{ height: '12px' }} />
+              </Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 메인 바 */}
+        <Box style={{ padding: '10px 16px' }}>
+          <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
+            <Group gap={8} align="center" wrap="nowrap" style={{ cursor: 'pointer' }} onClick={() => setIsExpanded((v) => !v)}>
+              <Stack gap={0}>
+                <Group gap={6} align="baseline">
+                  <Text style={{ fontSize: '19px', fontWeight: 800, color: '#8b5cf6', lineHeight: 1.2, ...mono }}>
+                    ₩{primaryProgram.amount.toLocaleString()}
+                  </Text>
+                  <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444', ...mono }}>
+                    {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
+                  </Text>
+                </Group>
+                <Text style={{ fontSize: '11px', color: '#71717a' }}>
+                  월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원 · 12개월 할부
+                </Text>
+              </Stack>
+              <ChevronDown
+                size={16}
+                color="#a1a1aa"
+                style={{
+                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 200ms ease',
+                }}
+              />
+            </Group>
+            <Button
+              component={Link} href="/checkout/allinone" size="md" radius="xl"
+              style={{
+                background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(139,92,246,0.2)',
+              }}
+            >
+              신청하기
+            </Button>
+          </Group>
+        </Box>
       </Box>
     );
   }
@@ -2227,24 +2217,32 @@ function FloatingCTA() {
           <Stack gap={12}>
             <Text fw={700} style={{ fontSize: '15px', color: '#18181b' }}>올인원 패스</Text>
             <Stack gap={2}>
-              <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>
-                ₩{primaryProgram.listAmount.toLocaleString()}
-              </Text>
+              <Group gap={6} align="center">
+                <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>
+                  ₩{primaryProgram.listAmount.toLocaleString()}
+                </Text>
+                <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444', ...mono }}>
+                  {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
+                </Text>
+              </Group>
               <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6', ...mono }}>
                 ₩{primaryProgram.amount.toLocaleString()}
               </Text>
+              <Text style={{ fontSize: '13px', color: '#52525b', ...mono }}>
+                월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원 · 12개월 할부
+              </Text>
             </Stack>
-            <CheckoutCtaButton
-              size="sm" fullWidth radius="lg"
+            <Button
+              component={Link} href="/checkout/allinone" size="sm" fullWidth radius="lg"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
                 boxShadow: '0 2px 8px rgba(139,92,246,0.15)',
               }}
             >
               신청하기
-            </CheckoutCtaButton>
+            </Button>
             <Text size="xs" ta="center" style={{ color: '#71717a', fontSize: '11px' }}>
-              4개월 이용권 · 매달 400cr × 4회
+              40강 · 전자책 · 4개월 이용 · 7일 환불
             </Text>
           </Stack>
         </Paper>
