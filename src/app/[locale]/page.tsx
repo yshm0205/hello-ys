@@ -181,33 +181,6 @@ function HeroSection() {
               {' '}패키지
             </Title>
 
-            {/* 가격 */}
-            <Stack align="center" gap={4} style={{ marginBottom: 'clamp(16px, 3vw, 24px)' }}>
-              <Group gap={8} align="baseline">
-                <Text style={{
-                  fontSize: 'clamp(14px, 3vw, 16px)', color: 'rgba(255,255,255,0.45)',
-                  textDecoration: 'line-through',
-                }}>
-                  ₩{primaryProgram.listAmount.toLocaleString()}
-                </Text>
-                <Text style={{
-                  fontSize: 'clamp(28px, 7vw, 40px)', fontWeight: 900, color: '#ffffff',
-                }}>
-                  ₩{primaryProgram.amount.toLocaleString()}
-                </Text>
-                <Text style={{
-                  fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 800, color: '#f87171',
-                }}>
-                  {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
-                </Text>
-              </Group>
-              <Text style={{
-                fontSize: 'clamp(13px, 3vw, 15px)', color: 'rgba(255,255,255,0.5)',
-              }}>
-                12개월 할부 시 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원
-              </Text>
-            </Stack>
-
             {/* CTA 버튼 */}
             <AuthAwareButton
               id="hero-cta"
