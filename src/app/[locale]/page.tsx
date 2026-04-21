@@ -2859,8 +2859,8 @@ export default function LandingPage() {
     <main style={{ background: '#ffffff' }}>
       <LandingHeader />
       <HeroSection />
-      <LoopPainSection />
       <EarlyBirdSection />
+      <LoopPainSection />
       <StickyTabNav />
       <PainSection />
       <ProductRevealSection />
