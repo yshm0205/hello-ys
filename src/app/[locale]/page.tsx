@@ -1972,6 +1972,88 @@ function PackageSection() {
           </Box>
         </motion.div>
 
+        {/* 가격 카드 — 3단 구조 */}
+        <motion.div {...fadeUp}>
+          <Paper radius="lg" style={{
+            background: '#ffffff', border: '1px solid #d4d4d8',
+            maxWidth: '480px', margin: '0 auto',
+            padding: 'clamp(24px, 5vw, 36px)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          }}>
+            <Stack gap={20}>
+              <Text fw={700} ta="center" style={{ fontSize: 'clamp(18px, 3vw, 20px)', color: '#18181b' }}>
+                올인원 패스
+              </Text>
+
+              {/* 구성 리스트 */}
+              <Stack gap={0}>
+                {[
+                  '강의 40강 (기획→촬영→수익화)',
+                  'AI 스크립트 도구 4개월',
+                  '전자책 133p + 노션 템플릿',
+                  '월간 트렌드 채널 리스트',
+                ].map((item, i) => (
+                  <Group key={i} gap={8} wrap="nowrap" style={{
+                    padding: '12px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
+                  }}>
+                    <Text style={{ color: '#8b5cf6', fontSize: '16px', flexShrink: 0 }}>✓</Text>
+                    <Text style={{ color: '#3f3f46', fontSize: 'clamp(15px, 3vw, 16px)', lineHeight: 1.3 }}>{item}</Text>
+                  </Group>
+                ))}
+              </Stack>
+
+              <Divider color="#d4d4d8" />
+
+              {/* 3단 가격 */}
+              <Stack gap={6}>
+                <Group justify="space-between">
+                  <Text style={{ fontSize: '14px', color: '#71717a' }}>정가</Text>
+                  <Text style={{ fontSize: '14px', color: '#71717a', textDecoration: 'line-through' }}>
+                    ₩{primaryProgram.listAmount.toLocaleString()}
+                  </Text>
+                </Group>
+                <Group justify="space-between">
+                  <Text style={{ fontSize: '14px', color: '#ef4444', fontWeight: 700 }}>할인</Text>
+                  <Text style={{ fontSize: '14px', color: '#ef4444', fontWeight: 700 }}>
+                    -₩{(primaryProgram.listAmount - primaryProgram.amount).toLocaleString()}
+                  </Text>
+                </Group>
+                <Divider color="#e4e4e7" />
+                <Group justify="space-between" align="baseline">
+                  <Text style={{ fontSize: '16px', color: '#18181b', fontWeight: 800 }}>최종 금액</Text>
+                  <Group gap={8} align="baseline">
+                    <Text style={{ fontSize: 'clamp(28px, 5vw, 32px)', fontWeight: 900, color: '#8b5cf6' }}>
+                      ₩{primaryProgram.amount.toLocaleString()}
+                    </Text>
+                    <Text style={{ fontSize: '14px', fontWeight: 800, color: '#ef4444' }}>
+                      {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
+                    </Text>
+                  </Group>
+                </Group>
+                <Text ta="right" style={{ fontSize: '13px', color: '#71717a' }}>
+                  12개월 할부 시 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원
+                </Text>
+              </Stack>
+
+              {/* CTA */}
+              <Button
+                component={Link} href="/checkout/allinone" size="lg" fullWidth radius="xl"
+                style={{
+                  background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
+                  padding: '16px', height: 'auto', border: 'none',
+                  boxShadow: '0 2px 12px rgba(139,92,246,0.2)',
+                }}
+              >
+                올인원 패스 신청하기
+              </Button>
+
+              <Text ta="center" style={{ fontSize: '13px', color: '#a1a1aa' }}>
+                7일 이내 전액 환불 · 4개월 이용권
+              </Text>
+            </Stack>
+          </Paper>
+        </motion.div>
+
         {/* Pro 구독 안내 */}
         <motion.div {...fadeUp}>
           <Text ta="center" style={{
