@@ -128,6 +128,7 @@ function HeroSection() {
   return (
     <Box
       component="section"
+      id="landing-hero"
       style={{
         minHeight: '100dvh',
         display: 'flex',
@@ -392,7 +393,7 @@ function PainSection() {
 
   return (
     <>
-    <Box component="section" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 140px) 0' }}>
+    <Box component="section" id="pain" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 140px) 0', scrollMarginTop: '120px' }}>
       <Container size="lg">
         {/* 제목 — 먼 길을 돌아가는 중 */}
         <motion.div {...fadeUp}>
@@ -1276,8 +1277,8 @@ function ProductRevealSection() {
   ];
 
   return (
-    <Box component="section" style={{
-      background: '#faf5ff',
+    <Box component="section" id="offer" style={{
+      background: '#faf5ff', scrollMarginTop: '120px',
       padding: 'clamp(80px, 15vw, 160px) 0',
     }}>
       <Container size="lg">
@@ -1542,8 +1543,8 @@ function WhySpecialSection() {
   ];
 
   return (
-    <Box component="section" style={{
-      background: '#ffffff',
+    <Box component="section" id="compare" style={{
+      background: '#ffffff', scrollMarginTop: '120px',
       padding: 'clamp(56px, 10vw, 100px) 0',
       position: 'relative',
     }}>
@@ -1780,7 +1781,7 @@ function HowItWorksSection() {
   ];
 
   return (
-    <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 140px) 0' }}>
+    <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 140px) 0', scrollMarginTop: '120px' }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
           <Stack align="center" gap={8} mb={56}>
@@ -1937,7 +1938,7 @@ function HowItWorksSection() {
    ═══════════════════════════════════════════════════════════════ */
 function PackageSection() {
   return (
-    <Box component="section" style={{ background: '#fafafa', padding: 'clamp(56px, 10vw, 100px) 0', position: 'relative' }}>
+    <Box component="section" id="pricing" style={{ background: '#fafafa', padding: 'clamp(56px, 10vw, 100px) 0', position: 'relative', scrollMarginTop: '120px' }}>
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
@@ -2000,7 +2001,7 @@ function FAQSection() {
   ];
 
   return (
-    <Box component="section" id="faq" style={{ background: '#ffffff', padding: 'clamp(56px, 10vw, 100px) 0' }}>
+    <Box component="section" id="faq" style={{ background: '#ffffff', padding: 'clamp(56px, 10vw, 100px) 0', scrollMarginTop: '120px' }}>
       <Container size={640}>
         <motion.div {...fadeUp}>
           <Title order={2} ta="center" style={{
@@ -2293,6 +2294,96 @@ function FloatingCTA() {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   Sticky 섹션 탭 네비
+   ═══════════════════════════════════════════════════════════════ */
+const sectionTabs = [
+  { id: 'pain', label: '문제' },
+  { id: 'offer', label: '구성' },
+  { id: 'compare', label: '비교' },
+  { id: 'pricing', label: '가격' },
+  { id: 'faq', label: 'FAQ' },
+];
+
+function StickyTabNav() {
+  const [activeId, setActiveId] = useState('');
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // 히어로 지나면 표시
+      const heroEl = document.getElementById('landing-hero');
+      if (heroEl) {
+        setShow(window.scrollY > heroEl.offsetTop + heroEl.offsetHeight - 80);
+      }
+
+      // 현재 활성 섹션 감지
+      let current = '';
+      for (const tab of sectionTabs) {
+        const el = document.getElementById(tab.id);
+        if (el && window.scrollY + 160 >= el.offsetTop) {
+          current = tab.id;
+        }
+      }
+      setActiveId(current);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <Box style={{
+      position: 'sticky', top: 0, zIndex: 90,
+      background: 'rgba(255,255,255,0.92)',
+      backdropFilter: 'blur(12px)',
+      borderBottom: '1px solid rgba(24,24,27,0.08)',
+    }}>
+      <Container size="lg">
+        <Group
+          gap={0}
+          wrap="nowrap"
+          style={{
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          {sectionTabs.map((tab) => {
+            const active = activeId === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => document.getElementById(tab.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                style={{
+                  flex: '1 0 auto',
+                  padding: '14px 20px',
+                  fontSize: '14px',
+                  fontWeight: active ? 800 : 600,
+                  color: active ? '#6d28d9' : '#71717a',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: active ? '2px solid #6d28d9' : '2px solid transparent',
+                  cursor: 'pointer',
+                  transition: 'all 150ms ease',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </Group>
+      </Container>
+    </Box>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    Page Export
    ═══════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
@@ -2300,6 +2391,7 @@ export default function LandingPage() {
     <main style={{ background: '#ffffff' }}>
       <LandingHeader />
       <HeroSection />
+      <StickyTabNav />
       <PainSection />
       <ProductRevealSection />
       <WhySpecialSection />
