@@ -22,6 +22,7 @@ import {
 } from '@mantine/core';
 import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { AuthAwareButton } from '@/components/landing/AuthAwareButton';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
@@ -230,9 +231,11 @@ function HeroSection() {
             </Stack>
 
             {/* CTA 버튼 */}
-            <Button
+            <AuthAwareButton
               id="hero-cta"
-              component={Link} href="/checkout/allinone" size="xl" radius="xl"
+              authenticatedHref="/checkout/allinone"
+              unauthenticatedHref="/login?redirect=/checkout/allinone"
+              size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#ffffff', color: '#18181b',
@@ -242,7 +245,7 @@ function HeroSection() {
               }}
             >
               올인원 패스 신청하기
-            </Button>
+            </AuthAwareButton>
           </Stack>
         </Box>
       </motion.div>
@@ -1915,8 +1918,10 @@ function HowItWorksSection() {
               어떤 단계든,{' '}
               <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
             </Text>
-            <Button
-              component={Link} href="/checkout/allinone" size="lg" radius="xl"
+            <AuthAwareButton
+              authenticatedHref="/checkout/allinone"
+              unauthenticatedHref="/login?redirect=/checkout/allinone"
+              size="lg" radius="xl"
               style={{
                 background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
                 padding: '14px 40px', height: 'auto', border: 'none',
@@ -1924,7 +1929,7 @@ function HowItWorksSection() {
               }}
             >
               올인원 패스 신청하기
-            </Button>
+            </AuthAwareButton>
           </Stack>
         </motion.div>
       </Container>
@@ -2036,8 +2041,10 @@ function PackageSection() {
               </Stack>
 
               {/* CTA */}
-              <Button
-                component={Link} href="/checkout/allinone" size="lg" fullWidth radius="xl"
+              <AuthAwareButton
+                authenticatedHref="/checkout/allinone"
+                unauthenticatedHref="/login?redirect=/checkout/allinone"
+                size="lg" fullWidth radius="xl"
                 style={{
                   background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
                   padding: '16px', height: 'auto', border: 'none',
@@ -2045,7 +2052,7 @@ function PackageSection() {
                 }}
               >
                 올인원 패스 신청하기
-              </Button>
+              </AuthAwareButton>
 
               <Text ta="center" style={{ fontSize: '13px', color: '#a1a1aa' }}>
                 7일 이내 전액 환불 · 4개월 이용권
@@ -2142,8 +2149,10 @@ function CTASection() {
               <br />
               내일도 같은 고민을 하게 됩니다
             </Title>
-            <Button
-              component={Link} href="/checkout/allinone" size="xl" radius="xl"
+            <AuthAwareButton
+              authenticatedHref="/checkout/allinone"
+              unauthenticatedHref="/login?redirect=/checkout/allinone"
+              size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#8b5cf6', fontSize: '17px', fontWeight: 700,
@@ -2152,7 +2161,7 @@ function CTASection() {
               }}
             >
               올인원 패스 시작하기
-            </Button>
+            </AuthAwareButton>
             <Stack align="center" gap={4}>
               <Text size="sm" style={{ color: '#71717a', fontSize: '15px' }}>
                 7일 환불 보장 · 문의: hmys0205hmys@gmail.com
@@ -2311,15 +2320,17 @@ function FloatingCTA() {
                 }}
               />
             </Group>
-            <Button
-              component={Link} href="/checkout/allinone" size="md" radius="xl"
+            <AuthAwareButton
+              authenticatedHref="/checkout/allinone"
+              unauthenticatedHref="/login?redirect=/checkout/allinone"
+              size="md" radius="xl"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
                 boxShadow: '0 2px 8px rgba(139,92,246,0.2)',
               }}
             >
               신청하기
-            </Button>
+            </AuthAwareButton>
           </Group>
         </Box>
       </Box>
@@ -2358,15 +2369,17 @@ function FloatingCTA() {
                 12개월 할부 시 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원
               </Text>
             </Stack>
-            <Button
-              component={Link} href="/checkout/allinone" size="sm" fullWidth radius="lg"
+            <AuthAwareButton
+              authenticatedHref="/checkout/allinone"
+              unauthenticatedHref="/login?redirect=/checkout/allinone"
+              size="sm" fullWidth radius="lg"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
                 boxShadow: '0 2px 8px rgba(139,92,246,0.15)',
               }}
             >
               신청하기
-            </Button>
+            </AuthAwareButton>
           </Stack>
         </Paper>
       </motion.div>
