@@ -1956,42 +1956,16 @@ function PackageSection() {
           </Stack>
         </motion.div>
 
-        {/* Value breakdown — receipt */}
+        {/* 가격 표시 */}
         <motion.div {...fadeUp}>
-          <Paper radius="lg" style={{
-            background: '#ffffff', border: '1px solid #d4d4d8',
-            maxWidth: '480px', margin: '0 auto',
-            padding: 'clamp(24px, 5vw, 36px)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-          }}>
-            <Text fw={700} ta="center" style={{ fontSize: 'clamp(18px, 3vw, 20px)', color: '#18181b', marginBottom: '24px' }}>
-              뭐가 들어있나요?
+          <Stack align="center" gap={2}>
+            <Text style={{ fontSize: 'clamp(14px, 3vw, 15px)', color: '#a1a1aa', textDecoration: 'line-through' }}>
+              ₩{primaryProgram.listAmount.toLocaleString()}
             </Text>
-            <Stack gap={0}>
-              {[
-                { item: '강의 40강 (기획→촬영→수익화)' },
-                { item: 'AI 스크립트 도구 4개월' },
-                { item: '채널 분석 피드백' },
-                { item: '보너스: 터진 영상 템플릿' },
-              ].map((row, i) => (
-                <Group key={i} gap={8} wrap="nowrap" style={{
-                  padding: '12px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
-                }}>
-                  <Text style={{ color: '#8b5cf6', fontSize: '16px', flexShrink: 0 }}>✓</Text>
-                  <Text style={{ color: '#3f3f46', fontSize: 'clamp(15px, 3vw, 16px)', lineHeight: 1.3 }}>{row.item}</Text>
-                </Group>
-              ))}
-            </Stack>
-            <Divider my="xl" color="#d4d4d8" />
-            <Stack align="center" gap={2}>
-              <Text style={{ fontSize: 'clamp(14px, 3vw, 15px)', color: '#71717a', textDecoration: 'line-through' }}>
-                ₩{primaryProgram.listAmount.toLocaleString()}
-              </Text>
-              <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#8b5cf6' }}>
-                ₩{primaryProgram.amount.toLocaleString()}
-              </Text>
-            </Stack>
-          </Paper>
+            <Text fw={900} style={{ fontSize: 'clamp(32px, 7vw, 44px)', color: '#8b5cf6' }}>
+              ₩{primaryProgram.amount.toLocaleString()}
+            </Text>
+          </Stack>
         </motion.div>
 
         {/* Pro 구독 안내 */}
