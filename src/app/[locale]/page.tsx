@@ -2426,6 +2426,351 @@ function StickyTabNav() {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   섹션 1.5: EarlyBirdSection — 얼리버드 3단계 (다크 카드)
+   ═══════════════════════════════════════════════════════════════ */
+const EARLYBIRD_DEADLINE = '2026-05-08T23:59:59+09:00'; // 1차 얼리버드 종료
+
+function EarlyBirdSection() {
+  const isMobile = useIsMobile(900);
+  const [tl, setTl] = useState({ d: '00', h: '00', m: '00', s: '00' });
+
+  useEffect(() => {
+    const deadline = new Date(EARLYBIRD_DEADLINE).getTime();
+    const tick = () => {
+      const diff = deadline - Date.now();
+      if (diff <= 0) { setTl({ d: '00', h: '00', m: '00', s: '00' }); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTl({
+        d: String(d).padStart(2, '0'),
+        h: String(h).padStart(2, '0'),
+        m: String(m).padStart(2, '0'),
+        s: String(s).padStart(2, '0'),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <Box component="section" id="earlybird" style={{
+      background: '#ffffff',
+      padding: 'clamp(40px, 7vw, 88px) 0 clamp(56px, 9vw, 110px)',
+    }}>
+      <style>{`
+        @keyframes ebPulse { 0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.7);} 70%{box-shadow:0 0 0 10px rgba(167,139,250,0);} }
+        @keyframes ebBlink { 0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.9);} 70%{box-shadow:0 0 0 7px rgba(255,255,255,0);} }
+        @keyframes ebGlow { 0%,100%{box-shadow:0 0 0 1px rgba(180,107,255,.25),0 0 40px rgba(180,107,255,.3),0 0 80px rgba(139,92,246,.2),inset 0 0 30px rgba(180,107,255,.08);} 50%{box-shadow:0 0 0 1px rgba(180,107,255,.35),0 0 55px rgba(180,107,255,.45),0 0 100px rgba(139,92,246,.3),inset 0 0 30px rgba(180,107,255,.12);} }
+        .eb-cta:hover { transform: translateY(-2px); box-shadow: 0 0 0 3px rgba(180,107,255,.3), 0 20px 50px -8px rgba(180,107,255,.7); }
+        .eb-cta svg { transition: transform .2s; }
+        .eb-cta:hover svg { transform: translateX(3px); }
+      `}</style>
+      <Container size="lg">
+        <Box style={{
+          position: 'relative',
+          background: '#0a0612',
+          borderRadius: 'clamp(18px, 2.5vw, 28px)',
+          padding: isMobile ? '28px 18px 36px' : 'clamp(40px, 5vw, 64px)',
+          overflow: 'hidden',
+          boxShadow: '0 30px 80px -20px rgba(24,24,27,.35), 0 10px 30px -10px rgba(0,0,0,.2)',
+          backgroundImage: `
+            radial-gradient(ellipse 700px 400px at 75% 20%, rgba(139,92,246,.22), transparent 60%),
+            radial-gradient(ellipse 600px 350px at 20% 80%, rgba(217,70,239,.14), transparent 60%),
+            radial-gradient(ellipse 500px 250px at 80% 90%, rgba(139,92,246,.1), transparent 60%)
+          `,
+        }}>
+          <Box style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1.2fr',
+            gap: isMobile ? 28 : 'clamp(28px, 4vw, 56px)',
+            alignItems: 'flex-start',
+          }}>
+            {/* LEFT — Countdown */}
+            <Box style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? 0 : 24 }}>
+              <Box style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '7px 14px', borderRadius: 999,
+                background: 'rgba(139,92,246,.12)',
+                border: '1px solid rgba(139,92,246,.25)',
+                fontSize: 12, fontWeight: 800, color: '#a78bfa',
+                letterSpacing: '-0.01em', marginBottom: 18,
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', background: '#a78bfa',
+                  animation: 'ebPulse 1.4s infinite',
+                }} />
+                All-in-One Pass · Early Bird
+              </Box>
+              <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 12 }}>
+                1차 얼리버드 종료까지
+              </Text>
+              <Box style={{ display: 'flex', alignItems: 'baseline', gap: isMobile ? 8 : 14, flexWrap: 'wrap', marginBottom: 14 }}>
+                {(['d','h','m','s'] as const).map((k, i) => (
+                  <Box key={k} style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <Text style={{
+                      fontSize: isMobile ? 40 : 'clamp(44px, 5.6vw, 62px)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1,
+                      background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
+                      WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+                      textShadow: '0 0 40px rgba(139,92,246,.35)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>{tl[k]}</Text>
+                    <Text style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#a78bfa', letterSpacing: '-0.02em' }}>
+                      {['일','시','분','초'][i]}
+                    </Text>
+                  </Box>
+                ))}
+              </Box>
+              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.55)', lineHeight: 1.55 }}>
+                단 한 번뿐인 혜택, 지금 놓치면 다시 받을 수 없습니다.<br />
+                종료 후엔 <b style={{ color: '#fff', fontWeight: 800 }}>가격은 590,000원</b>으로 오르고, <b style={{ color: '#fff', fontWeight: 800 }}>보너스도 사라집니다.</b>
+              </Text>
+              <Box style={{
+                marginTop: 24, padding: isMobile ? '16px 18px' : '20px 22px',
+                background: 'rgba(139,92,246,.1)',
+                border: '1px solid rgba(139,92,246,.3)',
+                borderRadius: 18,
+              }}>
+                <Text style={{ fontSize: 11, fontWeight: 800, color: '#a78bfa', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 6 }}>
+                  Now · 현재 1차 혜택
+                </Text>
+                <Text style={{ fontSize: isMobile ? 26 : 'clamp(26px, 3.4vw, 34px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#fff' }}>
+                  총 <span style={{ color: '#a78bfa' }}>169,000원</span> 상당
+                </Text>
+                <Text style={{ marginTop: 6, fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.5)', lineHeight: 1.5 }}>
+                  할인 91,000원 + 보너스 크레딧 78,000원 상당
+                </Text>
+              </Box>
+            </Box>
+
+            {/* RIGHT — Tier Stack */}
+            <Box style={{ display: 'flex', flexDirection: 'column' }}>
+              <EbTier
+                stageNum="01" status="live" statusText="LIVE · 진행 중"
+                tierName={<>1차 <em style={{ fontStyle: 'normal', color: '#a78bfa' }}>얼리버드</em></>}
+                feats={[
+                  { ok: true, text: <><b>정가 대비 91,000원 할인</b> · 499,000원</> },
+                  { ok: true, text: <><b>보너스 크레딧 800cr</b> 즉시 지급 (78,000원 상당 · Pro 2개월분)</> },
+                  { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
+                ]}
+                bonusText={<>+ 보너스 <b>800cr</b> · <b>78,000원 상당</b></>}
+                priceStrike="590,000원" priceNow="499,000원" priceNote="정가 590,000원"
+                variant="active" isMobile={isMobile}
+              />
+              <EbChevron />
+              <EbTier
+                stageNum="02" status="wait" statusText="다음 단계 · 혜택 축소"
+                tierName="2차 얼리버드"
+                feats={[
+                  { ok: true, text: <>정가 대비 91,000원 할인 · 499,000원</> },
+                  { ok: false, muted: true, text: <><b>1차 한정 보너스 +400cr 종료</b> — 400cr로 축소</> },
+                  { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
+                ]}
+                bonusText={<>+ 보너스 <b>400cr</b> · 39,000원 상당</>}
+                priceStrike="590,000원" priceNow="499,000원" priceNote="정가 590,000원"
+                variant="dim" isMobile={isMobile}
+              />
+              <EbChevron />
+              <EbTier
+                stageNum="03" status="end" statusText="종료 · 가격 인상"
+                tierName="얼리버드 종료"
+                feats={[
+                  { ok: false, muted: true, text: <><b>할인 종료</b> — 정가 590,000원으로 복귀</> },
+                  { ok: false, muted: true, text: <><b>보너스 크레딧 지급 없음</b></> },
+                  { ok: false, muted: true, text: <>기본 구성만 제공</> },
+                ]}
+                bonusText={<>보너스 <b>0cr</b> · 혜택 없음</>}
+                priceNow="590,000원" priceUp="+91,000원 인상"
+                variant="end" isMobile={isMobile}
+              />
+              <Box style={{ marginTop: 32, display: 'flex', justifyContent: 'center' }}>
+                <Link href="/pricing" style={{ textDecoration: 'none' }}>
+                  <button className="eb-cta" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 10,
+                    padding: isMobile ? '16px 32px' : '18px 40px',
+                    border: 'none', cursor: 'pointer',
+                    fontFamily: 'inherit', fontSize: isMobile ? 15 : 17, fontWeight: 900, letterSpacing: '-0.02em',
+                    background: 'linear-gradient(135deg,#8b5cf6,#d946ef)',
+                    color: '#fff', borderRadius: 999,
+                    boxShadow: '0 0 0 3px rgba(180,107,255,.2), 0 14px 40px -8px rgba(180,107,255,.6)',
+                    transition: 'all .2s ease',
+                  }}>
+                    지금 1차 얼리버드로 신청하기
+                    <ArrowRight size={20} />
+                  </button>
+                </Link>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  );
+}
+
+function EbChevron() {
+  return (
+    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 26 }}>
+      <ChevronDown size={20} color="rgba(255,255,255,.25)" />
+    </Box>
+  );
+}
+
+type EbTierProps = {
+  stageNum: string;
+  status: 'live' | 'wait' | 'end';
+  statusText: string;
+  tierName: React.ReactNode;
+  feats: { ok: boolean; text: React.ReactNode; muted?: boolean }[];
+  bonusText: React.ReactNode;
+  priceStrike?: string;
+  priceNow: string;
+  priceNote?: string;
+  priceUp?: string;
+  variant: 'active' | 'dim' | 'end';
+  isMobile: boolean;
+};
+
+function EbTier(p: EbTierProps) {
+  const base: React.CSSProperties = {
+    position: 'relative',
+    background: 'linear-gradient(180deg,rgba(24,20,34,.9),rgba(18,15,26,.9))',
+    border: '1px solid rgba(255,255,255,.06)',
+    borderRadius: 20,
+    padding: p.isMobile ? '20px 18px' : '26px 28px',
+    backdropFilter: 'blur(10px)',
+  };
+  const variantStyle: React.CSSProperties =
+    p.variant === 'active' ? {
+      background: 'linear-gradient(180deg,rgba(40,22,70,.55),rgba(24,20,34,.7))',
+      border: '2px solid #b46bff',
+      animation: 'ebGlow 2.8s ease-in-out infinite',
+    } : p.variant === 'dim' ? {
+      opacity: .55, filter: 'saturate(.75)',
+    } : {
+      opacity: .42, filter: 'saturate(.6)',
+    };
+  const statusStyle: React.CSSProperties =
+    p.status === 'live' ? { background: '#b46bff', color: '#fff', boxShadow: '0 0 20px rgba(180,107,255,.5), 0 0 0 3px rgba(180,107,255,.2)' } :
+    p.status === 'wait' ? { background: 'rgba(255,255,255,.06)', color: 'rgba(255,255,255,.5)', border: '1px solid rgba(255,255,255,.1)' } :
+    { background: 'rgba(239,68,68,.15)', color: '#fca5a5', border: '1px solid rgba(239,68,68,.25)' };
+  const bonusStyle: React.CSSProperties =
+    p.variant === 'active' ? {
+      background: 'linear-gradient(135deg,#8b5cf6,#d946ef)',
+      color: '#fff', boxShadow: '0 8px 20px -4px rgba(180,107,255,.5)',
+    } : p.variant === 'dim' ? {
+      background: 'rgba(139,92,246,.12)', color: '#a78bfa',
+      border: '1px solid rgba(139,92,246,.25)',
+    } : {
+      background: 'transparent', color: 'rgba(255,255,255,.3)',
+      border: '1.5px dashed rgba(255,255,255,.15)',
+    };
+
+  return (
+    <Box style={{ ...base, ...variantStyle }}>
+      <Box style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: 26, height: 26, borderRadius: 7,
+          background: p.variant === 'active' ? '#b46bff' : 'rgba(255,255,255,.06)',
+          color: p.variant === 'active' ? '#fff' : 'rgba(255,255,255,.5)',
+          fontSize: 11, fontWeight: 900,
+          boxShadow: p.variant === 'active' ? '0 0 16px rgba(180,107,255,.7)' : 'none',
+        }}>{p.stageNum}</span>
+        <span style={{ color: 'rgba(255,255,255,.35)', fontWeight: 700, letterSpacing: '-0.01em', fontSize: 11.5 }}>
+          STAGE {p.stageNum} / 03
+        </span>
+        <span style={{
+          marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6,
+          padding: '4px 10px', borderRadius: 999,
+          fontSize: 10.5, fontWeight: 900, letterSpacing: '.06em',
+          ...statusStyle,
+        }}>
+          {p.status === 'live' && (
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', background: '#fff',
+              animation: 'ebBlink 1.2s infinite',
+            }} />
+          )}
+          {p.statusText}
+        </span>
+      </Box>
+
+      <Box style={{
+        display: 'grid',
+        gridTemplateColumns: p.isMobile ? '1fr' : '1.2fr auto',
+        gap: p.isMobile ? 14 : 20,
+        alignItems: 'flex-start',
+      }}>
+        <Box>
+          <Box style={{
+            fontSize: p.isMobile ? 20 : 'clamp(22px, 2.4vw, 26px)', fontWeight: 900, letterSpacing: '-0.03em',
+            color: p.variant === 'end' ? 'rgba(255,255,255,.6)' : '#fff',
+            lineHeight: 1.1, marginBottom: 12,
+            textDecoration: p.variant === 'end' ? 'line-through' : 'none',
+          }}>{p.tierName}</Box>
+          <Box component="ul" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {p.feats.map((f, i) => (
+              <Box component="li" key={i} style={{
+                display: 'flex', alignItems: 'flex-start', gap: 10,
+                fontSize: p.isMobile ? 13 : 13.5, fontWeight: 600,
+                color: f.muted ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.8)',
+                lineHeight: 1.5,
+              }}>
+                <span style={{
+                  width: 17, height: 17, flexShrink: 0, marginTop: 2,
+                  borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 10.5, fontWeight: 900,
+                  background: f.ok ? 'rgba(167,139,250,.2)' : 'rgba(239,68,68,.15)',
+                  color: f.ok ? '#a78bfa' : '#fca5a5',
+                }}>{f.ok ? '✓' : '✕'}</span>
+                <span>{f.text}</span>
+              </Box>
+            ))}
+          </Box>
+          <Box style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '7px 13px', borderRadius: 999,
+            fontSize: 12.5, fontWeight: 800, letterSpacing: '-0.01em',
+            marginTop: 16, whiteSpace: 'nowrap',
+            ...bonusStyle,
+          }}>{p.bonusText}</Box>
+        </Box>
+        <Box style={{ textAlign: p.isMobile ? 'left' : 'right', minWidth: p.isMobile ? undefined : 150 }}>
+          {p.priceStrike && (
+            <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.35)', textDecoration: 'line-through', letterSpacing: '-0.01em', marginBottom: 4 }}>
+              {p.priceStrike}
+            </Text>
+          )}
+          <Text style={{
+            fontSize: p.isMobile ? 26 : 'clamp(24px, 3vw, 30px)', fontWeight: 900, letterSpacing: '-0.035em',
+            color: p.variant === 'end' ? '#fca5a5' : '#fff',
+            lineHeight: 1,
+            textShadow: p.variant === 'active' ? '0 0 24px rgba(180,107,255,.6)' : 'none',
+          }}>{p.priceNow}</Text>
+          {p.priceNote && (
+            <Text style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', marginTop: 6, letterSpacing: '-0.01em' }}>
+              {p.priceNote}
+            </Text>
+          )}
+          {p.priceUp && (
+            <Box style={{
+              display: 'inline-block', marginTop: 8,
+              fontSize: 11, fontWeight: 900, letterSpacing: '-0.01em',
+              background: '#ef4444', color: '#fff',
+              padding: '3px 8px', borderRadius: 6,
+            }}>{p.priceUp}</Box>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    Page Export
    ═══════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
@@ -2433,6 +2778,7 @@ export default function LandingPage() {
     <main style={{ background: '#ffffff' }}>
       <LandingHeader />
       <HeroSection />
+      <EarlyBirdSection />
       <StickyTabNav />
       <PainSection />
       <ProductRevealSection />
