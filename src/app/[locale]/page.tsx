@@ -1614,6 +1614,33 @@ function WhySpecialSection() {
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
+        {/* ═══ 브리지: 시간 → 가격 전환 ═══ */}
+        <motion.div {...fadeUp}>
+          <Box style={{
+            textAlign: 'center',
+            maxWidth: '520px',
+            margin: '0 auto',
+            marginBottom: 'clamp(40px, 8vw, 64px)',
+          }}>
+            <Text style={{
+              fontSize: 'clamp(17px, 4.3vw, 20px)',
+              fontWeight: 600, color: '#71717a',
+              lineHeight: 1.6,
+            }}>
+              여기서 드는 질문은 하나.
+            </Text>
+            <Text style={{
+              fontSize: 'clamp(24px, 6vw, 32px)',
+              fontWeight: 800, color: '#18181b',
+              lineHeight: 1.4,
+              marginTop: 'clamp(8px, 2vw, 12px)',
+              letterSpacing: '-0.02em',
+            }}>
+              &ldquo;그래서, 얼마인가요?&rdquo;
+            </Text>
+          </Box>
+        </motion.div>
+
         {/* ═══ 비용 구조 비교 ═══ */}
         <motion.div {...fadeUp}>
           <Box style={{
