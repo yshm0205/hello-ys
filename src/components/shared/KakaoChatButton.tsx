@@ -58,7 +58,7 @@ export function KakaoChatButton() {
     <button
       onClick={handleClick}
       aria-label="카카오톡 문의"
-      className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#FEE500] shadow-lg transition-transform hover:scale-105 active:scale-95"
+      className="fixed bottom-[calc(env(safe-area-inset-bottom)+76px)] right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEE500] shadow-lg transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:h-14 md:w-14"
     >
       <svg
         width="28"
