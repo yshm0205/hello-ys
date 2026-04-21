@@ -2281,9 +2281,6 @@ function FloatingCTA() {
             >
               신청하기
             </Button>
-            <Text size="xs" ta="center" style={{ color: '#71717a', fontSize: '11px' }}>
-              40강 · 전자책 · 4개월 이용 · 7일 환불
-            </Text>
           </Stack>
         </Paper>
       </motion.div>
