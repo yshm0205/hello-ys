@@ -28,7 +28,6 @@ import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/c
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
-const mono = { fontFamily: 'var(--font-geist-mono), ui-monospace, monospace' };
 const primaryProgram = TOSSPAY_PLAN_CONFIG.allinone;
 const monthlySubscription = MONTHLY_SUBSCRIPTION_PREVIEW;
 
@@ -372,7 +371,7 @@ function PainSection() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Text style={{
-                    ...mono, fontSize: 'clamp(18px, 3vw, 24px)',
+                    fontSize: 'clamp(18px, 3vw, 24px)',
                     fontWeight: 900, color: '#ffffff',
                   }}>
                     {p.num}
@@ -1524,7 +1523,7 @@ function WhySpecialSection() {
                 <Group gap={10} wrap="nowrap" justify="space-between" mb={12}>
                   <Group gap={10} wrap="nowrap">
                     <Text style={{
-                      ...mono, fontSize: '12px', fontWeight: 800,
+                      fontSize: '12px', fontWeight: 800,
                       color: '#8b5cf6', flexShrink: 0,
                     }}>
                       {c.part}
@@ -1539,7 +1538,7 @@ function WhySpecialSection() {
                 <Stack gap={8}>
                   {c.vods.map((vod, j) => (
                     <Group key={j} gap={8} wrap="nowrap" align="flex-start">
-                      <Text style={{ ...mono, fontSize: '13px', color: '#8b5cf6', flexShrink: 0, marginTop: '2px' }}>
+                      <Text style={{ fontSize: '13px', color: '#8b5cf6', flexShrink: 0, marginTop: '2px' }}>
                         {String(j + 1).padStart(2, '0')}
                       </Text>
                       <Text style={{ fontSize: 'clamp(15px, 3.8vw, 16px)', color: '#27272a', lineHeight: 1.6 }}>{vod}</Text>
@@ -1721,7 +1720,7 @@ function HowItWorksSection() {
                   borderRadius: '12px', background: s.color,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Text style={{ ...mono, fontSize: 'clamp(16px, 3vw, 18px)', fontWeight: 900, color: '#ffffff' }}>
+                  <Text style={{ fontSize: 'clamp(16px, 3vw, 18px)', fontWeight: 900, color: '#ffffff' }}>
                     {s.qNum}
                   </Text>
                 </Box>
@@ -1745,7 +1744,7 @@ function HowItWorksSection() {
                     background: s.color, borderRadius: '10px',
                     padding: '2px 8px', flexShrink: 0,
                   }}>
-                    <Text style={{ ...mono, fontSize: '10px', fontWeight: 800, color: '#ffffff' }}>YES</Text>
+                    <Text style={{ fontSize: '10px', fontWeight: 800, color: '#ffffff' }}>YES</Text>
                   </Box>
                   <Box style={{ width: 0, flex: 1, borderLeft: `2px dashed ${s.color}`, opacity: 0.4 }} />
                 </Box>
@@ -1802,7 +1801,7 @@ function HowItWorksSection() {
                     background: '#f4f4f5', borderRadius: '12px',
                     padding: '3px 12px', flexShrink: 0,
                   }}>
-                    <Text style={{ ...mono, fontSize: '11px', fontWeight: 700, color: '#71717a' }}>NO ↓</Text>
+                    <Text style={{ fontSize: '11px', fontWeight: 700, color: '#71717a' }}>NO ↓</Text>
                   </Box>
                   <Box style={{ width: 0, flex: 1, borderLeft: '2px dashed #a1a1aa' }} />
                 </Box>
@@ -1855,9 +1854,9 @@ function PackageSection() {
               fontSize: 'clamp(24px, 6.5vw, 36px)',
               fontWeight: 800, color: '#3f3f46', lineHeight: 1.5,
             }}>
-              <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>4</span>년의 시행착오를 앞지르고,
+              <span style={{ color: '#8b5cf6', fontWeight: 900 }}>4</span>년의 시행착오를 앞지르고,
               <br />
-              매달 <span style={{ ...mono, color: '#8b5cf6', fontWeight: 900 }}>80</span>시간을 절약하는 것.
+              매달 <span style={{ color: '#8b5cf6', fontWeight: 900 }}>80</span>시간을 절약하는 것.
             </Text>
             <Text style={{
               fontSize: 'clamp(28px, 7.5vw, 42px)',
@@ -1918,10 +1917,10 @@ function PackageSection() {
             </Stack>
             <Divider my="xl" color="#d4d4d8" />
             <Stack align="center" gap={2}>
-              <Text style={{ fontSize: 'clamp(14px, 3vw, 15px)', color: '#71717a', textDecoration: 'line-through', ...mono }}>
+              <Text style={{ fontSize: 'clamp(14px, 3vw, 15px)', color: '#71717a', textDecoration: 'line-through' }}>
                 ₩{primaryProgram.listAmount.toLocaleString()}
               </Text>
-              <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#8b5cf6', ...mono }}>
+              <Text fw={900} style={{ fontSize: 'clamp(28px, 5vw, 32px)', color: '#8b5cf6' }}>
                 ₩{primaryProgram.amount.toLocaleString()}
               </Text>
             </Stack>
@@ -2165,10 +2164,10 @@ function FloatingCTA() {
             <Group gap={8} align="center" wrap="nowrap" style={{ cursor: 'pointer' }} onClick={() => setIsExpanded((v) => !v)}>
               <Stack gap={0}>
                 <Group gap={6} align="baseline">
-                  <Text style={{ fontSize: '19px', fontWeight: 800, color: '#8b5cf6', lineHeight: 1.2, ...mono }}>
+                  <Text style={{ fontSize: '19px', fontWeight: 800, color: '#8b5cf6', lineHeight: 1.2 }}>
                     ₩{primaryProgram.amount.toLocaleString()}
                   </Text>
-                  <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444', ...mono }}>
+                  <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444' }}>
                     {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
                   </Text>
                 </Group>
@@ -2218,17 +2217,17 @@ function FloatingCTA() {
             <Text fw={700} style={{ fontSize: '15px', color: '#18181b' }}>올인원 패스</Text>
             <Stack gap={2}>
               <Group gap={6} align="center">
-                <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through', ...mono }}>
+                <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through' }}>
                   ₩{primaryProgram.listAmount.toLocaleString()}
                 </Text>
-                <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444', ...mono }}>
+                <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444' }}>
                   {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
                 </Text>
               </Group>
-              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6', ...mono }}>
+              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6' }}>
                 ₩{primaryProgram.amount.toLocaleString()}
               </Text>
-              <Text style={{ fontSize: '13px', color: '#52525b', ...mono }}>
+              <Text style={{ fontSize: '13px', color: '#52525b' }}>
                 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원 · 12개월 할부
               </Text>
             </Stack>
