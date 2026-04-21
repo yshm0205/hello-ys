@@ -5,12 +5,13 @@
  * Refined Editorial: zinc neutrals, monospace data accents, intentional violet
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import {
   Container,
   Title,
   Text,
   Button,
+  type ButtonProps,
   Group,
   Stack,
   Box,
@@ -21,16 +22,42 @@ import {
   Divider,
 } from '@mantine/core';
 import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
+import { createClient } from '@/utils/supabase/client';
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
 const mono = { fontFamily: 'var(--font-geist-mono), ui-monospace, monospace' };
 const primaryProgram = TOSSPAY_PLAN_CONFIG.allinone;
 const monthlySubscription = MONTHLY_SUBSCRIPTION_PREVIEW;
+const CHECKOUT_PATH = '/checkout/allinone';
+const LOGIN_CHECKOUT_REDIRECT_PATH = '/login?redirect=/checkout/allinone';
+
+let cachedLandingCtaHref: string | null = null;
+let landingCtaHrefPromise: Promise<string> | null = null;
+
+async function resolveLandingCtaHref() {
+  if (cachedLandingCtaHref) {
+    return cachedLandingCtaHref;
+  }
+
+  if (!landingCtaHrefPromise) {
+    const supabase = createClient();
+    landingCtaHrefPromise = supabase.auth
+      .getSession()
+      .then(({ data }) => (data.session ? CHECKOUT_PATH : LOGIN_CHECKOUT_REDIRECT_PATH))
+      .catch(() => LOGIN_CHECKOUT_REDIRECT_PATH)
+      .then((href) => {
+        cachedLandingCtaHref = href;
+        return href;
+      });
+  }
+
+  return landingCtaHrefPromise;
+}
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -80,6 +107,27 @@ function useIsMobile(bp = 768) {
     return () => window.removeEventListener('resize', c);
   }, [bp]);
   return m;
+}
+
+function CheckoutCtaButton({
+  children,
+  ...props
+}: Omit<ButtonProps, 'component'> & { children: ReactNode }) {
+  const [href, setHref] = useState(cachedLandingCtaHref ?? LOGIN_CHECKOUT_REDIRECT_PATH);
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch(CHECKOUT_PATH);
+    router.prefetch('/login');
+
+    void resolveLandingCtaHref().then(setHref);
+  }, [router]);
+
+  return (
+    <Button component={Link} href={href} {...props}>
+      {children}
+    </Button>
+  );
 }
 
 
@@ -165,8 +213,8 @@ function HeroSection() {
             </Title>
 
             {/* CTA 버튼 */}
-            <Button
-              component={Link} href="/checkout/allinone" size="xl" radius="xl"
+            <CheckoutCtaButton
+              size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#ffffff', color: '#18181b',
@@ -176,7 +224,7 @@ function HeroSection() {
               }}
             >
               올인원 패스 신청하기
-            </Button>
+            </CheckoutCtaButton>
           </Stack>
         </Box>
       </motion.div>
@@ -1155,7 +1203,20 @@ function PainSection() {
    섹션 3: ProductReveal — 최단거리의 정체 (강의 + AI 소개)
    ═══════════════════════════════════════════════════════════════ */
 function ProductRevealSection() {
-  const items = [
+  type ProductRevealItem = {
+    tag: string;
+    num: string;
+    title: string;
+    timeSave?: string;
+    desc: string;
+    features?: string[];
+    src: string;
+    accent: string;
+    featured?: boolean;
+    achievement?: string;
+  };
+
+  const items: ProductRevealItem[] = [
     {
       tag: 'AI',
       num: '01',
@@ -1839,8 +1900,8 @@ function HowItWorksSection() {
               어떤 단계든,{' '}
               <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
             </Text>
-            <Button
-              component={Link} href="/checkout/allinone" size="lg" radius="xl"
+            <CheckoutCtaButton
+              size="lg" radius="xl"
               style={{
                 background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
                 padding: '14px 40px', height: 'auto', border: 'none',
@@ -1848,7 +1909,7 @@ function HowItWorksSection() {
               }}
             >
               올인원 패스 신청하기
-            </Button>
+            </CheckoutCtaButton>
           </Stack>
         </motion.div>
       </Container>
@@ -2034,8 +2095,8 @@ function CTASection() {
               <br />
               내일도 같은 고민을 하게 됩니다
             </Title>
-            <Button
-              component={Link} href="/checkout/allinone" size="xl" radius="xl"
+            <CheckoutCtaButton
+              size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
                 background: '#8b5cf6', fontSize: '17px', fontWeight: 700,
@@ -2044,7 +2105,7 @@ function CTASection() {
               }}
             >
               올인원 패스 시작하기
-            </Button>
+            </CheckoutCtaButton>
             <Stack align="center" gap={4}>
               <Text size="sm" style={{ color: '#71717a', fontSize: '15px' }}>
                 7일 환불 보장 · 문의: hmys0205hmys@gmail.com
@@ -2135,15 +2196,15 @@ function FloatingCTA() {
               ₩{primaryProgram.amount.toLocaleString()}
             </Text>
           </Stack>
-          <Button
-            component={Link} href="/checkout/allinone" size="md" radius="xl"
+          <CheckoutCtaButton
+            size="md" radius="xl"
             style={{
               background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
               boxShadow: '0 2px 8px rgba(139,92,246,0.2)',
             }}
           >
             신청하기
-          </Button>
+          </CheckoutCtaButton>
         </Group>
       </Box>
     );
@@ -2173,15 +2234,15 @@ function FloatingCTA() {
                 ₩{primaryProgram.amount.toLocaleString()}
               </Text>
             </Stack>
-            <Button
-              component={Link} href="/checkout/allinone" size="sm" fullWidth radius="lg"
+            <CheckoutCtaButton
+              size="sm" fullWidth radius="lg"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
                 boxShadow: '0 2px 8px rgba(139,92,246,0.15)',
               }}
             >
               신청하기
-            </Button>
+            </CheckoutCtaButton>
             <Text size="xs" ta="center" style={{ color: '#71717a', fontSize: '11px' }}>
               4개월 이용권 · 매달 400cr × 4회
             </Text>
