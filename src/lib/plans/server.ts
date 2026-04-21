@@ -200,9 +200,14 @@ export async function resolvePostLoginRedirectPath(
     return normalizedRequestedPath!;
   }
 
-  if (normalizedRequestedPath) {
+  const creditInfo = await getEffectiveCreditInfo(userId);
+  const defaultPath = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at)
+    ? "/dashboard"
+    : "/checkout/allinone";
+
+  if (defaultPath === "/dashboard" && normalizedRequestedPath) {
     return normalizedRequestedPath;
   }
 
-  return "/dashboard";
+  return defaultPath;
 }
