@@ -2172,7 +2172,7 @@ function FloatingCTA() {
                   </Text>
                 </Group>
                 <Text style={{ fontSize: '11px', color: '#71717a' }}>
-                  월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원 · 12개월 할부
+                  12개월 할부 시 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원
                 </Text>
               </Stack>
               <ChevronDown
@@ -2228,7 +2228,7 @@ function FloatingCTA() {
                 ₩{primaryProgram.amount.toLocaleString()}
               </Text>
               <Text style={{ fontSize: '13px', color: '#52525b' }}>
-                월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원 · 12개월 할부
+                12개월 할부 시 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원
               </Text>
             </Stack>
             <Button
