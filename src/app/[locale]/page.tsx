@@ -83,6 +83,44 @@ function useIsMobile(bp = 768) {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   PricingBar — 비용 구조 비교 바
+   ═══════════════════════════════════════════════════════════════ */
+function PricingBar({ name, price, nameColor, priceColor, barWidth, mobileBarWidth, segments, isMobile }: {
+  name: string; price: string; nameColor: string; priceColor: string;
+  barWidth: string; mobileBarWidth?: string; isMobile: boolean;
+  segments: { label: string; sublabel?: string; flex: number; bg: string; color: string; bold?: boolean }[];
+}) {
+  const w = isMobile ? (mobileBarWidth || '100%') : barWidth;
+  return (
+    <Box style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 8 : 24, marginBottom: 20, flexDirection: isMobile ? 'column' : 'row' }}>
+      <Box style={{ width: isMobile ? '100%' : 160, flexShrink: 0, textAlign: isMobile ? 'left' : 'right', display: 'flex', alignItems: 'baseline', gap: 8, flexDirection: isMobile ? 'row' : 'column' }}>
+        <Text style={{ fontSize: isMobile ? 13 : 15, fontWeight: 800, letterSpacing: '-0.3px', color: nameColor }}>{name}</Text>
+        <Text style={{ fontSize: isMobile ? 18 : 22, fontWeight: 900, letterSpacing: '-0.5px', color: priceColor }}>{price}</Text>
+      </Box>
+      <Box style={{ flex: 1, width: '100%' }}>
+        <Box style={{ display: 'flex', height: isMobile ? 44 : 52, borderRadius: 8, overflow: 'hidden', width: w }}>
+          {segments.map((seg, i) => (
+            <Box key={i} style={{
+              flex: seg.flex, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              fontSize: isMobile ? (seg.bold ? 10 : 9) : (seg.bold ? 12 : 11),
+              fontWeight: seg.bold ? 800 : 700,
+              padding: '0 4px', whiteSpace: 'nowrap', lineHeight: 1.2,
+              borderRight: i < segments.length - 1 ? '1px solid rgba(0,0,0,0.2)' : 'none',
+              background: seg.bg, color: seg.color, letterSpacing: '-0.3px',
+            }}>
+              {seg.label}
+              {seg.sublabel && <span style={{ fontSize: isMobile ? 7 : 9, fontWeight: 600, opacity: 0.7, marginTop: 1 }}>{seg.sublabel}</span>}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    섹션 1: Hero — 다크 카드 블록 (크리투스 스타일)
    ═══════════════════════════════════════════════════════════════ */
 function HeroSection() {
@@ -1380,14 +1418,6 @@ function ProductRevealSection() {
 function WhySpecialSection() {
   const isMobile = useIsMobile();
 
-  const comparisonRows = [
-    { label: '가격', left: '99~160만원', right: `₩${primaryProgram.amount.toLocaleString()}` },
-    { label: '주제 선정', left: '정해진 주제로 수강생끼리 경쟁', right: '지속가능한 내 채널 주제를 직접 찾는 법' },
-    { label: '커리큘럼', left: '편집 위주', right: '기획→제작→편집→수익화 전 과정 40강' },
-    { label: 'AI 스크립트', left: '제한적 활용', right: '주제 입력만으로 스크립트 자동 생성' },
-    { label: '트렌드 채널', left: '직접 찾아야 함', right: '매월 트렌드 채널 리스트 제공' },
-  ];
-
   const curriculum = [
     {
       part: 'Part 1', title: '채널 기획',
@@ -1550,108 +1580,145 @@ function WhySpecialSection() {
           ))}
         </Stack>
 
-        {/* 전환 멘트 → 비교표 */}
-        <motion.div {...fadeUp}>
-          <Text ta="center" style={{
-            fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
-            color: '#18181b', letterSpacing: '-0.02em',
-            marginTop: 'clamp(64px, 12vw, 100px)',
-            marginBottom: 'clamp(32px, 6vw, 48px)',
-          }}>
-            비교하면 차이가 보입니다
-          </Text>
-        </motion.div>
-
+        {/* ═══ 비용 구조 비교 ═══ */}
         <motion.div {...fadeUp}>
           <Box style={{
-            maxWidth: '720px', margin: '0 auto',
-            borderRadius: '16px', overflow: 'hidden',
-            border: '1px solid #d4d4d8',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+            background: '#0a0a0a',
+            borderRadius: '20px',
+            padding: isMobile ? '48px 20px' : '72px 56px',
+            marginTop: 'clamp(64px, 12vw, 100px)',
           }}>
-            {/* 헤더 */}
-            <Box style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr',
-            }}>
-              <Box style={{
-                background: '#f4f4f5',
-                padding: 'clamp(16px, 4vw, 24px)',
-                textAlign: 'center',
-                borderRight: '1px solid #d4d4d8',
-                borderBottom: '1px solid #d4d4d8',
+            {/* 헤드라인 */}
+            <Box style={{ textAlign: 'center', marginBottom: isMobile ? 48 : 64 }}>
+              <Text style={{
+                fontSize: 'clamp(28px, 7.5vw, 36px)', fontWeight: 900,
+                color: '#fff', lineHeight: 1.4, letterSpacing: '-1.5px',
               }}>
-                <Group gap={6} justify="center" wrap="nowrap">
-                  <X size={18} color="#a1a1aa" />
-                  <Text fw={700} style={{ fontSize: 'clamp(15px, 4vw, 18px)', color: '#71717a' }}>
-                    일반 강의
-                  </Text>
-                </Group>
-              </Box>
-              <Box style={{
-                background: '#8b5cf6',
-                padding: 'clamp(16px, 4vw, 24px)',
-                textAlign: 'center',
-                borderBottom: '1px solid #7c3aed',
+                300만원 이상의 가치를{isMobile ? <br /> : ' '}
+                <span style={{ color: '#8b5cf6' }}>합리적인 가격</span>에.
+              </Text>
+              <Text style={{
+                marginTop: 40, fontSize: 'clamp(16px, 4vw, 22px)',
+                color: '#aaa', lineHeight: 1.8, letterSpacing: '-0.5px',
               }}>
-                <Group gap={6} justify="center" wrap="nowrap">
-                  <Check size={18} color="#ffffff" />
-                  <Text fw={700} style={{ fontSize: 'clamp(15px, 4vw, 18px)', color: '#ffffff' }}>
-                    올인원 패스
-                  </Text>
-                </Group>
-              </Box>
+                수강료가 <strong style={{ color: '#fff', fontWeight: 700 }}>어디에 쓰이는지</strong>를 보셔야 합니다.<br />
+                플랫폼 수수료와 광고비는, <strong style={{ color: '#fff', fontWeight: 700 }}>수강생에게 돌아오지 않기 때문</strong>입니다.
+              </Text>
+              <Text style={{
+                marginTop: 28, fontSize: 'clamp(16px, 4vw, 22px)',
+                color: '#777', lineHeight: 1.8, letterSpacing: '-0.5px',
+              }}>
+                플랫폼 수수료와 광고비 대신,<br />
+                전부 강의와 도구에 쓰면 —<br />
+                <strong style={{ color: '#e2e2e2', fontWeight: 700 }}>가격은 낮아지고, 가치는 높아집니다.</strong>
+              </Text>
             </Box>
 
-            {/* 비교 행들 */}
-            {comparisonRows.map((row, i) => {
-              const isPrice = i === 0;
-              return (
-              <Box key={i} style={{
-                display: 'grid', gridTemplateColumns: '1fr 1fr',
-                borderBottom: i < comparisonRows.length - 1 ? '1px solid #e5e7eb' : 'none',
-              }}>
-                <Box style={{
-                  padding: 'clamp(14px, 3.5vw, 20px) clamp(16px, 4vw, 24px)',
-                  borderRight: '1px solid #e5e7eb',
-                  background: '#f9fafb',
-                }}>
-                  <Text style={{
-                    fontSize: '11px', fontWeight: 600, color: '#a1a1aa',
-                    letterSpacing: '0.04em', marginBottom: '4px',
-                    textTransform: 'uppercase',
-                  }}>
-                    {row.label}
-                  </Text>
-                  <Text style={{
-                    fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#a1a1aa',
-                    lineHeight: 1.5,
-                    textDecoration: isPrice ? 'line-through' : 'none',
-                  }}>
-                    {row.left}
-                  </Text>
-                </Box>
-                <Box style={{
-                  padding: 'clamp(14px, 3.5vw, 20px) clamp(16px, 4vw, 24px)',
-                  background: '#f5f0ff',
-                }}>
-                  <Text style={{
-                    fontSize: '11px', fontWeight: 600, color: 'rgba(139,92,246,0.5)',
-                    letterSpacing: '0.04em', marginBottom: '4px',
-                    textTransform: 'uppercase',
-                  }}>
-                    {row.label}
-                  </Text>
-                  <Text fw={700} style={{
-                    fontSize: isPrice ? 'clamp(20px, 5vw, 24px)' : 'clamp(15px, 3.8vw, 18px)',
-                    color: isPrice ? '#8b5cf6' : '#18181b',
-                    lineHeight: 1.5,
-                  }}>
-                    {row.right}
-                  </Text>
-                </Box>
-              </Box>
-              );
-            })}
+            {/* ── 내는 돈 ── */}
+            <Text style={{
+              fontSize: 12, fontWeight: 700, color: '#555',
+              letterSpacing: 2, marginBottom: 20,
+              paddingLeft: isMobile ? 0 : 184,
+            }}>내는 돈</Text>
+
+            {/* 타 강의 A */}
+            <PricingBar name="타 강의 A" price="160만원" nameColor="#777" priceColor="#999" barWidth="53%" mobileBarWidth="80%" isMobile={isMobile}
+              segments={[
+                { label: '강의 제작', flex: 2, bg: '#333', color: '#999' },
+                { label: '플랫폼 수수료', flex: 1.8, bg: '#444', color: '#bbb' },
+                { label: '광고', flex: 1.3, bg: '#444', color: '#bbb' },
+                { label: '인건비', flex: 0.8, bg: '#333', color: '#999' },
+                { label: '마진', flex: 0.6, bg: '#333', color: '#999' },
+              ]}
+            />
+            <Box style={{ marginLeft: isMobile ? 0 : 184, paddingLeft: 40, borderLeft: '2px dashed rgba(255,255,255,0.08)', height: 12 }} />
+
+            {/* 타 강의 B */}
+            <PricingBar name="타 강의 B" price="300만원" nameColor="#777" priceColor="#999" barWidth="100%" isMobile={isMobile}
+              segments={[
+                { label: '강의 제작', flex: 2, bg: '#333', color: '#999' },
+                { label: '플랫폼 수수료', flex: 2.2, bg: '#444', color: '#bbb' },
+                { label: '광고·마케팅', flex: 2, bg: '#444', color: '#bbb' },
+                { label: '인건비', flex: 1.2, bg: '#333', color: '#999' },
+                { label: '마진', flex: 1, bg: '#333', color: '#999' },
+              ]}
+            />
+            <Box style={{ marginLeft: isMobile ? 0 : 184, paddingLeft: 40, borderLeft: '2px dashed rgba(255,255,255,0.08)', height: 12 }} />
+
+            {/* 원초적 인사이트 — 내는 돈 */}
+            <Box style={{
+              background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.2)',
+              borderRadius: 14, padding: '20px 24px', marginLeft: -24, marginRight: -24,
+            }}>
+              <PricingBar name="원초적 인사이트" price="50만원" nameColor="#a78bfa" priceColor="#8b5cf6" barWidth="28%" mobileBarWidth="55%" isMobile={isMobile}
+                segments={[
+                  { label: '강의 제작', flex: 2, bg: '#7c3aed', color: '#e9d5ff' },
+                  { label: 'AI 개발', flex: 1.5, bg: '#7c3aed', color: '#e9d5ff' },
+                  { label: '서버', flex: 0.8, bg: '#7c3aed', color: '#e9d5ff' },
+                  { label: '마진', flex: 0.5, bg: '#7c3aed', color: '#e9d5ff' },
+                ]}
+              />
+            </Box>
+
+            {/* ── 구분선 ── */}
+            <Box style={{
+              display: 'flex', alignItems: 'center', gap: 16,
+              margin: '48px 0', paddingLeft: isMobile ? 0 : 184,
+            }}>
+              <Text style={{ fontSize: 11, fontWeight: 700, color: '#8b5cf6', letterSpacing: 2 }}>그런데</Text>
+              <Box style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(139,92,246,0.3), transparent)' }} />
+            </Box>
+
+            {/* ── 받는 것 ── */}
+            <Text style={{
+              fontSize: 12, fontWeight: 700, color: '#555',
+              letterSpacing: 2, marginBottom: 20,
+              paddingLeft: isMobile ? 0 : 184,
+            }}>받는 것</Text>
+
+            {/* 타 강의 A — 받는 것 */}
+            <PricingBar name="타 강의 A" price="160만원" nameColor="#777" priceColor="#555" barWidth="14%" mobileBarWidth="25%" isMobile={isMobile}
+              segments={[
+                { label: '강의 영상', flex: 1, bg: '#222', color: '#555' },
+              ]}
+            />
+            <Box style={{ marginLeft: isMobile ? 0 : 184, paddingLeft: 40, borderLeft: '2px dashed rgba(255,255,255,0.08)', height: 12 }} />
+
+            {/* 타 강의 B — 받는 것 */}
+            <PricingBar name="타 강의 B" price="300만원" nameColor="#777" priceColor="#555" barWidth="20%" mobileBarWidth="35%" isMobile={isMobile}
+              segments={[
+                { label: '강의 영상', flex: 2, bg: '#222', color: '#555' },
+                { label: '커뮤니티', flex: 1, bg: '#222', color: '#555' },
+              ]}
+            />
+            <Box style={{ marginLeft: isMobile ? 0 : 184, paddingLeft: 40, borderLeft: '2px dashed rgba(255,255,255,0.08)', height: 12 }} />
+
+            {/* 원초적 인사이트 — 받는 것 */}
+            <Box style={{
+              background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.2)',
+              borderRadius: 14, padding: '20px 24px', marginLeft: -24, marginRight: -24,
+            }}>
+              <PricingBar name="원초적 인사이트" price="50만원" nameColor="#a78bfa" priceColor="#8b5cf6" barWidth="100%" isMobile={isMobile}
+                segments={[
+                  { label: '강의 40강', flex: 1.8, bg: '#8b5cf6', color: '#fff' },
+                  { label: '전자책', flex: 1.3, bg: '#8b5cf6', color: '#fff' },
+                  { label: 'FlowSpot', sublabel: '(AI 스크립트 도구)', flex: 2.2, bg: '#a78bfa', color: '#1a1a2e', bold: true },
+                  { label: '채널 트렌드 데이터', sublabel: '(매달 업데이트)', flex: 2, bg: '#a78bfa', color: '#1a1a2e', bold: true },
+                  { label: '노션 템플릿', flex: 1.5, bg: '#8b5cf6', color: '#fff' },
+                ]}
+              />
+            </Box>
+
+            {/* ── 마무리 카피 ── */}
+            <Text style={{
+              marginTop: 72, fontSize: 'clamp(18px, 4.5vw, 24px)',
+              fontWeight: 700, color: '#8b5cf6',
+              lineHeight: 1.7, letterSpacing: '-0.5px',
+              padding: '0 20px',
+            }}>
+              원초적 인사이트는 플랫폼 수수료와 광고비를 걷어내고,<br />
+              그 비용을 강의와 도구에 직접 담았습니다.
+            </Text>
           </Box>
         </motion.div>
       </Container>
