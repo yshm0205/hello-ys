@@ -1938,144 +1938,6 @@ function HowItWorksSection() {
 }
 
 
-/* ═══════════════════════════════════════════════════════════════
-   섹션 5: Package — 가격 비교 + 부분별 가치
-   ═══════════════════════════════════════════════════════════════ */
-function PackageSection() {
-  return (
-    <Box component="section" id="pricing" style={{ background: '#fafafa', padding: 'clamp(56px, 10vw, 100px) 0', position: 'relative', scrollMarginTop: '120px' }}>
-      <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
-
-      <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
-        {/* 최단거리 클로저 */}
-        <motion.div {...fadeUp}>
-          <Box style={{ textAlign: 'center', marginBottom: 'clamp(48px, 10vw, 72px)' }}>
-            <Text style={{
-              fontSize: 'clamp(24px, 6.5vw, 36px)',
-              fontWeight: 800, color: '#3f3f46', lineHeight: 1.5,
-            }}>
-              <span style={{ color: '#8b5cf6', fontWeight: 900 }}>4</span>년의 시행착오를 앞지르고,
-              <br />
-              매달 <span style={{ color: '#8b5cf6', fontWeight: 900 }}>80</span>시간을 절약하는 것.
-            </Text>
-            <Text style={{
-              fontSize: 'clamp(28px, 7.5vw, 42px)',
-              fontWeight: 900, color: '#18181b', lineHeight: 1.3,
-              marginTop: 'clamp(12px, 3vw, 20px)',
-            }}>
-              그게{' '}
-              <span style={{ color: '#8b5cf6', position: 'relative', display: 'inline-block' }}>
-                최단거리
-                <Box component="span" style={{
-                  position: 'absolute', bottom: '2px', left: '-2px', right: '-2px',
-                  height: '8px', background: 'rgba(139,92,246,0.25)',
-                  borderRadius: '4px', zIndex: -1,
-                }} />
-              </span>
-              입니다.
-            </Text>
-          </Box>
-        </motion.div>
-
-        {/* 가격 카드 — 3단 구조 */}
-        <motion.div {...fadeUp}>
-          <Paper radius="lg" style={{
-            background: '#ffffff', border: '1px solid #d4d4d8',
-            maxWidth: '480px', margin: '0 auto',
-            padding: 'clamp(24px, 5vw, 36px)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-          }}>
-            <Stack gap={20}>
-              <Text fw={700} ta="center" style={{ fontSize: 'clamp(18px, 3vw, 20px)', color: '#18181b' }}>
-                올인원 패스
-              </Text>
-
-              {/* 구성 리스트 */}
-              <Stack gap={0}>
-                {[
-                  '강의 40강 (기획→촬영→수익화)',
-                  'AI 스크립트 도구 4개월',
-                  '전자책 133p + 노션 템플릿',
-                  '월간 트렌드 채널 리스트',
-                ].map((item, i) => (
-                  <Group key={i} gap={8} wrap="nowrap" style={{
-                    padding: '12px 0', borderBottom: i < 3 ? '1px solid #f4f4f5' : 'none',
-                  }}>
-                    <Text style={{ color: '#8b5cf6', fontSize: '16px', flexShrink: 0 }}>✓</Text>
-                    <Text style={{ color: '#3f3f46', fontSize: 'clamp(15px, 3vw, 16px)', lineHeight: 1.3 }}>{item}</Text>
-                  </Group>
-                ))}
-              </Stack>
-
-              <Divider color="#d4d4d8" />
-
-              {/* 3단 가격 */}
-              <Stack gap={6}>
-                <Group justify="space-between">
-                  <Text style={{ fontSize: '14px', color: '#71717a' }}>정가</Text>
-                  <Text style={{ fontSize: '14px', color: '#71717a', textDecoration: 'line-through' }}>
-                    ₩{primaryProgram.listAmount.toLocaleString()}
-                  </Text>
-                </Group>
-                <Group justify="space-between">
-                  <Text style={{ fontSize: '14px', color: '#ef4444', fontWeight: 700 }}>할인</Text>
-                  <Text style={{ fontSize: '14px', color: '#ef4444', fontWeight: 700 }}>
-                    -₩{(primaryProgram.listAmount - primaryProgram.amount).toLocaleString()}
-                  </Text>
-                </Group>
-                <Divider color="#e4e4e7" />
-                <Group justify="space-between" align="baseline">
-                  <Text style={{ fontSize: '16px', color: '#18181b', fontWeight: 800 }}>최종 금액</Text>
-                  <Group gap={8} align="baseline">
-                    <Text style={{ fontSize: 'clamp(28px, 5vw, 32px)', fontWeight: 900, color: '#8b5cf6' }}>
-                      ₩{primaryProgram.amount.toLocaleString()}
-                    </Text>
-                    <Text style={{ fontSize: '14px', fontWeight: 800, color: '#ef4444' }}>
-                      {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
-                    </Text>
-                  </Group>
-                </Group>
-                <Text ta="right" style={{ fontSize: '13px', color: '#71717a' }}>
-                  12개월 할부 시 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원
-                </Text>
-              </Stack>
-
-              {/* CTA */}
-              <AuthAwareButton
-                authenticatedHref="/checkout/allinone"
-                unauthenticatedHref="/login?redirect=/checkout/allinone"
-                size="lg" fullWidth radius="xl"
-                style={{
-                  background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
-                  padding: '16px', height: 'auto', border: 'none',
-                  boxShadow: '0 2px 12px rgba(139,92,246,0.2)',
-                }}
-              >
-                올인원 패스 신청하기
-              </AuthAwareButton>
-
-              <Text ta="center" style={{ fontSize: '13px', color: '#a1a1aa' }}>
-                7일 이내 전액 환불 · 4개월 이용권
-              </Text>
-            </Stack>
-          </Paper>
-        </motion.div>
-
-        {/* Pro 구독 안내 */}
-        <motion.div {...fadeUp}>
-          <Text ta="center" style={{
-            fontSize: 'clamp(13px, 3.2vw, 14px)',
-            color: '#a1a1aa',
-            marginTop: '24px',
-          }}>
-            4개월 종료 후에는 월 ₩{monthlySubscription.amount.toLocaleString()} 구독 상품이 열릴 예정입니다.
-          </Text>
-        </motion.div>
-      </Container>
-    </Box>
-  );
-}
-
 
 /* ═══════════════════════════════════════════════════════════════
    섹션 6: FAQ
@@ -2395,7 +2257,6 @@ const sectionTabs = [
   { id: 'pain', label: '문제' },
   { id: 'offer', label: '구성' },
   { id: 'compare', label: '비교' },
-  { id: 'pricing', label: '가격' },
   { id: 'faq', label: 'FAQ' },
 ];
 
@@ -2491,7 +2352,6 @@ export default function LandingPage() {
       <ProductRevealSection />
       <WhySpecialSection />
       <HowItWorksSection />
-      <PackageSection />
       <FAQSection />
       <CTASection />
       <Footer />
