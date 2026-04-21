@@ -10,7 +10,6 @@ import {
   Container,
   Title,
   Text,
-  Button,
   Group,
   Stack,
   Box,
@@ -18,9 +17,9 @@ import {
   Paper,
   Accordion,
   Anchor,
-  Divider,
 } from '@mantine/core';
-import { Check, X, Bot, ChevronDown, ArrowRight } from 'lucide-react';
+import { Check, Bot, ChevronDown, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { AuthAwareButton } from '@/components/landing/AuthAwareButton';
 import { LandingHeader } from '@/components/landing/LandingHeader';
@@ -46,27 +45,6 @@ const gridBg = {
   `,
   backgroundSize: '56px 56px',
 };
-
-
-/* ═══════════════════════════════════════════════════════════════
-   CountUp — 숫자 카운트 애니메이션
-   ═══════════════════════════════════════════════════════════════ */
-function CountUp({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      let n = 0;
-      const step = target / (1400 / 16);
-      const interval = setInterval(() => {
-        n += step;
-        if (n >= target) { setCount(target); clearInterval(interval); }
-        else setCount(Math.floor(n));
-      }, 16);
-    }, 900);
-    return () => clearTimeout(delay);
-  }, [target]);
-  return <>{count}</>;
-}
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -636,10 +614,13 @@ function PainSection() {
                   boxShadow: '0 4px 20px rgba(239,68,68,0.1), 0 2px 8px rgba(0,0,0,0.06)',
                   position: 'relative',
                 }}>
-                  <img
+                  <Image
                     src={img.src}
                     alt={img.caption}
-                    style={{ width: '100%', display: 'block' }}
+                    width={776}
+                    height={384}
+                    sizes="(max-width: 520px) 100vw, 520px"
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
                   />
                   {/* 실패 오버레이 그래디언트 */}
                   <Box style={{
@@ -746,7 +727,14 @@ function PainSection() {
                   ? '0 4px 20px rgba(0,0,0,0.3), 0 0 24px rgba(34,197,94,0.12)'
                   : '0 4px 20px rgba(0,0,0,0.3), 0 0 12px rgba(34,197,94,0.06)',
               }}>
-                <img src={item.src} alt={`${item.label} 수익 ${item.amount}`} style={{ width: '100%', display: 'block' }} />
+                <Image
+                  src={item.src}
+                  alt={`${item.label} 수익 ${item.amount}`}
+                  width={350}
+                  height={270}
+                  sizes="(max-width: 560px) 100vw, 560px"
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
               </Box>
             </motion.div>
           ))}
@@ -799,7 +787,14 @@ function PainSection() {
                 boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 12px rgba(34,197,94,0.06)',
                 background: '#ffffff',
               }}>
-                <img src="/images/success-naver-clip.png" alt="네이버 클립 수익" style={{ width: '100%', display: 'block' }} />
+                <Image
+                  src="/images/success-naver-clip.png"
+                  alt="네이버 클립 수익"
+                  width={602}
+                  height={320}
+                  sizes="(max-width: 560px) 100vw, 560px"
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
               </Box>
               <Box style={{
                 borderRadius: '12px', overflow: 'hidden',
@@ -807,7 +802,14 @@ function PainSection() {
                 boxShadow: '0 4px 20px rgba(0,0,0,0.3), 0 0 12px rgba(34,197,94,0.06)',
                 background: '#ffffff',
               }}>
-                <img src="/images/success-naver-revenue.jpg" alt="네이버 클립 월별 수익" style={{ width: '100%', display: 'block' }} />
+                <Image
+                  src="/images/success-naver-revenue.jpg"
+                  alt="네이버 클립 월별 수익"
+                  width={864}
+                  height={710}
+                  sizes="(max-width: 560px) 100vw, 560px"
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
               </Box>
             </Stack>
           </motion.div>
@@ -857,10 +859,13 @@ function PainSection() {
               </Text>
             </Group>
             <Box style={{ padding: '12px 16px 16px' }}>
-              <img
+              <Image
                 src="/images/success-instagram-monthly.jpg"
                 alt="인스타 릴스 월 800만 조회"
-                style={{ width: '100%', display: 'block', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}
+                width={1080}
+                height={683}
+                sizes="(max-width: 560px) 100vw, 528px"
+                style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}
               />
             </Box>
           </Box>
@@ -1080,10 +1085,10 @@ function PainSection() {
         {/* 수강생 후기 — 성과 인증 */}
         <Stack gap={40} style={{ maxWidth: '400px', margin: 'clamp(48px, 8vw, 72px) auto 0' }}>
           {[
-            { src: '/images/reviews/review_1_revenue.png', caption: '월 1,356만 수익', sub: '조회수 7,613만회', alt: '수강생 성과 — 월 1356만 수익' },
-            { src: '/images/reviews/review_3_kakao.png', caption: '월 700만 수익', alt: '수강생 성과 — 월 700만 수익' },
-            { src: '/images/reviews/review_7_kakao.png', caption: '구독자 1,000명 돌파', alt: '수강생 성과 — 구독자 1000 달성' },
-            { src: '/images/reviews/review_6_youtube.png', caption: '조회수 폭발', alt: '수강생 성과 — 조회수 폭발' },
+            { src: '/images/reviews/review_1_revenue.png', caption: '월 1,356만 수익', sub: '조회수 7,613만회', alt: '수강생 성과 — 월 1356만 수익', w: 1024, h: 563 },
+            { src: '/images/reviews/review_3_kakao.png', caption: '월 700만 수익', alt: '수강생 성과 — 월 700만 수익', w: 1000, h: 500 },
+            { src: '/images/reviews/review_7_kakao.png', caption: '구독자 1,000명 돌파', alt: '수강생 성과 — 구독자 1000 달성', w: 1000, h: 1000 },
+            { src: '/images/reviews/review_6_youtube.png', caption: '조회수 폭발', alt: '수강생 성과 — 조회수 폭발', w: 1000, h: 500 },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -1127,7 +1132,14 @@ function PainSection() {
                   position: 'relative',
                 }}
               >
-                <img src={item.src} alt={item.alt} style={{ width: '100%', display: 'block' }} />
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  width={item.w}
+                  height={item.h}
+                  sizes="(max-width: 400px) 100vw, 400px"
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
                 {i === 0 && (
                   <Text style={{
                     position: 'absolute', bottom: '10px', right: '12px',
@@ -1173,7 +1185,14 @@ function PainSection() {
                   cursor: 'zoom-in',
                 }}
               >
-                <img src={item.src} alt={item.alt} style={{ width: '100%', display: 'block' }} />
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  width={1000}
+                  height={300}
+                  sizes="(max-width: 400px) 100vw, 400px"
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
               </Box>
             </motion.div>
           ))}
@@ -1234,6 +1253,7 @@ function ProductRevealSection() {
 
       features: ['FlowSpot', '4개월 이용권'],
       src: '/images/product-ai-script.gif',
+      w: 1920, h: 1080,
       accent: '#8b5cf6',
       featured: true,
     },
@@ -1245,6 +1265,7 @@ function ProductRevealSection() {
       desc: '숏폼은 트렌드를 빨리 캐치하는 자가 이깁니다. 잘하는 채널은 뭘 만드는지 직접 수집·정리해서 알려드립니다.',
       features: ['구독자 수', '평균 조회수', '중위값', '분류', '제작 형식'],
       src: '/images/product-channel-list.gif',
+      w: 1080, h: 608,
       accent: '#22c55e',
     },
     {
@@ -1255,6 +1276,7 @@ function ProductRevealSection() {
       desc: '기획·제작·편집 노하우를 전부 담았습니다.',
       features: ['채널 설계', '소재 발굴', '스크립트 공식', '소스', '편집 마스터', '쇼핑 수익화'],
       src: '/images/product-vod.gif',
+      w: 1920, h: 1080,
       accent: '#f59e0b',
     },
     {
@@ -1265,6 +1287,7 @@ function ProductRevealSection() {
       desc: '채널 기획부터 수익화까지, 기본기를 133p 한 권에 담았습니다.',
       features: ['채널 기획', '주제 선정', '후킹', '소스', '편집', '수익화'],
       src: '/images/product-ebook.gif',
+      w: 1920, h: 1080,
       accent: '#8b5cf6',
     },
     {
@@ -1275,6 +1298,7 @@ function ProductRevealSection() {
       desc: '조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.',
       features: ['개인 운영', '편집자 협업', '제작 프로세스', '업로드 일정'],
       src: '/images/product-notion.gif',
+      w: 1920, h: 1080,
       accent: '#3b82f6',
     },
   ];
@@ -1328,11 +1352,14 @@ function ProductRevealSection() {
                   position: 'relative',
                   overflow: 'hidden',
                 }}>
-                  <img
+                  <Image
                     src={item.src}
                     alt={item.title}
-                    loading="lazy"
-                    style={{ width: '100%', display: 'block' }}
+                    width={item.w}
+                    height={item.h}
+                    unoptimized
+                    sizes="(max-width: 480px) 100vw, 480px"
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
                   />
                 </Box>
 
