@@ -2426,6 +2426,87 @@ function StickyTabNav() {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   섹션 1.3: LoopPainSection — 무한 루프 공감 훅
+   ═══════════════════════════════════════════════════════════════ */
+function LoopPainSection() {
+  const isMobile = useIsMobile(768);
+  const steps = ['뭘 올리지 고민', '몇 시간 투자', '떨리는 업로드', '조회수 47회', '다시 처음부터'];
+  return (
+    <Box component="section" style={{
+      background: '#fafafa',
+      padding: 'clamp(64px, 10vw, 120px) 16px clamp(48px, 7vw, 80px)',
+      position: 'relative',
+    }}>
+      <Container size="md">
+        <Stack align="center" gap={isMobile ? 24 : 40}>
+          <Badge
+            size="lg" variant="light" color="red"
+            style={{ fontWeight: 800, letterSpacing: '-0.01em', padding: '9px 14px', textTransform: 'none' }}
+          >
+            혹시 당신의 이야기?
+          </Badge>
+
+          <Box style={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: 'center',
+            gap: isMobile ? 10 : 8,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}>
+            {steps.map((s, i) => (
+              <Box key={i} style={{ display: 'contents' }}>
+                <Box style={{
+                  padding: isMobile ? '11px 18px' : '13px 22px',
+                  background: '#fff',
+                  border: '1px solid #e4e4e7',
+                  borderRadius: 999,
+                  fontSize: isMobile ? 14 : 15.5,
+                  fontWeight: 700,
+                  color: '#3f3f46',
+                  letterSpacing: '-0.01em',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                  whiteSpace: 'nowrap',
+                }}>{s}</Box>
+                {i < steps.length - 1 && (
+                  <span style={{
+                    color: '#a1a1aa',
+                    fontSize: isMobile ? 18 : 14,
+                    fontWeight: 400,
+                    lineHeight: 1,
+                  }}>
+                    {isMobile ? '↓' : '→'}
+                  </span>
+                )}
+              </Box>
+            ))}
+          </Box>
+
+          <Box style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '6px 14px', borderRadius: 999,
+            background: 'rgba(239,68,68,.08)', color: '#b91c1c',
+            fontSize: 12.5, fontWeight: 800, letterSpacing: '-0.01em',
+          }}>
+            <span style={{ fontSize: 14, lineHeight: 1 }}>↻</span> 무한 반복
+          </Box>
+
+          <Text style={{
+            fontSize: 'clamp(22px, 4vw, 38px)', fontWeight: 900, letterSpacing: '-0.035em',
+            color: '#18181b', lineHeight: 1.35, textAlign: 'center',
+            marginTop: isMobile ? 4 : 12,
+          }}>
+            혹시 지금도<br />
+            이 <span style={{ color: '#8b5cf6' }}>무한 루프</span> 속에 갇혀 계신가요?
+          </Text>
+        </Stack>
+      </Container>
+    </Box>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    섹션 1.5: EarlyBirdSection — 얼리버드 3단계 (다크 카드)
    ═══════════════════════════════════════════════════════════════ */
 const EARLYBIRD_DEADLINE = '2026-05-08T23:59:59+09:00'; // 1차 얼리버드 종료
@@ -2778,6 +2859,7 @@ export default function LandingPage() {
     <main style={{ background: '#ffffff' }}>
       <LandingHeader />
       <HeroSection />
+      <LoopPainSection />
       <EarlyBirdSection />
       <StickyTabNav />
       <PainSection />
