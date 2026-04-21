@@ -1404,11 +1404,44 @@ function ProductRevealSection() {
           ))}
         </Stack>
 
+        {/* 최단거리 헤드라인 */}
+        <motion.div {...fadeUp}>
+          <Box style={{
+            textAlign: 'center',
+            marginTop: 'clamp(56px, 11vw, 88px)',
+            marginBottom: 'clamp(24px, 5vw, 32px)',
+          }}>
+            <Text style={{
+              fontSize: 'clamp(22px, 5.5vw, 30px)',
+              fontWeight: 800, color: '#3f3f46', lineHeight: 1.5,
+            }}>
+              <span style={{ color: '#8b5cf6', fontWeight: 900 }}>4</span>년의 시행착오를 앞지르고,
+              <br />
+              매달 <span style={{ color: '#8b5cf6', fontWeight: 900 }}>80</span>시간을 절약하는 것.
+            </Text>
+            <Text style={{
+              fontSize: 'clamp(26px, 6.8vw, 36px)',
+              fontWeight: 900, color: '#18181b', lineHeight: 1.3,
+              marginTop: 'clamp(10px, 2.5vw, 16px)',
+            }}>
+              그게{' '}
+              <span style={{ color: '#8b5cf6', position: 'relative', display: 'inline-block' }}>
+                최단거리
+                <Box component="span" style={{
+                  position: 'absolute', bottom: '2px', left: '-2px', right: '-2px',
+                  height: '8px', background: 'rgba(139,92,246,0.25)',
+                  borderRadius: '4px', zIndex: -1,
+                }} />
+              </span>
+              입니다.
+            </Text>
+          </Box>
+        </motion.div>
+
         {/* 시간 절약 팩트 요약 — 2분할 */}
         <motion.div {...fadeUp}>
           <Box style={{
             maxWidth: '480px', margin: '0 auto',
-            marginTop: 'clamp(48px, 10vw, 72px)',
             display: 'flex', gap: 'clamp(12px, 3vw, 16px)',
           }}>
             <Box style={{
@@ -1554,70 +1587,12 @@ function WhySpecialSection() {
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
       <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
-        {/* 커리큘럼 헤딩 */}
-        <motion.div {...fadeUp}>
-          <Stack align="center" gap={8} mb={56}>
-            <Title order={2} ta="center" style={{
-              fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
-              color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
-            }}>
-              강의는 이렇게 구성되어 있습니다
-            </Title>
-          </Stack>
-        </motion.div>
-
-        {/* 커리큘럼 리스트 */}
-        <Stack gap={24} style={{ maxWidth: '540px', margin: '0 auto' }}>
-          {curriculum.map((c, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08, ease }}
-            >
-              <Box style={{
-                background: '#ffffff', border: '1px solid #d4d4d8',
-                borderRadius: '16px', padding: 'clamp(20px, 5vw, 28px)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-              }}>
-                <Group gap={10} wrap="nowrap" justify="space-between" mb={12}>
-                  <Group gap={10} wrap="nowrap">
-                    <Text style={{
-                      fontSize: '12px', fontWeight: 800,
-                      color: '#8b5cf6', flexShrink: 0,
-                    }}>
-                      {c.part}
-                    </Text>
-                    <Text fw={700} style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#18181b' }}>
-                      {c.title}
-                    </Text>
-                  </Group>
-                  <Badge size="sm" variant="light" color="gray" radius="xl">{c.count}강</Badge>
-                </Group>
-                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#52525b', marginBottom: '16px' }}>{c.subtitle}</Text>
-                <Stack gap={8}>
-                  {c.vods.map((vod, j) => (
-                    <Group key={j} gap={8} wrap="nowrap" align="flex-start">
-                      <Text style={{ fontSize: '13px', color: '#8b5cf6', flexShrink: 0, marginTop: '2px' }}>
-                        {String(j + 1).padStart(2, '0')}
-                      </Text>
-                      <Text style={{ fontSize: 'clamp(15px, 3.8vw, 16px)', color: '#27272a', lineHeight: 1.6 }}>{vod}</Text>
-                    </Group>
-                  ))}
-                </Stack>
-              </Box>
-            </motion.div>
-          ))}
-        </Stack>
-
         {/* ═══ 비용 구조 비교 ═══ */}
         <motion.div {...fadeUp}>
           <Box style={{
             background: '#0a0a0a',
             borderRadius: '20px',
             padding: isMobile ? '48px 20px' : '72px 56px',
-            marginTop: 'clamp(64px, 12vw, 100px)',
           }}>
             {/* 헤드라인 */}
             <Box style={{ textAlign: 'center', marginBottom: isMobile ? 48 : 64 }}>
@@ -1752,6 +1727,63 @@ function WhySpecialSection() {
             </Text>
           </Box>
         </motion.div>
+
+        {/* 커리큘럼 헤딩 */}
+        <motion.div {...fadeUp}>
+          <Stack align="center" gap={8} mb={56} style={{ marginTop: 'clamp(64px, 12vw, 100px)' }}>
+            <Title order={2} ta="center" style={{
+              fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
+              color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
+            }}>
+              강의는 이렇게 구성되어 있습니다
+            </Title>
+          </Stack>
+        </motion.div>
+
+        {/* 커리큘럼 리스트 */}
+        <Stack gap={24} style={{ maxWidth: '540px', margin: '0 auto' }}>
+          {curriculum.map((c, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.08, ease }}
+            >
+              <Box style={{
+                background: '#ffffff', border: '1px solid #d4d4d8',
+                borderRadius: '16px', padding: 'clamp(20px, 5vw, 28px)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+              }}>
+                <Group gap={10} wrap="nowrap" justify="space-between" mb={12}>
+                  <Group gap={10} wrap="nowrap">
+                    <Text style={{
+                      fontSize: '12px', fontWeight: 800,
+                      color: '#8b5cf6', flexShrink: 0,
+                    }}>
+                      {c.part}
+                    </Text>
+                    <Text fw={700} style={{ fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#18181b' }}>
+                      {c.title}
+                    </Text>
+                  </Group>
+                  <Badge size="sm" variant="light" color="gray" radius="xl">{c.count}강</Badge>
+                </Group>
+                <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#52525b', marginBottom: '16px' }}>{c.subtitle}</Text>
+                <Stack gap={8}>
+                  {c.vods.map((vod, j) => (
+                    <Group key={j} gap={8} wrap="nowrap" align="flex-start">
+                      <Text style={{ fontSize: '13px', color: '#8b5cf6', flexShrink: 0, marginTop: '2px' }}>
+                        {String(j + 1).padStart(2, '0')}
+                      </Text>
+                      <Text style={{ fontSize: 'clamp(15px, 3.8vw, 16px)', color: '#27272a', lineHeight: 1.6 }}>{vod}</Text>
+                    </Group>
+                  ))}
+                </Stack>
+              </Box>
+            </motion.div>
+          ))}
+        </Stack>
       </Container>
     </Box>
   );
