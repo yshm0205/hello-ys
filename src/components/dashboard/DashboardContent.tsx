@@ -49,6 +49,7 @@ interface DashboardContentProps {
     } | null;
     initialProjects?: ProjectItem[];
     initialCompletedVodCount?: number;
+    totalLectureVods?: number;
 }
 
 // 프로젝트 타입 정의
@@ -70,14 +71,13 @@ const NICHE_LABELS: Record<string, string> = {
     'place': '여행',
 };
 
-// 전체 VOD 수 (강의실 데이터와 동기화)
-const TOTAL_LECTURE_VODS = 32;
 
 export function DashboardContent({
     user,
     creditInfo,
     initialProjects = [],
     initialCompletedVodCount = 0,
+    totalLectureVods: TOTAL_LECTURE_VODS = 0,
 }: DashboardContentProps) {
     const { creditInfo: shellCreditInfo } = useDashboardShell();
     const resolvedCreditInfo = creditInfo ?? shellCreditInfo;

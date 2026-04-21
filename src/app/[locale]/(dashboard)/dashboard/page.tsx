@@ -21,6 +21,18 @@ export default async function DashboardPage() {
     niche?: string | null;
   }> = [];
   let initialCompletedVodCount = 0;
+  let totalLectureVods = 0;
+
+  try {
+    const { count: lectureCount } = await supabase
+      .from('lectures')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_published', true);
+
+    totalLectureVods = lectureCount ?? 0;
+  } catch {
+    // fall back to 0
+  }
 
   try {
     const { data } = await supabase
@@ -64,6 +76,7 @@ export default async function DashboardPage() {
       user={user}
       initialProjects={initialProjects}
       initialCompletedVodCount={initialCompletedVodCount}
+      totalLectureVods={totalLectureVods}
     />
   );
 }
