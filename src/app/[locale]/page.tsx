@@ -1944,30 +1944,6 @@ function PackageSection() {
           </Box>
         </motion.div>
 
-        {/* 가격 헤딩 */}
-        <motion.div {...fadeUp}>
-          <Stack align="center" gap={8} mb={56}>
-            <Title order={2} ta="center" style={{
-              fontSize: 'clamp(32px, 9vw, 52px)', fontWeight: 900,
-              color: '#18181b', letterSpacing: '-0.03em', lineHeight: 1.2,
-            }}>
-              얼마인가요?
-            </Title>
-          </Stack>
-        </motion.div>
-
-        {/* 가격 표시 */}
-        <motion.div {...fadeUp}>
-          <Stack align="center" gap={2}>
-            <Text style={{ fontSize: 'clamp(14px, 3vw, 15px)', color: '#a1a1aa', textDecoration: 'line-through' }}>
-              ₩{primaryProgram.listAmount.toLocaleString()}
-            </Text>
-            <Text fw={900} style={{ fontSize: 'clamp(32px, 7vw, 44px)', color: '#8b5cf6' }}>
-              ₩{primaryProgram.amount.toLocaleString()}
-            </Text>
-          </Stack>
-        </motion.div>
-
         {/* Pro 구독 안내 */}
         <motion.div {...fadeUp}>
           <Text ta="center" style={{
