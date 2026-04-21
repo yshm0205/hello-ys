@@ -228,122 +228,124 @@ function HeroSection() {
         </Box>
       </motion.div>
 
-      {/* 무한 루프 섹션 */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.6, ease }}
-        style={{
-          width: '100%',
-          marginTop: 'clamp(56px, 9vw, 80px)',
-          padding: 'clamp(48px, 8vw, 80px) 16px clamp(32px, 5vw, 48px)',
-          background: '#fafafa',
-        }}
-      >
-        <Box style={{ maxWidth: '520px', margin: '0 auto' }}>
-          {/* 원형 루프 시각화 — SVG 원 + HTML 라벨 */}
-          <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', maxWidth: '380px', margin: '0 auto' }}>
-            {/* SVG: 원 + 화살표 + 빨간 점만 */}
-            <svg
-              viewBox="0 0 200 200"
+    </Box>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   섹션 1.7: LoopPainSection — 무한 루프 원형 시각화 + 갇혀 계신가요?
+   ═══════════════════════════════════════════════════════════════ */
+function LoopPainSection() {
+  return (
+    <Box
+      component="section"
+      id="loop-pain"
+      style={{
+        width: '100%',
+        padding: 'clamp(64px, 10vw, 110px) 16px clamp(48px, 8vw, 80px)',
+        background: '#fafafa',
+      }}
+    >
+      <Box style={{ maxWidth: '520px', margin: '0 auto' }}>
+        {/* 원형 루프 시각화 — SVG 원 + HTML 라벨 */}
+        <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', maxWidth: '380px', margin: '0 auto' }}>
+          <svg
+            viewBox="0 0 200 200"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '60%',
+              height: '60%',
+            }}
+          >
+            <circle cx={100} cy={100} r={85} fill="none" stroke="#d4d4d8" strokeWidth={1.2} strokeDasharray="7 5">
+              <animate attributeName="stroke-dashoffset" from="0" to="-36" dur="3s" repeatCount="indefinite" />
+            </circle>
+            {[36, 108, 180, 252, 324].map((angle) => {
+              const rad = (angle * Math.PI) / 180;
+              const x = 100 + 85 * Math.sin(rad);
+              const y = 100 - 85 * Math.cos(rad);
+              return (
+                <polygon key={angle} points="0,-4 3,2.5 -3,2.5" fill="#a1a1aa"
+                  transform={`translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${angle + 90})`} />
+              );
+            })}
+            <g>
+              <animateTransform attributeName="transform" type="rotate"
+                from="0 100 100" to="360 100 100" dur="8s" repeatCount="indefinite" />
+              <circle cx={100} cy={15} r={4} fill="#ef4444" opacity={0.9} />
+              <circle cx={100} cy={15} r={4} fill="none" stroke="#ef4444" strokeWidth={1.2}>
+                <animate attributeName="r" values="4;11;4" dur="2s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+              </circle>
+            </g>
+            {[0, 72, 144, 216, 288].map((angle) => {
+              const rad = (angle * Math.PI) / 180;
+              const cx = 100 + 85 * Math.sin(rad);
+              const cy = 100 - 85 * Math.cos(rad);
+              const isFail = angle === 288;
+              return (
+                <circle key={angle} cx={cx} cy={cy} r={4}
+                  fill={isFail ? '#fef2f2' : '#fff'}
+                  stroke={isFail ? '#fca5a5' : '#d4d4d8'} strokeWidth={1.5} />
+              );
+            })}
+          </svg>
+
+          {[
+            { label: '뭘 올리지 고민', top: '10%', left: '50%', transform: 'translateX(-50%)', fail: false },
+            { label: '몇 시간 투자', top: '33%', right: '4%', transform: 'none', fail: false },
+            { label: '떨리는 업로드', bottom: '14%', right: '12%', transform: 'none', fail: false },
+            { label: '조회수 47회', bottom: '14%', left: '12%', transform: 'none', fail: true },
+            { label: '다시 처음부터', top: '33%', left: '4%', transform: 'none', fail: true },
+          ].map((node) => (
+            <span
+              key={node.label}
               style={{
                 position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '60%',
-                height: '60%',
+                top: node.top,
+                bottom: node.bottom,
+                left: node.left,
+                right: node.right,
+                transform: node.transform,
+                fontSize: 'clamp(14px, 3.8vw, 17px)',
+                fontWeight: 700,
+                color: node.fail ? '#ef4444' : '#3f3f46',
+                background: node.fail ? '#fef2f2' : '#ffffff',
+                border: `1.5px solid ${node.fail ? '#fca5a5' : '#e4e4e7'}`,
+                borderRadius: '10px',
+                padding: '6px 14px',
+                whiteSpace: 'nowrap',
               }}
             >
-              <circle cx={100} cy={100} r={85} fill="none" stroke="#d4d4d8" strokeWidth={1.2} strokeDasharray="7 5">
-                <animate attributeName="stroke-dashoffset" from="0" to="-36" dur="3s" repeatCount="indefinite" />
-              </circle>
-              {[36, 108, 180, 252, 324].map((angle) => {
-                const rad = (angle * Math.PI) / 180;
-                const x = 100 + 85 * Math.sin(rad);
-                const y = 100 - 85 * Math.cos(rad);
-                return (
-                  <polygon key={angle} points="0,-4 3,2.5 -3,2.5" fill="#a1a1aa"
-                    transform={`translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${angle + 90})`} />
-                );
-              })}
-              <g>
-                <animateTransform attributeName="transform" type="rotate"
-                  from="0 100 100" to="360 100 100" dur="8s" repeatCount="indefinite" />
-                <circle cx={100} cy={15} r={4} fill="#ef4444" opacity={0.9} />
-                <circle cx={100} cy={15} r={4} fill="none" stroke="#ef4444" strokeWidth={1.2}>
-                  <animate attributeName="r" values="4;11;4" dur="2s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
-                </circle>
-              </g>
-              {/* 원 위 5개 노드 점 */}
-              {[0, 72, 144, 216, 288].map((angle) => {
-                const rad = (angle * Math.PI) / 180;
-                const cx = 100 + 85 * Math.sin(rad);
-                const cy = 100 - 85 * Math.cos(rad);
-                const isFail = angle === 288;
-                return (
-                  <circle key={angle} cx={cx} cy={cy} r={4}
-                    fill={isFail ? '#fef2f2' : '#fff'}
-                    stroke={isFail ? '#fca5a5' : '#d4d4d8'} strokeWidth={1.5} />
-                );
-              })}
-            </svg>
+              {node.label}
+            </span>
+          ))}
+        </div>
 
-            {/* HTML 라벨들 — 원 노드 바로 옆 배치 */}
-            {[
-              { label: '뭘 올리지 고민', top: '10%', left: '50%', transform: 'translateX(-50%)', fail: false },
-              { label: '몇 시간 투자', top: '33%', right: '4%', transform: 'none', fail: false },
-              { label: '떨리는 업로드', bottom: '14%', right: '12%', transform: 'none', fail: false },
-              { label: '조회수 47회', bottom: '14%', left: '12%', transform: 'none', fail: true },
-              { label: '다시 처음부터', top: '33%', left: '4%', transform: 'none', fail: true },
-            ].map((node) => (
-              <span
-                key={node.label}
-                style={{
-                  position: 'absolute',
-                  top: node.top,
-                  bottom: node.bottom,
-                  left: node.left,
-                  right: node.right,
-                  transform: node.transform,
-                  fontSize: 'clamp(14px, 3.8vw, 17px)',
-                  fontWeight: 700,
-                  color: node.fail ? '#ef4444' : '#3f3f46',
-                  background: node.fail ? '#fef2f2' : '#ffffff',
-                  border: `1.5px solid ${node.fail ? '#fca5a5' : '#e4e4e7'}`,
-                  borderRadius: '10px',
-                  padding: '6px 14px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {node.label}
-              </span>
-            ))}
-          </div>
-
-          {/* 질문 — 갇혀 계신가요? */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.4, ease }}
-            style={{ marginTop: 'clamp(40px, 8vw, 64px)', textAlign: 'center' }}
-          >
-            <Title order={2} ta="center" style={{
-              fontSize: 'clamp(32px, 9vw, 56px)',
-              fontWeight: 900, color: '#18181b',
-              lineHeight: 1.2, letterSpacing: '-0.03em',
-            }}>
-              혹시 지금도
-              <br />
-              이 무한 루프 속에
-              <br />
-              갇혀 계신가요?
-            </Title>
-          </motion.div>
-        </Box>
-      </motion.div>
-
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease }}
+          style={{ marginTop: 'clamp(40px, 8vw, 64px)', textAlign: 'center' }}
+        >
+          <Title order={2} ta="center" style={{
+            fontSize: 'clamp(32px, 9vw, 56px)',
+            fontWeight: 900, color: '#18181b',
+            lineHeight: 1.2, letterSpacing: '-0.03em',
+          }}>
+            혹시 지금도
+            <br />
+            이 무한 루프 속에
+            <br />
+            갇혀 계신가요?
+          </Title>
+        </motion.div>
+      </Box>
     </Box>
   );
 }
@@ -2779,6 +2781,7 @@ export default function LandingPage() {
       <LandingHeader />
       <HeroSection />
       <EarlyBirdSection />
+      <LoopPainSection />
       <StickyTabNav />
       <PainSection />
       <ProductRevealSection />
