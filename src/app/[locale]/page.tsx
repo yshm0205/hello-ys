@@ -2490,15 +2490,15 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
   const discountPct = Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100);
   const floatingLabel =
     earlybird.currentTier === 'phase1'
-      ? '1차 얼리버드 잔여석'
+      ? '1차 얼리버드'
       : earlybird.currentTier === 'phase2'
-        ? '2차 얼리버드 잔여석'
+        ? '2차 얼리버드'
         : '얼리버드 종료';
   const floatingCountLabel =
     earlybird.currentTier === 'ended'
       ? '혜택 종료'
       : earlybird.claimed === 0
-        ? `선착순 ${earlybird.total}석`
+        ? `${earlybird.total}석 한정`
         : `${earlybird.remaining} / ${earlybird.total}명 남음`;
 
   if (isMobile) {
@@ -2977,14 +2977,14 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
       : '정가로 신청하기';
   const stage1Status: EbTierProps['status'] = phase1IsLive ? 'live' : 'end';
   const stage1StatusText = phase1IsLive
-    ? `LIVE · 선착순 ${earlybirdSummary.phase1Total}명 한정`
+    ? 'LIVE · 진행 중'
     : '1차 혜택 종료';
   const stage1Variant: EbTierProps['variant'] = phase1IsLive ? 'active' : 'dim';
   const stage2Status: EbTierProps['status'] = phase1IsLive ? 'wait' : phase2IsLive ? 'live' : 'end';
   const stage2StatusText = phase1IsLive
-    ? `1차 마감 후 시작 · 선착순 ${earlybirdSummary.phase2Total}명`
+    ? '1차 마감 후 시작'
     : phase2IsLive
-      ? `LIVE · 선착순 ${earlybirdSummary.phase2Total}명 한정`
+      ? 'LIVE · 진행 중'
       : '2차 혜택 종료';
   const stage2Variant: EbTierProps['variant'] = phase1IsLive ? 'dim' : phase2IsLive ? 'active' : 'dim';
   const stage3Status: EbTierProps['status'] = earlybirdEnded ? 'live' : 'end';
@@ -3040,7 +3040,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 All-in-One Pass · {currentStageLabel}
               </Box>
               <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 14 }}>
-                {currentStageLabel} <b style={{ color: '#fff' }}>선착순 {total}명</b> 한정
+                {currentStageLabel} · <b style={{ color: '#fff' }}>선착순 모집</b>
               </Text>
               <Box style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 18 }}>
                 <Text style={{
@@ -3058,7 +3058,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   {earlybirdEnded ? '혜택 종료' : '자리 남음'}
                 </Text>
               </Box>
-              {claimed > 0 ? (
+              {claimed > 0 && (
                 <>
                   <Box style={{
                     width: '100%', height: 10, borderRadius: 999,
@@ -3077,22 +3077,6 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                     {claimed}명 신청 완료 · 전체 {total}석 중 {claimedPct}%
                   </Text>
                 </>
-              ) : !earlybirdEnded && (
-                <Box style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '7px 13px', borderRadius: 999,
-                  background: 'rgba(217,70,239,.14)',
-                  border: '1px solid rgba(217,70,239,.35)',
-                  marginBottom: 18,
-                }}>
-                  <span style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: '#f0abfc', animation: 'ebBlink 1.2s infinite',
-                  }} />
-                  <Text style={{ fontSize: 12.5, fontWeight: 800, color: '#f0abfc', letterSpacing: '-0.01em' }}>
-                    방금 오픈 · 선착순 {total}석
-                  </Text>
-                </Box>
               )}
               <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55 }}>
                 {isUrgent ? (
