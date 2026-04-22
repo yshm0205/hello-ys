@@ -2474,7 +2474,7 @@ function EarlyBirdSection() {
                 }} />
                 All-in-One Pass · Early Bird
               </Box>
-              <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 12 }}>
+              <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 12 }}>
                 1차 얼리버드 종료까지
               </Text>
               <Box style={{ display: 'flex', alignItems: 'baseline', gap: isMobile ? 8 : 14, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -2493,7 +2493,7 @@ function EarlyBirdSection() {
                   </Box>
                 ))}
               </Box>
-              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.55)', lineHeight: 1.55 }}>
+              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55 }}>
                 단 한 번뿐인 혜택, 지금 놓치면 다시 받을 수 없습니다.<br />
                 종료 후엔 <b style={{ color: '#fff', fontWeight: 800 }}>가격은 590,000원</b>으로 오르고, <b style={{ color: '#fff', fontWeight: 800 }}>보너스도 사라집니다.</b>
               </Text>
@@ -2509,7 +2509,7 @@ function EarlyBirdSection() {
                 <Text style={{ fontSize: isMobile ? 26 : 'clamp(26px, 3.4vw, 34px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#fff' }}>
                   총 <span style={{ color: '#a78bfa' }}>169,000원</span> 상당
                 </Text>
-                <Text style={{ marginTop: 6, fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.5)', lineHeight: 1.5 }}>
+                <Text style={{ marginTop: 6, fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.75)', lineHeight: 1.5 }}>
                   할인 91,000원 + 보너스 크레딧 78,000원 상당
                 </Text>
               </Box>
@@ -2618,9 +2618,11 @@ function EbTier(p: EbTierProps) {
       border: '2px solid #b46bff',
       animation: 'ebGlow 2.8s ease-in-out infinite',
     } : p.variant === 'dim' ? {
-      opacity: .55, filter: 'saturate(.75)',
+      background: 'linear-gradient(180deg,rgba(24,20,34,.55),rgba(18,15,26,.55))',
+      border: '1px solid rgba(255,255,255,.05)',
     } : {
-      opacity: .42, filter: 'saturate(.6)',
+      background: 'linear-gradient(180deg,rgba(24,20,34,.4),rgba(18,15,26,.4))',
+      border: '1px solid rgba(255,255,255,.04)',
     };
   const statusStyle: React.CSSProperties =
     p.status === 'live' ? { background: '#b46bff', color: '#fff', boxShadow: '0 0 20px rgba(180,107,255,.5), 0 0 0 3px rgba(180,107,255,.2)' } :
@@ -2649,7 +2651,7 @@ function EbTier(p: EbTierProps) {
           fontSize: 11, fontWeight: 900,
           boxShadow: p.variant === 'active' ? '0 0 16px rgba(180,107,255,.7)' : 'none',
         }}>{p.stageNum}</span>
-        <span style={{ color: 'rgba(255,255,255,.35)', fontWeight: 700, letterSpacing: '-0.01em', fontSize: 11.5 }}>
+        <span style={{ color: 'rgba(255,255,255,.55)', fontWeight: 700, letterSpacing: '-0.01em', fontSize: 11.5 }}>
           STAGE {p.stageNum} / 03
         </span>
         <span style={{
@@ -2677,7 +2679,7 @@ function EbTier(p: EbTierProps) {
         <Box>
           <Box style={{
             fontSize: p.isMobile ? 20 : 'clamp(22px, 2.4vw, 26px)', fontWeight: 900, letterSpacing: '-0.03em',
-            color: p.variant === 'end' ? 'rgba(255,255,255,.6)' : '#fff',
+            color: p.variant === 'end' ? 'rgba(255,255,255,.55)' : p.variant === 'dim' ? 'rgba(255,255,255,.8)' : '#fff',
             lineHeight: 1.1, marginBottom: 12,
             textDecoration: p.variant === 'end' ? 'line-through' : 'none',
           }}>{p.tierName}</Box>
@@ -2686,7 +2688,7 @@ function EbTier(p: EbTierProps) {
               <Box component="li" key={i} style={{
                 display: 'flex', alignItems: 'flex-start', gap: 10,
                 fontSize: p.isMobile ? 13 : 13.5, fontWeight: 600,
-                color: f.muted ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.8)',
+                color: f.muted ? 'rgba(255,255,255,.55)' : (p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.88)'),
                 lineHeight: 1.5,
               }}>
                 <span style={{
@@ -2710,18 +2712,18 @@ function EbTier(p: EbTierProps) {
         </Box>
         <Box style={{ textAlign: p.isMobile ? 'left' : 'right', minWidth: p.isMobile ? undefined : 150 }}>
           {p.priceStrike && (
-            <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.35)', textDecoration: 'line-through', letterSpacing: '-0.01em', marginBottom: 4 }}>
+            <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.55)', textDecoration: 'line-through', letterSpacing: '-0.01em', marginBottom: 4 }}>
               {p.priceStrike}
             </Text>
           )}
           <Text style={{
             fontSize: p.isMobile ? 26 : 'clamp(24px, 3vw, 30px)', fontWeight: 900, letterSpacing: '-0.035em',
-            color: p.variant === 'end' ? '#fca5a5' : '#fff',
+            color: p.variant === 'end' ? '#fca5a5' : p.variant === 'dim' ? 'rgba(255,255,255,.82)' : '#fff',
             lineHeight: 1,
             textShadow: p.variant === 'active' ? '0 0 24px rgba(180,107,255,.6)' : 'none',
           }}>{p.priceNow}</Text>
           {p.priceNote && (
-            <Text style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.45)', marginTop: 6, letterSpacing: '-0.01em' }}>
+            <Text style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.65)', marginTop: 6, letterSpacing: '-0.01em' }}>
               {p.priceNote}
             </Text>
           )}
