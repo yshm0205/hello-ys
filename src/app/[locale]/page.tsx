@@ -3082,8 +3082,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 {isUrgent ? (
                   <>자리 <b style={{ color: '#fca5a5', fontWeight: 800 }}>마감 임박</b>. 마감되면 다음 대기자는 2차 혜택으로 전환됩니다.</>
                 ) : (
-                  <>{earlybird.progressHint}<br />
-                  <b style={{ color: '#fff', fontWeight: 800 }}>혜택 단계만</b> 줄어들고, 2차 종료 후에는 기본 구성으로 전환됩니다.</>
+                  earlybird.progressHint
                 )}
               </Text>
               <Box style={{
