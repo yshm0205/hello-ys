@@ -1828,19 +1828,19 @@ function HowItWorksSection() {
       qNum: 'Q1', question: '쇼츠, 처음이신가요?',
       label: '입문', color: '#8b5cf6',
       answer: '기획부터 수익화까지 순서대로 알려드립니다.',
-      includes: ['전자책 (기초 가이드)', 'VOD 40강 (순차 학습)', 'AI 스크립트 4개월'],
+      includes: ['전자책', 'VOD 40강', 'AI 스크립트'],
     },
     {
       qNum: 'Q2', question: '하고 있는데 성장이 안 되나요?',
       label: '성장', color: '#22c55e',
       answer: '터지는 영상에는 공식이 있습니다. 그 공식을 드립니다.',
-      includes: ['채널 리스트 (벤치마크)', 'AI 스크립트 (검증된 구조)', 'VOD 40강 (심화)'],
+      includes: ['채널 리스트', 'AI 스크립트', 'VOD 40강'],
     },
     {
       qNum: 'Q3', question: '혼자 하려니 지치셨나요?',
       label: '시스템화', color: '#3b82f6',
       answer: '반복 작업은 AI에게. 당신은 기획만 하세요.',
-      includes: ['노션 운영 템플릿', 'AI 스크립트 (자동화)', '채널 리스트 (트렌드)'],
+      includes: ['노션 운영 템플릿', 'AI 스크립트', '채널 리스트'],
     },
   ];
 
