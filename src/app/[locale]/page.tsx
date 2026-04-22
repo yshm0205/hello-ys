@@ -2244,18 +2244,22 @@ function FloatingCTA() {
           )}
         </AnimatePresence>
 
-        {/* 메인 바 — 한 줄 가격 */}
+        {/* 메인 바 — 2줄 (위: 할부 원가+할인% / 아래: 최종 월 가격 크게) */}
         <Box style={{ padding: '4px 16px 12px' }}>
           <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
             <Box style={{ flex: 1, minWidth: 0 }}>
-              <Text style={{ fontSize: '13px', color: '#3f3f46', lineHeight: 1.35, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <span style={{ color: '#52525b' }}>12개월 할부 시 </span>
+              <Text style={{ fontSize: '11px', color: '#71717a', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+                <span>12개월 할부 시 </span>
                 <span style={{ color: '#a1a1aa', textDecoration: 'line-through' }}>월 {monthly12Orig.toLocaleString()}원</span>
-                {' '}
-                <span style={{ color: '#ef4444', fontWeight: 800 }}>{discountPct}%</span>
-                {' '}
-                <span style={{ color: '#18181b', fontWeight: 800, fontSize: '15px' }}>월 {monthly12Now.toLocaleString()}원</span>
               </Text>
+              <Group gap={6} align="baseline" wrap="nowrap" style={{ marginTop: 1 }}>
+                <Text style={{ fontSize: '13px', fontWeight: 800, color: '#ef4444', lineHeight: 1.1 }}>
+                  {discountPct}%
+                </Text>
+                <Text style={{ fontSize: '18px', fontWeight: 800, color: '#18181b', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+                  월 {monthly12Now.toLocaleString()}원
+                </Text>
+              </Group>
             </Box>
             <AuthAwareButton
               authenticatedHref="/checkout/allinone"
