@@ -2154,14 +2154,20 @@ function FloatingCTA() {
   if (!isVisible) return null;
 
   if (isMobile) {
+    const monthly12 = Math.ceil(primaryProgram.amount / 12);
+    const monthly6 = Math.ceil(primaryProgram.amount / 6);
+    const monthly3 = Math.ceil(primaryProgram.amount / 3);
+    const discountPct = Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100);
+    const discountAmt = primaryProgram.listAmount - primaryProgram.amount;
+
     return (
       <Box style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000,
-        background: '#ffffff', borderTop: '1px solid #d4d4d8',
+        background: '#ffffff', borderTop: '1px solid #e4e4e7',
         paddingBottom: 'env(safe-area-inset-bottom)',
         boxShadow: '0 -2px 16px rgba(0,0,0,0.08)',
       }}>
-        {/* 펼침 영역 */}
+        {/* 펼침 영역 — 가격 정보만 */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -2172,50 +2178,80 @@ function FloatingCTA() {
               style={{ overflow: 'hidden' }}
             >
               <Box style={{
-                padding: '16px 16px 0',
+                padding: '16px 16px 12px',
                 borderBottom: '1px solid #f4f4f5',
+                background: '#fafafa',
               }}>
-                <Stack gap={8}>
-                  {[
-                    { label: '총 금액', value: `₩${primaryProgram.amount.toLocaleString()} (${Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}% 할인)` },
-                    { label: '구성', value: 'VOD 40강 + 전자책 133p' },
-                    { label: '이용기간', value: '4개월 올인원' },
-                    { label: '크레딧', value: '매달 400cr × 4회' },
-                    { label: '환불', value: '7일 이내 전액 환불' },
-                  ].map((item) => (
-                    <Group key={item.label} justify="space-between" wrap="nowrap">
-                      <Text style={{ fontSize: '13px', color: '#71717a' }}>{item.label}</Text>
-                      <Text style={{ fontSize: '13px', fontWeight: 700, color: '#27272a' }}>{item.value}</Text>
-                    </Group>
-                  ))}
+                <Stack gap={10}>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text style={{ fontSize: '13px', color: '#71717a' }}>정가</Text>
+                    <Text style={{ fontSize: '13px', color: '#a1a1aa', textDecoration: 'line-through' }}>
+                      ₩{primaryProgram.listAmount.toLocaleString()}
+                    </Text>
+                  </Group>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text style={{ fontSize: '13px', color: '#71717a' }}>할인</Text>
+                    <Text style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>
+                      -₩{discountAmt.toLocaleString()} ({discountPct}%)
+                    </Text>
+                  </Group>
+                  <Group justify="space-between" wrap="nowrap" style={{
+                    paddingTop: '10px', borderTop: '1px solid #e4e4e7',
+                  }}>
+                    <Text style={{ fontSize: '14px', fontWeight: 700, color: '#27272a' }}>총 결제금액</Text>
+                    <Text style={{ fontSize: '15px', fontWeight: 800, color: '#18181b' }}>
+                      ₩{primaryProgram.amount.toLocaleString()}
+                    </Text>
+                  </Group>
+
+                  <Box style={{
+                    marginTop: '6px', padding: '10px 12px',
+                    background: '#ffffff', border: '1px solid #e4e4e7', borderRadius: '8px',
+                  }}>
+                    <Text style={{ fontSize: '11px', fontWeight: 700, color: '#71717a', marginBottom: '6px', letterSpacing: '0.5px' }}>
+                      무이자 할부 (카드사별 상이)
+                    </Text>
+                    <Stack gap={4}>
+                      <Group justify="space-between" wrap="nowrap">
+                        <Text style={{ fontSize: '12px', color: '#52525b' }}>3개월</Text>
+                        <Text style={{ fontSize: '12px', fontWeight: 700, color: '#27272a' }}>월 ₩{monthly3.toLocaleString()}</Text>
+                      </Group>
+                      <Group justify="space-between" wrap="nowrap">
+                        <Text style={{ fontSize: '12px', color: '#52525b' }}>6개월</Text>
+                        <Text style={{ fontSize: '12px', fontWeight: 700, color: '#27272a' }}>월 ₩{monthly6.toLocaleString()}</Text>
+                      </Group>
+                      <Group justify="space-between" wrap="nowrap">
+                        <Text style={{ fontSize: '12px', color: '#8b5cf6' }}>12개월</Text>
+                        <Text style={{ fontSize: '12px', fontWeight: 800, color: '#8b5cf6' }}>월 ₩{monthly12.toLocaleString()}</Text>
+                      </Group>
+                    </Stack>
+                  </Box>
                 </Stack>
-                <Box style={{ height: '12px' }} />
               </Box>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* 메인 바 */}
+        {/* 메인 바 — 월할부 중심 */}
         <Box style={{ padding: '10px 16px' }}>
           <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
-            <Group gap={8} align="center" wrap="nowrap" style={{ cursor: 'pointer' }} onClick={() => setIsExpanded((v) => !v)}>
-              <Stack gap={0}>
-                <Group gap={6} align="baseline">
-                  <Text style={{ fontSize: '19px', fontWeight: 800, color: '#8b5cf6', lineHeight: 1.2 }}>
-                    ₩{primaryProgram.amount.toLocaleString()}
-                  </Text>
-                  <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444' }}>
-                    {Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100)}%
+            <Group gap={8} align="center" wrap="nowrap" style={{ cursor: 'pointer', flex: 1, minWidth: 0 }} onClick={() => setIsExpanded((v) => !v)}>
+              <Stack gap={2} style={{ minWidth: 0 }}>
+                <Group gap={6} align="baseline" wrap="nowrap">
+                  <Text style={{ fontSize: '11px', fontWeight: 700, color: '#8b5cf6' }}>월</Text>
+                  <Text style={{ fontSize: '20px', fontWeight: 800, color: '#18181b', lineHeight: 1.1 }}>
+                    ₩{monthly12.toLocaleString()}
                   </Text>
                 </Group>
                 <Text style={{ fontSize: '11px', color: '#71717a' }}>
-                  12개월 할부 시 월 {Math.ceil(primaryProgram.amount / 12).toLocaleString()}원
+                  12개월 할부 · 총 ₩{primaryProgram.amount.toLocaleString()}
                 </Text>
               </Stack>
               <ChevronDown
-                size={16}
-                color="#a1a1aa"
+                size={18}
+                color="#71717a"
                 style={{
+                  flexShrink: 0,
                   transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                   transition: 'transform 200ms ease',
                 }}
