@@ -23,6 +23,8 @@ export function KakaoChatButton() {
   const pathname = usePathname();
 
   const isLecturePlayer = /\/lectures\/vod_/.test(pathname);
+  // 랜딩 페이지(로케일 루트)에선 모바일 FloatingCTA 위로 올라가야 겹침 방지
+  const isLandingRoot = /^\/[a-z]{2}\/?$/.test(pathname) || pathname === "/";
 
   useEffect(() => {
     if (window.Kakao?.isInitialized()) {
@@ -58,7 +60,7 @@ export function KakaoChatButton() {
     <button
       onClick={handleClick}
       aria-label="카카오톡 문의"
-      className="fixed bottom-[calc(env(safe-area-inset-bottom)+76px)] right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEE500] shadow-lg transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:h-14 md:w-14"
+      className={`fixed ${isLandingRoot ? "bottom-[calc(env(safe-area-inset-bottom)+108px)]" : "bottom-[calc(env(safe-area-inset-bottom)+76px)]"} right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEE500] shadow-lg transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:h-14 md:w-14`}
     >
       <svg
         width="28"
