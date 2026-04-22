@@ -2442,8 +2442,8 @@ function EarlyBirdSection() {
         <Box style={{
           position: 'relative',
           background: '#0a0612',
-          borderRadius: 'clamp(18px, 2.5vw, 28px)',
-          padding: isMobile ? '28px 18px 36px' : 'clamp(40px, 5vw, 64px)',
+          borderRadius: 'clamp(20px, 2.5vw, 28px)',
+          padding: isMobile ? '32px 20px 40px' : 'clamp(48px, 5.5vw, 72px)',
           overflow: 'hidden',
           boxShadow: '0 30px 80px -20px rgba(24,24,27,.35), 0 10px 30px -10px rgba(0,0,0,.2)',
           backgroundImage: `
@@ -2455,7 +2455,7 @@ function EarlyBirdSection() {
           <Box style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : '1fr 1.2fr',
-            gap: isMobile ? 28 : 'clamp(28px, 4vw, 56px)',
+            gap: isMobile ? 36 : 'clamp(36px, 5vw, 72px)',
             alignItems: 'flex-start',
           }}>
             {/* LEFT — Countdown */}
@@ -2481,7 +2481,7 @@ function EarlyBirdSection() {
                 {(['d','h','m','s'] as const).map((k, i) => (
                   <Box key={k} style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <Text style={{
-                      fontSize: isMobile ? 40 : 'clamp(44px, 5.6vw, 62px)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1,
+                      fontSize: isMobile ? 48 : 'clamp(52px, 6.8vw, 72px)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1,
                       background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
                       WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
                       textShadow: '0 0 40px rgba(139,92,246,.35)',
@@ -2535,7 +2535,7 @@ function EarlyBirdSection() {
                 tierName="2차 얼리버드"
                 feats={[
                   { ok: true, text: <>정가 대비 91,000원 할인 · 499,000원</> },
-                  { ok: false, muted: true, text: <><b>1차 한정 보너스 +400cr 종료</b> — 400cr로 축소</> },
+                  { ok: true, text: <>보너스 크레딧 <b>400cr</b> 지급 (1차 대비 축소)</> },
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
                 bonusText={<>+ 보너스 <b>400cr</b> · 39,000원 상당</>}
@@ -2555,13 +2555,13 @@ function EarlyBirdSection() {
                 priceNow="590,000원" priceUp="+91,000원 인상"
                 variant="end" isMobile={isMobile}
               />
-              <Box style={{ marginTop: 32, display: 'flex', justifyContent: 'center' }}>
+              <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
                 <Link href="/pricing" style={{ textDecoration: 'none' }}>
                   <button className="eb-cta" style={{
                     display: 'inline-flex', alignItems: 'center', gap: 10,
-                    padding: isMobile ? '16px 32px' : '18px 40px',
+                    padding: isMobile ? '18px 36px' : '20px 44px',
                     border: 'none', cursor: 'pointer',
-                    fontFamily: 'inherit', fontSize: isMobile ? 15 : 17, fontWeight: 900, letterSpacing: '-0.02em',
+                    fontFamily: 'inherit', fontSize: isMobile ? 16 : 17, fontWeight: 900, letterSpacing: '-0.02em',
                     background: 'linear-gradient(135deg,#8b5cf6,#d946ef)',
                     color: '#fff', borderRadius: 999,
                     boxShadow: '0 0 0 3px rgba(180,107,255,.2), 0 14px 40px -8px rgba(180,107,255,.6)',
@@ -2582,8 +2582,8 @@ function EarlyBirdSection() {
 
 function EbChevron() {
   return (
-    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 26 }}>
-      <ChevronDown size={20} color="rgba(255,255,255,.25)" />
+    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 32 }}>
+      <ChevronDown size={22} color="rgba(255,255,255,.3)" />
     </Box>
   );
 }
@@ -2608,8 +2608,8 @@ function EbTier(p: EbTierProps) {
     position: 'relative',
     background: 'linear-gradient(180deg,rgba(24,20,34,.9),rgba(18,15,26,.9))',
     border: '1px solid rgba(255,255,255,.06)',
-    borderRadius: 20,
-    padding: p.isMobile ? '20px 18px' : '26px 28px',
+    borderRadius: 22,
+    padding: p.isMobile ? '24px 20px' : '30px 34px',
     backdropFilter: 'blur(10px)',
   };
   const variantStyle: React.CSSProperties =
@@ -2678,12 +2678,11 @@ function EbTier(p: EbTierProps) {
       }}>
         <Box>
           <Box style={{
-            fontSize: p.isMobile ? 20 : 'clamp(22px, 2.4vw, 26px)', fontWeight: 900, letterSpacing: '-0.03em',
-            color: p.variant === 'end' ? 'rgba(255,255,255,.55)' : p.variant === 'dim' ? 'rgba(255,255,255,.8)' : '#fff',
-            lineHeight: 1.1, marginBottom: 12,
-            textDecoration: p.variant === 'end' ? 'line-through' : 'none',
+            fontSize: p.isMobile ? 22 : 'clamp(24px, 2.6vw, 28px)', fontWeight: 900, letterSpacing: '-0.03em',
+            color: p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.82)' : '#fff',
+            lineHeight: 1.1, marginBottom: 14,
           }}>{p.tierName}</Box>
-          <Box component="ul" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Box component="ul" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
             {p.feats.map((f, i) => (
               <Box component="li" key={i} style={{
                 display: 'flex', alignItems: 'flex-start', gap: 10,
@@ -2692,9 +2691,9 @@ function EbTier(p: EbTierProps) {
                 lineHeight: 1.5,
               }}>
                 <span style={{
-                  width: 17, height: 17, flexShrink: 0, marginTop: 2,
+                  width: 19, height: 19, flexShrink: 0, marginTop: 2,
                   borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10.5, fontWeight: 900,
+                  fontSize: 11, fontWeight: 900,
                   background: f.ok ? 'rgba(167,139,250,.2)' : 'rgba(239,68,68,.15)',
                   color: f.ok ? '#a78bfa' : '#fca5a5',
                 }}>{f.ok ? '✓' : '✕'}</span>
@@ -2704,9 +2703,9 @@ function EbTier(p: EbTierProps) {
           </Box>
           <Box style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '7px 13px', borderRadius: 999,
-            fontSize: 12.5, fontWeight: 800, letterSpacing: '-0.01em',
-            marginTop: 16, whiteSpace: 'nowrap',
+            padding: '9px 15px', borderRadius: 999,
+            fontSize: 13, fontWeight: 800, letterSpacing: '-0.01em',
+            marginTop: 20, whiteSpace: 'nowrap',
             ...bonusStyle,
           }}>{p.bonusText}</Box>
         </Box>
