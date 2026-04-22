@@ -2126,7 +2126,6 @@ function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [tl, setTl] = useState({ d: '00', h: '00', m: '00', s: '00' });
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -2146,29 +2145,9 @@ function FloatingCTA() {
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // 얼리버드 카운트다운 (FloatingCTA 내부용)
-    const deadline = new Date(EARLYBIRD_DEADLINE).getTime();
-    const tick = () => {
-      const diff = deadline - Date.now();
-      if (diff <= 0) { setTl({ d: '00', h: '00', m: '00', s: '00' }); return; }
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setTl({
-        d: String(d).padStart(2, '0'),
-        h: String(h).padStart(2, '0'),
-        m: String(m).padStart(2, '0'),
-        s: String(s).padStart(2, '0'),
-      });
-    };
-    tick();
-    const tickId = setInterval(tick, 1000);
-
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleScroll);
-      clearInterval(tickId);
     };
   }, []);
 
@@ -2204,7 +2183,7 @@ function FloatingCTA() {
           />
         </Box>
 
-        {/* 펼침 영역 — 프로모션 기간 + 카운트다운 */}
+        {/* 펼침 영역 — 선착순 카운터 */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -2219,24 +2198,33 @@ function FloatingCTA() {
                   background: '#f4f4f5', borderRadius: '10px',
                   padding: '14px 16px',
                 }}>
-                  <Text style={{
-                    fontSize: '12px', fontWeight: 700, color: '#52525b',
-                    textAlign: 'center', marginBottom: '6px',
+                  <Group justify="space-between" align="baseline" wrap="nowrap" mb={8}>
+                    <Text style={{ fontSize: '12px', fontWeight: 700, color: '#52525b' }}>
+                      1차 얼리버드 선착순
+                    </Text>
+                    <Text style={{
+                      fontSize: '13px', fontWeight: 800, color: '#8b5cf6',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>
+                      {EARLYBIRD_TIER1_REMAINING} / {EARLYBIRD_TIER1_TOTAL}명 남음
+                    </Text>
+                  </Group>
+                  <Box style={{
+                    width: '100%', height: 6, borderRadius: 999,
+                    background: '#e4e4e7', overflow: 'hidden', marginBottom: 8,
                   }}>
-                    1차 얼리버드 프로모션
-                  </Text>
+                    <Box style={{
+                      width: `${Math.round(((EARLYBIRD_TIER1_TOTAL - EARLYBIRD_TIER1_REMAINING) / EARLYBIRD_TIER1_TOTAL) * 100)}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
+                      transition: 'width 600ms ease',
+                    }} />
+                  </Box>
                   <Text style={{
-                    fontSize: '13px', color: '#27272a',
-                    textAlign: 'center', marginBottom: '8px', lineHeight: 1.45,
+                    fontSize: '11.5px', color: '#71717a',
+                    textAlign: 'center', lineHeight: 1.45,
                   }}>
-                    지금부터 ~ 2026년 5월 8일 23:59
-                  </Text>
-                  <Text style={{
-                    fontSize: '13px', fontWeight: 800, color: '#8b5cf6',
-                    textAlign: 'center',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}>
-                    프로모션 {parseInt(tl.d, 10)}일 {tl.h}:{tl.m}:{tl.s} 남음
+                    마감되면 2차 얼리버드(보너스 절반)로 전환됩니다
                   </Text>
                 </Box>
               </Box>
@@ -2421,32 +2409,19 @@ function StickyTabNav() {
 /* ═══════════════════════════════════════════════════════════════
    섹션 1.5: EarlyBirdSection — 얼리버드 3단계 (다크 카드)
    ═══════════════════════════════════════════════════════════════ */
-const EARLYBIRD_DEADLINE = '2026-05-08T23:59:59+09:00'; // 1차 얼리버드 종료
+// 얼리버드 선착순 설정 — 외부 노출은 선착순 단일, 날짜는 내부 운영용 (UI 노출 X)
+// TODO: 실제 결제 데이터에 연결 (예: Supabase view `paid_early_bird_slot_count`)
+const EARLYBIRD_TIER1_TOTAL = 30;
+const EARLYBIRD_TIER1_REMAINING = 23; // placeholder — DB 연동 예정
+const EARLYBIRD_TIER2_TOTAL = 70;
 
 function EarlyBirdSection() {
   const isMobile = useIsMobile(900);
-  const [tl, setTl] = useState({ d: '00', h: '00', m: '00', s: '00' });
-
-  useEffect(() => {
-    const deadline = new Date(EARLYBIRD_DEADLINE).getTime();
-    const tick = () => {
-      const diff = deadline - Date.now();
-      if (diff <= 0) { setTl({ d: '00', h: '00', m: '00', s: '00' }); return; }
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setTl({
-        d: String(d).padStart(2, '0'),
-        h: String(h).padStart(2, '0'),
-        m: String(m).padStart(2, '0'),
-        s: String(s).padStart(2, '0'),
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
+  const remaining = EARLYBIRD_TIER1_REMAINING;
+  const total = EARLYBIRD_TIER1_TOTAL;
+  const claimed = total - remaining;
+  const claimedPct = Math.round((claimed / total) * 100);
+  const isUrgent = remaining <= 5;
 
   return (
     <Box component="section" id="earlybird" style={{
@@ -2481,7 +2456,7 @@ function EarlyBirdSection() {
             gap: isMobile ? 36 : 'clamp(36px, 5vw, 72px)',
             alignItems: 'flex-start',
           }}>
-            {/* LEFT — Countdown */}
+            {/* LEFT — 선착순 카운터 */}
             <Box style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? 0 : 24 }}>
               <Box style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -2497,28 +2472,48 @@ function EarlyBirdSection() {
                 }} />
                 All-in-One Pass · Early Bird
               </Box>
-              <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 12 }}>
-                1차 얼리버드 종료까지
+              <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 14 }}>
+                1차 얼리버드 <b style={{ color: '#fff' }}>선착순 {total}명</b> 한정
               </Text>
-              <Box style={{ display: 'flex', alignItems: 'baseline', gap: isMobile ? 8 : 14, flexWrap: 'wrap', marginBottom: 14 }}>
-                {(['d','h','m','s'] as const).map((k, i) => (
-                  <Box key={k} style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <Text style={{
-                      fontSize: isMobile ? 48 : 'clamp(52px, 6.8vw, 72px)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1,
-                      background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
-                      WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-                      textShadow: '0 0 40px rgba(139,92,246,.35)',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}>{tl[k]}</Text>
-                    <Text style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#a78bfa', letterSpacing: '-0.02em' }}>
-                      {['일','시','분','초'][i]}
-                    </Text>
-                  </Box>
-                ))}
+              <Box style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 18 }}>
+                <Text style={{
+                  fontSize: isMobile ? 72 : 'clamp(80px, 9vw, 112px)', fontWeight: 900,
+                  letterSpacing: '-0.05em', lineHeight: 0.95,
+                  background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
+                  WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+                  textShadow: '0 0 40px rgba(139,92,246,.35)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}>{remaining}</Text>
+                <Text style={{
+                  fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#a78bfa',
+                  letterSpacing: '-0.02em',
+                }}>
+                  자리 남음
+                </Text>
               </Box>
+              <Box style={{
+                width: '100%', height: 10, borderRadius: 999,
+                background: 'rgba(255,255,255,.08)',
+                border: '1px solid rgba(255,255,255,.1)',
+                overflow: 'hidden', marginBottom: 14,
+              }}>
+                <Box style={{
+                  width: `${claimedPct}%`, height: '100%',
+                  background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
+                  boxShadow: '0 0 12px rgba(180,107,255,.6)',
+                  transition: 'width 600ms ease',
+                }} />
+              </Box>
+              <Text style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 18, letterSpacing: '-0.01em' }}>
+                {claimed}명 신청 완료 · 전체 {total}석 중 {claimedPct}%
+              </Text>
               <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55 }}>
-                단 한 번뿐인 혜택, 지금 놓치면 다시 받을 수 없습니다.<br />
-                종료 후엔 <b style={{ color: '#fff', fontWeight: 800 }}>가격은 599,000원</b>으로 오르고, <b style={{ color: '#fff', fontWeight: 800 }}>보너스도 사라집니다.</b>
+                {isUrgent ? (
+                  <>자리 <b style={{ color: '#fca5a5', fontWeight: 800 }}>마감 임박</b>. 마감되면 다음 대기자는 2차 혜택으로 넘어갑니다.</>
+                ) : (
+                  <>1차 마감되면 2차 얼리버드로 전환됩니다.<br />
+                  <b style={{ color: '#fff', fontWeight: 800 }}>보너스 크레딧이 절반</b>으로 줄어들고, 그 이후엔 <b style={{ color: '#fff', fontWeight: 800 }}>정가 599,000원</b>으로 복귀합니다.</>
+                )}
               </Text>
               <Box style={{
                 marginTop: 24, padding: isMobile ? '16px 18px' : '20px 22px',
@@ -2541,7 +2536,7 @@ function EarlyBirdSection() {
             {/* RIGHT — Tier Stack */}
             <Box style={{ display: 'flex', flexDirection: 'column' }}>
               <EbTier
-                stageNum="01" status="live" statusText="LIVE · 진행 중"
+                stageNum="01" status="live" statusText={`LIVE · 선착순 ${EARLYBIRD_TIER1_TOTAL}명 한정`}
                 tierName={<>1차 <em style={{ fontStyle: 'normal', color: '#a78bfa' }}>얼리버드</em></>}
                 feats={[
                   { ok: true, text: <><b>정가 대비 100,000원 할인</b> · 499,000원</> },
@@ -2554,7 +2549,7 @@ function EarlyBirdSection() {
               />
               <EbChevron />
               <EbTier
-                stageNum="02" status="wait" statusText="다음 단계 · 혜택 축소"
+                stageNum="02" status="wait" statusText={`1차 마감 후 시작 · 선착순 ${EARLYBIRD_TIER2_TOTAL}명`}
                 tierName="2차 얼리버드"
                 feats={[
                   { ok: true, text: <>정가 대비 100,000원 할인 · 499,000원</> },
