@@ -2526,7 +2526,7 @@ function EarlyBirdSection() {
                   { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
                 ]}
                 bonusText={<>+ 보너스 <b>78,000원 상당</b></>}
-                priceStrike="590,000원" priceNow="499,000원"
+                priceStrike="정가 590,000원" priceNow="499,000원"
                 variant="active" isMobile={isMobile}
               />
               <EbChevron />
@@ -2539,7 +2539,7 @@ function EarlyBirdSection() {
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
                 bonusText={<>+ 보너스 <b>39,000원 상당</b></>}
-                priceStrike="590,000원" priceNow="499,000원"
+                priceStrike="정가 590,000원" priceNow="499,000원"
                 variant="dim" isMobile={isMobile}
               />
               <EbChevron />
