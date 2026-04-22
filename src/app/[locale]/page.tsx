@@ -1976,30 +1976,6 @@ function HowItWorksSection() {
           ))}
         </Stack>
 
-        {/* Convergence CTA */}
-        <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.3, ease }}>
-          <Stack align="center" gap={16} mt={56}>
-            <Text ta="center" style={{
-              fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900,
-              color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.2,
-            }}>
-              어떤 단계든,{' '}
-              <span style={{ color: '#8b5cf6' }}>올인원 하나</span>면 됩니다
-            </Text>
-            <AuthAwareButton
-              authenticatedHref="/checkout/allinone"
-              unauthenticatedHref="/login?redirect=/checkout/allinone"
-              size="lg" radius="xl"
-              style={{
-                background: '#8b5cf6', fontSize: '16px', fontWeight: 700,
-                padding: '14px 40px', height: 'auto', border: 'none',
-                boxShadow: '0 2px 12px rgba(139,92,246,0.2)',
-              }}
-            >
-              올인원 패스 신청하기
-            </AuthAwareButton>
-          </Stack>
-        </motion.div>
       </Container>
     </Box>
   );
