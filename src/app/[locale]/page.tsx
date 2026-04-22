@@ -2497,7 +2497,9 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
   const floatingCountLabel =
     earlybird.currentTier === 'ended'
       ? '혜택 종료'
-      : `${earlybird.remaining} / ${earlybird.total}명 남음`;
+      : earlybird.claimed === 0
+        ? `선착순 ${earlybird.total}석`
+        : `${earlybird.remaining} / ${earlybird.total}명 남음`;
 
   if (isMobile) {
     return (
@@ -2549,17 +2551,19 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
                       {floatingCountLabel}
                     </Text>
                   </Group>
-                  <Box style={{
-                    width: '100%', height: 6, borderRadius: 999,
-                    background: '#e4e4e7', overflow: 'hidden', marginBottom: 8,
-                  }}>
+                  {earlybird.claimed > 0 && (
                     <Box style={{
-                      width: `${earlybird.claimedPct}%`,
-                      height: '100%',
-                      background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
-                      transition: 'width 600ms ease',
-                    }} />
-                  </Box>
+                      width: '100%', height: 6, borderRadius: 999,
+                      background: '#e4e4e7', overflow: 'hidden', marginBottom: 8,
+                    }}>
+                      <Box style={{
+                        width: `${earlybird.claimedPct}%`,
+                        height: '100%',
+                        background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
+                        transition: 'width 600ms ease',
+                      }} />
+                    </Box>
+                  )}
                   <Text style={{
                     fontSize: '11.5px', color: '#71717a',
                     textAlign: 'center', lineHeight: 1.45,
@@ -2749,7 +2753,7 @@ function StickyTabNav() {
 // 얼리버드 선착순 설정 — 외부 노출은 선착순 단일, 날짜는 내부 운영용 (UI 노출 X)
 // TODO: 실제 결제 데이터에 연결 (예: Supabase view `paid_early_bird_slot_count`)
 const EARLYBIRD_TIER1_TOTAL = 30;
-const EARLYBIRD_TIER1_REMAINING = 23; // placeholder — DB 연동 예정
+const EARLYBIRD_TIER1_REMAINING = 30; // 오픈 직후 — DB 연동 전 실제값 기준
 const EARLYBIRD_TIER2_TOTAL = 70;
 
 function LegacyEarlyBirdSection_DoNotUse() {
@@ -3054,22 +3058,42 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   {earlybirdEnded ? '혜택 종료' : '자리 남음'}
                 </Text>
               </Box>
-              <Box style={{
-                width: '100%', height: 10, borderRadius: 999,
-                background: 'rgba(255,255,255,.08)',
-                border: '1px solid rgba(255,255,255,.1)',
-                overflow: 'hidden', marginBottom: 14,
-              }}>
+              {claimed > 0 ? (
+                <>
+                  <Box style={{
+                    width: '100%', height: 10, borderRadius: 999,
+                    background: 'rgba(255,255,255,.08)',
+                    border: '1px solid rgba(255,255,255,.1)',
+                    overflow: 'hidden', marginBottom: 14,
+                  }}>
+                    <Box style={{
+                      width: `${claimedPct}%`, height: '100%',
+                      background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
+                      boxShadow: '0 0 12px rgba(180,107,255,.6)',
+                      transition: 'width 600ms ease',
+                    }} />
+                  </Box>
+                  <Text style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 18, letterSpacing: '-0.01em' }}>
+                    {claimed}명 신청 완료 · 전체 {total}석 중 {claimedPct}%
+                  </Text>
+                </>
+              ) : !earlybirdEnded && (
                 <Box style={{
-                  width: `${claimedPct}%`, height: '100%',
-                  background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
-                  boxShadow: '0 0 12px rgba(180,107,255,.6)',
-                  transition: 'width 600ms ease',
-                }} />
-              </Box>
-              <Text style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 18, letterSpacing: '-0.01em' }}>
-                {claimed}명 신청 완료 · 전체 {total}석 중 {claimedPct}%
-              </Text>
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '7px 13px', borderRadius: 999,
+                  background: 'rgba(217,70,239,.14)',
+                  border: '1px solid rgba(217,70,239,.35)',
+                  marginBottom: 18,
+                }}>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: '#f0abfc', animation: 'ebBlink 1.2s infinite',
+                  }} />
+                  <Text style={{ fontSize: 12.5, fontWeight: 800, color: '#f0abfc', letterSpacing: '-0.01em' }}>
+                    방금 오픈 · 선착순 {total}석
+                  </Text>
+                </Box>
+              )}
               <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55 }}>
                 {isUrgent ? (
                   <>자리 <b style={{ color: '#fca5a5', fontWeight: 800 }}>마감 임박</b>. 마감되면 다음 대기자는 2차 혜택으로 전환됩니다.</>
