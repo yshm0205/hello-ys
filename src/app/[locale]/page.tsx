@@ -2149,27 +2149,22 @@ function FloatingCTA() {
     handleResize();
     window.addEventListener('resize', handleResize);
 
-    // 히어로 CTA가 화면에서 사라지면 FloatingCTA 표시
-    const heroCta = document.getElementById('hero-cta');
-    if (!heroCta) {
-      // fallback: 히어로 CTA 없으면 스크롤 기반
-      const handleScroll = () => setIsVisible(window.scrollY > 400);
-      window.addEventListener('scroll', handleScroll);
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('scroll', handleScroll);
-      };
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(heroCta);
+    // 얼리버드 섹션을 완전히 지나간 이후에만 FloatingCTA 표시 (겹침 방지)
+    const handleScroll = () => {
+      const eb = document.getElementById('earlybird');
+      if (eb) {
+        setIsVisible(eb.getBoundingClientRect().bottom < 0);
+        return;
+      }
+      // fallback: 얼리버드 없으면 스크롤 기반
+      setIsVisible(window.scrollY > 400);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
