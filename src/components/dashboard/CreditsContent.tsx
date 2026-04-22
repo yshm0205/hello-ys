@@ -11,7 +11,6 @@ import {
     Progress,
     SimpleGrid,
     Stack,
-    Table,
     Text,
     Title,
 } from '@mantine/core';
@@ -19,11 +18,6 @@ import { useSearchParams } from 'next/navigation';
 import {
     Coins,
     Crown,
-    FlaskConical,
-    RefreshCw,
-    Search,
-    SkipForward,
-    Sparkles,
     Zap,
 } from 'lucide-react';
 
@@ -55,7 +49,7 @@ interface CreditInfo {
 
 interface CreditsContentProps {
     userId?: string;
-    isAdmin?: boolean;
+    userEmail?: string;
 }
 
 const packs = CREDIT_TOPUP_PACKS.map((pack) => ({
@@ -64,33 +58,6 @@ const packs = CREDIT_TOPUP_PACKS.map((pack) => ({
     unitLabel: `10cr당 ₩${Math.round(pack.amount / (pack.credits / 10)).toLocaleString()}`,
     generationLabel: `생성 ${(pack.credits / 10).toLocaleString()}회 분량`,
 }));
-
-const usageGuide = [
-    {
-        action: '리서치',
-        cost: 3,
-        icon: <Search size={16} />,
-        desc: '주제 기반 리서치와 구조 분석',
-    },
-    {
-        action: '전체 생성',
-        cost: 10,
-        icon: <Sparkles size={16} />,
-        desc: '리서치를 포함한 전체 스크립트 생성',
-    },
-    {
-        action: '스킵 생성',
-        cost: 7,
-        icon: <SkipForward size={16} />,
-        desc: '리서치 없이 바로 스크립트 생성',
-    },
-    {
-        action: '리라이트',
-        cost: 2,
-        icon: <RefreshCw size={16} />,
-        desc: '기존 스크립트의 말투와 표현 수정',
-    },
-];
 
 function formatDate(value?: string | null) {
     if (!value) return '-';
@@ -101,42 +68,22 @@ function formatDate(value?: string | null) {
     });
 }
 
-export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps) {
+export function CreditsContent({ userId, userEmail }: CreditsContentProps) {
     const tossPayTestPlan = TOSSPAY_PLAN_CONFIG.allinone;
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
-    const [testEmailLoading, setTestEmailLoading] = useState(false);
-    const [testEmailMessage, setTestEmailMessage] = useState<string | null>(null);
     const autoCheckoutTriggeredRef = useRef(false);
     const searchParams = useSearchParams();
-    const { requestPayment, loading: paymentLoading } = useTossPayment(userId);
+    const {
+        requestPayment,
+        loading: paymentLoading,
+        error: paymentError,
+        notice: paymentNotice,
+    } = useTossPayment(userId, userEmail);
     const {
         requestPayment: requestTossPay,
         loading: tossPayLoading,
         error: tossPayError,
     } = useTossPay();
-
-    async function sendTestPaymentEmail() {
-        setTestEmailLoading(true);
-        setTestEmailMessage(null);
-
-        try {
-            const res = await fetch('/api/admin/test-payment-email', {
-                method: 'POST',
-            });
-            const data = await res.json();
-
-            if (!res.ok) {
-                setTestEmailMessage(data.error || '테스트 메일 발송에 실패했습니다.');
-                return;
-            }
-
-            setTestEmailMessage(`${data.email}로 결제 완료 테스트 메일을 보냈습니다.`);
-        } catch {
-            setTestEmailMessage('테스트 메일 발송에 실패했습니다.');
-        } finally {
-            setTestEmailLoading(false);
-        }
-    }
 
     useEffect(() => {
         async function fetchCredits() {
@@ -187,9 +134,6 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
     const totalCycles = creditInfo?.monthly_credit_total_cycles ?? null;
     const nextCreditAt = creditInfo?.next_credit_at ?? null;
     const statusLabel = hasActiveAccess ? '활성' : isExpiredPaid ? '만료' : '무료';
-    const isEmailError =
-        !!testEmailMessage &&
-        (testEmailMessage.includes('실패') || testEmailMessage.toLowerCase().includes('fail'));
 
     return (
         <Container size="xl" py="md">
@@ -431,106 +375,17 @@ export function CreditsContent({ userId, isAdmin = false }: CreditsContentProps)
                             </Card>
                         ))}
                     </SimpleGrid>
+                    {paymentError && (
+                        <Text size="sm" c="red.6" mt="md">
+                            {paymentError}
+                        </Text>
+                    )}
+                    {paymentNotice && (
+                        <Text size="sm" c="dimmed" mt="md">
+                            {paymentNotice}
+                        </Text>
+                    )}
                 </Box>
-
-                {isAdmin && (
-                    <Card padding="lg" radius="xl" withBorder>
-                        <Group justify="space-between" align="flex-start" gap="md">
-                            <Box maw={560}>
-                                <Group gap="xs" mb="xs">
-                                    <FlaskConical size={18} color="#8b5cf6" />
-                                    <Text fw={700} style={{ color: 'var(--mantine-color-text)' }}>
-                                        TossPay API 테스트
-                                    </Text>
-                                </Group>
-                                <Text size="sm" c="dimmed">
-                                    `TOSSPAY_API_KEY`로 TossPay 생성, 콜백, 성공 페이지 흐름을
-                                    실제 결제로 검증합니다. 4개월 프로그램 기준{' '}
-                                    ₩{tossPayTestPlan.amount.toLocaleString()} 결제 페이지를 엽니다.
-                                </Text>
-                                {tossPayError && (
-                                    <Text size="sm" c="red.6" mt="xs">
-                                        {tossPayError}
-                                    </Text>
-                                )}
-                            </Box>
-                            <Button
-                                color="violet"
-                                radius="lg"
-                                loading={tossPayLoading}
-                                onClick={() => requestTossPay('allinone')}
-                            >
-                                토스페이 테스트 결제
-                            </Button>
-                        </Group>
-                    </Card>
-                )}
-
-                {isAdmin && (
-                    <Card padding="lg" radius="xl" withBorder>
-                        <Group justify="space-between" align="flex-start" gap="md">
-                            <Box maw={560}>
-                                <Group gap="xs" mb="xs">
-                                    <FlaskConical size={18} color="#8b5cf6" />
-                                    <Text fw={700} style={{ color: 'var(--mantine-color-text)' }}>
-                                        결제 완료 이메일 테스트
-                                    </Text>
-                                </Group>
-                                <Text size="sm" c="dimmed">
-                                    실결제 없이 현재 로그인한 관리자 계정 이메일로 결제 완료 메일만
-                                    발송합니다.
-                                </Text>
-                                {testEmailMessage && (
-                                    <Text size="sm" c={isEmailError ? 'red.6' : 'teal.6'} mt="xs">
-                                        {testEmailMessage}
-                                    </Text>
-                                )}
-                            </Box>
-                            <Button
-                                variant="light"
-                                color="violet"
-                                radius="lg"
-                                loading={testEmailLoading}
-                                onClick={sendTestPaymentEmail}
-                            >
-                                테스트 메일 보내기
-                            </Button>
-                        </Group>
-                    </Card>
-                )}
-
-                <Card padding="xl" radius="xl" withBorder>
-                    <Title order={4} mb="md" style={{ color: 'var(--mantine-color-text)' }}>
-                        크레딧 사용 안내
-                    </Title>
-                    <Table>
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th>기능</Table.Th>
-                                <Table.Th>소모량</Table.Th>
-                                <Table.Th>설명</Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                            {usageGuide.map((item) => (
-                                <Table.Tr key={item.action}>
-                                    <Table.Td>
-                                        <Group gap={8}>
-                                            {item.icon}
-                                            <Text size="sm" fw={500}>{item.action}</Text>
-                                        </Group>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Badge variant="light" color="violet" size="sm">{item.cost} cr</Badge>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size="sm" c="gray.6">{item.desc}</Text>
-                                    </Table.Td>
-                                </Table.Tr>
-                            ))}
-                        </Table.Tbody>
-                    </Table>
-                </Card>
             </Stack>
         </Container>
     );

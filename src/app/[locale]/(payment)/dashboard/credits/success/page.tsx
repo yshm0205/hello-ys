@@ -30,7 +30,42 @@ export default function PaymentSuccessPage() {
         let cancelled = false;
         let timer: ReturnType<typeof setTimeout> | null = null;
 
-        async function confirmTossPayments(paymentKey: string, orderId: string, amount: number) {
+        async function confirmPortOnePayment(paymentId: string, attempt = 0) {
+            try {
+                const res = await fetch('/api/payments/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId }),
+                });
+
+                const data = await res.json();
+                if (cancelled) return;
+
+                if (res.ok && data.success) {
+                    setStatus('success');
+                    setAddedCredits(data.added ?? 0);
+                    setMessage(data.message || `${data.orderName || '결제'}가 완료되었습니다.`);
+                    return;
+                }
+
+                if ((res.status === 202 || data.pending) && attempt < 15) {
+                    setMessage('결제 완료를 반영하는 중입니다...');
+                    timer = setTimeout(() => {
+                        void confirmPortOnePayment(paymentId, attempt + 1);
+                    }, 2000);
+                    return;
+                }
+
+                setStatus('error');
+                setMessage(data.error || '결제 확인에 실패했습니다.');
+            } catch {
+                if (cancelled) return;
+                setStatus('error');
+                setMessage('서버 연결에 실패했습니다.');
+            }
+        }
+
+        async function confirmLegacyTossPayments(paymentKey: string, orderId: string, amount: number) {
             try {
                 const res = await fetch('/api/payments/confirm', {
                     method: 'POST',
@@ -57,7 +92,7 @@ export default function PaymentSuccessPage() {
             }
         }
 
-        async function pollTossPayStatus(orderNo: string, attempt = 0) {
+        async function pollLegacyTossPayStatus(orderNo: string, attempt = 0) {
             try {
                 const res = await fetch(`/api/tosspay/status?orderNo=${encodeURIComponent(orderNo)}`, {
                     cache: 'no-store',
@@ -74,14 +109,14 @@ export default function PaymentSuccessPage() {
                 if (data.status === 'DONE') {
                     setStatus('success');
                     setAddedCredits(data.addedCredits || 0);
-                    setMessage(`${data.orderName || '올인원 패스'} 결제가 완료되었습니다.`);
+                    setMessage(`${data.orderName || '올인원'} 결제가 완료되었습니다.`);
                     return;
                 }
 
                 if (TOSSPAY_PENDING_STATUSES.has(data.status) && attempt < 15) {
                     setMessage('결제 확인 완료를 확인하는 중입니다...');
                     timer = setTimeout(() => {
-                        void pollTossPayStatus(orderNo, attempt + 1);
+                        void pollLegacyTossPayStatus(orderNo, attempt + 1);
                     }, 2000);
                     return;
                 }
@@ -99,15 +134,23 @@ export default function PaymentSuccessPage() {
             }
         }
 
+        const paymentId = searchParams.get('payment_id') || searchParams.get('paymentId');
+        const code = searchParams.get('code');
+        const queryMessage = searchParams.get('message');
         const paymentKey = searchParams.get('paymentKey');
         const orderId = searchParams.get('orderId');
         const amount = searchParams.get('amount');
         const orderNo = searchParams.get('orderNo');
 
-        if (paymentKey && orderId && amount) {
-            void confirmTossPayments(paymentKey, orderId, Number(amount));
+        if (code) {
+            setStatus('error');
+            setMessage(queryMessage || `결제가 완료되지 않았습니다. 오류 코드: ${code}`);
+        } else if (paymentId) {
+            void confirmPortOnePayment(paymentId);
+        } else if (paymentKey && orderId && amount) {
+            void confirmLegacyTossPayments(paymentKey, orderId, Number(amount));
         } else if (orderNo) {
-            void pollTossPayStatus(orderNo);
+            void pollLegacyTossPayStatus(orderNo);
         } else {
             timer = setTimeout(() => {
                 if (cancelled) return;
@@ -170,7 +213,7 @@ export default function PaymentSuccessPage() {
                                     radius="lg"
                                     style={{ background: '#8b5cf6' }}
                                 >
-                                    스크립트 제작하러가기
+                                    스크립트 생성하러가기
                                 </Button>
                             </Group>
                         </>

@@ -74,6 +74,7 @@ export function LandingHeader() {
             <AuthAwareButton
               authenticatedHref="/dashboard"
               unauthenticatedHref="/login"
+              unpaidAuthenticatedHref="/checkout/allinone"
               variant="subtle"
               color="gray"
               style={{ color: '#4b5563' }}
@@ -84,6 +85,7 @@ export function LandingHeader() {
             <AuthAwareButton
               authenticatedHref="/dashboard"
               unauthenticatedHref="/login?redirect=/dashboard"
+              unpaidAuthenticatedHref="/checkout/allinone"
               radius="lg"
               style={{
                 background: '#8b5cf6',
@@ -144,6 +146,7 @@ export function LandingHeader() {
           <AuthAwareButton
             authenticatedHref="/dashboard"
             unauthenticatedHref="/login"
+            unpaidAuthenticatedHref="/checkout/allinone"
             variant="outline"
             color="gray"
             fullWidth
@@ -157,6 +160,7 @@ export function LandingHeader() {
           <AuthAwareButton
             authenticatedHref="/dashboard"
             unauthenticatedHref="/login?redirect=/dashboard"
+            unpaidAuthenticatedHref="/checkout/allinone"
             fullWidth
             size="lg"
             radius="lg"

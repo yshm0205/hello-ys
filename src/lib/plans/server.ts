@@ -76,6 +76,22 @@ function normalizePlanInfo(plan: PartialEffectiveCreditInfo | null | undefined):
   };
 }
 
+function shouldUseProgramPaymentFallback(plan: EffectiveCreditInfo | null) {
+  if (!plan) return true;
+
+  return (
+    plan.plan_type === PLAN_TYPE.FREE &&
+    plan.credits === 0 &&
+    plan.subscription_credits === 0 &&
+    plan.purchased_credits === 0 &&
+    plan.expires_at === null &&
+    plan.monthly_credit_amount === 0 &&
+    plan.monthly_credit_total_cycles === null &&
+    plan.monthly_credit_granted_cycles === 0 &&
+    plan.next_credit_at === null
+  );
+}
+
 function normalizeRequestedPath(requestedPath?: string | null) {
   if (!requestedPath) return null;
 
@@ -136,15 +152,10 @@ export async function getEffectiveCreditInfo(userId: string): Promise<EffectiveC
   if (!fullResult.error && fullResult.data) {
     const fullPlan = normalizePlanInfo(fullResult.data as FullPlanRow);
 
-    if (fullPlan?.plan_type === PLAN_TYPE.FREE) {
+    if (shouldUseProgramPaymentFallback(fullPlan)) {
       const fallback = await getProgramPaymentFallback(userId);
       if (fallback) {
-        return {
-          ...fallback,
-          credits: fullPlan.credits,
-          subscription_credits: fullPlan.subscription_credits,
-          purchased_credits: fullPlan.purchased_credits,
-        };
+        return fallback;
       }
     }
 
@@ -171,17 +182,8 @@ export async function getEffectiveCreditInfo(userId: string): Promise<EffectiveC
     return legacyPlan;
   }
 
-  if (!legacyPlan) {
+  if (!legacyPlan || shouldUseProgramPaymentFallback(legacyPlan)) {
     return fallback;
-  }
-
-  if (legacyPlan.plan_type === PLAN_TYPE.FREE) {
-    return {
-      ...fallback,
-      credits: legacyPlan.credits,
-      subscription_credits: fallback.subscription_credits,
-      purchased_credits: legacyPlan.credits,
-    };
   }
 
   return legacyPlan;

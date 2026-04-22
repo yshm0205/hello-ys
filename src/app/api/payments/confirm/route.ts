@@ -5,6 +5,7 @@ import {
   recordCreditTransaction,
   updateCreditPlanBalances,
 } from "@/lib/credits/server";
+import { finalizePortOnePayment } from "@/lib/payments/portone";
 import { CREDIT_TOPUP_PACKS } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
@@ -36,11 +37,26 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { paymentKey, orderId, amount } = body as {
+    const { paymentId, paymentKey, orderId, amount } = body as {
+      paymentId?: string;
       paymentKey?: string;
       orderId?: string;
       amount?: number;
     };
+
+    if (paymentId) {
+      const result = await finalizePortOnePayment(paymentId, { userId: user.id });
+
+      if (result.success) {
+        return NextResponse.json(result);
+      }
+
+      if (result.pending) {
+        return NextResponse.json(result, { status: 202 });
+      }
+
+      return NextResponse.json(result, { status: 400 });
+    }
 
     if (!paymentKey || !orderId || !amount) {
       return NextResponse.json(

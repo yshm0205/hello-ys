@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { CREDIT_TOPUP_PACKS } from "@/lib/plans/config";
@@ -32,21 +34,23 @@ export async function POST(request: NextRequest) {
     const adminClient = createAdminClient();
     const orderId = `credit_${user.id.slice(0, 8)}_${Date.now()}`;
     const orderName = `FlowSpot 크레딧 ${pack.credits}cr`;
-    const pendingPaymentKey = `pending:${orderId}`;
+    const paymentId = `payment-${randomUUID()}`;
     const now = new Date().toISOString();
 
     const { error: insertError } = await adminClient.from("toss_payments").insert({
       user_id: user.id,
-      payment_key: pendingPaymentKey,
+      payment_key: paymentId,
       order_id: orderId,
       order_name: orderName,
       amount: pack.amount,
       credits: pack.credits,
       status: "PENDING",
       metadata: {
+        provider: "portone",
+        pgProvider: "tosspay",
+        paymentId,
         paymentKind: "credit_topup",
         packCredits: pack.credits,
-        pendingPaymentKey,
         createdAt: now,
       },
       updated_at: now,
@@ -62,10 +66,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      paymentId,
       orderId,
       orderName,
       amount: pack.amount,
       credits: pack.credits,
+      customerId: user.id,
     });
   } catch (error) {
     console.error("[Payments Create] Error:", error);

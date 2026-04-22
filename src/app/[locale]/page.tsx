@@ -2245,10 +2245,11 @@ function Footer() {
 /* ═══════════════════════════════════════════════════════════════
    Floating CTA
    ═══════════════════════════════════════════════════════════════ */
-function FloatingCTA() {
+function LegacyFloatingCTA_DoNotUse({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdSummary }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const earlybird = getActiveEarlybirdView(earlybirdSummary);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -2447,6 +2448,215 @@ function FloatingCTA() {
 /* ═══════════════════════════════════════════════════════════════
    Sticky 섹션 탭 네비
    ═══════════════════════════════════════════════════════════════ */
+function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdSummary }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const earlybird = getActiveEarlybirdView(earlybirdSummary);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    const handleScroll = () => {
+      if (window.innerWidth < 768) {
+        setIsVisible(true);
+        return;
+      }
+
+      const earlybirdSection = document.getElementById('earlybird');
+      if (earlybirdSection) {
+        setIsVisible(earlybirdSection.getBoundingClientRect().bottom < 0);
+        return;
+      }
+
+      setIsVisible(window.scrollY > 400);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  if (!isVisible) return null;
+
+  const monthly12Orig = Math.ceil(primaryProgram.listAmount / 12);
+  const monthly12Now = Math.ceil(primaryProgram.amount / 12);
+  const discountPct = Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100);
+  const floatingLabel =
+    earlybird.currentTier === 'phase1'
+      ? '1차 얼리버드 잔여석'
+      : earlybird.currentTier === 'phase2'
+        ? '2차 얼리버드 잔여석'
+        : '얼리버드 종료';
+  const floatingCountLabel =
+    earlybird.currentTier === 'ended'
+      ? '혜택 종료'
+      : `${earlybird.remaining} / ${earlybird.total}명 남음`;
+
+  if (isMobile) {
+    return (
+      <Box style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000,
+        background: '#ffffff', borderTop: '1px solid #e4e4e7',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        boxShadow: '0 -2px 16px rgba(0,0,0,0.08)',
+      }}>
+        <Box
+          onClick={() => setIsExpanded((prev) => !prev)}
+          style={{
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            padding: '6px 0 2px', cursor: 'pointer',
+          }}
+        >
+          <ChevronDown
+            size={20}
+            color="#a1a1aa"
+            style={{
+              transform: isExpanded ? 'rotate(0deg)' : 'rotate(180deg)',
+              transition: 'transform 200ms ease',
+            }}
+          />
+        </Box>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease }}
+              style={{ overflow: 'hidden' }}
+            >
+              <Box style={{ padding: '0 16px 14px' }}>
+                <Box style={{
+                  background: '#f4f4f5', borderRadius: '10px',
+                  padding: '14px 16px',
+                }}>
+                  <Group justify="space-between" align="baseline" wrap="nowrap" mb={8}>
+                    <Text style={{ fontSize: '12px', fontWeight: 700, color: '#52525b' }}>
+                      {floatingLabel}
+                    </Text>
+                    <Text style={{
+                      fontSize: '13px', fontWeight: 800, color: '#8b5cf6',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>
+                      {floatingCountLabel}
+                    </Text>
+                  </Group>
+                  <Box style={{
+                    width: '100%', height: 6, borderRadius: 999,
+                    background: '#e4e4e7', overflow: 'hidden', marginBottom: 8,
+                  }}>
+                    <Box style={{
+                      width: `${earlybird.claimedPct}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
+                      transition: 'width 600ms ease',
+                    }} />
+                  </Box>
+                  <Text style={{
+                    fontSize: '11.5px', color: '#71717a',
+                    textAlign: 'center', lineHeight: 1.45,
+                  }}>
+                    {earlybird.progressHint}
+                  </Text>
+                </Box>
+              </Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <Box style={{ padding: '4px 16px 12px' }}>
+          <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
+            <Box style={{ flex: 1, minWidth: 0 }}>
+              <Text style={{ fontSize: '11px', color: '#71717a', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+                <span>12개월 분할 시</span>
+                <span style={{ color: '#a1a1aa', textDecoration: 'line-through' }}> 월 {monthly12Orig.toLocaleString()}원</span>
+              </Text>
+              <Group gap={6} align="baseline" wrap="nowrap" style={{ marginTop: 1 }}>
+                <Text style={{ fontSize: '13px', fontWeight: 800, color: '#ef4444', lineHeight: 1.1 }}>
+                  {discountPct}%
+                </Text>
+                <Text style={{ fontSize: '18px', fontWeight: 800, color: '#18181b', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+                  월 {monthly12Now.toLocaleString()}원
+                </Text>
+              </Group>
+            </Box>
+            <AuthAwareButton
+              authenticatedHref="/checkout/allinone"
+              unauthenticatedHref="/login?redirect=/checkout/allinone"
+              size="md" radius="xl"
+              style={{
+                background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(139,92,246,0.2)',
+              }}
+            >
+              신청하기
+            </AuthAwareButton>
+          </Group>
+        </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <Box style={{
+      position: 'fixed', top: '50%', right: '24px',
+      transform: 'translateY(-50%)', zIndex: 1000, width: '240px',
+    }}>
+      <motion.div
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.35, ease }}
+      >
+        <Paper p="lg" radius="lg" style={{
+          background: '#ffffff', border: '1px solid #d4d4d8',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+        }}>
+          <Stack gap={12}>
+            <Text fw={700} style={{ fontSize: '15px', color: '#18181b' }}>올인원 패스</Text>
+            <Stack gap={2}>
+              <Group gap={6} align="center">
+                <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through' }}>
+                  ₩ {primaryProgram.listAmount.toLocaleString()}
+                </Text>
+                <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444' }}>
+                  {discountPct}%
+                </Text>
+              </Group>
+              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6' }}>
+                ₩ {primaryProgram.amount.toLocaleString()}
+              </Text>
+              <Text style={{ fontSize: '13px', color: '#52525b' }}>
+                {earlybird.currentTier === 'ended'
+                  ? '얼리버드 혜택 종료'
+                  : `${earlybird.headline} · ${floatingCountLabel}`}
+              </Text>
+            </Stack>
+            <AuthAwareButton
+              authenticatedHref="/checkout/allinone"
+              unauthenticatedHref="/login?redirect=/checkout/allinone"
+              size="sm" fullWidth radius="lg"
+              style={{
+                background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
+                boxShadow: '0 2px 8px rgba(139,92,246,0.15)',
+              }}
+            >
+              신청하기
+            </AuthAwareButton>
+          </Stack>
+        </Paper>
+      </motion.div>
+    </Box>
+  );
+}
+
 const sectionTabs = [
   { id: 'pain', label: '문제' },
   { id: 'offer', label: '구성' },
@@ -2542,7 +2752,7 @@ const EARLYBIRD_TIER1_TOTAL = 30;
 const EARLYBIRD_TIER1_REMAINING = 23; // placeholder — DB 연동 예정
 const EARLYBIRD_TIER2_TOTAL = 70;
 
-function EarlyBirdSection() {
+function LegacyEarlyBirdSection_DoNotUse() {
   const isMobile = useIsMobile(900);
   const remaining = EARLYBIRD_TIER1_REMAINING;
   const total = EARLYBIRD_TIER1_TOTAL;
@@ -2725,6 +2935,231 @@ function EarlyBirdSection() {
   );
 }
 
+function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdSummary }) {
+  const isMobile = useIsMobile(900);
+  const earlybird = getActiveEarlybirdView(earlybirdSummary);
+  const remaining = earlybird.remaining;
+  const total = earlybird.total;
+  const claimed = earlybird.claimed;
+  const claimedPct = earlybird.claimedPct;
+  const isUrgent = earlybird.isUrgent;
+  const phase1IsLive = earlybird.currentTier === 'phase1';
+  const phase2IsLive = earlybird.currentTier === 'phase2';
+  const earlybirdEnded = earlybird.currentTier === 'ended';
+  const currentStageLabel = phase1IsLive
+    ? '1차 얼리버드'
+    : phase2IsLive
+      ? '2차 얼리버드'
+      : '얼리버드 종료';
+  const currentMetaLabel = phase1IsLive
+    ? 'Now · 현재 1차 혜택'
+    : phase2IsLive
+      ? 'Now · 현재 2차 혜택'
+      : 'Now · 현재 기본 구성';
+  const currentBenefitTitle = phase1IsLive
+    ? '+800cr 즉시 지급'
+    : phase2IsLive
+      ? '+400cr 즉시 지급'
+      : '보너스 지급 종료';
+  const currentBenefitDescription = phase1IsLive
+    ? '결제 완료 즉시 추가 구매 크레딧 800cr가 지급됩니다.'
+    : phase2IsLive
+      ? '결제 완료 즉시 추가 구매 크레딧 400cr가 지급됩니다.'
+      : '현재는 보너스 크레딧 없이 기본 구성으로만 신청 가능합니다.';
+  const ctaText = phase1IsLive
+    ? '지금 1차 얼리버드로 신청하기'
+    : phase2IsLive
+      ? '지금 2차 얼리버드로 신청하기'
+      : '정가로 신청하기';
+  const stage1Status: EbTierProps['status'] = phase1IsLive ? 'live' : 'end';
+  const stage1StatusText = phase1IsLive
+    ? `LIVE · 선착순 ${earlybirdSummary.phase1Total}명 한정`
+    : '1차 혜택 종료';
+  const stage1Variant: EbTierProps['variant'] = phase1IsLive ? 'active' : 'dim';
+  const stage2Status: EbTierProps['status'] = phase1IsLive ? 'wait' : phase2IsLive ? 'live' : 'end';
+  const stage2StatusText = phase1IsLive
+    ? `1차 마감 후 시작 · 선착순 ${earlybirdSummary.phase2Total}명`
+    : phase2IsLive
+      ? `LIVE · 선착순 ${earlybirdSummary.phase2Total}명 한정`
+      : '2차 혜택 종료';
+  const stage2Variant: EbTierProps['variant'] = phase1IsLive ? 'dim' : phase2IsLive ? 'active' : 'dim';
+  const stage3Status: EbTierProps['status'] = earlybirdEnded ? 'live' : 'end';
+  const stage3StatusText = earlybirdEnded ? 'LIVE · 정가 신청 진행 중' : '종료 · 가격 인상';
+  const stage3Variant: EbTierProps['variant'] = earlybirdEnded ? 'active' : 'end';
+
+  return (
+    <Box component="section" id="earlybird" style={{
+      background: '#ffffff',
+      padding: 'clamp(16px, 2.5vw, 28px) 0 clamp(56px, 9vw, 110px)',
+    }}>
+      <style>{`
+        @keyframes ebPulse { 0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.7);} 70%{box-shadow:0 0 0 10px rgba(167,139,250,0);} }
+        @keyframes ebBlink { 0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.9);} 70%{box-shadow:0 0 0 7px rgba(255,255,255,0);} }
+        @keyframes ebGlow { 0%,100%{box-shadow:0 0 0 1px rgba(180,107,255,.25),0 0 40px rgba(180,107,255,.3),0 0 80px rgba(139,92,246,.2),inset 0 0 30px rgba(180,107,255,.08);} 50%{box-shadow:0 0 0 1px rgba(180,107,255,.35),0 0 55px rgba(180,107,255,.45),0 0 100px rgba(139,92,246,.3),inset 0 0 30px rgba(180,107,255,.12);} }
+        .eb-cta:hover { transform: translateY(-2px); box-shadow: 0 0 0 3px rgba(180,107,255,.3), 0 20px 50px -8px rgba(180,107,255,.7); }
+        .eb-cta svg { transition: transform .2s; }
+        .eb-cta:hover svg { transform: translateX(3px); }
+      `}</style>
+      <Container size="lg">
+        <Box style={{
+          position: 'relative',
+          background: '#0a0612',
+          borderRadius: 'clamp(20px, 2.5vw, 28px)',
+          padding: isMobile ? '32px 20px 40px' : 'clamp(48px, 5.5vw, 72px)',
+          overflow: 'hidden',
+          boxShadow: '0 30px 80px -20px rgba(24,24,27,.35), 0 10px 30px -10px rgba(0,0,0,.2)',
+          backgroundImage: `
+            radial-gradient(ellipse 700px 400px at 75% 20%, rgba(139,92,246,.22), transparent 60%),
+            radial-gradient(ellipse 600px 350px at 20% 80%, rgba(217,70,239,.14), transparent 60%),
+            radial-gradient(ellipse 500px 250px at 80% 90%, rgba(139,92,246,.1), transparent 60%)
+          `,
+        }}>
+          <Box style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1.2fr',
+            gap: isMobile ? 36 : 'clamp(36px, 5vw, 72px)',
+            alignItems: 'flex-start',
+          }}>
+            <Box style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? 0 : 24 }}>
+              <Box style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '7px 14px', borderRadius: 999,
+                background: 'rgba(139,92,246,.12)',
+                border: '1px solid rgba(139,92,246,.25)',
+                fontSize: 12, fontWeight: 800, color: '#a78bfa',
+                letterSpacing: '-0.01em', marginBottom: 18,
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', background: '#a78bfa',
+                  animation: 'ebPulse 1.4s infinite',
+                }} />
+                All-in-One Pass · {currentStageLabel}
+              </Box>
+              <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 14 }}>
+                {currentStageLabel} <b style={{ color: '#fff' }}>선착순 {total}명</b> 한정
+              </Text>
+              <Box style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 18 }}>
+                <Text style={{
+                  fontSize: isMobile ? 72 : 'clamp(80px, 9vw, 112px)', fontWeight: 900,
+                  letterSpacing: '-0.05em', lineHeight: 0.95,
+                  background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
+                  WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+                  textShadow: '0 0 40px rgba(139,92,246,.35)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}>{remaining}</Text>
+                <Text style={{
+                  fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#a78bfa',
+                  letterSpacing: '-0.02em',
+                }}>
+                  {earlybirdEnded ? '혜택 종료' : '자리 남음'}
+                </Text>
+              </Box>
+              <Box style={{
+                width: '100%', height: 10, borderRadius: 999,
+                background: 'rgba(255,255,255,.08)',
+                border: '1px solid rgba(255,255,255,.1)',
+                overflow: 'hidden', marginBottom: 14,
+              }}>
+                <Box style={{
+                  width: `${claimedPct}%`, height: '100%',
+                  background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
+                  boxShadow: '0 0 12px rgba(180,107,255,.6)',
+                  transition: 'width 600ms ease',
+                }} />
+              </Box>
+              <Text style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 18, letterSpacing: '-0.01em' }}>
+                {claimed}명 신청 완료 · 전체 {total}석 중 {claimedPct}%
+              </Text>
+              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55 }}>
+                {isUrgent ? (
+                  <>자리 <b style={{ color: '#fca5a5', fontWeight: 800 }}>마감 임박</b>. 마감되면 다음 대기자는 2차 혜택으로 전환됩니다.</>
+                ) : (
+                  <>{earlybird.progressHint}<br />
+                  <b style={{ color: '#fff', fontWeight: 800 }}>혜택 단계만</b> 줄어들고, 2차 종료 후에는 기본 구성으로 전환됩니다.</>
+                )}
+              </Text>
+              <Box style={{
+                marginTop: 24, padding: isMobile ? '16px 18px' : '20px 22px',
+                background: 'rgba(139,92,246,.1)',
+                border: '1px solid rgba(139,92,246,.3)',
+                borderRadius: 18,
+              }}>
+                <Text style={{ fontSize: 11, fontWeight: 800, color: '#a78bfa', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 6 }}>
+                  {currentMetaLabel}
+                </Text>
+                <Text style={{ fontSize: isMobile ? 26 : 'clamp(26px, 3.4vw, 34px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#fff' }}>
+                  {currentBenefitTitle}
+                </Text>
+                <Text style={{ marginTop: 6, fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.75)', lineHeight: 1.5 }}>
+                  {currentBenefitDescription}
+                </Text>
+              </Box>
+            </Box>
+
+            <Box style={{ display: 'flex', flexDirection: 'column' }}>
+              <EbTier
+                stageNum="01" status={stage1Status} statusText={stage1StatusText}
+                tierName={<>1차<em style={{ fontStyle: 'normal', color: '#a78bfa' }}> 얼리버드</em></>}
+                feats={[
+                  { ok: true, text: <><b>정가 대비 100,000원 할인</b> · 499,000원</> },
+                  { ok: true, text: <><b>보너스 크레딧 800cr</b> 즉시 지급</> },
+                  { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
+                ]}
+                bonusText={<>+ 보너스 <b>800cr</b></>}
+                priceStrike="정가 599,000원" priceNow="499,000원"
+                variant={stage1Variant} isMobile={isMobile}
+              />
+              <EbChevron />
+              <EbTier
+                stageNum="02" status={stage2Status} statusText={stage2StatusText}
+                tierName="2차 얼리버드"
+                feats={[
+                  { ok: true, text: <>정가 대비 100,000원 할인 · 499,000원</> },
+                  { ok: true, text: <>보너스 크레딧 <b>400cr</b> 지급</> },
+                  { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
+                ]}
+                bonusText={<>+ 보너스 <b>400cr</b></>}
+                priceStrike="정가 599,000원" priceNow="499,000원"
+                variant={stage2Variant} isMobile={isMobile}
+              />
+              <EbChevron />
+              <EbTier
+                stageNum="03" status={stage3Status} statusText={stage3StatusText}
+                tierName="얼리버드 종료"
+                feats={[
+                  { ok: false, muted: true, text: <><b>추가 보너스 크레딧 지급 없음</b></> },
+                  { ok: false, muted: true, text: <>기본 구성으로만 신청 가능</> },
+                  { ok: false, muted: true, text: <>기본 제공 크레딧과 강의 구성은 동일</> },
+                ]}
+                bonusText={<>보너스 없음</>}
+                priceNow="499,000원"
+                variant={stage3Variant} isMobile={isMobile}
+              />
+              <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
+                <Link href="/checkout/allinone" style={{ textDecoration: 'none' }}>
+                  <button className="eb-cta" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 10,
+                    padding: isMobile ? '18px 36px' : '20px 44px',
+                    border: 'none', cursor: 'pointer',
+                    fontFamily: 'inherit', fontSize: isMobile ? 16 : 17, fontWeight: 900, letterSpacing: '-0.02em',
+                    background: 'linear-gradient(135deg,#8b5cf6,#d946ef)',
+                    color: '#fff', borderRadius: 999,
+                    boxShadow: '0 0 0 3px rgba(180,107,255,.2), 0 14px 40px -8px rgba(180,107,255,.6)',
+                    transition: 'all .2s ease',
+                  }}>
+                    {ctaText}
+                    <ArrowRight size={20} />
+                  </button>
+                </Link>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  );
+}
+
 function EbChevron() {
   return (
     <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 96 }}>
@@ -2890,11 +3325,13 @@ function EbTier(p: EbTierProps) {
    Page Export
    ═══════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
+  const earlybirdSummary = useLandingEarlybirdSummary();
+
   return (
     <main style={{ background: '#ffffff' }}>
       <LandingHeader />
       <HeroSection />
-      <EarlyBirdSection />
+      <EarlyBirdSection earlybirdSummary={earlybirdSummary} />
       <LoopPainSection />
       <PainSection />
       <ProductRevealSection />
@@ -2902,7 +3339,7 @@ export default function LandingPage() {
       <HowItWorksSection />
       <FAQSection />
       <Footer />
-      <FloatingCTA />
+      <FloatingCTA earlybirdSummary={earlybirdSummary} />
     </main>
   );
 }

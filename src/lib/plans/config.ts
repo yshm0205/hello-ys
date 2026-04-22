@@ -9,6 +9,21 @@ export const PLAN_TYPE = {
 
 export type AppPlanType = (typeof PLAN_TYPE)[keyof typeof PLAN_TYPE];
 
+export const EARLYBIRD_CONFIG = {
+  phase1: {
+    totalSlots: 30,
+    bonusCredits: 800,
+    hardDeadline: "2026-05-08T23:59:59+09:00",
+  },
+  phase2: {
+    totalSlots: 70,
+    bonusCredits: 400,
+  },
+} as const;
+
+export type EarlybirdTierKey = keyof typeof EARLYBIRD_CONFIG;
+export type EarlybirdTier = EarlybirdTierKey | "ended";
+
 export const ACTIVE_ACCESS_PLAN_TYPES = new Set<string>([
   PLAN_TYPE.STUDENT_4M,
   PLAN_TYPE.SUBSCRIBER_MONTHLY,
@@ -54,6 +69,11 @@ export type TossPayPlanType = keyof typeof TOSSPAY_PLAN_CONFIG;
 
 export function isTossPayPlanType(value: string): value is TossPayPlanType {
   return value in TOSSPAY_PLAN_CONFIG;
+}
+
+export function getEarlybirdBonusCredits(tier?: EarlybirdTierKey | null) {
+  if (!tier) return 0;
+  return EARLYBIRD_CONFIG[tier].bonusCredits;
 }
 
 export function isActiveAccessPlan(planType?: string | null, expiresAt?: string | null) {

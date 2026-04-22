@@ -4,17 +4,26 @@ import { useEffect, useState, type MouseEventHandler, type ReactNode } from 'rea
 import { Button, type ButtonProps } from '@mantine/core';
 
 import { Link, useRouter } from '@/i18n/routing';
+import { isActiveAccessPlan } from '@/lib/plans/config';
 import { createClient } from '@/utils/supabase/client';
 
 const hrefCache = new Map<string, string>();
 const hrefPromises = new Map<string, Promise<string>>();
 
-function getCacheKey(authenticatedHref: string, unauthenticatedHref: string) {
-  return `${authenticatedHref}::${unauthenticatedHref}`;
+function getCacheKey(
+  authenticatedHref: string,
+  unauthenticatedHref: string,
+  unpaidAuthenticatedHref?: string,
+) {
+  return `${authenticatedHref}::${unauthenticatedHref}::${unpaidAuthenticatedHref ?? ''}`;
 }
 
-async function resolveHref(authenticatedHref: string, unauthenticatedHref: string) {
-  const cacheKey = getCacheKey(authenticatedHref, unauthenticatedHref);
+async function resolveHref(
+  authenticatedHref: string,
+  unauthenticatedHref: string,
+  unpaidAuthenticatedHref?: string,
+) {
+  const cacheKey = getCacheKey(authenticatedHref, unauthenticatedHref, unpaidAuthenticatedHref);
   const cached = hrefCache.get(cacheKey);
   if (cached) {
     return cached;
@@ -27,7 +36,37 @@ async function resolveHref(authenticatedHref: string, unauthenticatedHref: strin
 
   const promise = createClient()
     .auth.getSession()
-    .then(({ data }) => (data.session ? authenticatedHref : unauthenticatedHref))
+    .then(async ({ data }) => {
+      if (!data.session) {
+        return unauthenticatedHref;
+      }
+
+      if (!unpaidAuthenticatedHref) {
+        return authenticatedHref;
+      }
+
+      try {
+        const response = await fetch('/api/credits', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          return unpaidAuthenticatedHref;
+        }
+
+        const creditInfo = (await response.json()) as {
+          plan_type?: string | null;
+          expires_at?: string | null;
+        };
+
+        return isActiveAccessPlan(creditInfo.plan_type, creditInfo.expires_at)
+          ? authenticatedHref
+          : unpaidAuthenticatedHref;
+      } catch {
+        return unpaidAuthenticatedHref;
+      }
+    })
     .catch(() => unauthenticatedHref)
     .then((resolvedHref) => {
       hrefCache.set(cacheKey, resolvedHref);
@@ -42,6 +81,7 @@ async function resolveHref(authenticatedHref: string, unauthenticatedHref: strin
 type AuthAwareButtonProps = Omit<ButtonProps, 'component' | 'href'> & {
   authenticatedHref: string;
   unauthenticatedHref: string;
+  unpaidAuthenticatedHref?: string;
   children: ReactNode;
   id?: string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
@@ -50,19 +90,23 @@ type AuthAwareButtonProps = Omit<ButtonProps, 'component' | 'href'> & {
 export function AuthAwareButton({
   authenticatedHref,
   unauthenticatedHref,
+  unpaidAuthenticatedHref,
   children,
   ...props
 }: AuthAwareButtonProps) {
   const router = useRouter();
-  const cacheKey = getCacheKey(authenticatedHref, unauthenticatedHref);
+  const cacheKey = getCacheKey(authenticatedHref, unauthenticatedHref, unpaidAuthenticatedHref);
   const [href, setHref] = useState(hrefCache.get(cacheKey) ?? unauthenticatedHref);
 
   useEffect(() => {
     router.prefetch(authenticatedHref);
     router.prefetch(unauthenticatedHref);
+    if (unpaidAuthenticatedHref) {
+      router.prefetch(unpaidAuthenticatedHref);
+    }
 
-    void resolveHref(authenticatedHref, unauthenticatedHref).then(setHref);
-  }, [authenticatedHref, router, unauthenticatedHref]);
+    void resolveHref(authenticatedHref, unauthenticatedHref, unpaidAuthenticatedHref).then(setHref);
+  }, [authenticatedHref, router, unauthenticatedHref, unpaidAuthenticatedHref]);
 
   return (
     <Button component={Link} href={href} {...props}>

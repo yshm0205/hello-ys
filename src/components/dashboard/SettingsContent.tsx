@@ -85,7 +85,12 @@ function formatDate(dateString?: string | null) {
 
 export function SettingsContent({ user }: SettingsContentProps) {
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
-    const { requestPayment, loading: paymentLoading } = useTossPayment(user?.id);
+    const {
+        requestPayment,
+        loading: paymentLoading,
+        error: paymentError,
+        notice: paymentNotice,
+    } = useTossPayment(user?.id, user?.email);
 
     useEffect(() => {
         async function fetchCredits() {
@@ -383,6 +388,16 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                             </Card>
                                         ))}
                                     </SimpleGrid>
+                                    {paymentError && (
+                                        <Text size="sm" c="red.6" mt="md">
+                                            {paymentError}
+                                        </Text>
+                                    )}
+                                    {paymentNotice && (
+                                        <Text size="sm" c="dimmed" mt="md">
+                                            {paymentNotice}
+                                        </Text>
+                                    )}
                                 </Box>
                             )}
 

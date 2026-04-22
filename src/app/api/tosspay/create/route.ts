@@ -3,21 +3,14 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import {
+  getEarlybirdBonusCredits,
   isTossPayPlanType,
   TOSSPAY_PLAN_CONFIG,
 } from "@/lib/tosspay/config";
+import { getEarlybirdSummary } from "@/lib/marketing/earlybird";
+import { isActiveAccessPlan } from "@/lib/plans/config";
+import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { createClient } from "@/utils/supabase/server";
-
-const TOSSPAY_API_URL = "https://pay.toss.im/api/v2/payments";
-const TOSSPAY_API_KEY = process.env.TOSSPAY_API_KEY || "";
-
-interface TossPayCreateResponse {
-  code: number;
-  errorCode?: string;
-  msg?: string;
-  payToken?: string;
-  checkoutPage?: string;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,13 +23,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "로그인이 필요합니다." },
         { status: 401 },
-      );
-    }
-
-    if (!TOSSPAY_API_KEY) {
-      return NextResponse.json(
-        { error: "TossPay API 설정이 없습니다." },
-        { status: 500 },
       );
     }
 
@@ -53,66 +39,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const buyerEmail = (rawBuyerEmail || user.email || "").trim();
-    const plan = TOSSPAY_PLAN_CONFIG[planType];
-    const orderId = `flowspot_${user.id.slice(0, 8)}_${Date.now()}`;
-    const callbackSecret = randomUUID();
-    const origin =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://flowspot-kr.vercel.app";
-
-    const tossRes = await fetch(TOSSPAY_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        apiKey: TOSSPAY_API_KEY,
-        orderNo: orderId,
-        amount: plan.amount,
-        amountTaxFree: 0,
-        productDesc: `FlowSpot ${plan.name}`,
-        autoExecute: true,
-        resultCallback: `${origin}/api/tosspay/callback?cb=${callbackSecret}`,
-        retUrl: `${origin}/ko/dashboard/credits/success?orderNo=${orderId}&planType=${planType}`,
-        retCancelUrl: `${origin}/ko`,
-        callbackVersion: "V2",
-      }),
-    });
-
-    const tossData: TossPayCreateResponse = await tossRes.json();
-
-    if (tossData.code !== 0 || !tossData.checkoutPage || !tossData.payToken) {
-      console.error("[TossPay] Create failed:", tossData);
+    const currentPlan = await getEffectiveCreditInfo(user.id);
+    if (isActiveAccessPlan(currentPlan?.plan_type, currentPlan?.expires_at)) {
       return NextResponse.json(
-        { error: tossData.msg || "결제 생성에 실패했습니다." },
-        { status: 400 },
+        { error: "Active all-in-one access already exists." },
+        { status: 409 },
       );
     }
 
+    const buyerEmail = (rawBuyerEmail || user.email || "").trim();
+    const plan = TOSSPAY_PLAN_CONFIG[planType];
+    const orderId = `flowspot_${user.id.slice(0, 8)}_${Date.now()}`;
+    const paymentId = `payment-${randomUUID()}`;
+
     const { createAdminClient } = await import("@/utils/supabase/admin");
     const admin = createAdminClient();
+    const earlybirdSummary = await getEarlybirdSummary(admin);
+    const earlybirdTier =
+      earlybirdSummary.currentTier === "ended" ? null : earlybirdSummary.currentTier;
+    const earlybirdBonusCredits = getEarlybirdBonusCredits(earlybirdTier);
+    const immediateGrantedCredits = plan.initialCredits + earlybirdBonusCredits;
 
     const { error: insertError } = await admin.from("toss_payments").insert({
       user_id: user.id,
-      payment_key: tossData.payToken,
+      payment_key: paymentId,
       order_id: orderId,
       order_name: `FlowSpot ${plan.name}`,
       amount: plan.amount,
-      credits: plan.initialCredits,
+      credits: immediateGrantedCredits,
       status: "PENDING",
       metadata: {
-        planType,
-        callbackSecret,
-        payToken: tossData.payToken,
+        provider: "portone",
+        pgProvider: "tosspay",
+        paymentId,
         buyerEmail,
+        planType,
         paymentKind: plan.paymentKind,
         userPlanType: plan.userPlanType,
         initialCredits: plan.initialCredits,
+        earlybirdTier,
+        earlybirdBonusCredits,
+        purchasedGranted: earlybirdBonusCredits,
         monthlyCredits: plan.monthlyCredits,
         months: plan.months,
       },
     });
 
     if (insertError) {
-      console.error("[TossPay Create] Failed to persist pending order:", insertError);
+      console.error("[Payments Program Create] Failed to persist pending order:", insertError);
       return NextResponse.json(
         { error: "결제 주문 저장에 실패했습니다. 다시 시도해 주세요." },
         { status: 500 },
@@ -121,12 +95,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      checkoutPage: tossData.checkoutPage,
+      paymentId,
       orderId,
-      payToken: tossData.payToken,
+      orderName: `FlowSpot ${plan.name}`,
+      amount: plan.amount,
+      customerId: user.id,
+      buyerEmail,
     });
   } catch (error) {
-    console.error("[TossPay Create] Error:", error);
+    console.error("[Payments Program Create] Error:", error);
     return NextResponse.json(
       { error: "결제 생성에 실패했습니다." },
       { status: 500 },
