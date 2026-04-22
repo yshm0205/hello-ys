@@ -46,6 +46,129 @@ const gridBg = {
   backgroundSize: '56px 56px',
 };
 
+type LandingEarlybirdSummary = {
+  currentTier: 'phase1' | 'phase2' | 'ended';
+  phase1SoldCount: number;
+  phase1Remaining: number;
+  phase1Total: number;
+  phase2SoldCount: number;
+  phase2Remaining: number;
+  phase2Total: number;
+  tier1Deadline: string;
+};
+
+const EARLYBIRD_FALLBACK_SUMMARY: LandingEarlybirdSummary = {
+  currentTier: 'phase1',
+  phase1SoldCount: 7,
+  phase1Remaining: 23,
+  phase1Total: 30,
+  phase2SoldCount: 0,
+  phase2Remaining: 70,
+  phase2Total: 70,
+  tier1Deadline: '2026-05-08T23:59:59+09:00',
+};
+
+function useLandingEarlybirdSummary() {
+  const [summary, setSummary] = useState<LandingEarlybirdSummary>(EARLYBIRD_FALLBACK_SUMMARY);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const res = await fetch('/api/marketing/earlybird', { cache: 'no-store' });
+        if (!res.ok) return;
+
+        const data = (await res.json()) as Partial<LandingEarlybirdSummary>;
+        if (cancelled) return;
+
+        if (
+          typeof data.currentTier === 'string' &&
+          typeof data.phase1Remaining === 'number' &&
+          typeof data.phase1Total === 'number' &&
+          typeof data.phase2Remaining === 'number' &&
+          typeof data.phase2Total === 'number'
+        ) {
+          setSummary({
+            currentTier:
+              data.currentTier === 'phase2' || data.currentTier === 'ended'
+                ? data.currentTier
+                : 'phase1',
+            phase1SoldCount: Number(data.phase1SoldCount ?? 0),
+            phase1Remaining: Number(data.phase1Remaining),
+            phase1Total: Number(data.phase1Total),
+            phase2SoldCount: Number(data.phase2SoldCount ?? 0),
+            phase2Remaining: Number(data.phase2Remaining),
+            phase2Total: Number(data.phase2Total),
+            tier1Deadline: String(data.tier1Deadline ?? EARLYBIRD_FALLBACK_SUMMARY.tier1Deadline),
+          });
+        }
+      } catch {
+        // keep fallback summary
+      }
+    };
+
+    void load();
+    const interval = window.setInterval(load, 15000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  return summary;
+}
+
+function getActiveEarlybirdView(summary: LandingEarlybirdSummary) {
+  if (summary.currentTier === 'phase2') {
+    const remaining = summary.phase2Remaining;
+    const total = summary.phase2Total;
+    return {
+      currentTier: 'phase2' as const,
+      remaining,
+      total,
+      claimed: total - remaining,
+      claimedPct: Math.round(((total - remaining) / total) * 100),
+      isUrgent: remaining <= 5,
+      badgeLabel: '현재 2차 혜택',
+      bonusValue: '39,000원 상당',
+      headline: '2차 얼리버드',
+      progressHint: '2차 종료 후 얼리버드 혜택은 종료됩니다.',
+    };
+  }
+
+  if (summary.currentTier === 'ended') {
+    return {
+      currentTier: 'ended' as const,
+      remaining: 0,
+      total: summary.phase2Total,
+      claimed: summary.phase2Total,
+      claimedPct: 100,
+      isUrgent: false,
+      badgeLabel: '얼리버드 종료',
+      bonusValue: '혜택 종료',
+      headline: '얼리버드 종료',
+      progressHint: '이제 정가 구성으로만 신청할 수 있습니다.',
+    };
+  }
+
+  const remaining = summary.phase1Remaining;
+  const total = summary.phase1Total;
+  return {
+    currentTier: 'phase1' as const,
+    remaining,
+    total,
+    claimed: total - remaining,
+    claimedPct: Math.round(((total - remaining) / total) * 100),
+    isUrgent: remaining <= 5,
+    badgeLabel: '현재 1차 혜택',
+    bonusValue: '78,000원 상당',
+    headline: '1차 얼리버드',
+    progressHint: '1차 마감되면 2차로 전환되고, 보너스 크레딧은 절반으로 줄어듭니다.',
+  };
+}
+
 
 /* ═══════════════════════════════════════════════════════════════
    useIsMobile — 반응형 분기 훅
@@ -2132,14 +2255,18 @@ function FloatingCTA() {
     handleResize();
     window.addEventListener('resize', handleResize);
 
-    // 얼리버드 섹션을 완전히 지나간 이후에만 FloatingCTA 표시 (겹침 방지)
+    // 모바일: 진입 순간부터 항상 표시 (화면 좁아서 얼리버드 CTA와 겹침 부담 적음)
+    // 데스크탑: 얼리버드 섹션을 완전히 지나간 이후에만 표시 (우측 카드와 섹션 CTA 중복 방지)
     const handleScroll = () => {
+      if (window.innerWidth < 768) {
+        setIsVisible(true);
+        return;
+      }
       const eb = document.getElementById('earlybird');
       if (eb) {
         setIsVisible(eb.getBoundingClientRect().bottom < 0);
         return;
       }
-      // fallback: 얼리버드 없으면 스크롤 기반
       setIsVisible(window.scrollY > 400);
     };
     handleScroll();
