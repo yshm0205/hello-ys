@@ -2739,7 +2739,6 @@ export default function LandingPage() {
       <WhySpecialSection />
       <HowItWorksSection />
       <FAQSection />
-      <CTASection />
       <Footer />
       <FloatingCTA />
     </main>
