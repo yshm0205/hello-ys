@@ -2556,7 +2556,7 @@ function EarlyBirdSection() {
                 variant="end" isMobile={isMobile}
               />
               <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
-                <Link href="/pricing" style={{ textDecoration: 'none' }}>
+                <Link href="/checkout/allinone" style={{ textDecoration: 'none' }}>
                   <button className="eb-cta" style={{
                     display: 'inline-flex', alignItems: 'center', gap: 10,
                     padding: isMobile ? '18px 36px' : '20px 44px',
@@ -2751,7 +2751,6 @@ export default function LandingPage() {
       <HeroSection />
       <EarlyBirdSection />
       <LoopPainSection />
-      <StickyTabNav />
       <PainSection />
       <ProductRevealSection />
       <WhySpecialSection />
