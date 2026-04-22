@@ -117,7 +117,7 @@ function HeroSection() {
         position: 'relative',
         overflow: 'hidden',
         background: '#ffffff',
-        padding: 'clamp(80px, 12vw, 120px) 0 clamp(48px, 8vw, 80px)',
+        padding: 'clamp(80px, 12vw, 120px) 0 clamp(16px, 2.5vw, 28px)',
       }}
     >
       {/* 다크 히어로 카드 */}
@@ -2428,7 +2428,7 @@ function EarlyBirdSection() {
   return (
     <Box component="section" id="earlybird" style={{
       background: '#ffffff',
-      padding: 'clamp(40px, 7vw, 88px) 0 clamp(56px, 9vw, 110px)',
+      padding: 'clamp(16px, 2.5vw, 28px) 0 clamp(56px, 9vw, 110px)',
     }}>
       <style>{`
         @keyframes ebPulse { 0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.7);} 70%{box-shadow:0 0 0 10px rgba(167,139,250,0);} }
