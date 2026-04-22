@@ -2582,8 +2582,8 @@ function EarlyBirdSection() {
 
 function EbChevron() {
   return (
-    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 32 }}>
-      <ChevronDown size={22} color="rgba(255,255,255,.3)" />
+    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 48 }}>
+      <ChevronDown size={24} color="rgba(255,255,255,.35)" />
     </Box>
   );
 }
@@ -2607,7 +2607,7 @@ function EbTier(p: EbTierProps) {
   const base: React.CSSProperties = {
     position: 'relative',
     background: 'linear-gradient(180deg,rgba(24,20,34,.9),rgba(18,15,26,.9))',
-    border: '1px solid rgba(255,255,255,.06)',
+    border: '1px solid rgba(255,255,255,.14)',
     borderRadius: 22,
     padding: p.isMobile ? '24px 20px' : '30px 34px',
     backdropFilter: 'blur(10px)',
@@ -2619,10 +2619,10 @@ function EbTier(p: EbTierProps) {
       animation: 'ebGlow 2.8s ease-in-out infinite',
     } : p.variant === 'dim' ? {
       background: 'linear-gradient(180deg,rgba(24,20,34,.55),rgba(18,15,26,.55))',
-      border: '1px solid rgba(255,255,255,.05)',
+      border: '1px solid rgba(255,255,255,.12)',
     } : {
       background: 'linear-gradient(180deg,rgba(24,20,34,.4),rgba(18,15,26,.4))',
-      border: '1px solid rgba(255,255,255,.04)',
+      border: '1px solid rgba(255,255,255,.09)',
     };
   const statusStyle: React.CSSProperties =
     p.status === 'live' ? { background: '#b46bff', color: '#fff', boxShadow: '0 0 20px rgba(180,107,255,.5), 0 0 0 3px rgba(180,107,255,.2)' } :
