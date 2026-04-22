@@ -2582,8 +2582,8 @@ function EarlyBirdSection() {
 
 function EbChevron() {
   return (
-    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 48 }}>
-      <ChevronDown size={24} color="rgba(255,255,255,.35)" />
+    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 72 }}>
+      <ChevronDown size={28} color="rgba(255,255,255,.4)" />
     </Box>
   );
 }
