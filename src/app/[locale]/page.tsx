@@ -2522,10 +2522,10 @@ function EarlyBirdSection() {
                 tierName={<>1차 <em style={{ fontStyle: 'normal', color: '#a78bfa' }}>얼리버드</em></>}
                 feats={[
                   { ok: true, text: <><b>정가 대비 91,000원 할인</b> · 499,000원</> },
-                  { ok: true, text: <><b>보너스 크레딧 800cr</b> 즉시 지급 (78,000원 상당 · Pro 2개월분)</> },
+                  { ok: true, text: <><b>보너스 크레딧 78,000원 상당</b> 즉시 지급 (Pro 2개월분)</> },
                   { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
                 ]}
-                bonusText={<>+ 보너스 <b>800cr</b> · <b>78,000원 상당</b></>}
+                bonusText={<>+ 보너스 <b>78,000원 상당</b></>}
                 priceStrike="590,000원" priceNow="499,000원" priceNote="정가 590,000원"
                 variant="active" isMobile={isMobile}
               />
@@ -2535,10 +2535,10 @@ function EarlyBirdSection() {
                 tierName="2차 얼리버드"
                 feats={[
                   { ok: true, text: <>정가 대비 91,000원 할인 · 499,000원</> },
-                  { ok: true, text: <>보너스 크레딧 <b>400cr</b> 지급 (1차 대비 축소)</> },
+                  { ok: true, text: <>보너스 크레딧 <b>39,000원 상당</b> 지급 (1차 대비 축소)</> },
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
-                bonusText={<>+ 보너스 <b>400cr</b> · 39,000원 상당</>}
+                bonusText={<>+ 보너스 <b>39,000원 상당</b></>}
                 priceStrike="590,000원" priceNow="499,000원" priceNote="정가 590,000원"
                 variant="dim" isMobile={isMobile}
               />
@@ -2551,7 +2551,7 @@ function EarlyBirdSection() {
                   { ok: false, muted: true, text: <><b>보너스 크레딧 지급 없음</b></> },
                   { ok: false, muted: true, text: <>기본 구성만 제공</> },
                 ]}
-                bonusText={<>보너스 <b>0cr</b> · 혜택 없음</>}
+                bonusText={<>보너스 없음</>}
                 priceNow="590,000원" priceUp="+91,000원 인상"
                 variant="end" isMobile={isMobile}
               />
@@ -2582,8 +2582,8 @@ function EarlyBirdSection() {
 
 function EbChevron() {
   return (
-    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 72 }}>
-      <ChevronDown size={28} color="rgba(255,255,255,.4)" />
+    <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 96 }}>
+      <ChevronDown size={30} color="rgba(255,255,255,.45)" />
     </Box>
   );
 }
