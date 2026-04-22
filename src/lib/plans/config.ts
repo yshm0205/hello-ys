@@ -45,7 +45,7 @@ export const CREDIT_TOPUP_PACKS = [
 ] as const;
 
 export const MONTHLY_SUBSCRIPTION_PREVIEW = {
-  amount: 69000,
+  amount: 39000,
   monthlyCredits: 400,
   name: "월 구독",
 } as const;
