@@ -2495,7 +2495,7 @@ function EarlyBirdSection() {
               </Box>
               <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55 }}>
                 단 한 번뿐인 혜택, 지금 놓치면 다시 받을 수 없습니다.<br />
-                종료 후엔 <b style={{ color: '#fff', fontWeight: 800 }}>가격은 590,000원</b>으로 오르고, <b style={{ color: '#fff', fontWeight: 800 }}>보너스도 사라집니다.</b>
+                종료 후엔 <b style={{ color: '#fff', fontWeight: 800 }}>가격은 599,000원</b>으로 오르고, <b style={{ color: '#fff', fontWeight: 800 }}>보너스도 사라집니다.</b>
               </Text>
               <Box style={{
                 marginTop: 24, padding: isMobile ? '16px 18px' : '20px 22px',
@@ -2507,10 +2507,10 @@ function EarlyBirdSection() {
                   Now · 현재 1차 혜택
                 </Text>
                 <Text style={{ fontSize: isMobile ? 26 : 'clamp(26px, 3.4vw, 34px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#fff' }}>
-                  총 <span style={{ color: '#a78bfa' }}>169,000원</span> 상당
+                  총 <span style={{ color: '#a78bfa' }}>178,000원</span> 상당
                 </Text>
                 <Text style={{ marginTop: 6, fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.75)', lineHeight: 1.5 }}>
-                  할인 91,000원 + 보너스 크레딧 78,000원 상당
+                  할인 100,000원 + 보너스 크레딧 78,000원 상당
                 </Text>
               </Box>
             </Box>
@@ -2521,12 +2521,12 @@ function EarlyBirdSection() {
                 stageNum="01" status="live" statusText="LIVE · 진행 중"
                 tierName={<>1차 <em style={{ fontStyle: 'normal', color: '#a78bfa' }}>얼리버드</em></>}
                 feats={[
-                  { ok: true, text: <><b>정가 대비 91,000원 할인</b> · 499,000원</> },
+                  { ok: true, text: <><b>정가 대비 100,000원 할인</b> · 499,000원</> },
                   { ok: true, text: <><b>보너스 크레딧 78,000원 상당</b> 즉시 지급 (Pro 2개월분)</> },
                   { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
                 ]}
                 bonusText={<>+ 보너스 <b>78,000원 상당</b></>}
-                priceStrike="정가 590,000원" priceNow="499,000원"
+                priceStrike="정가 599,000원" priceNow="499,000원"
                 variant="active" isMobile={isMobile}
               />
               <EbChevron />
@@ -2534,12 +2534,12 @@ function EarlyBirdSection() {
                 stageNum="02" status="wait" statusText="다음 단계 · 혜택 축소"
                 tierName="2차 얼리버드"
                 feats={[
-                  { ok: true, text: <>정가 대비 91,000원 할인 · 499,000원</> },
+                  { ok: true, text: <>정가 대비 100,000원 할인 · 499,000원</> },
                   { ok: true, text: <>보너스 크레딧 <b>39,000원 상당</b> 지급 (1차 대비 축소)</> },
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
                 bonusText={<>+ 보너스 <b>39,000원 상당</b></>}
-                priceStrike="정가 590,000원" priceNow="499,000원"
+                priceStrike="정가 599,000원" priceNow="499,000원"
                 variant="dim" isMobile={isMobile}
               />
               <EbChevron />
@@ -2547,12 +2547,12 @@ function EarlyBirdSection() {
                 stageNum="03" status="end" statusText="종료 · 가격 인상"
                 tierName="얼리버드 종료"
                 feats={[
-                  { ok: false, muted: true, text: <><b>할인 종료</b> — 정가 590,000원으로 복귀</> },
+                  { ok: false, muted: true, text: <><b>할인 종료</b> — 정가 599,000원으로 복귀</> },
                   { ok: false, muted: true, text: <><b>보너스 크레딧 지급 없음</b></> },
                   { ok: false, muted: true, text: <>기본 구성만 제공</> },
                 ]}
                 bonusText={<>보너스 없음</>}
-                priceNow="590,000원" priceUp="+91,000원 인상"
+                priceNow="599,000원" priceUp="+100,000원 인상"
                 variant="end" isMobile={isMobile}
               />
               <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
