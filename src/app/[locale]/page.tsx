@@ -1848,13 +1848,20 @@ function HowItWorksSection() {
     <Box component="section" id="how-it-works" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 140px) 0', scrollMarginTop: '120px' }}>
       <Container size="lg">
         <motion.div {...fadeUp}>
-          <Stack align="center" gap={8} mb={56}>
+          <Stack align="center" gap={14} mb={56}>
             <Title order={2} ta="center" style={{
               fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
               color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
             }}>
               혹시 여러분은 어디서 헤매고 계신가요?
             </Title>
+            <Text ta="center" style={{
+              fontSize: 'clamp(14px, 2.5vw, 16px)', color: '#71717a',
+              lineHeight: 1.6, maxWidth: 520, letterSpacing: '-0.01em',
+            }}>
+              모든 단계의 솔루션이 <b style={{ color: '#18181b' }}>올인원 패스 하나</b>에 전부 포함됩니다.<br />
+              단계별로 지금 가장 빛날 솔루션을 먼저 보여드립니다.
+            </Text>
           </Stack>
         </motion.div>
 
@@ -1934,7 +1941,7 @@ function HowItWorksSection() {
                       color: '#71717a', fontSize: '11px', letterSpacing: '0.04em',
                       marginBottom: '8px', textTransform: 'uppercase',
                     }}>
-                      포함 솔루션
+                      이 단계 핵심 솔루션
                     </Text>
                     <Stack gap={6}>
                       {s.includes.map((item, j) => (
