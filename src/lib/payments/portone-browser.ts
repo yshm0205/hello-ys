@@ -9,6 +9,12 @@ const PORTONE_CHANNEL_KEY_TOSSPAY =
 
 export type PortOnePaymentMethod = "CARD" | "TOSSPAY";
 
+export type CardCompanyCode =
+  | "SHINHAN_CARD"
+  | "SAMSUNG_CARD"
+  | "HYUNDAI_CARD"
+  | "NH_CARD";
+
 type PortOneCheckoutInput = {
   paymentId: string;
   orderName: string;
@@ -16,6 +22,7 @@ type PortOneCheckoutInput = {
   customerId?: string;
   customerEmail?: string;
   paymentMethod?: PortOnePaymentMethod;
+  cardCompany?: CardCompanyCode;
 };
 
 type PortOneCheckoutResult =
@@ -88,18 +95,15 @@ export async function requestPortOneCheckout(
       ? {
           easyPayProvider: "TOSSPAY",
         }
-      : {
-          // 심사 완료된 카드사만 노출 (5/9경 심사 완료 예정)
-          // 완료 후 card 블록 전체 제거
-          card: {
-            availableCards: [
-              "SHINHAN_CARD",
-              "SAMSUNG_CARD",
-              "HYUNDAI_CARD",
-              "NH_CARD",
-            ],
-          },
-        }),
+      : input.cardCompany
+        ? {
+            // 심사 완료된 카드사만 다이렉트 호출 (5/9경 심사 완료 예정)
+            // 완료 후 cardCompany 파라미터 제거로 일반 카드 결제창 복구
+            card: {
+              cardCompany: input.cardCompany,
+            },
+          }
+        : {}),
     redirectUrl: `${origin}/${currentLocale}/dashboard/credits/success`,
     noticeUrls: [`${origin}/api/payments/webhook`],
     customer: {

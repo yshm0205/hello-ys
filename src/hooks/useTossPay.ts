@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 
 import {
   requestPortOneTossPayment,
+  type CardCompanyCode,
   type PortOnePaymentMethod,
 } from '@/lib/payments/portone-browser';
 
@@ -21,6 +22,7 @@ export function useTossPay() {
       planType: string,
       buyerInfo?: TossPayBuyerInfo,
       paymentMethod: PortOnePaymentMethod = 'CARD',
+      cardCompany?: CardCompanyCode,
     ) => {
       setLoading(true);
       setError(null);
@@ -47,6 +49,7 @@ export function useTossPay() {
           customerId: data.customerId,
           customerEmail: data.buyerEmail,
           paymentMethod,
+          cardCompany,
         });
 
         if (!portoneResult.ok) {

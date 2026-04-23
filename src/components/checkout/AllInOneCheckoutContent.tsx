@@ -271,22 +271,83 @@ export function AllInOneCheckoutContent({
                   </Text>
                 </Alert>
 
-                <Button
-                  color="violet"
-                  radius="lg"
-                  size="lg"
-                  disabled={!canCheckout}
-                  loading={loading}
-                  onClick={() =>
-                    requestPayment(
-                      'allinone',
-                      { buyerEmail: userEmail },
-                      'CARD',
-                    )
-                  }
-                >
-                  카드로 결제 (신한·삼성·현대·농협)
-                </Button>
+                <Stack gap="xs">
+                  <Text size="xs" c="gray.6" fw={600}>
+                    카드사 선택 (승인 완료된 4개만 가능)
+                  </Text>
+                  <Group grow gap="xs">
+                    <Button
+                      color="violet"
+                      radius="lg"
+                      size="md"
+                      disabled={!canCheckout}
+                      loading={loading}
+                      onClick={() =>
+                        requestPayment(
+                          'allinone',
+                          { buyerEmail: userEmail },
+                          'CARD',
+                          'SHINHAN_CARD',
+                        )
+                      }
+                    >
+                      신한카드
+                    </Button>
+                    <Button
+                      color="violet"
+                      radius="lg"
+                      size="md"
+                      disabled={!canCheckout}
+                      loading={loading}
+                      onClick={() =>
+                        requestPayment(
+                          'allinone',
+                          { buyerEmail: userEmail },
+                          'CARD',
+                          'SAMSUNG_CARD',
+                        )
+                      }
+                    >
+                      삼성카드
+                    </Button>
+                  </Group>
+                  <Group grow gap="xs">
+                    <Button
+                      color="violet"
+                      radius="lg"
+                      size="md"
+                      disabled={!canCheckout}
+                      loading={loading}
+                      onClick={() =>
+                        requestPayment(
+                          'allinone',
+                          { buyerEmail: userEmail },
+                          'CARD',
+                          'HYUNDAI_CARD',
+                        )
+                      }
+                    >
+                      현대카드
+                    </Button>
+                    <Button
+                      color="violet"
+                      radius="lg"
+                      size="md"
+                      disabled={!canCheckout}
+                      loading={loading}
+                      onClick={() =>
+                        requestPayment(
+                          'allinone',
+                          { buyerEmail: userEmail },
+                          'CARD',
+                          'NH_CARD',
+                        )
+                      }
+                    >
+                      농협카드
+                    </Button>
+                  </Group>
+                </Stack>
 
                 <Button
                   color="blue"
@@ -303,7 +364,7 @@ export function AllInOneCheckoutContent({
                     )
                   }
                 >
-                  토스페이로 결제
+                  토스페이로 결제 (기타 카드)
                 </Button>
 
                 {!canCheckout && (
