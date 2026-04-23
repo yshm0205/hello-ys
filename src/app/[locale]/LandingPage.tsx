@@ -2301,15 +2301,28 @@ function renderWithLinks(text: string): ReactNode {
       parts.push(text.slice(lastIndex, match.index));
     }
     const [, label, href] = match;
+    const isExternal = /^https?:\/\//.test(href);
     parts.push(
-      <Anchor
-        key={`lnk-${key++}`}
-        component={Link}
-        href={href}
-        style={{ color: '#8b5cf6', fontWeight: 600 }}
-      >
-        {label}
-      </Anchor>,
+      isExternal ? (
+        <Anchor
+          key={`lnk-${key++}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#8b5cf6', fontWeight: 600 }}
+        >
+          {label}
+        </Anchor>
+      ) : (
+        <Anchor
+          key={`lnk-${key++}`}
+          component={Link}
+          href={href}
+          style={{ color: '#8b5cf6', fontWeight: 600 }}
+        >
+          {label}
+        </Anchor>
+      ),
     );
     lastIndex = match.index + match[0].length;
   }
@@ -2384,7 +2397,11 @@ function FAQSection() {
         },
         {
           q: '환불 되나요?',
-          a: '결제일로부터 28일 이내 3구간 환불이 가능합니다.\n\n• 1~7일 (& 5강 미만 & 크레딧 미사용): 전액 환불\n• 8~14일: 결제금의 2/3 − 위약금 10%\n• 15~28일: 결제금의 1/2 − 위약금 10%\n• 29일 경과 또는 5강 이상 수강/크레딧 사용 시: 환불 제한\n\n자세한 조건과 예시는 [환불 규정 페이지](/refund)에서 확인해 주세요.',
+          a: '결제일로부터 28일 이내 3구간 환불이 가능합니다.\n\n• 1~7일 (& 5강 미만 & 크레딧 미사용): 전액 환불\n• 8~14일: 결제금의 2/3 − 위약금 10%\n• 15~28일: 결제금의 1/2 − 위약금 10%\n• 29일 경과 또는 5강 이상 수강/크레딧 사용 시: 환불 제한\n\n자세한 조건과 예시는 [환불 규정 페이지](/refund)에서 확인해 주세요.\n\n환불을 원하시는 경우 [환불 신청서](https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform)를 작성해 주세요.',
+        },
+        {
+          q: '결제 카드 변경, 결제 취소는 어떻게 하나요?',
+          a: '결제 카드를 변경하시려면 [환불 신청서](https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform)를 먼저 작성하신 뒤, 환불 완료 후 원하시는 카드로 재결제해 주세요.\n\n결제 취소(환불)를 원하시는 경우에도 동일하게 [환불 신청서](https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform)를 작성해 주시면 접수 후 3영업일 이내에 안내드립니다.',
         },
         {
           q: '크레딧만 따로 구매할 수 있나요?',
@@ -3353,6 +3370,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
   const stage3Status: EbTierProps['status'] = earlybirdEnded ? 'live' : 'end';
   const stage3StatusText = earlybirdEnded ? 'LIVE · 정가 신청 진행 중' : '종료 · 가격 인상';
   const stage3Variant: EbTierProps['variant'] = earlybirdEnded ? 'active' : 'end';
+  const monthlyNote = `12개월 할부 시 월 ${Math.ceil(primaryProgram.amount / 12).toLocaleString()}원`;
 
   return (
     <Box component="section" id="earlybird" style={{
@@ -3460,7 +3478,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
                 ]}
                 bonusText={<>+ 보너스 <b>800cr</b></>}
-                priceStrike="정가 599,000원" priceNow="499,000원"
+                priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
                 variant={stage1Variant} isMobile={isMobile}
               />
               <EbChevron />
@@ -3473,7 +3491,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
                 bonusText={<>+ 보너스 <b>400cr</b></>}
-                priceStrike="정가 599,000원" priceNow="499,000원"
+                priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
                 variant={stage2Variant} isMobile={isMobile}
               />
               <EbChevron />
@@ -3486,7 +3504,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: false, muted: true, text: <>기본 제공 크레딧과 강의 구성은 동일</> },
                 ]}
                 bonusText={<>보너스 없음</>}
-                priceNow="499,000원"
+                priceNow="499,000원" priceNote={monthlyNote}
                 variant={stage3Variant} isMobile={isMobile}
               />
               <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>

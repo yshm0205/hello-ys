@@ -218,10 +218,22 @@ export default async function RefundPage() {
 
           <h2>제5조 (환불 절차)</h2>
           <ol>
-            <li>아래 이메일로 환불을 요청합니다.</li>
-            <li>요청 시 <strong>결제 시 사용한 이메일, 결제일, 결제 금액</strong>을 함께 기재해 주세요.</li>
-            <li>환불 요청 접수 후 <strong>3영업일 이내</strong>에 검토 결과를 안내합니다.</li>
+            <li>
+              환불을 원하시는 경우{" "}
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-600 dark:text-violet-400 font-semibold underline"
+              >
+                환불 신청서
+              </a>
+              를 작성해 주세요.
+            </li>
+            <li>신청서 작성 시 <strong>결제 시 사용한 이메일, 결제일, 결제 금액</strong>을 정확히 기재해 주세요.</li>
+            <li>접수 후 <strong>3영업일 이내</strong>에 검토 결과를 안내합니다.</li>
             <li>환불 승인 시, 원래 결제 수단으로 <strong>5~7영업일 이내</strong>에 환불됩니다.</li>
+            <li><strong>결제 카드 변경</strong>을 원하실 경우에도 위 환불 신청서를 먼저 작성하신 뒤, 환불 완료 후 재결제해 주세요.</li>
           </ol>
 
           <h2>제6조 (환불이 불가한 경우)</h2>
