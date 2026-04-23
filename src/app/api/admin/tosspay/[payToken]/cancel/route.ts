@@ -135,7 +135,8 @@ export async function POST(
   }
 
   const admin = createAdminClient();
-  const refundNo = `refund-${randomUUID()}`;
+  // TossPay refundNo max length is 36 chars — use raw UUID (36 chars, no prefix)
+  const refundNo = randomUUID();
   const refundAmount = preview.refundAmount;
   const isFullRefund = preview.refundType === "full";
 
