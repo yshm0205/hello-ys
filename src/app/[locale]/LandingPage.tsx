@@ -223,107 +223,295 @@ function PricingBar({ name, price, nameColor, priceColor, barWidth, mobileBarWid
 
 
 /* ═══════════════════════════════════════════════════════════════
-   섹션 1: Hero — 다크 카드 블록 (크리투스 스타일)
+   섹션 1: Hero — Cinematic Dark 3D (풀블리드 모래시계)
    ═══════════════════════════════════════════════════════════════ */
 function HeroSection() {
-
   return (
     <Box
       component="section"
       id="landing-hero"
       style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
         position: 'relative',
+        width: '100%',
+        minHeight: '760px',
+        height: '100vh',
         overflow: 'hidden',
-        background: '#ffffff',
-        padding: 'clamp(80px, 12vw, 120px) 0 clamp(16px, 2.5vw, 28px)',
+        background: '#0a0a0f',
+        color: '#f4f4f5',
+        isolation: 'isolate',
       }}
     >
-      {/* 다크 히어로 카드 */}
+      {/* Inline scoped styles for responsive image/overlay treatment */}
+      <style>{`
+        .fs-hero-img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center right;
+          z-index: 0;
+          user-select: none;
+          -webkit-user-drag: none;
+        }
+        .fs-hero-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          background: linear-gradient(to right,
+            rgba(10,10,15,0.88) 0%,
+            rgba(10,10,15,0.55) 40%,
+            rgba(10,10,15,0.0) 65%);
+        }
+        @media (max-width: 768px) {
+          .fs-hero-img {
+            opacity: 0.35;
+            filter: blur(1.5px) brightness(0.55);
+          }
+          .fs-hero-overlay {
+            background:
+              radial-gradient(ellipse at center, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0) 70%),
+              rgba(10,10,15,0.78);
+          }
+        }
+        .fs-eyebrow-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #a78bfa;
+          box-shadow: 0 0 10px #a78bfa, 0 0 20px #8b5cf6;
+          animation: fs-pulse 2.4s ease-in-out infinite;
+        }
+        @keyframes fs-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%      { opacity: 0.5; transform: scale(0.8); }
+        }
+        .fs-headline-accent::after {
+          content: '';
+          position: absolute;
+          left: 0; right: 0; bottom: -0.08em;
+          height: 0.08em;
+          background: linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent);
+          filter: blur(3px);
+        }
+      `}</style>
+
+      {/* Full-bleed background image */}
+      <Image
+        src="/images/hero-hourglass.webp"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="fs-hero-img"
+      />
+
+      {/* Overlay */}
+      <Box className="fs-hero-overlay" />
+
+      {/* Copy container */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.1, ease }}
-        style={{ width: '100%', maxWidth: '600px', padding: '0 16px' }}
-      >
-        <Box style={{
-          background: '#18181b',
-          borderRadius: '24px',
-          padding: 'clamp(32px, 6vw, 48px) clamp(20px, 4vw, 40px)',
+        style={{
           position: 'relative',
-          overflow: 'hidden',
-          boxShadow: '0 8px 40px rgba(24,24,27,0.3), 0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          {/* 배경 데코 — violet glow */}
-          <Box style={{
-            position: 'absolute', top: '-60px', right: '-60px',
-            width: '200px', height: '200px', borderRadius: '50%',
-            background: 'rgba(139,92,246,0.12)', filter: 'blur(40px)',
-            pointerEvents: 'none',
-          }} />
-          <Box style={{
-            position: 'absolute', bottom: '-40px', left: '-40px',
-            width: '160px', height: '160px', borderRadius: '50%',
-            background: 'rgba(139,92,246,0.08)', filter: 'blur(30px)',
-            pointerEvents: 'none',
-          }} />
+          zIndex: 5,
+          width: '100%',
+          maxWidth: '1440px',
+          margin: '0 auto',
+          padding: 'clamp(80px, 12vw, 140px) clamp(24px, 6vw, 80px) clamp(48px, 8vw, 120px)',
+          minHeight: '100%',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          style={{
+            maxWidth: '560px',
+            width: '100%',
+            textAlign: 'left',
+          }}
+          className="fs-hero-copy"
+        >
+          {/* Mobile center alignment via media query */}
+          <style>{`
+            @media (max-width: 768px) {
+              .fs-hero-copy { text-align: center; margin: 0 auto; max-width: 340px; }
+              .fs-hero-copy .fs-ctas, .fs-hero-copy .fs-social { justify-content: center; }
+              .fs-hero-copy .fs-sub { margin-left: auto; margin-right: auto; }
+            }
+          `}</style>
 
-          <Stack align="center" gap={0} style={{ position: 'relative', zIndex: 1 }}>
-            {/* 구성요소 나열 */}
-            <Text ta="center" style={{
-              color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(17px, 4vw, 20px)',
-              fontWeight: 600, letterSpacing: '0.02em',
-              marginBottom: 'clamp(20px, 4vw, 28px)',
-            }}>
-              AI 스크립트 도구 + 월간 트렌드 채널 데이터 + VOD 강의 40강 + 전자책 + 노션 템플릿
-            </Text>
+          {/* Eyebrow pill */}
+          <Box
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 16px 8px 14px',
+              borderRadius: '9999px',
+              fontSize: '13px',
+              fontWeight: 500,
+              color: 'rgba(250,250,250,0.88)',
+              background: 'linear-gradient(180deg, rgba(139,92,246,0.14), rgba(139,92,246,0.06))',
+              border: '1px solid rgba(167,139,250,0.35)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.02) inset, 0 0 24px rgba(139,92,246,0.25)',
+              marginBottom: '28px',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+            }}
+          >
+            <span className="fs-eyebrow-dot" />
+            <span>AI 스크립트 · 트렌드 데이터 · VOD 40강 · 전자책 · 노션 템플릿</span>
+          </Box>
 
-            {/* 헤드라인 */}
-            <Title order={1} ta="center" style={{
-              fontSize: 'clamp(32px, 8vw, 56px)',
-              fontWeight: 900, color: '#ffffff',
-              lineHeight: 1.15, letterSpacing: '-0.03em',
-              marginBottom: 'clamp(24px, 5vw, 36px)',
-            }}>
+          {/* Headline */}
+          <Title
+            order={1}
+            style={{
+              margin: 0,
+              fontWeight: 900,
+              lineHeight: 1.02,
+              letterSpacing: '-0.035em',
+              color: '#fafafa',
+              fontSize: 'clamp(44px, 7vw, 78px)',
+            }}
+          >
+            <Box
+              component="span"
+              style={{
+                display: 'block',
+                color: 'rgba(250,250,250,0.75)',
+                fontWeight: 500,
+                letterSpacing: '-0.02em',
+                fontSize: 'clamp(32px, 5vw, 62px)',
+                marginBottom: '8px',
+              }}
+            >
               쇼츠 수익화
-              <br />
-              <span style={{
-                color: '#a78bfa', position: 'relative', display: 'inline-block',
-              }}>
+            </Box>
+            <Box
+              component="span"
+              style={{
+                display: 'block',
+                background: 'linear-gradient(180deg, #ffffff 0%, #d4d4d8 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent',
+              }}
+            >
+              <Box
+                component="span"
+                className="fs-headline-accent"
+                style={{
+                  position: 'relative',
+                  background: 'linear-gradient(120deg, #c4b5fd 0%, #8b5cf6 40%, #f0abfc 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  color: 'transparent',
+                }}
+              >
                 최단거리
-                <Box style={{
-                  position: 'absolute', bottom: '2px', left: '-2px', right: '-2px',
-                  height: '8px', background: 'rgba(167,139,250,0.3)',
-                  borderRadius: '4px', zIndex: -1,
-                }} />
-              </span>
+              </Box>
               {' '}패키지
-            </Title>
+            </Box>
+          </Title>
 
-            {/* CTA 버튼 */}
+          {/* Sub copy */}
+          <Text
+            className="fs-sub"
+            style={{
+              margin: '28px 0 0',
+              color: 'rgba(228,228,231,0.7)',
+              maxWidth: '560px',
+              fontSize: 'clamp(16px, 2vw, 19px)',
+              lineHeight: 1.55,
+            }}
+          >
+            조회수가 안 터지는 이유는 스크립트에 있습니다.<br />
+            <b style={{ color: '#fafafa', fontWeight: 700 }}>도구 + 데이터 + 강의</b>로 한 번에 해결하세요.
+          </Text>
+
+          {/* CTA */}
+          <Box
+            className="fs-ctas"
+            style={{
+              display: 'flex',
+              gap: '12px',
+              marginTop: 'clamp(28px, 4vw, 40px)',
+              flexWrap: 'wrap',
+            }}
+          >
             <AuthAwareButton
               id="hero-cta"
               authenticatedHref="/checkout/allinone"
               unauthenticatedHref="/login?redirect=/checkout/allinone"
-              size="xl" radius="xl"
+              size="xl"
+              radius="md"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
-                background: '#ffffff', color: '#18181b',
-                fontSize: 'clamp(15px, 2.5vw, 17px)', fontWeight: 700,
-                padding: '16px 40px', height: 'auto', border: 'none',
-                boxShadow: '0 2px 12px rgba(255,255,255,0.15)',
+                background: 'linear-gradient(180deg, #a78bfa 0%, #8b5cf6 45%, #7c3aed 100%)',
+                color: '#fff',
+                fontSize: '16px',
+                fontWeight: 600,
+                padding: '16px 26px',
+                height: 'auto',
+                border: 'none',
+                letterSpacing: '-0.01em',
+                boxShadow:
+                  '0 0 0 1px rgba(167,139,250,0.6) inset, 0 1px 0 rgba(255,255,255,0.4) inset, 0 0 24px rgba(139,92,246,0.45), 0 8px 28px rgba(139,92,246,0.35)',
               }}
             >
               올인원 패스 신청하기
             </AuthAwareButton>
-          </Stack>
+          </Box>
+
+          {/* Social proof */}
+          <Box
+            className="fs-social"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              marginTop: 'clamp(28px, 4vw, 40px)',
+            }}
+          >
+            <Box style={{ display: 'flex' }}>
+              {[
+                'radial-gradient(circle at 30% 30%, #f0abfc, #8b5cf6)',
+                'radial-gradient(circle at 30% 30%, #06b6d4, #3b82f6)',
+                'radial-gradient(circle at 30% 30%, #a78bfa, #6366f1)',
+                'radial-gradient(circle at 30% 30%, #ec4899, #8b5cf6)',
+                'radial-gradient(circle at 30% 30%, #22d3ee, #8b5cf6)',
+              ].map((bg, i) => (
+                <Box
+                  key={i}
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    border: '2px solid #0a0a0f',
+                    marginRight: '-8px',
+                    boxShadow: '0 2px 8px rgba(139,92,246,0.3)',
+                    background: bg,
+                  }}
+                />
+              ))}
+            </Box>
+            <Text
+              style={{
+                color: 'rgba(228,228,231,0.7)',
+                fontSize: '14px',
+                marginLeft: '8px',
+              }}
+            >
+              <b style={{ color: '#fafafa', fontWeight: 700 }}>얼리버드 특가</b> · 선착순 진행 중
+            </Text>
+          </Box>
         </Box>
       </motion.div>
-
     </Box>
   );
 }
@@ -2126,31 +2314,31 @@ function FAQSection() {
       items: [
         {
           q: 'AI 1도 몰라도 되나요?',
-          a: '네, 전혀 몰라도 괜찮습니다.\n\n소재만 입력하면 AI가 스크립트를 자동으로 만들어줍니다. 사용법도 강의에서 처음부터 알려드리니까 걱정 마세요.',
+          a: '네, 전혀 몰라도 괜찮습니다. 소재만 입력하면 AI가 스크립트를 자동으로 만들어주고, 사용법도 강의에서 처음부터 알려드리니까 걱정 마세요.',
         },
         {
           q: '이것만 구매하면 바로 성공하나요?',
-          a: '솔직히 말씀드리면, 노력 없이 큰 결과를 기대하시는 분에게는 추천드리지 않습니다.\n\n이 과정은 4년 걸릴 길을 최단거리로 바꿔드릴 뿐, 그 길은 직접 걸으셔야 합니다. 빠르게 실행할 의지가 있는 분이라면 충분히 결과를 만들 수 있습니다.',
+          a: '솔직히 말씀드리면, 노력 없이 큰 결과를 기대하시는 분에게는 추천드리지 않습니다. 이 과정은 4년 걸릴 길을 최단거리로 바꿔드릴 뿐, 그 길은 직접 걸으셔야 합니다. 빠르게 실행할 의지가 있는 분이라면 충분히 결과를 만들 수 있습니다.',
         },
         {
           q: '어떤 사람에게 맞나요?',
-          a: '쇼츠를 처음 시작하는 분, 올리고 있는데 조회수가 안 나오는 분, 혼자 하다 지치신 분 모두를 고려해서 설계했습니다.\n\n다만 컴퓨터 사용이 미숙하거나 편집을 한 번도 해보지 않으신 분은 기본 세팅과 프로그램까지 함께 익히셔야 하므로 시간이 조금 더 걸릴 수 있습니다.',
+          a: '쇼츠를 처음 시작하는 분, 올리고 있는데 조회수가 안 나오는 분, 혼자 하다 지치신 분 모두를 고려해서 설계했습니다. 다만 컴퓨터 사용이 미숙하거나 편집을 한 번도 해보지 않으신 분은 기본 세팅과 프로그램까지 함께 익히셔야 하므로 시간이 조금 더 걸릴 수 있습니다.',
         },
         {
           q: '얼굴을 공개해야 하나요?',
-          a: '아니요, 얼굴 공개 없이 운영할 수 있는 채널 유형도 강의에서 다룹니다.\n\nPart 1에서 얼굴 노출 여부에 따른 채널 구조와 장단점을 비교해드리고, 본인에게 맞는 방향을 고르실 수 있게 설계했습니다.',
+          a: '아니요, 얼굴 공개 없이 운영할 수 있는 채널 유형도 강의에서 다룹니다. Part 1에서 얼굴 노출 여부에 따른 채널 구조와 장단점을 비교해드리고, 본인에게 맞는 방향을 고르실 수 있게 설계했습니다.',
         },
         {
           q: '촬영 장비나 편집 프로그램이 없어도 되나요?',
-          a: '고가 촬영 장비 없이 스마트폰만으로 시작할 수 있습니다.\n\n편집은 캡컷(CapCut) 기반 워크플로우를 Part 5 실전 예시로 보여드리며, 편집 시간을 절반으로 줄이는 루틴도 포함됩니다.',
+          a: '고가 촬영 장비 없이 스마트폰만으로 시작할 수 있습니다. 편집은 캡컷(CapCut) 기반 워크플로우를 Part 5 실전 예시로 보여드리며, 편집 시간을 절반으로 줄이는 루틴도 포함됩니다.',
         },
         {
           q: '수강 기한은 언제까지인가요?',
-          a: '올인원 패스는 결제일로부터 4개월간 강의와 프로그램을 이용할 수 있습니다.\n\n기간 내에는 자유롭게 복습 가능하며, 정상적인 학습 범위를 넘는 과도한 반복 재생(예: 비정상적 자동 재생)은 제한될 수 있습니다.',
+          a: '올인원 패스는 결제일로부터 4개월간 강의와 프로그램을 이용할 수 있습니다. 기간 내에는 자유롭게 복습 가능하며, 정상적인 학습 범위를 넘는 과도한 반복 재생(예: 비정상적 자동 재생)은 제한될 수 있습니다.',
         },
         {
           q: '강의는 어떻게 제공되나요?',
-          a: 'VOD 온라인 스트리밍 방식입니다.\n\n로그인 후 대시보드의 강의 플레이어에서 바로 재생할 수 있고, DRM 보호 영상이라 다운로드는 제공되지 않습니다. PC/모바일 모두 시청 가능합니다.',
+          a: 'VOD 온라인 스트리밍 방식입니다. 로그인 후 대시보드의 강의 플레이어에서 바로 재생할 수 있고, DRM 보호 영상이라 다운로드는 제공되지 않습니다. PC/모바일 모두 시청 가능합니다.',
         },
       ],
     },
@@ -2159,19 +2347,19 @@ function FAQSection() {
       items: [
         {
           q: '크레딧은 어떻게 사용되나요?',
-          a: '스크립트 1회 생성 = 10크레딧 차감 방식입니다.\n\n올인원 패스는 결제 즉시 400cr 지급되고, 이후 매달 400cr씩 총 4회(1,600cr) 지급됩니다. 1달에 약 40회 생성 분량입니다.',
+          a: '스크립트 1회 생성 = 10크레딧 차감 방식입니다. 올인원 패스는 결제 즉시 400cr 지급되고, 이후 매달 400cr씩 총 4회(1,600cr) 지급됩니다. 1달에 약 40회 생성 분량입니다.',
         },
         {
           q: '크레딧이 부족하면 어떻게 되나요?',
-          a: '강의와 월간 트렌드 데이터는 계속 이용 가능하며, 스크립트 생성만 제한됩니다.\n\n대시보드에서 추가 크레딧을 따로 구매할 수 있습니다.',
+          a: '강의와 월간 트렌드 데이터는 계속 이용 가능하며, 스크립트 생성만 제한됩니다. 대시보드에서 추가 크레딧을 따로 구매할 수 있습니다.',
         },
         {
           q: '어떤 주제든 생성할 수 있나요?',
-          a: '현재는 "지식 정보형"과 "썰/설렘형" 두 가지 주제에 최적화되어 있습니다.\n\n두 카테고리에 해당하는 소재라면 자유롭게 생성할 수 있고, 새로운 주제가 추가될 경우 해당 페이지에 안내드립니다.',
+          a: '현재는 "지식 정보형"과 "썰/설렘형" 두 가지 주제에 최적화되어 있습니다. 두 카테고리에 해당하는 소재라면 자유롭게 생성할 수 있고, 새로운 주제가 추가될 경우 해당 페이지에 안내드립니다.',
         },
         {
           q: 'AI로 만든 스크립트의 저작권은 누구에게 있나요?',
-          a: '생성된 스크립트는 사용자가 자유롭게 활용하실 수 있습니다. 상업적 이용, 수정, 재배포 모두 제한 없이 가능합니다.\n\n다만 AI 생성물 특성상 타인의 저작물과 우연히 유사할 수 있으니 최종 검수는 직접 해주세요.',
+          a: '생성된 스크립트는 사용자가 자유롭게 활용하실 수 있습니다. 상업적 이용, 수정, 재배포 모두 제한 없이 가능합니다. 다만 AI 생성물 특성상 타인의 저작물과 우연히 유사할 수 있으니 최종 검수는 직접 해주세요.',
         },
       ],
     },
@@ -2180,7 +2368,7 @@ function FAQSection() {
       items: [
         {
           q: '올인원 4개월 끝나면 어떻게 되나요?',
-          a: `4개월 종료 후에는 올인원 구매자 한정 특전으로 월 ₩${monthlySubscription.amount.toLocaleString()} 구독 상품을 이어서 이용하실 수 있도록 열어드릴 예정입니다.\n\n그 전까지는 강의와 프로그램, 매달 400cr 지급 기준으로 이용하시면 됩니다.`,
+          a: `4개월 종료 후에는 올인원 구매자 한정 특전으로 월 ₩${monthlySubscription.amount.toLocaleString()} 구독 상품을 이어서 이용하실 수 있도록 열어드릴 예정입니다. 그 전까지는 강의와 프로그램, 매달 400cr 지급 기준으로 이용하시면 됩니다.`,
         },
         {
           q: '환불 되나요?',
@@ -2188,19 +2376,19 @@ function FAQSection() {
         },
         {
           q: '크레딧만 따로 구매할 수 있나요?',
-          a: '네, 올인원 결제 이후 대시보드에서 크레딧 단독 충전이 가능합니다.\n\n다만 강의와 프로그램까지 포함된 올인원이 크레딧만 기준으로 환산해도 더 저렴하게 설계되어 있습니다.',
+          a: '네, 올인원 결제 이후 대시보드에서 크레딧 단독 충전이 가능합니다. 다만 강의와 프로그램까지 포함된 올인원이 크레딧만 기준으로 환산해도 더 저렴하게 설계되어 있습니다.',
         },
         {
           q: '결제 수단은 뭐가 있나요?',
-          a: '신용/체크카드와 계좌이체를 지원합니다.\n\n결제는 토스페이먼츠(PG)를 통해 안전하게 처리됩니다.',
+          a: '신용/체크카드와 계좌이체를 지원합니다. 결제는 토스페이먼츠(PG)를 통해 안전하게 처리됩니다.',
         },
         {
           q: '세금계산서나 현금영수증 발행되나요?',
-          a: '개인은 결제 시 토스페이먼츠 결제창에서 현금영수증을 자동 발행하실 수 있습니다.\n\n사업자 세금계산서 발행은 화면 우측 하단 채널톡으로 사업자등록증과 결제 정보를 보내주시면 영업일 기준 1~2일 내 발행해드립니다.',
+          a: '개인은 결제 시 토스페이먼츠 결제창에서 현금영수증을 자동 발행하실 수 있습니다. 사업자 세금계산서 발행은 화면 우측 하단 채널톡으로 사업자등록증과 결제 정보를 보내주시면 영업일 기준 1~2일 내 발행해드립니다.',
         },
         {
           q: '해외에서도 결제/수강 가능한가요?',
-          a: '해외에서도 한국 발급 카드 또는 해외 카드로 결제 가능합니다.\n\n강의와 프로그램 모두 웹 기반이라 국가 제한 없이 접속 가능합니다. 단 고객 응대는 한국어로만 제공됩니다.',
+          a: '해외에서도 한국 발급 카드 또는 해외 카드로 결제 가능합니다. 강의와 프로그램 모두 웹 기반이라 국가 제한 없이 접속 가능하며, 고객 응대는 한국어로만 제공됩니다.',
         },
       ],
     },
@@ -2209,11 +2397,11 @@ function FAQSection() {
       items: [
         {
           q: '문의는 어디로 하면 되나요?',
-          a: '화면 우측 하단의 채널톡으로 문의 주시면 영업일 기준 24~48시간 내 답변드립니다.\n\n결제/환불, 수강, 프로그램 오류 모두 같은 창구로 문의 가능합니다.',
+          a: '화면 우측 하단의 채널톡으로 문의 주시면 영업일 기준 24~48시간 내 답변드립니다. 결제/환불, 수강, 프로그램 오류 모두 같은 창구로 문의 가능합니다.',
         },
         {
           q: '계정 공유가 가능한가요?',
-          a: '계정 공유는 금지됩니다. 1인 1계정 원칙이며, 비정상적인 동시 접속이 감지될 경우 이용이 제한될 수 있습니다.\n\n자료의 외부 공유/유출 또한 약관상 금지됩니다.',
+          a: '계정 공유는 금지됩니다. 1인 1계정 원칙이며, 비정상적인 동시 접속이 감지될 경우 이용이 제한될 수 있습니다. 자료의 외부 공유/유출 또한 약관상 금지됩니다.',
         },
       ],
     },
