@@ -419,21 +419,6 @@ function HeroSection() {
             </Box>
           </Title>
 
-          {/* Sub copy */}
-          <Text
-            className="fs-sub"
-            style={{
-              margin: '28px 0 0',
-              color: 'rgba(228,228,231,0.7)',
-              maxWidth: '560px',
-              fontSize: 'clamp(16px, 2vw, 19px)',
-              lineHeight: 1.55,
-            }}
-          >
-            조회수가 안 터지는 이유는 스크립트에 있습니다.<br />
-            <b style={{ color: '#fafafa', fontWeight: 700 }}>도구 + 데이터 + 강의</b>로 한 번에 해결하세요.
-          </Text>
-
           {/* CTA */}
           <Box
             className="fs-ctas"
