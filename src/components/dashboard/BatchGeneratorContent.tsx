@@ -94,6 +94,26 @@ const NICHE_OPTIONS = [
     { value: 'animal', label: '동물/자연', desc: '신기한 동물, 자연 현상', image: null, enabled: false },
 ];
 
+const NICHE_LABELS: Record<string, string> = {
+    knowledge: '지식',
+    seollem: '설렘/썰',
+    animal: '동물',
+};
+
+const NICHE_COLORS: Record<string, string> = {
+    knowledge: 'violet',
+    seollem: 'pink',
+    animal: 'green',
+};
+
+function getQueueNicheLabel(niche?: string) {
+    return NICHE_LABELS[niche ?? ''] ?? '지식';
+}
+
+function getQueueNicheColor(niche?: string) {
+    return NICHE_COLORS[niche ?? ''] ?? 'violet';
+}
+
 // ============ 에이전트 팀 (V2 에셋 재사용) ============
 
 const AGENT_TEAM = [
@@ -891,6 +911,16 @@ export function BatchGeneratorContent() {
                                                         <AlertCircle size={18} color="#ef4444" style={{ flexShrink: 0 }} />
                                                     )}
 
+                                                    <Badge
+                                                        variant="light"
+                                                        color={getQueueNicheColor(item.niche)}
+                                                        size="xs"
+                                                        radius="sm"
+                                                        style={{ flexShrink: 0 }}
+                                                    >
+                                                        {getQueueNicheLabel(item.niche)}
+                                                    </Badge>
+
                                                     <Text size="sm" lineClamp={1} style={{ color: 'var(--mantine-color-text)', flex: 1, minWidth: 0 }}>
                                                         {item.material}
                                                     </Text>
@@ -991,6 +1021,15 @@ export function BatchGeneratorContent() {
                                                         }}>
                                                             <Check size={10} color="#fff" strokeWidth={3} />
                                                         </Box>
+                                                        <Badge
+                                                            variant="light"
+                                                            color={getQueueNicheColor(item.niche)}
+                                                            size="xs"
+                                                            radius="sm"
+                                                            style={{ flexShrink: 0 }}
+                                                        >
+                                                            {getQueueNicheLabel(item.niche)}
+                                                        </Badge>
                                                         <Text size="sm" lineClamp={1} style={{ color: 'var(--mantine-color-text)', flex: 1, minWidth: 0 }}>
                                                             {item.material}
                                                         </Text>

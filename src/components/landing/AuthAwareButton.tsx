@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type MouseEventHandler, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type MouseEventHandler, type ReactNode } from 'react';
 import { Button, type ButtonProps } from '@mantine/core';
 
 import { Link, useRouter } from '@/i18n/routing';
@@ -16,6 +16,11 @@ function getCacheKey(
   unpaidAuthenticatedHref?: string,
 ) {
   return `${authenticatedHref}::${unauthenticatedHref}::${unpaidAuthenticatedHref ?? ''}`;
+}
+
+function invalidateResolvedHref(cacheKey: string) {
+  hrefCache.delete(cacheKey);
+  hrefPromises.delete(cacheKey);
 }
 
 async function resolveHref(
@@ -34,25 +39,26 @@ async function resolveHref(
     return existingPromise;
   }
 
-  const promise = createClient()
-    .auth.getSession()
-    .then(async ({ data }) => {
-      if (!data.session) {
-        return unauthenticatedHref;
-      }
-
-      if (!unpaidAuthenticatedHref) {
-        return authenticatedHref;
-      }
-
+  const fallbackHref = cached ?? unauthenticatedHref;
+  const promise = Promise.resolve()
+    .then(async () => {
       try {
         const response = await fetch('/api/credits', {
           method: 'GET',
           credentials: 'include',
+          cache: 'no-store',
         });
 
+        if (response.status === 401) {
+          return unauthenticatedHref;
+        }
+
         if (!response.ok) {
-          return unpaidAuthenticatedHref;
+          return fallbackHref;
+        }
+
+        if (!unpaidAuthenticatedHref) {
+          return authenticatedHref;
         }
 
         const creditInfo = (await response.json()) as {
@@ -64,10 +70,10 @@ async function resolveHref(
           ? authenticatedHref
           : unpaidAuthenticatedHref;
       } catch {
-        return unpaidAuthenticatedHref;
+        return fallbackHref;
       }
     })
-    .catch(() => unauthenticatedHref)
+    .catch(() => fallbackHref)
     .then((resolvedHref) => {
       hrefCache.set(cacheKey, resolvedHref);
       hrefPromises.delete(cacheKey);
@@ -98,6 +104,17 @@ export function AuthAwareButton({
   const cacheKey = getCacheKey(authenticatedHref, unauthenticatedHref, unpaidAuthenticatedHref);
   const [href, setHref] = useState(hrefCache.get(cacheKey) ?? unauthenticatedHref);
 
+  const refreshHref = useCallback(
+    (force = false) => {
+      if (force) {
+        invalidateResolvedHref(cacheKey);
+      }
+
+      return resolveHref(authenticatedHref, unauthenticatedHref, unpaidAuthenticatedHref).then(setHref);
+    },
+    [authenticatedHref, cacheKey, unauthenticatedHref, unpaidAuthenticatedHref],
+  );
+
   useEffect(() => {
     router.prefetch(authenticatedHref);
     router.prefetch(unauthenticatedHref);
@@ -105,8 +122,34 @@ export function AuthAwareButton({
       router.prefetch(unpaidAuthenticatedHref);
     }
 
-    void resolveHref(authenticatedHref, unauthenticatedHref, unpaidAuthenticatedHref).then(setHref);
-  }, [authenticatedHref, router, unauthenticatedHref, unpaidAuthenticatedHref]);
+    const supabase = createClient();
+    void refreshHref();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      void refreshHref(true);
+    });
+
+    const handleFocus = () => {
+      void refreshHref(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshHref(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('pageshow', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      authListener.subscription.unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('pageshow', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [authenticatedHref, refreshHref, router, unauthenticatedHref, unpaidAuthenticatedHref]);
 
   return (
     <Button component={Link} href={href} {...props}>
