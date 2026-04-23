@@ -2223,19 +2223,7 @@ function FAQSection() {
     <Box component="section" id="faq" style={{ background: '#ffffff', padding: 'clamp(72px, 12vw, 120px) 0', scrollMarginTop: '120px' }}>
       <Container size={720}>
         <motion.div {...fadeUp}>
-          <Stack align="center" gap={12} mb={64}>
-            <Text
-              style={{
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                fontSize: '12px',
-                letterSpacing: '0.2em',
-                color: '#8b5cf6',
-                textTransform: 'uppercase',
-                fontWeight: 600,
-              }}
-            >
-              FAQ
-            </Text>
+          <Stack align="center" gap={14} mb={64}>
             <Title
               order={2}
               ta="center"
@@ -2256,26 +2244,16 @@ function FAQSection() {
         </motion.div>
 
         <Stack gap={56}>
-          {groups.map((group, idx) => (
+          {groups.map((group) => (
             <Box key={group.label}>
-              <Group gap={10} mb={20} align="center">
+              <Group gap={14} mb={20} align="center">
                 <Text
                   style={{
-                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                    fontSize: '12px',
-                    color: '#8b5cf6',
-                    fontWeight: 600,
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  {String(idx + 1).padStart(2, '0')}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: '18px',
+                    fontSize: '19px',
                     color: '#18181b',
                     fontWeight: 700,
                     letterSpacing: '-0.02em',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {group.label}
