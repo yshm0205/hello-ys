@@ -2256,28 +2256,37 @@ function FAQSection() {
         </motion.div>
 
         <Stack gap={56}>
-          {groups.map((group) => (
+          {groups.map((group, idx) => (
             <Box key={group.label}>
-              <Group gap={10} mb={18} align="center">
-                <Box
-                  style={{
-                    width: 28,
-                    height: 1,
-                    background: '#d4d4d8',
-                  }}
-                />
+              <Group gap={10} mb={20} align="center">
                 <Text
                   style={{
                     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                    fontSize: '11px',
-                    letterSpacing: '0.18em',
-                    color: '#a1a1aa',
-                    textTransform: 'uppercase',
+                    fontSize: '12px',
+                    color: '#8b5cf6',
                     fontWeight: 600,
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {String(idx + 1).padStart(2, '0')}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: '18px',
+                    color: '#18181b',
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
                   }}
                 >
                   {group.label}
                 </Text>
+                <Box
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    background: '#e4e4e7',
+                  }}
+                />
               </Group>
               <Accordion
                 variant="default"
