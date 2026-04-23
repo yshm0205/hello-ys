@@ -32,8 +32,40 @@ const REVIEW_BENEFITS = {
   monthly_random_credit_draw: true,
 } as const;
 
+const REVIEW_WINDOW_DAYS = 7;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+async function resolveReviewWindowAnchor(userId: string): Promise<string | null> {
+  const admin = createAdminClient();
+
+  const { data: planRow } = await admin
+    .from("user_plans")
+    .select("created_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (planRow?.created_at) return planRow.created_at;
+
+  const { data: firstPayment } = await admin
+    .from("toss_payments")
+    .select("updated_at")
+    .eq("user_id", userId)
+    .eq("status", "DONE")
+    .order("updated_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return firstPayment?.updated_at ?? null;
+}
+
 function getKakaoInviteUrl() {
   return process.env.REVIEW_KAKAO_INVITE_URL || process.env.KAKAO_REVIEW_INVITE_URL || null;
+}
+
+function getKakaoInvitePassword() {
+  return (
+    process.env.REVIEW_KAKAO_INVITE_PASSWORD ||
+    process.env.KAKAO_REVIEW_INVITE_PASSWORD ||
+    null
+  );
 }
 
 function toClientReview(row: Record<string, unknown> | null | undefined) {
@@ -104,6 +136,7 @@ export async function GET() {
       success: true,
       review: toClientReview(data),
       kakaoInviteUrl: data ? getKakaoInviteUrl() : null,
+      kakaoInvitePassword: data ? getKakaoInvitePassword() : null,
     });
   } catch (error) {
     console.error("[Reviews API] GET error:", error);
@@ -122,6 +155,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: Object.values(fieldErrors).flat()[0] || "입력값을 확인해주세요." },
         { status: 400 },
+      );
+    }
+
+    const anchor = await resolveReviewWindowAnchor(user.id);
+    if (!anchor) {
+      return NextResponse.json(
+        { error: "후기 이벤트 참여 자격을 확인하지 못했습니다." },
+        { status: 403 },
+      );
+    }
+    const windowEndMs = new Date(anchor).getTime() + REVIEW_WINDOW_DAYS * DAY_MS;
+    if (Date.now() > windowEndMs) {
+      return NextResponse.json(
+        { error: "후기 이벤트 참여 기간(결제 후 7일)이 종료되었습니다." },
+        { status: 403 },
       );
     }
 
@@ -164,6 +212,7 @@ export async function POST(request: NextRequest) {
             error: "이미 후기를 제출했습니다.",
             review: toClientReview(existing.data),
             kakaoInviteUrl: existing.data ? getKakaoInviteUrl() : null,
+            kakaoInvitePassword: existing.data ? getKakaoInvitePassword() : null,
           },
           { status: 409 },
         );
@@ -177,6 +226,7 @@ export async function POST(request: NextRequest) {
       success: true,
       review: toClientReview(data),
       kakaoInviteUrl: getKakaoInviteUrl(),
+      kakaoInvitePassword: getKakaoInvitePassword(),
     });
   } catch (error) {
     console.error("[Reviews API] POST error:", error);

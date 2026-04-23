@@ -23,6 +23,10 @@ import {
 } from "@mantine/core";
 import { CheckCircle2, Gift, MessageCircle, Send, Sparkles, Star, Ticket } from "lucide-react";
 
+import { Link } from "@/i18n/routing";
+
+import { ReviewCelebrationModal } from "./ReviewCelebrationModal";
+
 type SubmittedReview = {
   id: string;
   rating: number;
@@ -39,23 +43,27 @@ type SubmittedReview = {
 const benefits = [
   {
     icon: MessageCircle,
-    title: "수강생 비밀 카카오톡 단톡방 초대",
-    description: "운영 팁, 질문, 공지, 업데이트 소식을 수강생끼리 빠르게 공유합니다.",
+    title: "비밀 카톡방 초대",
+    description:
+      "작은 단톡방에서 수강생들과 직접 소통하고, 운영진에게 바로 질문할 수 있습니다.",
   },
   {
     icon: Sparkles,
-    title: "추후 업데이트 주제 얼리액세스",
-    description: "새 강의/툴 업데이트 주제를 먼저 보고 필요한 내용을 제안할 수 있습니다.",
+    title: "업데이트 주제 얼리액세스",
+    description:
+      "새 강의·툴 업데이트를 먼저 체험하고 원하는 내용을 제안할 수 있습니다.",
   },
   {
     icon: Ticket,
-    title: "피드백권 3개",
-    description: "채널 방향, 주제, 스크립트에 대해 운영진 피드백을 요청할 수 있습니다.",
+    title: "1:1 피드백권 3회",
+    description:
+      "작성한 스크립트/기획을 운영진이 직접 검토해드립니다. (소진 시까지 유효)",
   },
   {
     icon: Star,
-    title: "월마다 랜덤 크레딧 뽑기",
-    description: "후기 제출자는 월간 랜덤 크레딧 추첨 대상에 자동 포함됩니다.",
+    title: "월 1명 400크레딧 추첨",
+    description:
+      "후기 제출자 전원 자동 응모. 매달 1명을 뽑아 400크레딧(₩39,000 상당)을 지급합니다.",
   },
 ];
 
@@ -65,12 +73,14 @@ export function ReviewEventContent() {
   const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState<SubmittedReview | null>(null);
   const [kakaoInviteUrl, setKakaoInviteUrl] = useState<string | null>(null);
+  const [kakaoInvitePassword, setKakaoInvitePassword] = useState<string | null>(null);
   const [rating, setRating] = useState(5);
   const [headline, setHeadline] = useState("");
   const [content, setContent] = useState("");
   const [channelName, setChannelName] = useState("");
   const [proofUrl, setProofUrl] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -84,6 +94,7 @@ export function ReviewEventContent() {
         if (res.ok) {
           setReview(data.review || null);
           setKakaoInviteUrl(data.kakaoInviteUrl || null);
+          setKakaoInvitePassword(data.kakaoInvitePassword || null);
         } else {
           setError(data.error || "후기 이벤트 정보를 불러오지 못했습니다.");
         }
@@ -134,12 +145,15 @@ export function ReviewEventContent() {
         if (data.review) {
           setReview(data.review);
           setKakaoInviteUrl(data.kakaoInviteUrl || null);
+          setKakaoInvitePassword(data.kakaoInvitePassword || null);
         }
         return;
       }
 
       setReview(data.review);
       setKakaoInviteUrl(data.kakaoInviteUrl || null);
+      setKakaoInvitePassword(data.kakaoInvitePassword || null);
+      setCelebrationOpen(true);
     } catch {
       setError("후기 제출에 실패했습니다.");
     } finally {
@@ -160,6 +174,14 @@ export function ReviewEventContent() {
 
   return (
     <Container size="lg" py="lg">
+      <ReviewCelebrationModal
+        opened={celebrationOpen}
+        onClose={() => setCelebrationOpen(false)}
+        kakaoInviteUrl={kakaoInviteUrl}
+        kakaoInvitePassword={kakaoInvitePassword}
+        feedbackTicketsRemaining={review?.feedbackTicketsRemaining ?? 3}
+        feedbackRequestUrl="/dashboard/feedback"
+      />
       <Stack gap="lg">
         <Card
           radius="xl"
@@ -222,28 +244,39 @@ export function ReviewEventContent() {
                 피드백권 {review.feedbackTicketsRemaining ?? 3}개 사용 가능
               </Badge>
               <Badge color="violet" variant="light" size="lg">
-                월간 크레딧 추첨 대상
+                월 1명 400크레딧 추첨 응모
               </Badge>
               <Badge color="grape" variant="light" size="lg">
-                업데이트 얼리액세스 대상
+                업데이트 주제 얼리액세스
               </Badge>
               <Badge color="orange" variant="light" size="lg">
                 비밀 카톡방 초대 대상
               </Badge>
             </SimpleGrid>
             {kakaoInviteUrl ? (
-              <Button
-                component="a"
-                href={kakaoInviteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                mt="lg"
-                color="yellow"
-                c="black"
-                leftSection={<MessageCircle size={16} />}
-              >
-                비밀 카카오톡방 입장하기
-              </Button>
+              <Stack gap="xs" mt="lg">
+                <Button
+                  component="a"
+                  href={kakaoInviteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="yellow"
+                  c="black"
+                  leftSection={<MessageCircle size={16} />}
+                >
+                  비밀 카카오톡방 입장하기
+                </Button>
+                {kakaoInvitePassword && (
+                  <Alert color="yellow" variant="light">
+                    <Text size="sm" fw={600}>
+                      입장 비밀번호: <span style={{ fontFamily: "monospace" }}>{kakaoInvitePassword}</span>
+                    </Text>
+                    <Text size="xs" c="gray.6" mt={4}>
+                      오픈채팅 입장 시 위 비밀번호를 입력해주세요.
+                    </Text>
+                  </Alert>
+                )}
+              </Stack>
             ) : (
               <Alert color="violet" variant="light" mt="lg">
                 카카오톡방 초대 링크는 운영진 확인 후 채널톡 또는 이메일로 안내됩니다.
@@ -265,7 +298,8 @@ export function ReviewEventContent() {
                     수강 후기 작성
                   </Text>
                   <Text size="sm" c="gray.6">
-                    어떤 점이 도움됐는지, 아쉬운 점은 무엇인지 솔직하게 남겨주세요.
+                    수강 전후 어떤 변화가 있었는지, 가장 기억에 남는 강의나 기능을 중심으로
+                    남겨주세요.
                   </Text>
                 </Box>
                 <Rating value={rating} onChange={setRating} size="lg" color="yellow" />
@@ -282,7 +316,7 @@ export function ReviewEventContent() {
               <Textarea
                 label="후기 내용"
                 description="최소 30자 이상 작성해주세요."
-                placeholder="수강 전 고민, 실제로 도움된 부분, 적용해본 결과를 적어주세요."
+                placeholder="예) 수강 전에는 주제 찾느라 며칠이 걸렸는데, Part 3을 듣고 3일 만에 첫 영상을 올렸습니다. 스크립트 생성기 배치 기능이 특히 유용했어요."
                 value={content}
                 onChange={(event) => setContent(event.currentTarget.value)}
                 autosize

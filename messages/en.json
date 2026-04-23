@@ -503,6 +503,10 @@
       "title": "Reviews",
       "description": "Manage student review event submissions."
     },
+    "feedbackRequests": {
+      "title": "Feedback Requests",
+      "description": "Review and respond to 1:1 feedback requests submitted by students."
+    },
     "hotList": {
       "title": "HOT List",
       "description": "Manage trending content data collection.",

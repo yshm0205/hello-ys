@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Flame,
   Star,
+  Ticket,
   LifeBuoy,
   Webhook,
   ChevronLeft,
@@ -87,6 +88,11 @@ const navGroups: NavGroup[] = [
         href: "/admin/reviews",
         labelKey: "reviews.title",
         icon: <Star className="h-4 w-4" />,
+      },
+      {
+        href: "/admin/feedback-requests",
+        labelKey: "feedbackRequests.title",
+        icon: <Ticket className="h-4 w-4" />,
       },
       {
         href: "/admin/hot-list",
