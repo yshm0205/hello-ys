@@ -5,7 +5,7 @@
  * Refined Editorial: zinc neutrals, monospace data accents, intentional violet
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import {
   Container,
   Title,
@@ -2290,6 +2290,35 @@ function HowItWorksSection() {
 /* ═══════════════════════════════════════════════════════════════
    섹션 6: FAQ
    ═══════════════════════════════════════════════════════════════ */
+function renderWithLinks(text: string): ReactNode {
+  const parts: ReactNode[] = [];
+  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    const [, label, href] = match;
+    parts.push(
+      <Anchor
+        key={`lnk-${key++}`}
+        component={Link}
+        href={href}
+        style={{ color: '#8b5cf6', fontWeight: 600 }}
+      >
+        {label}
+      </Anchor>,
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+  return parts.length > 0 ? parts : text;
+}
+
 function FAQSection() {
   const groups: { label: string; items: { q: string; a: string }[] }[] = [
     {
@@ -2355,7 +2384,7 @@ function FAQSection() {
         },
         {
           q: '환불 되나요?',
-          a: '결제일로부터 28일 이내 3구간 환불이 가능합니다.\n\n• 1~7일 (& 5강 미만 & 크레딧 미사용): 전액 환불\n• 8~14일: 결제금의 2/3 − 위약금 10%\n• 15~28일: 결제금의 1/2 − 위약금 10%\n• 29일 경과 또는 5강 이상 수강/크레딧 사용 시: 환불 제한\n\n자세한 조건과 예시는 /refund 페이지를 확인해 주세요.',
+          a: '결제일로부터 28일 이내 3구간 환불이 가능합니다.\n\n• 1~7일 (& 5강 미만 & 크레딧 미사용): 전액 환불\n• 8~14일: 결제금의 2/3 − 위약금 10%\n• 15~28일: 결제금의 1/2 − 위약금 10%\n• 29일 경과 또는 5강 이상 수강/크레딧 사용 시: 환불 제한\n\n자세한 조건과 예시는 [환불 규정 페이지](/refund)에서 확인해 주세요.',
         },
         {
           q: '크레딧만 따로 구매할 수 있나요?',
@@ -2485,7 +2514,7 @@ function FAQSection() {
                             lineHeight: 'inherit',
                           }}
                         >
-                          {para}
+                          {renderWithLinks(para)}
                         </Text>
                       ))}
                     </Accordion.Panel>
