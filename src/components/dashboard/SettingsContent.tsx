@@ -11,6 +11,7 @@ import {
     Container,
     Divider,
     Group,
+    PasswordInput,
     Progress,
     SimpleGrid,
     Stack,
@@ -23,10 +24,12 @@ import {
     Calendar,
     Coins,
     Crown,
+    KeyRound,
     LogOut,
     Mail,
     Package,
     Shield,
+    Trash2,
     User,
     Zap,
 } from 'lucide-react';
@@ -83,8 +86,20 @@ function formatDate(dateString?: string | null) {
     });
 }
 
+type ChannelIOInvoker = (command: string, ...args: unknown[]) => void;
+
+function getChannelIO(): ChannelIOInvoker | null {
+    if (typeof window === 'undefined') return null;
+    const channelIO = (window as Window & { ChannelIO?: ChannelIOInvoker }).ChannelIO;
+    return typeof channelIO === 'function' ? channelIO : null;
+}
+
 export function SettingsContent({ user }: SettingsContentProps) {
     const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+    const [newPassword, setNewPassword] = useState('');
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
     const {
         requestPayment,
         loading: paymentLoading,
@@ -117,6 +132,64 @@ export function SettingsContent({ user }: SettingsContentProps) {
     const maxCredits = getPlanCreditDisplayCap(planType);
     const planConfig = TOSSPAY_PLAN_CONFIG.allinone;
     const statusLabel = hasActiveAccess ? '활성' : isExpiredPaid ? '만료' : '무료';
+
+    const handlePasswordChange = async () => {
+        setPasswordMessage(null);
+        setPasswordError(null);
+
+        if (newPassword.length < 8) {
+            setPasswordError('비밀번호는 8자 이상으로 입력해 주세요.');
+            return;
+        }
+
+        setPasswordLoading(true);
+        try {
+            const res = await fetch('/api/account/password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: newPassword }),
+            });
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                setPasswordError(data.error || '비밀번호 변경에 실패했습니다.');
+                return;
+            }
+
+            setNewPassword('');
+            setPasswordMessage('비밀번호가 변경되었습니다.');
+        } catch {
+            setPasswordError('서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
+    const handleAccountDeletionRequest = () => {
+        const subject = encodeURIComponent('[FlowSpot] 계정 삭제 요청');
+        const body = encodeURIComponent(
+            [
+                '계정 삭제 및 개인정보 삭제를 요청합니다.',
+                '',
+                `이메일: ${user?.email || ''}`,
+                `사용자 ID: ${user?.id || ''}`,
+                '',
+                '결제/환불/강의 이용 이력 확인 후 처리해 주세요.',
+            ].join('\n'),
+        );
+        const channelIO = getChannelIO();
+
+        if (channelIO) {
+            channelIO('showMessenger');
+            channelIO('track', 'account_deletion_requested', {
+                email: user?.email || '',
+                userId: user?.id || '',
+            });
+            return;
+        }
+
+        window.location.href = `mailto:hmys0205hmys@gmail.com?subject=${subject}&body=${body}`;
+    };
 
     return (
         <Container size="md" py="md">
@@ -218,6 +291,68 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                             leftSection={<LogOut size={18} />}
                                         >
                                             로그아웃
+                                        </Button>
+                                    </Group>
+
+                                    <Divider />
+
+                                    <Stack gap="sm">
+                                        <Group gap="sm">
+                                            <KeyRound size={20} color="#8b5cf6" />
+                                            <Box>
+                                                <Text fw={500}>비밀번호 변경</Text>
+                                                <Text size="sm" c="gray.5">
+                                                    이메일/비밀번호로 로그인하는 경우 새 비밀번호를 설정할 수 있습니다.
+                                                </Text>
+                                            </Box>
+                                        </Group>
+                                        <Group align="flex-end" gap="sm">
+                                            <PasswordInput
+                                                label="새 비밀번호"
+                                                placeholder="8자 이상 입력"
+                                                value={newPassword}
+                                                onChange={(event) => setNewPassword(event.currentTarget.value)}
+                                                style={{ flex: 1 }}
+                                            />
+                                            <Button
+                                                color="violet"
+                                                variant="light"
+                                                loading={passwordLoading}
+                                                onClick={handlePasswordChange}
+                                            >
+                                                변경하기
+                                            </Button>
+                                        </Group>
+                                        {passwordError && (
+                                            <Text size="sm" c="red.6">
+                                                {passwordError}
+                                            </Text>
+                                        )}
+                                        {passwordMessage && (
+                                            <Text size="sm" c="green.6">
+                                                {passwordMessage}
+                                            </Text>
+                                        )}
+                                    </Stack>
+
+                                    <Divider />
+
+                                    <Group justify="space-between" align="center" wrap="wrap" gap="md">
+                                        <Box>
+                                            <Group gap="xs">
+                                                <Trash2 size={18} color="#ef4444" />
+                                                <Text fw={500}>계정 삭제 요청</Text>
+                                            </Group>
+                                            <Text size="sm" c="gray.5" mt={4}>
+                                                결제, 환불, 강의 이용 이력을 확인한 뒤 처리됩니다.
+                                            </Text>
+                                        </Box>
+                                        <Button
+                                            variant="light"
+                                            color="red"
+                                            onClick={handleAccountDeletionRequest}
+                                        >
+                                            삭제 요청하기
                                         </Button>
                                     </Group>
                                 </Stack>
