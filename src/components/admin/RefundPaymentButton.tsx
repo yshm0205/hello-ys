@@ -40,11 +40,26 @@ type RefundPreview = {
   penaltyAmount: number;
 };
 
+type TossPayDirectPreview = {
+  payToken: string;
+  orderId: string;
+  orderName: string;
+  amount: number;
+  grantedCredits: number;
+  status: string;
+  paymentKind: "initial_program" | "credit_topup" | null;
+  refundable: boolean;
+  createdAt: string;
+};
+
+export type RefundProvider = "portone" | "tosspay-direct";
+
 interface RefundPaymentButtonProps {
   paymentKey: string;
   orderName: string;
   amount: number;
   disabled?: boolean;
+  provider?: RefundProvider;
 }
 
 function formatWon(value: number) {
@@ -56,6 +71,7 @@ export function RefundPaymentButton({
   orderName,
   amount,
   disabled,
+  provider = "portone",
 }: RefundPaymentButtonProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -63,6 +79,12 @@ export function RefundPaymentButton({
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState("");
   const [preview, setPreview] = useState<RefundPreview | null>(null);
+  const [directPreview, setDirectPreview] = useState<TossPayDirectPreview | null>(null);
+
+  const endpoint =
+    provider === "tosspay-direct"
+      ? `/api/admin/tosspay/${encodeURIComponent(paymentKey)}/cancel`
+      : `/api/admin/payments/${encodeURIComponent(paymentKey)}/cancel`;
 
   useEffect(() => {
     if (!open) return;
@@ -74,21 +96,29 @@ export function RefundPaymentButton({
       setMessage("");
 
       try {
-        const res = await fetch(`/api/admin/payments/${encodeURIComponent(paymentKey)}/cancel`);
+        const res = await fetch(endpoint);
         const data = await res.json();
 
         if (aborted) return;
 
         if (!res.ok) {
           setPreview(null);
+          setDirectPreview(null);
           setMessage(data.error || "환불 계산에 실패했습니다.");
           return;
         }
 
-        setPreview(data.preview || null);
+        if (provider === "tosspay-direct") {
+          setDirectPreview((data.preview as TossPayDirectPreview) || null);
+          setPreview(null);
+        } else {
+          setPreview(data.preview || null);
+          setDirectPreview(null);
+        }
       } catch {
         if (!aborted) {
           setPreview(null);
+          setDirectPreview(null);
           setMessage("환불 계산을 불러오는 중 네트워크 오류가 발생했습니다.");
         }
       } finally {
@@ -103,39 +133,61 @@ export function RefundPaymentButton({
     return () => {
       aborted = true;
     };
-  }, [open, paymentKey]);
+  }, [open, endpoint, provider]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!preview?.refundable) {
-      setMessage(preview?.reason || "현재 환불할 수 없는 결제입니다.");
-      return;
-    }
+    if (provider === "tosspay-direct") {
+      if (!directPreview?.refundable) {
+        setMessage("현재 환불할 수 없는 결제입니다.");
+        return;
+      }
 
-    const confirmLabel =
-      preview.refundType === "partial"
-        ? `${formatWon(preview.refundAmount)} 부분 환불`
-        : `${formatWon(preview.refundAmount)} 환불`;
+      const revokeLabel =
+        directPreview.paymentKind === "initial_program"
+          ? "이용권과 잔여 크레딧이 회수됩니다."
+          : directPreview.paymentKind === "credit_topup"
+            ? "해당 토큰 팩 크레딧이 회수됩니다."
+            : "";
 
-    const revokeLabel =
-      preview.revokeScope === "plan_and_credits"
-        ? "이용권과 잔여 크레딧도 함께 회수됩니다."
-        : "해당 토큰 팩 크레딧도 함께 회수됩니다.";
+      if (
+        !window.confirm(
+          `"${orderName}"에 대해 ${formatWon(directPreview.amount)} 전액 환불을 진행하시겠습니까?\n${revokeLabel}`,
+        )
+      ) {
+        return;
+      }
+    } else {
+      if (!preview?.refundable) {
+        setMessage(preview?.reason || "현재 환불할 수 없는 결제입니다.");
+        return;
+      }
 
-    if (
-      !window.confirm(
-        `"${orderName}"에 대해 ${confirmLabel}을 진행하시겠습니까?\n${revokeLabel}`,
-      )
-    ) {
-      return;
+      const confirmLabel =
+        preview.refundType === "partial"
+          ? `${formatWon(preview.refundAmount)} 부분 환불`
+          : `${formatWon(preview.refundAmount)} 환불`;
+
+      const revokeLabel =
+        preview.revokeScope === "plan_and_credits"
+          ? "이용권과 잔여 크레딧도 함께 회수됩니다."
+          : "해당 토큰 팩 크레딧도 함께 회수됩니다.";
+
+      if (
+        !window.confirm(
+          `"${orderName}"에 대해 ${confirmLabel}을 진행하시겠습니까?\n${revokeLabel}`,
+        )
+      ) {
+        return;
+      }
     }
 
     setLoading(true);
     setMessage("");
 
     try {
-      const res = await fetch(`/api/admin/payments/${encodeURIComponent(paymentKey)}/cancel`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),
@@ -192,6 +244,65 @@ export function RefundPaymentButton({
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm">
             {loadingPreview ? (
               <p className="text-zinc-600">환불 규정 계산 중...</p>
+            ) : provider === "tosspay-direct" && directPreview ? (
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-zinc-900">
+                      TossPay 직접 결제 ·{" "}
+                      {directPreview.paymentKind === "initial_program"
+                        ? "올인원 패스"
+                        : directPreview.paymentKind === "credit_topup"
+                          ? "토큰 팩"
+                          : "기타"}
+                    </p>
+                    <p className="text-zinc-600">
+                      전액 환불로 진행됩니다. 부분 환불은 현재 이 UI에서 지원하지 않습니다.
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      directPreview.refundable
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-rose-100 text-rose-700"
+                    }`}
+                  >
+                    {directPreview.refundable ? "환불 가능" : "환불 불가"}
+                  </span>
+                </div>
+
+                <div className="grid gap-2 text-xs text-zinc-700 sm:grid-cols-2">
+                  <div className="rounded-md bg-white px-3 py-2">
+                    결제 금액
+                    <div className="mt-1 text-sm font-semibold text-zinc-900">
+                      {formatWon(directPreview.amount)}
+                    </div>
+                  </div>
+                  <div className="rounded-md bg-white px-3 py-2">
+                    지급된 크레딧
+                    <div className="mt-1 text-sm font-semibold text-zinc-900">
+                      {directPreview.grantedCredits.toLocaleString("ko-KR")}cr
+                    </div>
+                  </div>
+                  <div className="rounded-md bg-white px-3 py-2 sm:col-span-2">
+                    주문번호
+                    <div className="mt-1 text-sm font-semibold text-zinc-900 break-all">
+                      {directPreview.orderId}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                  <div className="mb-1 flex items-center gap-2 font-semibold">
+                    <AlertTriangle className="h-4 w-4" />
+                    확인
+                  </div>
+                  <p>
+                    TossPay 직접 결제는 환불 규정 계산이 적용되지 않습니다. 전액 환불 시
+                    이용권/크레딧이 모두 회수됩니다.
+                  </p>
+                </div>
+              </div>
             ) : preview ? (
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
@@ -305,14 +416,23 @@ export function RefundPaymentButton({
             <Button
               type="submit"
               variant="destructive"
-              disabled={loading || loadingPreview || !reason.trim() || !preview?.refundable}
+              disabled={
+                loading ||
+                loadingPreview ||
+                !reason.trim() ||
+                (provider === "tosspay-direct"
+                  ? !directPreview?.refundable
+                  : !preview?.refundable)
+              }
               className="flex-1"
             >
               {loading
                 ? "처리 중..."
-                : preview?.refundType === "partial"
-                  ? "규정 환불 실행"
-                  : "환불 실행"}
+                : provider === "tosspay-direct"
+                  ? "전액 환불 실행"
+                  : preview?.refundType === "partial"
+                    ? "규정 환불 실행"
+                    : "환불 실행"}
             </Button>
           </div>
         </form>

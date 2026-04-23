@@ -195,6 +195,11 @@ export default async function AdminSalesPage({
                             paymentKey={payment.payment_key}
                             orderName={payment.order_name}
                             amount={payment.amount}
+                            provider={
+                              payment.metadata?.provider === "tosspay-direct"
+                                ? "tosspay-direct"
+                                : "portone"
+                            }
                           />
                         ) : payment.status === "PENDING" ? (
                           <span className="text-xs text-zinc-400">미결제</span>
