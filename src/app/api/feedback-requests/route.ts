@@ -162,6 +162,19 @@ export async function GET() {
       );
     }
 
+    // 대시보드 피드백 탭 진입 시 답변 완료된 요청들을 읽음 처리
+    void admin
+      .from("feedback_requests")
+      .update({ user_read_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("status", "answered")
+      .is("user_read_at", null)
+      .then(({ error: markError }) => {
+        if (markError) {
+          console.error("[FeedbackRequests API] mark-read error:", markError);
+        }
+      });
+
     return NextResponse.json({
       success: true,
       review: review

@@ -39,6 +39,7 @@ import {
 import { Link } from '@/i18n/routing';
 import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
 import { getPlanLabel, isActiveAccessPlan } from '@/lib/plans/config';
+import { FeedbackAnswerAlert } from '@/components/dashboard/FeedbackAnswerAlert';
 
 interface DashboardContentProps {
     user?: { email?: string };
@@ -156,6 +157,9 @@ export function DashboardContent({
                                 : 'Beta 무료 체험 중'}
                     </Badge>
                 </Group>
+
+                {/* 피드백 답변 알림 */}
+                <FeedbackAnswerAlert />
 
                 {/* 액션 카드 2개 - Streamlit 스타일 */}
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
