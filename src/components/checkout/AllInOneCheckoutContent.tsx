@@ -67,7 +67,8 @@ export function AllInOneCheckoutContent({
   const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
   const [confirmedUsagePolicy, setConfirmedUsagePolicy] = useState(false);
   const [confirmedNoticePolicy, setConfirmedNoticePolicy] = useState(false);
-  const canCheckout = confirmedUsagePolicy && confirmedNoticePolicy;
+  const [confirmedRefundPolicy, setConfirmedRefundPolicy] = useState(false);
+  const canCheckout = confirmedUsagePolicy && confirmedNoticePolicy && confirmedRefundPolicy;
 
   return (
     <Box style={{ minHeight: '100vh', background: '#fafafa' }}>
@@ -208,7 +209,26 @@ export function AllInOneCheckoutContent({
                     <Checkbox
                       checked={confirmedNoticePolicy}
                       onChange={(event) => setConfirmedNoticePolicy(event.currentTarget.checked)}
-                      label="계정 공유 금지, 자료 외부 공유 금지 및 환불 규정을 확인했습니다."
+                      label="계정 공유 금지, 자료 외부 공유 금지 규정을 확인했습니다."
+                    />
+                    <Checkbox
+                      checked={confirmedRefundPolicy}
+                      onChange={(event) => setConfirmedRefundPolicy(event.currentTarget.checked)}
+                      label={
+                        <Text size="sm" style={{ lineHeight: 1.5 }}>
+                          아래 <strong>청약철회 제한 조건</strong>에 동의합니다 (전자상거래법 17조 2항):
+                          <br />
+                          ① 강의 <strong>5강 이상 수강</strong> 시 환불 제한
+                          <br />
+                          ② 지급된 <strong>크레딧 1개 이상 사용</strong> 시 환불 제한
+                          <br />
+                          ③ 결제 후 <strong>14일 경과</strong> 시 환불 불가
+                          <br />
+                          <a href="/refund" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>
+                            전체 환불 규정 보기 →
+                          </a>
+                        </Text>
+                      }
                     />
                   </Stack>
                 </Card>

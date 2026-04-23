@@ -19,19 +19,19 @@ export default async function RefundPage() {
       <main className="flex-1 container mx-auto px-4 py-16 max-w-3xl">
         <h1 className="text-4xl font-bold mb-8">환불 및 취소 규정</h1>
         <div className="prose dark:prose-invert max-w-none prose-headings:text-black dark:prose-headings:text-white prose-p:text-black dark:prose-p:text-white prose-li:text-black dark:prose-li:text-white prose-strong:text-black dark:prose-strong:text-white">
-          <p className="lead">시행일: 2026-02-16</p>
+          <p className="lead">시행일: 2026-04-23</p>
 
           <p>
             본 규정은 플로우스팟(FlowSpot)(이하 &quot;회사&quot;)이 제공하는 유료 서비스의
             환불 및 취소에 관한 사항을 규정합니다.
-            본 규정은 「전자상거래 등에서의 소비자보호에 관한 법률」 및
+            본 규정은 「전자상거래 등에서의 소비자보호에 관한 법률」 제17조 및
             「이러닝(전자학습) 이용표준약관」을 따릅니다.
           </p>
 
           <h2>제1조 (서비스 유형)</h2>
           <p>회사가 제공하는 유료 서비스는 다음과 같습니다.</p>
           <ul>
-            <li><strong>올인원 패스</strong>: 온라인 강의 + FlowSpot 이용권 + AI 크레딧(토큰) 포함</li>
+            <li><strong>올인원 패스</strong>: 온라인 강의 40강 + 구매 특전(FlowSpot 이용권 4개월 + 크레딧 1,600cr + 얼리버드 보너스 크레딧)</li>
             <li><strong>토큰 팩</strong>: AI 스크립트 생성에 사용되는 크레딧 단위 구매</li>
             <li><strong>구독</strong>: 월간 정기 결제 (향후 제공 예정)</li>
           </ul>
@@ -39,49 +39,131 @@ export default async function RefundPage() {
           <h2>제2조 (올인원 패스 환불)</h2>
           <p>
             올인원 패스는 「이러닝(전자학습) 이용표준약관」 제28조 제1항 제2호에 따른
-            <strong>학습회차 기준 상품</strong>에 해당합니다.
+            <strong>학습회차 기준 상품</strong>입니다.
           </p>
 
           <h3>① 과금 기준</h3>
           <ul>
-            <li>본 상품은 수강기간이 아닌 <strong>강의 회차(강의 수)</strong>를 기준으로 판매됩니다.</li>
-            <li>패스에 포함된 FlowSpot 이용권 및 크레딧(토큰)은 <strong>구매 특전</strong>으로 제공되며, 별도 과금 대상이 아닙니다.</li>
+            <li>올인원 패스 결제 금액 ₩499,000은 <strong>강의 40강 수강료 전액</strong>으로 책정됩니다.</li>
+            <li>FlowSpot 이용권 4개월, 기본 크레딧 1,600cr, 얼리버드 보너스 크레딧은 상품 구매에 부수되는 <strong>특전(사은품)</strong>으로 제공되며, 별도 과금 대상이 아닙니다.</li>
+            <li>1강 단가: ₩499,000 ÷ 40강 = <strong>₩12,475</strong></li>
           </ul>
 
           <h3>② 이용 간주 기준</h3>
           <ul>
-            <li>온라인 강의 콘텐츠를 <strong>열람하거나 재생을 시작</strong>한 경우, 해당 강의는 1강좌를 이용한 것으로 간주합니다.</li>
-            <li>시청 시간의 길이와 관계없이 <strong>1회 열람 시 1강 이용</strong>으로 처리됩니다.</li>
-            <li>강의 자료를 다운로드한 경우에도 해당 강의를 수강한 것으로 간주합니다.</li>
+            <li>온라인 강의를 <strong>열람하거나 재생을 시작</strong>한 경우, 해당 강의는 1강을 이용한 것으로 간주합니다. (시청 시간과 무관)</li>
+            <li>강의 자료를 <strong>다운로드</strong>한 경우에도 해당 강의를 수강한 것으로 처리됩니다.</li>
+            <li>구매 특전으로 지급된 <strong>크레딧을 1개라도 사용</strong>한 경우, 재화의 일부 소비로 간주합니다.</li>
           </ul>
 
-          <h3>③ 청약철회 (7일 이내)</h3>
+          <h3>③ 청약철회 제한 사유 (전자상거래법 제17조 제2항)</h3>
+          <p>다음 중 <strong>하나라도 해당</strong>할 경우, 디지털 콘텐츠의 제공이 개시되거나 재화의 일부가 소비된 것으로 간주하여 청약철회가 제한됩니다.</p>
           <ul>
-            <li>결제일로부터 <strong>7일 이내</strong>, 강의를 <strong>1강도 이용하지 않은 경우</strong> 전액 환불됩니다.</li>
-            <li>7일 이내라도 강의를 이용한 경우, 아래 ④항의 공제 기준이 적용됩니다.</li>
+            <li>ㄱ. 강의를 <strong>5강 이상 수강</strong> 또는 자료를 다운로드한 경우</li>
+            <li>ㄴ. 지급된 <strong>크레딧을 1개 이상 사용</strong>한 경우</li>
+            <li>ㄷ. 결제일로부터 <strong>14일이 경과</strong>한 경우</li>
           </ul>
 
-          <h3>④ 중도해지 및 환불 금액 산정</h3>
-          <p>중도해지 시 환불 금액은 다음과 같이 산정됩니다.</p>
-          <p><strong>환불 금액 = 결제 금액 - (1강 단가 × 수강한 강의 수) - 위약금</strong></p>
+          <h3>④ 전액 환불 (청약철회)</h3>
           <ul>
-            <li><strong>1강 단가</strong>: 결제 금액 ÷ 총 강의 수 (소수점 이하 올림)</li>
-            <li><strong>위약금</strong>: 총 결제 금액의 10%</li>
+            <li>결제일로부터 <strong>7일 이내</strong>이며, 위 ③항의 어떤 조건에도 해당하지 않는 경우 <strong>전액 환불</strong>됩니다.</li>
+          </ul>
+
+          <h3>⑤ 중도해지 환불 금액 산정</h3>
+          <p>결제일로부터 8일 이상 14일 이내이며, 위 ③항의 어떤 조건에도 해당하지 않는 경우 아래 공식으로 환불됩니다.</p>
+          <p><strong>환불 금액 = ₩499,000 − (₩12,475 × 수강 강수) − 위약금 ₩74,850</strong></p>
+          <ul>
+            <li>위약금: 결제 금액의 15% (₩74,850)</li>
             <li>공제 금액이 결제 금액을 초과하는 경우 환불 금액은 0원입니다.</li>
           </ul>
 
-          <h3>⑤ 특전 회수</h3>
+          <h3>⑥ 특전 회수</h3>
           <ul>
-            <li>환불 시 패스에 포함된 <strong>FlowSpot 이용권 및 잔여 크레딧(토큰)은 즉시 회수</strong>됩니다.</li>
-            <li>이미 사용한 크레딧(토큰)에 대해서는 별도 공제하지 않습니다.</li>
+            <li>환불 시 패스에 포함된 <strong>FlowSpot 이용권 및 잔여 크레딧은 즉시 회수</strong>됩니다.</li>
           </ul>
 
-          <h3>⑥ 이용기한</h3>
+          <h3>⑦ 이용기한</h3>
           <ul>
             <li>구매한 강의 콘텐츠는 구매일로부터 <strong>4개월간</strong> 시청 가능합니다.</li>
-            <li>이용기한은 시청 편의를 위한 기간으로, 과금 기준 또는 환불 산정 기준에는 영향을 미치지 않습니다.</li>
             <li>이용기한 경과 후에는 환불이 불가합니다.</li>
           </ul>
+
+          <h3>⑧ 환불 시뮬레이션 (예시)</h3>
+          <p>아래 예시는 <strong>올인원 패스 ₩499,000</strong> 기준이며, 얼리버드 할인가도 동일하게 적용됩니다.</p>
+
+          <div className="overflow-x-auto my-4">
+            <table className="min-w-full border border-zinc-300 dark:border-zinc-700 text-sm">
+              <thead className="bg-zinc-100 dark:bg-zinc-800">
+                <tr>
+                  <th className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-left">시점</th>
+                  <th className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-left">수강 상황</th>
+                  <th className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-left">환불 여부</th>
+                  <th className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-left">환불 금액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 3일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">0강 수강 · 크레딧 0 사용</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-green-600 dark:text-green-400 font-semibold">전액 환불</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩499,000</td>
+                </tr>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 5일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">3강 수강 · 크레딧 0 사용</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-green-600 dark:text-green-400 font-semibold">전액 환불</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩499,000</td>
+                </tr>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 5일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">5강 수강 · 크레딧 0 사용</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-red-600 dark:text-red-400 font-semibold">환불 불가</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩0 (5강 룰)</td>
+                </tr>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 3일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">0강 수강 · <strong>크레딧 1개 사용</strong></td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-red-600 dark:text-red-400 font-semibold">환불 불가</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩0 (크레딧 룰)</td>
+                </tr>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 10일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">2강 수강 · 크레딧 0 사용</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-amber-600 dark:text-amber-400 font-semibold">중도해지</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">
+                    ₩399,200<br/>
+                    <span className="text-xs text-zinc-500">= 499,000 − (12,475 × 2) − 74,850</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 12일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">4강 수강 · 크레딧 0 사용</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-amber-600 dark:text-amber-400 font-semibold">중도해지</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">
+                    ₩374,250<br/>
+                    <span className="text-xs text-zinc-500">= 499,000 − (12,475 × 4) − 74,850</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 15일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">1강 수강 · 크레딧 0 사용</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-red-600 dark:text-red-400 font-semibold">환불 불가</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩0 (14일 경과)</td>
+                </tr>
+                <tr>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 6일차</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">10강 수강 · 크레딧 0 사용</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-red-600 dark:text-red-400 font-semibold">환불 불가</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩0 (5강 룰)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            ※ 수강 강수에는 <strong>미리보기로 공개된 강의 및 자료 다운로드</strong>가 포함됩니다.<br/>
+            ※ &quot;크레딧 사용&quot;은 구매 특전(기본 1,600cr + 보너스 크레딧) 중 1개 이상을 소비한 경우를 의미합니다.
+          </p>
 
           <h2>제3조 (토큰 팩 환불)</h2>
           <p>토큰 팩은 디지털 콘텐츠 이용권으로, 다음 기준에 따라 환불됩니다.</p>
@@ -111,6 +193,7 @@ export default async function RefundPage() {
           <h2>제6조 (환불이 불가한 경우)</h2>
           <p>다음의 경우 환불이 제한됩니다.</p>
           <ul>
+            <li>제2조 ③항의 청약철회 제한 사유에 해당하는 경우</li>
             <li>이용기한(4개월)이 경과한 경우</li>
             <li>서비스 약관 위반으로 이용이 제한된 경우</li>
             <li>공제 금액이 결제 금액을 초과하는 경우</li>
