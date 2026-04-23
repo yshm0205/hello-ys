@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Box,
+  Button,
   Container,
   Group,
   Burger,
@@ -13,7 +15,8 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { Bot } from 'lucide-react';
 
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
+import { createClient } from '@/utils/supabase/client';
 
 import { AuthAwareButton } from './AuthAwareButton';
 
@@ -25,6 +28,29 @@ const navLinks = [
 
 export function LandingHeader() {
   const [opened, { toggle, close }] = useDisclosure(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setIsAuthenticated(!!data.user);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    close();
+    router.refresh();
+  }
 
   return (
     <Box
@@ -71,29 +97,27 @@ export function LandingHeader() {
           </Group>
 
           <Group gap="md" visibleFrom="sm">
-            <AuthAwareButton
-              authenticatedHref="/dashboard"
-              unauthenticatedHref="/login"
-              unpaidAuthenticatedHref="/checkout/allinone"
-              variant="subtle"
-              color="gray"
-              style={{ color: '#4b5563' }}
-            >
-              로그인
-            </AuthAwareButton>
-
-            <AuthAwareButton
-              authenticatedHref="/dashboard"
-              unauthenticatedHref="/login?redirect=/dashboard"
-              unpaidAuthenticatedHref="/checkout/allinone"
-              radius="lg"
-              style={{
-                background: '#8b5cf6',
-                border: 'none',
-              }}
-            >
-              무료로 시작
-            </AuthAwareButton>
+            {isAuthenticated ? (
+              <Button
+                variant="subtle"
+                color="gray"
+                style={{ color: '#4b5563' }}
+                onClick={handleSignOut}
+              >
+                로그아웃
+              </Button>
+            ) : (
+              <AuthAwareButton
+                authenticatedHref="/dashboard"
+                unauthenticatedHref="/login"
+                unpaidAuthenticatedHref="/checkout/allinone"
+                variant="subtle"
+                color="gray"
+                style={{ color: '#4b5563' }}
+              >
+                로그인
+              </AuthAwareButton>
+            )}
           </Group>
 
           <Burger
@@ -143,35 +167,32 @@ export function LandingHeader() {
 
           <Divider color="#e5e7eb" my="sm" />
 
-          <AuthAwareButton
-            authenticatedHref="/dashboard"
-            unauthenticatedHref="/login"
-            unpaidAuthenticatedHref="/checkout/allinone"
-            variant="outline"
-            color="gray"
-            fullWidth
-            size="lg"
-            radius="lg"
-            onClick={close}
-          >
-            로그인
-          </AuthAwareButton>
-
-          <AuthAwareButton
-            authenticatedHref="/dashboard"
-            unauthenticatedHref="/login?redirect=/dashboard"
-            unpaidAuthenticatedHref="/checkout/allinone"
-            fullWidth
-            size="lg"
-            radius="lg"
-            style={{
-              background: '#8b5cf6',
-              border: 'none',
-            }}
-            onClick={close}
-          >
-            무료로 시작하기
-          </AuthAwareButton>
+          {isAuthenticated ? (
+            <Button
+              variant="outline"
+              color="gray"
+              fullWidth
+              size="lg"
+              radius="lg"
+              onClick={handleSignOut}
+            >
+              로그아웃
+            </Button>
+          ) : (
+            <AuthAwareButton
+              authenticatedHref="/dashboard"
+              unauthenticatedHref="/login"
+              unpaidAuthenticatedHref="/checkout/allinone"
+              variant="outline"
+              color="gray"
+              fullWidth
+              size="lg"
+              radius="lg"
+              onClick={close}
+            >
+              로그인
+            </AuthAwareButton>
+          )}
         </Stack>
       </Drawer>
     </Box>
