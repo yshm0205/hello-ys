@@ -118,9 +118,7 @@ async function getActivityStats() {
   const newUsersToday = (newUsersTodayRows || []).filter((row) => !internalAdminIds.has(row.id)).length;
   const creditsUsedToday = creditUsageError
     ? null
-    : (creditUsageRows || [])
-        .filter((row) => !internalAdminIds.has(row.user_id))
-        .reduce((sum, row) => sum + Math.abs(row.amount || 0), 0);
+    : (creditUsageRows || []).reduce((sum, row) => sum + Math.abs(row.amount || 0), 0);
 
   return {
     dau: activeUserIds.size,

@@ -1,4 +1,9 @@
-import { createAdminClient } from "@/utils/supabase/admin";
+import { getTranslations } from "next-intl/server";
+
+import { RefundPaymentButton } from "@/components/admin/RefundPaymentButton";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSearch } from "@/components/admin/AdminSearch";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -6,15 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { getTranslations } from "next-intl/server";
-import { AdminSearch } from "@/components/admin/AdminSearch";
-import { AdminPagination } from "@/components/admin/AdminPagination";
-import { RefundPaymentButton } from "@/components/admin/RefundPaymentButton";
+import { getInternalAdminUsers } from "@/lib/admin/internal-users";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 interface TossPayment {
   id: string;
   created_at: string;
+  user_id: string;
   order_name: string;
   order_id: string;
   amount: number;
@@ -30,18 +33,28 @@ interface TossPayment {
 const CANCELLABLE_STATUSES = new Set(["DONE"]);
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 
+function getNumericMetadata(metadata: Record<string, unknown> | null | undefined, key: string) {
+  const value = metadata?.[key];
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  return 0;
+}
+
 function getNetRevenue(payment: TossPayment) {
   if (payment.status === "DONE") {
     return payment.amount;
   }
 
-  if (payment.status === "PARTIAL_CANCELLED") {
-    const cancelledAmount =
-      typeof payment.metadata?.cancelledAmount === "number" ? payment.metadata.cancelledAmount : 0;
-    return Math.max(0, payment.amount - cancelledAmount);
-  }
-
-  return 0;
+  const cancelledAmount = getNumericMetadata(payment.metadata, "cancelledAmount");
+  return Math.max(0, payment.amount - cancelledAmount);
 }
 
 function getNetCredits(payment: TossPayment) {
@@ -49,13 +62,8 @@ function getNetCredits(payment: TossPayment) {
     return payment.credits;
   }
 
-  if (payment.status === "PARTIAL_CANCELLED") {
-    const revokedCredits =
-      typeof payment.metadata?.revokedCredits === "number" ? payment.metadata.revokedCredits : 0;
-    return Math.max(0, payment.credits - revokedCredits);
-  }
-
-  return 0;
+  const revokedCredits = getNumericMetadata(payment.metadata, "revokedCredits");
+  return Math.max(0, payment.credits - revokedCredits);
 }
 
 export default async function AdminSalesPage({
@@ -64,55 +72,60 @@ export default async function AdminSalesPage({
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   const { q, page } = await searchParams;
-  const currentPage = parseInt(page || "1");
+  const currentPage = parseInt(page || "1", 10);
   const pageSize = 10;
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
 
   const t = await getTranslations("Admin.sales");
   const supabase = createAdminClient();
+  const internalAdmins = await getInternalAdminUsers();
+  const internalAdminIds = new Set(internalAdmins.map((user) => user.id));
 
-  let query = supabase
+  const { data: paymentRows } = await supabase
     .from("toss_payments")
-    .select("*, user:users!toss_payments_user_id_public_users_fkey(email)", { count: "exact" })
+    .select("*, user:users!toss_payments_user_id_public_users_fkey(email)")
     .in("status", [...SALES_STATUSES])
     .order("created_at", { ascending: false });
 
-  if (q) {
-    query = query.or(`order_name.ilike.%${q}%,order_id.ilike.%${q}%`);
-  }
+  const externalPayments = ((paymentRows || []) as TossPayment[]).filter(
+    (payment) => !internalAdminIds.has(payment.user_id),
+  );
 
-  const { data: payments, count } = await query.range(from, to);
-  const totalPages = Math.ceil((count || 0) / pageSize);
+  const keyword = q?.trim().toLowerCase() || "";
+  const searchedPayments = keyword
+    ? externalPayments.filter((payment) => {
+        const email = payment.user?.email?.toLowerCase() || "";
+        return (
+          payment.order_name.toLowerCase().includes(keyword) ||
+          payment.order_id.toLowerCase().includes(keyword) ||
+          email.includes(keyword)
+        );
+      })
+    : externalPayments;
 
-  // 통계
-  const { data: allPayments } = await supabase
-    .from("toss_payments")
-    .select("amount, credits, status, metadata")
-    .in("status", [...SALES_STATUSES]);
+  const payments = searchedPayments.slice(from, to + 1);
+  const totalPages = Math.max(1, Math.ceil(searchedPayments.length / pageSize));
 
-  const normalizedAllPayments = ((allPayments || []) as TossPayment[]);
-  const totalRevenue = normalizedAllPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0);
-  const totalCredits = normalizedAllPayments.reduce((sum, payment) => sum + getNetCredits(payment), 0);
-  const totalCount = normalizedAllPayments.length;
+  const totalRevenue = externalPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0);
+  const totalCredits = externalPayments.reduce((sum, payment) => sum + getNetCredits(payment), 0);
+  const totalCount = externalPayments.length;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
-          <p className="text-zinc-500 mt-2">
-            {t("description")}
-          </p>
+          <p className="mt-2 text-zinc-500">{t("description")}</p>
         </div>
-        <AdminSearch placeholder="주문명 또는 주문번호 검색..." />
+        <AdminSearch placeholder="주문명, 주문번호, 이메일 검색" />
       </div>
 
-      {/* 통계 카드 */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">총 매출</CardTitle>
+            <CardDescription>내부 계정 제외 기준</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalRevenue.toLocaleString("ko-KR")}원</div>
@@ -121,14 +134,16 @@ export default async function AdminSalesPage({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">총 판매 크레딧</CardTitle>
+            <CardDescription>내부 계정 제외 기준</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCredits.toLocaleString()}cr</div>
+            <div className="text-2xl font-bold">{totalCredits.toLocaleString("ko-KR")}cr</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">총 거래 건수</CardTitle>
+            <CardDescription>내부 계정 제외 기준</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalCount}건</div>
@@ -143,47 +158,34 @@ export default async function AdminSalesPage({
         </CardHeader>
         <CardContent>
           <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-zinc-500 uppercase bg-zinc-50">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-zinc-50 text-xs uppercase text-zinc-500">
                 <tr>
-                  <th className="px-4 py-3 rounded-l-lg">{t("colDate")}</th>
+                  <th className="rounded-l-lg px-4 py-3">{t("colDate")}</th>
                   <th className="px-4 py-3">{t("colCustomer")}</th>
                   <th className="px-4 py-3">{t("colProduct")}</th>
                   <th className="px-4 py-3">크레딧</th>
                   <th className="px-4 py-3">{t("colAmount")}</th>
                   <th className="px-4 py-3">{t("colStatus")}</th>
-                  <th className="px-4 py-3 rounded-r-lg text-right">관리</th>
+                  <th className="rounded-r-lg px-4 py-3 text-right">관리</th>
                 </tr>
               </thead>
               <tbody className="text-foreground">
-                {payments && payments.length > 0 ? (
-                  (payments as unknown as TossPayment[]).map((payment) => (
-                    <tr
-                      key={payment.id}
-                      className="bg-white border-b"
-                    >
+                {payments.length > 0 ? (
+                  payments.map((payment) => (
+                    <tr key={payment.id} className="border-b bg-white">
                       <td className="px-4 py-3">
                         {new Date(payment.created_at).toLocaleDateString("ko-KR")}
                       </td>
-                      <td className="px-4 py-3">
-                        {payment.user?.email || "-"}
-                      </td>
+                      <td className="px-4 py-3">{payment.user?.email || "-"}</td>
                       <td className="px-4 py-3 font-medium">
                         {payment.order_name}
-                        <span className="block text-xs text-zinc-500">
-                          {payment.order_id}
-                        </span>
+                        <span className="block text-xs text-zinc-500">{payment.order_id}</span>
                       </td>
+                      <td className="px-4 py-3">+{payment.credits}cr</td>
+                      <td className="px-4 py-3">{payment.amount.toLocaleString("ko-KR")}원</td>
                       <td className="px-4 py-3">
-                        +{payment.credits}cr
-                      </td>
-                      <td className="px-4 py-3">
-                        {payment.amount.toLocaleString("ko-KR")}원
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge
-                          variant={payment.status === "DONE" ? "default" : "secondary"}
-                        >
+                        <Badge variant={payment.status === "DONE" ? "default" : "secondary"}>
                           {payment.status}
                         </Badge>
                       </td>
@@ -195,7 +197,7 @@ export default async function AdminSalesPage({
                             amount={payment.amount}
                           />
                         ) : payment.status === "PENDING" ? (
-                          <span className="text-xs text-amber-600">미결제</span>
+                          <span className="text-xs text-zinc-400">미결제</span>
                         ) : (
                           <span className="text-xs text-zinc-400">-</span>
                         )}
@@ -204,10 +206,7 @@ export default async function AdminSalesPage({
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={7}
-                      className="px-4 py-8 text-center text-zinc-500"
-                    >
+                    <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">
                       결제 내역이 없습니다.
                     </td>
                   </tr>
@@ -217,6 +216,7 @@ export default async function AdminSalesPage({
           </div>
         </CardContent>
       </Card>
+
       <AdminPagination currentPage={currentPage} totalPages={totalPages} />
     </div>
   );
