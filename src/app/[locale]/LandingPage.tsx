@@ -2279,14 +2279,15 @@ function FAQSection() {
                   control: {
                     color: '#18181b',
                     fontWeight: 600,
-                    fontSize: '17px',
+                    fontSize: 'clamp(15px, 4vw, 17px)',
                     lineHeight: 1.5,
-                    padding: '22px 4px',
+                    padding: '20px 4px',
                     letterSpacing: '-0.01em',
+                    wordBreak: 'keep-all',
                   },
                   panel: {
                     color: '#52525b',
-                    fontSize: '15.5px',
+                    fontSize: 'clamp(14.5px, 3.8vw, 15.5px)',
                     lineHeight: 1.8,
                     padding: '0 4px 24px',
                     letterSpacing: '-0.005em',
@@ -2300,9 +2301,22 @@ function FAQSection() {
                   <Accordion.Item key={f.q} value={f.q}>
                     <Accordion.Control>{f.q}</Accordion.Control>
                     <Accordion.Panel>
-                      <Text component="div" style={{ whiteSpace: 'pre-line', color: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}>
-                        {f.a}
-                      </Text>
+                      {f.a.split('\n\n').map((para, i) => (
+                        <Text
+                          key={i}
+                          component="p"
+                          style={{
+                            margin: i === 0 ? 0 : '14px 0 0',
+                            whiteSpace: 'pre-line',
+                            wordBreak: 'keep-all',
+                            color: 'inherit',
+                            fontSize: 'inherit',
+                            lineHeight: 'inherit',
+                          }}
+                        >
+                          {para}
+                        </Text>
+                      ))}
                     </Accordion.Panel>
                   </Accordion.Item>
                 ))}
