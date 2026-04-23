@@ -1,122 +1,264 @@
-import { createAdminClient } from "@/utils/supabase/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminChart } from "@/components/admin/AdminChart";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { isActiveAccessPlan, PAID_PLAN_TYPES } from "@/lib/plans/config";
 import {
+  Clock3,
   Coins,
-  Users,
   CreditCard,
-  TrendingUp,
   Eye,
   MousePointerClick,
-  Clock3,
+  TrendingUp,
+  Users,
 } from "lucide-react";
-import { AdminChart } from "@/components/admin/AdminChart";
-import { getTranslations } from "next-intl/server";
-import { PAID_PLAN_TYPES } from "@/lib/plans/config";
+
+const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
+const SEOUL_TIME_ZONE = "Asia/Seoul";
+
+type SalesStatus = (typeof SALES_STATUSES)[number];
+
+interface UserRelation {
+  email: string;
+}
+
+interface PaymentRow {
+  id: string;
+  order_name: string;
+  amount: number;
+  credits: number;
+  created_at: string;
+  user_id: string;
+  status: SalesStatus;
+  metadata: Record<string, unknown> | null;
+  user: UserRelation | UserRelation[] | null;
+}
+
+interface MarketingSessionRow {
+  duration_seconds: number | null;
+  pricing_views: number | null;
+  cta_clicks: number | null;
+  referrer: string | null;
+  first_path: string | null;
+  first_seen_at: string;
+}
+
+interface UserPlanRow {
+  plan_type: string | null;
+  expires_at: string | null;
+}
+
+function getKstDateParts(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SEOUL_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value ?? "1970";
+  const month = parts.find((part) => part.type === "month")?.value ?? "01";
+  const day = parts.find((part) => part.type === "day")?.value ?? "01";
+
+  return { year, month, day };
+}
+
+function getKstDayRange(dayOffset = 0) {
+  const { year, month, day } = getKstDateParts();
+  const start = new Date(`${year}-${month}-${day}T00:00:00+09:00`);
+  start.setUTCDate(start.getUTCDate() + dayOffset);
+
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return {
+    startIso: start.toISOString(),
+    endIso: end.toISOString(),
+  };
+}
+
+function getKstMonthRange(monthOffset = 0) {
+  const { year, month } = getKstDateParts();
+  const start = new Date(`${year}-${month}-01T00:00:00+09:00`);
+  start.setUTCMonth(start.getUTCMonth() + monthOffset);
+
+  const end = new Date(start);
+  end.setUTCMonth(end.getUTCMonth() + 1);
+
+  return {
+    start,
+    startIso: start.toISOString(),
+    endIso: end.toISOString(),
+  };
+}
+
+function getNumericMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+  key: string,
+) {
+  const value = metadata?.[key];
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  return 0;
+}
+
+function getNetRevenue(payment: Pick<PaymentRow, "amount" | "status" | "metadata">) {
+  if (payment.status === "DONE") {
+    return payment.amount;
+  }
+
+  const cancelledAmount = getNumericMetadata(payment.metadata, "cancelledAmount");
+  return Math.max(0, payment.amount - cancelledAmount);
+}
+
+function getPaymentEmail(user: PaymentRow["user"], userId: string) {
+  if (Array.isArray(user)) {
+    return user[0]?.email ?? userId.slice(0, 12);
+  }
+
+  return user?.email ?? userId.slice(0, 12);
+}
+
+function formatCurrency(value: number) {
+  return `${value.toLocaleString("ko-KR")}원`;
+}
+
+function formatMonthLabel(date: Date) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: SEOUL_TIME_ZONE,
+    month: "short",
+  })
+    .format(date)
+    .replace(/\s/g, "");
+}
 
 async function getAdminStats() {
   const supabase = createAdminClient();
+  const { startIso: todayStartIso, endIso: tomorrowStartIso } = getKstDayRange();
+  const { startIso: monthStartIso } = getKstMonthRange();
 
-  // 총 사용자 수
-  const { count: totalUsers } = await supabase
-    .from("user_plans")
-    .select("*", { count: "exact", head: true });
+  const monthRanges = Array.from({ length: 6 }, (_, index) => getKstMonthRange(index - 5));
 
-  // 유료 사용자 (pro 또는 allinone)
-  const { count: paidUsers } = await supabase
-    .from("user_plans")
-    .select("*", { count: "exact", head: true })
-    .in("plan_type", [...PAID_PLAN_TYPES]);
-
-  // 오늘 매출 (toss_payments)
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const { data: todayPayments } = await supabase
-    .from("toss_payments")
-    .select("amount, credits")
-    .gte("created_at", todayStart.toISOString());
-
-  const salesToday = todayPayments?.length || 0;
-  const revenueToday = todayPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
-
-  // 이번 달 총 매출
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
-
-  const { data: monthPayments } = await supabase
-    .from("toss_payments")
-    .select("amount")
-    .gte("created_at", monthStart.toISOString());
-
-  const monthlyRevenue = monthPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
-
-  // 전체 총 매출
-  const { data: allPayments } = await supabase
-    .from("toss_payments")
-    .select("amount");
-
-  const totalRevenue = allPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
-
-  // 월별 차트 데이터 (최근 6개월)
-  const months = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
-  const chartData: { name: string; mrr: number }[] = [];
-
-  for (let i = 5; i >= 0; i--) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    const start = new Date(date.getFullYear(), date.getMonth(), 1);
-    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
-
-    const { data: mPayments } = await supabase
+  const [
+    { count: totalUsers },
+    { data: paidPlanRows },
+    { data: todayPayments },
+    { data: monthPayments },
+    { data: allPayments },
+    { data: recentPayments },
+    monthlyPaymentSets,
+  ] = await Promise.all([
+    supabase.from("users").select("id", { count: "exact", head: true }),
+    supabase
+      .from("user_plans")
+      .select("plan_type, expires_at")
+      .in("plan_type", [...PAID_PLAN_TYPES]),
+    supabase
       .from("toss_payments")
-      .select("amount")
-      .gte("created_at", start.toISOString())
-      .lte("created_at", end.toISOString());
+      .select("amount, credits, status, metadata")
+      .in("status", [...SALES_STATUSES])
+      .gte("created_at", todayStartIso)
+      .lt("created_at", tomorrowStartIso),
+    supabase
+      .from("toss_payments")
+      .select("amount, credits, status, metadata")
+      .in("status", [...SALES_STATUSES])
+      .gte("created_at", monthStartIso),
+    supabase
+      .from("toss_payments")
+      .select("amount, credits, status, metadata")
+      .in("status", [...SALES_STATUSES]),
+    supabase
+      .from("toss_payments")
+      .select(
+        "id, order_name, amount, credits, created_at, user_id, status, metadata, user:users!toss_payments_user_id_public_users_fkey(email)",
+      )
+      .in("status", [...SALES_STATUSES])
+      .order("created_at", { ascending: false })
+      .limit(5),
+    Promise.all(
+      monthRanges.map((range) =>
+        supabase
+          .from("toss_payments")
+          .select("amount, credits, status, metadata")
+          .in("status", [...SALES_STATUSES])
+          .gte("created_at", range.startIso)
+          .lt("created_at", range.endIso),
+      ),
+    ),
+  ]);
 
-    chartData.push({
-      name: months[date.getMonth()],
-      mrr: mPayments?.reduce((sum, p) => sum + p.amount, 0) || 0,
-    });
-  }
+  const normalizedPaidPlanRows = (paidPlanRows || []) as UserPlanRow[];
+  const paidUsers = normalizedPaidPlanRows.filter((plan) =>
+    isActiveAccessPlan(plan.plan_type, plan.expires_at),
+  ).length;
 
-  // 최근 결제 내역
-  const { data: recentPayments } = await supabase
-    .from("toss_payments")
-    .select("id, order_name, amount, credits, created_at, user_id, user:users!toss_payments_user_id_public_users_fkey(email)")
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const normalizedTodayPayments = ((todayPayments || []) as PaymentRow[]);
+  const normalizedMonthPayments = ((monthPayments || []) as PaymentRow[]);
+  const normalizedAllPayments = ((allPayments || []) as PaymentRow[]);
+  const normalizedRecentPayments = ((recentPayments || []) as PaymentRow[]);
+
+  const salesToday = normalizedTodayPayments.length;
+  const revenueToday = normalizedTodayPayments.reduce(
+    (sum, payment) => sum + getNetRevenue(payment),
+    0,
+  );
+  const monthlyRevenue = normalizedMonthPayments.reduce(
+    (sum, payment) => sum + getNetRevenue(payment),
+    0,
+  );
+  const totalRevenue = normalizedAllPayments.reduce(
+    (sum, payment) => sum + getNetRevenue(payment),
+    0,
+  );
+
+  const chartData = monthRanges.map((range, index) => {
+    const payments = ((monthlyPaymentSets[index].data || []) as PaymentRow[]);
+    return {
+      name: formatMonthLabel(range.start),
+      mrr: payments.reduce((sum, payment) => sum + getNetRevenue(payment), 0),
+    };
+  });
 
   return {
     totalUsers: totalUsers || 0,
-    paidUsers: paidUsers || 0,
+    paidUsers,
     salesToday,
     revenueToday,
     monthlyRevenue,
     totalRevenue,
     chartData,
-    recentPayments: recentPayments || [],
+    recentPayments: normalizedRecentPayments,
   };
 }
 
 async function getMarketingStats() {
   const supabase = createAdminClient();
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const { startIso: todayStartIso, endIso: tomorrowStartIso } = getKstDayRange();
 
   const { data: sessions } = await supabase
     .from("marketing_sessions")
     .select("duration_seconds, pricing_views, cta_clicks, referrer, first_path, first_seen_at")
-    .gte("first_seen_at", todayStart.toISOString())
-    .order("first_seen_at", { ascending: false })
-    .limit(50);
+    .gte("first_seen_at", todayStartIso)
+    .lt("first_seen_at", tomorrowStartIso)
+    .order("first_seen_at", { ascending: false });
 
-  const rows = sessions || [];
+  const rows = (sessions || []) as MarketingSessionRow[];
   const totalSessions = rows.length;
   const pricingSessions = rows.filter((row) => (row.pricing_views || 0) > 0).length;
   const ctaClicks = rows.reduce((sum, row) => sum + (row.cta_clicks || 0), 0);
   const avgDurationSeconds = totalSessions
-    ? Math.round(rows.reduce((sum, row) => sum + (row.duration_seconds || 0), 0) / totalSessions)
+    ? Math.round(
+        rows.reduce((sum, row) => sum + (row.duration_seconds || 0), 0) / totalSessions,
+      )
     : 0;
 
   return {
@@ -129,32 +271,34 @@ async function getMarketingStats() {
 }
 
 export default async function AdminOverviewPage() {
-  const stats = await getAdminStats();
-  const marketing = await getMarketingStats();
-  const t = await getTranslations("Admin.overview");
+  const [stats, marketing] = await Promise.all([getAdminStats(), getMarketingStats()]);
+  const conversionRate = stats.totalUsers > 0 ? (stats.paidUsers / stats.totalUsers) * 100 : 0;
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h1>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">개요</h1>
+        <p className="text-sm text-muted-foreground">
+          실결제와 실제 랜딩 유입 기준으로 다시 집계한 운영 개요입니다.
+        </p>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* 이번 달 매출 */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">이번 달 매출</CardTitle>
+            <CardTitle className="text-sm font-medium">이번 달 순매출</CardTitle>
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              {stats.monthlyRevenue.toLocaleString("ko-KR")}원
+              {formatCurrency(stats.monthlyRevenue)}
             </div>
             <p className="text-xs text-muted-foreground">
-              총 누적: {stats.totalRevenue.toLocaleString("ko-KR")}원
+              누적 순매출: {formatCurrency(stats.totalRevenue)}
             </p>
           </CardContent>
         </Card>
 
-        {/* 전체 사용자 */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">전체 사용자</CardTitle>
@@ -162,27 +306,23 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              유료: {stats.paidUsers}명
-            </p>
+            <p className="text-xs text-muted-foreground">활성 유료: {stats.paidUsers}명</p>
           </CardContent>
         </Card>
 
-        {/* 오늘 판매 */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">오늘 판매</CardTitle>
+            <CardTitle className="text-sm font-medium">오늘 실결제</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">+{stats.salesToday}건</div>
+            <div className="text-2xl font-bold text-foreground">{stats.salesToday}건</div>
             <p className="text-xs text-muted-foreground">
-              {stats.revenueToday.toLocaleString("ko-KR")}원
+              오늘 순매출: {formatCurrency(stats.revenueToday)}
             </p>
           </CardContent>
         </Card>
 
-        {/* 유료 전환율 */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">유료 전환율</CardTitle>
@@ -190,9 +330,7 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              {stats.totalUsers > 0
-                ? ((stats.paidUsers / stats.totalUsers) * 100).toFixed(1)
-                : "0"}%
+              {conversionRate.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground">
               {stats.paidUsers} / {stats.totalUsers}
@@ -209,7 +347,7 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">{marketing.totalSessions}</div>
-            <p className="text-xs text-muted-foreground">랜딩/가격 페이지 방문 세션</p>
+            <p className="text-xs text-muted-foreground">랜딩과 가격 페이지 기준</p>
           </CardContent>
         </Card>
 
@@ -230,8 +368,10 @@ export default async function AdminOverviewPage() {
             <Clock3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{marketing.avgDurationSeconds}초</div>
-            <p className="text-xs text-muted-foreground">오늘 랜딩/가격 평균</p>
+            <div className="text-2xl font-bold text-foreground">
+              {marketing.avgDurationSeconds}초
+            </div>
+            <p className="text-xs text-muted-foreground">오늘 세션 평균</p>
           </CardContent>
         </Card>
 
@@ -242,7 +382,7 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">{marketing.ctaClicks}</div>
-            <p className="text-xs text-muted-foreground">pricing/login 이동 클릭 수</p>
+            <p className="text-xs text-muted-foreground">가격 진입 및 결제 유도 클릭 수</p>
           </CardContent>
         </Card>
       </div>
@@ -251,42 +391,39 @@ export default async function AdminOverviewPage() {
         <div className="col-span-4">
           <AdminChart data={stats.chartData} />
         </div>
+
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>최근 결제</CardTitle>
+            <CardTitle>최근 실결제</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats.recentPayments.map(
-                (payment: Record<string, unknown>) => {
-                  const userArr = payment.user as
-                    | { email: string }[]
-                    | null;
-                  const userInfo = Array.isArray(userArr) ? userArr[0] : null;
-                  return (
-                    <div key={payment.id as string} className="flex items-center">
-                      <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none text-foreground">
-                          {userInfo?.email || (payment.user_id as string).substring(0, 15)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {payment.order_name as string}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {new Date(payment.created_at as string).toLocaleString("ko-KR")}
-                        </p>
-                      </div>
-                      <div className="ml-auto font-medium text-foreground">
-                        {(payment.amount as number).toLocaleString("ko-KR")}원
-                      </div>
+              {stats.recentPayments.map((payment) => (
+                <div key={payment.id} className="flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium leading-none text-foreground">
+                      {getPaymentEmail(payment.user, payment.user_id)}
+                    </p>
+                    <p className="truncate text-sm text-muted-foreground">{payment.order_name}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {new Date(payment.created_at).toLocaleString("ko-KR", {
+                        timeZone: SEOUL_TIME_ZONE,
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-foreground">
+                      {formatCurrency(getNetRevenue(payment))}
                     </div>
-                  );
-                }
-              )}
+                    <p className="text-[10px] text-muted-foreground">
+                      {payment.status === "PARTIAL_CANCELLED" ? "부분취소 반영" : "완료"}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
               {!stats.recentPayments.length && (
-                <p className="text-sm text-muted-foreground">
-                  결제 내역이 없습니다.
-                </p>
+                <p className="text-sm text-muted-foreground">최근 실결제 내역이 없습니다.</p>
               )}
             </div>
           </CardContent>
@@ -309,7 +446,9 @@ export default async function AdminOverviewPage() {
                     {session.referrer || "direct"}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    {new Date(session.first_seen_at as string).toLocaleString("ko-KR")}
+                    {new Date(session.first_seen_at).toLocaleString("ko-KR", {
+                      timeZone: SEOUL_TIME_ZONE,
+                    })}
                   </p>
                 </div>
                 <div className="text-right text-xs text-muted-foreground">
@@ -319,8 +458,9 @@ export default async function AdminOverviewPage() {
                 </div>
               </div>
             ))}
+
             {!marketing.recentSessions.length && (
-              <p className="text-sm text-muted-foreground">아직 수집된 랜딩 세션이 없습니다.</p>
+              <p className="text-sm text-muted-foreground">오늘 수집된 랜딩 세션이 없습니다.</p>
             )}
           </div>
         </CardContent>
