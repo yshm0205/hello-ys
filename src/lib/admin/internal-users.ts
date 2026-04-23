@@ -9,7 +9,6 @@ const DEFAULT_INTERNAL_METRIC_EMAILS = [
   "dyj05194@gmail.com",
   "duj05194@gmail.com",
   "hmys0205hmys@gmail.com",
-  "lhmkys0205@gmail.com",
   "myengjun01@gmail.com",
   "review@flowspot.kr",
   "somangg748@gmail.com",
