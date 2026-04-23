@@ -35,6 +35,11 @@ const REVIEW_BENEFITS = {
 const REVIEW_WINDOW_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean);
+
 async function resolveReviewWindowAnchor(userId: string): Promise<string | null> {
   const admin = createAdminClient();
 
@@ -165,8 +170,9 @@ export async function POST(request: NextRequest) {
         { status: 403 },
       );
     }
+    const isAdmin = !!user.email && ADMIN_EMAILS.includes(user.email);
     const windowEndMs = new Date(anchor).getTime() + REVIEW_WINDOW_DAYS * DAY_MS;
-    if (Date.now() > windowEndMs) {
+    if (!isAdmin && Date.now() > windowEndMs) {
       return NextResponse.json(
         { error: "후기 이벤트 참여 기간(결제 후 7일)이 종료되었습니다." },
         { status: 403 },

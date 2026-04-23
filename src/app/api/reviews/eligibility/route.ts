@@ -9,6 +9,11 @@ const VOD_THRESHOLD = 3;
 const WINDOW_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean);
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -68,11 +73,15 @@ export async function GET() {
       });
     }
 
+    const isAdmin = !!user.email && ADMIN_EMAILS.includes(user.email);
     const anchorMs = new Date(anchor).getTime();
     const windowEndMs = anchorMs + WINDOW_DAYS * DAY_MS;
     const nowMs = Date.now();
-    const daysLeft = Math.max(0, Math.ceil((windowEndMs - nowMs) / DAY_MS));
-    const windowClosed = nowMs > windowEndMs;
+    const rawDaysLeft = Math.max(0, Math.ceil((windowEndMs - nowMs) / DAY_MS));
+    const rawWindowClosed = nowMs > windowEndMs;
+    // 관리자는 윈도우 무시 (항상 미리보기 가능)
+    const windowClosed = isAdmin ? false : rawWindowClosed;
+    const daysLeft = isAdmin ? Math.max(rawDaysLeft, WINDOW_DAYS) : rawDaysLeft;
 
     const { data: review } = await admin
       .from("student_reviews")
