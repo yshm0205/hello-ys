@@ -18,9 +18,9 @@ import {
   ThemeIcon,
   Title,
 } from '@mantine/core';
+import { useLocale } from 'next-intl';
 import { AlertCircle, Check, ChevronLeft, Crown, ShieldCheck } from 'lucide-react';
 
-import { useTossPay } from '@/hooks/useTossPay';
 import { Link } from '@/i18n/routing';
 import {
   isActiveAccessPlan,
@@ -58,7 +58,7 @@ export function AllInOneCheckoutContent({
   userEmail,
   creditInfo,
 }: AllInOneCheckoutContentProps) {
-  const { requestPayment, loading, error } = useTossPay();
+  const locale = useLocale();
   const plan = TOSSPAY_PLAN_CONFIG.allinone;
   const monthlyGenerationCount = Math.floor(plan.monthlyCredits / 10);
   const totalGenerationCount = Math.floor(plan.totalCredits / 10);
@@ -68,12 +68,43 @@ export function AllInOneCheckoutContent({
   const [confirmedDuration, setConfirmedDuration] = useState(false);
   const [confirmedSharing, setConfirmedSharing] = useState(false);
   const [confirmedRefund, setConfirmedRefund] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const allConfirmed = confirmedDuration && confirmedSharing && confirmedRefund;
   const canCheckout = allConfirmed;
   const toggleAll = (checked: boolean) => {
     setConfirmedDuration(checked);
     setConfirmedSharing(checked);
     setConfirmedRefund(checked);
+  };
+
+  const handleTossPayCheckout = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/tosspay/direct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planType: 'allinone',
+          buyerEmail: userEmail,
+          locale,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.checkoutPage) {
+        setError(data.error || '결제 주문 생성에 실패했습니다.');
+        return;
+      }
+
+      window.location.assign(data.checkoutPage);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '결제 요청에 실패했습니다.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -257,114 +288,27 @@ export function AllInOneCheckoutContent({
                   radius="lg"
                   variant="light"
                   icon={<AlertCircle size={18} />}
-                  title="결제 수단 안내"
+                  title="결제 안내"
                 >
                   <Text size="sm" style={{ lineHeight: 1.6 }}>
-                    현재 일부 카드사가 PG 심사 진행 중이라{' '}
-                    <strong>신한 · 삼성 · 현대 · 농협 카드</strong>만 결제 가능합니다.
+                    현재 PG 심사 정책에 따라{' '}
+                    <strong>토스페이</strong>로만 결제가 가능합니다.
                     <br />
-                    다른 카드(국민·하나·BC·롯데·우리)는{' '}
-                    <strong>토스페이</strong>를 이용해 주세요.{' '}
-                    <Text span size="xs" c="gray.6">
-                      (~5/9경 정상화 예정)
-                    </Text>
+                    토스페이 결제창에서{' '}
+                    <strong>모든 카드사 · 토스머니 · 계좌이체</strong>를 이용하실 수 있습니다.
                   </Text>
                 </Alert>
 
-                <Stack gap="xs">
-                  <Text size="xs" c="gray.6" fw={600}>
-                    카드사 선택 (승인 완료된 4개만 가능)
-                  </Text>
-                  <Group grow gap="xs">
-                    <Button
-                      color="violet"
-                      radius="lg"
-                      size="md"
-                      disabled={!canCheckout}
-                      loading={loading}
-                      onClick={() =>
-                        requestPayment(
-                          'allinone',
-                          { buyerEmail: userEmail },
-                          'CARD',
-                          'SHINHAN_CARD',
-                        )
-                      }
-                    >
-                      신한카드
-                    </Button>
-                    <Button
-                      color="violet"
-                      radius="lg"
-                      size="md"
-                      disabled={!canCheckout}
-                      loading={loading}
-                      onClick={() =>
-                        requestPayment(
-                          'allinone',
-                          { buyerEmail: userEmail },
-                          'CARD',
-                          'SAMSUNG_CARD',
-                        )
-                      }
-                    >
-                      삼성카드
-                    </Button>
-                  </Group>
-                  <Group grow gap="xs">
-                    <Button
-                      color="violet"
-                      radius="lg"
-                      size="md"
-                      disabled={!canCheckout}
-                      loading={loading}
-                      onClick={() =>
-                        requestPayment(
-                          'allinone',
-                          { buyerEmail: userEmail },
-                          'CARD',
-                          'HYUNDAI_CARD',
-                        )
-                      }
-                    >
-                      현대카드
-                    </Button>
-                    <Button
-                      color="violet"
-                      radius="lg"
-                      size="md"
-                      disabled={!canCheckout}
-                      loading={loading}
-                      onClick={() =>
-                        requestPayment(
-                          'allinone',
-                          { buyerEmail: userEmail },
-                          'CARD',
-                          'NH_CARD',
-                        )
-                      }
-                    >
-                      농협카드
-                    </Button>
-                  </Group>
-                </Stack>
-
                 <Button
-                  color="blue"
+                  color="violet"
                   radius="lg"
                   size="lg"
-                  variant="outline"
                   disabled={!canCheckout}
                   loading={loading}
-                  onClick={() =>
-                    requestPayment(
-                      'allinone',
-                      { buyerEmail: userEmail },
-                      'TOSSPAY',
-                    )
-                  }
+                  onClick={handleTossPayCheckout}
+                  style={{ background: canCheckout ? '#8b5cf6' : undefined }}
                 >
-                  토스페이로 결제 (기타 카드)
+                  토스페이로 결제하기
                 </Button>
 
                 {!canCheckout && (
