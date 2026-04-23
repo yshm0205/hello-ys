@@ -21,12 +21,41 @@ interface TossPayment {
   credits: number;
   status: string;
   payment_key: string | null;
+  metadata?: Record<string, unknown> | null;
   user: {
     email: string;
   } | null;
 }
 
 const CANCELLABLE_STATUSES = new Set(["DONE"]);
+
+function getNetRevenue(payment: TossPayment) {
+  if (payment.status === "DONE") {
+    return payment.amount;
+  }
+
+  if (payment.status === "PARTIAL_CANCELLED") {
+    const cancelledAmount =
+      typeof payment.metadata?.cancelledAmount === "number" ? payment.metadata.cancelledAmount : 0;
+    return Math.max(0, payment.amount - cancelledAmount);
+  }
+
+  return 0;
+}
+
+function getNetCredits(payment: TossPayment) {
+  if (payment.status === "DONE") {
+    return payment.credits;
+  }
+
+  if (payment.status === "PARTIAL_CANCELLED") {
+    const revokedCredits =
+      typeof payment.metadata?.revokedCredits === "number" ? payment.metadata.revokedCredits : 0;
+    return Math.max(0, payment.credits - revokedCredits);
+  }
+
+  return 0;
+}
 
 export default async function AdminSalesPage({
   searchParams,
@@ -57,11 +86,14 @@ export default async function AdminSalesPage({
   // 통계
   const { data: allPayments } = await supabase
     .from("toss_payments")
-    .select("amount, credits");
+    .select("amount, credits, status, metadata");
 
-  const totalRevenue = allPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
-  const totalCredits = allPayments?.reduce((sum, p) => sum + p.credits, 0) || 0;
-  const totalCount = allPayments?.length || 0;
+  const normalizedAllPayments = ((allPayments || []) as TossPayment[]);
+  const totalRevenue = normalizedAllPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0);
+  const totalCredits = normalizedAllPayments.reduce((sum, payment) => sum + getNetCredits(payment), 0);
+  const totalCount = normalizedAllPayments.filter(
+    (payment) => payment.status === "DONE" || payment.status === "PARTIAL_CANCELLED",
+  ).length;
 
   return (
     <div className="space-y-6">

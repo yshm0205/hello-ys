@@ -386,6 +386,35 @@ async function applyCancelledCreditTopup(
   remoteStatus: (typeof PORTONE_CANCELLED_STATUSES)[number],
   portonePayment: Record<string, unknown>,
 ): Promise<PortOneFinalizeResult> {
+  if (remoteStatus === "PARTIAL_CANCELLED") {
+    await admin
+      .from("toss_payments")
+      .update({
+        status: remoteStatus,
+        metadata: {
+          ...(payment.metadata || {}),
+          provider: "portone",
+          pgProvider: "tosspay",
+          paymentId: payment.payment_key,
+          portoneStatus: remoteStatus,
+          manualReviewRequired: true,
+          cancelledAmount: getCancelledAmount(portonePayment, payment.amount),
+          cancelledAt:
+            ("cancelledAt" in portonePayment && typeof portonePayment.cancelledAt === "string"
+              ? portonePayment.cancelledAt
+              : new Date().toISOString()),
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("payment_key", payment.payment_key);
+
+    return {
+      success: false,
+      status: remoteStatus,
+      error: "Partial cancellation needs manual review.",
+    };
+  }
+
   const { data: lockRows, error: lockError } = await admin
     .from("toss_payments")
     .update({
@@ -511,35 +540,6 @@ async function applyCancelledInitialProgram(
   remoteStatus: (typeof PORTONE_CANCELLED_STATUSES)[number],
   portonePayment: Record<string, unknown>,
 ): Promise<PortOneFinalizeResult> {
-  if (remoteStatus === "PARTIAL_CANCELLED") {
-    await admin
-      .from("toss_payments")
-      .update({
-        status: remoteStatus,
-        metadata: {
-          ...(payment.metadata || {}),
-          provider: "portone",
-          pgProvider: "tosspay",
-          paymentId: payment.payment_key,
-          portoneStatus: remoteStatus,
-          manualReviewRequired: true,
-          cancelledAmount: getCancelledAmount(portonePayment, payment.amount),
-          cancelledAt:
-            ("cancelledAt" in portonePayment && typeof portonePayment.cancelledAt === "string"
-              ? portonePayment.cancelledAt
-              : new Date().toISOString()),
-        },
-        updated_at: new Date().toISOString(),
-      })
-      .eq("payment_key", payment.payment_key);
-
-    return {
-      success: false,
-      status: remoteStatus,
-      error: "Partial cancellation needs manual review.",
-    };
-  }
-
   const { data: lockRows, error: lockError } = await admin
     .from("toss_payments")
     .update({
@@ -560,6 +560,7 @@ async function applyCancelledInitialProgram(
   }
 
   const currentPlan = await loadCreditPlanSnapshot(admin, payment.user_id);
+  const cancelledAmount = getCancelledAmount(portonePayment, payment.amount);
   const revokedSubscriptionCredits = currentPlan?.subscriptionCredits || 0;
   const purchasedCredits = currentPlan?.purchasedCredits || 0;
   const grantedPurchasedCredits = getStoredPurchasedGrantedCredits(payment);
@@ -634,6 +635,7 @@ async function applyCancelledInitialProgram(
         pgProvider: "tosspay",
         paymentId: payment.payment_key,
         portoneStatus: remoteStatus,
+        cancelledAmount,
         revokedSubscriptionCredits,
         revokedPurchasedCredits,
         remainingShortfall,
