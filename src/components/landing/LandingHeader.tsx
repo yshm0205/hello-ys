@@ -99,10 +99,12 @@ export function LandingHeader() {
           <Group gap="md" visibleFrom="sm">
             {isAuthenticated ? (
               <Button
-                variant="subtle"
-                color="gray"
-                style={{ color: '#4b5563' }}
+                radius="lg"
                 onClick={handleSignOut}
+                style={{
+                  background: '#8b5cf6',
+                  border: 'none',
+                }}
               >
                 로그아웃
               </Button>
@@ -111,9 +113,11 @@ export function LandingHeader() {
                 authenticatedHref="/dashboard"
                 unauthenticatedHref="/login"
                 unpaidAuthenticatedHref="/checkout/allinone"
-                variant="subtle"
-                color="gray"
-                style={{ color: '#4b5563' }}
+                radius="lg"
+                style={{
+                  background: '#8b5cf6',
+                  border: 'none',
+                }}
               >
                 로그인
               </AuthAwareButton>
@@ -169,12 +173,14 @@ export function LandingHeader() {
 
           {isAuthenticated ? (
             <Button
-              variant="outline"
-              color="gray"
               fullWidth
               size="lg"
               radius="lg"
               onClick={handleSignOut}
+              style={{
+                background: '#8b5cf6',
+                border: 'none',
+              }}
             >
               로그아웃
             </Button>
@@ -183,12 +189,14 @@ export function LandingHeader() {
               authenticatedHref="/dashboard"
               unauthenticatedHref="/login"
               unpaidAuthenticatedHref="/checkout/allinone"
-              variant="outline"
-              color="gray"
               fullWidth
               size="lg"
               radius="lg"
               onClick={close}
+              style={{
+                background: '#8b5cf6',
+                border: 'none',
+              }}
             >
               로그인
             </AuthAwareButton>
