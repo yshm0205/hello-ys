@@ -83,15 +83,16 @@ export function ReviewEventContent() {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
   const searchParams = useSearchParams();
+  const isPreview = searchParams.get("preview") === "celebration";
 
   // 미리보기 모드 — ?preview=celebration 으로 축하 모달 확인
   useEffect(() => {
-    if (searchParams.get("preview") === "celebration") {
+    if (isPreview) {
       setKakaoInviteUrl("https://open.kakao.com/o/g9CeeMri");
       setKakaoInvitePassword("00001111");
       setCelebrationOpen(true);
     }
-  }, [searchParams]);
+  }, [isPreview]);
 
   useEffect(() => {
     let ignore = false;
@@ -104,8 +105,11 @@ export function ReviewEventContent() {
 
         if (res.ok) {
           setReview(data.review || null);
-          setKakaoInviteUrl(data.kakaoInviteUrl || null);
-          setKakaoInvitePassword(data.kakaoInvitePassword || null);
+          // 미리보기 모드에서는 하드코딩된 카카오 값 유지
+          if (!isPreview) {
+            setKakaoInviteUrl(data.kakaoInviteUrl || null);
+            setKakaoInvitePassword(data.kakaoInvitePassword || null);
+          }
         } else {
           setError(data.error || "후기 이벤트 정보를 불러오지 못했습니다.");
         }
@@ -120,7 +124,7 @@ export function ReviewEventContent() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [isPreview]);
 
   async function submitReview() {
     setError(null);
