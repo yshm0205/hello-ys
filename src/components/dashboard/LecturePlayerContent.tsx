@@ -113,6 +113,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const lastSaveRef = useRef<number>(0);
     const autoCompletedRef = useRef(false);
+    const currentPositionRef = useRef(0);
     const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const allVods = useMemo(() => getAllVods(lectureChapters), [lectureChapters]);
@@ -213,6 +214,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
 
     // 진도 저장 함수
     const savePosition = useCallback((position: number) => {
+        currentPositionRef.current = position;
         fetch('/api/lectures/progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -231,7 +233,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
         })
             .then((res) => res.json())
             .then((data) => {
-                if (data.success) {
+                if (data.success && data.completed) {
                     setCompletedVods((prev) =>
                         prev.includes(vodId) ? prev : [...prev, vodId]
                     );
@@ -272,6 +274,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                 player.video.addEventListener('timeupdate', () => {
                     const current = player.video.currentTime;
                     const duration = player.video.duration;
+                    currentPositionRef.current = current;
 
                     // 15초마다 위치 저장
                     const now = Date.now();
@@ -292,7 +295,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                     // 완료 처리
                     if (!autoCompletedRef.current) {
                         autoCompletedRef.current = true;
-                        markComplete();
+                        markComplete(player.video.duration || player.video.currentTime);
                     }
 
                     // 다음 강의 카운트다운 시작
@@ -336,14 +339,15 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
         if (isMarking || isCompleted) return;
         setIsMarking(true);
         try {
+            const position = currentPositionRef.current || positions[vodId] || 0;
             const res = await fetch('/api/lectures/progress', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ vod_id: vodId, completed: true }),
+                body: JSON.stringify({ vod_id: vodId, completed: true, last_position: position }),
             });
             const data = await res.json();
-            if (data.success) {
-                setCompletedVods((prev) => [...prev, vodId]);
+            if (data.success && data.completed) {
+                setCompletedVods((prev) => (prev.includes(vodId) ? prev : [...prev, vodId]));
             }
         } catch {
             // 에러 무시
