@@ -65,10 +65,8 @@ export function AllInOneCheckoutContent({
   const hasActiveAccess = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
   const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
   const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
-  const [confirmedUsagePolicy, setConfirmedUsagePolicy] = useState(false);
-  const [confirmedNoticePolicy, setConfirmedNoticePolicy] = useState(false);
-  const [confirmedRefundPolicy, setConfirmedRefundPolicy] = useState(false);
-  const canCheckout = confirmedUsagePolicy && confirmedNoticePolicy && confirmedRefundPolicy;
+  const [confirmedAllPolicies, setConfirmedAllPolicies] = useState(false);
+  const canCheckout = confirmedAllPolicies;
 
   return (
     <Box style={{ minHeight: '100vh', background: '#fafafa' }}>
@@ -201,32 +199,26 @@ export function AllInOneCheckoutContent({
                     <Text fw={700} size="sm" style={{ color: '#111827' }}>
                       필수 확인
                     </Text>
+                    <Stack gap={4} pl={4}>
+                      <Text size="sm" c="gray.7" style={{ lineHeight: 1.6 }}>
+                        • 이용 기간 <strong>4개월</strong>, 결제 즉시 시작
+                      </Text>
+                      <Text size="sm" c="gray.7" style={{ lineHeight: 1.6 }}>
+                        • 계정 공유 / 자료 외부 공유 금지
+                      </Text>
+                      <Text size="sm" c="gray.7" style={{ lineHeight: 1.6 }}>
+                        • 환불 규정 (전자상거래법 17조 2항 예외 조건 포함){' '}
+                        <a href="/refund" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>
+                          자세히 보기 →
+                        </a>
+                      </Text>
+                    </Stack>
                     <Checkbox
-                      checked={confirmedUsagePolicy}
-                      onChange={(event) => setConfirmedUsagePolicy(event.currentTarget.checked)}
-                      label="이용 기간은 결제 즉시 시작되며, 강의 및 프로그램 이용 기간이 4개월임을 확인했습니다."
-                    />
-                    <Checkbox
-                      checked={confirmedNoticePolicy}
-                      onChange={(event) => setConfirmedNoticePolicy(event.currentTarget.checked)}
-                      label="계정 공유 금지, 자료 외부 공유 금지 규정을 확인했습니다."
-                    />
-                    <Checkbox
-                      checked={confirmedRefundPolicy}
-                      onChange={(event) => setConfirmedRefundPolicy(event.currentTarget.checked)}
+                      checked={confirmedAllPolicies}
+                      onChange={(event) => setConfirmedAllPolicies(event.currentTarget.checked)}
                       label={
-                        <Text size="sm" style={{ lineHeight: 1.5 }}>
-                          아래 <strong>청약철회 제한 조건</strong>에 동의합니다 (전자상거래법 17조 2항):
-                          <br />
-                          ① 강의 <strong>5강 이상 수강</strong> 시 환불 제한
-                          <br />
-                          ② 지급된 <strong>크레딧 1개 이상 사용</strong> 시 환불 제한
-                          <br />
-                          ③ 결제 후 <strong>14일 경과</strong> 시 환불 불가
-                          <br />
-                          <a href="/refund" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>
-                            전체 환불 규정 보기 →
-                          </a>
+                        <Text size="sm" fw={600} style={{ lineHeight: 1.5 }}>
+                          위 내용을 모두 확인했으며 동의합니다.
                         </Text>
                       }
                     />
@@ -250,7 +242,7 @@ export function AllInOneCheckoutContent({
 
                 {!canCheckout && (
                   <Text size="xs" c="gray.5">
-                    필수 확인 항목을 모두 체크해 주세요.
+                    필수 확인 항목에 동의해 주세요.
                   </Text>
                 )}
 
