@@ -124,7 +124,7 @@ async function getAuthenticatedUser() {
   return { response: null, user };
 }
 
-async function hasActiveReviewAccess(userId: string) {
+async function requireActiveReviewPlan(userId: string) {
   const plan = await getEffectiveCreditInfo(userId);
   return isActiveAccessPlan(plan?.plan_type, plan?.expires_at);
 }
@@ -134,7 +134,14 @@ export async function GET() {
     const { response, user } = await getAuthenticatedUser();
     if (response || !user) return response;
 
-    const hasActivePlan = await hasActiveReviewAccess(user.id);
+    const hasActivePlan = await requireActiveReviewPlan(user.id);
+    if (!hasActivePlan) {
+      return NextResponse.json(
+        { error: "후기 이벤트는 올인원 이용권 보유 중에만 볼 수 있습니다." },
+        { status: 403 },
+      );
+    }
+
     const admin = createAdminClient();
     const { data, error } = await admin
       .from("student_reviews")
@@ -147,13 +154,6 @@ export async function GET() {
     if (error) {
       console.error("[Reviews API] Failed to load review:", error);
       return NextResponse.json({ error: "후기 정보를 불러오지 못했습니다." }, { status: 500 });
-    }
-
-    if (!hasActivePlan && !data) {
-      return NextResponse.json(
-        { error: "후기 이벤트는 이용권 보유 중이거나 후기 제출 완료 사용자만 볼 수 있습니다." },
-        { status: 403 },
-      );
     }
 
     return NextResponse.json({
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hasActivePlan = await hasActiveReviewAccess(user.id);
+    const hasActivePlan = await requireActiveReviewPlan(user.id);
     if (!hasActivePlan) {
       return NextResponse.json(
         { error: "수강 후기 이벤트는 올인원 이용권 보유 중에만 참여할 수 있습니다." },

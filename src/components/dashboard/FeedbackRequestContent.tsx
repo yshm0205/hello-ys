@@ -221,7 +221,7 @@ export function FeedbackRequestContent() {
                     남은 피드백권 {remaining}회 / 총 {review.feedbackTicketsGranted}회
                   </Text>
                   <Text size="sm" c="gray.6">
-                    제출 시 1회 차감됩니다. 소진 시까지 유효해요.
+                    제출 시 1회 차감되며, 이용권 기간 내에만 사용할 수 있어요.
                   </Text>
                 </Box>
               </Group>

@@ -130,23 +130,23 @@ async function requireFeedbackAccess() {
 
   const plan = await getEffectiveCreditInfo(user.id);
   const hasActivePlan = isActiveAccessPlan(plan?.plan_type, plan?.expires_at);
-  const admin = createAdminClient();
-  const { data: review } = await admin
-    .from("student_reviews")
-    .select("id, feedback_tickets_granted, feedback_tickets_remaining")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!hasActivePlan && !review) {
+  if (!hasActivePlan) {
     return {
       response: NextResponse.json(
-        { error: "피드백권은 올인원 이용권 보유 중이거나 후기 이벤트 참여자만 사용할 수 있습니다." },
+        { error: "피드백권은 올인원 이용권 보유 중에만 사용할 수 있습니다." },
         { status: 403 },
       ),
       user: null,
       review: null,
     };
   }
+
+  const admin = createAdminClient();
+  const { data: review } = await admin
+    .from("student_reviews")
+    .select("id, feedback_tickets_granted, feedback_tickets_remaining")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   return {
     response: null,
