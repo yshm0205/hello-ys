@@ -16,11 +16,21 @@ const KakaoChatButton = dynamic(
   { ssr: false }
 );
 
+const ChannelTalkButton = dynamic(
+  () =>
+    import("@/components/shared/ChannelTalkButton").then(
+      (mod) => mod.ChannelTalkButton
+    ),
+  { ssr: false }
+);
+
 export function ClientWidgets() {
+  const hasChannelTalk = Boolean(process.env.NEXT_PUBLIC_CHANNEL_TALK_PLUGIN_KEY);
+
   return (
     <>
       <CookieConsent />
-      <KakaoChatButton />
+      {hasChannelTalk ? <ChannelTalkButton /> : <KakaoChatButton />}
     </>
   );
 }

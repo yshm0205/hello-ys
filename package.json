@@ -12,6 +12,7 @@
     "test:env": "node scripts/check-env.js"
   },
   "dependencies": {
+    "@channel.io/channel-web-sdk-loader": "^2.0.2",
     "@hookform/resolvers": "^5.2.2",
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@mantine/core": "^8.3.12",
