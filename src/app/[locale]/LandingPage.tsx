@@ -3367,6 +3367,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
   const stage3StatusText = earlybirdEnded ? 'LIVE · 정가 신청 진행 중' : '종료 · 가격 인상';
   const stage3Variant: EbTierProps['variant'] = earlybirdEnded ? 'active' : 'end';
   const monthlyNote = `12개월 할부 시 월 ${Math.ceil(primaryProgram.amount / 12).toLocaleString()}원`;
+  const monthlyNoteEnd = `12개월 할부 시 월 ${Math.ceil(599000 / 12).toLocaleString()}원`;
 
   return (
     <Box component="section" id="earlybird" style={{
@@ -3500,7 +3501,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: false, muted: true, text: <>기본 제공 크레딧과 강의 구성은 동일</> },
                 ]}
                 bonusText={<>보너스 없음</>}
-                priceNow="499,000원" priceNote={monthlyNote}
+                priceNow="599,000원" priceNote={monthlyNoteEnd}
                 variant={stage3Variant} isMobile={isMobile}
               />
               <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
