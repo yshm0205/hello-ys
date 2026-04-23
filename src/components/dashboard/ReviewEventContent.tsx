@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Alert,
   Anchor,
@@ -81,6 +82,16 @@ export function ReviewEventContent() {
   const [proofUrl, setProofUrl] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
+  const searchParams = useSearchParams();
+
+  // 미리보기 모드 — ?preview=celebration 으로 축하 모달 확인
+  useEffect(() => {
+    if (searchParams.get("preview") === "celebration") {
+      setKakaoInviteUrl("https://open.kakao.com/o/g9CeeMri");
+      setKakaoInvitePassword("00001111");
+      setCelebrationOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let ignore = false;
