@@ -88,7 +88,18 @@ export async function requestPortOneCheckout(
       ? {
           easyPayProvider: "TOSSPAY",
         }
-      : {}),
+      : {
+          // 심사 완료된 카드사만 노출 (5/9경 심사 완료 예정)
+          // 완료 후 card 블록 전체 제거
+          card: {
+            availableCards: [
+              "SHINHAN_CARD",
+              "SAMSUNG_CARD",
+              "HYUNDAI_CARD",
+              "NH_CARD",
+            ],
+          },
+        }),
     redirectUrl: `${origin}/${currentLocale}/dashboard/credits/success`,
     noticeUrls: [`${origin}/api/payments/webhook`],
     customer: {

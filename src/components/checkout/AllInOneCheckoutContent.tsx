@@ -65,8 +65,16 @@ export function AllInOneCheckoutContent({
   const hasActiveAccess = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
   const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
   const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
-  const [confirmedAllPolicies, setConfirmedAllPolicies] = useState(false);
-  const canCheckout = confirmedAllPolicies;
+  const [confirmedDuration, setConfirmedDuration] = useState(false);
+  const [confirmedSharing, setConfirmedSharing] = useState(false);
+  const [confirmedRefund, setConfirmedRefund] = useState(false);
+  const allConfirmed = confirmedDuration && confirmedSharing && confirmedRefund;
+  const canCheckout = allConfirmed;
+  const toggleAll = (checked: boolean) => {
+    setConfirmedDuration(checked);
+    setConfirmedSharing(checked);
+    setConfirmedRefund(checked);
+  };
 
   return (
     <Box style={{ minHeight: '100vh', background: '#fafafa' }}>
@@ -199,31 +207,69 @@ export function AllInOneCheckoutContent({
                     <Text fw={700} size="sm" style={{ color: '#111827' }}>
                       필수 확인
                     </Text>
-                    <Stack gap={4} pl={4}>
-                      <Text size="sm" c="gray.7" style={{ lineHeight: 1.6 }}>
-                        • 이용 기간 <strong>4개월</strong>, 결제 즉시 시작
-                      </Text>
-                      <Text size="sm" c="gray.7" style={{ lineHeight: 1.6 }}>
-                        • 계정 공유 / 자료 외부 공유 금지
-                      </Text>
-                      <Text size="sm" c="gray.7" style={{ lineHeight: 1.6 }}>
-                        • 환불 규정 (전자상거래법 17조 2항 예외 조건 포함){' '}
-                        <a href="/refund" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>
-                          자세히 보기 →
-                        </a>
-                      </Text>
-                    </Stack>
                     <Checkbox
-                      checked={confirmedAllPolicies}
-                      onChange={(event) => setConfirmedAllPolicies(event.currentTarget.checked)}
+                      checked={allConfirmed}
+                      onChange={(event) => toggleAll(event.currentTarget.checked)}
                       label={
-                        <Text size="sm" fw={600} style={{ lineHeight: 1.5 }}>
-                          위 내용을 모두 확인했으며 동의합니다.
+                        <Text size="sm" fw={700} style={{ lineHeight: 1.5 }}>
+                          모든 이용 조건을 확인하고 동의합니다.
                         </Text>
                       }
                     />
+                    <Divider />
+                    <Stack gap="xs" pl={4}>
+                      <Checkbox
+                        checked={confirmedDuration}
+                        onChange={(event) => setConfirmedDuration(event.currentTarget.checked)}
+                        label={
+                          <Text size="sm" style={{ lineHeight: 1.5 }}>
+                            이용 기간 <strong>4개월</strong>이며, 결제 즉시 시작되는 것을 확인했습니다.
+                          </Text>
+                        }
+                      />
+                      <Checkbox
+                        checked={confirmedSharing}
+                        onChange={(event) => setConfirmedSharing(event.currentTarget.checked)}
+                        label={
+                          <Text size="sm" style={{ lineHeight: 1.5 }}>
+                            계정 공유 및 자료 외부 공유가 금지됨을 확인했습니다.
+                          </Text>
+                        }
+                      />
+                      <Checkbox
+                        checked={confirmedRefund}
+                        onChange={(event) => setConfirmedRefund(event.currentTarget.checked)}
+                        label={
+                          <Text size="sm" style={{ lineHeight: 1.5 }}>
+                            환불 규정을 정확히 확인했습니다.{' '}
+                            <a href="/refund" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>
+                              자세히 보기 →
+                            </a>
+                          </Text>
+                        }
+                      />
+                    </Stack>
                   </Stack>
                 </Card>
+
+                <Alert
+                  color="violet"
+                  radius="lg"
+                  variant="light"
+                  icon={<AlertCircle size={18} />}
+                  title="결제 수단 안내"
+                >
+                  <Text size="sm" style={{ lineHeight: 1.6 }}>
+                    현재 일부 카드사가 PG 심사 진행 중이라{' '}
+                    <strong>신한 · 삼성 · 현대 · 농협 카드</strong>만 결제 가능합니다.
+                    <br />
+                    다른 카드(국민·하나·BC·롯데·우리)는{' '}
+                    <strong>토스페이</strong>를 이용해 주세요.{' '}
+                    <Text span size="xs" c="gray.6">
+                      (~5/9경 정상화 예정)
+                    </Text>
+                  </Text>
+                </Alert>
 
                 <Button
                   color="violet"
@@ -232,12 +278,32 @@ export function AllInOneCheckoutContent({
                   disabled={!canCheckout}
                   loading={loading}
                   onClick={() =>
-                    requestPayment('allinone', {
-                      buyerEmail: userEmail,
-                    })
+                    requestPayment(
+                      'allinone',
+                      { buyerEmail: userEmail },
+                      'CARD',
+                    )
                   }
                 >
-                  결제창 열기
+                  카드로 결제 (신한·삼성·현대·농협)
+                </Button>
+
+                <Button
+                  color="blue"
+                  radius="lg"
+                  size="lg"
+                  variant="outline"
+                  disabled={!canCheckout}
+                  loading={loading}
+                  onClick={() =>
+                    requestPayment(
+                      'allinone',
+                      { buyerEmail: userEmail },
+                      'TOSSPAY',
+                    )
+                  }
+                >
+                  토스페이로 결제
                 </Button>
 
                 {!canCheckout && (
