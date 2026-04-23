@@ -132,6 +132,7 @@ async function applyInitialProgramPlan(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
   config: (typeof TOSSPAY_PLAN_CONFIG)[keyof typeof TOSSPAY_PLAN_CONFIG],
+  earlybirdBonusCredits: number,
   expiresAtIso: string,
   nextCreditAtIso: string,
 ): Promise<{ success: true; credits: number } | { success: false; error: unknown }> {
@@ -150,7 +151,7 @@ async function applyInitialProgramPlan(
 
     const planRow = currentPlan as ExistingUserPlanRow | null;
     const nextSubscriptionCredits = config.initialCredits;
-    const nextPurchasedCredits = planRow?.purchased_credits || 0;
+    const nextPurchasedCredits = (planRow?.purchased_credits || 0) + earlybirdBonusCredits;
     const nextCredits = nextSubscriptionCredits + nextPurchasedCredits;
 
     if (!planRow) {
@@ -357,10 +358,20 @@ export async function POST(request: NextRequest) {
     const nextCreditAt = new Date();
     nextCreditAt.setMonth(nextCreditAt.getMonth() + 1);
 
+    const rawEarlybirdBonus =
+      typeof payment.metadata?.earlybirdBonusCredits === "number"
+        ? payment.metadata.earlybirdBonusCredits
+        : typeof payment.metadata?.purchasedGranted === "number"
+          ? payment.metadata.purchasedGranted
+          : 0;
+    const earlybirdBonusCredits = Math.max(0, Number(rawEarlybirdBonus || 0));
+    const totalGranted = config.initialCredits + earlybirdBonusCredits;
+
     const planGrantResult = await applyInitialProgramPlan(
       admin,
       payment.user_id,
       config,
+      earlybirdBonusCredits,
       expiresAt.toISOString(),
       nextCreditAt.toISOString(),
     );
@@ -372,7 +383,7 @@ export async function POST(request: NextRequest) {
         const legacyGrantResult = await applyLegacyProgramCreditsOnly(
           admin,
           payment.user_id,
-          config.initialCredits,
+          totalGranted,
         );
 
         if (legacyGrantResult.success) {
@@ -381,7 +392,7 @@ export async function POST(request: NextRequest) {
             .update({
               status: "DONE",
               payment_key: payToken,
-              credits: config.initialCredits,
+              credits: totalGranted,
               metadata: {
                 ...(payment.metadata || {}),
                 payToken,
@@ -389,6 +400,8 @@ export async function POST(request: NextRequest) {
                 userPlanType: config.userPlanType,
                 paymentKind: config.paymentKind,
                 initialCredits: config.initialCredits,
+                earlybirdBonusCredits,
+                purchasedGranted: earlybirdBonusCredits,
                 monthlyCredits: config.monthlyCredits,
                 months: config.months,
                 fallbackMode: "legacy_schema",
@@ -401,7 +414,7 @@ export async function POST(request: NextRequest) {
           await recordCreditTransaction({
             userId: payment.user_id,
             type: "charge",
-            amount: config.initialCredits,
+            amount: totalGranted,
             balanceAfter: legacyGrantResult.credits,
             description: `initial program payment (legacy fallback): ${config.name}`,
             referenceId: orderNo,
@@ -413,9 +426,10 @@ export async function POST(request: NextRequest) {
               payToken,
               amount,
               initialCredits: config.initialCredits,
+              earlybirdBonusCredits,
               monthlyCredits: config.monthlyCredits,
               subscriptionGranted: config.initialCredits,
-              purchasedGranted: 0,
+              purchasedGranted: earlybirdBonusCredits,
               fallbackMode: "legacy_schema",
             },
           });
@@ -423,7 +437,7 @@ export async function POST(request: NextRequest) {
           await notifyPaymentCompleteByEmail(
             admin,
             payment as PaymentRow,
-            config.initialCredits,
+            totalGranted,
           );
 
           console.warn("[TossPay Callback] Completed with legacy schema fallback:", {
@@ -446,7 +460,7 @@ export async function POST(request: NextRequest) {
         .update({
           status: "CREDIT_GRANT_FAILED",
           payment_key: payToken,
-          credits: config.initialCredits,
+          credits: totalGranted,
           metadata: {
             ...(payment.metadata || {}),
             payToken,
@@ -454,6 +468,8 @@ export async function POST(request: NextRequest) {
             userPlanType: config.userPlanType,
             paymentKind: config.paymentKind,
             initialCredits: config.initialCredits,
+            earlybirdBonusCredits,
+            purchasedGranted: earlybirdBonusCredits,
             monthlyCredits: config.monthlyCredits,
             months: config.months,
           },
@@ -471,7 +487,7 @@ export async function POST(request: NextRequest) {
       .update({
         status: "DONE",
         payment_key: payToken,
-        credits: config.initialCredits,
+        credits: totalGranted,
         metadata: {
           ...(payment.metadata || {}),
           payToken,
@@ -479,6 +495,8 @@ export async function POST(request: NextRequest) {
           userPlanType: config.userPlanType,
           paymentKind: config.paymentKind,
           initialCredits: config.initialCredits,
+          earlybirdBonusCredits,
+          purchasedGranted: earlybirdBonusCredits,
           monthlyCredits: config.monthlyCredits,
           months: config.months,
         },
@@ -489,7 +507,7 @@ export async function POST(request: NextRequest) {
     await recordCreditTransaction({
       userId: payment.user_id,
       type: "charge",
-      amount: config.initialCredits,
+      amount: totalGranted,
       balanceAfter: newCredits,
       description: `initial program payment: ${config.name}`,
       referenceId: orderNo,
@@ -501,13 +519,14 @@ export async function POST(request: NextRequest) {
         payToken,
         amount,
         initialCredits: config.initialCredits,
+        earlybirdBonusCredits,
         monthlyCredits: config.monthlyCredits,
         subscriptionGranted: config.initialCredits,
-        purchasedGranted: 0,
+        purchasedGranted: earlybirdBonusCredits,
       },
     });
 
-    await notifyPaymentCompleteByEmail(admin, payment as PaymentRow, config.initialCredits);
+    await notifyPaymentCompleteByEmail(admin, payment as PaymentRow, totalGranted);
 
     console.log("[TossPay Callback] Success:", {
       orderNo,
