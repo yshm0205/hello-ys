@@ -2397,11 +2397,7 @@ function FAQSection() {
         },
         {
           q: '환불 되나요?',
-          a: '결제일로부터 28일 이내 3구간 환불이 가능합니다.\n\n• 1~7일 (& 5강 미만 & 크레딧 미사용): 전액 환불\n• 8~14일: 결제금의 2/3 − 위약금 10%\n• 15~28일: 결제금의 1/2 − 위약금 10%\n• 29일 경과 또는 5강 이상 수강/크레딧 사용 시: 환불 제한\n\n자세한 조건과 예시는 [환불 규정 페이지](/refund)에서 확인해 주세요.\n\n환불을 원하시는 경우 [환불 신청서](https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform)를 작성해 주세요.',
-        },
-        {
-          q: '결제 카드 변경, 결제 취소는 어떻게 하나요?',
-          a: '결제 카드를 변경하시려면 [환불 신청서](https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform)를 먼저 작성하신 뒤, 환불 완료 후 원하시는 카드로 재결제해 주세요.\n\n결제 취소(환불)를 원하시는 경우에도 동일하게 [환불 신청서](https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform)를 작성해 주시면 접수 후 3영업일 이내에 안내드립니다.',
+          a: '환불을 원하시는 경우 [환불 신청서](https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform)를 작성해 주세요.\n\n결제 카드 변경은 환불 신청서 작성 후 재결제해 주세요.',
         },
         {
           q: '크레딧만 따로 구매할 수 있나요?',
