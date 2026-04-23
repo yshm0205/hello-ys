@@ -194,6 +194,8 @@ export default async function AdminSalesPage({
                             orderName={payment.order_name}
                             amount={payment.amount}
                           />
+                        ) : payment.status === "PENDING" ? (
+                          <span className="text-xs text-amber-600">미결제</span>
                         ) : (
                           <span className="text-xs text-zinc-400">-</span>
                         )}
