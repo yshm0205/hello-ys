@@ -44,9 +44,9 @@ export default async function RefundPage() {
 
           <h3>① 과금 기준</h3>
           <ul>
-            <li>올인원 패스 결제 금액 ₩499,000은 <strong>강의 40강 수강료 전액</strong>으로 책정됩니다.</li>
+            <li>올인원 패스 <strong>정가</strong> ₩599,000은 <strong>강의 40강 수강료 전액</strong>으로 책정됩니다. (얼리버드 할인가 ₩499,000 적용 시에도 동일한 % 기준으로 산정)</li>
             <li>FlowSpot 이용권 4개월, 기본 크레딧 1,600cr, 얼리버드 보너스 크레딧은 상품 구매에 부수되는 <strong>특전(사은품)</strong>으로 제공되며, 별도 과금 대상이 아닙니다.</li>
-            <li>1강 단가: ₩499,000 ÷ 40강 = <strong>₩12,475</strong></li>
+            <li>1강 단가: ₩599,000 ÷ 40강 = <strong>₩14,975</strong></li>
           </ul>
 
           <h3>② 이용 간주 기준</h3>
@@ -97,7 +97,7 @@ export default async function RefundPage() {
           </div>
 
           <ul>
-            <li>위약금: 결제 금액의 10% (₩49,900)</li>
+            <li>위약금: 결제 금액의 10% (정가 기준 ₩59,900)</li>
             <li>공제 금액이 결제 금액을 초과하는 경우 환불 금액은 0원입니다.</li>
           </ul>
 
@@ -113,7 +113,7 @@ export default async function RefundPage() {
           </ul>
 
           <h3>⑦ 환불 시뮬레이션 (예시)</h3>
-          <p>아래 예시는 <strong>올인원 패스 ₩499,000</strong> 기준이며, 얼리버드 할인가도 동일하게 적용됩니다.</p>
+          <p>아래 예시는 <strong>올인원 패스 정가 ₩599,000</strong> 기준이며, 얼리버드 할인가 ₩499,000에도 동일한 % 공식이 적용됩니다.</p>
 
           <div className="overflow-x-auto my-4">
             <table className="min-w-full border border-zinc-300 dark:border-zinc-700 text-sm">
@@ -130,13 +130,13 @@ export default async function RefundPage() {
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 3일차</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">0강 수강 · 크레딧 0 사용</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-green-600 dark:text-green-400 font-semibold">전액 환불</td>
-                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩499,000</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩599,000</td>
                 </tr>
                 <tr>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 5일차</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">3강 수강 · 크레딧 0 사용</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-green-600 dark:text-green-400 font-semibold">전액 환불</td>
-                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩499,000</td>
+                  <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">₩599,000</td>
                 </tr>
                 <tr>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">결제 5일차</td>
@@ -155,8 +155,8 @@ export default async function RefundPage() {
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">2강 수강 · 크레딧 0 사용</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-amber-600 dark:text-amber-400 font-semibold">일부 환불</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">
-                    ₩282,767<br/>
-                    <span className="text-xs text-zinc-500">= 499,000 × 2/3 − 49,900</span>
+                    ₩339,433<br/>
+                    <span className="text-xs text-zinc-500">= 599,000 × 2/3 − 59,900</span>
                   </td>
                 </tr>
                 <tr>
@@ -164,8 +164,8 @@ export default async function RefundPage() {
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">4강 수강 · 크레딧 0 사용</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-amber-600 dark:text-amber-400 font-semibold">일부 환불</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">
-                    ₩282,767<br/>
-                    <span className="text-xs text-zinc-500">= 499,000 × 2/3 − 49,900</span>
+                    ₩339,433<br/>
+                    <span className="text-xs text-zinc-500">= 599,000 × 2/3 − 59,900</span>
                   </td>
                 </tr>
                 <tr>
@@ -173,8 +173,8 @@ export default async function RefundPage() {
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">3강 수강 · 크레딧 0 사용</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-amber-600 dark:text-amber-400 font-semibold">일부 환불</td>
                   <td className="border border-zinc-300 dark:border-zinc-700 px-3 py-2">
-                    ₩199,600<br/>
-                    <span className="text-xs text-zinc-500">= 499,000 × 1/2 − 49,900</span>
+                    ₩239,600<br/>
+                    <span className="text-xs text-zinc-500">= 599,000 × 1/2 − 59,900</span>
                   </td>
                 </tr>
                 <tr>
