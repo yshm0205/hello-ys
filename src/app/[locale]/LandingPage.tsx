@@ -59,8 +59,8 @@ type LandingEarlybirdSummary = {
 
 const EARLYBIRD_FALLBACK_SUMMARY: LandingEarlybirdSummary = {
   currentTier: 'phase1',
-  phase1SoldCount: 7,
-  phase1Remaining: 23,
+  phase1SoldCount: 0,
+  phase1Remaining: 30,
   phase1Total: 30,
   phase2SoldCount: 0,
   phase2Remaining: 70,
@@ -68,8 +68,8 @@ const EARLYBIRD_FALLBACK_SUMMARY: LandingEarlybirdSummary = {
   tier1Deadline: '2026-05-08T23:59:59+09:00',
 };
 
-function useLandingEarlybirdSummary() {
-  const [summary, setSummary] = useState<LandingEarlybirdSummary>(EARLYBIRD_FALLBACK_SUMMARY);
+function useLandingEarlybirdSummary(initialSummary: LandingEarlybirdSummary) {
+  const [summary, setSummary] = useState<LandingEarlybirdSummary>(initialSummary);
 
   useEffect(() => {
     let cancelled = false;
@@ -2955,21 +2955,6 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
     : phase2IsLive
       ? '2차 얼리버드'
       : '얼리버드 종료';
-  const currentMetaLabel = phase1IsLive
-    ? 'Now · 현재 1차 혜택'
-    : phase2IsLive
-      ? 'Now · 현재 2차 혜택'
-      : 'Now · 현재 기본 구성';
-  const currentBenefitTitle = phase1IsLive
-    ? '+800cr 즉시 지급'
-    : phase2IsLive
-      ? '+400cr 즉시 지급'
-      : '보너스 지급 종료';
-  const currentBenefitDescription = phase1IsLive
-    ? '결제 완료 즉시 추가 구매 크레딧 800cr가 지급됩니다.'
-    : phase2IsLive
-      ? '결제 완료 즉시 추가 구매 크레딧 400cr가 지급됩니다.'
-      : '현재는 보너스 크레딧 없이 기본 구성으로만 신청 가능합니다.';
   const ctaText = phase1IsLive
     ? '지금 1차 얼리버드로 신청하기'
     : phase2IsLive
@@ -3085,22 +3070,6 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   earlybird.progressHint
                 )}
               </Text>
-              <Box style={{
-                marginTop: 24, padding: isMobile ? '16px 18px' : '20px 22px',
-                background: 'rgba(139,92,246,.1)',
-                border: '1px solid rgba(139,92,246,.3)',
-                borderRadius: 18,
-              }}>
-                <Text style={{ fontSize: 11, fontWeight: 800, color: '#a78bfa', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 6 }}>
-                  {currentMetaLabel}
-                </Text>
-                <Text style={{ fontSize: isMobile ? 26 : 'clamp(26px, 3.4vw, 34px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#fff' }}>
-                  {currentBenefitTitle}
-                </Text>
-                <Text style={{ marginTop: 6, fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.75)', lineHeight: 1.5 }}>
-                  {currentBenefitDescription}
-                </Text>
-              </Box>
             </Box>
 
             <Box style={{ display: 'flex', flexDirection: 'column' }}>
@@ -3331,8 +3300,8 @@ function EbTier(p: EbTierProps) {
 /* ═══════════════════════════════════════════════════════════════
    Page Export
    ═══════════════════════════════════════════════════════════════ */
-export default function LandingPage() {
-  const earlybirdSummary = useLandingEarlybirdSummary();
+export default function LandingPage({ initialSummary }: { initialSummary: LandingEarlybirdSummary }) {
+  const earlybirdSummary = useLandingEarlybirdSummary(initialSummary);
 
   return (
     <main style={{ background: '#ffffff' }}>
