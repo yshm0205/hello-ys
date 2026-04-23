@@ -7,22 +7,11 @@ import {
   recordCreditTransaction,
   updateCreditPlanBalances,
 } from "@/lib/credits/server";
+import { evaluateAdminRefund } from "@/lib/payments/refund-policy";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
 const TOSSPAY_REFUND_URL = "https://pay.toss.im/api/v2/refunds";
-
-type StoredPaymentRow = {
-  user_id: string;
-  order_id: string;
-  order_name: string;
-  amount: number;
-  credits: number;
-  status: string;
-  payment_key: string | null;
-  metadata: Record<string, unknown> | null;
-  created_at: string;
-};
 
 type TossPayRefundResponse = {
   code?: number;
@@ -61,60 +50,8 @@ async function requireAdminUser() {
   return { ok: true as const, user };
 }
 
-function getPaymentKind(payment: StoredPaymentRow): "initial_program" | "credit_topup" | null {
-  const metadataKind = payment.metadata?.paymentKind;
-  if (metadataKind === "initial_program" || metadataKind === "credit_topup") {
-    return metadataKind;
-  }
-  return null;
-}
-
-function getGrantedCredits(payment: StoredPaymentRow) {
-  const initial = payment.metadata?.initialCredits;
-  if (typeof initial === "number" && Number.isFinite(initial)) {
-    return Math.max(0, initial);
-  }
-  return Math.max(0, payment.credits || 0);
-}
-
-function getPurchasedGrantedCredits(payment: StoredPaymentRow) {
-  const value = payment.metadata?.purchasedGranted;
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return Math.max(0, value);
-  }
-  return 0;
-}
-
-async function loadDirectPayment(payToken: string) {
-  const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("toss_payments")
-    .select(
-      "user_id, order_id, order_name, amount, credits, status, payment_key, metadata, created_at",
-    )
-    .eq("payment_key", payToken)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[TossPay Cancel] Failed to load payment:", error);
-    return { ok: false as const, status: 500, error: "결제 조회에 실패했습니다." };
-  }
-
-  if (!data) {
-    return { ok: false as const, status: 404, error: "결제를 찾을 수 없습니다." };
-  }
-
-  const payment = data as StoredPaymentRow;
-  const provider = payment.metadata?.provider;
-  if (provider !== "tosspay-direct") {
-    return {
-      ok: false as const,
-      status: 400,
-      error: "이 엔드포인트는 TossPay 직접 결제 건만 처리합니다.",
-    };
-  }
-
-  return { ok: true as const, payment };
+function assertDirectProvider(metadata: Record<string, unknown> | null | undefined) {
+  return metadata?.provider === "tosspay-direct";
 }
 
 export async function GET(
@@ -129,27 +66,21 @@ export async function GET(
     return NextResponse.json({ error: "payToken is required" }, { status: 400 });
   }
 
-  const loaded = await loadDirectPayment(payToken);
-  if (!loaded.ok) {
-    return NextResponse.json({ error: loaded.error }, { status: loaded.status });
+  const evaluation = await evaluateAdminRefund(payToken);
+  if (!evaluation.ok) {
+    return NextResponse.json({ error: evaluation.error }, { status: evaluation.status });
   }
 
-  const { payment } = loaded;
-  const paymentKind = getPaymentKind(payment);
+  if (!assertDirectProvider(evaluation.payment.metadata)) {
+    return NextResponse.json(
+      { error: "이 엔드포인트는 TossPay 직접 결제 건만 처리합니다." },
+      { status: 400 },
+    );
+  }
 
   return NextResponse.json({
     success: true,
-    preview: {
-      payToken,
-      orderId: payment.order_id,
-      orderName: payment.order_name,
-      amount: payment.amount,
-      grantedCredits: getGrantedCredits(payment),
-      status: payment.status,
-      paymentKind,
-      refundable: payment.status === "DONE",
-      createdAt: payment.created_at,
-    },
+    preview: evaluation.preview,
   });
 }
 
@@ -175,40 +106,38 @@ export async function POST(
 
   const body = await request.json().catch(() => ({}));
   const reason = typeof body?.reason === "string" ? body.reason.trim() : "";
-  const requestedAmount =
-    typeof body?.amount === "number" && Number.isFinite(body.amount) && body.amount > 0
-      ? Math.floor(body.amount)
-      : null;
-
   if (!reason) {
     return NextResponse.json({ error: "reason is required" }, { status: 400 });
   }
 
-  const loaded = await loadDirectPayment(payToken);
-  if (!loaded.ok) {
-    return NextResponse.json({ error: loaded.error }, { status: loaded.status });
+  const evaluation = await evaluateAdminRefund(payToken);
+  if (!evaluation.ok) {
+    return NextResponse.json({ error: evaluation.error }, { status: evaluation.status });
   }
 
-  const { payment } = loaded;
-
-  if (payment.status !== "DONE") {
+  if (!assertDirectProvider(evaluation.payment.metadata)) {
     return NextResponse.json(
-      { error: `현재 상태(${payment.status})에서는 취소할 수 없습니다.` },
-      { status: 409 },
-    );
-  }
-
-  const refundAmount = requestedAmount ?? payment.amount;
-  if (refundAmount > payment.amount) {
-    return NextResponse.json(
-      { error: "결제 금액보다 큰 환불은 요청할 수 없습니다." },
+      { error: "이 엔드포인트는 TossPay 직접 결제 건만 처리합니다." },
       { status: 400 },
     );
   }
 
-  const isFullRefund = refundAmount === payment.amount;
-  const refundNo = `refund-${randomUUID()}`;
+  const { payment, preview } = evaluation;
+
+  if (!preview.refundable || preview.refundAmount <= 0) {
+    return NextResponse.json(
+      {
+        error: preview.reason,
+        preview,
+      },
+      { status: 409 },
+    );
+  }
+
   const admin = createAdminClient();
+  const refundNo = `refund-${randomUUID()}`;
+  const refundAmount = preview.refundAmount;
+  const isFullRefund = preview.refundType === "full";
 
   const refundResponse = await fetch(TOSSPAY_REFUND_URL, {
     method: "POST",
@@ -253,21 +182,26 @@ export async function POST(
     );
   }
 
-  const paymentKind = getPaymentKind(payment);
-  const currentPlan = await loadCreditPlanSnapshot(admin, payment.user_id);
-  const currentSubscriptionCredits = currentPlan?.subscriptionCredits || 0;
-  const currentPurchasedCredits = currentPlan?.purchasedCredits || 0;
-
   let revokedSubscriptionCredits = 0;
   let revokedPurchasedCredits = 0;
   let remainingShortfall = 0;
+  let revokeError: unknown = null;
 
   if (isFullRefund) {
-    if (paymentKind === "initial_program") {
+    const currentPlan = await loadCreditPlanSnapshot(admin, payment.user_id);
+    const currentSubscriptionCredits = currentPlan?.subscriptionCredits || 0;
+    const currentPurchasedCredits = currentPlan?.purchasedCredits || 0;
+
+    if (preview.revokeScope === "plan_and_credits") {
       revokedSubscriptionCredits = currentSubscriptionCredits;
-      const grantedPurchased = getPurchasedGrantedCredits(payment);
-      revokedPurchasedCredits = Math.min(currentPurchasedCredits, grantedPurchased);
-      remainingShortfall = Math.max(0, grantedPurchased - revokedPurchasedCredits);
+      revokedPurchasedCredits = Math.min(
+        currentPurchasedCredits,
+        preview.grantedPurchasedCredits,
+      );
+      remainingShortfall = Math.max(
+        0,
+        preview.grantedPurchasedCredits - revokedPurchasedCredits,
+      );
 
       const updateResult = await updateCreditPlanBalances(admin, {
         userId: payment.user_id,
@@ -285,49 +219,33 @@ export async function POST(
       });
 
       if (!updateResult.success) {
-        await admin
-          .from("toss_payments")
-          .update({
-            status: "CANCELLATION_FAILED",
+        revokeError = updateResult;
+      } else {
+        const totalRevoked = revokedSubscriptionCredits + revokedPurchasedCredits;
+        if (totalRevoked > 0) {
+          await recordCreditTransaction({
+            userId: payment.user_id,
+            type: "manual_deduct",
+            amount: -totalRevoked,
+            balanceAfter: updateResult.plan.credits,
+            description: `tosspay cancelled: initial program (${totalRevoked}cr)`,
+            referenceId: payment.order_id,
             metadata: {
-              ...(payment.metadata || {}),
-              manualReviewRequired: true,
+              provider: "tosspay-direct",
+              paymentKind: "initial_program",
+              payToken,
               refundNo,
-              tossRefundAt: new Date().toISOString(),
+              revokedSubscriptionCredits,
+              revokedPurchasedCredits,
+              remainingShortfall,
+              refundAmount,
             },
-            updated_at: new Date().toISOString(),
-          })
-          .eq("payment_key", payToken);
-
-        return NextResponse.json(
-          { error: "환불은 접수되었으나 이용권 회수에 실패했습니다. 관리자 확인 필요." },
-          { status: 500 },
-        );
+          });
+        }
       }
-
-      const totalRevoked = revokedSubscriptionCredits + revokedPurchasedCredits;
-      if (totalRevoked > 0) {
-        await recordCreditTransaction({
-          userId: payment.user_id,
-          type: "manual_deduct",
-          amount: -totalRevoked,
-          balanceAfter: updateResult.plan.credits,
-          description: `tosspay cancelled: initial program (${totalRevoked}cr)`,
-          referenceId: payment.order_id,
-          metadata: {
-            provider: "tosspay-direct",
-            paymentKind: "initial_program",
-            payToken,
-            refundNo,
-            revokedSubscriptionCredits,
-            revokedPurchasedCredits,
-            remainingShortfall,
-            refundAmount,
-          },
-        });
-      }
-    } else if (paymentKind === "credit_topup") {
-      const granted = getGrantedCredits(payment);
+    } else {
+      // purchased_credits scope (credit_topup)
+      const granted = preview.grantedPurchasedCredits;
       revokedPurchasedCredits = Math.min(currentPurchasedCredits, granted);
       const afterPurchased = granted - revokedPurchasedCredits;
       revokedSubscriptionCredits = Math.min(currentSubscriptionCredits, afterPurchased);
@@ -346,48 +264,54 @@ export async function POST(
       });
 
       if (!updateResult.success) {
-        await admin
-          .from("toss_payments")
-          .update({
-            status: "CANCELLATION_FAILED",
+        revokeError = updateResult;
+      } else {
+        const totalRevoked = revokedSubscriptionCredits + revokedPurchasedCredits;
+        if (totalRevoked > 0) {
+          await recordCreditTransaction({
+            userId: payment.user_id,
+            type: "manual_deduct",
+            amount: -totalRevoked,
+            balanceAfter: updateResult.plan.credits,
+            description: `tosspay cancelled: credit topup (${totalRevoked}cr)`,
+            referenceId: payment.order_id,
             metadata: {
-              ...(payment.metadata || {}),
-              manualReviewRequired: true,
+              provider: "tosspay-direct",
+              paymentKind: "credit_topup",
+              payToken,
               refundNo,
-              tossRefundAt: new Date().toISOString(),
+              revokedSubscriptionCredits,
+              revokedPurchasedCredits,
+              remainingShortfall,
+              refundAmount,
             },
-            updated_at: new Date().toISOString(),
-          })
-          .eq("payment_key", payToken);
-
-        return NextResponse.json(
-          { error: "환불은 접수되었으나 크레딧 회수에 실패했습니다. 관리자 확인 필요." },
-          { status: 500 },
-        );
-      }
-
-      const totalRevoked = revokedSubscriptionCredits + revokedPurchasedCredits;
-      if (totalRevoked > 0) {
-        await recordCreditTransaction({
-          userId: payment.user_id,
-          type: "manual_deduct",
-          amount: -totalRevoked,
-          balanceAfter: updateResult.plan.credits,
-          description: `tosspay cancelled: credit topup (${totalRevoked}cr)`,
-          referenceId: payment.order_id,
-          metadata: {
-            provider: "tosspay-direct",
-            paymentKind: "credit_topup",
-            payToken,
-            refundNo,
-            revokedSubscriptionCredits,
-            revokedPurchasedCredits,
-            remainingShortfall,
-            refundAmount,
-          },
-        });
+          });
+        }
       }
     }
+  }
+
+  if (revokeError) {
+    console.error("[TossPay Cancel] Plan/credit revoke failed:", revokeError);
+    await admin
+      .from("toss_payments")
+      .update({
+        status: "CANCELLATION_FAILED",
+        metadata: {
+          ...(payment.metadata || {}),
+          manualReviewRequired: true,
+          refundNo,
+          refundAmount,
+          tossRefundAt: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("payment_key", payToken);
+
+    return NextResponse.json(
+      { error: "환불은 접수되었으나 이용권/크레딧 회수에 실패했습니다. 관리자 확인 필요." },
+      { status: 500 },
+    );
   }
 
   const finalStatus = isFullRefund ? "CANCELLED" : "PARTIAL_CANCELLED";
@@ -405,12 +329,20 @@ export async function POST(
         revokedSubscriptionCredits,
         revokedPurchasedCredits,
         remainingShortfall,
+        cancelledAmount: refundAmount,
+        manualReviewRequired: !isFullRefund ? true : undefined,
         adminCancel: {
           at: new Date().toISOString(),
           by: adminCheck.user.email,
           reason,
           refundAmount,
           refundNo,
+          refundType: preview.refundType,
+          revokeScope: preview.revokeScope,
+          elapsedDays: preview.elapsedDays,
+          lectureCount: preview.lectureCount,
+          creditsUsed: preview.creditsUsed,
+          materialDownloadTracked: preview.materialDownloadTracked,
         },
       },
       updated_at: new Date().toISOString(),
@@ -423,11 +355,14 @@ export async function POST(
     refundNo,
     refundAmount,
     status: finalStatus,
+    preview,
     revokedSubscriptionCredits,
     revokedPurchasedCredits,
     remainingShortfall,
     message: isFullRefund
-      ? "환불 완료되었고 이용권/크레딧이 회수되었습니다."
-      : "부분 환불 완료. 크레딧/플랜 조정은 수동 확인이 필요합니다.",
+      ? preview.revokeScope === "plan_and_credits"
+        ? "규정에 따른 전액 환불이 처리되었고, 이용권과 크레딧이 회수되었습니다."
+        : "전액 환불이 처리되었고, 해당 크레딧이 회수되었습니다."
+      : "규정에 따른 부분 환불이 처리되었습니다. 크레딧/플랜 조정은 수동 확인이 필요합니다.",
   });
 }
