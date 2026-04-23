@@ -120,9 +120,28 @@ export function ChannelTalkButton() {
       return;
     }
 
-    const timer = window.setTimeout(() => setTooltipVisible(true), 2500);
-    return () => window.clearTimeout(timer);
-  }, []);
+    // Show tooltip only when FAQ section enters viewport (landing page only).
+    // On other pages without #faq, show after a 4s delay as fallback.
+    const faqEl = document.getElementById("faq");
+    if (!faqEl) {
+      const timer = window.setTimeout(() => setTooltipVisible(true), 4000);
+      return () => window.clearTimeout(timer);
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTooltipVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: "0px 0px -20% 0px", threshold: 0.1 },
+    );
+    observer.observe(faqEl);
+    return () => observer.disconnect();
+  }, [pathname]);
 
   const handleDismissTooltip = (e: React.MouseEvent) => {
     e.stopPropagation();
