@@ -112,7 +112,12 @@ export async function PATCH(request: NextRequest) {
   const patch: Record<string, unknown> = { status };
   if (typeof adminNote === "string") patch.admin_note = adminNote;
   if (typeof adminResponse === "string") patch.admin_response = adminResponse;
-  if (status === "answered") patch.responded_at = now;
+  if (status === "answered") {
+    patch.responded_at = now;
+    patch.user_read_at = null;
+    patch.closed_at = null;
+  }
+  if (status === "submitted" || status === "in_progress") patch.closed_at = null;
   if (status === "closed" || status === "rejected") patch.closed_at = now;
 
   const { data, error } = await supabase

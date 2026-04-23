@@ -41,6 +41,15 @@ type SubmittedReview = {
   createdAt: string;
 };
 
+type ReviewEligibility = {
+  canSubmit: boolean;
+  windowClosed: boolean;
+  daysLeft: number;
+  vodsCompleted: number;
+  vodThreshold: number;
+  windowDays: number;
+};
+
 const benefits = [
   {
     icon: MessageCircle,
@@ -73,6 +82,7 @@ export function ReviewEventContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState<SubmittedReview | null>(null);
+  const [eligibility, setEligibility] = useState<ReviewEligibility | null>(null);
   const [kakaoInviteUrl, setKakaoInviteUrl] = useState<string | null>(null);
   const [kakaoInvitePassword, setKakaoInvitePassword] = useState<string | null>(null);
   const [rating, setRating] = useState(5);
@@ -99,11 +109,26 @@ export function ReviewEventContent() {
 
     async function loadReview() {
       try {
-        const res = await fetch("/api/reviews", { cache: "no-store" });
-        const data = await res.json();
+        const [reviewRes, eligibilityRes] = await Promise.all([
+          fetch("/api/reviews", { cache: "no-store" }),
+          fetch("/api/reviews/eligibility", { cache: "no-store" }),
+        ]);
+        const data = await reviewRes.json();
+        const eligibilityData = await eligibilityRes.json().catch(() => null);
         if (ignore) return;
 
-        if (res.ok) {
+        if (eligibilityData) {
+          setEligibility({
+            canSubmit: Boolean(eligibilityData.canSubmit),
+            windowClosed: Boolean(eligibilityData.windowClosed),
+            daysLeft: Number(eligibilityData.daysLeft ?? 0),
+            vodsCompleted: Number(eligibilityData.vodsCompleted ?? 0),
+            vodThreshold: Number(eligibilityData.vodThreshold ?? 3),
+            windowDays: Number(eligibilityData.windowDays ?? 7),
+          });
+        }
+
+        if (reviewRes.ok) {
           setReview(data.review || null);
           // 미리보기 모드에서는 하드코딩된 카카오 값 유지
           if (!isPreview) {
@@ -125,6 +150,8 @@ export function ReviewEventContent() {
       ignore = true;
     };
   }, [isPreview]);
+
+  const reviewLocked = !review && !!eligibility && !eligibility.canSubmit;
 
   async function submitReview() {
     setError(null);
@@ -297,6 +324,59 @@ export function ReviewEventContent() {
                 카카오톡방 초대 링크는 운영진 확인 후 채널톡 또는 이메일로 안내됩니다.
               </Alert>
             )}
+          </Card>
+        ) : reviewLocked ? (
+          <Card radius="lg" p="xl" withBorder>
+            <Stack gap="md">
+              {error && (
+                <Alert color="red" variant="light">
+                  {error}
+                </Alert>
+              )}
+
+              <Group justify="space-between" align="flex-start" gap="md">
+                <Box>
+                  <Text fw={700} size="lg">
+                    {eligibility?.windowClosed
+                      ? "후기 이벤트 기간이 종료되었습니다"
+                      : `강의 ${eligibility?.vodThreshold ?? 3}개 완료 후 혜택이 열립니다`}
+                  </Text>
+                  <Text size="sm" c="gray.6" mt={6}>
+                    {eligibility?.windowClosed
+                      ? `결제 후 ${eligibility?.windowDays ?? 7}일 동안만 후기 이벤트에 참여할 수 있습니다.`
+                      : `현재 완료 강의는 ${eligibility?.vodsCompleted ?? 0}/${eligibility?.vodThreshold ?? 3}개입니다. 기준을 채우면 후기 제출과 함께 카카오톡방, 피드백권 3개, 얼리액세스 혜택이 열립니다.`}
+                  </Text>
+                  {!eligibility?.windowClosed && (
+                    <Text size="xs" c="gray.5" mt={8}>
+                      남은 기간: D-{eligibility?.daysLeft ?? 0}
+                    </Text>
+                  )}
+                </Box>
+                <Badge
+                  color={eligibility?.windowClosed ? "gray" : "violet"}
+                  variant="light"
+                  size="lg"
+                >
+                  {eligibility?.windowClosed
+                    ? "참여 종료"
+                    : `${eligibility?.vodsCompleted ?? 0}/${eligibility?.vodThreshold ?? 3} 완료`}
+                </Badge>
+              </Group>
+
+              {!eligibility?.windowClosed && (
+                <Group justify="flex-end">
+                  <Button
+                    component={Link}
+                    href="/dashboard/lectures"
+                    prefetch={false}
+                    color="violet"
+                    radius="xl"
+                  >
+                    강의 보러 가기
+                  </Button>
+                </Group>
+              )}
+            </Stack>
           </Card>
         ) : (
           <Card radius="lg" p="xl" withBorder>

@@ -32,7 +32,8 @@ const REVIEW_BENEFITS = {
   monthly_random_credit_draw: true,
 } as const;
 
-const REVIEW_WINDOW_DAYS = 7;
+const REVIEW_VOD_THRESHOLD = 3;
+const REVIEW_WINDOW_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
@@ -43,22 +44,38 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
 async function resolveReviewWindowAnchor(userId: string): Promise<string | null> {
   const admin = createAdminClient();
 
-  const { data: planRow } = await admin
-    .from("user_plans")
-    .select("created_at")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (planRow?.created_at) return planRow.created_at;
-
   const { data: firstPayment } = await admin
     .from("toss_payments")
     .select("updated_at")
     .eq("user_id", userId)
     .eq("status", "DONE")
+    .contains("metadata", { paymentKind: "initial_program" })
     .order("updated_at", { ascending: true })
     .limit(1)
     .maybeSingle();
-  return firstPayment?.updated_at ?? null;
+
+  if (firstPayment?.updated_at) {
+    return firstPayment.updated_at;
+  }
+
+  const { data: planRow } = await admin
+    .from("user_plans")
+    .select("created_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return planRow?.created_at ?? null;
+}
+
+async function countCompletedLectures(userId: string): Promise<number> {
+  const admin = createAdminClient();
+  const { count } = await admin
+    .from("lecture_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .not("completed_at", "is", null);
+
+  return count || 0;
 }
 
 function getKakaoInviteUrl() {
@@ -91,7 +108,7 @@ function toClientReview(row: Record<string, unknown> | null | undefined) {
   };
 }
 
-async function getAuthenticatedActiveUser() {
+async function getAuthenticatedUser() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -104,25 +121,20 @@ async function getAuthenticatedActiveUser() {
     };
   }
 
-  const plan = await getEffectiveCreditInfo(user.id);
-  if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
-    return {
-      response: NextResponse.json(
-        { error: "수강 후기 이벤트는 올인원 이용권 보유자만 참여할 수 있습니다." },
-        { status: 403 },
-      ),
-      user: null,
-    };
-  }
-
   return { response: null, user };
+}
+
+async function hasActiveReviewAccess(userId: string) {
+  const plan = await getEffectiveCreditInfo(userId);
+  return isActiveAccessPlan(plan?.plan_type, plan?.expires_at);
 }
 
 export async function GET() {
   try {
-    const { response, user } = await getAuthenticatedActiveUser();
+    const { response, user } = await getAuthenticatedUser();
     if (response || !user) return response;
 
+    const hasActivePlan = await hasActiveReviewAccess(user.id);
     const admin = createAdminClient();
     const { data, error } = await admin
       .from("student_reviews")
@@ -135,6 +147,13 @@ export async function GET() {
     if (error) {
       console.error("[Reviews API] Failed to load review:", error);
       return NextResponse.json({ error: "후기 정보를 불러오지 못했습니다." }, { status: 500 });
+    }
+
+    if (!hasActivePlan && !data) {
+      return NextResponse.json(
+        { error: "후기 이벤트는 이용권 보유 중이거나 후기 제출 완료 사용자만 볼 수 있습니다." },
+        { status: 403 },
+      );
     }
 
     return NextResponse.json({
@@ -151,7 +170,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { response, user } = await getAuthenticatedActiveUser();
+    const { response, user } = await getAuthenticatedUser();
     if (response || !user) return response;
 
     const parsed = reviewSchema.safeParse(await request.json());
@@ -163,6 +182,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const hasActivePlan = await hasActiveReviewAccess(user.id);
+    if (!hasActivePlan) {
+      return NextResponse.json(
+        { error: "수강 후기 이벤트는 올인원 이용권 보유 중에만 참여할 수 있습니다." },
+        { status: 403 },
+      );
+    }
+
     const anchor = await resolveReviewWindowAnchor(user.id);
     if (!anchor) {
       return NextResponse.json(
@@ -170,11 +197,22 @@ export async function POST(request: NextRequest) {
         { status: 403 },
       );
     }
+
     const isAdmin = !!user.email && ADMIN_EMAILS.includes(user.email);
     const windowEndMs = new Date(anchor).getTime() + REVIEW_WINDOW_DAYS * DAY_MS;
     if (!isAdmin && Date.now() > windowEndMs) {
       return NextResponse.json(
-        { error: "후기 이벤트 참여 기간(결제 후 7일)이 종료되었습니다." },
+        { error: `후기 이벤트 참여 기간은 결제 후 ${REVIEW_WINDOW_DAYS}일까지만 열립니다.` },
+        { status: 403 },
+      );
+    }
+
+    const completedLectures = await countCompletedLectures(user.id);
+    if (!isAdmin && completedLectures < REVIEW_VOD_THRESHOLD) {
+      return NextResponse.json(
+        {
+          error: `강의 ${REVIEW_VOD_THRESHOLD}개 완료 후 후기를 제출할 수 있습니다. 현재 ${completedLectures}개 완료 상태입니다.`,
+        },
         { status: 403 },
       );
     }

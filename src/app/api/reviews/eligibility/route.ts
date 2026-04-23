@@ -6,13 +6,39 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
 const VOD_THRESHOLD = 3;
-const WINDOW_DAYS = 7;
+const WINDOW_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
   .split(",")
   .map((e) => e.trim())
   .filter(Boolean);
+
+async function resolveReviewWindowAnchor(userId: string): Promise<string | null> {
+  const admin = createAdminClient();
+
+  const { data: firstPayment } = await admin
+    .from("toss_payments")
+    .select("updated_at")
+    .eq("user_id", userId)
+    .eq("status", "DONE")
+    .contains("metadata", { paymentKind: "initial_program" })
+    .order("updated_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (firstPayment?.updated_at) {
+    return firstPayment.updated_at;
+  }
+
+  const { data: planRow } = await admin
+    .from("user_plans")
+    .select("created_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return planRow?.created_at ?? null;
+}
 
 function getKakaoInviteUrl() {
   return process.env.REVIEW_KAKAO_INVITE_URL || process.env.KAKAO_REVIEW_INVITE_URL || null;
@@ -56,25 +82,7 @@ export async function GET() {
     }
 
     const admin = createAdminClient();
-
-    const { data: planRow } = await admin
-      .from("user_plans")
-      .select("created_at")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    let anchor: string | null = planRow?.created_at ?? null;
-    if (!anchor) {
-      const { data: firstPayment } = await admin
-        .from("toss_payments")
-        .select("updated_at")
-        .eq("user_id", user.id)
-        .eq("status", "DONE")
-        .order("updated_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      anchor = firstPayment?.updated_at ?? null;
-    }
+    const anchor = await resolveReviewWindowAnchor(user.id);
 
     if (!anchor) {
       return NextResponse.json({
@@ -104,7 +112,8 @@ export async function GET() {
     const { count } = await admin
       .from("lecture_progress")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .not("completed_at", "is", null);
 
     const vodsCompleted = count || 0;
     const alreadySubmitted = !!review;
@@ -121,8 +130,8 @@ export async function GET() {
       unreadFeedbackCount = unreadCount || 0;
     }
     const reachedThreshold = vodsCompleted >= VOD_THRESHOLD;
-    // 제출 자격: 7일 윈도우 내 + 최소 VOD 1개 수강 (완전 무경험자 차단)
-    const canSubmit = !alreadySubmitted && !windowClosed && vodsCompleted >= 1;
+    // 제출 자격: 14일 윈도우 내 + 기준 강의 완료
+    const canSubmit = !alreadySubmitted && !windowClosed && reachedThreshold;
     // 배너 노출: 윈도우 내면 항상 노출 (진행도 표시)
     const eligible = !alreadySubmitted && !windowClosed;
 

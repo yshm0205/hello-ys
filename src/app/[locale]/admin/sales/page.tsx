@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { getTranslations } from "next-intl/server";
 import { AdminSearch } from "@/components/admin/AdminSearch";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { RefundPaymentButton } from "@/components/admin/RefundPaymentButton";
 
 interface TossPayment {
   id: string;
@@ -19,10 +20,13 @@ interface TossPayment {
   amount: number;
   credits: number;
   status: string;
+  payment_key: string | null;
   user: {
     email: string;
   } | null;
 }
+
+const CANCELLABLE_STATUSES = new Set(["DONE"]);
 
 export default async function AdminSalesPage({
   searchParams,
@@ -114,7 +118,8 @@ export default async function AdminSalesPage({
                   <th className="px-4 py-3">{t("colProduct")}</th>
                   <th className="px-4 py-3">크레딧</th>
                   <th className="px-4 py-3">{t("colAmount")}</th>
-                  <th className="px-4 py-3 rounded-r-lg">{t("colStatus")}</th>
+                  <th className="px-4 py-3">{t("colStatus")}</th>
+                  <th className="px-4 py-3 rounded-r-lg text-right">관리</th>
                 </tr>
               </thead>
               <tbody className="text-foreground">
@@ -149,12 +154,23 @@ export default async function AdminSalesPage({
                           {payment.status}
                         </Badge>
                       </td>
+                      <td className="px-4 py-3 text-right">
+                        {payment.payment_key && CANCELLABLE_STATUSES.has(payment.status) ? (
+                          <RefundPaymentButton
+                            paymentKey={payment.payment_key}
+                            orderName={payment.order_name}
+                            amount={payment.amount}
+                          />
+                        ) : (
+                          <span className="text-xs text-zinc-400">-</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-4 py-8 text-center text-zinc-500"
                     >
                       결제 내역이 없습니다.
