@@ -2958,6 +2958,7 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
                   <Text style={{
                     fontSize: '11.5px', color: '#71717a',
                     textAlign: 'center', lineHeight: 1.45,
+                    wordBreak: 'keep-all',
                   }}>
                     {earlybird.progressHint}
                   </Text>
@@ -3456,7 +3457,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   </Text>
                 </>
               )}
-              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55 }}>
+              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55, wordBreak: 'keep-all' }}>
                 {isUrgent ? (
                   <>자리 <b style={{ color: '#fca5a5', fontWeight: 800 }}>마감 임박</b>. 마감되면 다음 대기자는 2차 혜택으로 전환됩니다.</>
                 ) : (
