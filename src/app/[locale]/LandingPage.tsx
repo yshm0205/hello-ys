@@ -2099,11 +2099,32 @@ function WhySpecialSection() {
                 <Text style={{ fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#52525b', marginBottom: '16px' }}>{c.subtitle}</Text>
                 <Stack gap={8}>
                   {c.vods.map((vod, j) => (
-                    <Group key={j} gap={8} wrap="nowrap" align="flex-start">
-                      <Text style={{ fontSize: '13px', color: '#8b5cf6', flexShrink: 0, marginTop: '2px' }}>
+                    <Group key={j} gap={10} wrap="nowrap" align="flex-start">
+                      <Text
+                        style={{
+                          fontSize: '13px',
+                          color: '#8b5cf6',
+                          flexShrink: 0,
+                          marginTop: '2px',
+                          minWidth: '22px',
+                          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                          fontWeight: 600,
+                        }}
+                      >
                         {String(j + 1).padStart(2, '0')}
                       </Text>
-                      <Text style={{ fontSize: 'clamp(15px, 3.8vw, 16px)', color: '#27272a', lineHeight: 1.6 }}>{vod}</Text>
+                      <Text
+                        style={{
+                          fontSize: 'clamp(14px, 3.6vw, 16px)',
+                          color: '#27272a',
+                          lineHeight: 1.55,
+                          flex: 1,
+                          minWidth: 0,
+                          wordBreak: 'keep-all',
+                        }}
+                      >
+                        {vod}
+                      </Text>
                     </Group>
                   ))}
                 </Stack>
@@ -2336,7 +2357,7 @@ function FAQSection() {
         },
         {
           q: 'AI로 만든 스크립트의 저작권은 누구에게 있나요?',
-          a: '생성된 스크립트는 사용자가 자유롭게 활용하실 수 있습니다. 상업적 이용, 수정, 재배포 모두 제한 없이 가능합니다.\n\n다만 AI 생성물 특성상 타인의 저작물과 우연히 유사할 수 있으니 최종 검수는 직접 해주세요.',
+          a: '생성된 스크립트는 사용자가 자유롭게 활용하실 수 있습니다. 상업적 이용, 수정, 재배포 모두 제한 없이 가능합니다.\n\n다만 결과물은 초안 성격이니, 본인 스타일에 맞게 다듬어 최종 업로드 전 한 번 검토해 주세요.',
         },
       ],
     },
