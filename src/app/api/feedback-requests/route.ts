@@ -3,8 +3,65 @@ import { z } from "zod";
 
 import { isActiveAccessPlan } from "@/lib/plans/config";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
+import { getResendClient } from "@/lib/resend/client";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
+
+const TYPE_LABELS: Record<string, string> = {
+  channel: "채널 방향",
+  topic: "주제 기획",
+  script: "스크립트",
+  other: "기타",
+};
+
+async function notifyAdminsNewFeedback(payload: {
+  userEmail: string | null;
+  requestType: string;
+  title: string;
+  description: string;
+  referenceUrl: string | null;
+  requestId: string;
+}) {
+  const admins = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+  if (admins.length === 0) return;
+
+  const resend = getResendClient();
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!resend || !from) return;
+
+  const typeLabel = TYPE_LABELS[payload.requestType] || payload.requestType;
+  const preview = payload.description.length > 400
+    ? `${payload.description.slice(0, 400)}...`
+    : payload.description;
+  const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://flowspot.kr"}/ko/admin/feedback-requests`;
+
+  try {
+    await resend.emails.send({
+      from,
+      to: admins,
+      subject: `[FlowSpot] 새 피드백 요청 — ${payload.title}`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111">
+          <h2 style="margin:0 0 8px;color:#8b5cf6">새 피드백 요청이 도착했어요</h2>
+          <p style="color:#666;margin:0 0 20px">요청자: <strong>${payload.userEmail || "(이메일 미확인)"}</strong></p>
+          <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:16px;margin-bottom:16px">
+            <div style="font-size:12px;color:#7c3aed;font-weight:600;margin-bottom:4px">${typeLabel}</div>
+            <div style="font-size:18px;font-weight:700;margin-bottom:12px">${payload.title}</div>
+            <div style="white-space:pre-wrap;font-size:14px;line-height:1.6;color:#333">${preview}</div>
+            ${payload.referenceUrl ? `<div style="margin-top:12px;font-size:13px"><a href="${payload.referenceUrl}" style="color:#8b5cf6">참고 링크 →</a></div>` : ""}
+          </div>
+          <a href="${adminUrl}" style="display:inline-block;background:#8b5cf6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">답변하러 가기</a>
+          <p style="color:#999;font-size:12px;margin-top:24px">요청 ID: ${payload.requestId}</p>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error("[FeedbackRequests API] admin email notify error:", error);
+  }
+}
 
 const requestSchema = z.object({
   requestType: z.enum(["channel", "topic", "script", "other"]),
@@ -195,6 +252,16 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    // 관리자 이메일 알림 (실패해도 메인 흐름 유지)
+    void notifyAdminsNewFeedback({
+      userEmail: user.email ?? null,
+      requestType: inserted.request_type,
+      title: inserted.title,
+      description: inserted.description,
+      referenceUrl: inserted.reference_url,
+      requestId: inserted.id,
+    });
 
     return NextResponse.json({
       success: true,
