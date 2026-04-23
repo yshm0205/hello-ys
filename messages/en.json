@@ -499,6 +499,10 @@
       "formSave": "Save",
       "formCancel": "Cancel"
     },
+    "reviews": {
+      "title": "Reviews",
+      "description": "Manage student review event submissions."
+    },
     "hotList": {
       "title": "HOT List",
       "description": "Manage trending content data collection.",

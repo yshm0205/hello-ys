@@ -12,6 +12,7 @@ import {
   Activity,
   GraduationCap,
   Flame,
+  Star,
   LifeBuoy,
   Webhook,
   ChevronLeft,
@@ -81,6 +82,11 @@ const navGroups: NavGroup[] = [
         href: "/admin/lectures",
         labelKey: "lectures.title",
         icon: <GraduationCap className="h-4 w-4" />,
+      },
+      {
+        href: "/admin/reviews",
+        labelKey: "reviews.title",
+        icon: <Star className="h-4 w-4" />,
       },
       {
         href: "/admin/hot-list",

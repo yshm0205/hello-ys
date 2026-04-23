@@ -499,6 +499,10 @@
       "formSave": "저장",
       "formCancel": "취소"
     },
+    "reviews": {
+      "title": "수강 후기",
+      "description": "수강생 후기 이벤트 제출 내역을 관리합니다."
+    },
     "hotList": {
       "title": "HOT 리스트",
       "description": "트렌드 콘텐츠 데이터 수집 관리.",

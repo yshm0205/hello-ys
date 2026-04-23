@@ -29,6 +29,7 @@ import {
     BarChart3,
     Zap,
     BookOpen,
+    Gift,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 
@@ -92,6 +93,12 @@ const navItems = [
         href: '/dashboard/lectures',
         icon: BookOpen,
         description: '단계별 학습 + 실습',
+    },
+    {
+        label: '후기 이벤트',
+        href: '/dashboard/review',
+        icon: Gift,
+        description: '수강 후기 혜택 신청',
     },
     {
         label: 'HOT 리스트',

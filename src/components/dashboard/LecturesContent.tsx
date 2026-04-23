@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { LectureCatalogChapter } from '@/lib/lectures/types';
+import { ReviewEventBanner } from './ReviewEventBanner';
 
 // ─── 강의 데이터 ───────────────────────────────────────────
 interface Vod {
@@ -246,6 +247,8 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                 </Box>
 
                 {/* 챕터별 아코디언 */}
+                <ReviewEventBanner />
+
                 <Stack gap="md">
                     {lectureChapters.map((chapter) => {
                         const chapterCompleted = chapter.vods.filter((v) =>

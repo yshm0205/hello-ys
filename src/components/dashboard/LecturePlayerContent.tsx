@@ -48,6 +48,7 @@ import {
 import { Link, useRouter } from '@/i18n/routing';
 import { VideoWatermark } from './VideoWatermark';
 import type { LectureCatalogChapter } from '@/lib/lectures/types';
+import { ReviewEventBanner } from './ReviewEventBanner';
 
 interface LecturePlayerContentProps {
     vodId: string;
@@ -571,6 +572,8 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                         </Card>
 
                         {/* 수업 자료 */}
+                        <ReviewEventBanner />
+
                         {materials.length > 0 && (
                             <Card padding="lg" radius="lg" withBorder>
                                 <Group gap={8} mb="sm">
