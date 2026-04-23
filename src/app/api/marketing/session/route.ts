@@ -19,6 +19,15 @@ type MarketingPayload = {
   utmTerm?: string | null;
 };
 
+const SESSION_KEY_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const EVENT_THROTTLE_WINDOWS_MS: Record<MarketingEventType, number> = {
+  page_view: 5000,
+  heartbeat: 20000,
+  cta_click: 2000,
+};
+const recentEventCache = new Map<string, number>();
+
 function clampDuration(value: unknown) {
   if (typeof value !== "number" || Number.isNaN(value)) return 0;
   return Math.max(0, Math.min(Math.floor(value), 60 * 60 * 6));
@@ -42,12 +51,70 @@ function normalizeNullable(input: string | null | undefined, max = 255) {
   return input.slice(0, max);
 }
 
+function getClientAddress(request: NextRequest) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || "unknown";
+  }
+
+  return request.headers.get("x-real-ip") || "unknown";
+}
+
+function isSameOriginRequest(request: NextRequest) {
+  const requestOrigin = request.nextUrl.origin;
+  const origin = request.headers.get("origin");
+
+  if (origin) {
+    return origin === requestOrigin;
+  }
+
+  const referer = request.headers.get("referer");
+  if (!referer) {
+    return true;
+  }
+
+  try {
+    return new URL(referer).origin === requestOrigin;
+  } catch {
+    return false;
+  }
+}
+
+function buildThrottleKey(
+  eventType: MarketingEventType,
+  sessionKey: string,
+  pagePath: string,
+  ctaTarget: string | null,
+  clientAddress: string,
+) {
+  return [eventType, sessionKey, clientAddress, pagePath, ctaTarget || "-"].join(":");
+}
+
+function shouldThrottleEvent(cacheKey: string, windowMs: number) {
+  const now = Date.now();
+
+  for (const [key, expiresAt] of recentEventCache) {
+    if (expiresAt <= now) {
+      recentEventCache.delete(key);
+    }
+  }
+
+  const existingExpiry = recentEventCache.get(cacheKey);
+  if (existingExpiry && existingExpiry > now) {
+    return true;
+  }
+
+  recentEventCache.set(cacheKey, now + windowMs);
+  return false;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as MarketingPayload;
     const eventType = body.eventType;
     const sessionKey = body.sessionKey?.trim();
     const pagePath = normalizePath(body.pagePath);
+    const ctaTarget = normalizeNullable(body.ctaTarget, 200);
 
     if (!sessionKey || !eventType) {
       return NextResponse.json(
@@ -61,6 +128,32 @@ export async function POST(request: NextRequest) {
         { success: false, error: "invalid eventType" },
         { status: 400 },
       );
+    }
+
+    if (!SESSION_KEY_PATTERN.test(sessionKey)) {
+      return NextResponse.json(
+        { success: false, error: "invalid sessionKey" },
+        { status: 400 },
+      );
+    }
+
+    if (!isSameOriginRequest(request)) {
+      return NextResponse.json(
+        { success: false, error: "cross-origin marketing tracking blocked" },
+        { status: 403 },
+      );
+    }
+
+    const throttleKey = buildThrottleKey(
+      eventType,
+      sessionKey,
+      pagePath,
+      ctaTarget,
+      getClientAddress(request),
+    );
+
+    if (shouldThrottleEvent(throttleKey, EVENT_THROTTLE_WINDOWS_MS[eventType])) {
+      return NextResponse.json({ success: true, skipped: true });
     }
 
     const supabase = createAdminClient();
@@ -113,7 +206,7 @@ export async function POST(request: NextRequest) {
     }
 
     const nextValues = {
-      last_path: normalizePath(body.ctaTarget || pagePath),
+      last_path: normalizePath(ctaTarget || pagePath),
       last_seen_at: now,
       updated_at: now,
       pageviews:

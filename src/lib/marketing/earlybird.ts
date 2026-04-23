@@ -16,7 +16,12 @@ export type EarlybirdSummary = {
   phase2Remaining: number;
   phase2Total: number;
   tier1Deadline: string;
+  countsAreEstimated: boolean;
 };
+
+const EARLYBIRD_RESERVED_PAYMENT_WINDOW_MINUTES = 20;
+const EARLYBIRD_COMMITTED_STATUSES = ["DONE", "CREDIT_GRANT_FAILED"];
+const EARLYBIRD_RESERVED_STATUSES = ["PENDING", "PROCESSING"];
 
 export const EARLYBIRD_FALLBACK_SUMMARY: EarlybirdSummary = {
   currentTier: "phase1",
@@ -27,24 +32,33 @@ export const EARLYBIRD_FALLBACK_SUMMARY: EarlybirdSummary = {
   phase2Remaining: EARLYBIRD_CONFIG.phase2.totalSlots,
   phase2Total: EARLYBIRD_CONFIG.phase2.totalSlots,
   tier1Deadline: EARLYBIRD_CONFIG.phase1.hardDeadline,
+  countsAreEstimated: true,
 };
 
 function clampRemaining(total: number, soldCount: number) {
   return Math.max(0, total - soldCount);
 }
 
-async function countCompletedInitialProgramByTier(
+async function countInitialProgramPaymentsByTier(
   adminClient: ReturnType<typeof createAdminClient>,
   tier: EarlybirdTierKey,
+  statuses: string[],
+  createdAfter?: string,
 ) {
-  const { count, error } = await adminClient
+  let query = adminClient
     .from("toss_payments")
     .select("order_id", { count: "exact", head: true })
-    .eq("status", "DONE")
+    .in("status", statuses)
     .contains("metadata", {
       paymentKind: "initial_program",
       earlybirdTier: tier,
     });
+
+  if (createdAfter) {
+    query = query.gte("created_at", createdAfter);
+  }
+
+  const { count, error } = await query;
 
   if (error) {
     throw error;
@@ -53,7 +67,31 @@ async function countCompletedInitialProgramByTier(
   return count ?? 0;
 }
 
-export function resolveEarlybirdTier(summary: Pick<EarlybirdSummary, "phase1SoldCount" | "phase2SoldCount">, now = new Date()): EarlybirdTier {
+async function countOccupiedInitialProgramByTier(
+  adminClient: ReturnType<typeof createAdminClient>,
+  tier: EarlybirdTierKey,
+) {
+  const reservedSince = new Date(
+    Date.now() - EARLYBIRD_RESERVED_PAYMENT_WINDOW_MINUTES * 60 * 1000,
+  ).toISOString();
+
+  const [committedCount, reservedCount] = await Promise.all([
+    countInitialProgramPaymentsByTier(adminClient, tier, EARLYBIRD_COMMITTED_STATUSES),
+    countInitialProgramPaymentsByTier(
+      adminClient,
+      tier,
+      EARLYBIRD_RESERVED_STATUSES,
+      reservedSince,
+    ),
+  ]);
+
+  return committedCount + reservedCount;
+}
+
+export function resolveEarlybirdTier(
+  summary: Pick<EarlybirdSummary, "phase1SoldCount" | "phase2SoldCount">,
+  now = new Date(),
+): EarlybirdTier {
   const tier1Deadline = new Date(EARLYBIRD_CONFIG.phase1.hardDeadline);
   const beforeTier1Deadline = now.getTime() <= tier1Deadline.getTime();
 
@@ -72,8 +110,8 @@ export async function getEarlybirdSummary(
   adminClient: ReturnType<typeof createAdminClient> = createAdminClient(),
 ): Promise<EarlybirdSummary> {
   const [phase1SoldCount, phase2SoldCount] = await Promise.all([
-    countCompletedInitialProgramByTier(adminClient, "phase1"),
-    countCompletedInitialProgramByTier(adminClient, "phase2"),
+    countOccupiedInitialProgramByTier(adminClient, "phase1"),
+    countOccupiedInitialProgramByTier(adminClient, "phase2"),
   ]);
 
   const summary: EarlybirdSummary = {
@@ -85,6 +123,7 @@ export async function getEarlybirdSummary(
     phase2Remaining: clampRemaining(EARLYBIRD_CONFIG.phase2.totalSlots, phase2SoldCount),
     phase2Total: EARLYBIRD_CONFIG.phase2.totalSlots,
     tier1Deadline: EARLYBIRD_CONFIG.phase1.hardDeadline,
+    countsAreEstimated: false,
   };
 
   return summary;
