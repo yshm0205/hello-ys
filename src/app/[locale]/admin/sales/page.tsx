@@ -28,6 +28,7 @@ interface TossPayment {
 }
 
 const CANCELLABLE_STATUSES = new Set(["DONE"]);
+const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 
 function getNetRevenue(payment: TossPayment) {
   if (payment.status === "DONE") {
@@ -74,6 +75,7 @@ export default async function AdminSalesPage({
   let query = supabase
     .from("toss_payments")
     .select("*, user:users!toss_payments_user_id_public_users_fkey(email)", { count: "exact" })
+    .in("status", [...SALES_STATUSES])
     .order("created_at", { ascending: false });
 
   if (q) {
@@ -86,14 +88,13 @@ export default async function AdminSalesPage({
   // 통계
   const { data: allPayments } = await supabase
     .from("toss_payments")
-    .select("amount, credits, status, metadata");
+    .select("amount, credits, status, metadata")
+    .in("status", [...SALES_STATUSES]);
 
   const normalizedAllPayments = ((allPayments || []) as TossPayment[]);
   const totalRevenue = normalizedAllPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0);
   const totalCredits = normalizedAllPayments.reduce((sum, payment) => sum + getNetCredits(payment), 0);
-  const totalCount = normalizedAllPayments.filter(
-    (payment) => payment.status === "DONE" || payment.status === "PARTIAL_CANCELLED",
-  ).length;
+  const totalCount = normalizedAllPayments.length;
 
   return (
     <div className="space-y-6">
