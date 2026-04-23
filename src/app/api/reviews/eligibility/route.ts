@@ -14,6 +14,18 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
   .map((e) => e.trim())
   .filter(Boolean);
 
+function getKakaoInviteUrl() {
+  return process.env.REVIEW_KAKAO_INVITE_URL || process.env.KAKAO_REVIEW_INVITE_URL || null;
+}
+
+function getKakaoInvitePassword() {
+  return (
+    process.env.REVIEW_KAKAO_INVITE_PASSWORD ||
+    process.env.KAKAO_REVIEW_INVITE_PASSWORD ||
+    null
+  );
+}
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -96,6 +108,18 @@ export async function GET() {
 
     const vodsCompleted = count || 0;
     const alreadySubmitted = !!review;
+
+    // 미확인 피드백 답변 수 (제출자만)
+    let unreadFeedbackCount = 0;
+    if (alreadySubmitted) {
+      const { count: unreadCount } = await admin
+        .from("feedback_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "answered")
+        .is("user_read_at", null);
+      unreadFeedbackCount = unreadCount || 0;
+    }
     const reachedThreshold = vodsCompleted >= VOD_THRESHOLD;
     // 제출 자격: 7일 윈도우 내 + 최소 VOD 1개 수강 (완전 무경험자 차단)
     const canSubmit = !alreadySubmitted && !windowClosed && vodsCompleted >= 1;
@@ -119,6 +143,9 @@ export async function GET() {
             status: review.status,
           }
         : null,
+      kakaoInviteUrl: alreadySubmitted ? getKakaoInviteUrl() : null,
+      kakaoInvitePassword: alreadySubmitted ? getKakaoInvitePassword() : null,
+      unreadFeedbackCount,
     });
   } catch (error) {
     console.error("[Reviews Eligibility] GET error:", error);

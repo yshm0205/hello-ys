@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Box, Button, Card, Group, Progress, SimpleGrid, Text } from "@mantine/core";
-import { CheckCircle2, Gift, MessageCircle, Sparkles, Star, Ticket } from "lucide-react";
+import { Alert, Badge, Box, Button, Card, Divider, Group, Progress, SimpleGrid, Stack, Text } from "@mantine/core";
+import { CheckCircle2, Gift, MessageCircle, MessageSquareText, Sparkles, Star, Ticket } from "lucide-react";
 
 import { Link } from "@/i18n/routing";
 
@@ -21,6 +21,9 @@ type EligibilityState = {
     feedbackTicketsRemaining: number;
     status: string;
   } | null;
+  kakaoInviteUrl?: string | null;
+  kakaoInvitePassword?: string | null;
+  unreadFeedbackCount?: number;
 };
 
 const benefits = [
@@ -54,43 +57,124 @@ export function ReviewEventBanner() {
 
   if (!loaded || !state) return null;
 
-  // 이미 제출 완료 — 혜택 활성화됨 고정 표시
+  // 이미 제출 완료 — 혜택 활성화됨 펼쳐진 패널
   if (state.alreadySubmitted && state.review) {
+    const unread = state.unreadFeedbackCount ?? 0;
     return (
       <Card
         radius="lg"
         p="lg"
         style={{
-          border: "1px solid rgba(22, 163, 74, 0.25)",
+          border: "1px solid rgba(22, 163, 74, 0.28)",
           background:
-            "linear-gradient(135deg, rgba(22, 163, 74, 0.08), rgba(139, 92, 246, 0.05) 60%, #ffffff)",
+            "linear-gradient(135deg, rgba(22, 163, 74, 0.08), rgba(139, 92, 246, 0.06) 60%, #ffffff)",
         }}
       >
-        <Group justify="space-between" align="center" gap="md">
-          <Group gap="sm" wrap="nowrap">
-            <CheckCircle2 size={22} color="#16a34a" />
-            <Box>
-              <Text fw={700} size="md">
-                후기 이벤트 혜택이 활성화됐어요
-              </Text>
-              <Text size="sm" c="gray.6">
-                피드백권 {state.review.feedbackTicketsRemaining}회 사용 가능 · 월간 크레딧 추첨
-                대상
-              </Text>
-            </Box>
+        <Stack gap="md">
+          <Group justify="space-between" align="flex-start" gap="md" wrap="nowrap">
+            <Group gap="sm" wrap="nowrap" align="flex-start">
+              <CheckCircle2 size={22} color="#16a34a" />
+              <Box>
+                <Text fw={800} size="lg">
+                  후기 이벤트 혜택
+                </Text>
+                <Text size="sm" c="gray.6">
+                  후기 제출 완료 · 모든 혜택이 활성화됐어요
+                </Text>
+              </Box>
+            </Group>
+            <Badge color="green" variant="light" radius="xl" size="lg">
+              활성화됨
+            </Badge>
           </Group>
-          <Button
-            component={Link}
-            href="/dashboard/review"
-            prefetch={false}
-            radius="xl"
-            variant="light"
-            color="violet"
-            size="sm"
-          >
-            내 혜택 보기
-          </Button>
-        </Group>
+
+          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="xs">
+            <Badge color="violet" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
+              🎫 피드백권 {state.review.feedbackTicketsRemaining}회
+            </Badge>
+            <Badge color="orange" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
+              💬 카톡방 입장
+            </Badge>
+            <Badge color="grape" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
+              ✨ 업데이트 얼리액세스
+            </Badge>
+            <Badge color="yellow" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
+              ⭐ 월 400cr 추첨
+            </Badge>
+          </SimpleGrid>
+
+          {unread > 0 && (
+            <Alert
+              color="green"
+              variant="light"
+              icon={<MessageSquareText size={18} />}
+              style={{ border: "1px solid #86efac" }}
+            >
+              <Group justify="space-between" align="center" wrap="nowrap">
+                <Text fw={700} c="green.8" size="sm">
+                  💬 피드백 답변 {unread}개가 도착했어요
+                </Text>
+                <Button
+                  component={Link}
+                  href="/dashboard/feedback"
+                  prefetch={false}
+                  size="xs"
+                  color="green"
+                  radius="lg"
+                >
+                  확인하기
+                </Button>
+              </Group>
+            </Alert>
+          )}
+
+          <Divider variant="dashed" />
+
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            {state.kakaoInviteUrl ? (
+              <Stack gap={6}>
+                <Button
+                  component="a"
+                  href={state.kakaoInviteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="yellow"
+                  c="black"
+                  radius="lg"
+                  leftSection={<MessageCircle size={16} />}
+                  fullWidth
+                >
+                  비밀 카카오톡방 입장하기
+                </Button>
+                {state.kakaoInvitePassword && (
+                  <Text size="xs" c="gray.7">
+                    입장 비밀번호:{" "}
+                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#1f2937" }}>
+                      {state.kakaoInvitePassword}
+                    </span>
+                  </Text>
+                )}
+              </Stack>
+            ) : (
+              <Alert color="violet" variant="light">
+                <Text size="xs">카톡방 초대는 운영진 확인 후 안내됩니다.</Text>
+              </Alert>
+            )}
+
+            <Button
+              component={Link}
+              href="/dashboard/feedback"
+              prefetch={false}
+              radius="lg"
+              variant="light"
+              color="violet"
+              leftSection={<Ticket size={16} />}
+              fullWidth
+            >
+              피드백 요청하기 ({state.review.feedbackTicketsRemaining}회 남음)
+            </Button>
+          </SimpleGrid>
+        </Stack>
       </Card>
     );
   }
