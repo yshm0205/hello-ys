@@ -1,16 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Clock3, Coins, CreditCard, Eye, MousePointerClick, TrendingUp, Users } from "lucide-react";
+
 import { AdminChart } from "@/components/admin/AdminChart";
-import { createAdminClient } from "@/utils/supabase/admin";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getInternalAdminUsers } from "@/lib/admin/internal-users";
 import { isActiveAccessPlan, PAID_PLAN_TYPES } from "@/lib/plans/config";
-import {
-  Clock3,
-  Coins,
-  CreditCard,
-  Eye,
-  MousePointerClick,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
@@ -43,6 +37,7 @@ interface MarketingSessionRow {
 }
 
 interface UserPlanRow {
+  user_id: string;
   plan_type: string | null;
   expires_at: string | null;
 }
@@ -92,10 +87,7 @@ function getKstMonthRange(monthOffset = 0) {
   };
 }
 
-function getNumericMetadata(
-  metadata: Record<string, unknown> | null | undefined,
-  key: string,
-) {
+function getNumericMetadata(metadata: Record<string, unknown> | null | undefined, key: string) {
   const value = metadata?.[key];
 
   if (typeof value === "number") {
@@ -142,13 +134,18 @@ function formatMonthLabel(date: Date) {
 
 async function getAdminStats() {
   const supabase = createAdminClient();
+  const internalAdmins = await getInternalAdminUsers();
+  const internalAdminIds = new Set(internalAdmins.map((user) => user.id));
+
   const { startIso: todayStartIso, endIso: tomorrowStartIso } = getKstDayRange();
   const { startIso: monthStartIso } = getKstMonthRange();
-
   const monthRanges = Array.from({ length: 6 }, (_, index) => getKstMonthRange(index - 5));
 
+  const paymentSelect =
+    "id, order_name, amount, credits, created_at, user_id, status, metadata, user:users!toss_payments_user_id_public_users_fkey(email)";
+
   const [
-    { count: totalUsers },
+    { count: totalUsersRaw },
     { data: paidPlanRows },
     { data: todayPayments },
     { data: monthPayments },
@@ -159,36 +156,31 @@ async function getAdminStats() {
     supabase.from("users").select("id", { count: "exact", head: true }),
     supabase
       .from("user_plans")
-      .select("plan_type, expires_at")
+      .select("user_id, plan_type, expires_at")
       .in("plan_type", [...PAID_PLAN_TYPES]),
     supabase
       .from("toss_payments")
-      .select("amount, credits, status, metadata")
+      .select(paymentSelect)
       .in("status", [...SALES_STATUSES])
       .gte("created_at", todayStartIso)
       .lt("created_at", tomorrowStartIso),
     supabase
       .from("toss_payments")
-      .select("amount, credits, status, metadata")
+      .select(paymentSelect)
       .in("status", [...SALES_STATUSES])
       .gte("created_at", monthStartIso),
+    supabase.from("toss_payments").select(paymentSelect).in("status", [...SALES_STATUSES]),
     supabase
       .from("toss_payments")
-      .select("amount, credits, status, metadata")
-      .in("status", [...SALES_STATUSES]),
-    supabase
-      .from("toss_payments")
-      .select(
-        "id, order_name, amount, credits, created_at, user_id, status, metadata, user:users!toss_payments_user_id_public_users_fkey(email)",
-      )
+      .select(paymentSelect)
       .in("status", [...SALES_STATUSES])
       .order("created_at", { ascending: false })
-      .limit(5),
+      .limit(20),
     Promise.all(
       monthRanges.map((range) =>
         supabase
           .from("toss_payments")
-          .select("amount, credits, status, metadata")
+          .select(paymentSelect)
           .in("status", [...SALES_STATUSES])
           .gte("created_at", range.startIso)
           .lt("created_at", range.endIso),
@@ -197,31 +189,33 @@ async function getAdminStats() {
   ]);
 
   const normalizedPaidPlanRows = (paidPlanRows || []) as UserPlanRow[];
-  const paidUsers = normalizedPaidPlanRows.filter((plan) =>
-    isActiveAccessPlan(plan.plan_type, plan.expires_at),
+  const paidUsers = normalizedPaidPlanRows.filter(
+    (plan) =>
+      !internalAdminIds.has(plan.user_id) &&
+      isActiveAccessPlan(plan.plan_type, plan.expires_at),
   ).length;
 
-  const normalizedTodayPayments = ((todayPayments || []) as PaymentRow[]);
-  const normalizedMonthPayments = ((monthPayments || []) as PaymentRow[]);
-  const normalizedAllPayments = ((allPayments || []) as PaymentRow[]);
-  const normalizedRecentPayments = ((recentPayments || []) as PaymentRow[]);
+  const filterExternalPayments = (payments: PaymentRow[]) =>
+    payments.filter((payment) => !internalAdminIds.has(payment.user_id));
+
+  const normalizedTodayPayments = filterExternalPayments((todayPayments || []) as PaymentRow[]);
+  const normalizedMonthPayments = filterExternalPayments((monthPayments || []) as PaymentRow[]);
+  const normalizedAllPayments = filterExternalPayments((allPayments || []) as PaymentRow[]);
+  const normalizedRecentPayments = filterExternalPayments((recentPayments || []) as PaymentRow[]).slice(
+    0,
+    5,
+  );
 
   const salesToday = normalizedTodayPayments.length;
-  const revenueToday = normalizedTodayPayments.reduce(
-    (sum, payment) => sum + getNetRevenue(payment),
-    0,
-  );
+  const revenueToday = normalizedTodayPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0);
   const monthlyRevenue = normalizedMonthPayments.reduce(
     (sum, payment) => sum + getNetRevenue(payment),
     0,
   );
-  const totalRevenue = normalizedAllPayments.reduce(
-    (sum, payment) => sum + getNetRevenue(payment),
-    0,
-  );
+  const totalRevenue = normalizedAllPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0);
 
   const chartData = monthRanges.map((range, index) => {
-    const payments = ((monthlyPaymentSets[index].data || []) as PaymentRow[]);
+    const payments = filterExternalPayments((monthlyPaymentSets[index].data || []) as PaymentRow[]);
     return {
       name: formatMonthLabel(range.start),
       mrr: payments.reduce((sum, payment) => sum + getNetRevenue(payment), 0),
@@ -229,7 +223,7 @@ async function getAdminStats() {
   });
 
   return {
-    totalUsers: totalUsers || 0,
+    totalUsers: Math.max(0, (totalUsersRaw || 0) - internalAdmins.length),
     paidUsers,
     salesToday,
     revenueToday,
@@ -279,7 +273,7 @@ export default async function AdminOverviewPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">개요</h1>
         <p className="text-sm text-muted-foreground">
-          실결제와 실제 랜딩 유입 기준으로 다시 집계한 운영 개요입니다.
+          내부 관리자 계정을 제외한 실결제와 실제 랜딩 유입 기준 운영 개요입니다.
         </p>
       </div>
 
@@ -290,9 +284,7 @@ export default async function AdminOverviewPage() {
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(stats.monthlyRevenue)}
-            </div>
+            <div className="text-2xl font-bold text-foreground">{formatCurrency(stats.monthlyRevenue)}</div>
             <p className="text-xs text-muted-foreground">
               누적 순매출: {formatCurrency(stats.totalRevenue)}
             </p>
@@ -329,9 +321,7 @@ export default async function AdminOverviewPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {conversionRate.toFixed(1)}%
-            </div>
+            <div className="text-2xl font-bold text-foreground">{conversionRate.toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">
               {stats.paidUsers} / {stats.totalUsers}
             </p>
@@ -368,9 +358,7 @@ export default async function AdminOverviewPage() {
             <Clock3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {marketing.avgDurationSeconds}초
-            </div>
+            <div className="text-2xl font-bold text-foreground">{marketing.avgDurationSeconds}초</div>
             <p className="text-xs text-muted-foreground">오늘 세션 평균</p>
           </CardContent>
         </Card>
@@ -423,7 +411,7 @@ export default async function AdminOverviewPage() {
               ))}
 
               {!stats.recentPayments.length && (
-                <p className="text-sm text-muted-foreground">최근 실결제 내역이 없습니다.</p>
+                <p className="text-sm text-muted-foreground">외부 사용자 실결제 내역이 없습니다.</p>
               )}
             </div>
           </CardContent>

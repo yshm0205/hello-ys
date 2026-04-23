@@ -1,6 +1,7 @@
 import { Activity, Coins, FileText, UserPlus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { getInternalAdminUsers } from "@/lib/admin/internal-users";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminSearch } from "@/components/admin/AdminSearch";
 import { Badge } from "@/components/ui/badge";
@@ -15,69 +16,119 @@ import {
 } from "@/components/ui/table";
 import { createAdminClient } from "@/utils/supabase/admin";
 
+const SALES_ACTIVITY_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
+const SEOUL_TIME_ZONE = "Asia/Seoul";
+
+function getKstDateParts(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SEOUL_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value ?? "1970";
+  const month = parts.find((part) => part.type === "month")?.value ?? "01";
+  const day = parts.find((part) => part.type === "day")?.value ?? "01";
+
+  return { year, month, day };
+}
+
+function getKstDayRange(dayOffset = 0) {
+  const { year, month, day } = getKstDateParts();
+  const start = new Date(`${year}-${month}-${day}T00:00:00+09:00`);
+  start.setUTCDate(start.getUTCDate() + dayOffset);
+
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return {
+    startIso: start.toISOString(),
+    endIso: end.toISOString(),
+  };
+}
+
 async function getActivityStats() {
   const supabase = createAdminClient();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayISO = today.toISOString();
+  const internalAdmins = await getInternalAdminUsers();
+  const internalAdminIds = new Set(internalAdmins.map((user) => user.id));
+  const { startIso: todayStartIso, endIso: tomorrowStartIso } = getKstDayRange();
 
   const [
-    { count: newUsersToday },
-    { count: totalUsers },
-    { count: scriptsToday },
-    { data: scriptUsers },
-    { data: paymentUsers },
-    { data: completedLectureUsers },
-    { data: batchUsers },
+    { data: newUsersTodayRows },
+    { count: totalUsersRaw },
+    { data: scriptRows },
+    { data: paymentRows },
+    { data: completedLectureRows },
+    { data: batchRows },
     { data: creditUsageRows, error: creditUsageError },
   ] = await Promise.all([
-    supabase.from("users").select("id", { count: "exact", head: true }).gte("created_at", todayISO),
+    supabase
+      .from("users")
+      .select("id")
+      .gte("created_at", todayStartIso)
+      .lt("created_at", tomorrowStartIso),
     supabase.from("users").select("id", { count: "exact", head: true }),
     supabase
       .from("script_generations")
-      .select("id", { count: "exact", head: true })
-      .gte("created_at", todayISO),
-    supabase
-      .from("script_generations")
-      .select("user_id")
-      .gte("created_at", todayISO),
+      .select("id, user_id")
+      .gte("created_at", todayStartIso)
+      .lt("created_at", tomorrowStartIso),
     supabase
       .from("toss_payments")
       .select("user_id")
-      .gte("created_at", todayISO),
+      .in("status", [...SALES_ACTIVITY_STATUSES])
+      .gte("created_at", todayStartIso)
+      .lt("created_at", tomorrowStartIso),
     supabase
       .from("lecture_progress")
       .select("user_id")
-      .gte("completed_at", todayISO),
+      .gte("completed_at", todayStartIso)
+      .lt("completed_at", tomorrowStartIso),
     supabase
       .from("batch_job_items")
       .select("user_id")
-      .gte("created_at", todayISO),
+      .gte("created_at", todayStartIso)
+      .lt("created_at", tomorrowStartIso),
     supabase
       .from("credit_transactions")
-      .select("amount")
+      .select("user_id, amount")
       .lt("amount", 0)
-      .gte("created_at", todayISO),
+      .gte("created_at", todayStartIso)
+      .lt("created_at", tomorrowStartIso),
   ]);
 
   const activeUserIds = new Set<string>();
 
-  for (const row of scriptUsers || []) activeUserIds.add(row.user_id);
-  for (const row of paymentUsers || []) activeUserIds.add(row.user_id);
-  for (const row of completedLectureUsers || []) activeUserIds.add(row.user_id);
-  for (const row of batchUsers || []) activeUserIds.add(row.user_id);
+  for (const row of paymentRows || []) {
+    if (!internalAdminIds.has(row.user_id)) activeUserIds.add(row.user_id);
+  }
+  for (const row of completedLectureRows || []) {
+    if (!internalAdminIds.has(row.user_id)) activeUserIds.add(row.user_id);
+  }
+  for (const row of batchRows || []) {
+    if (!internalAdminIds.has(row.user_id)) activeUserIds.add(row.user_id);
+  }
+  for (const row of scriptRows || []) {
+    if (!internalAdminIds.has(row.user_id)) activeUserIds.add(row.user_id);
+  }
 
+  const scriptsToday = (scriptRows || []).filter((row) => !internalAdminIds.has(row.user_id)).length;
+  const newUsersToday = (newUsersTodayRows || []).filter((row) => !internalAdminIds.has(row.id)).length;
   const creditsUsedToday = creditUsageError
     ? null
-    : (creditUsageRows || []).reduce((sum, row) => sum + Math.abs(row.amount || 0), 0);
+    : (creditUsageRows || [])
+        .filter((row) => !internalAdminIds.has(row.user_id))
+        .reduce((sum, row) => sum + Math.abs(row.amount || 0), 0);
 
   return {
     dau: activeUserIds.size,
-    scriptsToday: scriptsToday || 0,
+    scriptsToday,
     creditsUsedToday,
     creditsSource: creditUsageError ? "credit ledger 미설정" : "credit_transactions 기준",
-    newUsersToday: newUsersToday || 0,
-    totalUsers: totalUsers || 0,
+    newUsersToday,
+    totalUsers: Math.max(0, (totalUsersRaw || 0) - internalAdmins.length),
   };
 }
 
@@ -87,6 +138,8 @@ async function getUserList(filters?: {
   pageSize?: number;
 }) {
   const supabase = createAdminClient();
+  const internalAdmins = await getInternalAdminUsers();
+  const internalAdminIds = new Set(internalAdmins.map((user) => user.id));
   const page = filters?.page || 1;
   const pageSize = filters?.pageSize || 15;
   const from = (page - 1) * pageSize;
@@ -94,17 +147,17 @@ async function getUserList(filters?: {
 
   let query = supabase
     .from("users")
-    .select("id, email, full_name, avatar_url, created_at", {
-      count: "exact",
-    })
+    .select("id, email, full_name, avatar_url, created_at")
     .order("created_at", { ascending: false });
 
   if (filters?.q) {
     query = query.ilike("email", `%${filters.q}%`);
   }
 
-  const { data: users, count } = await query.range(from, to);
-  const userIds = (users || []).map((user) => user.id);
+  const { data: users } = await query;
+  const filteredUsers = (users || []).filter((user) => !internalAdminIds.has(user.id));
+  const pagedUsers = filteredUsers.slice(from, to + 1);
+  const userIds = pagedUsers.map((user) => user.id);
 
   const { data: plans } = userIds.length
     ? await supabase
@@ -116,11 +169,11 @@ async function getUserList(filters?: {
   const planMap = new Map((plans || []).map((plan) => [plan.user_id, plan]));
 
   return {
-    data: (users || []).map((user) => ({
+    data: pagedUsers.map((user) => ({
       ...user,
       plan: planMap.get(user.id) || null,
     })),
-    totalPages: Math.max(1, Math.ceil((count || 0) / pageSize)),
+    totalPages: Math.max(1, Math.ceil(filteredUsers.length / pageSize)),
   };
 }
 
@@ -154,31 +207,25 @@ export default async function AdminActivityPage({
           <CardContent>
             <div className="text-2xl font-bold">{stats.dau}</div>
             <p className="text-xs text-muted-foreground">
-              오늘 스크립트/결제/강의완료/배치 활동 사용자
+              내부 계정을 제외한 오늘 스크립트, 실결제, 강의 완료, 배치 실행 사용자
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("scriptsToday")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("scriptsToday")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.scriptsToday}</div>
-            <p className="text-xs text-muted-foreground">
-              script_generations 기준
-            </p>
+            <p className="text-xs text-muted-foreground">내부 계정 제외 script_generations 기준</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("creditsUsedToday")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("creditsUsedToday")}</CardTitle>
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -191,15 +238,13 @@ export default async function AdminActivityPage({
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("newUsers")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("newUsers")}</CardTitle>
             <UserPlus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.newUsersToday}</div>
             <p className="text-xs text-muted-foreground">
-              {t("newUsersDesc")} (Total: {stats.totalUsers})
+              내부 계정 제외 {t("newUsersDesc")} (Total: {stats.totalUsers})
             </p>
           </CardContent>
         </Card>
@@ -240,7 +285,9 @@ export default async function AdminActivityPage({
                       {user.plan?.credits ?? "-"}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {new Date(user.created_at).toLocaleDateString("ko-KR")}
+                      {new Date(user.created_at).toLocaleDateString("ko-KR", {
+                        timeZone: SEOUL_TIME_ZONE,
+                      })}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -254,10 +301,7 @@ export default async function AdminActivityPage({
               </TableBody>
             </Table>
           </div>
-          <AdminPagination
-            currentPage={currentPage}
-            totalPages={users.totalPages}
-          />
+          <AdminPagination currentPage={currentPage} totalPages={users.totalPages} />
         </CardContent>
       </Card>
     </div>
