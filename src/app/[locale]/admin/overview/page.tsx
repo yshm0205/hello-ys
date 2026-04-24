@@ -2,14 +2,21 @@ import { Clock3, Coins, CreditCard, Eye, MousePointerClick, TrendingUp, Users } 
 
 import { AdminChart } from "@/components/admin/AdminChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@/i18n/routing";
 import { getInternalAdminUsers } from "@/lib/admin/internal-users";
 import { isActiveAccessPlan, PAID_PLAN_TYPES } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
+const MARKETING_PERIODS = {
+  today: { label: "오늘", caption: "오늘 기준" },
+  "7d": { label: "최근 7일", caption: "최근 7일 기준" },
+  "30d": { label: "최근 30일", caption: "최근 30일 기준" },
+} as const;
 
 type SalesStatus = (typeof SALES_STATUSES)[number];
+type MarketingPeriod = keyof typeof MARKETING_PERIODS;
 
 interface UserRelation {
   email: string;
@@ -85,6 +92,29 @@ function getKstMonthRange(monthOffset = 0) {
     startIso: start.toISOString(),
     endIso: end.toISOString(),
   };
+}
+
+function getKstMarketingRange(period: MarketingPeriod) {
+  if (period === "today") {
+    return getKstDayRange();
+  }
+
+  const { year, month, day } = getKstDateParts();
+  const end = new Date(`${year}-${month}-${day}T00:00:00+09:00`);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - (period === "7d" ? 7 : 30));
+
+  return {
+    startIso: start.toISOString(),
+    endIso: end.toISOString(),
+  };
+}
+
+function normalizeMarketingPeriod(value?: string): MarketingPeriod {
+  if (value === "7d" || value === "30d") return value;
+  return "today";
 }
 
 function getNumericMetadata(metadata: Record<string, unknown> | null | undefined, key: string) {
@@ -234,15 +264,15 @@ async function getAdminStats() {
   };
 }
 
-async function getMarketingStats() {
+async function getMarketingStats(period: MarketingPeriod) {
   const supabase = createAdminClient();
-  const { startIso: todayStartIso, endIso: tomorrowStartIso } = getKstDayRange();
+  const { startIso, endIso } = getKstMarketingRange(period);
 
   const { data: sessions } = await supabase
     .from("marketing_sessions")
     .select("duration_seconds, pricing_views, cta_clicks, referrer, first_path, first_seen_at")
-    .gte("first_seen_at", todayStartIso)
-    .lt("first_seen_at", tomorrowStartIso)
+    .gte("first_seen_at", startIso)
+    .lt("first_seen_at", endIso)
     .order("first_seen_at", { ascending: false });
 
   const rows = (sessions || []) as MarketingSessionRow[];
@@ -264,8 +294,14 @@ async function getMarketingStats() {
   };
 }
 
-export default async function AdminOverviewPage() {
-  const [stats, marketing] = await Promise.all([getAdminStats(), getMarketingStats()]);
+export default async function AdminOverviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string }>;
+}) {
+  const { period } = await searchParams;
+  const marketingPeriod = normalizeMarketingPeriod(period);
+  const [stats, marketing] = await Promise.all([getAdminStats(), getMarketingStats(marketingPeriod)]);
   const conversionRate = stats.totalUsers > 0 ? (stats.paidUsers / stats.totalUsers) * 100 : 0;
 
   return (
@@ -329,50 +365,77 @@ export default async function AdminOverviewPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">오늘 랜딩 세션</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{marketing.totalSessions}</div>
-            <p className="text-xs text-muted-foreground">랜딩과 가격 페이지 기준</p>
-          </CardContent>
-        </Card>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">랜딩 유입</h2>
+            <p className="text-xs text-muted-foreground">랜딩·가격 페이지 방문과 CTA 기준</p>
+          </div>
+          <div className="inline-flex rounded-lg border bg-background p-1">
+            {Object.entries(MARKETING_PERIODS).map(([key, config]) => {
+              const active = key === marketingPeriod;
+              return (
+                <Link
+                  key={key}
+                  href={`/admin/overview?period=${key}`}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {config.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">오늘 가격 진입</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{marketing.pricingSessions}</div>
-            <p className="text-xs text-muted-foreground">pricing 페이지까지 이동한 세션</p>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{MARKETING_PERIODS[marketingPeriod].label} 랜딩 세션</CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{marketing.totalSessions}</div>
+              <p className="text-xs text-muted-foreground">{MARKETING_PERIODS[marketingPeriod].caption}</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">평균 체류시간</CardTitle>
-            <Clock3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{marketing.avgDurationSeconds}초</div>
-            <p className="text-xs text-muted-foreground">오늘 세션 평균</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{MARKETING_PERIODS[marketingPeriod].label} 가격 진입</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{marketing.pricingSessions}</div>
+              <p className="text-xs text-muted-foreground">{MARKETING_PERIODS[marketingPeriod].caption}</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">CTA 클릭</CardTitle>
-            <MousePointerClick className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{marketing.ctaClicks}</div>
-            <p className="text-xs text-muted-foreground">가격 진입 및 결제 유도 클릭 수</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">평균 체류시간</CardTitle>
+              <Clock3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{marketing.avgDurationSeconds}초</div>
+              <p className="text-xs text-muted-foreground">{MARKETING_PERIODS[marketingPeriod].caption}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">CTA 클릭</CardTitle>
+              <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{marketing.ctaClicks}</div>
+              <p className="text-xs text-muted-foreground">{MARKETING_PERIODS[marketingPeriod].caption}</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -420,7 +483,7 @@ export default async function AdminOverviewPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>최근 랜딩 세션</CardTitle>
+          <CardTitle>{MARKETING_PERIODS[marketingPeriod].label} 랜딩 세션</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -448,7 +511,9 @@ export default async function AdminOverviewPage() {
             ))}
 
             {!marketing.recentSessions.length && (
-              <p className="text-sm text-muted-foreground">오늘 수집된 랜딩 세션이 없습니다.</p>
+              <p className="text-sm text-muted-foreground">
+                {MARKETING_PERIODS[marketingPeriod].caption} 수집된 랜딩 세션이 없습니다.
+              </p>
             )}
           </div>
         </CardContent>
