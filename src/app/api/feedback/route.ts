@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getResendClient } from "@/lib/resend/client";
+import { notifyTelegramFeedbackReceived } from "@/lib/telegram/payments";
 import { createClient } from "@/utils/supabase/server";
 
 const FEEDBACK_COOLDOWN_MS = 60 * 1000;
@@ -115,6 +116,14 @@ ${message}
     if (error) {
       return NextResponse.json({ error }, { status: 500 });
     }
+
+    await notifyTelegramFeedbackReceived({
+      userId: user.id,
+      email: user.email || "",
+      message,
+      ipAddress: getClientAddress(request),
+      sentAt: new Date().toISOString(),
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

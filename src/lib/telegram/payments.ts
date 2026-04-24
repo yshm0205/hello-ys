@@ -1,6 +1,10 @@
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN?.trim() || "";
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID?.trim() || "";
 
+type TelegramNotifyResult =
+  | { success: true }
+  | { skipped: true; reason: "not_configured" | "request_failed" };
+
 type TelegramPaymentCompletedPayload = {
   userId: string;
   email?: string;
@@ -16,6 +20,14 @@ type TelegramPaymentCompletedPayload = {
   paidAt?: string;
 };
 
+type TelegramFeedbackReceivedPayload = {
+  userId: string;
+  email?: string;
+  message: string;
+  ipAddress?: string;
+  sentAt?: string;
+};
+
 function isConfigured() {
   return !!TELEGRAM_BOT_TOKEN && !!TELEGRAM_CHAT_ID;
 }
@@ -24,10 +36,10 @@ function formatWon(amount: number) {
   return `${amount.toLocaleString("ko-KR")}원`;
 }
 
-function formatPaidAt(value?: string) {
+function formatDateTime(value?: string) {
   const date = value ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) {
-    return value || "";
+    return value || "-";
   }
 
   return date.toLocaleString("ko-KR", {
@@ -38,6 +50,15 @@ function formatPaidAt(value?: string) {
 
 function pick(value?: string | null) {
   return typeof value === "string" && value.trim() ? value.trim() : "-";
+}
+
+function clipText(value: string, maxLength = 700) {
+  const normalized = value.trim().replace(/\r\n/g, "\n");
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, maxLength - 1)}…`;
 }
 
 async function sendTelegramMessage(text: string) {
@@ -60,34 +81,56 @@ async function sendTelegramMessage(text: string) {
   }
 }
 
-export async function notifyTelegramPaymentCompleted(
-  payload: TelegramPaymentCompletedPayload,
-) {
+async function notifyTelegram(lines: string[], logLabel: string): Promise<TelegramNotifyResult> {
   if (!isConfigured()) {
-    return { skipped: true as const, reason: "not_configured" };
+    return { skipped: true, reason: "not_configured" };
   }
-
-  const lines = [
-    "✅ 결제 성공",
-    `상품: ${pick(payload.orderName)}`,
-    `금액: ${formatWon(payload.amount)}`,
-    `이메일: ${pick(payload.email)}`,
-    `이름: ${pick(payload.name)}`,
-    `지급 크레딧: ${payload.grantedCredits.toLocaleString("ko-KR")}cr`,
-    `주문번호: ${pick(payload.orderId)}`,
-    `결제키: ${pick(payload.paymentId)}`,
-    `결제종류: ${pick(payload.paymentKind)}`,
-    `제공자: ${pick(payload.provider)}`,
-    `플랜: ${pick(payload.planType)}`,
-    `사용자ID: ${pick(payload.userId)}`,
-    `시각: ${formatPaidAt(payload.paidAt)}`,
-  ];
 
   try {
     await sendTelegramMessage(lines.join("\n"));
-    return { success: true as const };
+    return { success: true };
   } catch (error) {
-    console.error("[Telegram] payment_completed notify failed:", error);
-    return { skipped: true as const, reason: "request_failed" };
+    console.error(`[Telegram] ${logLabel} notify failed:`, error);
+    return { skipped: true, reason: "request_failed" };
   }
+}
+
+export async function notifyTelegramPaymentCompleted(
+  payload: TelegramPaymentCompletedPayload,
+): Promise<TelegramNotifyResult> {
+  return notifyTelegram(
+    [
+      "결제 성공",
+      `상품: ${pick(payload.orderName)}`,
+      `금액: ${formatWon(payload.amount)}`,
+      `이메일: ${pick(payload.email)}`,
+      `이름: ${pick(payload.name)}`,
+      `지급 크레딧: ${payload.grantedCredits.toLocaleString("ko-KR")}cr`,
+      `주문번호: ${pick(payload.orderId)}`,
+      `결제키: ${pick(payload.paymentId)}`,
+      `결제종류: ${pick(payload.paymentKind)}`,
+      `제공자: ${pick(payload.provider)}`,
+      `플랜: ${pick(payload.planType)}`,
+      `사용자ID: ${pick(payload.userId)}`,
+      `시각: ${formatDateTime(payload.paidAt)}`,
+    ],
+    "payment_completed",
+  );
+}
+
+export async function notifyTelegramFeedbackReceived(
+  payload: TelegramFeedbackReceivedPayload,
+): Promise<TelegramNotifyResult> {
+  return notifyTelegram(
+    [
+      "문의 접수",
+      `이메일: ${pick(payload.email)}`,
+      `사용자ID: ${pick(payload.userId)}`,
+      `IP: ${pick(payload.ipAddress)}`,
+      `시각: ${formatDateTime(payload.sentAt)}`,
+      "",
+      clipText(payload.message),
+    ],
+    "feedback_received",
+  );
 }
