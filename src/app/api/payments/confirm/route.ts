@@ -7,6 +7,7 @@ import {
 } from "@/lib/credits/server";
 import { finalizePortOnePayment } from "@/lib/payments/portone";
 import { CREDIT_TOPUP_PACKS } from "@/lib/plans/config";
+import { notifyTelegramPaymentCompleted } from "@/lib/telegram/payments";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -276,6 +277,24 @@ export async function POST(request: NextRequest) {
         purchasedGranted: pack.credits,
         subscriptionGranted: 0,
       },
+    });
+
+    await notifyTelegramPaymentCompleted({
+      userId: user.id,
+      email: user.email || "",
+      name:
+        (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+        (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
+        (user.email?.split("@")[0] ?? ""),
+      amount,
+      grantedCredits: pack.credits,
+      orderId,
+      orderName: payment.order_name || `FlowSpot 크레딧 ${pack.credits}cr`,
+      paymentKind: "credit_topup",
+      provider: "toss",
+      paymentId: paymentKey,
+      planType: null,
+      paidAt: new Date().toISOString(),
     });
 
     return NextResponse.json({

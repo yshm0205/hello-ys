@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 
 import { NextRequest, NextResponse } from "next/server";
 
+import { buildGrantSnapshotMetadata } from "@/lib/payments/grant-snapshot";
 import { CREDIT_TOPUP_PACKS } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
@@ -52,6 +53,11 @@ export async function POST(request: NextRequest) {
         paymentKind: "credit_topup",
         packCredits: pack.credits,
         createdAt: now,
+        ...buildGrantSnapshotMetadata({
+          paymentKind: "credit_topup",
+          chargedAmount: pack.amount,
+          grantedPurchasedCredits: pack.credits,
+        }),
       },
       updated_at: now,
     });

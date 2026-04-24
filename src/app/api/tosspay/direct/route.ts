@@ -8,6 +8,7 @@ import {
   TOSSPAY_PLAN_CONFIG,
 } from "@/lib/tosspay/config";
 import { getEarlybirdSummary } from "@/lib/marketing/earlybird";
+import { buildGrantSnapshotMetadata } from "@/lib/payments/grant-snapshot";
 import { isActiveAccessPlan } from "@/lib/plans/config";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { createClient } from "@/utils/supabase/server";
@@ -100,6 +101,17 @@ export async function POST(request: NextRequest) {
       earlybirdSummary.currentTier === "ended" ? null : earlybirdSummary.currentTier;
     const earlybirdBonusCredits = getEarlybirdBonusCredits(earlybirdTier);
     const immediateGrantedCredits = plan.initialCredits + earlybirdBonusCredits;
+    const grantSnapshot = buildGrantSnapshotMetadata({
+      paymentKind: "initial_program",
+      chargedAmount: plan.amount,
+      grantedSubscriptionCredits: plan.initialCredits,
+      grantedPurchasedCredits: earlybirdBonusCredits,
+      planType,
+      userPlanType: plan.userPlanType,
+      monthlyCredits: plan.monthlyCredits,
+      months: plan.months,
+      earlybirdTier,
+    });
 
     const origin = resolveOrigin(request);
     const retUrl = `${origin}/${locale}/dashboard/credits/success?orderNo=${encodeURIComponent(
@@ -126,13 +138,11 @@ export async function POST(request: NextRequest) {
         planType,
         paymentKind: plan.paymentKind,
         userPlanType: plan.userPlanType,
-        initialCredits: plan.initialCredits,
         earlybirdTier,
-        earlybirdBonusCredits,
-        purchasedGranted: earlybirdBonusCredits,
         monthlyCredits: plan.monthlyCredits,
         months: plan.months,
         callbackSecret,
+        ...grantSnapshot,
       },
     });
 
@@ -177,15 +187,13 @@ export async function POST(request: NextRequest) {
             planType,
             paymentKind: plan.paymentKind,
             userPlanType: plan.userPlanType,
-            initialCredits: plan.initialCredits,
             earlybirdTier,
-            earlybirdBonusCredits,
-            purchasedGranted: earlybirdBonusCredits,
             monthlyCredits: plan.monthlyCredits,
             months: plan.months,
             callbackSecret,
             tossErrorCode: tossData.errorCode || null,
             tossErrorMessage: tossData.msg || null,
+            ...grantSnapshot,
           },
           updated_at: new Date().toISOString(),
         })
@@ -212,14 +220,12 @@ export async function POST(request: NextRequest) {
           planType,
           paymentKind: plan.paymentKind,
           userPlanType: plan.userPlanType,
-          initialCredits: plan.initialCredits,
           earlybirdTier,
-          earlybirdBonusCredits,
-          purchasedGranted: earlybirdBonusCredits,
           monthlyCredits: plan.monthlyCredits,
           months: plan.months,
           callbackSecret,
           payToken: tossData.payToken,
+          ...grantSnapshot,
         },
         updated_at: new Date().toISOString(),
       })

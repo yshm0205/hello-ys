@@ -8,6 +8,7 @@ import {
   TOSSPAY_PLAN_CONFIG,
 } from "@/lib/tosspay/config";
 import { getEarlybirdSummary } from "@/lib/marketing/earlybird";
+import { buildGrantSnapshotMetadata } from "@/lib/payments/grant-snapshot";
 import { isActiveAccessPlan } from "@/lib/plans/config";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { createClient } from "@/utils/supabase/server";
@@ -76,12 +77,20 @@ export async function POST(request: NextRequest) {
         planType,
         paymentKind: plan.paymentKind,
         userPlanType: plan.userPlanType,
-        initialCredits: plan.initialCredits,
         earlybirdTier,
-        earlybirdBonusCredits,
-        purchasedGranted: earlybirdBonusCredits,
         monthlyCredits: plan.monthlyCredits,
         months: plan.months,
+        ...buildGrantSnapshotMetadata({
+          paymentKind: "initial_program",
+          chargedAmount: plan.amount,
+          grantedSubscriptionCredits: plan.initialCredits,
+          grantedPurchasedCredits: earlybirdBonusCredits,
+          planType,
+          userPlanType: plan.userPlanType,
+          monthlyCredits: plan.monthlyCredits,
+          months: plan.months,
+          earlybirdTier,
+        }),
       },
     });
 

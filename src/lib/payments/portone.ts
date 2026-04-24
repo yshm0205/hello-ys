@@ -5,6 +5,12 @@ import {
   recordCreditTransaction,
   updateCreditPlanBalances,
 } from "@/lib/credits/server";
+import {
+  getStoredGrantedPurchasedCredits as getSnapshotGrantedPurchasedCredits,
+  getStoredGrantedSubscriptionCredits as getSnapshotGrantedSubscriptionCredits,
+  getStoredGrantedTotalCredits,
+} from "@/lib/payments/grant-snapshot";
+import { notifyTelegramPaymentCompleted } from "@/lib/telegram/payments";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
 import { sendPaymentCompleteEmail } from "@/services/email/actions";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -32,6 +38,8 @@ type ExistingUserPlanRow = {
 
 type PaymentEmailRow = {
   user_id: string;
+  order_id?: string;
+  order_name?: string | null;
   amount: number;
   metadata?: Record<string, unknown> | null;
 };
@@ -122,6 +130,56 @@ async function notifyPaymentCompleteByEmail(
   }
 }
 
+async function notifyPaymentCompleteByTelegram(
+  admin: ReturnType<typeof createAdminClient>,
+  payment: PaymentEmailRow,
+  grantedCredits: number,
+) {
+  let buyerEmail =
+    typeof payment.metadata?.buyerEmail === "string" ? payment.metadata.buyerEmail : "";
+  let buyerName = "";
+
+  const { data, error } = await admin.auth.admin.getUserById(payment.user_id);
+  if (error) {
+    console.error("[PortOne] Failed to resolve profile for telegram:", error);
+  } else {
+    buyerEmail = buyerEmail || data.user?.email || "";
+    buyerName =
+      (typeof data.user?.user_metadata?.full_name === "string" &&
+        data.user.user_metadata.full_name) ||
+      (typeof data.user?.user_metadata?.name === "string" && data.user.user_metadata.name) ||
+      "";
+  }
+
+  await notifyTelegramPaymentCompleted({
+    userId: payment.user_id,
+    email: buyerEmail,
+    name: buyerName || buyerEmail.split("@")[0] || "",
+    amount: payment.amount,
+    grantedCredits,
+    orderId:
+      typeof payment.order_id === "string"
+        ? payment.order_id
+        : typeof payment.metadata?.orderId === "string"
+          ? payment.metadata.orderId
+          : undefined,
+    orderName:
+      typeof payment.order_name === "string" ? payment.order_name : "FlowSpot 결제",
+    paymentKind:
+      typeof payment.metadata?.paymentKind === "string" ? payment.metadata.paymentKind : null,
+    provider:
+      typeof payment.metadata?.provider === "string" ? payment.metadata.provider : "portone",
+    paymentId:
+      typeof payment.metadata?.paymentId === "string"
+        ? payment.metadata.paymentId
+        : typeof payment.metadata?.payToken === "string"
+          ? payment.metadata.payToken
+          : undefined,
+    planType: typeof payment.metadata?.planType === "string" ? payment.metadata.planType : null,
+    paidAt: new Date().toISOString(),
+  });
+}
+
 async function applyLegacyProgramCreditsOnly(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
@@ -188,6 +246,7 @@ async function applyInitialProgramPlan(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
   config: (typeof TOSSPAY_PLAN_CONFIG)[keyof typeof TOSSPAY_PLAN_CONFIG],
+  subscriptionCredits: number,
   expiresAtIso: string,
   nextCreditAtIso: string,
   purchasedBonusCredits = 0,
@@ -206,7 +265,7 @@ async function applyInitialProgramPlan(
     }
 
     const planRow = currentPlan as ExistingUserPlanRow | null;
-    const nextSubscriptionCredits = config.initialCredits;
+    const nextSubscriptionCredits = Math.max(0, Number(subscriptionCredits || 0));
     const nextPurchasedCredits = (planRow?.purchased_credits || 0) + purchasedBonusCredits;
     const nextCredits = nextSubscriptionCredits + nextPurchasedCredits;
 
@@ -307,11 +366,7 @@ async function buildCompletedResult(
   const creditPlan = await loadCreditPlanSnapshot(admin, payment.user_id);
   const paymentKind =
     payment.metadata?.paymentKind === "initial_program" ? "initial_program" : "credit_topup";
-  const added =
-    payment.credits ??
-    (paymentKind === "initial_program"
-      ? Number(payment.metadata?.initialCredits ?? 0)
-      : Number(payment.metadata?.packCredits ?? 0));
+  const added = payment.credits ?? getStoredGrantedTotalCredits(payment.metadata, 0);
 
   return {
     success: true,
@@ -329,26 +384,11 @@ async function buildCompletedResult(
 }
 
 function getStoredGrantedCredits(payment: StoredPaymentRow) {
-  const paymentKind =
-    payment.metadata?.paymentKind === "initial_program" ? "initial_program" : "credit_topup";
-
-  return (
-    payment.credits ??
-    (paymentKind === "initial_program"
-      ? Number(payment.metadata?.initialCredits ?? 0)
-      : Number(payment.metadata?.packCredits ?? 0))
-  );
+  return payment.credits ?? getStoredGrantedTotalCredits(payment.metadata, 0);
 }
 
 function getStoredPurchasedGrantedCredits(payment: StoredPaymentRow) {
-  const rawValue =
-    typeof payment.metadata?.purchasedGranted === "number"
-      ? payment.metadata.purchasedGranted
-      : typeof payment.metadata?.earlybirdBonusCredits === "number"
-        ? payment.metadata.earlybirdBonusCredits
-        : 0;
-
-  return Math.max(0, Number(rawValue || 0));
+  return getSnapshotGrantedPurchasedCredits(payment.metadata, 0);
 }
 
 function getCancelledAmount(portonePayment: Record<string, unknown>, fallbackAmount: number) {
@@ -836,8 +876,7 @@ export async function finalizePortOnePayment(
     typeof payment.metadata?.paymentKind === "string" ? payment.metadata.paymentKind : null;
 
   if (paymentKind === "credit_topup") {
-    const grantedCredits =
-      Number(payment.metadata?.packCredits ?? payment.credits ?? 0) || payment.credits || 0;
+    const grantedCredits = getStoredGrantedTotalCredits(payment.metadata, payment.credits ?? 0);
 
     const currentPlan = await loadCreditPlanSnapshot(admin, payment.user_id);
     const updateResult = await updateCreditPlanBalances(admin, {
@@ -924,6 +963,10 @@ export async function finalizePortOnePayment(
   const planType =
     typeof payment.metadata?.planType === "string" ? payment.metadata.planType : "allinone";
   const config = TOSSPAY_PLAN_CONFIG[planType as keyof typeof TOSSPAY_PLAN_CONFIG];
+  const subscriptionGrantedCredits = getSnapshotGrantedSubscriptionCredits(
+    payment.metadata,
+    config?.initialCredits ?? 0,
+  );
   const purchasedBonusCredits = getStoredPurchasedGrantedCredits(payment);
 
   if (!config) {
@@ -947,7 +990,7 @@ export async function finalizePortOnePayment(
 
   const expiresAt = new Date();
   expiresAt.setMonth(expiresAt.getMonth() + config.months);
-  const immediateGrantedCredits = config.initialCredits + purchasedBonusCredits;
+  const immediateGrantedCredits = subscriptionGrantedCredits + purchasedBonusCredits;
 
   const nextCreditAt = new Date();
   nextCreditAt.setMonth(nextCreditAt.getMonth() + 1);
@@ -956,6 +999,7 @@ export async function finalizePortOnePayment(
     admin,
     payment.user_id,
     config,
+    subscriptionGrantedCredits,
     expiresAt.toISOString(),
     nextCreditAt.toISOString(),
     purchasedBonusCredits,
@@ -986,7 +1030,10 @@ export async function finalizePortOnePayment(
               fallbackMode: "legacy_schema",
               userPlanType: config.userPlanType,
               paymentKind: config.paymentKind,
-              initialCredits: config.initialCredits,
+              initialCredits: subscriptionGrantedCredits,
+              grantedSubscriptionCredits: subscriptionGrantedCredits,
+              grantedPurchasedCredits: purchasedBonusCredits,
+              grantedTotalCredits: immediateGrantedCredits,
               earlybirdBonusCredits: purchasedBonusCredits,
               monthlyCredits: config.monthlyCredits,
               months: config.months,
@@ -1012,16 +1059,20 @@ export async function finalizePortOnePayment(
             paymentKind: config.paymentKind,
             paymentId,
             amount: payment.amount,
-            initialCredits: config.initialCredits,
+            initialCredits: subscriptionGrantedCredits,
             monthlyCredits: config.monthlyCredits,
-            subscriptionGranted: config.initialCredits,
+            subscriptionGranted: subscriptionGrantedCredits,
             purchasedGranted: purchasedBonusCredits,
+            grantedSubscriptionCredits: subscriptionGrantedCredits,
+            grantedPurchasedCredits: purchasedBonusCredits,
+            grantedTotalCredits: immediateGrantedCredits,
             earlybirdBonusCredits: purchasedBonusCredits,
             fallbackMode: "legacy_schema",
           },
         });
 
         await notifyPaymentCompleteByEmail(admin, payment, immediateGrantedCredits);
+        await notifyPaymentCompleteByTelegram(admin, payment, immediateGrantedCredits);
 
         return {
           success: true,
@@ -1049,7 +1100,10 @@ export async function finalizePortOnePayment(
           portoneStatus: remoteStatus,
           userPlanType: config.userPlanType,
           paymentKind: config.paymentKind,
-          initialCredits: config.initialCredits,
+          initialCredits: subscriptionGrantedCredits,
+          grantedSubscriptionCredits: subscriptionGrantedCredits,
+          grantedPurchasedCredits: purchasedBonusCredits,
+          grantedTotalCredits: immediateGrantedCredits,
           earlybirdBonusCredits: purchasedBonusCredits,
           monthlyCredits: config.monthlyCredits,
           months: config.months,
@@ -1101,15 +1155,19 @@ export async function finalizePortOnePayment(
       paymentKind: config.paymentKind,
       paymentId,
       amount: payment.amount,
-      initialCredits: config.initialCredits,
+      initialCredits: subscriptionGrantedCredits,
       monthlyCredits: config.monthlyCredits,
-      subscriptionGranted: config.initialCredits,
+      subscriptionGranted: subscriptionGrantedCredits,
       purchasedGranted: purchasedBonusCredits,
+      grantedSubscriptionCredits: subscriptionGrantedCredits,
+      grantedPurchasedCredits: purchasedBonusCredits,
+      grantedTotalCredits: immediateGrantedCredits,
       earlybirdBonusCredits: purchasedBonusCredits,
     },
   });
 
   await notifyPaymentCompleteByEmail(admin, payment, immediateGrantedCredits);
+  await notifyPaymentCompleteByTelegram(admin, payment, immediateGrantedCredits);
 
   return {
     success: true,

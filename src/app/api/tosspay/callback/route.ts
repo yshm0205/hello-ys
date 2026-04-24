@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { recordCreditTransaction } from "@/lib/credits/server";
+import {
+  getStoredGrantedPurchasedCredits,
+  getStoredGrantedSubscriptionCredits,
+} from "@/lib/payments/grant-snapshot";
+import { notifyTelegramPaymentCompleted } from "@/lib/telegram/payments";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
 import { sendPaymentCompleteEmail } from "@/services/email/actions";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -15,6 +20,8 @@ type ExistingUserPlanRow = {
 
 type PaymentRow = {
   user_id: string;
+  order_id?: string;
+  order_name?: string | null;
   amount: number;
   status: string;
   metadata?: Record<string, unknown> | null;
@@ -59,6 +66,57 @@ async function notifyPaymentCompleteByEmail(
   } catch (error) {
     console.error("[TossPay Callback] Payment complete email failed:", error);
   }
+}
+
+async function notifyPaymentCompleteByTelegram(
+  admin: ReturnType<typeof createAdminClient>,
+  payment: PaymentRow,
+  grantedCredits: number,
+) {
+  let buyerEmail =
+    typeof payment.metadata?.buyerEmail === "string"
+      ? payment.metadata.buyerEmail
+      : "";
+  let buyerName = "";
+
+  const { data, error } = await admin.auth.admin.getUserById(payment.user_id);
+  if (error) {
+    console.error("[TossPay Callback] Failed to resolve profile for telegram:", error);
+  } else {
+    buyerEmail = buyerEmail || data.user?.email || "";
+    buyerName =
+      (typeof data.user?.user_metadata?.full_name === "string" &&
+        data.user.user_metadata.full_name) ||
+      (typeof data.user?.user_metadata?.name === "string" && data.user.user_metadata.name) ||
+      "";
+  }
+
+  await notifyTelegramPaymentCompleted({
+    userId: payment.user_id,
+    email: buyerEmail,
+    name: buyerName || buyerEmail.split("@")[0] || "",
+    amount: payment.amount,
+    grantedCredits,
+    orderId:
+      typeof payment.order_id === "string"
+        ? payment.order_id
+        : typeof payment.metadata?.orderNo === "string"
+          ? payment.metadata.orderNo
+          : undefined,
+    orderName:
+      typeof payment.order_name === "string"
+        ? payment.order_name
+        : typeof payment.metadata?.planType === "string"
+          ? `FlowSpot ${payment.metadata.planType}`
+          : null,
+    paymentKind:
+      typeof payment.metadata?.paymentKind === "string" ? payment.metadata.paymentKind : null,
+    provider: "tosspay-direct",
+    paymentId:
+      typeof payment.metadata?.payToken === "string" ? payment.metadata.payToken : undefined,
+    planType: typeof payment.metadata?.planType === "string" ? payment.metadata.planType : null,
+    paidAt: new Date().toISOString(),
+  });
 }
 
 function isLegacySchemaError(error: unknown) {
@@ -132,6 +190,7 @@ async function applyInitialProgramPlan(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
   config: (typeof TOSSPAY_PLAN_CONFIG)[keyof typeof TOSSPAY_PLAN_CONFIG],
+  subscriptionCredits: number,
   earlybirdBonusCredits: number,
   expiresAtIso: string,
   nextCreditAtIso: string,
@@ -150,7 +209,7 @@ async function applyInitialProgramPlan(
     }
 
     const planRow = currentPlan as ExistingUserPlanRow | null;
-    const nextSubscriptionCredits = config.initialCredits;
+    const nextSubscriptionCredits = Math.max(0, Number(subscriptionCredits || 0));
     const nextPurchasedCredits = (planRow?.purchased_credits || 0) + earlybirdBonusCredits;
     const nextCredits = nextSubscriptionCredits + nextPurchasedCredits;
 
@@ -358,19 +417,18 @@ export async function POST(request: NextRequest) {
     const nextCreditAt = new Date();
     nextCreditAt.setMonth(nextCreditAt.getMonth() + 1);
 
-    const rawEarlybirdBonus =
-      typeof payment.metadata?.earlybirdBonusCredits === "number"
-        ? payment.metadata.earlybirdBonusCredits
-        : typeof payment.metadata?.purchasedGranted === "number"
-          ? payment.metadata.purchasedGranted
-          : 0;
-    const earlybirdBonusCredits = Math.max(0, Number(rawEarlybirdBonus || 0));
-    const totalGranted = config.initialCredits + earlybirdBonusCredits;
+    const earlybirdBonusCredits = getStoredGrantedPurchasedCredits(payment.metadata, 0);
+    const subscriptionGrantedCredits = getStoredGrantedSubscriptionCredits(
+      payment.metadata,
+      config.initialCredits,
+    );
+    const totalGranted = subscriptionGrantedCredits + earlybirdBonusCredits;
 
     const planGrantResult = await applyInitialProgramPlan(
       admin,
       payment.user_id,
       config,
+      subscriptionGrantedCredits,
       earlybirdBonusCredits,
       expiresAt.toISOString(),
       nextCreditAt.toISOString(),
@@ -399,7 +457,10 @@ export async function POST(request: NextRequest) {
                 planType,
                 userPlanType: config.userPlanType,
                 paymentKind: config.paymentKind,
-                initialCredits: config.initialCredits,
+                initialCredits: subscriptionGrantedCredits,
+                grantedSubscriptionCredits: subscriptionGrantedCredits,
+                grantedPurchasedCredits: earlybirdBonusCredits,
+                grantedTotalCredits: totalGranted,
                 earlybirdBonusCredits,
                 purchasedGranted: earlybirdBonusCredits,
                 monthlyCredits: config.monthlyCredits,
@@ -425,16 +486,24 @@ export async function POST(request: NextRequest) {
               paymentKind: config.paymentKind,
               payToken,
               amount,
-              initialCredits: config.initialCredits,
+              initialCredits: subscriptionGrantedCredits,
               earlybirdBonusCredits,
               monthlyCredits: config.monthlyCredits,
-              subscriptionGranted: config.initialCredits,
+              subscriptionGranted: subscriptionGrantedCredits,
               purchasedGranted: earlybirdBonusCredits,
+              grantedSubscriptionCredits: subscriptionGrantedCredits,
+              grantedPurchasedCredits: earlybirdBonusCredits,
+              grantedTotalCredits: totalGranted,
               fallbackMode: "legacy_schema",
             },
           });
 
           await notifyPaymentCompleteByEmail(
+            admin,
+            payment as PaymentRow,
+            totalGranted,
+          );
+          await notifyPaymentCompleteByTelegram(
             admin,
             payment as PaymentRow,
             totalGranted,
@@ -467,7 +536,10 @@ export async function POST(request: NextRequest) {
             planType,
             userPlanType: config.userPlanType,
             paymentKind: config.paymentKind,
-            initialCredits: config.initialCredits,
+            initialCredits: subscriptionGrantedCredits,
+            grantedSubscriptionCredits: subscriptionGrantedCredits,
+            grantedPurchasedCredits: earlybirdBonusCredits,
+            grantedTotalCredits: totalGranted,
             earlybirdBonusCredits,
             purchasedGranted: earlybirdBonusCredits,
             monthlyCredits: config.monthlyCredits,
@@ -518,15 +590,19 @@ export async function POST(request: NextRequest) {
         paymentKind: config.paymentKind,
         payToken,
         amount,
-        initialCredits: config.initialCredits,
+        initialCredits: subscriptionGrantedCredits,
         earlybirdBonusCredits,
         monthlyCredits: config.monthlyCredits,
-        subscriptionGranted: config.initialCredits,
+        subscriptionGranted: subscriptionGrantedCredits,
         purchasedGranted: earlybirdBonusCredits,
+        grantedSubscriptionCredits: subscriptionGrantedCredits,
+        grantedPurchasedCredits: earlybirdBonusCredits,
+        grantedTotalCredits: totalGranted,
       },
     });
 
     await notifyPaymentCompleteByEmail(admin, payment as PaymentRow, totalGranted);
+    await notifyPaymentCompleteByTelegram(admin, payment as PaymentRow, totalGranted);
 
     console.log("[TossPay Callback] Success:", {
       orderNo,

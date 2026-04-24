@@ -1,4 +1,8 @@
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/plans/config";
+import {
+  getStoredGrantedPurchasedCredits,
+  getStoredGrantedSubscriptionCredits,
+} from "@/lib/payments/grant-snapshot";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 const SEOUL_TIME_ZONE = "Asia/Seoul";
@@ -96,23 +100,10 @@ function getPaymentKind(payment: StoredPaymentRow): PaymentKind | null {
 }
 
 function getPurchasedGrantedCredits(payment: Pick<StoredPaymentRow, "credits" | "metadata">) {
-  if (payment.metadata?.paymentKind === "initial_program") {
-    const rawValue =
-      typeof payment.metadata?.purchasedGranted === "number"
-        ? payment.metadata.purchasedGranted
-        : typeof payment.metadata?.earlybirdBonusCredits === "number"
-          ? payment.metadata.earlybirdBonusCredits
-          : 0;
+  const fallback =
+    payment.metadata?.paymentKind === "credit_topup" ? Number(payment.credits ?? 0) : 0;
 
-    return Math.max(0, Number(rawValue || 0));
-  }
-
-  const rawValue =
-    typeof payment.metadata?.packCredits === "number"
-      ? payment.metadata.packCredits
-      : payment.credits ?? 0;
-
-  return Math.max(0, Number(rawValue || 0));
+  return getStoredGrantedPurchasedCredits(payment.metadata, fallback);
 }
 
 function getInitialSubscriptionCredits(payment: StoredPaymentRow) {
@@ -126,12 +117,7 @@ function getInitialSubscriptionCredits(payment: StoredPaymentRow) {
       ? TOSSPAY_PLAN_CONFIG[payment.metadata.planType as keyof typeof TOSSPAY_PLAN_CONFIG]
       : TOSSPAY_PLAN_CONFIG.allinone;
 
-  const rawValue =
-    typeof payment.metadata?.initialCredits === "number"
-      ? payment.metadata.initialCredits
-      : config.initialCredits;
-
-  return Math.max(0, Number(rawValue || 0));
+  return getStoredGrantedSubscriptionCredits(payment.metadata, config.initialCredits);
 }
 
 function getKstDaySerial(input: string | Date) {
