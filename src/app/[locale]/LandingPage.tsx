@@ -21,6 +21,7 @@ import {
 import { Check, Bot, ChevronDown, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
+import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import { AuthAwareButton } from '@/components/landing/AuthAwareButton';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -3699,6 +3700,7 @@ export default function LandingPage({ initialSummary }: { initialSummary: Landin
 
   return (
     <main style={{ background: '#ffffff' }}>
+      <MarketingTracker pageType="landing" />
       <LandingHeader />
       <HeroSection />
       <EarlyBirdSection earlybirdSummary={earlybirdSummary} />
