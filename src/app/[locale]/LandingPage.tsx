@@ -2889,9 +2889,7 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
   const floatingCountLabel =
     earlybird.currentTier === 'ended'
       ? '혜택 종료'
-      : earlybird.claimed === 0
-        ? `${earlybird.total}석 한정`
-        : `${earlybird.remaining} / ${earlybird.total}명 남음`;
+      : `선착순 ${earlybird.total}명 한정`;
 
   if (isMobile) {
     return (
@@ -2943,19 +2941,6 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
                       {floatingCountLabel}
                     </Text>
                   </Group>
-                  {earlybird.claimed > 0 && (
-                    <Box style={{
-                      width: '100%', height: 6, borderRadius: 999,
-                      background: '#e4e4e7', overflow: 'hidden', marginBottom: 8,
-                    }}>
-                      <Box style={{
-                        width: `${earlybird.claimedPct}%`,
-                        height: '100%',
-                        background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
-                        transition: 'width 600ms ease',
-                      }} />
-                    </Box>
-                  )}
                   <Text style={{
                     fontSize: '11.5px', color: '#71717a',
                     textAlign: 'center', lineHeight: 1.45,
@@ -3335,11 +3320,7 @@ function LegacyEarlyBirdSection_DoNotUse() {
 function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdSummary }) {
   const isMobile = useIsMobile(900);
   const earlybird = getActiveEarlybirdView(earlybirdSummary);
-  const remaining = earlybird.remaining;
   const total = earlybird.total;
-  const claimed = earlybird.claimed;
-  const claimedPct = earlybird.claimedPct;
-  const isUrgent = earlybird.isUrgent;
   const phase1IsLive = earlybird.currentTier === 'phase1';
   const phase2IsLive = earlybird.currentTier === 'phase2';
   const earlybirdEnded = earlybird.currentTier === 'ended';
@@ -3370,6 +3351,11 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
   const stage3Variant: EbTierProps['variant'] = earlybirdEnded ? 'active' : 'end';
   const monthlyNote = `12개월 할부 시 월 ${Math.ceil(primaryProgram.amount / 12).toLocaleString()}원`;
   const monthlyNoteEnd = `12개월 할부 시 월 ${Math.ceil(599000 / 12).toLocaleString()}원`;
+  const slotGuide = earlybirdEnded
+    ? '얼리버드 혜택은 종료되었고, 지금은 정가 신청만 가능합니다.'
+    : phase1IsLive
+      ? `1차는 선착순 ${total}명 한정이며, 마감 시 2차 얼리버드로 전환됩니다.`
+      : `2차는 선착순 ${total}명 한정이며, 마감 시 얼리버드 혜택이 종료됩니다.`;
 
   return (
     <Box component="section" id="earlybird" style={{
@@ -3423,47 +3409,37 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 {currentStageLabel} · <b style={{ color: '#fff' }}>선착순 모집</b>
               </Text>
               <Box style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 18 }}>
-                <Text style={{
-                  fontSize: isMobile ? 72 : 'clamp(80px, 9vw, 112px)', fontWeight: 900,
-                  letterSpacing: '-0.05em', lineHeight: 0.95,
-                  background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
-                  WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-                  textShadow: '0 0 40px rgba(139,92,246,.35)',
-                  fontVariantNumeric: 'tabular-nums',
-                }}>{remaining}</Text>
-                <Text style={{
-                  fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#a78bfa',
-                  letterSpacing: '-0.02em',
-                }}>
-                  {earlybirdEnded ? '혜택 종료' : '자리 남음'}
-                </Text>
-              </Box>
-              {claimed > 0 && (
-                <>
-                  <Box style={{
-                    width: '100%', height: 10, borderRadius: 999,
-                    background: 'rgba(255,255,255,.08)',
-                    border: '1px solid rgba(255,255,255,.1)',
-                    overflow: 'hidden', marginBottom: 14,
+                {earlybirdEnded ? (
+                  <Text style={{
+                    fontSize: isMobile ? 36 : 48,
+                    fontWeight: 900,
+                    letterSpacing: '-0.04em',
+                    lineHeight: 1,
+                    color: '#fff',
                   }}>
-                    <Box style={{
-                      width: `${claimedPct}%`, height: '100%',
-                      background: 'linear-gradient(90deg,#8b5cf6,#d946ef)',
-                      boxShadow: '0 0 12px rgba(180,107,255,.6)',
-                      transition: 'width 600ms ease',
-                    }} />
-                  </Box>
-                  <Text style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,.6)', marginBottom: 18, letterSpacing: '-0.01em' }}>
-                    {claimed}명 신청 완료 · 전체 {total}석 중 {claimedPct}%
+                    혜택 종료
                   </Text>
-                </>
-              )}
-              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55, wordBreak: 'keep-all' }}>
-                {isUrgent ? (
-                  <>자리 <b style={{ color: '#fca5a5', fontWeight: 800 }}>마감 임박</b>. 마감되면 다음 대기자는 2차 혜택으로 전환됩니다.</>
                 ) : (
-                  earlybird.progressHint
+                  <>
+                    <Text style={{
+                      fontSize: isMobile ? 72 : 'clamp(80px, 9vw, 112px)', fontWeight: 900,
+                      letterSpacing: '-0.05em', lineHeight: 0.95,
+                      background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
+                      WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+                      textShadow: '0 0 40px rgba(139,92,246,.35)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>{total}</Text>
+                    <Text style={{
+                      fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#a78bfa',
+                      letterSpacing: '-0.02em',
+                    }}>
+                      명 선착순
+                    </Text>
+                  </>
                 )}
+              </Box>
+              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55, wordBreak: 'keep-all' }}>
+                {slotGuide}
               </Text>
             </Box>
 

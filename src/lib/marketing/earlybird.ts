@@ -25,8 +25,8 @@ const EARLYBIRD_RESERVED_STATUSES = ["PENDING", "PROCESSING"];
 
 export const EARLYBIRD_FALLBACK_SUMMARY: EarlybirdSummary = {
   currentTier: "phase1",
-  phase1SoldCount: 7,
-  phase1Remaining: 23,
+  phase1SoldCount: 0,
+  phase1Remaining: EARLYBIRD_CONFIG.phase1.totalSlots,
   phase1Total: EARLYBIRD_CONFIG.phase1.totalSlots,
   phase2SoldCount: 0,
   phase2Remaining: EARLYBIRD_CONFIG.phase2.totalSlots,
