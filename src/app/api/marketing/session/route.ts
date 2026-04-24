@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { MARKETING_TOKEN_COOKIE } from "@/lib/marketing/tracking";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 type MarketingEventType = "page_view" | "heartbeat" | "cta_click";
@@ -17,6 +18,7 @@ type MarketingPayload = {
   utmCampaign?: string | null;
   utmContent?: string | null;
   utmTerm?: string | null;
+  marketingToken?: string;
 };
 
 const SESSION_KEY_PATTERN =
@@ -70,7 +72,7 @@ function isSameOriginRequest(request: NextRequest) {
 
   const referer = request.headers.get("referer");
   if (!referer) {
-    return true;
+    return false;
   }
 
   try {
@@ -108,6 +110,13 @@ function shouldThrottleEvent(cacheKey: string, windowMs: number) {
   return false;
 }
 
+function hasValidMarketingToken(request: NextRequest, token: string | undefined) {
+  const cookieToken = request.cookies.get(MARKETING_TOKEN_COOKIE)?.value?.trim() || "";
+  const requestToken = (token || "").trim();
+
+  return !!cookieToken && !!requestToken && cookieToken === requestToken;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as MarketingPayload;
@@ -140,6 +149,13 @@ export async function POST(request: NextRequest) {
     if (!isSameOriginRequest(request)) {
       return NextResponse.json(
         { success: false, error: "cross-origin marketing tracking blocked" },
+        { status: 403 },
+      );
+    }
+
+    if (!hasValidMarketingToken(request, body.marketingToken)) {
+      return NextResponse.json(
+        { success: false, error: "invalid marketing tracking token" },
         { status: 403 },
       );
     }

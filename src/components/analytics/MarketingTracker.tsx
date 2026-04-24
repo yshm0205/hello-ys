@@ -1,0 +1,164 @@
+"use client";
+
+import { useEffect } from "react";
+
+import { MARKETING_TOKEN_COOKIE } from "@/lib/marketing/tracking";
+
+const STORAGE_KEY = "flowspot_marketing_session";
+
+type MarketingTrackerProps = {
+  pageType: "landing" | "pricing";
+};
+
+function getSessionKey() {
+  const existing = window.localStorage.getItem(STORAGE_KEY);
+  if (existing) return existing;
+
+  const next = crypto.randomUUID();
+  window.localStorage.setItem(STORAGE_KEY, next);
+  return next;
+}
+
+function readCookie(name: string) {
+  const prefix = `${name}=`;
+  const matched = document.cookie
+    .split(";")
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(prefix));
+
+  if (!matched) return "";
+  return decodeURIComponent(matched.slice(prefix.length));
+}
+
+function getMarketingToken() {
+  const existing = readCookie(MARKETING_TOKEN_COOKIE);
+  if (existing) return existing;
+
+  const token = crypto.randomUUID();
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${MARKETING_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax${secure}`;
+  return token;
+}
+
+function getUtmParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    utmSource: params.get("utm_source"),
+    utmMedium: params.get("utm_medium"),
+    utmCampaign: params.get("utm_campaign"),
+    utmContent: params.get("utm_content"),
+    utmTerm: params.get("utm_term"),
+  };
+}
+
+async function postEvent(payload: Record<string, unknown>, keepalive = false) {
+  const body = JSON.stringify({
+    ...payload,
+    marketingToken: getMarketingToken(),
+  });
+
+  if (keepalive && typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+    const blob = new Blob([body], { type: "application/json" });
+    navigator.sendBeacon("/api/marketing/session", blob);
+    return;
+  }
+
+  await fetch("/api/marketing/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+    keepalive,
+  }).catch(() => undefined);
+}
+
+export function MarketingTracker({ pageType }: MarketingTrackerProps) {
+  useEffect(() => {
+    const sessionKey = getSessionKey();
+    const startedAt = Date.now();
+    const locale = window.location.pathname.split("/").filter(Boolean)[0] || "ko";
+    const pagePath = window.location.pathname;
+    const utm = getUtmParams();
+
+    void postEvent({
+      eventType: "page_view",
+      sessionKey,
+      pagePath,
+      referrer: document.referrer || null,
+      locale,
+      ...utm,
+    });
+
+    let lastDurationSent = 0;
+
+    const flushDuration = (keepalive = false) => {
+      const durationSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+      if (durationSeconds <= lastDurationSent) return;
+      lastDurationSent = durationSeconds;
+
+      void postEvent(
+        {
+          eventType: "heartbeat",
+          sessionKey,
+          pagePath,
+          locale,
+          durationSeconds,
+        },
+        keepalive,
+      );
+    };
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        flushDuration(false);
+      }
+    }, 30000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        flushDuration(true);
+      }
+    };
+
+    const handlePageHide = () => flushDuration(true);
+
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href") || "";
+      if (!href.startsWith("/")) return;
+
+      if (href.includes("/pricing") || href.includes("/login")) {
+        void postEvent(
+          {
+            eventType: "cta_click",
+            sessionKey,
+            pagePath,
+            locale,
+            ctaTarget: href,
+            durationSeconds: Math.max(
+              lastDurationSent,
+              Math.floor((Date.now() - startedAt) / 1000),
+            ),
+          },
+          true,
+        );
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("click", handleClick, true);
+
+    return () => {
+      flushDuration(true);
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [pageType]);
+
+  return null;
+}
