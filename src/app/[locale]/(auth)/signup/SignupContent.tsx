@@ -18,15 +18,17 @@ import {
 } from '@mantine/core';
 import { Bot, Mail, Lock, AlertCircle, Check } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { useTranslations } from 'next-intl';
-import { loginWithGoogle, loginWithMagicLink, loginWithEmailPassword } from '@/services/auth/actions';
+import {
+  loginWithGoogle,
+  loginWithMagicLink,
+  signUpWithEmailPassword,
+} from '@/services/auth/actions';
 
-export function LoginContent() {
-  const t = useTranslations('Auth');
+export function SignupContent() {
   const locale = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isMagicLoading, setIsMagicLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -34,20 +36,18 @@ export function LoginContent() {
   const redirectTarget =
     rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
       ? rawRedirect
-      : '/dashboard';
-  const signupLinkHref = `/signup?redirect=${encodeURIComponent(redirectTarget)}`;
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    () => (searchParams.get('error')
-      ? { type: 'error', text: '로그인에 실패했습니다. 다시 시도해주세요.' }
-      : null)
-  );
+      : '/checkout/allinone';
 
-  const titleText = locale === 'en' ? 'Log in' : '로그인';
+  const [message, setMessage] = useState<
+    { type: 'success' | 'error'; text: string } | null
+  >(null);
+
+  const titleText = locale === 'en' ? 'Create account' : '회원가입';
   const googleButtonLabel = locale === 'en' ? 'Continue with Google' : 'Google로 계속하기';
-  const passwordButtonLabel = locale === 'en' ? 'Log in' : '로그인';
-  const magicLinkButtonLabel = locale === 'en' ? 'Log in with email link' : '이메일 링크로 로그인';
+  const passwordButtonLabel = locale === 'en' ? 'Sign up with email' : '이메일로 회원가입';
+  const magicLinkButtonLabel = locale === 'en' ? 'Get a sign-up link by email' : '이메일 링크로 가입';
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignup = async () => {
     setIsGoogleLoading(true);
     setMessage(null);
     try {
@@ -57,22 +57,30 @@ export function LoginContent() {
         setIsGoogleLoading(false);
       }
     } catch (error) {
-      if (error && typeof error === 'object' && 'digest' in error &&
-          typeof (error as { digest: string }).digest === 'string' &&
-          (error as { digest: string }).digest.includes('NEXT_REDIRECT')) return;
-      setMessage({ type: 'error', text: 'Google 로그인에 실패했습니다. 다시 시도해주세요.' });
+      if (
+        error &&
+        typeof error === 'object' &&
+        'digest' in error &&
+        typeof (error as { digest: string }).digest === 'string' &&
+        (error as { digest: string }).digest.includes('NEXT_REDIRECT')
+      )
+        return;
+      setMessage({
+        type: 'error',
+        text: 'Google 회원가입에 실패했습니다. 다시 시도해주세요.',
+      });
       setIsGoogleLoading(false);
     }
   };
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handleMagicLinkSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
       setMessage({ type: 'error', text: '유효한 이메일을 입력해주세요.' });
       return;
     }
 
-    setIsLoading(true);
+    setIsMagicLoading(true);
     setMessage(null);
 
     const res = await loginWithMagicLink(email, redirectTarget);
@@ -80,20 +88,26 @@ export function LoginContent() {
     if (res?.error) {
       setMessage({ type: 'error', text: res.error });
     } else {
-      setMessage({ type: 'success', text: '이메일을 확인해주세요. 로그인 링크를 보냈습니다.' });
+      setMessage({
+        type: 'success',
+        text: '이메일을 확인해주세요. 가입 확인 링크를 보냈습니다.',
+      });
       setEmail('');
     }
-    setIsLoading(false);
+    setIsMagicLoading(false);
   };
 
-  const handleEmailPasswordLogin = async (e: React.FormEvent) => {
+  const handlePasswordSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
       setMessage({ type: 'error', text: '유효한 이메일을 입력해주세요.' });
       return;
     }
-    if (!password) {
-      setMessage({ type: 'error', text: '비밀번호를 입력해주세요.' });
+    if (!password || password.length < 6) {
+      setMessage({
+        type: 'error',
+        text: '비밀번호는 6자 이상이어야 합니다.',
+      });
       return;
     }
 
@@ -101,18 +115,43 @@ export function LoginContent() {
     setMessage(null);
 
     try {
-      const res = await loginWithEmailPassword(email, password, redirectTarget, locale);
-      if (res?.error) {
-        setMessage({ type: 'error', text: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+      const res = await signUpWithEmailPassword(
+        email,
+        password,
+        redirectTarget,
+        locale
+      );
+      if (res && 'error' in res && res.error) {
+        setMessage({ type: 'error', text: res.error });
+      } else if (
+        res &&
+        'requiresEmailConfirmation' in res &&
+        res.requiresEmailConfirmation
+      ) {
+        setMessage({
+          type: 'success',
+          text: '가입 확인 이메일을 보냈습니다. 메일함을 확인해주세요.',
+        });
+        setPassword('');
       }
     } catch (error) {
-      if (error && typeof error === 'object' && 'digest' in error &&
-          typeof (error as { digest: string }).digest === 'string' &&
-          (error as { digest: string }).digest.includes('NEXT_REDIRECT')) return;
-      setMessage({ type: 'error', text: '로그인에 실패했습니다. 다시 시도해주세요.' });
+      if (
+        error &&
+        typeof error === 'object' &&
+        'digest' in error &&
+        typeof (error as { digest: string }).digest === 'string' &&
+        (error as { digest: string }).digest.includes('NEXT_REDIRECT')
+      )
+        return;
+      setMessage({
+        type: 'error',
+        text: '회원가입에 실패했습니다. 다시 시도해주세요.',
+      });
     }
     setIsPasswordLoading(false);
   };
+
+  const loginLinkHref = `/login?redirect=${encodeURIComponent(redirectTarget)}`;
 
   return (
     <Box
@@ -147,7 +186,8 @@ export function LoginContent() {
           transform: 'translateX(-50%)',
           width: '400px',
           height: '400px',
-          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
+          background:
+            'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
           filter: 'blur(60px)',
         }}
       />
@@ -188,7 +228,7 @@ export function LoginContent() {
               radius="lg"
               variant="white"
               fullWidth
-              onClick={handleGoogleLogin}
+              onClick={handleGoogleSignup}
               loading={isGoogleLoading}
               leftSection={
                 !isGoogleLoading && (
@@ -212,15 +252,17 @@ export function LoginContent() {
                   </svg>
                 )
               }
-              style={{
-                fontWeight: 600,
-              }}
+              style={{ fontWeight: 600 }}
             >
               {googleButtonLabel}
             </Button>
 
             <Divider
-              label={<Text size="xs" c="gray.6">{t('orContinue')}</Text>}
+              label={
+                <Text size="xs" c="gray.6">
+                  또는 이메일로
+                </Text>
+              }
               labelPosition="center"
               color="dark.5"
             />
@@ -244,7 +286,7 @@ export function LoginContent() {
 
               <TextInput
                 type="password"
-                placeholder="비밀번호"
+                placeholder="비밀번호 (6자 이상)"
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
                 size="lg"
@@ -264,11 +306,8 @@ export function LoginContent() {
                 radius="lg"
                 fullWidth
                 loading={isPasswordLoading}
-                onClick={handleEmailPasswordLogin}
-                style={{
-                  background: '#8b5cf6',
-                  border: 'none',
-                }}
+                onClick={handlePasswordSignup}
+                style={{ background: '#8b5cf6', border: 'none' }}
               >
                 {passwordButtonLabel}
               </Button>
@@ -277,22 +316,22 @@ export function LoginContent() {
                 size="lg"
                 radius="lg"
                 fullWidth
-                loading={isLoading}
-                onClick={handleMagicLink}
+                loading={isMagicLoading}
+                onClick={handleMagicLinkSignup}
                 variant="subtle"
-                style={{
-                  color: '#a78bfa',
-                }}
+                style={{ color: '#a78bfa' }}
               >
                 {magicLinkButtonLabel}
               </Button>
             </Stack>
 
             <Text size="sm" ta="center" c="gray.5">
-              {locale === 'en' ? 'No account yet? ' : '아직 회원이 아니신가요? '}
+              {locale === 'en'
+                ? 'Already have an account? '
+                : '이미 계정이 있으신가요? '}
               <Text
                 component={Link}
-                href={signupLinkHref}
+                href={loginLinkHref}
                 inherit
                 style={{
                   color: '#a78bfa',
@@ -300,7 +339,7 @@ export function LoginContent() {
                   fontWeight: 600,
                 }}
               >
-                {locale === 'en' ? 'Sign up' : '회원가입'}
+                {locale === 'en' ? 'Log in' : '로그인'}
               </Text>
             </Text>
 
@@ -313,8 +352,8 @@ export function LoginContent() {
                 style={{ color: '#a78bfa', textDecoration: 'underline' }}
               >
                 이용약관
-              </Text>
-              {' '}및{' '}
+              </Text>{' '}
+              및{' '}
               <Text
                 component={Link}
                 href="/privacy"
@@ -328,7 +367,13 @@ export function LoginContent() {
 
             {message && (
               <Alert
-                icon={message.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
+                icon={
+                  message.type === 'success' ? (
+                    <Check size={18} />
+                  ) : (
+                    <AlertCircle size={18} />
+                  )
+                }
                 color={message.type === 'success' ? 'green' : 'red'}
                 radius="lg"
                 variant="light"

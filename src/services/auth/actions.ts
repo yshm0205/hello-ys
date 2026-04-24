@@ -105,6 +105,50 @@ export async function loginWithEmailPassword(
 }
 
 /**
+ * Signs up a new user with email and password.
+ * 세션이 즉시 발급되면 바로 결제창(또는 요청된 경로)으로 이동하고,
+ * 이메일 확인이 필요한 설정이면 안내 메시지를 반환한다.
+ */
+export async function signUpWithEmailPassword(
+  email: string,
+  password: string,
+  nextPath?: string,
+  locale?: string
+) {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+  const next = sanitizeNextPath(nextPath);
+  const callbackUrl = next
+    ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${origin}/auth/callback`;
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: callbackUrl,
+    },
+  });
+
+  if (error) {
+    console.error("Email/Password Sign-up Error:", error);
+    return { error: error.message };
+  }
+
+  // 이메일 확인이 필요한 프로젝트 설정인 경우 세션이 바로 발급되지 않는다.
+  if (!data.session || !data.user) {
+    return {
+      success: true,
+      requiresEmailConfirmation: true,
+    };
+  }
+
+  const redirectPath = await resolvePostLoginRedirectPath(data.user.id, next);
+  const nextLocale = locale === "en" ? "en" : "ko";
+  redirect(`/${nextLocale}${redirectPath}`);
+}
+
+/**
  * Signs out the current user and redirects to the home page.
  */
 export async function logout() {
