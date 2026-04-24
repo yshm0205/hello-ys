@@ -272,10 +272,7 @@ export function AllInOneCheckoutContent({
                         onChange={(event) => setConfirmedRefund(event.currentTarget.checked)}
                         label={
                           <Text size="sm" style={{ lineHeight: 1.5 }}>
-                            환불 규정을 정확히 확인했습니다.{' '}
-                            <a href="/refund" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>
-                              자세히 보기 →
-                            </a>
+                            환불 규정을 정확히 확인했습니다.
                           </Text>
                         }
                       />
