@@ -291,11 +291,9 @@ export function AllInOneCheckoutContent({
                   title="결제 안내"
                 >
                   <Text size="sm" style={{ lineHeight: 1.6 }}>
-                    현재 PG 심사 정책에 따라{' '}
-                    <strong>토스페이</strong>로만 결제가 가능합니다.
+                    결제는 <strong>토스 보안 결제창</strong>에서 진행됩니다.
                     <br />
-                    토스페이 결제창에서{' '}
-                    <strong>모든 카드사 · 토스머니 · 계좌이체</strong>를 이용하실 수 있습니다.
+                    다음 단계에서 <strong>카드, 토스머니, 계좌이체</strong> 중 선택할 수 있습니다.
                   </Text>
                 </Alert>
 
