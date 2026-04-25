@@ -277,56 +277,6 @@ export function AllInOneCheckoutContent({
 
                 <Divider />
 
-                <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
-                  <Stack gap="sm">
-                    <Group gap="xs">
-                      <TicketPercent size={18} color="#8b5cf6" />
-                      <Text fw={700} style={{ color: '#111827' }}>
-                        쿠폰 적용
-                      </Text>
-                    </Group>
-                    <Group align="flex-end">
-                      <TextInput
-                        flex={1}
-                        label="쿠폰 코드"
-                        placeholder="쿠폰 코드를 입력해 주세요"
-                        value={couponCode}
-                        onChange={(event) => {
-                          setCouponCode(event.currentTarget.value.toUpperCase());
-                          setAppliedCoupon(null);
-                        }}
-                      />
-                      <Button
-                        color="violet"
-                        radius="md"
-                        loading={couponLoading}
-                        onClick={() => void applyCoupon()}
-                      >
-                        적용
-                      </Button>
-                    </Group>
-                    {appliedCoupon && (
-                      <Alert color="green" radius="lg" variant="light">
-                        <Text size="sm" fw={600}>
-                          {appliedCoupon.label}
-                        </Text>
-                        <Text size="sm" c="gray.7">
-                          {appliedCoupon.description}
-                        </Text>
-                        <Text size="sm" c="gray.7">
-                          결제 금액: {formatWon(appliedCoupon.originalAmount)} →{' '}
-                          {formatWon(appliedCoupon.finalAmount)}
-                        </Text>
-                        {appliedCoupon.expiresAt && (
-                          <Text size="xs" c="gray.6">
-                            사용 기한: {formatDate(appliedCoupon.expiresAt)}
-                          </Text>
-                        )}
-                      </Alert>
-                    )}
-                  </Stack>
-                </Card>
-
                 <Card padding="md" radius="lg" withBorder>
                   <Stack gap="md">
                     <Group gap="xs">
@@ -432,6 +382,56 @@ export function AllInOneCheckoutContent({
                     다음 단계에서 <strong>카드, 토스머니, 계좌이체</strong> 중 선택할 수 있습니다.
                   </Text>
                 </Alert>
+
+                <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
+                  <Stack gap="sm">
+                    <Group gap="xs">
+                      <TicketPercent size={18} color="#8b5cf6" />
+                      <Text fw={700} style={{ color: '#111827' }}>
+                        쿠폰 적용
+                      </Text>
+                    </Group>
+                    <Group align="flex-end">
+                      <TextInput
+                        flex={1}
+                        label="쿠폰 코드"
+                        placeholder="쿠폰 코드를 입력해 주세요"
+                        value={couponCode}
+                        onChange={(event) => {
+                          setCouponCode(event.currentTarget.value.toUpperCase());
+                          setAppliedCoupon(null);
+                        }}
+                      />
+                      <Button
+                        color="violet"
+                        radius="md"
+                        loading={couponLoading}
+                        onClick={() => void applyCoupon()}
+                      >
+                        적용
+                      </Button>
+                    </Group>
+                    {appliedCoupon && (
+                      <Alert color="green" radius="lg" variant="light">
+                        <Text size="sm" fw={600}>
+                          {appliedCoupon.label}
+                        </Text>
+                        <Text size="sm" c="gray.7">
+                          {appliedCoupon.description}
+                        </Text>
+                        <Text size="sm" c="gray.7">
+                          결제 금액: {formatWon(appliedCoupon.originalAmount)} →{' '}
+                          {formatWon(appliedCoupon.finalAmount)}
+                        </Text>
+                        {appliedCoupon.expiresAt && (
+                          <Text size="xs" c="gray.6">
+                            사용 기한: {formatDate(appliedCoupon.expiresAt)}
+                          </Text>
+                        )}
+                      </Alert>
+                    )}
+                  </Stack>
+                </Card>
 
                 <Button
                   color="violet"
