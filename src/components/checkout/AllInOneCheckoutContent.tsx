@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Alert,
@@ -15,11 +15,12 @@ import {
   List,
   Stack,
   Text,
+  TextInput,
   ThemeIcon,
   Title,
 } from '@mantine/core';
 import { useLocale } from 'next-intl';
-import { AlertCircle, Check, ChevronLeft, Crown, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Check, ChevronLeft, Crown, ShieldCheck, TicketPercent } from 'lucide-react';
 
 import { Link } from '@/i18n/routing';
 import {
@@ -40,9 +41,20 @@ interface CheckoutCreditInfo {
   next_credit_at: string | null;
 }
 
+interface AppliedCoupon {
+  code: string;
+  label: string;
+  description: string;
+  discountAmount: number;
+  originalAmount: number;
+  finalAmount: number;
+  expiresAt: string | null;
+}
+
 interface AllInOneCheckoutContentProps {
   userEmail?: string;
   creditInfo: CheckoutCreditInfo | null;
+  initialCouponCode?: string;
 }
 
 function formatDate(value?: string | null) {
@@ -54,9 +66,14 @@ function formatDate(value?: string | null) {
   });
 }
 
+function formatWon(amount: number) {
+  return `${amount.toLocaleString()}원`;
+}
+
 export function AllInOneCheckoutContent({
   userEmail,
   creditInfo,
+  initialCouponCode = '',
 }: AllInOneCheckoutContentProps) {
   const locale = useLocale();
   const plan = TOSSPAY_PLAN_CONFIG.allinone;
@@ -65,22 +82,78 @@ export function AllInOneCheckoutContent({
   const hasActiveAccess = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
   const isInitialProgram = isInitialProgramPlan(creditInfo?.plan_type);
   const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
+
   const [confirmedDuration, setConfirmedDuration] = useState(false);
   const [confirmedSharing, setConfirmedSharing] = useState(false);
   const [confirmedRefund, setConfirmedRefund] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [couponLoading, setCouponLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState(initialCouponCode.trim().toUpperCase());
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+
   const allConfirmed = confirmedDuration && confirmedSharing && confirmedRefund;
   const canCheckout = allConfirmed;
+  const finalCheckoutAmount = appliedCoupon?.finalAmount ?? plan.amount;
+
   const toggleAll = (checked: boolean) => {
     setConfirmedDuration(checked);
     setConfirmedSharing(checked);
     setConfirmedRefund(checked);
   };
 
+  const applyCoupon = async (rawCode?: string) => {
+    const normalizedCode = String(rawCode ?? couponCode).trim().toUpperCase();
+
+    if (!normalizedCode) {
+      setAppliedCoupon(null);
+      setError('쿠폰 코드를 입력해 주세요.');
+      return;
+    }
+
+    setCouponLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          couponCode: normalizedCode,
+          context: 'allinone',
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.success || !data.coupon) {
+        setAppliedCoupon(null);
+        setError(data.error || '쿠폰 적용에 실패했습니다.');
+        return;
+      }
+
+      setCouponCode(data.coupon.code);
+      setAppliedCoupon(data.coupon as AppliedCoupon);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '쿠폰 확인 중 오류가 발생했습니다.';
+      setAppliedCoupon(null);
+      setError(message);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!initialCouponCode) return;
+    void applyCoupon(initialCouponCode);
+    // initial coupon is a one-time bootstrap value from the server-rendered URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCouponCode]);
+
   const handleTossPayCheckout = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch('/api/tosspay/direct', {
         method: 'POST',
@@ -89,6 +162,7 @@ export function AllInOneCheckoutContent({
           planType: 'allinone',
           buyerEmail: userEmail,
           locale,
+          couponCode: appliedCoupon?.code || null,
         }),
       });
       const data = await res.json();
@@ -133,7 +207,7 @@ export function AllInOneCheckoutContent({
               Checkout
             </Badge>
             <Title order={1} style={{ color: '#111827' }}>
-              올인원 패스 결제
+              올인원 결제
             </Title>
             <Text c="gray.6">
               상품 구성과 이용 조건을 확인한 뒤 결제를 진행해 주세요.
@@ -146,12 +220,12 @@ export function AllInOneCheckoutContent({
               radius="xl"
               variant="light"
               icon={<ShieldCheck size={18} />}
-              title="이미 올인원 패스를 이용 중입니다"
+              title="이미 올인원 클래스를 이용 중입니다"
             >
               이용 기간은 {formatDate(creditInfo?.expires_at)}까지입니다.
               {isInitialProgram && ' 이용권이 만료되기 전에는 중복 결제가 제한됩니다.'}
               {isMonthlySubscriber &&
-                ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도 구매할 수 있습니다.'}
+                ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
             </Alert>
           ) : (
             <Card
@@ -164,30 +238,97 @@ export function AllInOneCheckoutContent({
                   <Group gap="xs" mb={6}>
                     <Crown size={20} color="#8b5cf6" />
                     <Text fw={700} size="xl" style={{ color: '#111827' }}>
-                      올인원 패스
+                      올인원 클래스
                     </Text>
                   </Group>
                   <Text size="sm" c="gray.6">
                     강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달{' '}
-                    {plan.monthlyCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
+                    {plan.monthlyCredits.toLocaleString()}cr 지급(생성 {monthlyGenerationCount}편 분량)
                   </Text>
                 </Box>
 
                 <Group justify="space-between" align="flex-end">
                   <Box>
                     <Text size="sm" c="gray.4" td="line-through">
-                      ₩{plan.listAmount.toLocaleString()}
+                      {formatWon(plan.listAmount)}
                     </Text>
-                    <Title order={1} style={{ color: '#111827' }}>
-                      ₩{plan.amount.toLocaleString()}
-                    </Title>
+                    {appliedCoupon ? (
+                      <Stack gap={2}>
+                        <Text size="sm" c="gray.5" td="line-through">
+                          {formatWon(plan.amount)}
+                        </Text>
+                        <Title order={1} style={{ color: '#111827' }}>
+                          {formatWon(appliedCoupon.finalAmount)}
+                        </Title>
+                        <Text size="xs" c="green.7" fw={600}>
+                          {appliedCoupon.label} -{formatWon(appliedCoupon.discountAmount)}
+                        </Text>
+                      </Stack>
+                    ) : (
+                      <Title order={1} style={{ color: '#111827' }}>
+                        {formatWon(plan.amount)}
+                      </Title>
+                    )}
                   </Box>
                   <Badge color="violet" variant="light">
-                    총 {plan.totalCredits.toLocaleString()}cr · 생성 {totalGenerationCount}회 분량
+                    총 {plan.totalCredits.toLocaleString()}cr / 생성 {totalGenerationCount}편 분량
                   </Badge>
                 </Group>
 
                 <Divider />
+
+                <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
+                  <Stack gap="sm">
+                    <Group gap="xs">
+                      <TicketPercent size={18} color="#8b5cf6" />
+                      <Text fw={700} style={{ color: '#111827' }}>
+                        쿠폰 적용
+                      </Text>
+                    </Group>
+                    <Text size="sm" c="gray.6">
+                      전자책 구매자 전용 쿠폰이 있으시면 입력해 주세요.
+                    </Text>
+                    <Group align="flex-end">
+                      <TextInput
+                        flex={1}
+                        label="쿠폰 코드"
+                        placeholder="예: EBOOK50"
+                        value={couponCode}
+                        onChange={(event) => {
+                          setCouponCode(event.currentTarget.value.toUpperCase());
+                          setAppliedCoupon(null);
+                        }}
+                      />
+                      <Button
+                        color="violet"
+                        radius="md"
+                        loading={couponLoading}
+                        onClick={() => void applyCoupon()}
+                      >
+                        적용
+                      </Button>
+                    </Group>
+                    {appliedCoupon && (
+                      <Alert color="green" radius="lg" variant="light">
+                        <Text size="sm" fw={600}>
+                          {appliedCoupon.label}
+                        </Text>
+                        <Text size="sm" c="gray.7">
+                          {appliedCoupon.description}
+                        </Text>
+                        <Text size="sm" c="gray.7">
+                          결제 금액: {formatWon(appliedCoupon.originalAmount)} →{' '}
+                          {formatWon(appliedCoupon.finalAmount)}
+                        </Text>
+                        {appliedCoupon.expiresAt && (
+                          <Text size="xs" c="gray.6">
+                            사용 기한: {formatDate(appliedCoupon.expiresAt)}
+                          </Text>
+                        )}
+                      </Alert>
+                    )}
+                  </Stack>
+                </Card>
 
                 <Card padding="md" radius="lg" withBorder>
                   <Stack gap="md">
@@ -203,7 +344,7 @@ export function AllInOneCheckoutContent({
                         'AI 스크립트 도구 4개월 이용',
                         '월간 트렌드 채널 데이터',
                         '전자책',
-                        '노션 운영 템플릿',
+                        '썸네일 운영 템플릿',
                         '프로그램 4개월 참여',
                       ].map((item) => (
                         <List.Item
@@ -221,13 +362,14 @@ export function AllInOneCheckoutContent({
                     </List>
                     <Stack gap={6}>
                       <Text size="sm" c="gray.6">
-                        결제 직후 {plan.initialCredits.toLocaleString()}cr 지급 (생성 {monthlyGenerationCount}회 분량)
+                        결제 직후 {plan.initialCredits.toLocaleString()}cr 지급(생성 {monthlyGenerationCount}
+                        편 분량)
                       </Text>
                       <Text size="sm" c="gray.6">
                         이후 매달 {plan.monthlyCredits.toLocaleString()}cr씩 총 {plan.months}회 지급
                       </Text>
                       <Text size="sm" c="gray.6">
-                        총 {plan.totalCredits.toLocaleString()}cr 제공 (생성 {totalGenerationCount}회 분량)
+                        총 {plan.totalCredits.toLocaleString()}cr 제공 (생성 {totalGenerationCount}편 분량)
                       </Text>
                     </Stack>
                   </Stack>
@@ -254,7 +396,7 @@ export function AllInOneCheckoutContent({
                         onChange={(event) => setConfirmedDuration(event.currentTarget.checked)}
                         label={
                           <Text size="sm" style={{ lineHeight: 1.5 }}>
-                            이용 기간 <strong>4개월</strong>이며, 결제 즉시 시작되는 것을 확인했습니다.
+                            이용 기간은 <strong>4개월</strong>이며, 결제 즉시 시작되는 것을 확인했습니다.
                           </Text>
                         }
                       />
@@ -263,7 +405,7 @@ export function AllInOneCheckoutContent({
                         onChange={(event) => setConfirmedSharing(event.currentTarget.checked)}
                         label={
                           <Text size="sm" style={{ lineHeight: 1.5 }}>
-                            계정 공유 및 자료 외부 공유가 금지됨을 확인했습니다.
+                            계정 공유 및 자료 무단 공유가 금지됨을 확인했습니다.
                           </Text>
                         }
                       />
@@ -303,12 +445,14 @@ export function AllInOneCheckoutContent({
                   onClick={handleTossPayCheckout}
                   style={{ background: canCheckout ? '#8b5cf6' : undefined }}
                 >
-                  토스페이로 결제하기
+                  {finalCheckoutAmount === plan.amount
+                    ? `${formatWon(finalCheckoutAmount)} 결제하기`
+                    : `${formatWon(finalCheckoutAmount)}로 결제하기`}
                 </Button>
 
                 {!canCheckout && (
                   <Text size="xs" c="gray.5">
-                    필수 확인 항목에 동의해 주세요.
+                    필수 확인 항목에 모두 동의해 주세요.
                   </Text>
                 )}
 
