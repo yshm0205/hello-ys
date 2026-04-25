@@ -207,7 +207,7 @@ export function AllInOneCheckoutContent({
               Checkout
             </Badge>
             <Title order={1} style={{ color: '#111827' }}>
-              올인원 결제
+              올인원 패스 결제
             </Title>
             <Text c="gray.6">
               상품 구성과 이용 조건을 확인한 뒤 결제를 진행해 주세요.
@@ -220,7 +220,7 @@ export function AllInOneCheckoutContent({
               radius="xl"
               variant="light"
               icon={<ShieldCheck size={18} />}
-              title="이미 올인원 클래스를 이용 중입니다"
+              title="이미 올인원 패스를 이용 중입니다"
             >
               이용 기간은 {formatDate(creditInfo?.expires_at)}까지입니다.
               {isInitialProgram && ' 이용권이 만료되기 전에는 중복 결제가 제한됩니다.'}
@@ -238,7 +238,7 @@ export function AllInOneCheckoutContent({
                   <Group gap="xs" mb={6}>
                     <Crown size={20} color="#8b5cf6" />
                     <Text fw={700} size="xl" style={{ color: '#111827' }}>
-                      올인원 클래스
+                      올인원 패스
                     </Text>
                   </Group>
                   <Text size="sm" c="gray.6">
@@ -285,14 +285,11 @@ export function AllInOneCheckoutContent({
                         쿠폰 적용
                       </Text>
                     </Group>
-                    <Text size="sm" c="gray.6">
-                      전자책 구매자 전용 쿠폰이 있으시면 입력해 주세요.
-                    </Text>
                     <Group align="flex-end">
                       <TextInput
                         flex={1}
                         label="쿠폰 코드"
-                        placeholder="예: EBOOK50"
+                        placeholder="쿠폰 코드를 입력해 주세요"
                         value={couponCode}
                         onChange={(event) => {
                           setCouponCode(event.currentTarget.value.toUpperCase());
