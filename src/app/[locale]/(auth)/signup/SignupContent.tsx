@@ -13,10 +13,9 @@ import {
   Button,
   Stack,
   Divider,
-  Group,
   Alert,
 } from '@mantine/core';
-import { Bot, Mail, Lock, AlertCircle, Check } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Check } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import {
   loginWithGoogle,
@@ -164,7 +163,7 @@ export function SignupContent() {
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
-        padding: '40px 20px',
+        padding: '24px 16px',
       }}
     >
       <Box
@@ -182,63 +181,55 @@ export function SignupContent() {
       <Box
         style={{
           position: 'absolute',
-          top: '30%',
+          top: '18%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '400px',
-          height: '400px',
+          width: '320px',
+          height: '320px',
           background:
             'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
-          filter: 'blur(60px)',
+          filter: 'blur(48px)',
         }}
       />
 
       <Container size="xs" style={{ position: 'relative', zIndex: 1, width: '100%' }}>
         <Card
-          padding="xl"
+          padding={0}
           radius="xl"
           style={{
+            padding: '16px 16px 14px',
+            borderRadius: '24px',
             background: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(20px)',
           }}
         >
-          <Stack gap="lg">
-            <Stack align="center" gap="xs">
-              <Group gap="sm">
-                <Bot size={28} color="#a78bfa" />
-                <Text
-                  size="xl"
-                  fw={700}
-                  style={{
-                    background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  FlowSpot
-                </Text>
-              </Group>
-              <Title order={3} c="white" mt="xs">
+          <Stack gap="md">
+            <Stack align="center" gap={4}>
+              <Text
+                size="lg"
+                fw={700}
+                style={{
+                  background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                FlowSpot
+              </Text>
+              <Title order={3} c="white">
                 {titleText}
               </Title>
               {isCheckoutRedirect && (
-                <Text size="sm" c="gray.5" ta="center" maw={320}>
-                  회원가입 후 바로 결제 화면으로
-                  <br />
-                  이동합니다.
-                </Text>
-              )}
-              {isCheckoutRedirect && (
-                <Text size="xs" c="gray.6" ta="center" maw={320}>
-                  결제 후 바로 이용을 위해 회원가입을 진행합니다.
+                <Text size="xs" c="gray.5" ta="center" maw={280}>
+                  결제 진행을 위해 회원가입이 필요합니다.
                 </Text>
               )}
             </Stack>
 
             <Button
-              size="lg"
-              radius="lg"
+              size="md"
+              radius="md"
               variant="white"
               fullWidth
               onClick={handleGoogleSignup}
@@ -265,7 +256,7 @@ export function SignupContent() {
                   </svg>
                 )
               }
-              style={{ fontWeight: 600 }}
+              style={{ fontWeight: 600, height: 46 }}
             >
               {googleButtonLabel}
             </Button>
@@ -278,16 +269,17 @@ export function SignupContent() {
               }
               labelPosition="center"
               color="dark.5"
+              my={-2}
             />
 
-            <Stack gap="md">
+            <Stack gap="xs">
               <TextInput
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.currentTarget.value)}
-                size="lg"
-                radius="lg"
-                leftSection={<Mail size={18} color="#6b7280" />}
+                size="md"
+                radius="md"
+                leftSection={<Mail size={16} color="#6b7280" />}
                 styles={{
                   input: {
                     background: 'rgba(255, 255, 255, 0.05)',
@@ -302,9 +294,9 @@ export function SignupContent() {
                 placeholder="비밀번호 (6자 이상)"
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
-                size="lg"
-                radius="lg"
-                leftSection={<Lock size={18} color="#6b7280" />}
+                size="md"
+                radius="md"
+                leftSection={<Lock size={16} color="#6b7280" />}
                 styles={{
                   input: {
                     background: 'rgba(255, 255, 255, 0.05)',
@@ -315,30 +307,30 @@ export function SignupContent() {
               />
 
               <Button
-                size="lg"
-                radius="lg"
+                size="md"
+                radius="md"
                 fullWidth
                 loading={isPasswordLoading}
                 onClick={handlePasswordSignup}
-                style={{ background: '#8b5cf6', border: 'none' }}
+                style={{ background: '#8b5cf6', border: 'none', height: 44 }}
               >
                 {passwordButtonLabel}
               </Button>
 
               <Button
-                size="lg"
-                radius="lg"
+                size="md"
+                radius="md"
                 fullWidth
                 loading={isMagicLoading}
                 onClick={handleMagicLinkSignup}
                 variant="subtle"
-                style={{ color: '#a78bfa' }}
+                style={{ color: '#a78bfa', height: 40 }}
               >
                 {magicLinkButtonLabel}
               </Button>
             </Stack>
 
-            <Text size="sm" ta="center" c="gray.5">
+            <Text size="xs" ta="center" c="gray.5">
               {isCheckoutRedirect && locale !== 'en' ? (
                 <>
                   이미 계정이 있으시면 로그인 후 바로 결제하실 수 있습니다.{' '}
@@ -393,14 +385,14 @@ export function SignupContent() {
                   )
                 }
                 color={message.type === 'success' ? 'green' : 'red'}
-                radius="lg"
+                radius="md"
                 variant="light"
               >
                 {message.text}
               </Alert>
             )}
 
-            <Text size="sm" ta="center">
+            <Text size="xs" ta="center">
               <Text
                 component={Link}
                 href="/"

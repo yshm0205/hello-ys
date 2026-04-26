@@ -13,10 +13,9 @@ import {
   Button,
   Stack,
   Divider,
-  Group,
   Alert,
 } from '@mantine/core';
-import { Bot, Mail, Lock, AlertCircle, Check } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Check } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { loginWithGoogle, loginWithMagicLink, loginWithEmailPassword } from '@/services/auth/actions';
@@ -125,7 +124,7 @@ export function LoginContent() {
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
-        padding: '40px 20px',
+        padding: '24px 16px',
       }}
     >
       <Box
@@ -143,62 +142,54 @@ export function LoginContent() {
       <Box
         style={{
           position: 'absolute',
-          top: '30%',
+          top: '18%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '400px',
-          height: '400px',
+          width: '320px',
+          height: '320px',
           background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
-          filter: 'blur(60px)',
+          filter: 'blur(48px)',
         }}
       />
 
       <Container size="xs" style={{ position: 'relative', zIndex: 1, width: '100%' }}>
         <Card
-          padding="xl"
+          padding={0}
           radius="xl"
           style={{
+            padding: '16px 16px 14px',
+            borderRadius: '24px',
             background: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(20px)',
           }}
         >
-          <Stack gap="lg">
-            <Stack align="center" gap="xs">
-              <Group gap="sm">
-                <Bot size={28} color="#a78bfa" />
-                <Text
-                  size="xl"
-                  fw={700}
-                  style={{
-                    background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  FlowSpot
-                </Text>
-              </Group>
-              <Title order={3} c="white" mt="xs">
+          <Stack gap="md">
+            <Stack align="center" gap={4}>
+              <Text
+                size="lg"
+                fw={700}
+                style={{
+                  background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                FlowSpot
+              </Text>
+              <Title order={3} c="white">
                 {titleText}
               </Title>
               {isCheckoutRedirect && (
-                <Text size="sm" c="gray.5" ta="center" maw={320}>
-                  로그인 후 바로 결제 화면으로
-                  <br />
-                  이동합니다.
-                </Text>
-              )}
-              {isCheckoutRedirect && (
-                <Text size="xs" c="gray.6" ta="center" maw={320}>
-                  결제 후 바로 이용을 위해 로그인이 필요합니다.
+                <Text size="xs" c="gray.5" ta="center" maw={280}>
+                  결제 진행을 위해 로그인이 필요합니다.
                 </Text>
               )}
             </Stack>
 
             <Button
-              size="lg"
-              radius="lg"
+              size="md"
+              radius="md"
               variant="white"
               fullWidth
               onClick={handleGoogleLogin}
@@ -227,6 +218,7 @@ export function LoginContent() {
               }
               style={{
                 fontWeight: 600,
+                height: 46,
               }}
             >
               {googleButtonLabel}
@@ -236,16 +228,17 @@ export function LoginContent() {
               label={<Text size="xs" c="gray.6">{t('orContinue')}</Text>}
               labelPosition="center"
               color="dark.5"
+              my={-2}
             />
 
-            <Stack gap="md">
+            <Stack gap="xs">
               <TextInput
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.currentTarget.value)}
-                size="lg"
-                radius="lg"
-                leftSection={<Mail size={18} color="#6b7280" />}
+                size="md"
+                radius="md"
+                leftSection={<Mail size={16} color="#6b7280" />}
                 styles={{
                   input: {
                     background: 'rgba(255, 255, 255, 0.05)',
@@ -260,9 +253,9 @@ export function LoginContent() {
                 placeholder="비밀번호"
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
-                size="lg"
-                radius="lg"
-                leftSection={<Lock size={18} color="#6b7280" />}
+                size="md"
+                radius="md"
+                leftSection={<Lock size={16} color="#6b7280" />}
                 styles={{
                   input: {
                     background: 'rgba(255, 255, 255, 0.05)',
@@ -273,35 +266,37 @@ export function LoginContent() {
               />
 
               <Button
-                size="lg"
-                radius="lg"
+                size="md"
+                radius="md"
                 fullWidth
                 loading={isPasswordLoading}
                 onClick={handleEmailPasswordLogin}
                 style={{
                   background: '#8b5cf6',
                   border: 'none',
+                  height: 44,
                 }}
               >
                 {passwordButtonLabel}
               </Button>
 
               <Button
-                size="lg"
-                radius="lg"
+                size="md"
+                radius="md"
                 fullWidth
                 loading={isLoading}
                 onClick={handleMagicLink}
                 variant="subtle"
                 style={{
                   color: '#a78bfa',
+                  height: 40,
                 }}
               >
                 {magicLinkButtonLabel}
               </Button>
             </Stack>
 
-            <Text size="sm" ta="center" c="gray.5">
+            <Text size="xs" ta="center" c="gray.5">
               {isCheckoutRedirect && locale !== 'en' ? (
                 <>
                   처음이셔도 회원가입 후 바로 결제하실 수 있습니다.{' '}
@@ -348,14 +343,14 @@ export function LoginContent() {
               <Alert
                 icon={message.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
                 color={message.type === 'success' ? 'green' : 'red'}
-                radius="lg"
+                radius="md"
                 variant="light"
               >
                 {message.text}
               </Alert>
             )}
 
-            <Text size="sm" ta="center">
+            <Text size="xs" ta="center">
               <Text
                 component={Link}
                 href="/"
