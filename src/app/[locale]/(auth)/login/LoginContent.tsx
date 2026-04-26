@@ -189,6 +189,11 @@ export function LoginContent() {
                   이동합니다.
                 </Text>
               )}
+              {isCheckoutRedirect && (
+                <Text size="xs" c="gray.6" ta="center" maw={320}>
+                  결제 후 바로 이용을 위해 로그인이 필요합니다.
+                </Text>
+              )}
             </Stack>
 
             <Button
@@ -299,9 +304,7 @@ export function LoginContent() {
             <Text size="sm" ta="center" c="gray.5">
               {isCheckoutRedirect && locale !== 'en' ? (
                 <>
-                  처음이셔도 회원가입 후
-                  <br />
-                  바로 결제하실 수 있습니다.{' '}
+                  처음이셔도 회원가입 후 바로 결제하실 수 있습니다.{' '}
                 </>
               ) : null}
               {locale === 'en' ? 'No account yet? ' : '아직 회원이 아니신가요? '}
