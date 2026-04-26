@@ -35,6 +35,7 @@ export function LoginContent() {
     rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
       ? rawRedirect
       : '/dashboard';
+  const isCheckoutRedirect = redirectTarget.startsWith('/checkout/allinone');
   const signupLinkHref = `/signup?redirect=${encodeURIComponent(redirectTarget)}`;
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
     () => (searchParams.get('error')
@@ -181,6 +182,13 @@ export function LoginContent() {
               <Title order={3} c="white" mt="xs">
                 {titleText}
               </Title>
+              {isCheckoutRedirect && (
+                <Text size="sm" c="gray.5" ta="center" maw={320}>
+                  로그인 후 바로 결제 화면으로
+                  <br />
+                  이동합니다.
+                </Text>
+              )}
             </Stack>
 
             <Button
@@ -289,6 +297,13 @@ export function LoginContent() {
             </Stack>
 
             <Text size="sm" ta="center" c="gray.5">
+              {isCheckoutRedirect && locale !== 'en' ? (
+                <>
+                  처음이셔도 회원가입 후
+                  <br />
+                  바로 결제하실 수 있습니다.{' '}
+                </>
+              ) : null}
               {locale === 'en' ? 'No account yet? ' : '아직 회원이 아니신가요? '}
               <Text
                 component={Link}

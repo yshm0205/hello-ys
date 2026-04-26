@@ -37,6 +37,7 @@ export function SignupContent() {
     rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
       ? rawRedirect
       : '/checkout/allinone';
+  const isCheckoutRedirect = redirectTarget.startsWith('/checkout/allinone');
 
   const [message, setMessage] = useState<
     { type: 'success' | 'error'; text: string } | null
@@ -221,6 +222,13 @@ export function SignupContent() {
               <Title order={3} c="white" mt="xs">
                 {titleText}
               </Title>
+              {isCheckoutRedirect && (
+                <Text size="sm" c="gray.5" ta="center" maw={320}>
+                  회원가입 후 바로 결제 화면으로
+                  <br />
+                  이동합니다.
+                </Text>
+              )}
             </Stack>
 
             <Button
@@ -326,6 +334,13 @@ export function SignupContent() {
             </Stack>
 
             <Text size="sm" ta="center" c="gray.5">
+              {isCheckoutRedirect && locale !== 'en' ? (
+                <>
+                  이미 계정이 있으시면 로그인 후
+                  <br />
+                  바로 결제하실 수 있습니다.{' '}
+                </>
+              ) : null}
               {locale === 'en'
                 ? 'Already have an account? '
                 : '이미 계정이 있으신가요? '}
