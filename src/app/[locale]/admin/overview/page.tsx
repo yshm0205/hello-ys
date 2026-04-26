@@ -1,4 +1,4 @@
-import { Clock3, Coins, CreditCard, Eye, MousePointerClick, TrendingUp, Users } from "lucide-react";
+import { Clock3, Coins, CreditCard, Eye, MousePointerClick, TrendingUp, UserPlus, Users } from "lucide-react";
 
 import { AdminChart } from "@/components/admin/AdminChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
+const LAUNCH_OPEN_AT_KST = "2026-04-24T17:00:00+09:00";
 const MARKETING_PERIODS = {
   today: { label: "오늘", caption: "오늘 기준" },
   "7d": { label: "최근 7일", caption: "최근 7일 기준" },
@@ -47,6 +48,20 @@ interface UserPlanRow {
   user_id: string;
   plan_type: string | null;
   expires_at: string | null;
+}
+
+interface UserRow {
+  id: string;
+  created_at: string;
+}
+
+interface LaunchPaymentRow {
+  id: string;
+  amount: number;
+  created_at: string;
+  user_id: string;
+  status: string;
+  metadata: Record<string, unknown> | null;
 }
 
 function getKstDateParts(date = new Date()) {
@@ -132,7 +147,11 @@ function getNumericMetadata(metadata: Record<string, unknown> | null | undefined
   return 0;
 }
 
-function getNetRevenue(payment: Pick<PaymentRow, "amount" | "status" | "metadata">) {
+function getNetRevenue(payment: {
+  amount: number;
+  status: string;
+  metadata: Record<string, unknown> | null;
+}) {
   if (payment.status === "DONE") {
     return payment.amount;
   }
@@ -160,6 +179,16 @@ function formatMonthLabel(date: Date) {
   })
     .format(date)
     .replace(/\s/g, "");
+}
+
+function getLaunchOpenAtIso() {
+  return new Date(LAUNCH_OPEN_AT_KST).toISOString();
+}
+
+function getLaunchOpenAtLabel() {
+  return new Date(LAUNCH_OPEN_AT_KST).toLocaleString("ko-KR", {
+    timeZone: SEOUL_TIME_ZONE,
+  });
 }
 
 async function getAdminStats() {
@@ -294,6 +323,49 @@ async function getMarketingStats(period: MarketingPeriod) {
   };
 }
 
+async function getLaunchStats() {
+  const supabase = createAdminClient();
+  const internalAdmins = await getInternalAdminUsers();
+  const internalAdminIds = new Set(internalAdmins.map((user) => user.id));
+  const launchStartIso = getLaunchOpenAtIso();
+
+  const [{ data: sessions }, { data: users }, { data: payments }] = await Promise.all([
+    supabase
+      .from("marketing_sessions")
+      .select("cta_clicks, first_seen_at")
+      .gte("first_seen_at", launchStartIso),
+    supabase.from("users").select("id, created_at").gte("created_at", launchStartIso),
+    supabase
+      .from("toss_payments")
+      .select("id, amount, created_at, user_id, status, metadata")
+      .gte("created_at", launchStartIso),
+  ]);
+
+  const launchPayments = ((payments || []) as LaunchPaymentRow[]).filter(
+    (payment) =>
+      !internalAdminIds.has(payment.user_id) &&
+      payment.metadata?.provider === "tosspay-direct",
+  );
+  const launchSessions = (sessions || []) as Array<Pick<MarketingSessionRow, "cta_clicks" | "first_seen_at">>;
+  const launchUsers = ((users || []) as UserRow[]).filter((user) => !internalAdminIds.has(user.id));
+  const completedPayments = launchPayments.filter((payment) =>
+    (SALES_STATUSES as readonly string[]).includes(payment.status),
+  );
+  const pendingPayments = launchPayments.filter((payment) => payment.status === "PENDING");
+
+  return {
+    openedAtLabel: getLaunchOpenAtLabel(),
+    landingSessions: launchSessions.length,
+    ctaUnique: launchSessions.filter((session) => (session.cta_clicks || 0) > 0).length,
+    ctaClicks: launchSessions.reduce((sum, session) => sum + (session.cta_clicks || 0), 0),
+    signups: launchUsers.length,
+    paymentAttempts: launchPayments.length,
+    paymentPending: pendingPayments.length,
+    paymentCompleted: completedPayments.length,
+    revenue: completedPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0),
+  };
+}
+
 export default async function AdminOverviewPage({
   searchParams,
 }: {
@@ -301,7 +373,11 @@ export default async function AdminOverviewPage({
 }) {
   const { period } = await searchParams;
   const marketingPeriod = normalizeMarketingPeriod(period);
-  const [stats, marketing] = await Promise.all([getAdminStats(), getMarketingStats(marketingPeriod)]);
+  const [stats, marketing, launch] = await Promise.all([
+    getAdminStats(),
+    getMarketingStats(marketingPeriod),
+    getLaunchStats(),
+  ]);
   const conversionRate = stats.totalUsers > 0 ? (stats.paidUsers / stats.totalUsers) * 100 : 0;
 
   return (
@@ -363,6 +439,94 @@ export default async function AdminOverviewPage({
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">런칭 기준 현황</h2>
+          <p className="text-xs text-muted-foreground">
+            {launch.openedAtLabel} 오픈 이후, TossPay Direct만 집계한 숫자입니다.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">런칭 이후 랜딩</CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{launch.landingSessions}</div>
+              <p className="text-xs text-muted-foreground">오픈 이후 누적 방문 세션</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">런칭 이후 CTA</CardTitle>
+              <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{launch.ctaUnique}</div>
+              <p className="text-xs text-muted-foreground">유니크 {launch.ctaUnique} / 총 클릭 {launch.ctaClicks}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">런칭 이후 가입</CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{launch.signups}</div>
+              <p className="text-xs text-muted-foreground">내부 관리자 제외 신규 가입</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">결제 시도</CardTitle>
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{launch.paymentAttempts}</div>
+              <p className="text-xs text-muted-foreground">TossPay Direct 생성 주문</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">PENDING</CardTitle>
+              <Clock3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{launch.paymentPending}</div>
+              <p className="text-xs text-muted-foreground">결제창 진입 후 미완료 상태</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">결제 완료</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{launch.paymentCompleted}</div>
+              <p className="text-xs text-muted-foreground">DONE / PARTIAL_CANCELLED 기준</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">런칭 매출</CardTitle>
+              <Coins className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{formatCurrency(launch.revenue)}</div>
+              <p className="text-xs text-muted-foreground">TossPay Direct 완료 기준</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="space-y-3">

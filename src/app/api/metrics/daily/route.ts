@@ -5,6 +5,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
+const LAUNCH_OPEN_AT_KST = "2026-04-24T17:00:00+09:00";
 
 type SalesStatus = (typeof SALES_STATUSES)[number];
 
@@ -24,6 +25,11 @@ interface MarketingSessionRow {
 }
 
 interface FeedbackRow {
+  id: string;
+  created_at: string;
+}
+
+interface UserRow {
   id: string;
   created_at: string;
 }
@@ -82,6 +88,10 @@ function getKstBackRange(days: number) {
     startIso: start.toISOString(),
     endIso: end.toISOString(),
   };
+}
+
+function getLaunchOpenAtIso() {
+  return new Date(LAUNCH_OPEN_AT_KST).toISOString();
 }
 
 function getNumericMetadata(metadata: Record<string, unknown> | null, key: string) {
@@ -198,6 +208,7 @@ export async function GET(request: NextRequest) {
     const yesterday = getKstDayRange(-1);
     const last7 = getKstBackRange(7);
     const last30 = getKstBackRange(30);
+    const launchOpenAtIso = getLaunchOpenAtIso();
 
     const paymentSelect = "id, amount, created_at, user_id, status, metadata";
 
@@ -211,6 +222,9 @@ export async function GET(request: NextRequest) {
       { data: m30Payments },
       { data: m30Sessions },
       { data: m30Inquiries },
+      { data: launchPaymentsRaw },
+      { data: launchSessionsRaw },
+      { data: launchUsersRaw },
     ] = await Promise.all([
       admin
         .from("toss_payments")
@@ -257,6 +271,15 @@ export async function GET(request: NextRequest) {
         .select("id, created_at")
         .gte("created_at", last30.startIso)
         .lt("created_at", last30.endIso),
+      admin
+        .from("toss_payments")
+        .select(paymentSelect)
+        .gte("created_at", launchOpenAtIso),
+      admin
+        .from("marketing_sessions")
+        .select("cta_clicks, referrer, first_seen_at")
+        .gte("first_seen_at", launchOpenAtIso),
+      admin.from("users").select("id, created_at").gte("created_at", launchOpenAtIso),
     ]);
 
     const filterPayments = (rows: PaymentRow[] | null) =>
@@ -281,6 +304,18 @@ export async function GET(request: NextRequest) {
       includeSalesAmount: true,
     });
 
+    const launchPayments = filterPayments(launchPaymentsRaw as PaymentRow[] | null).filter(
+      (payment) => payment.metadata?.provider === "tosspay-direct",
+    );
+    const launchSessions = (launchSessionsRaw || []) as MarketingSessionRow[];
+    const launchUsers = ((launchUsersRaw || []) as UserRow[]).filter(
+      (user) => !internalIds.has(user.id),
+    );
+    const launchCompletedRows = launchPayments.filter((payment) =>
+      (SALES_STATUSES as readonly string[]).includes(payment.status),
+    );
+    const launchPendingRows = launchPayments.filter((payment) => payment.status === "PENDING");
+
     return NextResponse.json({
       generated_at: new Date().toISOString(),
       timezone: SEOUL_TIME_ZONE,
@@ -302,10 +337,27 @@ export async function GET(request: NextRequest) {
           ...last30Data,
         },
       },
+      launch_since_open: {
+        start: launchOpenAtIso,
+        landing: launchSessions.length,
+        cta_unique: launchSessions.filter((session) => (session.cta_clicks || 0) > 0).length,
+        cta_clicks: launchSessions.reduce((sum, session) => sum + (session.cta_clicks || 0), 0),
+        signups: launchUsers.length,
+        payment_attempts: launchPayments.length,
+        payment_pending: launchPendingRows.length,
+        payment_completed: launchCompletedRows.length,
+        sales_amount_krw: launchCompletedRows.reduce(
+          (sum, payment) => sum + getNetRevenue(payment),
+          0,
+        ),
+        referrer_top: countReferrerTop(launchSessions, 4),
+        payment_provider: "tosspay-direct",
+      },
       notes: {
         internal_emails_excluded: internalAdmins.length,
         sales_filter: "DONE + PARTIAL_CANCELLED",
         refunds_filter: "status CANCELED (created_at in period)",
+        launch_basis: "2026-04-24 17:00 KST open, TossPay Direct only",
       },
     });
   } catch (error) {
