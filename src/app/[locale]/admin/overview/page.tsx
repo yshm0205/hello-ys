@@ -17,10 +17,28 @@ const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
 const LAUNCH_OPEN_AT_KST = "2026-04-24T17:00:00+09:00";
 const PERIOD_CONFIG = {
+  launch: { label: "런칭 이후", caption: "오픈 이후 누적" },
   today: { label: "오늘", caption: "오늘 기준" },
   "7d": { label: "최근 7일", caption: "최근 7일 기준" },
   "30d": { label: "최근 30일", caption: "최근 30일 기준" },
 } as const;
+const LAUNCH_CHANGES = [
+  {
+    happenedAt: "4/25 새벽",
+    title: "로그인/회원가입 후 체크아웃 복귀 수정",
+    watch: "CTA → 결제 시도",
+  },
+  {
+    happenedAt: "4/26 오전",
+    title: "전자책 쿠폰 EBOOK50 적용",
+    watch: "결제 시도 / 결제 완료",
+  },
+  {
+    happenedAt: "4/26 저녁",
+    title: "로그인·회원가입 화면 압축 및 문구 보강",
+    watch: "CTA → 결제 시도",
+  },
+] as const;
 
 type MarketingPeriod = keyof typeof PERIOD_CONFIG;
 
@@ -75,6 +93,13 @@ function getKstDayRange(dayOffset = 0) {
 }
 
 function getPeriodRange(period: MarketingPeriod) {
+  if (period === "launch") {
+    return {
+      startIso: getLaunchOpenAtIso(),
+      endIso: new Date().toISOString(),
+    };
+  }
+
   if (period === "today") {
     return getKstDayRange();
   }
@@ -93,7 +118,7 @@ function getPeriodRange(period: MarketingPeriod) {
 }
 
 function normalizeMarketingPeriod(value?: string): MarketingPeriod {
-  if (value === "7d" || value === "30d") return value;
+  if (value === "launch" || value === "7d" || value === "30d") return value;
   return "today";
 }
 
@@ -190,50 +215,6 @@ async function getInternalAdminIdSet() {
   return new Set(internalAdmins.map((user) => user.id));
 }
 
-async function getLaunchStats() {
-  const supabase = createAdminClient();
-  const internalAdminIds = await getInternalAdminIdSet();
-  const launchStartIso = getLaunchOpenAtIso();
-
-  const [{ data: sessions }, { data: users }, { data: payments }] = await Promise.all([
-    supabase
-      .from("marketing_sessions")
-      .select("cta_clicks, referrer, first_seen_at")
-      .gte("first_seen_at", launchStartIso),
-    supabase.from("users").select("id, created_at").gte("created_at", launchStartIso),
-    supabase
-      .from("toss_payments")
-      .select("id, amount, created_at, user_id, status, metadata")
-      .gte("created_at", launchStartIso),
-  ]);
-
-  const launchSessions = (sessions || []) as MarketingSessionRow[];
-  const launchUsers = ((users || []) as UserRow[]).filter((user) => !internalAdminIds.has(user.id));
-  const launchPayments = ((payments || []) as PaymentRow[]).filter(
-    (payment) =>
-      !internalAdminIds.has(payment.user_id) &&
-      payment.metadata?.provider === "tosspay-direct",
-  );
-
-  const completedPayments = launchPayments.filter((payment) =>
-    (SALES_STATUSES as readonly string[]).includes(payment.status),
-  );
-  const pendingPayments = launchPayments.filter((payment) => payment.status === "PENDING");
-
-  return {
-    openedAtLabel: getLaunchOpenAtLabel(),
-    landingSessions: launchSessions.length,
-    ctaUnique: launchSessions.filter((session) => (session.cta_clicks || 0) > 0).length,
-    ctaClicks: launchSessions.reduce((sum, session) => sum + (session.cta_clicks || 0), 0),
-    signups: launchUsers.length,
-    paymentAttempts: launchPayments.length,
-    paymentPending: pendingPayments.length,
-    paymentCompleted: completedPayments.length,
-    revenue: completedPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0),
-    topReferrers: summarizeReferrers(launchSessions, 3),
-  };
-}
-
 async function getPeriodStats(period: MarketingPeriod) {
   const supabase = createAdminClient();
   const internalAdminIds = await getInternalAdminIdSet();
@@ -268,14 +249,19 @@ async function getPeriodStats(period: MarketingPeriod) {
   const completedPayments = periodPayments.filter((payment) =>
     (SALES_STATUSES as readonly string[]).includes(payment.status),
   );
+  const pendingPayments = periodPayments.filter((payment) => payment.status === "PENDING");
 
   return {
+    openedAtLabel: getLaunchOpenAtLabel(),
     landingSessions: periodSessions.length,
     ctaUnique: periodSessions.filter((session) => (session.cta_clicks || 0) > 0).length,
+    ctaClicks: periodSessions.reduce((sum, session) => sum + (session.cta_clicks || 0), 0),
     signups: periodUsers.length,
     paymentAttempts: periodPayments.length,
+    paymentPending: pendingPayments.length,
     paymentCompleted: completedPayments.length,
     revenue: completedPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0),
+    topReferrers: summarizeReferrers(periodSessions, 3),
   };
 }
 
@@ -286,27 +272,67 @@ export default async function AdminOverviewPage({
 }) {
   const { period } = await searchParams;
   const marketingPeriod = normalizeMarketingPeriod(period);
-  const [launch, periodStats] = await Promise.all([
-    getLaunchStats(),
-    getPeriodStats(marketingPeriod),
-  ]);
-
+  const periodStats = await getPeriodStats(marketingPeriod);
   const periodConfig = PERIOD_CONFIG[marketingPeriod];
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-3">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">개요</h1>
         <p className="text-sm text-muted-foreground">
-          런칭 이후 퍼널과 기간별 핵심 숫자만 빠르게 보는 화면입니다.
+          선택한 기간 기준 퍼널과 핵심 숫자만 빠르게 보는 화면입니다.
         </p>
+        <div className="inline-flex rounded-lg border bg-background p-1">
+          {Object.entries(PERIOD_CONFIG).map(([key, config]) => {
+            const active = key === marketingPeriod;
+            return (
+              <Link
+                key={key}
+                href={`/admin/overview?period=${key}`}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {config.label}
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-3">
         <div>
-          <h2 className="text-base font-semibold text-foreground">런칭 퍼널</h2>
+          <h2 className="text-base font-semibold text-foreground">주요 수정</h2>
           <p className="text-xs text-muted-foreground">
-            {launch.openedAtLabel} 오픈 이후 · TossPay Direct · 내부 계정 제외
+            수정 직후에는 아래 지표가 같이 움직이는지 먼저 보면 됩니다.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {LAUNCH_CHANGES.map((change) => (
+            <Card key={`${change.happenedAt}-${change.title}`}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">{change.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                <p className="text-xs font-medium text-foreground">{change.happenedAt}</p>
+                <p className="text-xs text-muted-foreground">봐야 할 지표: {change.watch}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">{periodConfig.label} 퍼널</h2>
+          <p className="text-xs text-muted-foreground">
+            {marketingPeriod === "launch"
+              ? `${periodStats.openedAtLabel} 오픈 이후`
+              : periodConfig.caption}{" "}
+            · TossPay Direct · 내부 계정 제외
           </p>
         </div>
 
@@ -317,8 +343,8 @@ export default async function AdminOverviewPage({
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{launch.landingSessions}</div>
-              <p className="text-xs text-muted-foreground">오픈 이후 누적 방문 세션</p>
+              <div className="text-2xl font-bold text-foreground">{periodStats.landingSessions}</div>
+              <p className="text-xs text-muted-foreground">{periodConfig.caption} 방문 세션</p>
             </CardContent>
           </Card>
 
@@ -328,8 +354,8 @@ export default async function AdminOverviewPage({
               <MousePointerClick className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{launch.ctaUnique}</div>
-              <p className="text-xs text-muted-foreground">총 클릭 {launch.ctaClicks}</p>
+              <div className="text-2xl font-bold text-foreground">{periodStats.ctaUnique}</div>
+              <p className="text-xs text-muted-foreground">총 클릭 {periodStats.ctaClicks}</p>
             </CardContent>
           </Card>
 
@@ -339,7 +365,7 @@ export default async function AdminOverviewPage({
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{launch.paymentAttempts}</div>
+              <div className="text-2xl font-bold text-foreground">{periodStats.paymentAttempts}</div>
               <p className="text-xs text-muted-foreground">TossPay Direct 생성 주문</p>
             </CardContent>
           </Card>
@@ -350,7 +376,7 @@ export default async function AdminOverviewPage({
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{launch.paymentCompleted}</div>
+              <div className="text-2xl font-bold text-foreground">{periodStats.paymentCompleted}</div>
               <p className="text-xs text-muted-foreground">DONE / PARTIAL_CANCELLED 기준</p>
             </CardContent>
           </Card>
@@ -361,7 +387,7 @@ export default async function AdminOverviewPage({
               <Coins className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{formatCurrency(launch.revenue)}</div>
+              <div className="text-2xl font-bold text-foreground">{formatCurrency(periodStats.revenue)}</div>
               <p className="text-xs text-muted-foreground">완료 결제 기준</p>
             </CardContent>
           </Card>
@@ -381,10 +407,10 @@ export default async function AdminOverviewPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {getRate(launch.ctaUnique, launch.landingSessions)}%
+                {getRate(periodStats.ctaUnique, periodStats.landingSessions)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                {launch.landingSessions}명 중 {launch.ctaUnique}명
+                {periodStats.landingSessions}명 중 {periodStats.ctaUnique}명
               </p>
             </CardContent>
           </Card>
@@ -395,10 +421,10 @@ export default async function AdminOverviewPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {getRate(launch.paymentAttempts, launch.ctaUnique)}%
+                {getRate(periodStats.paymentAttempts, periodStats.ctaUnique)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                {launch.ctaUnique}명 중 {launch.paymentAttempts}건
+                {periodStats.ctaUnique}명 중 {periodStats.paymentAttempts}건
               </p>
             </CardContent>
           </Card>
@@ -409,10 +435,10 @@ export default async function AdminOverviewPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {getRate(launch.paymentCompleted, launch.paymentAttempts)}%
+                {getRate(periodStats.paymentCompleted, periodStats.paymentAttempts)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                {launch.paymentAttempts}건 중 {launch.paymentCompleted}건
+                {periodStats.paymentAttempts}건 중 {periodStats.paymentCompleted}건
               </p>
             </CardContent>
           </Card>
@@ -428,11 +454,11 @@ export default async function AdminOverviewPage({
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">런칭 이후 가입</CardTitle>
+              <CardTitle className="text-sm font-medium">{periodConfig.label} 가입</CardTitle>
               <UserPlus className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{launch.signups}</div>
+              <div className="text-2xl font-bold text-foreground">{periodStats.signups}</div>
               <p className="text-xs text-muted-foreground">내부 관리자 제외 신규 가입</p>
             </CardContent>
           </Card>
@@ -443,7 +469,7 @@ export default async function AdminOverviewPage({
               <Clock3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{launch.paymentPending}</div>
+              <div className="text-2xl font-bold text-foreground">{periodStats.paymentPending}</div>
               <p className="text-xs text-muted-foreground">결제창 진입 후 아직 완료 안 된 건</p>
             </CardContent>
           </Card>
@@ -453,7 +479,7 @@ export default async function AdminOverviewPage({
               <CardTitle className="text-sm font-medium">주요 유입</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {launch.topReferrers.map((referrer) => (
+              {periodStats.topReferrers.map((referrer) => (
                 <div
                   key={referrer.source}
                   className="flex items-center justify-between text-sm text-foreground"
@@ -462,135 +488,9 @@ export default async function AdminOverviewPage({
                   <span className="font-medium">{referrer.count}</span>
                 </div>
               ))}
-              {!launch.topReferrers.length && (
+              {!periodStats.topReferrers.length && (
                 <p className="text-xs text-muted-foreground">아직 유입 데이터가 없습니다.</p>
               )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">{periodConfig.label} 핵심 숫자</h2>
-            <p className="text-xs text-muted-foreground">{periodConfig.caption} 그래프 없이 숫자로만 봅니다.</p>
-          </div>
-
-          <div className="inline-flex rounded-lg border bg-background p-1">
-            {Object.entries(PERIOD_CONFIG).map(([key, config]) => {
-              const active = key === marketingPeriod;
-              return (
-                <Link
-                  key={key}
-                  href={`/admin/overview?period=${key}`}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-foreground text-background"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {config.label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">랜딩 방문</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{periodStats.landingSessions}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">CTA 유니크</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{periodStats.ctaUnique}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">신규 가입</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{periodStats.signups}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">결제 시도</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{periodStats.paymentAttempts}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">결제 완료</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{periodStats.paymentCompleted}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">매출</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{formatCurrency(periodStats.revenue)}</div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">{periodConfig.label} 전환율</h2>
-          <p className="text-xs text-muted-foreground">랜딩 기준과 결제 기준을 같이 봅니다.</p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">랜딩 → CTA</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.ctaUnique, periodStats.landingSessions)}%
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">랜딩 → 결제 완료</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.paymentCompleted, periodStats.landingSessions)}%
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">결제 시도 → 완료</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.paymentCompleted, periodStats.paymentAttempts)}%
-              </div>
             </CardContent>
           </Card>
         </div>
