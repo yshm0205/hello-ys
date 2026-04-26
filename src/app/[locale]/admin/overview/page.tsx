@@ -298,7 +298,7 @@ export default async function AdminOverviewPage({
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">개요</h1>
         <p className="text-sm text-muted-foreground">
-          런칭 이후 퍼널과 최근 추세를 한눈에 보는 화면입니다.
+          런칭 이후 퍼널과 기간별 핵심 숫자만 빠르게 보는 화면입니다.
         </p>
       </div>
 
@@ -473,8 +473,8 @@ export default async function AdminOverviewPage({
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-foreground">{periodConfig.label} 추세</h2>
-            <p className="text-xs text-muted-foreground">{periodConfig.caption} 흐름입니다.</p>
+            <h2 className="text-base font-semibold text-foreground">{periodConfig.label} 핵심 숫자</h2>
+            <p className="text-xs text-muted-foreground">{periodConfig.caption} 그래프 없이 숫자로만 봅니다.</p>
           </div>
 
           <div className="inline-flex rounded-lg border bg-background p-1">
