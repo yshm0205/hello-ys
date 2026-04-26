@@ -19,6 +19,7 @@ import { Mail, Lock, AlertCircle, Check } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import {
   loginWithGoogle,
+  loginWithKakao,
   loginWithMagicLink,
   signUpWithEmailPassword,
 } from '@/services/auth/actions';
@@ -30,6 +31,7 @@ export function SignupContent() {
   const [isMagicLoading, setIsMagicLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false);
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get('redirect');
   const redirectTarget =
@@ -46,6 +48,34 @@ export function SignupContent() {
   const googleButtonLabel = locale === 'en' ? 'Continue with Google' : 'Google로 계속하기';
   const passwordButtonLabel = locale === 'en' ? 'Sign up with email' : '이메일로 회원가입';
   const magicLinkButtonLabel = locale === 'en' ? 'Get a sign-up link by email' : '이메일 링크로 가입';
+
+  const kakaoButtonLabel = locale === 'en' ? 'Continue with Kakao' : 'Kakao로 계속하기';
+
+  const handleKakaoSignup = async () => {
+    setIsKakaoLoading(true);
+    setMessage(null);
+    try {
+      const result = await loginWithKakao(redirectTarget);
+      if (result?.error) {
+        setMessage({ type: 'error', text: result.error });
+        setIsKakaoLoading(false);
+      }
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'digest' in error &&
+        typeof (error as { digest: string }).digest === 'string' &&
+        (error as { digest: string }).digest.includes('NEXT_REDIRECT')
+      )
+        return;
+      setMessage({
+        type: 'error',
+        text: '카카오 회원가입에 실패했습니다. 다시 시도해 주세요.',
+      });
+      setIsKakaoLoading(false);
+    }
+  };
 
   const handleGoogleSignup = async () => {
     setIsGoogleLoading(true);
@@ -226,6 +256,32 @@ export function SignupContent() {
                 </Text>
               )}
             </Stack>
+
+            <Button
+              size="md"
+              radius="md"
+              fullWidth
+              onClick={handleKakaoSignup}
+              loading={isKakaoLoading}
+              leftSection={
+                !isKakaoLoading && (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 4C7.029 4 3 7.134 3 10.999c0 2.412 1.567 4.538 3.95 5.799L6.15 20l3.91-2.513c.628.089 1.277.136 1.94.136 4.971 0 9-3.134 9-7C21 7.134 16.971 4 12 4Z"
+                      fill="#191600"
+                    />
+                  </svg>
+                )
+              }
+              style={{
+                fontWeight: 700,
+                height: 46,
+                background: '#FEE500',
+                color: '#191600',
+              }}
+            >
+              {kakaoButtonLabel}
+            </Button>
 
             <Button
               size="md"
