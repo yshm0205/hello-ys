@@ -40,7 +40,8 @@ const LAUNCH_CHANGES = [
   },
 ] as const;
 
-type MarketingPeriod = keyof typeof PERIOD_CONFIG;
+type PresetMarketingPeriod = keyof typeof PERIOD_CONFIG;
+type MarketingPeriod = PresetMarketingPeriod | "custom";
 
 interface MarketingSessionRow {
   cta_clicks: number | null;
@@ -92,7 +93,44 @@ function getKstDayRange(dayOffset = 0) {
   };
 }
 
-function getPeriodRange(period: MarketingPeriod) {
+function isValidDateInput(value?: string) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function hasOrderedDateRange(startDate?: string, endDate?: string) {
+  if (!isValidDateInput(startDate) || !isValidDateInput(endDate)) {
+    return false;
+  }
+
+  return (startDate as string) <= (endDate as string);
+}
+
+function getDateInputValueFromIso(dateIso: string, subtractDays = 0) {
+  const date = new Date(dateIso);
+  if (subtractDays) {
+    date.setUTCDate(date.getUTCDate() - subtractDays);
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: SEOUL_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function getPeriodRange(period: MarketingPeriod, startDate?: string, endDate?: string) {
+  if (period === "custom" && hasOrderedDateRange(startDate, endDate)) {
+    const start = new Date(`${startDate}T00:00:00+09:00`);
+    const end = new Date(`${endDate}T00:00:00+09:00`);
+    end.setUTCDate(end.getUTCDate() + 1);
+
+    return {
+      startIso: start.toISOString(),
+      endIso: end.toISOString(),
+    };
+  }
+
   if (period === "launch") {
     return {
       startIso: getLaunchOpenAtIso(),
@@ -117,9 +155,21 @@ function getPeriodRange(period: MarketingPeriod) {
   };
 }
 
-function normalizeMarketingPeriod(value?: string): MarketingPeriod {
+function normalizeMarketingPeriod(value?: string, startDate?: string, endDate?: string): MarketingPeriod {
+  if (hasOrderedDateRange(startDate, endDate)) return "custom";
   if (value === "launch" || value === "7d" || value === "30d") return value;
   return "today";
+}
+
+function getPeriodMeta(period: MarketingPeriod, startDate?: string, endDate?: string) {
+  if (period === "custom" && hasOrderedDateRange(startDate, endDate)) {
+    return {
+      label: "직접 선택",
+      caption: `${startDate as string} ~ ${endDate as string}`,
+    };
+  }
+
+  return PERIOD_CONFIG[period as PresetMarketingPeriod];
 }
 
 function getLaunchOpenAtIso() {
@@ -215,10 +265,10 @@ async function getInternalAdminIdSet() {
   return new Set(internalAdmins.map((user) => user.id));
 }
 
-async function getPeriodStats(period: MarketingPeriod) {
+async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDate?: string) {
   const supabase = createAdminClient();
   const internalAdminIds = await getInternalAdminIdSet();
-  const range = getPeriodRange(period);
+  const range = getPeriodRange(period, startDate, endDate);
 
   const [{ data: sessions }, { data: users }, { data: payments }] = await Promise.all([
     supabase
@@ -268,12 +318,21 @@ async function getPeriodStats(period: MarketingPeriod) {
 export default async function AdminOverviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string }>;
+  searchParams: Promise<{ period?: string; start?: string; end?: string }>;
 }) {
-  const { period } = await searchParams;
-  const marketingPeriod = normalizeMarketingPeriod(period);
-  const periodStats = await getPeriodStats(marketingPeriod);
-  const periodConfig = PERIOD_CONFIG[marketingPeriod];
+  const { period, start, end } = await searchParams;
+  const marketingPeriod = normalizeMarketingPeriod(period, start, end);
+  const periodStats = await getPeriodStats(marketingPeriod, start, end);
+  const periodConfig = getPeriodMeta(marketingPeriod, start, end);
+  const activeRange = getPeriodRange(marketingPeriod, start, end);
+  const dateFromValue =
+    marketingPeriod === "custom" && isValidDateInput(start)
+      ? start
+      : getDateInputValueFromIso(activeRange.startIso);
+  const dateToValue =
+    marketingPeriod === "custom" && isValidDateInput(end)
+      ? end
+      : getDateInputValueFromIso(activeRange.endIso, 1);
 
   return (
     <div className="space-y-6">
@@ -282,23 +341,53 @@ export default async function AdminOverviewPage({
         <p className="text-sm text-muted-foreground">
           선택한 기간 기준 퍼널과 핵심 숫자만 빠르게 보는 화면입니다.
         </p>
-        <div className="inline-flex rounded-lg border bg-background p-1">
-          {Object.entries(PERIOD_CONFIG).map(([key, config]) => {
-            const active = key === marketingPeriod;
-            return (
-              <Link
-                key={key}
-                href={`/admin/overview?period=${key}`}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {config.label}
-              </Link>
-            );
-          })}
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="inline-flex rounded-lg border bg-background p-1">
+            {Object.entries(PERIOD_CONFIG).map(([key, config]) => {
+              const active = key === marketingPeriod;
+              return (
+                <Link
+                  key={key}
+                  href={`/admin/overview?period=${key}`}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {config.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <form method="get" className="flex flex-wrap items-end gap-2">
+            <input type="hidden" name="period" value="custom" />
+            <label className="grid gap-1 text-xs text-muted-foreground">
+              시작일
+              <input
+                type="date"
+                name="start"
+                defaultValue={dateFromValue}
+                className="h-9 rounded-md border bg-background px-3 text-sm text-foreground"
+              />
+            </label>
+            <label className="grid gap-1 text-xs text-muted-foreground">
+              종료일
+              <input
+                type="date"
+                name="end"
+                defaultValue={dateToValue}
+                className="h-9 rounded-md border bg-background px-3 text-sm text-foreground"
+              />
+            </label>
+            <button
+              type="submit"
+              className="h-9 rounded-md bg-foreground px-3 text-sm font-medium text-background"
+            >
+              적용
+            </button>
+          </form>
         </div>
       </div>
 
