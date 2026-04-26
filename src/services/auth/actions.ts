@@ -4,6 +4,7 @@ import { resolvePostLoginRedirectPath } from "@/lib/plans/server";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import type { Provider } from "@supabase/supabase-js";
 
 function sanitizeNextPath(nextPath?: string | null) {
   if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
@@ -14,10 +15,13 @@ function sanitizeNextPath(nextPath?: string | null) {
 }
 
 /**
- * Initiates the Google OAuth flow.
- * It redirects the user to Google's login page.
+ * Initiates an OAuth flow and redirects the user to the provider's login page.
  */
-export async function loginWithGoogle(nextPath?: string) {
+async function loginWithOAuthProvider(
+  provider: Provider,
+  nextPath?: string,
+  queryParams?: Record<string, string>
+) {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
   const next = sanitizeNextPath(nextPath);
@@ -26,24 +30,39 @@ export async function loginWithGoogle(nextPath?: string) {
     : `${origin}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
+    provider,
     options: {
       redirectTo: callbackUrl,
-      queryParams: {
-        prompt: "select_account",
-      },
+      queryParams,
     },
   });
 
   if (error) {
-    console.error("Google Login Error:", error);
-    // In a real app, you might return an error state
+    console.error(`${provider} Login Error:`, error);
     return { error: error.message };
   }
 
   if (data.url) {
     redirect(data.url);
   }
+}
+
+/**
+ * Initiates the Google OAuth flow.
+ * It redirects the user to Google's login page.
+ */
+export async function loginWithGoogle(nextPath?: string) {
+  return loginWithOAuthProvider("google", nextPath, {
+    prompt: "select_account",
+  });
+}
+
+/**
+ * Initiates the Kakao OAuth flow.
+ * It redirects the user to Kakao's login page.
+ */
+export async function loginWithKakao(nextPath?: string) {
+  return loginWithOAuthProvider("kakao", nextPath);
 }
 
 /**

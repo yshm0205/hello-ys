@@ -7,7 +7,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Form,
   FormControl,
@@ -24,7 +24,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { loginWithGoogle, loginWithMagicLink } from "@/services/auth/actions";
+import {
+  loginWithGoogle,
+  loginWithKakao,
+  loginWithMagicLink,
+} from "@/services/auth/actions";
 import { Loader2 } from "lucide-react";
 
 // 1. Zod Schema Definition
@@ -34,6 +38,7 @@ const formSchema = z.object({
 
 export function AuthForm() {
   const t = useTranslations("Auth");
+  const locale = useLocale();
   const [message, setMessage] = useState<string | null>(null);
 
   // 2. Form Hook Initialization
@@ -64,6 +69,10 @@ export function AuthForm() {
     await loginWithGoogle();
   };
 
+  const handleKakaoLogin = async () => {
+    await loginWithKakao();
+  };
+
   return (
     <Card className="w-[380px]">
       <CardHeader>
@@ -71,6 +80,21 @@ export function AuthForm() {
         <CardDescription>{t("loginDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
+        {/* Kakao Login Button */}
+        <Button
+          onClick={handleKakaoLogin}
+          className="w-full bg-[#FEE500] text-[#191600] hover:bg-[#FADA0A]"
+          type="button"
+        >
+          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 4C7.029 4 3 7.134 3 10.999c0 2.412 1.567 4.538 3.95 5.799L6.15 20l3.91-2.513c.628.089 1.277.136 1.94.136 4.971 0 9-3.134 9-7C21 7.134 16.971 4 12 4Z"
+              fill="#191600"
+            />
+          </svg>
+          {locale === "en" ? "Continue with Kakao" : "Kakao로 계속하기"}
+        </Button>
+
         {/* Google Login Button */}
         <Button
           variant="outline"
