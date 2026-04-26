@@ -454,16 +454,22 @@ function buildReport({ yesterdayLabel, summaryYesterday, summary7d, summary30d, 
 }
 
 async function sendTelegramMessage(botToken, chatId, text) {
-  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const body = Buffer.from(
+    JSON.stringify({
       chat_id: chatId,
       text,
       disable_web_page_preview: true,
     }),
+    "utf8",
+  );
+
+  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Content-Length": String(body.byteLength),
+    },
+    body,
   });
 
   if (!response.ok) {
