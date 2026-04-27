@@ -3336,7 +3336,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
       : '정가로 신청하기';
   const stage1Status: EbTierProps['status'] = phase1IsLive ? 'live' : 'end';
   const stage1StatusText = phase1IsLive
-    ? 'LIVE · 진행 중'
+    ? '마감 임박'
     : '1차 혜택 종료';
   const stage1Variant: EbTierProps['variant'] = phase1IsLive ? 'active' : 'dim';
   const stage2Status: EbTierProps['status'] = phase1IsLive ? 'wait' : phase2IsLive ? 'live' : 'end';
@@ -3391,37 +3391,19 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
             alignItems: 'flex-start',
           }}>
             <Box style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? 0 : 24 }}>
-              <Box style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
-                <Box style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '7px 14px', borderRadius: 999,
-                  background: 'rgba(139,92,246,.12)',
-                  border: '1px solid rgba(139,92,246,.25)',
-                  fontSize: 12, fontWeight: 800, color: '#a78bfa',
-                  letterSpacing: '-0.01em',
-                }}>
-                  <span style={{
-                    width: 6, height: 6, borderRadius: '50%', background: '#a78bfa',
-                    animation: 'ebPulse 1.4s infinite',
-                  }} />
-                  All-in-One Pass · {currentStageLabel}
-                </Box>
-                {phase1IsLive && (
-                  <Box style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '7px 12px', borderRadius: 999,
-                    background: 'rgba(245,158,11,.14)',
-                    border: '1px solid rgba(245,158,11,.4)',
-                    fontSize: 12, fontWeight: 800, color: '#fbbf24',
-                    letterSpacing: '-0.01em',
-                  }}>
-                    <span style={{
-                      width: 6, height: 6, borderRadius: '50%', background: '#fbbf24',
-                      animation: 'ebBlink 1.2s infinite',
-                    }} />
-                    마감 임박
-                  </Box>
-                )}
+              <Box style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '7px 14px', borderRadius: 999,
+                background: 'rgba(139,92,246,.12)',
+                border: '1px solid rgba(139,92,246,.25)',
+                fontSize: 12, fontWeight: 800, color: '#a78bfa',
+                letterSpacing: '-0.01em', marginBottom: 18,
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', background: '#a78bfa',
+                  animation: 'ebPulse 1.4s infinite',
+                }} />
+                All-in-One Pass · {currentStageLabel}
               </Box>
               <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 14 }}>
                 {currentStageLabel} · <b style={{ color: '#fff' }}>선착순 모집</b>
