@@ -3449,10 +3449,15 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 tierName={<>1차<em style={{ fontStyle: 'normal', color: '#a78bfa' }}> 얼리버드</em></>}
                 feats={[
                   { ok: true, text: <><b>정가 대비 100,000원 할인</b> · 499,000원</> },
-                  { ok: true, text: <><b>보너스 크레딧 800cr</b> 즉시 지급</> },
+                  { ok: true, text: <>
+                    <b>보너스 크레딧 800cr</b> 즉시 지급
+                    <span style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#a78bfa', marginTop: 3 }}>
+                      78,000원 상당
+                    </span>
+                  </> },
                   { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
                 ]}
-                bonusText={<>+ <b>78,000원</b> 상당</>}
+                bonusText={<>총 <b>178,000원</b> 혜택</>}
                 priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
                 variant={stage1Variant} isMobile={isMobile}
               />
@@ -3462,10 +3467,15 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 tierName="2차 얼리버드"
                 feats={[
                   { ok: true, text: <>정가 대비 100,000원 할인 · 499,000원</> },
-                  { ok: true, text: <>보너스 크레딧 <b>400cr</b> 지급</> },
+                  { ok: true, text: <>
+                    보너스 크레딧 <b>400cr</b> 지급
+                    <span style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#a78bfa', marginTop: 3 }}>
+                      39,000원 상당
+                    </span>
+                  </> },
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
-                bonusText={<>+ <b>39,000원</b> 상당</>}
+                bonusText={<>총 <b>139,000원</b> 혜택</>}
                 priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
                 variant={stage2Variant} isMobile={isMobile}
               />
