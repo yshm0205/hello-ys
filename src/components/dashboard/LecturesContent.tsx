@@ -20,6 +20,7 @@ import {
     Loader,
     Badge,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import {
     ChevronDown,
     ChevronRight,
@@ -54,9 +55,7 @@ const CHAPTERS: Chapter[] = [
     {
         id: 'ch0',
         title: 'Part 0. 소개',
-        vods: [
-            { id: 'vod_01', title: '소개', duration: 8 },
-        ],
+        vods: [{ id: 'vod_01', title: '소개', duration: 8 }],
     },
     {
         id: 'ch1',
@@ -156,13 +155,13 @@ interface LecturesContentProps {
 
 export function LecturesContent({ chapters }: LecturesContentProps) {
     const lectureChapters = chapters?.length ? chapters : CHAPTERS;
+    const isMobile = useMediaQuery('(max-width: 48em)');
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({
         [lectureChapters[0]?.id || 'ch0']: true,
     });
     const [isLoading, setIsLoading] = useState(true);
 
-    // 수강 진도 불러오기
     useEffect(() => {
         async function fetchProgress() {
             try {
@@ -190,7 +189,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
 
     if (isLoading) {
         return (
-            <Container size="md" py="xl">
+            <Container size="md" py={isMobile ? 'lg' : 'xl'}>
                 <Group justify="center" py="xl">
                     <Loader size="md" color="violet" />
                     <Text c="gray.6">강의 목록을 불러오는 중...</Text>
@@ -200,108 +199,180 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
     }
 
     return (
-        <Container size="md" py="md">
-            <Stack gap="xl">
-                {/* 상단: 제목 + 진도 요약 */}
+        <Container size="md" py={isMobile ? 'sm' : 'md'} px={isMobile ? 'sm' : undefined}>
+            <Stack gap={isMobile ? 'lg' : 'xl'}>
                 <Box>
-                    <Group justify="space-between" align="flex-end" mb="md">
+                    <Group
+                        justify="space-between"
+                        align={isMobile ? 'flex-start' : 'flex-end'}
+                        gap={isMobile ? 'sm' : 'md'}
+                        wrap="wrap"
+                        mb="md"
+                    >
                         <Box>
-                            <Group gap="sm" mb={4}>
-                                <BookOpen size={24} color="#8b5cf6" />
-                                <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>
+                            <Group gap={isMobile ? 'xs' : 'sm'} mb={4} wrap="nowrap">
+                                <BookOpen size={isMobile ? 20 : 24} color="#8b5cf6" />
+                                <Title order={isMobile ? 3 : 2} style={{ color: 'var(--mantine-color-text)' }}>
                                     강의실
                                 </Title>
                             </Group>
-                            <Text c="gray.6" size="sm">
+                            <Text c="gray.6" size={isMobile ? 'xs' : 'sm'}>
                                 단계별로 학습하고 FlowSpot으로 실습하세요
                             </Text>
                         </Box>
                         <Badge
-                            size="lg"
+                            size={isMobile ? 'md' : 'lg'}
                             radius="lg"
                             variant="light"
                             color="violet"
-                            style={{ padding: '8px 16px' }}
+                            style={{
+                                padding: isMobile ? '6px 12px' : '8px 16px',
+                                alignSelf: isMobile ? 'flex-start' : undefined,
+                            }}
                         >
                             {completedCount}/{totalVods}강 완료
                         </Badge>
                     </Group>
 
-                    {/* 프로그레스 바 */}
-                    <Card padding="lg" radius="lg" withBorder>
+                    <Card padding={isMobile ? 'md' : 'lg'} radius="lg" withBorder>
                         <Group justify="space-between" mb="xs">
-                            <Text size="sm" fw={500} c="gray.7">
+                            <Text size={isMobile ? 'xs' : 'sm'} fw={500} c="gray.7">
                                 전체 수강 진도
                             </Text>
-                            <Text size="sm" fw={600} c="violet.6">
+                            <Text size={isMobile ? 'xs' : 'sm'} fw={600} c="violet.6">
                                 {progressPercent}%
                             </Text>
                         </Group>
-                        <Progress
-                            value={progressPercent}
-                            color="violet"
-                            size="lg"
-                            radius="xl"
-                        />
+                        <Progress value={progressPercent} color="violet" size="lg" radius="xl" />
                     </Card>
                 </Box>
 
-                {/* 챕터별 아코디언 */}
                 <ReviewEventBanner />
 
                 <Stack gap="md">
                     {lectureChapters.map((chapter) => {
-                        const chapterCompleted = chapter.vods.filter((v) =>
-                            completedVods.includes(v.id)
-                        ).length;
+                        const chapterCompleted = chapter.vods.filter((v) => completedVods.includes(v.id)).length;
+                        const chapterMinutes = chapter.vods.reduce((s, v) => s + v.duration, 0);
                         const isOpen = openChapters[chapter.id] || false;
 
                         return (
                             <Box key={chapter.id}>
                                 <Card padding={0} radius="lg" withBorder>
-                                    {/* 챕터 헤더 */}
                                     <UnstyledButton
                                         onClick={() => toggleChapter(chapter.id)}
                                         style={{ width: '100%' }}
-                                        p="md"
+                                        p={isMobile ? 'sm' : 'md'}
                                     >
-                                        <Group justify="space-between">
-                                            <Group gap="sm">
+                                        <Group
+                                            justify="space-between"
+                                            align={isMobile ? 'flex-start' : 'center'}
+                                            gap={isMobile ? 'xs' : 'sm'}
+                                            wrap="nowrap"
+                                        >
+                                            <Group
+                                                gap={isMobile ? 'xs' : 'sm'}
+                                                align="flex-start"
+                                                wrap="nowrap"
+                                                style={{ flex: 1, minWidth: 0 }}
+                                            >
                                                 {isOpen ? (
                                                     <ChevronDown size={20} color="#6b7280" />
                                                 ) : (
                                                     <ChevronRight size={20} color="#6b7280" />
                                                 )}
-                                                <Text fw={600} size="md" style={{ color: 'var(--mantine-color-text)' }}>
-                                                    {chapter.title}
-                                                </Text>
-                                                <Badge
-                                                    variant="light"
-                                                    color={
-                                                        chapterCompleted === chapter.vods.length
-                                                            ? 'green'
-                                                            : 'gray'
-                                                    }
-                                                    size="sm"
-                                                >
-                                                    {chapterCompleted}/{chapter.vods.length}
-                                                </Badge>
+                                                <Box style={{ flex: 1, minWidth: 0 }}>
+                                                    <Group gap="xs" wrap="wrap" align="center" mb={isMobile ? 4 : 0}>
+                                                        <Text
+                                                            fw={600}
+                                                            size={isMobile ? 'sm' : 'md'}
+                                                            style={{
+                                                                color: 'var(--mantine-color-text)',
+                                                                lineHeight: 1.35,
+                                                            }}
+                                                        >
+                                                            {chapter.title}
+                                                        </Text>
+                                                        <Badge
+                                                            variant="light"
+                                                            color={chapterCompleted === chapter.vods.length ? 'green' : 'gray'}
+                                                            size="sm"
+                                                        >
+                                                            {chapterCompleted}/{chapter.vods.length}
+                                                        </Badge>
+                                                    </Group>
+                                                    {isMobile && (
+                                                        <Text size="xs" c="gray.5">
+                                                            {chapterMinutes}분
+                                                        </Text>
+                                                    )}
+                                                </Box>
                                             </Group>
-                                            <Text size="xs" c="gray.5">
-                                                {chapter.vods.reduce((s, v) => s + v.duration, 0)}분
-                                            </Text>
+                                            {!isMobile && (
+                                                <Text size="xs" c="gray.5">
+                                                    {chapterMinutes}분
+                                                </Text>
+                                            )}
                                         </Group>
                                     </UnstyledButton>
 
-                                    {/* VOD 목록 */}
                                     <Collapse in={isOpen}>
                                         <Stack gap={0}>
                                             {chapter.vods.map((vod) => {
                                                 const isDone = completedVods.includes(vod.id);
                                                 const isReady = !!vod.isPlayable;
-                                                const rowContent = (
-                                                    <Group justify="space-between">
-                                                        <Group gap="sm">
+
+                                                const rowMeta = (
+                                                    <Group gap="xs" wrap="wrap">
+                                                        {vod.hasMaterials && (
+                                                            <Paperclip size={13} color="#8b5cf6" aria-label="수업 자료 있음" />
+                                                        )}
+                                                        {!isReady ? (
+                                                            <Badge variant="light" color="gray" size="xs">
+                                                                준비 중
+                                                            </Badge>
+                                                        ) : (
+                                                            <>
+                                                                <Clock size={14} color="#9ca3af" />
+                                                                <Text size="xs" c="gray.5">
+                                                                    {vod.duration}분
+                                                                </Text>
+                                                            </>
+                                                        )}
+                                                    </Group>
+                                                );
+
+                                                const rowContent = isMobile ? (
+                                                    <Group align="flex-start" gap="sm" wrap="nowrap">
+                                                        {isDone ? (
+                                                            <CheckCircle2
+                                                                size={18}
+                                                                color="#8b5cf6"
+                                                                fill="#8b5cf6"
+                                                                strokeWidth={0}
+                                                                style={{ marginTop: 2, flexShrink: 0 }}
+                                                            />
+                                                        ) : (
+                                                            <Circle
+                                                                size={18}
+                                                                color={isReady ? '#d1d5db' : '#e5e7eb'}
+                                                                style={{ marginTop: 2, flexShrink: 0 }}
+                                                            />
+                                                        )}
+                                                        <Box style={{ flex: 1, minWidth: 0 }}>
+                                                            <Text
+                                                                size="sm"
+                                                                c={isDone ? 'gray.6' : isReady ? 'gray.8' : 'gray.4'}
+                                                                fw={isDone ? 400 : 500}
+                                                                style={{ lineHeight: 1.45 }}
+                                                            >
+                                                                {vod.title}
+                                                            </Text>
+                                                            <Box mt={6}>{rowMeta}</Box>
+                                                        </Box>
+                                                    </Group>
+                                                ) : (
+                                                    <Group justify="space-between" wrap="nowrap">
+                                                        <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
                                                             {isDone ? (
                                                                 <CheckCircle2
                                                                     size={18}
@@ -310,42 +381,21 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                                     strokeWidth={0}
                                                                 />
                                                             ) : (
-                                                                <Circle
-                                                                    size={18}
-                                                                    color={isReady ? '#d1d5db' : '#e5e7eb'}
-                                                                />
+                                                                <Circle size={18} color={isReady ? '#d1d5db' : '#e5e7eb'} />
                                                             )}
                                                             <Text
                                                                 size="sm"
                                                                 c={isDone ? 'gray.6' : isReady ? 'gray.8' : 'gray.4'}
                                                                 fw={isDone ? 400 : 500}
+                                                                style={{ minWidth: 0 }}
                                                             >
                                                                 {vod.title}
                                                             </Text>
                                                         </Group>
-                                                        <Group gap="xs">
-                                                            {vod.hasMaterials && (
-                                                                <Paperclip
-                                                                    size={13}
-                                                                    color="#8b5cf6"
-                                                                    aria-label="수업 자료 있음"
-                                                                />
-                                                            )}
-                                                            {!isReady ? (
-                                                                <Badge variant="light" color="gray" size="xs">
-                                                                    준비 중
-                                                                </Badge>
-                                                            ) : (
-                                                                <>
-                                                                    <Clock size={14} color="#9ca3af" />
-                                                                    <Text size="xs" c="gray.5">
-                                                                        {vod.duration}분
-                                                                    </Text>
-                                                                </>
-                                                            )}
-                                                        </Group>
+                                                        {rowMeta}
                                                     </Group>
                                                 );
+
                                                 return isReady ? (
                                                     <UnstyledButton
                                                         key={vod.id}
@@ -358,8 +408,8 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                             borderTop: '1px solid #f3f4f6',
                                                             transition: 'background 0.15s',
                                                         }}
-                                                        p="sm"
-                                                        pl="xl"
+                                                        p={isMobile ? 'md' : 'sm'}
+                                                        pl={isMobile ? 'md' : 'xl'}
                                                         styles={{
                                                             root: {
                                                                 '&:hover': {
@@ -373,8 +423,8 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                 ) : (
                                                     <Box
                                                         key={vod.id}
-                                                        p="sm"
-                                                        pl="xl"
+                                                        p={isMobile ? 'md' : 'sm'}
+                                                        pl={isMobile ? 'md' : 'xl'}
                                                         style={{
                                                             borderTop: '1px solid #f3f4f6',
                                                             opacity: 0.45,
@@ -389,7 +439,6 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                     </Collapse>
                                 </Card>
 
-                                {/* 실습 CTA 배너 */}
                                 {chapter.hasPracticeCta && (
                                     <UnstyledButton
                                         component={Link}
@@ -402,7 +451,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                         }}
                                     >
                                         <Card
-                                            padding="md"
+                                            padding={isMobile ? 'sm' : 'md'}
                                             radius="lg"
                                             style={{
                                                 background: '#8b5cf6',
@@ -416,13 +465,18 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                 e.currentTarget.style.opacity = '1';
                                             }}
                                         >
-                                            <Group justify="space-between">
-                                                <Group gap="sm">
-                                                    <Text c="white" fw={600} size="sm">
+                                            <Group justify="space-between" gap="sm" wrap="nowrap">
+                                                <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+                                                    <Text
+                                                        c="white"
+                                                        fw={600}
+                                                        size={isMobile ? 'xs' : 'sm'}
+                                                        style={{ lineHeight: 1.4 }}
+                                                    >
                                                         FlowSpot V2로 직접 실습해보세요
                                                     </Text>
                                                 </Group>
-                                                <ArrowRight size={18} color="white" />
+                                                <ArrowRight size={isMobile ? 16 : 18} color="white" />
                                             </Group>
                                         </Card>
                                     </UnstyledButton>
