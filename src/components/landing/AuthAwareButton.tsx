@@ -5,6 +5,10 @@ import { Button, type ButtonProps } from '@mantine/core';
 
 import { Link, useRouter } from '@/i18n/routing';
 import { isActiveAccessPlan } from '@/lib/plans/config';
+import {
+  hasRecentPaymentCompletionSignal,
+  subscribeToPaymentCompletionSignal,
+} from '@/lib/payments/completion-signal';
 import { createClient } from '@/utils/supabase/client';
 
 const hrefCache = new Map<string, string>();
@@ -21,6 +25,11 @@ function getCacheKey(
 function invalidateResolvedHref(cacheKey: string) {
   hrefCache.delete(cacheKey);
   hrefPromises.delete(cacheKey);
+}
+
+function invalidateAllResolvedHrefs() {
+  hrefCache.clear();
+  hrefPromises.clear();
 }
 
 async function resolveHref(
@@ -139,12 +148,23 @@ export function AuthAwareButton({
       }
     };
 
+    const unsubscribePaymentSignal = subscribeToPaymentCompletionSignal(() => {
+      invalidateAllResolvedHrefs();
+      void refreshHref();
+    });
+
+    if (hasRecentPaymentCompletionSignal()) {
+      invalidateAllResolvedHrefs();
+      void refreshHref();
+    }
+
     window.addEventListener('focus', handleFocus);
     window.addEventListener('pageshow', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       authListener.subscription.unsubscribe();
+      unsubscribePaymentSignal();
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('pageshow', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);

@@ -15,6 +15,7 @@ import {
 import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 
 import { Link } from '@/i18n/routing';
+import { emitPaymentCompletionSignal } from '@/lib/payments/completion-signal';
 
 type PaymentStatus = 'loading' | 'success' | 'error';
 
@@ -27,6 +28,19 @@ export default function PaymentSuccessPage() {
     const [message, setMessage] = useState('');
     const [addedCredits, setAddedCredits] = useState(0);
     const [redirectSeconds, setRedirectSeconds] = useState(5);
+
+    function getLecturesPath() {
+        if (typeof window === 'undefined') {
+            return '/dashboard/lectures';
+        }
+
+        const redirectedPath = window.location.pathname.replace(
+            /\/dashboard\/credits\/success\/?$/,
+            '/dashboard/lectures',
+        );
+
+        return redirectedPath === window.location.pathname ? '/dashboard/lectures' : redirectedPath;
+    }
 
     useEffect(() => {
         let cancelled = false;
@@ -173,11 +187,14 @@ export default function PaymentSuccessPage() {
             return;
         }
 
+        emitPaymentCompletionSignal();
+        router.refresh();
+
         const interval = setInterval(() => {
             setRedirectSeconds((prev) => {
                 if (prev <= 1) {
                     clearInterval(interval);
-                    router.push('/dashboard/lectures');
+                    window.location.replace(getLecturesPath());
                     return 0;
                 }
 
