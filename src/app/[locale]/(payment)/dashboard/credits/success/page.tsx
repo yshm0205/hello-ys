@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Button,
     Card,
@@ -22,9 +22,11 @@ const TOSSPAY_PENDING_STATUSES = new Set(['PENDING', 'PAY_PENDING', 'IN_PROGRESS
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const [status, setStatus] = useState<PaymentStatus>('loading');
     const [message, setMessage] = useState('');
     const [addedCredits, setAddedCredits] = useState(0);
+    const [redirectSeconds, setRedirectSeconds] = useState(5);
 
     useEffect(() => {
         let cancelled = false;
@@ -165,6 +167,27 @@ export default function PaymentSuccessPage() {
         };
     }, [searchParams]);
 
+    useEffect(() => {
+        if (status !== 'success') {
+            setRedirectSeconds(5);
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setRedirectSeconds((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    router.push('/dashboard/lectures');
+                    return 0;
+                }
+
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [router, status]);
+
     return (
         <Container size="sm" py={80}>
             <Card padding="xl" radius="xl" withBorder>
@@ -194,6 +217,15 @@ export default function PaymentSuccessPage() {
                             </Text>
                             <Text size="sm" c="gray.5" ta="center">
                                 {message}
+                            </Text>
+                            <Text size="sm" fw={600} c="violet.7" ta="center">
+                                {redirectSeconds > 0
+                                    ? `${redirectSeconds}초 후 강의실로 자동 이동합니다.`
+                                    : '강의실로 이동하는 중입니다.'}
+                            </Text>
+                            <Text size="xs" c="gray.5" ta="center">
+                                창을 닫으셨더라도 로그인 후 왼쪽 메뉴의 강의실에서
+                                바로 이어서 보실 수 있습니다.
                             </Text>
                             <Group mt="md">
                                 <Button
