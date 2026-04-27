@@ -98,6 +98,7 @@ type AuthAwareButtonProps = Omit<ButtonProps, 'component' | 'href'> & {
   unauthenticatedHref: string;
   unpaidAuthenticatedHref?: string;
   children: ReactNode;
+  activeAccessChildren?: ReactNode;
   id?: string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 };
@@ -107,6 +108,7 @@ export function AuthAwareButton({
   unauthenticatedHref,
   unpaidAuthenticatedHref,
   children,
+  activeAccessChildren,
   ...props
 }: AuthAwareButtonProps) {
   const router = useRouter();
@@ -171,9 +173,14 @@ export function AuthAwareButton({
     };
   }, [authenticatedHref, refreshHref, router, unauthenticatedHref, unpaidAuthenticatedHref]);
 
+  const displayChildren =
+    unpaidAuthenticatedHref && href === authenticatedHref && activeAccessChildren
+      ? activeAccessChildren
+      : children;
+
   return (
     <Button component={Link} href={href} {...props}>
-      {children}
+      {displayChildren}
     </Button>
   );
 }

@@ -432,8 +432,10 @@ function HeroSection() {
           >
             <AuthAwareButton
               id="hero-cta"
-              authenticatedHref="/checkout/allinone"
+              authenticatedHref="/dashboard/lectures"
               unauthenticatedHref="/login?redirect=/checkout/allinone"
+              unpaidAuthenticatedHref="/checkout/allinone"
+              activeAccessChildren="강의 보러가기"
               size="xl"
               radius="md"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
@@ -2571,8 +2573,10 @@ function CTASection() {
               내일도 같은 고민을 하게 됩니다
             </Title>
             <AuthAwareButton
-              authenticatedHref="/checkout/allinone"
+              authenticatedHref="/dashboard/lectures"
               unauthenticatedHref="/login?redirect=/checkout/allinone"
+              unpaidAuthenticatedHref="/checkout/allinone"
+              activeAccessChildren="강의 보러가기"
               size="xl" radius="xl"
               rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
               style={{
@@ -2770,8 +2774,10 @@ function LegacyFloatingCTA_DoNotUse({ earlybirdSummary }: { earlybirdSummary: La
               </Group>
             </Box>
             <AuthAwareButton
-              authenticatedHref="/checkout/allinone"
+              authenticatedHref="/dashboard/lectures"
               unauthenticatedHref="/login?redirect=/checkout/allinone"
+              unpaidAuthenticatedHref="/checkout/allinone"
+              activeAccessChildren="강의 보러가기"
               size="md" radius="xl"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
@@ -2819,8 +2825,10 @@ function LegacyFloatingCTA_DoNotUse({ earlybirdSummary }: { earlybirdSummary: La
               </Text>
             </Stack>
             <AuthAwareButton
-              authenticatedHref="/checkout/allinone"
+              authenticatedHref="/dashboard/lectures"
               unauthenticatedHref="/login?redirect=/checkout/allinone"
+              unpaidAuthenticatedHref="/checkout/allinone"
+              activeAccessChildren="강의 보러가기"
               size="sm" fullWidth radius="lg"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
@@ -2971,8 +2979,10 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
               </Group>
             </Box>
             <AuthAwareButton
-              authenticatedHref="/checkout/allinone"
+              authenticatedHref="/dashboard/lectures"
               unauthenticatedHref="/login?redirect=/checkout/allinone"
+              unpaidAuthenticatedHref="/checkout/allinone"
+              activeAccessChildren="강의 보러가기"
               size="md" radius="xl"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
@@ -3022,8 +3032,10 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
               </Text>
             </Stack>
             <AuthAwareButton
-              authenticatedHref="/checkout/allinone"
+              authenticatedHref="/dashboard/lectures"
               unauthenticatedHref="/login?redirect=/checkout/allinone"
+              unpaidAuthenticatedHref="/checkout/allinone"
+              activeAccessChildren="강의 보러가기"
               size="sm" fullWidth radius="lg"
               style={{
                 background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
