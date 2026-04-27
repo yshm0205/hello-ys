@@ -3,16 +3,18 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
+    Box,
     Button,
     Card,
     Container,
     Group,
     Loader,
+    SimpleGrid,
     Stack,
     Text,
     Title,
 } from '@mantine/core';
-import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, BookOpen, CheckCircle } from 'lucide-react';
 
 import { Link } from '@/i18n/routing';
 import { emitPaymentCompletionSignal } from '@/lib/payments/completion-signal';
@@ -240,10 +242,75 @@ export default function PaymentSuccessPage() {
                                     ? `${redirectSeconds}초 후 강의실로 자동 이동합니다.`
                                     : '강의실로 이동하는 중입니다.'}
                             </Text>
-                            <Text size="xs" c="gray.5" ta="center">
-                                창을 닫아도 다시 로그인하시면
-                                강의실에서 이어서 보실 수 있습니다.
-                            </Text>
+
+                            <Box
+                                mt="md"
+                                style={{
+                                    width: '100%',
+                                    background: '#faf5ff',
+                                    border: '1px solid #e9d5ff',
+                                    borderRadius: 16,
+                                    padding: '20px 18px',
+                                }}
+                            >
+                                <Group gap={8} mb={12} align="center" justify="center">
+                                    <BookOpen size={18} color="#7c3aed" />
+                                    <Text size="sm" fw={700} c="violet.7">
+                                        강의실로 들어가는 방법
+                                    </Text>
+                                </Group>
+                                <Text size="xs" c="gray.7" ta="center" mb={16} style={{ lineHeight: 1.6 }}>
+                                    자동 이동이 안 되거나 창을 닫으셨다면<br />
+                                    아래 위치에서 <b>강의실</b> 메뉴로 진입해 주세요.
+                                </Text>
+                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={14}>
+                                    <Stack gap={8} align="center">
+                                        <Text size="xs" fw={700} c="gray.7">
+                                            PC · 좌측 사이드바
+                                        </Text>
+                                        <Box
+                                            style={{
+                                                width: '100%',
+                                                borderRadius: 10,
+                                                overflow: 'hidden',
+                                                border: '1px solid #e4e4e7',
+                                                background: '#fff',
+                                            }}
+                                        >
+                                            <img
+                                                src="/payment-guide/pc-sidebar.png"
+                                                alt="PC 대시보드 좌측 사이드바의 강의실 메뉴"
+                                                style={{ width: '100%', height: 'auto', display: 'block' }}
+                                            />
+                                        </Box>
+                                    </Stack>
+                                    <Stack gap={8} align="center">
+                                        <Text size="xs" fw={700} c="gray.7">
+                                            모바일 · 좌측 상단 메뉴 ☰
+                                        </Text>
+                                        <Box
+                                            style={{
+                                                width: '100%',
+                                                borderRadius: 10,
+                                                overflow: 'hidden',
+                                                border: '1px solid #e4e4e7',
+                                                background: '#fff',
+                                            }}
+                                        >
+                                            <img
+                                                src="/payment-guide/mobile-menu.png"
+                                                alt="모바일 햄버거 메뉴를 열면 보이는 강의실 메뉴"
+                                                style={{ width: '100%', height: 'auto', display: 'block' }}
+                                            />
+                                        </Box>
+                                    </Stack>
+                                </SimpleGrid>
+                                <Text size="xs" c="gray.6" ta="center" mt={14} style={{ lineHeight: 1.6 }}>
+                                    같은 계정으로 다시 로그인하시면 진도가 자동 저장되어
+                                    이어서 시청하실 수 있습니다.
+                                </Text>
+                            </Box>
+
                             <Group mt="md">
                                 <Button
                                     component={Link}
