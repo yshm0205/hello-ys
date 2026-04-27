@@ -130,7 +130,7 @@ export default function PaymentSuccessPage() {
                 }
 
                 if (TOSSPAY_PENDING_STATUSES.has(data.status) && attempt < 15) {
-                    setMessage('결제 확인 완료를 확인하는 중입니다...');
+                    setMessage('결제 상태를 확인하는 중입니다...');
                     timer = setTimeout(() => {
                         void pollLegacyTossPayStatus(orderNo, attempt + 1);
                     }, 2000);
@@ -241,8 +241,8 @@ export default function PaymentSuccessPage() {
                                     : '강의실로 이동하는 중입니다.'}
                             </Text>
                             <Text size="xs" c="gray.5" ta="center">
-                                창을 닫으셨더라도 로그인 후 왼쪽 메뉴의 강의실에서
-                                바로 이어서 보실 수 있습니다.
+                                창을 닫아도 다시 로그인하시면
+                                강의실에서 이어서 보실 수 있습니다.
                             </Text>
                             <Group mt="md">
                                 <Button
