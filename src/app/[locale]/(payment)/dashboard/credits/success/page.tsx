@@ -152,6 +152,7 @@ export default function PaymentSuccessPage() {
             }
         }
 
+        const previewMode = searchParams.get('preview');
         const paymentId = searchParams.get('payment_id') || searchParams.get('paymentId');
         const code = searchParams.get('code');
         const queryMessage = searchParams.get('message');
@@ -160,7 +161,14 @@ export default function PaymentSuccessPage() {
         const amount = searchParams.get('amount');
         const orderNo = searchParams.get('orderNo');
 
-        if (code) {
+        if (previewMode === 'success') {
+            setStatus('success');
+            setAddedCredits(800);
+            setMessage('미리보기 모드입니다.');
+        } else if (previewMode === 'error') {
+            setStatus('error');
+            setMessage('미리보기 모드입니다.');
+        } else if (code) {
             setStatus('error');
             setMessage(queryMessage || `결제가 완료되지 않았습니다. 오류 코드: ${code}`);
         } else if (paymentId) {
@@ -189,6 +197,10 @@ export default function PaymentSuccessPage() {
             return;
         }
 
+        if (searchParams.get('preview')) {
+            return;
+        }
+
         emitPaymentCompletionSignal();
         router.refresh();
 
@@ -205,7 +217,7 @@ export default function PaymentSuccessPage() {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [router, status]);
+    }, [router, searchParams, status]);
 
     return (
         <Container size="sm" py={80}>
