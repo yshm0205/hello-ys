@@ -3334,7 +3334,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
     : phase2IsLive
       ? '지금 2차 얼리버드로 신청하기'
       : '정가로 신청하기';
-  const stage1Status: EbTierProps['status'] = phase1IsLive ? 'live' : 'end';
+  const stage1Status: EbTierProps['status'] = phase1IsLive ? 'urgent' : 'end';
   const stage1StatusText = phase1IsLive
     ? '마감 임박'
     : '1차 혜택 종료';
@@ -3517,7 +3517,7 @@ function EbChevron() {
 
 type EbTierProps = {
   stageNum: string;
-  status: 'live' | 'wait' | 'end';
+  status: 'live' | 'wait' | 'end' | 'urgent';
   statusText: string;
   tierName: React.ReactNode;
   feats: { ok: boolean; text: React.ReactNode; muted?: boolean }[];
@@ -3553,6 +3553,7 @@ function EbTier(p: EbTierProps) {
     };
   const statusStyle: React.CSSProperties =
     p.status === 'live' ? { background: '#b46bff', color: '#fff', boxShadow: '0 0 20px rgba(180,107,255,.5), 0 0 0 3px rgba(180,107,255,.2)' } :
+    p.status === 'urgent' ? { background: '#f59e0b', color: '#fff', boxShadow: '0 0 20px rgba(245,158,11,.55), 0 0 0 3px rgba(245,158,11,.2)' } :
     p.status === 'wait' ? { background: 'rgba(255,255,255,.06)', color: 'rgba(255,255,255,.5)', border: '1px solid rgba(255,255,255,.1)' } :
     { background: 'rgba(239,68,68,.15)', color: '#fca5a5', border: '1px solid rgba(239,68,68,.25)' };
   const bonusStyle: React.CSSProperties =
@@ -3587,7 +3588,7 @@ function EbTier(p: EbTierProps) {
           fontSize: 10.5, fontWeight: 900, letterSpacing: '.06em',
           ...statusStyle,
         }}>
-          {p.status === 'live' && (
+          {(p.status === 'live' || p.status === 'urgent') && (
             <span style={{
               width: 6, height: 6, borderRadius: '50%', background: '#fff',
               animation: 'ebBlink 1.2s infinite',
