@@ -2958,7 +2958,7 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
           <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
             <Box style={{ flex: 1, minWidth: 0 }}>
               <Text style={{ fontSize: '11px', color: '#71717a', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
-                <span>12개월 분할 시</span>
+                <span>12개월 할부 시</span>
                 <span style={{ color: '#a1a1aa', textDecoration: 'line-through' }}> 월 {monthly12Orig.toLocaleString()}원</span>
               </Text>
               <Group gap={6} align="baseline" wrap="nowrap" style={{ marginTop: 1 }}>
