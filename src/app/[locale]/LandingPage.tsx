@@ -3452,7 +3452,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: true, text: <><b>보너스 크레딧 800cr</b> 즉시 지급</> },
                   { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
                 ]}
-                bonusText={<>+ 보너스 <b>800cr</b></>}
+                bonusText={<>+ <b>78,000원</b> 상당</>}
                 priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
                 variant={stage1Variant} isMobile={isMobile}
               />
@@ -3465,7 +3465,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: true, text: <>보너스 크레딧 <b>400cr</b> 지급</> },
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
-                bonusText={<>+ 보너스 <b>400cr</b></>}
+                bonusText={<>+ <b>39,000원</b> 상당</>}
                 priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
                 variant={stage2Variant} isMobile={isMobile}
               />
