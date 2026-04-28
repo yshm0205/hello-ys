@@ -3491,7 +3491,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   </> },
                   { ok: true, text: <><b>만료 없는 영구 크레딧</b> · 평생 사용 가능</> },
                 ]}
-                bonusText={<>총 178,000원 혜택!</>}
+                bonusText={<><span style={{ display: 'block' }}>총 178,000원</span><span style={{ display: 'block' }}>혜택!</span></>}
                 variant={stage1Variant} isMobile={isMobile}
               />
               <EbChevron />
@@ -3508,7 +3508,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   </> },
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
-                bonusText={<>총 139,000원 혜택</>}
+                bonusText={<><span style={{ display: 'block' }}>총 139,000원</span><span style={{ display: 'block' }}>혜택</span></>}
                 variant={stage2Variant} isMobile={isMobile}
               />
               <EbChevron />
@@ -3587,12 +3587,11 @@ function EarlyBirdCountdown({ deadline, isMobile }: { deadline: string; isMobile
   };
 
   const labelStyle: React.CSSProperties = {
-    fontSize: isMobile ? 11 : 12,
+    fontSize: isMobile ? 12 : 13,
     fontWeight: 700,
-    color: 'rgba(255,255,255,.55)',
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    marginTop: 6,
+    color: 'rgba(255,255,255,.6)',
+    letterSpacing: '-0.01em',
+    marginTop: 8,
   };
 
   const colonStyle: React.CSSProperties = {
@@ -3612,22 +3611,22 @@ function EarlyBirdCountdown({ deadline, isMobile }: { deadline: string; isMobile
     }}>
       <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
         <span style={numberStyle}>{days}</span>
-        <span style={labelStyle}>DAYS</span>
+        <span style={labelStyle}>일</span>
       </Box>
       <span style={colonStyle}>:</span>
       <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
         <span style={numberStyle}>{pad(hours)}</span>
-        <span style={labelStyle}>HRS</span>
+        <span style={labelStyle}>시</span>
       </Box>
       <span style={colonStyle}>:</span>
       <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
         <span style={numberStyle}>{pad(minutes)}</span>
-        <span style={labelStyle}>MIN</span>
+        <span style={labelStyle}>분</span>
       </Box>
       <span style={colonStyle}>:</span>
       <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
         <span style={numberStyle}>{pad(seconds)}</span>
-        <span style={labelStyle}>SEC</span>
+        <span style={labelStyle}>초</span>
       </Box>
     </Box>
   );
@@ -3728,10 +3727,11 @@ function EbTier(p: EbTierProps) {
           borderRadius: 16,
           marginBottom: p.isMobile ? 18 : 22,
           textAlign: 'center',
-          fontSize: p.isMobile ? 26 : 'clamp(30px, 3.6vw, 38px)',
+          fontSize: p.isMobile ? 24 : 'clamp(28px, 3.4vw, 36px)',
           fontWeight: 900,
           letterSpacing: '-0.025em',
-          lineHeight: 1.1,
+          lineHeight: 1.2,
+          wordBreak: 'keep-all',
           textShadow: p.variant === 'active' ? '0 0 24px rgba(180,107,255,.5)' : 'none',
         }}>{p.bonusText}</Box>
 
