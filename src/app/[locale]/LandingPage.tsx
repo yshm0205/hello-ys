@@ -66,7 +66,7 @@ const EARLYBIRD_FALLBACK_SUMMARY: LandingEarlybirdSummary = {
   phase2SoldCount: 0,
   phase2Remaining: 70,
   phase2Total: 70,
-  tier1Deadline: '2026-05-08T23:59:59+09:00',
+  tier1Deadline: '2026-04-30T23:59:59+09:00',
 };
 
 function useLandingEarlybirdSummary(initialSummary: LandingEarlybirdSummary) {
@@ -389,7 +389,7 @@ function HeroSection() {
                 marginBottom: '8px',
               }}
             >
-              쇼츠 수익화
+              하루 30분 월 200만원
             </Box>
             <Box
               component="span"
@@ -475,6 +475,22 @@ function HeroSection() {
               <b style={{ color: '#fafafa', fontWeight: 700 }}>얼리버드 특가</b> · 선착순 진행 중
             </Text>
           </Box>
+
+          {/* 광고법 완충 주석 — 결과 단언 방어선 */}
+          <Text
+            className="fs-disclaimer"
+            style={{
+              color: 'rgba(228,228,231,0.45)',
+              fontSize: '11px',
+              fontWeight: 400,
+              lineHeight: 1.5,
+              marginTop: '14px',
+              maxWidth: '420px',
+              wordBreak: 'keep-all',
+            }}
+          >
+            * 수강생 사례 기준 · 결과는 개인의 노력·실행 정도에 따라 다를 수 있습니다.
+          </Text>
         </Box>
       </motion.div>
     </Box>
@@ -2869,9 +2885,9 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
         return;
       }
 
-      const earlybirdSection = document.getElementById('earlybird');
-      if (earlybirdSection) {
-        setIsVisible(earlybirdSection.getBoundingClientRect().bottom < 0);
+      const heroEl = document.getElementById('landing-hero');
+      if (heroEl) {
+        setIsVisible(heroEl.getBoundingClientRect().bottom < 0);
         return;
       }
 
@@ -3279,7 +3295,6 @@ function LegacyEarlyBirdSection_DoNotUse() {
                   { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
                 ]}
                 bonusText={<>+ 보너스 <b>78,000원 상당</b></>}
-                priceStrike="정가 599,000원" priceNow="499,000원"
                 variant="active" isMobile={isMobile}
               />
               <EbChevron />
@@ -3292,7 +3307,6 @@ function LegacyEarlyBirdSection_DoNotUse() {
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
                 bonusText={<>+ 보너스 <b>39,000원 상당</b></>}
-                priceStrike="정가 599,000원" priceNow="499,000원"
                 variant="dim" isMobile={isMobile}
               />
               <EbChevron />
@@ -3305,7 +3319,7 @@ function LegacyEarlyBirdSection_DoNotUse() {
                   { ok: false, muted: true, text: <>기본 구성만 제공</> },
                 ]}
                 bonusText={<>보너스 없음</>}
-                priceNow="599,000원" priceUp="+100,000원 인상"
+                priceUp="+100,000원 인상"
                 variant="end" isMobile={isMobile}
               />
               <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
@@ -3350,9 +3364,9 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
     : phase2IsLive
       ? '지금 2차 얼리버드로 신청하기'
       : '정가로 신청하기';
-  const stage1Status: EbTierProps['status'] = phase1IsLive ? 'urgent' : 'end';
+  const stage1Status: EbTierProps['status'] = phase1IsLive ? 'live' : 'end';
   const stage1StatusText = phase1IsLive
-    ? '마감 임박'
+    ? 'LIVE · 진행 중'
     : '1차 혜택 종료';
   const stage1Variant: EbTierProps['variant'] = phase1IsLive ? 'active' : 'dim';
   const stage2Status: EbTierProps['status'] = phase1IsLive ? 'wait' : phase2IsLive ? 'live' : 'end';
@@ -3365,8 +3379,6 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
   const stage3Status: EbTierProps['status'] = earlybirdEnded ? 'live' : 'end';
   const stage3StatusText = earlybirdEnded ? 'LIVE · 정가 신청 진행 중' : '종료 · 가격 인상';
   const stage3Variant: EbTierProps['variant'] = earlybirdEnded ? 'active' : 'end';
-  const monthlyNote = `12개월 할부 시 월 ${Math.ceil(primaryProgram.amount / 12).toLocaleString()}원`;
-  const monthlyNoteEnd = `12개월 할부 시 월 ${Math.ceil(599000 / 12).toLocaleString()}원`;
   const slotGuide = earlybirdEnded
     ? '얼리버드 혜택은 종료되었고, 지금은 정가 신청만 가능합니다.'
     : phase1IsLive
@@ -3419,44 +3431,50 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   width: 6, height: 6, borderRadius: '50%', background: '#a78bfa',
                   animation: 'ebPulse 1.4s infinite',
                 }} />
-                All-in-One Pass · {currentStageLabel}
+                얼리버드 특가 이벤트
               </Box>
-              <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 14 }}>
-                {currentStageLabel} · <b style={{ color: '#fff' }}>선착순 모집</b>
-              </Text>
-              <Box style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 18 }}>
-                {earlybirdEnded ? (
+              {earlybirdEnded ? (
+                <>
                   <Text style={{
                     fontSize: isMobile ? 36 : 48,
                     fontWeight: 900,
                     letterSpacing: '-0.04em',
                     lineHeight: 1,
                     color: '#fff',
+                    marginBottom: 14,
                   }}>
                     혜택 종료
                   </Text>
-                ) : (
-                  <>
-                    <Text style={{
-                      fontSize: isMobile ? 72 : 'clamp(80px, 9vw, 112px)', fontWeight: 900,
-                      letterSpacing: '-0.05em', lineHeight: 0.95,
-                      background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
-                      WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-                      textShadow: '0 0 40px rgba(139,92,246,.35)',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}>{total}</Text>
-                    <Text style={{
-                      fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#a78bfa',
-                      letterSpacing: '-0.02em',
-                    }}>
-                      명 선착순
-                    </Text>
-                  </>
-                )}
-              </Box>
-              <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55, wordBreak: 'keep-all' }}>
-                {slotGuide}
-              </Text>
+                  <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55, wordBreak: 'keep-all' }}>
+                    {slotGuide}
+                  </Text>
+                </>
+              ) : phase1IsLive ? (
+                <>
+                  <Text style={{ fontSize: 13.5, fontWeight: 700, color: 'rgba(255,255,255,.7)', marginBottom: 10, letterSpacing: '-0.01em' }}>
+                    1차 얼리버드 마감까지
+                  </Text>
+                  <EarlyBirdCountdown deadline={earlybirdSummary.tier1Deadline} isMobile={isMobile} />
+                  <Text style={{ marginTop: 16, fontSize: isMobile ? 12.5 : 13, fontWeight: 600, color: 'rgba(255,255,255,.6)', letterSpacing: '-0.01em' }}>
+                    선착순 <b style={{ color: '#a78bfa', fontWeight: 800 }}>{total}명</b> 한정 · 마감 시 2차 전환
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={{
+                    fontSize: isMobile ? 36 : 48, fontWeight: 900,
+                    letterSpacing: '-0.04em', lineHeight: 1, color: '#fff', marginBottom: 12,
+                  }}>
+                    2차 진행 중
+                  </Text>
+                  <Text style={{ fontSize: isMobile ? 13.5 : 14, fontWeight: 600, color: 'rgba(255,255,255,.7)', letterSpacing: '-0.01em', marginBottom: 14 }}>
+                    선착순 <b style={{ color: '#a78bfa', fontWeight: 800 }}>{total}명</b> 한정
+                  </Text>
+                  <Text style={{ fontSize: isMobile ? 13.5 : 14.5, fontWeight: 600, color: 'rgba(255,255,255,.78)', lineHeight: 1.55, wordBreak: 'keep-all' }}>
+                    {slotGuide}
+                  </Text>
+                </>
+              )}
             </Box>
 
             <Box style={{ display: 'flex', flexDirection: 'column' }}>
@@ -3464,17 +3482,16 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 stageNum="01" status={stage1Status} statusText={stage1StatusText}
                 tierName={<>1차<em style={{ fontStyle: 'normal', color: '#a78bfa' }}> 얼리버드</em></>}
                 feats={[
-                  { ok: true, text: <><b>정가 대비 100,000원 할인</b> · 499,000원</> },
+                  { ok: true, text: <><b>100,000원 즉시 할인</b></> },
                   { ok: true, text: <>
                     <b>보너스 크레딧 800cr</b> 즉시 지급
-                    <span style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#a78bfa', marginTop: 3 }}>
-                      78,000원 상당
+                    <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#a78bfa', marginTop: 3 }}>
+                      💜 78,000원 상당 · Pro 2개월분
                     </span>
                   </> },
-                  { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
+                  { ok: true, text: <><b>만료 없는 영구 크레딧</b> · 평생 사용 가능</> },
                 ]}
-                bonusText={<>총 <b>178,000원</b> 혜택</>}
-                priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
+                bonusText={<>총 178,000원 혜택!</>}
                 variant={stage1Variant} isMobile={isMobile}
               />
               <EbChevron />
@@ -3482,17 +3499,16 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 stageNum="02" status={stage2Status} statusText={stage2StatusText}
                 tierName="2차 얼리버드"
                 feats={[
-                  { ok: true, text: <>정가 대비 100,000원 할인 · 499,000원</> },
+                  { ok: true, text: <><b>100,000원 즉시 할인</b></> },
                   { ok: true, text: <>
                     보너스 크레딧 <b>400cr</b> 지급
-                    <span style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#a78bfa', marginTop: 3 }}>
-                      39,000원 상당
+                    <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#a78bfa', marginTop: 3 }}>
+                      💜 39,000원 상당 · 1차 대비 절반
                     </span>
                   </> },
                   { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
                 ]}
-                bonusText={<>총 <b>139,000원</b> 혜택</>}
-                priceStrike="정가 599,000원" priceNow="499,000원" priceNote={monthlyNote}
+                bonusText={<>총 139,000원 혜택</>}
                 variant={stage2Variant} isMobile={isMobile}
               />
               <EbChevron />
@@ -3504,8 +3520,8 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: false, muted: true, text: <>기본 구성으로만 신청 가능</> },
                   { ok: false, muted: true, text: <>기본 제공 크레딧과 강의 구성은 동일</> },
                 ]}
-                bonusText={<>보너스 없음</>}
-                priceNow="599,000원" priceNote={monthlyNoteEnd}
+                bonusText={<>혜택 종료</>}
+                priceUp="가격 인상"
                 variant={stage3Variant} isMobile={isMobile}
               />
               <Box style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
@@ -3541,6 +3557,82 @@ function EbChevron() {
   );
 }
 
+function EarlyBirdCountdown({ deadline, isMobile }: { deadline: string; isMobile: boolean }) {
+  const [now, setNow] = useState<number>(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const target = new Date(deadline).getTime();
+  const diff = Math.max(0, target - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  const pad = (n: number) => n.toString().padStart(2, '0');
+
+  const numberStyle: React.CSSProperties = {
+    fontSize: isMobile ? 44 : 'clamp(56px, 6.5vw, 80px)',
+    fontWeight: 900,
+    letterSpacing: '-0.04em',
+    lineHeight: 0.95,
+    background: 'linear-gradient(180deg,#fff 0%,#a78bfa 100%)',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    color: 'transparent',
+    textShadow: '0 0 40px rgba(139,92,246,.35)',
+    fontVariantNumeric: 'tabular-nums',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: isMobile ? 11 : 12,
+    fontWeight: 700,
+    color: 'rgba(255,255,255,.55)',
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    marginTop: 6,
+  };
+
+  const colonStyle: React.CSSProperties = {
+    fontSize: isMobile ? 32 : 'clamp(40px, 5vw, 56px)',
+    fontWeight: 700,
+    color: 'rgba(167,139,250,.5)',
+    paddingBottom: isMobile ? 14 : 18,
+    alignSelf: 'center',
+  };
+
+  return (
+    <Box style={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: isMobile ? 6 : 10,
+      flexWrap: 'nowrap',
+    }}>
+      <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
+        <span style={numberStyle}>{days}</span>
+        <span style={labelStyle}>DAYS</span>
+      </Box>
+      <span style={colonStyle}>:</span>
+      <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
+        <span style={numberStyle}>{pad(hours)}</span>
+        <span style={labelStyle}>HRS</span>
+      </Box>
+      <span style={colonStyle}>:</span>
+      <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
+        <span style={numberStyle}>{pad(minutes)}</span>
+        <span style={labelStyle}>MIN</span>
+      </Box>
+      <span style={colonStyle}>:</span>
+      <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 56 : 76 }}>
+        <span style={numberStyle}>{pad(seconds)}</span>
+        <span style={labelStyle}>SEC</span>
+      </Box>
+    </Box>
+  );
+}
+
 type EbTierProps = {
   stageNum: string;
   status: 'live' | 'wait' | 'end' | 'urgent';
@@ -3548,9 +3640,6 @@ type EbTierProps = {
   tierName: React.ReactNode;
   feats: { ok: boolean; text: React.ReactNode; muted?: boolean }[];
   bonusText: React.ReactNode;
-  priceStrike?: string;
-  priceNow: string;
-  priceNote?: string;
   priceUp?: string;
   variant: 'active' | 'dim' | 'end';
   isMobile: boolean;
@@ -3624,71 +3713,56 @@ function EbTier(p: EbTierProps) {
         </span>
       </Box>
 
-      <Box style={{
-        display: 'grid',
-        gridTemplateColumns: p.isMobile ? '1fr' : '1.2fr auto',
-        gap: p.isMobile ? 14 : 20,
-        alignItems: 'flex-start',
-      }}>
-        <Box>
-          <Box style={{
-            fontSize: p.isMobile ? 22 : 'clamp(24px, 2.6vw, 28px)', fontWeight: 900, letterSpacing: '-0.03em',
-            color: p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.82)' : '#fff',
-            lineHeight: 1.1, marginBottom: 14,
-          }}>{p.tierName}</Box>
-          <Box component="ul" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
-            {p.feats.map((f, i) => (
-              <Box component="li" key={i} style={{
-                display: 'flex', alignItems: 'flex-start', gap: 10,
-                fontSize: p.isMobile ? 13 : 13.5, fontWeight: 600,
-                color: f.muted ? 'rgba(255,255,255,.55)' : (p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.88)'),
-                lineHeight: 1.5,
-              }}>
-                <span style={{
-                  width: 19, height: 19, flexShrink: 0, marginTop: 2,
-                  borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 900,
-                  background: f.ok ? 'rgba(167,139,250,.2)' : 'rgba(239,68,68,.15)',
-                  color: f.ok ? '#a78bfa' : '#fca5a5',
-                }}>{f.ok ? '✓' : '✕'}</span>
-                <span>{f.text}</span>
-              </Box>
-            ))}
-          </Box>
-          <Box style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '9px 15px', borderRadius: 999,
-            fontSize: 13, fontWeight: 800, letterSpacing: '-0.01em',
-            marginTop: 20, whiteSpace: 'nowrap',
-            ...bonusStyle,
-          }}>{p.bonusText}</Box>
+      <Box style={{ display: 'flex', flexDirection: 'column' }}>
+        <Box style={{
+          fontSize: p.isMobile ? 20 : 'clamp(22px, 2.3vw, 26px)', fontWeight: 900, letterSpacing: '-0.03em',
+          color: p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.82)' : '#fff',
+          lineHeight: 1.1, marginBottom: p.isMobile ? 14 : 16,
+        }}>{p.tierName}</Box>
+
+        {/* 혜택 메인 헤드라인 — 가격 대신 혜택 금액을 카드의 시각적 1순위로 */}
+        <Box style={{
+          ...bonusStyle,
+          display: 'block',
+          padding: p.isMobile ? '16px 20px' : '20px 26px',
+          borderRadius: 16,
+          marginBottom: p.isMobile ? 18 : 22,
+          textAlign: 'center',
+          fontSize: p.isMobile ? 26 : 'clamp(30px, 3.6vw, 38px)',
+          fontWeight: 900,
+          letterSpacing: '-0.025em',
+          lineHeight: 1.1,
+          textShadow: p.variant === 'active' ? '0 0 24px rgba(180,107,255,.5)' : 'none',
+        }}>{p.bonusText}</Box>
+
+        <Box component="ul" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
+          {p.feats.map((f, i) => (
+            <Box component="li" key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 10,
+              fontSize: p.isMobile ? 13.5 : 14, fontWeight: 600,
+              color: f.muted ? 'rgba(255,255,255,.55)' : (p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.92)'),
+              lineHeight: 1.5,
+            }}>
+              <span style={{
+                width: 20, height: 20, flexShrink: 0, marginTop: 2,
+                borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 900,
+                background: f.ok ? 'rgba(167,139,250,.22)' : 'rgba(239,68,68,.15)',
+                color: f.ok ? '#a78bfa' : '#fca5a5',
+              }}>{f.ok ? '✓' : '✕'}</span>
+              <span>{f.text}</span>
+            </Box>
+          ))}
         </Box>
-        <Box style={{ textAlign: p.isMobile ? 'left' : 'right', minWidth: p.isMobile ? undefined : 150 }}>
-          {p.priceStrike && (
-            <Text style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.55)', textDecoration: 'line-through', letterSpacing: '-0.01em', marginBottom: 4 }}>
-              {p.priceStrike}
-            </Text>
-          )}
-          <Text style={{
-            fontSize: p.isMobile ? 26 : 'clamp(24px, 3vw, 30px)', fontWeight: 900, letterSpacing: '-0.035em',
-            color: p.variant === 'end' ? '#fca5a5' : p.variant === 'dim' ? 'rgba(255,255,255,.82)' : '#fff',
-            lineHeight: 1,
-            textShadow: p.variant === 'active' ? '0 0 24px rgba(180,107,255,.6)' : 'none',
-          }}>{p.priceNow}</Text>
-          {p.priceNote && (
-            <Text style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.65)', marginTop: 6, letterSpacing: '-0.01em' }}>
-              {p.priceNote}
-            </Text>
-          )}
-          {p.priceUp && (
-            <Box style={{
-              display: 'inline-block', marginTop: 8,
-              fontSize: 11, fontWeight: 900, letterSpacing: '-0.01em',
-              background: '#ef4444', color: '#fff',
-              padding: '3px 8px', borderRadius: 6,
-            }}>{p.priceUp}</Box>
-          )}
-        </Box>
+
+        {p.priceUp && (
+          <Box style={{
+            display: 'inline-block', alignSelf: 'flex-start', marginTop: 18,
+            fontSize: 11.5, fontWeight: 900, letterSpacing: '-0.01em',
+            background: '#ef4444', color: '#fff',
+            padding: '5px 12px', borderRadius: 6,
+          }}>{p.priceUp}</Box>
+        )}
       </Box>
     </Box>
   );

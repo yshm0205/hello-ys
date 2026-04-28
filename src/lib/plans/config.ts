@@ -13,7 +13,7 @@ export const EARLYBIRD_CONFIG = {
   phase1: {
     totalSlots: 30,
     bonusCredits: 800,
-    hardDeadline: "2026-05-08T23:59:59+09:00",
+    hardDeadline: "2026-04-30T23:59:59+09:00",
   },
   phase2: {
     totalSlots: 70,
