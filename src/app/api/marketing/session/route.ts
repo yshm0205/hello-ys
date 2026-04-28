@@ -13,12 +13,30 @@ type MarketingPayload = {
   locale?: string | null;
   durationSeconds?: number;
   ctaTarget?: string | null;
+  ctaId?: string | null;
+  ctaLabel?: string | null;
+  ctaSection?: string | null;
+  lastVisibleSection?: string | null;
+  maxScrollPercent?: number;
   utmSource?: string | null;
   utmMedium?: string | null;
   utmCampaign?: string | null;
   utmContent?: string | null;
   utmTerm?: string | null;
   marketingToken?: string;
+};
+
+type ExistingMarketingSessionRow = {
+  id: string;
+  pageviews?: number | null;
+  pricing_views?: number | null;
+  cta_clicks?: number | null;
+  duration_seconds?: number | null;
+  max_scroll_percent?: number | null;
+  last_visible_section?: string | null;
+  last_clicked_cta_id?: string | null;
+  last_clicked_cta_label?: string | null;
+  last_clicked_cta_section?: string | null;
 };
 
 const SESSION_KEY_PATTERN =
@@ -29,10 +47,18 @@ const EVENT_THROTTLE_WINDOWS_MS: Record<MarketingEventType, number> = {
   cta_click: 2000,
 };
 const recentEventCache = new Map<string, number>();
+const BASE_SESSION_SELECT =
+  "id, pageviews, pricing_views, cta_clicks, duration_seconds, first_path";
+const BEHAVIOR_SESSION_SELECT = `${BASE_SESSION_SELECT}, max_scroll_percent, last_visible_section, last_clicked_cta_id, last_clicked_cta_label, last_clicked_cta_section`;
 
 function clampDuration(value: unknown) {
   if (typeof value !== "number" || Number.isNaN(value)) return 0;
   return Math.max(0, Math.min(Math.floor(value), 60 * 60 * 6));
+}
+
+function clampScrollPercent(value: unknown) {
+  if (typeof value !== "number" || Number.isNaN(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
 }
 
 function detectDeviceType(userAgent: string) {
@@ -117,6 +143,21 @@ function hasValidMarketingToken(request: NextRequest, token: string | undefined)
   return !!cookieToken && !!requestToken && cookieToken === requestToken;
 }
 
+function isMissingBehaviorFieldError(error: unknown) {
+  const message =
+    typeof error === "object" && error && "message" in error
+      ? String(error.message)
+      : String(error || "");
+
+  return (
+    message.includes("max_scroll_percent") ||
+    message.includes("last_visible_section") ||
+    message.includes("last_clicked_cta_id") ||
+    message.includes("last_clicked_cta_label") ||
+    message.includes("last_clicked_cta_section")
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as MarketingPayload;
@@ -173,11 +214,31 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    const { data: existing, error: fetchError } = await supabase
+    let supportsBehaviorFields = true;
+
+    let { data: existing, error: fetchError } = (await supabase
       .from("marketing_sessions")
-      .select("id, pageviews, pricing_views, cta_clicks, duration_seconds, first_path")
+      .select(BEHAVIOR_SESSION_SELECT)
       .eq("session_key", sessionKey)
-      .maybeSingle();
+      .maybeSingle()) as {
+      data: ExistingMarketingSessionRow | null;
+      error: unknown;
+    };
+
+    if (fetchError && isMissingBehaviorFieldError(fetchError)) {
+      supportsBehaviorFields = false;
+      const fallbackResponse = (await supabase
+        .from("marketing_sessions")
+        .select(BASE_SESSION_SELECT)
+        .eq("session_key", sessionKey)
+        .maybeSingle()) as {
+        data: ExistingMarketingSessionRow | null;
+        error: unknown;
+      };
+
+      existing = fallbackResponse.data;
+      fetchError = fallbackResponse.error;
+    }
 
     if (fetchError) {
       throw fetchError;
@@ -185,10 +246,15 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString();
     const durationSeconds = clampDuration(body.durationSeconds);
+    const maxScrollPercent = clampScrollPercent(body.maxScrollPercent);
     const pricingBump = pagePath.includes("/pricing") ? 1 : 0;
+    const lastVisibleSection = normalizeNullable(body.lastVisibleSection, 120);
+    const lastClickedCtaId = normalizeNullable(body.ctaId, 120);
+    const lastClickedCtaLabel = normalizeNullable(body.ctaLabel, 160);
+    const lastClickedCtaSection = normalizeNullable(body.ctaSection, 120);
 
     if (!existing) {
-      const insertPayload = {
+      const insertPayload: Record<string, unknown> = {
         session_key: sessionKey,
         first_path: pagePath,
         last_path: pagePath,
@@ -210,6 +276,17 @@ export async function POST(request: NextRequest) {
         updated_at: now,
       };
 
+      if (supportsBehaviorFields) {
+        insertPayload.max_scroll_percent = maxScrollPercent;
+        insertPayload.last_visible_section = lastVisibleSection;
+        insertPayload.last_clicked_cta_id =
+          eventType === "cta_click" ? lastClickedCtaId : null;
+        insertPayload.last_clicked_cta_label =
+          eventType === "cta_click" ? lastClickedCtaLabel : null;
+        insertPayload.last_clicked_cta_section =
+          eventType === "cta_click" ? lastClickedCtaSection : null;
+      }
+
       const { error: insertError } = await supabase
         .from("marketing_sessions")
         .insert(insertPayload);
@@ -221,20 +298,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const nextValues = {
+    const nextValues: Record<string, unknown> = {
       last_path: normalizePath(ctaTarget || pagePath),
       last_seen_at: now,
       updated_at: now,
       pageviews:
-        eventType === "page_view" ? (existing.pageviews || 0) + 1 : existing.pageviews || 0,
+        eventType === "page_view"
+          ? Number(existing.pageviews || 0) + 1
+          : Number(existing.pageviews || 0),
       pricing_views:
         eventType === "page_view"
-          ? (existing.pricing_views || 0) + pricingBump
-          : existing.pricing_views || 0,
+          ? Number(existing.pricing_views || 0) + pricingBump
+          : Number(existing.pricing_views || 0),
       cta_clicks:
-        eventType === "cta_click" ? (existing.cta_clicks || 0) + 1 : existing.cta_clicks || 0,
-      duration_seconds: Math.max(existing.duration_seconds || 0, durationSeconds),
+        eventType === "cta_click"
+          ? Number(existing.cta_clicks || 0) + 1
+          : Number(existing.cta_clicks || 0),
+      duration_seconds: Math.max(Number(existing.duration_seconds || 0), durationSeconds),
     };
+
+    if (supportsBehaviorFields) {
+      nextValues.max_scroll_percent = Math.max(
+        Number(existing.max_scroll_percent || 0),
+        maxScrollPercent,
+      );
+      nextValues.last_visible_section = lastVisibleSection || existing.last_visible_section || null;
+      nextValues.last_clicked_cta_id =
+        eventType === "cta_click"
+          ? lastClickedCtaId
+          : existing.last_clicked_cta_id || null;
+      nextValues.last_clicked_cta_label =
+        eventType === "cta_click"
+          ? lastClickedCtaLabel
+          : existing.last_clicked_cta_label || null;
+      nextValues.last_clicked_cta_section =
+        eventType === "cta_click"
+          ? lastClickedCtaSection
+          : existing.last_clicked_cta_section || null;
+    }
 
     const { error: updateError } = await supabase
       .from("marketing_sessions")
