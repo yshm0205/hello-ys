@@ -2398,6 +2398,10 @@ function FAQSection() {
           a: '스크립트 1회 생성 = 10크레딧 차감 방식입니다.\n\n올인원 패스는 결제 즉시 400cr 지급되고, 이후 매달 400cr씩 총 4회(1,600cr) 지급됩니다. 1달에 약 40회 생성 분량입니다.',
         },
         {
+          q: '크레딧 만료가 있나요?',
+          a: '얼리버드 보너스 크레딧은 만료 없이 영구 보존됩니다.\n\n반면 매달 정기 지급되는 400cr와 월 구독 크레딧은 다음 지급일에 리셋되며, 미사용분은 이월되지 않습니다.\n\n즉 보너스만 평생 사용 가능, 정기 지급분은 그 달 안에 사용해주세요.',
+        },
+        {
           q: '크레딧이 부족하면 어떻게 되나요?',
           a: '강의와 월간 트렌드 데이터는 계속 이용 가능하며, 스크립트 생성만 제한됩니다. 대시보드에서 추가 크레딧을 따로 구매할 수 있습니다.',
         },
@@ -3292,7 +3296,7 @@ function LegacyEarlyBirdSection_DoNotUse() {
                 feats={[
                   { ok: true, text: <><b>정가 대비 100,000원 할인</b> · 499,000원</> },
                   { ok: true, text: <><b>보너스 크레딧 78,000원 상당</b> 즉시 지급 (Pro 2개월분)</> },
-                  { ok: true, text: <>지급된 크레딧은 <b>만료 없이 영구 보존</b></> },
+                  { ok: true, text: <><b>보너스 크레딧만</b> 만료 없이 영구 보존</> },
                 ]}
                 bonusText={<>+ 보너스 <b>78,000원 상당</b></>}
                 variant="active" isMobile={isMobile}
@@ -3304,7 +3308,7 @@ function LegacyEarlyBirdSection_DoNotUse() {
                 feats={[
                   { ok: true, text: <>정가 대비 100,000원 할인 · 499,000원</> },
                   { ok: true, text: <>보너스 크레딧 <b>39,000원 상당</b> 지급 (1차 대비 축소)</> },
-                  { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
+                  { ok: true, text: <><b>보너스 크레딧</b> 만료 없이 보존</> },
                 ]}
                 bonusText={<>+ 보너스 <b>39,000원 상당</b></>}
                 variant="dim" isMobile={isMobile}
@@ -3489,7 +3493,12 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                       💜 78,000원 상당 · Pro 2개월분
                     </span>
                   </> },
-                  { ok: true, text: <><b>만료 없는 영구 크레딧</b> · 평생 사용 가능</> },
+                  { ok: true, text: <>
+                    <b>보너스 크레딧 800cr 만료 없음</b>
+                    <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.55)', marginTop: 3 }}>
+                      ※ 매달 정기 지급분(400cr)은 다음 지급일에 리셋
+                    </span>
+                  </> },
                 ]}
                 bonusText={<><span style={{ display: 'block' }}>총 178,000원</span><span style={{ display: 'block' }}>혜택!</span></>}
                 variant={stage1Variant} isMobile={isMobile}
@@ -3506,7 +3515,12 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                       💜 39,000원 상당 · 1차 대비 절반
                     </span>
                   </> },
-                  { ok: true, text: <>지급된 크레딧은 만료 없이 보존</> },
+                  { ok: true, text: <>
+                    <b>보너스 크레딧 400cr 만료 없음</b>
+                    <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.55)', marginTop: 3 }}>
+                      ※ 매달 정기 지급분(400cr)은 다음 지급일에 리셋
+                    </span>
+                  </> },
                 ]}
                 bonusText={<><span style={{ display: 'block' }}>총 139,000원</span><span style={{ display: 'block' }}>혜택</span></>}
                 variant={stage2Variant} isMobile={isMobile}
@@ -3742,6 +3756,7 @@ function EbTier(p: EbTierProps) {
               fontSize: p.isMobile ? 13.5 : 14, fontWeight: 600,
               color: f.muted ? 'rgba(255,255,255,.55)' : (p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.92)'),
               lineHeight: 1.5,
+              wordBreak: 'keep-all',
             }}>
               <span style={{
                 width: 20, height: 20, flexShrink: 0, marginTop: 2,
