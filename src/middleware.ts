@@ -1,6 +1,7 @@
 import { updateSession } from "@/utils/supabase/middleware";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
+import { canAccessAdminPath, getAdminAccessLevel } from "@/lib/admin/access";
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -55,6 +56,20 @@ export async function middleware(request: NextRequest) {
     });
 
     return redirectResponse;
+  }
+
+  if (user && (normalizedPath === "/admin" || normalizedPath.startsWith("/admin/"))) {
+    const accessLevel = getAdminAccessLevel(user.email, user.user_metadata);
+
+    if (!canAccessAdminPath(accessLevel, normalizedPath)) {
+      const locale = getRequestLocale(request.nextUrl.pathname);
+      const fallbackPath = accessLevel === "marketing" ? `/${locale}/admin/overview` : `/${locale}/dashboard`;
+      const redirectResponse = NextResponse.redirect(new URL(fallbackPath, request.url));
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie);
+      });
+      return redirectResponse;
+    }
   }
 
   // 3. Simple Route Protection (Mockup logic, real protection involves checking session in updateSession or here)

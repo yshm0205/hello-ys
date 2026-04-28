@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { getAdminAccessLevel } from "@/lib/admin/access";
 
 export default async function AdminLayout({
   children,
@@ -18,9 +19,9 @@ export default async function AdminLayout({
   }
 
   const userEmail: string = user.email;
-  const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+  const accessLevel = getAdminAccessLevel(userEmail, user.user_metadata);
 
-  if (!adminEmails.includes(userEmail)) {
+  if (accessLevel === "none") {
     const { redirect } = await import("next/navigation");
     redirect("/dashboard");
     return null;
@@ -28,7 +29,7 @@ export default async function AdminLayout({
 
   return (
     <div className="admin-light flex min-h-screen bg-zinc-50">
-      <AdminSidebar />
+      <AdminSidebar accessLevel={accessLevel} />
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto p-6 md:p-8 max-w-7xl space-y-6">
           {children}

@@ -1,4 +1,5 @@
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { getAdminAccessLevel, type AdminAccessLevel } from '@/lib/admin/access';
 import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
@@ -28,13 +29,16 @@ export default async function DashboardGroupLayout({
     monthly_credit_granted_cycles?: number | null;
     next_credit_at?: string | null;
   } | null = null;
+  let adminAccessLevel: AdminAccessLevel = 'none';
 
   initialCreditInfo = await getEffectiveCreditInfo(user.id);
+  adminAccessLevel = getAdminAccessLevel(user.email, user.user_metadata);
 
   return (
     <DashboardLayout
       user={{ email: user.email ?? undefined }}
       initialCreditInfo={initialCreditInfo}
+      adminAccessLevel={adminAccessLevel}
     >
       {children}
     </DashboardLayout>

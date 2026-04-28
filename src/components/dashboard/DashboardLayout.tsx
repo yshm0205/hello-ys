@@ -31,10 +31,12 @@ import {
     BookOpen,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
+import type { AdminAccessLevel } from '@/lib/admin/access';
 
 interface DashboardLayoutProps {
     children: ReactNode;
     user?: { email?: string };
+    adminAccessLevel?: AdminAccessLevel;
     initialCreditInfo?: {
         credits: number;
         plan_type: string;
@@ -101,10 +103,27 @@ const navItems = [
     },
 ];
 
-export function DashboardLayout({ children, user, initialCreditInfo = null }: DashboardLayoutProps) {
+export function DashboardLayout({
+    children,
+    user,
+    adminAccessLevel = 'none',
+    initialCreditInfo = null,
+}: DashboardLayoutProps) {
     const [opened, { toggle }] = useDisclosure();
     const pathname = usePathname();
     const credits = initialCreditInfo?.credits ?? null;
+    const canViewMarketingOverview = adminAccessLevel === 'full' || adminAccessLevel === 'marketing';
+    const resolvedNavItems = canViewMarketingOverview
+        ? [
+              ...navItems,
+              {
+                  label: '운영 지표',
+                  href: '/admin/overview',
+                  icon: BarChart3,
+                  description: '런칭 퍼널과 핵심 지표',
+              },
+          ]
+        : navItems;
 
     return (
         <DashboardShellContext.Provider
@@ -198,7 +217,7 @@ export function DashboardLayout({ children, user, initialCreditInfo = null }: Da
                 }}
             >
                 <Stack gap="xs">
-                    {navItems.map((item) => {
+                    {resolvedNavItems.map((item) => {
                         const isActive = item.href === '/dashboard'
                             ? pathname === '/dashboard'
                             : pathname === item.href || pathname.startsWith(item.href + '/');

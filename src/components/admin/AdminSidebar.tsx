@@ -1,5 +1,6 @@
 "use client";
 
+import type { AdminAccessLevel } from "@/lib/admin/access";
 import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
@@ -118,7 +119,11 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({
+  accessLevel = "full",
+}: {
+  accessLevel?: AdminAccessLevel;
+}) {
   const t = useTranslations("Admin");
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -129,6 +134,16 @@ export function AdminSidebar() {
     const cleanPath = pathname.replace(/^\/[a-z]{2}/, "");
     return cleanPath === href || cleanPath.startsWith(href + "/");
   };
+
+  const visibleGroups =
+    accessLevel === "marketing"
+      ? navGroups
+          .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => item.href === "/admin/overview"),
+          }))
+          .filter((group) => group.items.length > 0)
+      : navGroups;
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -153,7 +168,7 @@ export function AdminSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-4">
-        {navGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.titleKey}>
             {!collapsed && (
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
