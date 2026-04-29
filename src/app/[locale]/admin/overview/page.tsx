@@ -432,6 +432,13 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       )
     : 0;
 
+  const hasBehaviorSignals = periodSessions.some(
+    (session) =>
+      (session.max_scroll_percent || 0) > 0 ||
+      !!session.last_visible_section ||
+      !!session.last_clicked_cta_section,
+  );
+
   return {
     openedAtLabel: getLaunchOpenAtLabel(),
     landingSessions: periodSessions.length,
@@ -445,6 +452,7 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     topReferrers: summarizeReferrers(periodSessions, 3),
     averageDurationSeconds,
     averageMaxScrollPercent,
+    hasBehaviorSignals,
     topExitSection: summarizeTopSection(
       periodSessions,
       (session) => session.last_visible_section,
@@ -717,7 +725,9 @@ export default async function AdminOverviewPage({
                 {formatDuration(periodStats.averageDurationSeconds)}
               </div>
               <p className="text-xs text-muted-foreground">
-                평균 최대 스크롤 {periodStats.averageMaxScrollPercent}%
+                {periodStats.hasBehaviorSignals
+                  ? `평균 최대 스크롤 ${periodStats.averageMaxScrollPercent}%`
+                  : "새 행동 추적은 지금부터 반영됩니다"}
               </p>
             </CardContent>
           </Card>
