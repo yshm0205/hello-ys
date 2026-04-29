@@ -59,7 +59,7 @@ const SECTION_LABELS: Record<string, string> = {
   faq: "FAQ",
   cta: "마지막 CTA",
 };
-const BASE_SESSION_SELECT = "cta_clicks, referrer, first_seen_at";
+const BASE_SESSION_SELECT = "cta_clicks, referrer, first_seen_at, duration_seconds";
 const BEHAVIOR_SESSION_SELECT = `${BASE_SESSION_SELECT}, duration_seconds, max_scroll_percent, last_visible_section, last_clicked_cta_section`;
 
 type PresetMarketingPeriod = keyof typeof PERIOD_CONFIG;
