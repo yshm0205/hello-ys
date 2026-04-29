@@ -8,10 +8,14 @@ import {
   UserPlus,
 } from "lucide-react";
 
+import { AdminOverviewLiveRefresh } from "@/components/admin/AdminOverviewLiveRefresh";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@/i18n/routing";
 import { getInternalAdminUsers } from "@/lib/admin/internal-users";
 import { createAdminClient } from "@/utils/supabase/admin";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
@@ -526,6 +530,7 @@ export default async function AdminOverviewPage({
             </button>
           </form>
         </div>
+        <AdminOverviewLiveRefresh />
       </div>
 
       <div className="space-y-3">
