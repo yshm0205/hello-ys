@@ -48,16 +48,56 @@ const LAUNCH_CHANGES = [
     watch: "결제 완료 후 문의 / 홈 재방문 흐름",
   },
 ] as const;
-const SECTION_LABELS: Record<string, string> = {
-  "landing-hero": "히어로",
-  earlybird: "얼리버드",
-  "loop-pain": "문제 인식",
-  pain: "문제 공감",
-  offer: "상품 소개",
-  compare: "차별점",
-  "how-it-works": "진행 방식",
-  faq: "FAQ",
-  cta: "마지막 CTA",
+const SECTION_INFOS: Record<
+  string,
+  { label: string; exitLabel?: string; range: string; check: string }
+> = {
+  "landing-hero": {
+    label: "첫 화면",
+    exitLabel: "첫 화면 이탈",
+    range: "상단 혜택 문구부터 첫 신청 버튼까지",
+    check: "헤드라인, 첫 CTA, 아래로 더 보게 만드는 문구",
+  },
+  earlybird: {
+    label: "얼리버드 혜택",
+    range: "1차 얼리버드 자리·가격·보너스 안내부터 신청 버튼까지",
+    check: "가격, 혜택, 선착순 메시지가 바로 이해되는지",
+  },
+  "loop-pain": {
+    label: "문제 인식",
+    range: "무한 루프 그림부터 '갇혀 계신가요?' 문구까지",
+    check: "문제 공감이 충분히 빠르게 되는지",
+  },
+  pain: {
+    label: "문제 공감",
+    range: "먼 길을 돌아가는 중 문구부터 3가지 문제 카드까지",
+    check: "문제 카드가 길거나 공감이 약하지 않은지",
+  },
+  offer: {
+    label: "상품 소개",
+    range: "최단거리 방법 소개부터 VOD·FlowSpot·템플릿 구성까지",
+    check: "무엇을 받는지 한눈에 이해되는지",
+  },
+  compare: {
+    label: "가치 비교",
+    range: "가격 질문부터 300만원 가치·가격 비교 설명까지",
+    check: "가격 설득과 가치 비교가 납득되는지",
+  },
+  "how-it-works": {
+    label: "진행 방식",
+    range: "어디서 헤매는지 질문부터 단계별 솔루션 안내까지",
+    check: "수강 흐름이 복잡해 보이지 않는지",
+  },
+  faq: {
+    label: "FAQ",
+    range: "자주 묻는 질문부터 수강·결제·환불 답변까지",
+    check: "불안 요소가 FAQ에서 해소되는지",
+  },
+  cta: {
+    label: "마지막 신청",
+    range: "마지막 시작 문구부터 최종 신청 버튼까지",
+    check: "마지막 CTA 문구와 마감감이 충분한지",
+  },
 };
 const BASE_SESSION_SELECT = "cta_clicks, referrer, first_seen_at, duration_seconds";
 const BEHAVIOR_SESSION_SELECT = `${BASE_SESSION_SELECT}, duration_seconds, max_scroll_percent, last_visible_section, last_clicked_cta_section`;
@@ -73,6 +113,15 @@ interface MarketingSessionRow {
   max_scroll_percent: number | null;
   last_visible_section: string | null;
   last_clicked_cta_section: string | null;
+}
+
+interface LandingSectionSummary {
+  raw: string;
+  label: string;
+  exitLabel: string;
+  range: string;
+  check: string;
+  count: number;
 }
 
 interface UserRow {
@@ -300,53 +349,53 @@ function summarizeReferrers(rows: MarketingSessionRow[], topN = 3) {
     .map(([source, count]) => ({ source, count }));
 }
 
-function normalizeSectionLabel(section: string | null) {
-  if (!section) return null;
-  return SECTION_LABELS[section] || section;
+function getSectionInfo(section: string) {
+  const info = SECTION_INFOS[section];
+
+  return {
+    label: info?.label || section,
+    exitLabel: info?.exitLabel || info?.label || section,
+    range: info?.range || "랜딩의 해당 구간",
+    check: info?.check || "해당 구간의 카피와 CTA 흐름",
+  };
+}
+
+function summarizeTopSections(
+  rows: MarketingSessionRow[],
+  selector: (row: MarketingSessionRow) => string | null,
+  limit = 3,
+) {
+  const counts = new Map<string, LandingSectionSummary>();
+
+  for (const row of rows) {
+    const raw = selector(row);
+    if (!raw) continue;
+    const info = getSectionInfo(raw);
+    const current = counts.get(raw) || { raw, ...info, count: 0 };
+    current.count += 1;
+    counts.set(raw, current);
+  }
+
+  return Array.from(counts.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
 
 function summarizeTopSection(
   rows: MarketingSessionRow[],
   selector: (row: MarketingSessionRow) => string | null,
 ) {
-  const counts = new Map<string, { raw: string; label: string; count: number }>();
-
-  for (const row of rows) {
-    const raw = selector(row);
-    if (!raw) continue;
-    const label = normalizeSectionLabel(raw);
-    if (!label) continue;
-    const current = counts.get(raw) || { raw, label, count: 0 };
-    current.count += 1;
-    counts.set(raw, current);
-  }
-
-  const topSection =
-    Array.from(counts.values()).sort((a, b) => b.count - a.count)[0] || null;
-
-  if (!topSection) {
-    return null;
-  }
-
-  return topSection;
+  return summarizeTopSections(rows, selector, 1)[0] || null;
 }
 
-function getExitSectionLabel(
-  section: { raw: string; label: string; count: number } | null,
-) {
+function getExitSectionLabel(section: LandingSectionSummary | null) {
   if (!section) return "-";
-  if (section.raw === "landing-hero") return "첫 화면 이탈";
-  return section.label;
+  return section.exitLabel;
 }
 
-function getExitSectionHint(
-  section: { raw: string; label: string; count: number } | null,
-) {
+function getExitSectionHint(section: LandingSectionSummary | null) {
   if (!section) return "아직 데이터 없음";
-  if (section.raw === "landing-hero") {
-    return `${section.count}세션 · 히어로에서 더 내려가지 않음`;
-  }
-  return `${section.count}세션 · ${section.label} 근처에서 이탈`;
+  return `${section.count}세션 · ${section.range}`;
 }
 
 function isMissingBehaviorFieldError(error: unknown) {
@@ -477,9 +526,19 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       periodSessions,
       (session) => session.last_visible_section,
     ),
+    topExitSections: summarizeTopSections(
+      periodSessions,
+      (session) => session.last_visible_section,
+      3,
+    ),
     topCtaSection: summarizeTopSection(
       periodSessions.filter((session) => (session.cta_clicks || 0) > 0),
       (session) => session.last_clicked_cta_section,
+    ),
+    topCtaSections: summarizeTopSections(
+      periodSessions.filter((session) => (session.cta_clicks || 0) > 0),
+      (session) => session.last_clicked_cta_section,
+      3,
     ),
   };
 }
@@ -730,7 +789,7 @@ export default async function AdminOverviewPage({
         <div>
           <h2 className="text-base font-semibold text-foreground">랜딩 행동 요약</h2>
           <p className="text-xs text-muted-foreground">
-            렉 없이 가볍게 보는 행동 지표만 붙였습니다.
+            마지막으로 본 랜딩 구간과 결제 버튼 클릭 위치를 같이 봅니다.
           </p>
         </div>
 
@@ -778,9 +837,82 @@ export default async function AdminOverviewPage({
               </div>
               <p className="text-xs text-muted-foreground">
                 {periodStats.topCtaSection
-                  ? `${periodStats.topCtaSection.count}세션`
+                  ? `${periodStats.topCtaSection.count}세션 · ${periodStats.topCtaSection.range}`
                   : "아직 데이터 없음"}
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">이탈 위치 TOP 3</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {periodStats.hasBehaviorSignals && periodStats.topExitSections.length ? (
+                periodStats.topExitSections.map((section, index) => (
+                  <div
+                    key={section.raw}
+                    className="rounded-lg border bg-background px-3 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">
+                          {index + 1}. {getExitSectionLabel(section)}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          본 구간: {section.range}
+                        </p>
+                        <p className="text-xs leading-5 text-muted-foreground">
+                          확인: {section.check}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold text-foreground">
+                        {section.count}세션
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  새 행동 추적은 지금부터 반영됩니다.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">결제 클릭 위치 TOP 3</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {periodStats.topCtaSections.length ? (
+                periodStats.topCtaSections.map((section, index) => (
+                  <div
+                    key={section.raw}
+                    className="rounded-lg border bg-background px-3 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">
+                          {index + 1}. {section.label}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          클릭 구간: {section.range}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold text-foreground">
+                        {section.count}세션
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  아직 결제 버튼 클릭 데이터가 없습니다.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
