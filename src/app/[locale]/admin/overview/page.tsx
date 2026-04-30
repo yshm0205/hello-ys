@@ -20,6 +20,8 @@ export const revalidate = 0;
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
 const LAUNCH_OPEN_AT_KST = "2026-04-24T17:00:00+09:00";
+const BEHAVIOR_TRACKING_RELIABLE_FROM_KST = "2026-04-30T12:40:00+09:00";
+const BEHAVIOR_TRACKING_RELIABLE_FROM_LABEL = "4/30 12:40 이후";
 const PERIOD_CONFIG = {
   launch: { label: "런칭 이후", caption: "오픈 이후 누적" },
   today: { label: "오늘", caption: "오늘 기준" },
@@ -203,6 +205,14 @@ function getLaunchOpenAtLabel() {
   return new Date(LAUNCH_OPEN_AT_KST).toLocaleString("ko-KR", {
     timeZone: SEOUL_TIME_ZONE,
   });
+}
+
+function isReliableBehaviorSession(session: MarketingSessionRow) {
+  if (!session.first_seen_at) return false;
+  return (
+    new Date(session.first_seen_at).getTime() >=
+    new Date(BEHAVIOR_TRACKING_RELIABLE_FROM_KST).getTime()
+  );
 }
 
 function getPeriodRange(period: MarketingPeriod, startDate?: string, endDate?: string) {
@@ -508,9 +518,18 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       !!session.last_visible_section ||
       !!session.last_clicked_cta_section,
   );
+  const reliableBehaviorSessions = periodSessions.filter(isReliableBehaviorSession);
+  const reliableCtaSessions = reliableBehaviorSessions.filter(
+    (session) => (session.cta_clicks || 0) > 0,
+  );
+  const hasReliableBehaviorSignals = reliableBehaviorSessions.some(
+    (session) => !!session.last_visible_section || !!session.last_clicked_cta_section,
+  );
 
   return {
     openedAtLabel: getLaunchOpenAtLabel(),
+    behaviorReliableFromLabel: BEHAVIOR_TRACKING_RELIABLE_FROM_LABEL,
+    reliableBehaviorSessionCount: reliableBehaviorSessions.length,
     landingSessions: periodSessions.length,
     ctaUnique,
     ctaClicks: periodSessions.reduce((sum, session) => sum + (session.cta_clicks || 0), 0),
@@ -523,21 +542,22 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     averageDurationSeconds,
     averageMaxScrollPercent,
     hasBehaviorSignals,
+    hasReliableBehaviorSignals,
     topExitSection: summarizeTopSection(
-      periodSessions,
+      reliableBehaviorSessions,
       (session) => session.last_visible_section,
     ),
     topExitSections: summarizeTopSections(
-      periodSessions,
+      reliableBehaviorSessions,
       (session) => session.last_visible_section,
       3,
     ),
     topCtaSection: summarizeTopSection(
-      periodSessions.filter((session) => (session.cta_clicks || 0) > 0),
+      reliableCtaSessions,
       (session) => session.last_clicked_cta_section,
     ),
     topCtaSections: summarizeTopSections(
-      periodSessions.filter((session) => (session.cta_clicks || 0) > 0),
+      reliableCtaSessions,
       (session) => session.last_clicked_cta_section,
       3,
     ),
@@ -790,7 +810,7 @@ export default async function AdminOverviewPage({
         <div>
           <h2 className="text-base font-semibold text-foreground">랜딩 행동 요약</h2>
           <p className="text-xs text-muted-foreground">
-            마지막으로 본 랜딩 구간과 결제 버튼 클릭 위치를 같이 봅니다.
+            이탈 위치와 클릭 위치는 {periodStats.behaviorReliableFromLabel} 새 데이터만 봅니다.
           </p>
         </div>
 
@@ -822,7 +842,9 @@ export default async function AdminOverviewPage({
                 {getExitSectionLabel(periodStats.topExitSection)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {getExitSectionHint(periodStats.topExitSection)}
+                {periodStats.hasReliableBehaviorSignals
+                  ? getExitSectionHint(periodStats.topExitSection)
+                  : `${periodStats.behaviorReliableFromLabel} 데이터부터 표시`}
               </p>
             </CardContent>
           </Card>
@@ -839,7 +861,7 @@ export default async function AdminOverviewPage({
               <p className="text-xs text-muted-foreground">
                 {periodStats.topCtaSection
                   ? `${periodStats.topCtaSection.count}세션 · ${periodStats.topCtaSection.range}`
-                  : "아직 데이터 없음"}
+                  : `${periodStats.behaviorReliableFromLabel} 데이터부터 표시`}
               </p>
             </CardContent>
           </Card>
@@ -851,7 +873,7 @@ export default async function AdminOverviewPage({
               <CardTitle className="text-sm font-medium">이탈 위치 TOP 3</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {periodStats.hasBehaviorSignals && periodStats.topExitSections.length ? (
+              {periodStats.hasReliableBehaviorSignals && periodStats.topExitSections.length ? (
                 periodStats.topExitSections.map((section, index) => (
                   <div
                     key={section.raw}
@@ -877,7 +899,8 @@ export default async function AdminOverviewPage({
                 ))
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  새 행동 추적은 지금부터 반영됩니다.
+                  이전 이탈 위치 데이터는 숨겼습니다. {periodStats.behaviorReliableFromLabel}{" "}
+                  새 세션부터 표시됩니다.
                 </p>
               )}
             </CardContent>
@@ -911,7 +934,8 @@ export default async function AdminOverviewPage({
                 ))
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  아직 결제 버튼 클릭 데이터가 없습니다.
+                  이전 클릭 위치 데이터는 숨겼습니다. {periodStats.behaviorReliableFromLabel}{" "}
+                  새 세션부터 표시됩니다.
                 </p>
               )}
             </CardContent>
