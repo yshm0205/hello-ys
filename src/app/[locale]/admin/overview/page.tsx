@@ -225,6 +225,23 @@ function isReliableBehaviorSession(session: MarketingSessionRow) {
   );
 }
 
+function isQuickBounceSession(session: MarketingSessionRow) {
+  return (session.duration_seconds || 0) < 10 || (session.max_scroll_percent || 0) < 20;
+}
+
+function isMiddleReadSession(session: MarketingSessionRow) {
+  return (session.max_scroll_percent || 0) >= 50;
+}
+
+function isFullReadSession(session: MarketingSessionRow) {
+  const lastSection = session.last_visible_section;
+  return (
+    (session.max_scroll_percent || 0) >= 85 ||
+    lastSection === "faq" ||
+    lastSection === "cta"
+  );
+}
+
 function getPeriodRange(period: MarketingPeriod, startDate?: string, endDate?: string) {
   if (period === "custom" && hasOrderedDateRange(startDate, endDate)) {
     const start = new Date(`${startDate}T00:00:00+09:00`);
@@ -535,11 +552,21 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
   const hasReliableBehaviorSignals = reliableBehaviorSessions.some(
     (session) => !!session.last_visible_section || !!session.last_clicked_cta_section,
   );
+  const quickBounceSessions = reliableBehaviorSessions.filter(isQuickBounceSession);
+  const middleReadSessions = reliableBehaviorSessions.filter(isMiddleReadSession);
+  const fullReadSessions = reliableBehaviorSessions.filter(isFullReadSession);
+  const readAndClickSessions = middleReadSessions.filter(
+    (session) => (session.cta_clicks || 0) > 0,
+  );
 
   return {
     openedAtLabel: getLaunchOpenAtLabel(),
     behaviorReliableFromLabel: BEHAVIOR_TRACKING_RELIABLE_FROM_LABEL,
     reliableBehaviorSessionCount: reliableBehaviorSessions.length,
+    quickBounceSessions: quickBounceSessions.length,
+    middleReadSessions: middleReadSessions.length,
+    fullReadSessions: fullReadSessions.length,
+    readAndClickSessions: readAndClickSessions.length,
     landingSessions: periodSessions.length,
     ctaUnique,
     ctaClicks: periodSessions.reduce((sum, session) => sum + (session.cta_clicks || 0), 0),
@@ -823,6 +850,64 @@ export default async function AdminOverviewPage({
             이탈 위치와 클릭 위치는 {periodStats.behaviorReliableFromLabel} 새 데이터만 봅니다.
             현재 표본 {periodStats.reliableBehaviorSessionCount}세션.
           </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">바로 나감</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {getRate(periodStats.quickBounceSessions, periodStats.reliableBehaviorSessionCount)}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {periodStats.quickBounceSessions}세션 · 10초 미만 또는 스크롤 20% 미만
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">중간까지 봄</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {getRate(periodStats.middleReadSessions, periodStats.reliableBehaviorSessionCount)}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {periodStats.middleReadSessions}세션 · 스크롤 50% 이상
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">끝까지 봄</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {getRate(periodStats.fullReadSessions, periodStats.reliableBehaviorSessionCount)}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {periodStats.fullReadSessions}세션 · 85% 이상 또는 FAQ/마지막 신청 도달
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">읽고 클릭</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {getRate(periodStats.readAndClickSessions, periodStats.middleReadSessions)}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                중간 이상 본 {periodStats.middleReadSessions}세션 중 {periodStats.readAndClickSessions}세션
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
