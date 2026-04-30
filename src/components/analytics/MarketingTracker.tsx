@@ -80,6 +80,35 @@ function getNearestSectionName(element: HTMLElement | null) {
   return getSectionName(section);
 }
 
+function getCurrentSectionName(sections: HTMLElement[]) {
+  if (!sections.length) return null;
+
+  const viewportAnchor = window.innerHeight * 0.55;
+  let closestSection: HTMLElement | null = null;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  for (const section of sections) {
+    const rect = section.getBoundingClientRect();
+    if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
+
+    if (rect.top <= viewportAnchor && rect.bottom >= viewportAnchor) {
+      return getSectionName(section);
+    }
+
+    const distance = Math.min(
+      Math.abs(rect.top - viewportAnchor),
+      Math.abs(rect.bottom - viewportAnchor),
+    );
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestSection = section;
+    }
+  }
+
+  return getSectionName(closestSection || sections[0]);
+}
+
 function isPurchaseCtaHref(href: string) {
   return (
     href.includes("/pricing") ||
@@ -119,9 +148,10 @@ export function MarketingTracker({ pageType }: MarketingTrackerProps) {
     const pagePath = window.location.pathname;
     const utm = getUtmParams();
 
-    maxScrollPercentRef.current = getScrollPercent();
     const sections = getTrackableSections();
-    lastVisibleSectionRef.current = getSectionName(sections[0] || null);
+    maxScrollPercentRef.current = getScrollPercent();
+    lastVisibleSectionRef.current =
+      getCurrentSectionName(sections) || getSectionName(sections[0] || null);
 
     void postEvent({
       eventType: "page_view",
@@ -156,50 +186,21 @@ export function MarketingTracker({ pageType }: MarketingTrackerProps) {
       );
     };
 
-    const updateScrollPercent = () => {
+    const updateScrollState = () => {
       scrollFrameRequested = false;
       maxScrollPercentRef.current = Math.max(
         maxScrollPercentRef.current,
         getScrollPercent(),
       );
+      lastVisibleSectionRef.current =
+        getCurrentSectionName(sections) || lastVisibleSectionRef.current;
     };
 
     const handleScroll = () => {
       if (scrollFrameRequested) return;
       scrollFrameRequested = true;
-      window.requestAnimationFrame(updateScrollPercent);
+      window.requestAnimationFrame(updateScrollState);
     };
-
-    const visibilityMap = new Map<HTMLElement, number>();
-    const observer =
-      sections.length > 0
-        ? new IntersectionObserver(
-            (entries) => {
-              for (const entry of entries) {
-                visibilityMap.set(entry.target as HTMLElement, entry.isIntersecting ? entry.intersectionRatio : 0);
-              }
-
-              let bestSection: HTMLElement | null = null;
-              let bestRatio = 0;
-              for (const [element, ratio] of visibilityMap.entries()) {
-                if (ratio > bestRatio) {
-                  bestSection = element;
-                  bestRatio = ratio;
-                }
-              }
-
-              if (bestSection) {
-                lastVisibleSectionRef.current = getSectionName(bestSection);
-              }
-            },
-            {
-              root: null,
-              threshold: [0.2, 0.35, 0.5, 0.7],
-            },
-          )
-        : null;
-
-    sections.forEach((section) => observer?.observe(section));
 
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
@@ -209,11 +210,15 @@ export function MarketingTracker({ pageType }: MarketingTrackerProps) {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
+        updateScrollState();
         flushDuration(true);
       }
     };
 
-    const handlePageHide = () => flushDuration(true);
+    const handlePageHide = () => {
+      updateScrollState();
+      flushDuration(true);
+    };
 
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
@@ -256,7 +261,6 @@ export function MarketingTracker({ pageType }: MarketingTrackerProps) {
 
     return () => {
       flushDuration(true);
-      observer?.disconnect();
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pagehide", handlePageHide);
