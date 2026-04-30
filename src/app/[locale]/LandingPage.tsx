@@ -3377,8 +3377,9 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
   const stage1Status: EbTierProps['status'] = phase1IsLive ? 'live' : 'end';
   const stage1StatusText = phase1IsLive
     ? 'LIVE · 진행 중'
-    : '1차 혜택 종료';
+    : '1차 마감';
   const stage1Variant: EbTierProps['variant'] = phase1IsLive ? 'active' : 'dim';
+  const stage1Strikethrough = !phase1IsLive;
   const stage2Status: EbTierProps['status'] = phase1IsLive ? 'wait' : phase2IsLive ? 'live' : 'end';
   const stage2StatusText = phase1IsLive
     ? '1차 마감 후 시작'
@@ -3508,6 +3509,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 ]}
                 bonusText={<><span style={{ display: 'block' }}>총 178,000원</span><span style={{ display: 'block' }}>혜택!</span></>}
                 variant={stage1Variant} isMobile={isMobile}
+                strikethrough={stage1Strikethrough}
               />
               <EbChevron />
               <EbTier
@@ -3518,7 +3520,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   { ok: true, text: <>
                     보너스 크레딧 <b>400cr</b> 지급
                     <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#a78bfa', marginTop: 3 }}>
-                      💜 39,000원 상당 · 1차 대비 절반
+                      💜 39,000원 상당
                     </span>
                   </> },
                   { ok: true, text: <>
@@ -3530,6 +3532,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                 ]}
                 bonusText={<><span style={{ display: 'block' }}>총 139,000원</span><span style={{ display: 'block' }}>혜택</span></>}
                 variant={stage2Variant} isMobile={isMobile}
+                lastDiscountBadge={phase2IsLive}
               />
               <EbChevron />
               <EbTier
@@ -3662,9 +3665,12 @@ type EbTierProps = {
   priceUp?: string;
   variant: 'active' | 'dim' | 'end';
   isMobile: boolean;
+  lastDiscountBadge?: boolean;
+  strikethrough?: boolean;
 };
 
 function EbTier(p: EbTierProps) {
+  const struck = !!p.strikethrough;
   const base: React.CSSProperties = {
     position: 'relative',
     background: 'linear-gradient(180deg,rgba(24,20,34,.9),rgba(18,15,26,.9))',
@@ -3673,8 +3679,13 @@ function EbTier(p: EbTierProps) {
     padding: p.isMobile ? '24px 20px' : '30px 34px',
     backdropFilter: 'blur(10px)',
   };
-  const variantStyle: React.CSSProperties =
-    p.variant === 'active' ? {
+  const variantStyle: React.CSSProperties = struck
+    ? {
+        background: 'linear-gradient(180deg,rgba(20,17,28,.35),rgba(15,13,22,.35))',
+        border: '1px solid rgba(255,255,255,.06)',
+        opacity: 0.85,
+      }
+    : p.variant === 'active' ? {
       background: 'linear-gradient(180deg,rgba(40,22,70,.55),rgba(24,20,34,.7))',
       border: '2px solid #b46bff',
       animation: 'ebGlow 2.8s ease-in-out infinite',
@@ -3685,13 +3696,21 @@ function EbTier(p: EbTierProps) {
       background: 'linear-gradient(180deg,rgba(24,20,34,.4),rgba(18,15,26,.4))',
       border: '1px solid rgba(255,255,255,.09)',
     };
-  const statusStyle: React.CSSProperties =
-    p.status === 'live' ? { background: '#b46bff', color: '#fff', boxShadow: '0 0 20px rgba(180,107,255,.5), 0 0 0 3px rgba(180,107,255,.2)' } :
+  const statusStyle: React.CSSProperties = struck
+    ? { background: 'rgba(239,68,68,.1)', color: 'rgba(252,165,165,.7)', border: '1px solid rgba(239,68,68,.18)' }
+    : p.status === 'live' ? { background: '#b46bff', color: '#fff', boxShadow: '0 0 20px rgba(180,107,255,.5), 0 0 0 3px rgba(180,107,255,.2)' } :
     p.status === 'urgent' ? { background: '#f59e0b', color: '#fff', boxShadow: '0 0 20px rgba(245,158,11,.55), 0 0 0 3px rgba(245,158,11,.2)' } :
     p.status === 'wait' ? { background: 'rgba(255,255,255,.06)', color: 'rgba(255,255,255,.5)', border: '1px solid rgba(255,255,255,.1)' } :
     { background: 'rgba(239,68,68,.15)', color: '#fca5a5', border: '1px solid rgba(239,68,68,.25)' };
-  const bonusStyle: React.CSSProperties =
-    p.variant === 'active' ? {
+  const bonusStyle: React.CSSProperties = struck
+    ? {
+        background: 'rgba(139,92,246,.05)', color: 'rgba(167,139,250,.35)',
+        border: '1px solid rgba(139,92,246,.1)',
+        textDecoration: 'line-through',
+        textDecorationColor: 'rgba(167,139,250,.3)',
+        textDecorationThickness: 2.5,
+      }
+    : p.variant === 'active' ? {
       background: 'linear-gradient(135deg,#8b5cf6,#d946ef)',
       color: '#fff', boxShadow: '0 8px 20px -4px rgba(180,107,255,.5)',
     } : p.variant === 'dim' ? {
@@ -3704,6 +3723,19 @@ function EbTier(p: EbTierProps) {
 
   return (
     <Box style={{ ...base, ...variantStyle }}>
+      {p.lastDiscountBadge && (
+        <Box style={{
+          position: 'absolute', top: -12, right: 24,
+          padding: '7px 16px', borderRadius: 6,
+          background: 'linear-gradient(135deg,#fde047,#84cc16)',
+          color: '#1a1a1a',
+          fontSize: 12, fontWeight: 900, letterSpacing: '-0.01em',
+          transform: 'rotate(-3deg)',
+          boxShadow: '0 8px 20px -4px rgba(132,204,22,.45)',
+          whiteSpace: 'nowrap',
+          zIndex: 2,
+        }}>마지막 할인</Box>
+      )}
       <Box style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         <span style={{
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -3735,8 +3767,11 @@ function EbTier(p: EbTierProps) {
       <Box style={{ display: 'flex', flexDirection: 'column' }}>
         <Box style={{
           fontSize: p.isMobile ? 20 : 'clamp(22px, 2.3vw, 26px)', fontWeight: 900, letterSpacing: '-0.03em',
-          color: p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.82)' : '#fff',
+          color: struck ? 'rgba(255,255,255,.4)' : p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.82)' : '#fff',
           lineHeight: 1.1, marginBottom: p.isMobile ? 14 : 16,
+          textDecoration: struck ? 'line-through' : 'none',
+          textDecorationColor: struck ? 'rgba(255,255,255,.3)' : undefined,
+          textDecorationThickness: struck ? 2 : undefined,
         }}>{p.tierName}</Box>
 
         {/* 혜택 메인 헤드라인 — 가격 대신 혜택 금액을 카드의 시각적 1순위로 */}
@@ -3760,17 +3795,20 @@ function EbTier(p: EbTierProps) {
             <Box component="li" key={i} style={{
               display: 'flex', alignItems: 'flex-start', gap: 10,
               fontSize: p.isMobile ? 13.5 : 14, fontWeight: 600,
-              color: f.muted ? 'rgba(255,255,255,.55)' : (p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.92)'),
+              color: struck ? 'rgba(255,255,255,.35)' : f.muted ? 'rgba(255,255,255,.55)' : (p.variant === 'end' ? 'rgba(255,255,255,.6)' : p.variant === 'dim' ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.92)'),
               lineHeight: 1.5,
               wordBreak: 'keep-all',
+              textDecoration: struck ? 'line-through' : 'none',
+              textDecorationColor: struck ? 'rgba(255,255,255,.2)' : undefined,
             }}>
               <span style={{
                 width: 20, height: 20, flexShrink: 0, marginTop: 2,
                 borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 11, fontWeight: 900,
-                background: f.ok ? 'rgba(167,139,250,.22)' : 'rgba(239,68,68,.15)',
-                color: f.ok ? '#a78bfa' : '#fca5a5',
-              }}>{f.ok ? '✓' : '✕'}</span>
+                background: struck ? 'rgba(239,68,68,.12)' : f.ok ? 'rgba(167,139,250,.22)' : 'rgba(239,68,68,.15)',
+                color: struck ? '#fca5a5' : f.ok ? '#a78bfa' : '#fca5a5',
+                textDecoration: 'none',
+              }}>{struck ? '✕' : f.ok ? '✓' : '✕'}</span>
               <span>{f.text}</span>
             </Box>
           ))}
