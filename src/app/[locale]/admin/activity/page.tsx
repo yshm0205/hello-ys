@@ -49,11 +49,50 @@ function getKstDayRange(dayOffset = 0) {
   };
 }
 
-async function getActivityStats() {
+function isValidDateInput(value?: string) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function getKstDayRangeForDate(dateInput?: string) {
+  if (!isValidDateInput(dateInput)) {
+    return getKstDayRange();
+  }
+
+  const start = new Date(`${dateInput}T00:00:00+09:00`);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return {
+    startIso: start.toISOString(),
+    endIso: end.toISOString(),
+  };
+}
+
+function getDateInputValueFromIso(dateIso: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: SEOUL_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(dateIso));
+}
+
+function isBatchUsageLedgerRow(row: {
+  description?: string | null;
+  metadata?: Record<string, unknown> | null;
+}) {
+  return (
+    row.description?.includes("generate_batch") ||
+    row.metadata?.action === "generate_batch"
+  );
+}
+
+async function getActivityStats(dateInput?: string) {
   const supabase = createAdminClient();
   const internalAdmins = await getInternalAdminUsers();
   const internalAdminIds = new Set(internalAdmins.map((user) => user.id));
-  const { startIso: todayStartIso, endIso: tomorrowStartIso } = getKstDayRange();
+  const { startIso: selectedStartIso, endIso: selectedEndIso } =
+    getKstDayRangeForDate(dateInput);
 
   const [
     { data: newUsersTodayRows },
@@ -63,40 +102,47 @@ async function getActivityStats() {
     { data: completedLectureRows },
     { data: batchRows },
     { data: creditUsageRows, error: creditUsageError },
+    { data: batchCreditRows, error: batchCreditError },
   ] = await Promise.all([
     supabase
       .from("users")
       .select("id")
-      .gte("created_at", todayStartIso)
-      .lt("created_at", tomorrowStartIso),
+      .gte("created_at", selectedStartIso)
+      .lt("created_at", selectedEndIso),
     supabase.from("users").select("id", { count: "exact", head: true }),
     supabase
       .from("script_generations")
       .select("id, user_id")
-      .gte("created_at", todayStartIso)
-      .lt("created_at", tomorrowStartIso),
+      .gte("created_at", selectedStartIso)
+      .lt("created_at", selectedEndIso),
     supabase
       .from("toss_payments")
       .select("user_id")
       .in("status", [...SALES_ACTIVITY_STATUSES])
-      .gte("created_at", todayStartIso)
-      .lt("created_at", tomorrowStartIso),
+      .gte("created_at", selectedStartIso)
+      .lt("created_at", selectedEndIso),
     supabase
       .from("lecture_progress")
       .select("user_id")
-      .gte("completed_at", todayStartIso)
-      .lt("completed_at", tomorrowStartIso),
+      .gte("completed_at", selectedStartIso)
+      .lt("completed_at", selectedEndIso),
     supabase
       .from("batch_job_items")
       .select("user_id")
-      .gte("created_at", todayStartIso)
-      .lt("created_at", tomorrowStartIso),
+      .gte("created_at", selectedStartIso)
+      .lt("created_at", selectedEndIso),
     supabase
       .from("credit_transactions")
-      .select("user_id, amount")
+      .select("user_id, amount, description, metadata")
       .lt("amount", 0)
-      .gte("created_at", todayStartIso)
-      .lt("created_at", tomorrowStartIso),
+      .gte("created_at", selectedStartIso)
+      .lt("created_at", selectedEndIso),
+    supabase
+      .from("batch_job_items")
+      .select("user_id, credits_deducted, credits_refunded")
+      .gt("credits_deducted", 0)
+      .gte("created_at", selectedStartIso)
+      .lt("created_at", selectedEndIso),
   ]);
 
   const activeUserIds = new Set<string>();
@@ -116,15 +162,33 @@ async function getActivityStats() {
 
   const scriptsToday = (scriptRows || []).filter((row) => !internalAdminIds.has(row.user_id)).length;
   const newUsersToday = (newUsersTodayRows || []).filter((row) => !internalAdminIds.has(row.id)).length;
-  const creditsUsedToday = creditUsageError
+  const nonBatchLedgerCreditsUsed = creditUsageError
     ? null
-    : (creditUsageRows || []).reduce((sum, row) => sum + Math.abs(row.amount || 0), 0);
+    : (creditUsageRows || [])
+        .filter((row) => !isBatchUsageLedgerRow(row))
+        .reduce((sum, row) => sum + Math.abs(row.amount || 0), 0);
+  const batchCreditsUsed = batchCreditError
+    ? null
+    : (batchCreditRows || [])
+        .reduce(
+          (sum, row) =>
+            sum + Math.max(0, (row.credits_deducted || 0) - (row.credits_refunded || 0)),
+          0,
+        );
+  const creditsUsedToday =
+    nonBatchLedgerCreditsUsed === null && batchCreditsUsed === null
+      ? null
+      : (nonBatchLedgerCreditsUsed || 0) + (batchCreditsUsed || 0);
 
   return {
+    selectedDate: getDateInputValueFromIso(selectedStartIso),
     dau: activeUserIds.size,
     scriptsToday,
     creditsUsedToday,
-    creditsSource: creditUsageError ? "credit ledger 미설정" : "credit_transactions 기준",
+    creditsSource:
+      creditUsageError && batchCreditError
+        ? "크레딧 집계 테이블 미설정"
+        : "일반 차감 + 배치 차감 기준",
     newUsersToday,
     totalUsers: Math.max(0, (totalUsersRaw || 0) - internalAdmins.length),
   };
@@ -178,14 +242,14 @@ async function getUserList(filters?: {
 export default async function AdminActivityPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; date?: string }>;
 }) {
-  const { q, page } = await searchParams;
+  const { q, page, date } = await searchParams;
   const currentPage = parseInt(page || "1", 10);
   const t = await getTranslations("Admin.activity");
 
   const [stats, users] = await Promise.all([
-    getActivityStats(),
+    getActivityStats(date),
     getUserList({ q, page: currentPage }),
   ]);
 
@@ -195,6 +259,24 @@ export default async function AdminActivityPage({
         <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
+
+      <form method="get" className="flex flex-wrap items-end gap-2">
+        <label className="grid gap-1 text-xs text-muted-foreground">
+          조회일
+          <input
+            type="date"
+            name="date"
+            defaultValue={stats.selectedDate}
+            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground"
+          />
+        </label>
+        <button
+          type="submit"
+          className="h-9 rounded-md bg-foreground px-3 text-sm font-medium text-background"
+        >
+          적용
+        </button>
+      </form>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
