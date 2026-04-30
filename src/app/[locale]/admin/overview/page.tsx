@@ -96,6 +96,16 @@ const SECTION_INFOS: Record<
     range: "자주 묻는 질문부터 수강·결제·환불 답변까지",
     check: "불안 요소가 FAQ에서 해소되는지",
   },
+  "floating-cta-mobile": {
+    label: "고정 CTA(모바일 하단)",
+    range: "모바일 화면 하단에 고정된 얼리버드 신청 버튼",
+    check: "하단 고정 버튼이 실제 결제 클릭을 만들고 있는지",
+  },
+  "floating-cta-desktop": {
+    label: "고정 CTA(PC 우측)",
+    range: "PC 화면 오른쪽에 고정된 얼리버드 신청 카드",
+    check: "우측 고정 버튼이 방해보다 클릭을 만들고 있는지",
+  },
   cta: {
     label: "마지막 신청",
     range: "마지막 시작 문구부터 최종 신청 버튼까지",
@@ -811,6 +821,7 @@ export default async function AdminOverviewPage({
           <h2 className="text-base font-semibold text-foreground">랜딩 행동 요약</h2>
           <p className="text-xs text-muted-foreground">
             이탈 위치와 클릭 위치는 {periodStats.behaviorReliableFromLabel} 새 데이터만 봅니다.
+            현재 표본 {periodStats.reliableBehaviorSessionCount}세션.
           </p>
         </div>
 

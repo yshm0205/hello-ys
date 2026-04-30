@@ -2925,12 +2925,15 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
 
   if (isMobile) {
     return (
-      <Box style={{
+      <Box
+        data-marketing-section="floating-cta-mobile"
+        style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000,
         background: '#ffffff', borderTop: '1px solid #e4e4e7',
         paddingBottom: 'env(safe-area-inset-bottom)',
         boxShadow: '0 -2px 16px rgba(0,0,0,0.08)',
-      }}>
+        }}
+      >
         <Box
           onClick={() => setIsExpanded((prev) => !prev)}
           style={{
@@ -3022,10 +3025,13 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
   }
 
   return (
-    <Box style={{
+    <Box
+      data-marketing-section="floating-cta-desktop"
+      style={{
       position: 'fixed', top: '50%', right: '24px',
       transform: 'translateY(-50%)', zIndex: 1000, width: '240px',
-    }}>
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
