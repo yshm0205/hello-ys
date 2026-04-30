@@ -309,24 +309,44 @@ function summarizeTopSection(
   rows: MarketingSessionRow[],
   selector: (row: MarketingSessionRow) => string | null,
 ) {
-  const counts = new Map<string, number>();
+  const counts = new Map<string, { raw: string; label: string; count: number }>();
 
   for (const row of rows) {
     const raw = selector(row);
     if (!raw) continue;
     const label = normalizeSectionLabel(raw);
     if (!label) continue;
-    counts.set(label, (counts.get(label) || 0) + 1);
+    const current = counts.get(raw) || { raw, label, count: 0 };
+    current.count += 1;
+    counts.set(raw, current);
   }
 
-  const [label, count] =
-    Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] || [];
+  const topSection =
+    Array.from(counts.values()).sort((a, b) => b.count - a.count)[0] || null;
 
-  if (!label || !count) {
+  if (!topSection) {
     return null;
   }
 
-  return { label, count };
+  return topSection;
+}
+
+function getExitSectionLabel(
+  section: { raw: string; label: string; count: number } | null,
+) {
+  if (!section) return "-";
+  if (section.raw === "landing-hero") return "첫 화면 이탈";
+  return section.label;
+}
+
+function getExitSectionHint(
+  section: { raw: string; label: string; count: number } | null,
+) {
+  if (!section) return "아직 데이터 없음";
+  if (section.raw === "landing-hero") {
+    return `${section.count}세션 · 히어로에서 더 내려가지 않음`;
+  }
+  return `${section.count}세션 · ${section.label} 근처에서 이탈`;
 }
 
 function isMissingBehaviorFieldError(error: unknown) {
@@ -734,17 +754,15 @@ export default async function AdminOverviewPage({
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">마지막으로 많이 본 위치</CardTitle>
+              <CardTitle className="text-sm font-medium">이탈 위치</CardTitle>
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {periodStats.topExitSection?.label || "-"}
+                {getExitSectionLabel(periodStats.topExitSection)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {periodStats.topExitSection
-                  ? `${periodStats.topExitSection.count}세션`
-                  : "아직 데이터 없음"}
+                {getExitSectionHint(periodStats.topExitSection)}
               </p>
             </CardContent>
           </Card>
