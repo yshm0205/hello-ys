@@ -560,8 +560,14 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
   const reliableCtaSessions = reliableBehaviorSessions.filter(
     (session) => (session.cta_clicks || 0) > 0,
   );
+  const reliableExitSessions = reliableBehaviorSessions.filter(
+    (session) => (session.cta_clicks || 0) === 0,
+  );
   const hasReliableBehaviorSignals = reliableBehaviorSessions.some(
     (session) => !!session.last_visible_section || !!session.last_clicked_cta_section,
+  );
+  const hasReliableExitSignals = reliableExitSessions.some(
+    (session) => !!session.last_visible_section,
   );
   const quickBounceSessions = readDepthSessions.filter(isQuickBounceSession);
   const middleReadSessions = readDepthSessions.filter(isMiddleReadSession);
@@ -593,12 +599,22 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     averageMaxScrollPercent,
     hasBehaviorSignals,
     hasReliableBehaviorSignals,
+    hasReliableExitSignals,
     topExitSection: summarizeTopSection(
-      reliableBehaviorSessions,
+      reliableExitSessions,
       (session) => session.last_visible_section,
     ),
     topExitSections: summarizeTopSections(
-      reliableBehaviorSessions,
+      reliableExitSessions,
+      (session) => session.last_visible_section,
+      3,
+    ),
+    topCtaViewSection: summarizeTopSection(
+      reliableCtaSessions,
+      (session) => session.last_visible_section,
+    ),
+    topCtaViewSections: summarizeTopSections(
+      reliableCtaSessions,
       (session) => session.last_visible_section,
       3,
     ),
@@ -811,7 +827,7 @@ export default async function AdminOverviewPage({
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">랜딩 → CTA</CardTitle>
@@ -954,8 +970,25 @@ export default async function AdminOverviewPage({
                 {getExitSectionLabel(periodStats.topExitSection)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {periodStats.hasReliableBehaviorSignals
+                {periodStats.hasReliableExitSignals
                   ? getExitSectionHint(periodStats.topExitSection)
+                  : `${periodStats.behaviorReliableFromLabel} 데이터부터 표시`}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">클릭 당시 본 구간</CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {periodStats.topCtaViewSection?.label || "-"}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {periodStats.topCtaViewSection
+                  ? `${periodStats.topCtaViewSection.count}세션 · ${periodStats.topCtaViewSection.range}`
                   : `${periodStats.behaviorReliableFromLabel} 데이터부터 표시`}
               </p>
             </CardContent>
@@ -979,13 +1012,13 @@ export default async function AdminOverviewPage({
           </Card>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">이탈 위치 TOP 3</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {periodStats.hasReliableBehaviorSignals && periodStats.topExitSections.length ? (
+              {periodStats.hasReliableExitSignals && periodStats.topExitSections.length ? (
                 periodStats.topExitSections.map((section, index) => (
                   <div
                     key={section.raw}
@@ -1000,7 +1033,7 @@ export default async function AdminOverviewPage({
                           본 구간: {section.range}
                         </p>
                         <p className="text-xs leading-5 text-muted-foreground">
-                          확인: {section.check}
+                          확인: CTA를 누르지 않고 여기서 끝난 이유
                         </p>
                       </div>
                       <span className="shrink-0 text-sm font-semibold text-foreground">
@@ -1012,6 +1045,41 @@ export default async function AdminOverviewPage({
               ) : (
                 <p className="text-xs text-muted-foreground">
                   이전 이탈 위치 데이터는 숨겼습니다. {periodStats.behaviorReliableFromLabel}{" "}
+                  새 세션부터 표시됩니다.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">클릭 당시 본 구간 TOP 3</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {periodStats.topCtaViewSections.length ? (
+                periodStats.topCtaViewSections.map((section, index) => (
+                  <div
+                    key={section.raw}
+                    className="rounded-lg border bg-background px-3 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">
+                          {index + 1}. {section.label}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          보고 있던 구간: {section.range}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold text-foreground">
+                        {section.count}세션
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  이전 클릭 당시 구간 데이터는 숨겼습니다. {periodStats.behaviorReliableFromLabel}{" "}
                   새 세션부터 표시됩니다.
                 </p>
               )}
