@@ -916,10 +916,11 @@ export default async function AdminOverviewPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.readAndClickSessions, periodStats.middleReadSessions)}%
+                {getRate(periodStats.readAndClickSessions, periodStats.readDepthSessionCount)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                중간 이상 본 {periodStats.middleReadSessions}세션 중 {periodStats.readAndClickSessions}세션
+                전체 {periodStats.readDepthSessionCount}세션 중 {periodStats.readAndClickSessions}세션 ·
+                중간 이상 기준 {getRate(periodStats.readAndClickSessions, periodStats.middleReadSessions)}%
               </p>
             </CardContent>
           </Card>
