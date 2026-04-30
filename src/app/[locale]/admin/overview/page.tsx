@@ -20,6 +20,8 @@ export const revalidate = 0;
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
 const LAUNCH_OPEN_AT_KST = "2026-04-24T17:00:00+09:00";
+const READ_DEPTH_TRACKING_FROM_KST = "2026-04-28T22:22:00+09:00";
+const READ_DEPTH_TRACKING_FROM_LABEL = "4/28 22:22 이후";
 const BEHAVIOR_TRACKING_RELIABLE_FROM_KST = "2026-04-30T12:40:00+09:00";
 const BEHAVIOR_TRACKING_RELIABLE_FROM_LABEL = "4/30 12:40 이후";
 const PERIOD_CONFIG = {
@@ -222,6 +224,14 @@ function isReliableBehaviorSession(session: MarketingSessionRow) {
   return (
     new Date(session.first_seen_at).getTime() >=
     new Date(BEHAVIOR_TRACKING_RELIABLE_FROM_KST).getTime()
+  );
+}
+
+function isReadDepthSession(session: MarketingSessionRow) {
+  if (!session.first_seen_at) return false;
+  return (
+    new Date(session.first_seen_at).getTime() >=
+    new Date(READ_DEPTH_TRACKING_FROM_KST).getTime()
   );
 }
 
@@ -524,22 +534,23 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     (payment) => payment.status === "PENDING",
   );
   const ctaUnique = periodSessions.filter((session) => (session.cta_clicks || 0) > 0).length;
+  const readDepthSessions = periodSessions.filter(isReadDepthSession);
 
-  const averageDurationSeconds = periodSessions.length
+  const averageDurationSeconds = readDepthSessions.length
     ? Math.round(
-        periodSessions.reduce((sum, session) => sum + (session.duration_seconds || 0), 0) /
-          periodSessions.length,
+        readDepthSessions.reduce((sum, session) => sum + (session.duration_seconds || 0), 0) /
+          readDepthSessions.length,
       )
     : 0;
 
-  const averageMaxScrollPercent = periodSessions.length
+  const averageMaxScrollPercent = readDepthSessions.length
     ? Math.round(
-        periodSessions.reduce((sum, session) => sum + (session.max_scroll_percent || 0), 0) /
-          periodSessions.length,
+        readDepthSessions.reduce((sum, session) => sum + (session.max_scroll_percent || 0), 0) /
+          readDepthSessions.length,
       )
     : 0;
 
-  const hasBehaviorSignals = periodSessions.some(
+  const hasBehaviorSignals = readDepthSessions.some(
     (session) =>
       (session.max_scroll_percent || 0) > 0 ||
       !!session.last_visible_section ||
@@ -552,15 +563,17 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
   const hasReliableBehaviorSignals = reliableBehaviorSessions.some(
     (session) => !!session.last_visible_section || !!session.last_clicked_cta_section,
   );
-  const quickBounceSessions = reliableBehaviorSessions.filter(isQuickBounceSession);
-  const middleReadSessions = reliableBehaviorSessions.filter(isMiddleReadSession);
-  const fullReadSessions = reliableBehaviorSessions.filter(isFullReadSession);
+  const quickBounceSessions = readDepthSessions.filter(isQuickBounceSession);
+  const middleReadSessions = readDepthSessions.filter(isMiddleReadSession);
+  const fullReadSessions = readDepthSessions.filter(isFullReadSession);
   const readAndClickSessions = middleReadSessions.filter(
     (session) => (session.cta_clicks || 0) > 0,
   );
 
   return {
     openedAtLabel: getLaunchOpenAtLabel(),
+    readDepthFromLabel: READ_DEPTH_TRACKING_FROM_LABEL,
+    readDepthSessionCount: readDepthSessions.length,
     behaviorReliableFromLabel: BEHAVIOR_TRACKING_RELIABLE_FROM_LABEL,
     reliableBehaviorSessionCount: reliableBehaviorSessions.length,
     quickBounceSessions: quickBounceSessions.length,
@@ -847,8 +860,10 @@ export default async function AdminOverviewPage({
         <div>
           <h2 className="text-base font-semibold text-foreground">랜딩 행동 요약</h2>
           <p className="text-xs text-muted-foreground">
-            이탈 위치와 클릭 위치는 {periodStats.behaviorReliableFromLabel} 새 데이터만 봅니다.
-            현재 표본 {periodStats.reliableBehaviorSessionCount}세션.
+            소화율은 {periodStats.readDepthFromLabel}, 이탈 위치와 클릭 위치는{" "}
+            {periodStats.behaviorReliableFromLabel} 새 데이터만 봅니다. 소화율 표본{" "}
+            {periodStats.readDepthSessionCount}세션 · 위치 표본{" "}
+            {periodStats.reliableBehaviorSessionCount}세션.
           </p>
         </div>
 
@@ -859,7 +874,7 @@ export default async function AdminOverviewPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.quickBounceSessions, periodStats.reliableBehaviorSessionCount)}%
+                {getRate(periodStats.quickBounceSessions, periodStats.readDepthSessionCount)}%
               </div>
               <p className="text-xs text-muted-foreground">
                 {periodStats.quickBounceSessions}세션 · 10초 미만 또는 스크롤 20% 미만
@@ -873,7 +888,7 @@ export default async function AdminOverviewPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.middleReadSessions, periodStats.reliableBehaviorSessionCount)}%
+                {getRate(periodStats.middleReadSessions, periodStats.readDepthSessionCount)}%
               </div>
               <p className="text-xs text-muted-foreground">
                 {periodStats.middleReadSessions}세션 · 스크롤 50% 이상
@@ -887,7 +902,7 @@ export default async function AdminOverviewPage({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.fullReadSessions, periodStats.reliableBehaviorSessionCount)}%
+                {getRate(periodStats.fullReadSessions, periodStats.readDepthSessionCount)}%
               </div>
               <p className="text-xs text-muted-foreground">
                 {periodStats.fullReadSessions}세션 · 85% 이상 또는 FAQ/마지막 신청 도달
