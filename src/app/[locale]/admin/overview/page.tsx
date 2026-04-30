@@ -74,9 +74,10 @@ const SECTION_INFOS: Record<
     check: "문제 카드가 길거나 공감이 약하지 않은지",
   },
   offer: {
-    label: "상품 소개",
-    range: "최단거리 방법 소개부터 VOD·FlowSpot·템플릿 구성까지",
-    check: "무엇을 받는지 한눈에 이해되는지",
+    label: "상품 소개 전체",
+    range:
+      "최단거리 소개부터 AI 도구, 채널 리스트, VOD 40강, 전자책, 노션 템플릿, 시간 절약 요약까지",
+    check: "구성품이 많아 보이거나 핵심 혜택이 흐려지지 않는지",
   },
   compare: {
     label: "가치 비교",
