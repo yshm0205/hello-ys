@@ -91,6 +91,11 @@ const SECTION_INFOS: Record<
     range: "어디서 헤매는지 질문부터 단계별 솔루션 안내까지",
     check: "수강 흐름이 복잡해 보이지 않는지",
   },
+  reviews: {
+    label: "구매자 리뷰",
+    range: "실제 구매자의 리뷰 섹션부터 FAQ 전까지",
+    check: "후기가 신뢰를 만들고 있는지, 후기 수가 부족해 보이지 않는지",
+  },
   faq: {
     label: "FAQ",
     range: "자주 묻는 질문부터 수강·결제·환불 답변까지",
@@ -120,6 +125,7 @@ const LANDING_SECTION_ORDER = [
   "offer",
   "compare",
   "how-it-works",
+  "reviews",
   "faq",
   "floating-cta-mobile",
   "floating-cta-desktop",
@@ -646,6 +652,11 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       (session) => session.last_visible_section,
       3,
     ),
+    allCtaViewSections: summarizeTopSections(
+      reliableCtaSessions,
+      (session) => session.last_visible_section,
+      20,
+    ),
     topCtaSection: summarizeTopSection(
       reliableCtaSessions,
       (session) => session.last_clicked_cta_section,
@@ -831,17 +842,21 @@ function getSectionCountMap(sections: LandingSectionSummary[]) {
   return new Map(sections.map((section) => [section.raw, section.count]));
 }
 
-function getSectionDiagnosis(exitCount: number, clickCount: number) {
-  if (exitCount > 0 && clickCount === 0) {
+function getSectionDiagnosis(exitCount: number, readClickCount: number, buttonClickCount: number) {
+  if (exitCount > 0 && readClickCount === 0 && buttonClickCount === 0) {
     return "읽고 멈춘 구간입니다. 문구가 길거나 다음 행동 이유가 약한지 확인";
   }
 
-  if (exitCount > clickCount) {
-    return "이탈이 클릭보다 많습니다. 혜택·가격·불안 해소 문구 확인";
+  if (exitCount > readClickCount) {
+    return "본 뒤 나간 사람이 신청한 사람보다 많습니다. 혜택·가격·불안 해소 문구 확인";
   }
 
-  if (clickCount > 0) {
-    return "클릭이 나온 구간입니다. 잘 먹힌 문구를 다른 구간에 재활용 가능";
+  if (readClickCount > 0) {
+    return "이 구간을 본 뒤 신청이 나온 구간입니다. 설득 문구를 다른 구간에 재활용 가능";
+  }
+
+  if (buttonClickCount > 0) {
+    return "실제 신청 버튼이 눌린 위치입니다. 버튼 문구와 배치 유지 후보";
   }
 
   return "아직 판단할 표본이 적습니다.";
@@ -849,24 +864,43 @@ function getSectionDiagnosis(exitCount: number, clickCount: number) {
 
 function getLandingSectionDiagnostics(stats: PeriodStats) {
   const exitCounts = getSectionCountMap(stats.allExitSections);
-  const ctaCounts = getSectionCountMap(stats.allCtaSections);
+  const readClickCounts = getSectionCountMap(stats.allCtaViewSections);
+  const buttonClickCounts = getSectionCountMap(stats.allCtaSections);
 
   return LANDING_SECTION_ORDER.map((raw) => {
     const info = getSectionInfo(raw);
     const exitCount = exitCounts.get(raw) || 0;
-    const clickCount = ctaCounts.get(raw) || 0;
+    const readClickCount = readClickCounts.get(raw) || 0;
+    const buttonClickCount = buttonClickCounts.get(raw) || 0;
 
     return {
       raw,
       ...info,
       exitCount,
-      clickCount,
+      readClickCount,
+      buttonClickCount,
       exitShare: getRate(exitCount, stats.reliableExitSessionCount),
-      clickShare: getRate(clickCount, stats.reliableCtaSessionCount),
-      diagnosis: getSectionDiagnosis(exitCount, clickCount),
+      readClickShare: getRate(readClickCount, stats.reliableCtaSessionCount),
+      buttonClickShare: getRate(buttonClickCount, stats.reliableCtaSessionCount),
+      diagnosis: getSectionDiagnosis(exitCount, readClickCount, buttonClickCount),
     };
   });
 }
+
+const OVERVIEW_READ_GUIDE = [
+  {
+    title: "1. 먼저 병목",
+    body: "상단 카드에서 빨간색·노란색만 보면 됩니다. 오늘 어디가 막혔는지 요약입니다.",
+  },
+  {
+    title: "2. 다음 퍼널",
+    body: "방문 → 신청 버튼 → 결제 시도 → 결제 완료 중 어느 단계에서 많이 빠지는지 봅니다.",
+  },
+  {
+    title: "3. 마지막 구간표",
+    body: "구간별로 여기서 나감과 읽고 신청을 비교합니다. 이탈만 높은 줄부터 확인하세요.",
+  },
+] as const;
 
 export default async function AdminOverviewPage({
   searchParams,
@@ -892,9 +926,11 @@ export default async function AdminOverviewPage({
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">개요</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          랜딩 문제 진단
+        </h1>
         <p className="text-sm text-muted-foreground">
-          선택한 기간 기준으로 런칭 퍼널과 핵심 숫자만 빠르게 보는 화면입니다.
+          숫자만 보는 화면이 아니라, 어느 구간을 고쳐야 하는지 판단하는 화면입니다.
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="inline-flex rounded-lg border bg-background p-1">
@@ -947,11 +983,27 @@ export default async function AdminOverviewPage({
         <AdminOverviewLiveRefresh />
       </div>
 
+      <Card className="border-slate-200 bg-slate-50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">이 화면은 이렇게 보면 됩니다</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-3">
+            {OVERVIEW_READ_GUIDE.map((item) => (
+              <div key={item.title} className="rounded-lg bg-white px-4 py-3">
+                <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="space-y-3">
         <div>
-          <h2 className="text-base font-semibold text-foreground">오늘 판단</h2>
+          <h2 className="text-base font-semibold text-foreground">먼저 이것만 보세요</h2>
           <p className="text-xs text-muted-foreground">
-            숫자를 보고 바로 어떤 구간을 의심해야 하는지 자동으로 요약합니다.
+            빨간색은 바로 의심할 문제, 노란색은 오늘 확인할 후보입니다.
           </p>
         </div>
 
@@ -1012,7 +1064,7 @@ export default async function AdminOverviewPage({
       <div className="space-y-3">
         <div>
           <h2 className="text-base font-semibold text-foreground">
-            {periodConfig.label} 퍼널
+            숫자 흐름
           </h2>
           <p className="text-xs text-muted-foreground">
             {marketingPeriod === "launch"
@@ -1025,7 +1077,7 @@ export default async function AdminOverviewPage({
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">랜딩 방문</CardTitle>
+              <CardTitle className="text-sm font-medium">랜딩 들어온 세션</CardTitle>
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -1040,7 +1092,7 @@ export default async function AdminOverviewPage({
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">CTA 유니크</CardTitle>
+              <CardTitle className="text-sm font-medium">신청 버튼 누른 세션</CardTitle>
               <MousePointerClick className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -1069,22 +1121,23 @@ export default async function AdminOverviewPage({
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">구간별 랜딩 진단표</CardTitle>
+            <CardTitle className="text-sm font-medium">랜딩 어느 부분을 고칠지</CardTitle>
             <p className="text-[11px] text-muted-foreground">
-              “이탈은 높은데 클릭은 낮은 구간”부터 보면 됩니다. 랜딩 수정 없이 어드민에서만
-              해석한 표입니다.
+              실제 랜딩 순서대로 봅니다. CTA를 누른 세션은 이탈로 세지 않고, “읽고 신청”에
+              따로 표시합니다.
             </p>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[920px] text-left text-sm">
                 <thead className="border-b text-xs text-muted-foreground">
                   <tr>
-                    <th className="py-2 pr-3 font-medium">구간</th>
-                    <th className="py-2 pr-3 font-medium">랜딩 위치</th>
-                    <th className="py-2 pr-3 font-medium">이탈</th>
-                    <th className="py-2 pr-3 font-medium">클릭</th>
-                    <th className="py-2 pr-3 font-medium">판단</th>
+                    <th className="py-2 pr-3 font-medium">랜딩 구간</th>
+                    <th className="py-2 pr-3 font-medium">실제 위치</th>
+                    <th className="py-2 pr-3 font-medium">여기서 나감</th>
+                    <th className="py-2 pr-3 font-medium">읽고 신청</th>
+                    <th className="py-2 pr-3 font-medium">버튼 클릭</th>
+                    <th className="py-2 pr-3 font-medium">해석</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -1109,10 +1162,18 @@ export default async function AdminOverviewPage({
                       </td>
                       <td className="py-3 pr-3">
                         <p className="font-semibold text-foreground">
-                          {section.clickCount}세션
+                          {section.readClickCount}세션
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          클릭 중 {section.clickShare}%
+                          신청 중 {section.readClickShare}%
+                        </p>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <p className="font-semibold text-foreground">
+                          {section.buttonClickCount}세션
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          버튼 중 {section.buttonClickShare}%
                         </p>
                       </td>
                       <td className="max-w-[260px] py-3 pr-3 text-xs leading-5 text-muted-foreground">

@@ -2435,6 +2435,7 @@ function BuyerReviewSection({
   return (
     <Box
       component="section"
+      id="reviews"
       style={{
         background: '#ffffff',
         padding: 'clamp(64px, 10vw, 96px) 0 clamp(24px, 5vw, 48px)',
