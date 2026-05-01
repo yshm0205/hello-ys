@@ -26,6 +26,7 @@ import { AuthAwareButton } from '@/components/landing/AuthAwareButton';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
+import type { PublicMarketingReviewsSummary } from '@/lib/marketing/reviews';
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
@@ -56,6 +57,12 @@ type LandingEarlybirdSummary = {
   phase2Remaining: number;
   phase2Total: number;
   tier1Deadline: string;
+};
+
+const MARKETING_REVIEWS_EMPTY: PublicMarketingReviewsSummary = {
+  reviews: [],
+  totalCount: 0,
+  averageRating: 0,
 };
 
 const EARLYBIRD_FALLBACK_SUMMARY: LandingEarlybirdSummary = {
@@ -115,6 +122,39 @@ function useLandingEarlybirdSummary(initialSummary: LandingEarlybirdSummary) {
     return () => {
       cancelled = true;
       window.clearInterval(interval);
+    };
+  }, []);
+
+  return summary;
+}
+
+function useLandingMarketingReviews(initialReviews: PublicMarketingReviewsSummary) {
+  const [summary, setSummary] = useState<PublicMarketingReviewsSummary>(initialReviews);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const res = await fetch('/api/marketing/reviews', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = (await res.json()) as Partial<PublicMarketingReviewsSummary>;
+        if (cancelled || !Array.isArray(data.reviews)) return;
+
+        setSummary({
+          reviews: data.reviews,
+          totalCount: Number(data.totalCount ?? data.reviews.length) || data.reviews.length,
+          averageRating: Number(data.averageRating ?? 0) || 0,
+        });
+      } catch {
+        // Keep the server-rendered review data if refresh fails.
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -2351,6 +2391,196 @@ function renderWithLinks(text: string): ReactNode {
   return parts.length > 0 ? parts : text;
 }
 
+function formatReviewDate(value: string) {
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(value));
+}
+
+function BuyerReviewSection({
+  initialReviews,
+}: {
+  initialReviews: PublicMarketingReviewsSummary;
+}) {
+  const reviewSummary = useLandingMarketingReviews(initialReviews);
+  const [expanded, setExpanded] = useState(false);
+  const reviews = reviewSummary.reviews;
+
+  if (reviews.length === 0) return null;
+
+  const showCollectionUi = reviewSummary.totalCount >= 3;
+  const visibleReviews = expanded || !showCollectionUi ? reviews : reviews.slice(0, 3);
+  const averageRating =
+    reviewSummary.averageRating > 0
+      ? reviewSummary.averageRating
+      : reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+  const ratingText = averageRating.toFixed(1);
+
+  return (
+    <Box
+      component="section"
+      style={{
+        background: '#ffffff',
+        padding: 'clamp(64px, 10vw, 96px) 0 clamp(24px, 5vw, 48px)',
+      }}
+    >
+      <Container size={820}>
+        <motion.div {...fadeUp}>
+          <Stack gap={0}>
+            <Title
+              order={2}
+              style={{
+                color: '#09090b',
+                fontSize: 'clamp(24px, 5.8vw, 34px)',
+                fontWeight: 850,
+                letterSpacing: '-0.035em',
+                marginBottom: 'clamp(26px, 5vw, 40px)',
+              }}
+            >
+              실제 구매자의 리뷰입니다.
+            </Title>
+
+            <Group justify="space-between" align="center" mb={24}>
+              <Text
+                style={{
+                  color: '#111827',
+                  fontSize: 'clamp(15px, 3.6vw, 18px)',
+                  fontWeight: 800,
+                }}
+              >
+                전체 {reviewSummary.totalCount}건
+              </Text>
+              <Group gap={10} wrap="nowrap">
+                <Text
+                  style={{
+                    color: '#111827',
+                    fontSize: 'clamp(28px, 6vw, 36px)',
+                    fontWeight: 600,
+                    letterSpacing: '-0.04em',
+                    lineHeight: 1,
+                  }}
+                >
+                  {ratingText}
+                </Text>
+                <Text
+                  aria-label={`평점 ${ratingText}점`}
+                  style={{
+                    color: '#fb7185',
+                    fontSize: 'clamp(20px, 4.8vw, 25px)',
+                    fontWeight: 900,
+                    letterSpacing: '0.04em',
+                    lineHeight: 1,
+                  }}
+                >
+                  ★★★★★
+                </Text>
+              </Group>
+            </Group>
+
+            <Box style={{ borderTop: '1px solid #e5e7eb' }}>
+              {visibleReviews.map((review) => (
+                <Box
+                  key={review.id}
+                  style={{
+                    padding: 'clamp(22px, 5vw, 30px) 0',
+                    borderBottom: '1px solid #e5e7eb',
+                  }}
+                >
+                  <Group gap={10} align="center" mb={14} wrap="wrap">
+                    <Text
+                      style={{
+                        color: '#374151',
+                        fontSize: 'clamp(14px, 3.5vw, 16px)',
+                        fontWeight: 850,
+                      }}
+                    >
+                      {review.displayName}
+                    </Text>
+                    <Text
+                      style={{
+                        color: '#94a3b8',
+                        fontSize: 'clamp(12px, 3vw, 14px)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {formatReviewDate(review.createdAt)}
+                    </Text>
+                    <Text
+                      style={{
+                        color: '#fb7185',
+                        fontSize: 'clamp(15px, 3.8vw, 18px)',
+                        fontWeight: 900,
+                        letterSpacing: '0.03em',
+                      }}
+                    >
+                      {'★'.repeat(Math.max(1, Math.min(5, Math.round(review.rating))))}
+                    </Text>
+                  </Group>
+
+                  {review.headline && (
+                    <Text
+                      style={{
+                        color: '#4b5563',
+                        fontSize: 'clamp(15px, 3.8vw, 17px)',
+                        lineHeight: 1.8,
+                        letterSpacing: '-0.012em',
+                        whiteSpace: 'pre-line',
+                        wordBreak: 'keep-all',
+                      }}
+                    >
+                      {review.headline}
+                    </Text>
+                  )}
+                  <Text
+                    mt={review.headline ? 8 : 0}
+                    style={{
+                      color: '#4b5563',
+                      fontSize: 'clamp(15px, 3.8vw, 17px)',
+                      lineHeight: 1.8,
+                      letterSpacing: '-0.012em',
+                      whiteSpace: 'pre-line',
+                      wordBreak: 'keep-all',
+                    }}
+                  >
+                    {review.content}
+                  </Text>
+                </Box>
+              ))}
+            </Box>
+
+            {showCollectionUi && reviews.length > 3 && (
+              <Box
+                component="button"
+                type="button"
+                onClick={() => setExpanded((value) => !value)}
+                style={{
+                  width: '100%',
+                  marginTop: 28,
+                  height: 54,
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 8,
+                  background: '#ffffff',
+                  color: '#334155',
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                {expanded ? '접기' : '+ 더보기'}
+              </Box>
+            )}
+          </Stack>
+        </motion.div>
+      </Container>
+    </Box>
+  );
+}
+
 function FAQSection() {
   const groups: { label: string; items: { q: string; a: string }[] }[] = [
     {
@@ -3831,7 +4061,13 @@ function EbTier(p: EbTierProps) {
 /* ═══════════════════════════════════════════════════════════════
    Page Export
    ═══════════════════════════════════════════════════════════════ */
-export default function LandingPage({ initialSummary }: { initialSummary: LandingEarlybirdSummary }) {
+export default function LandingPage({
+  initialSummary,
+  initialReviews = MARKETING_REVIEWS_EMPTY,
+}: {
+  initialSummary: LandingEarlybirdSummary;
+  initialReviews?: PublicMarketingReviewsSummary;
+}) {
   const earlybirdSummary = useLandingEarlybirdSummary(initialSummary);
 
   return (
@@ -3845,6 +4081,7 @@ export default function LandingPage({ initialSummary }: { initialSummary: Landin
       <ProductRevealSection />
       <WhySpecialSection />
       <HowItWorksSection />
+      <BuyerReviewSection initialReviews={initialReviews} />
       <FAQSection />
       <Footer />
       <FloatingCTA earlybirdSummary={earlybirdSummary} />
