@@ -3796,10 +3796,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                     2차 얼리버드 마감까지
                   </Text>
                   <EarlyBirdCountdown deadline="2026-05-14T23:59:59+09:00" isMobile={isMobile} />
-                  <Text style={{ marginTop: 16, fontSize: isMobile ? 12.5 : 13, fontWeight: 600, color: 'rgba(255,255,255,.6)', letterSpacing: '-0.01em' }}>
-                    선착순 <b style={{ color: '#a78bfa', fontWeight: 800 }}>{total}명</b> 한정 · 마감 시 혜택 종료
-                  </Text>
-                  <Text style={{ marginTop: 8, fontSize: isMobile ? 11.5 : 12, fontWeight: 500, color: 'rgba(255,255,255,.45)', letterSpacing: '-0.01em', wordBreak: 'keep-all' }}>
+                  <Text style={{ marginTop: 16, fontSize: isMobile ? 11.5 : 12, fontWeight: 500, color: 'rgba(255,255,255,.45)', letterSpacing: '-0.01em', wordBreak: 'keep-all' }}>
                     * 인원이 빠르게 차면 14일 전이라도 조기 마감될 수 있습니다.
                   </Text>
                 </>
