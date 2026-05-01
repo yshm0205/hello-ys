@@ -3266,12 +3266,20 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
     );
   }
 
+  const discountAmount = primaryProgram.listAmount - primaryProgram.amount;
+  const earlybirdBonusValue =
+    earlybird.currentTier === 'phase1'
+      ? 78000
+      : earlybird.currentTier === 'phase2'
+        ? 39000
+        : 0;
+
   return (
     <Box
       data-marketing-section="floating-cta-desktop"
       style={{
-      position: 'fixed', top: '50%', right: '24px',
-      transform: 'translateY(-50%)', zIndex: 1000, width: '240px',
+        position: 'fixed', top: '50%', right: '24px',
+        transform: 'translateY(-50%)', zIndex: 1000, width: '300px',
       }}
     >
       <motion.div
@@ -3279,47 +3287,126 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.35, ease }}
       >
-        <Paper p="lg" radius="lg" style={{
+        <Paper radius="md" style={{
           background: '#ffffff', border: '1px solid #d4d4d8',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          padding: '18px 18px 16px',
         }}>
-          <Stack gap={12}>
-            <Text fw={700} style={{ fontSize: '15px', color: '#18181b' }}>올인원 패스</Text>
-            <Stack gap={2}>
-              <Group gap={6} align="center">
-                <Text style={{ fontSize: '12px', color: '#71717a', textDecoration: 'line-through' }}>
-                  ₩ {primaryProgram.listAmount.toLocaleString()}
+          {/* 헤드라인 */}
+          <Text style={{
+            fontSize: '13px', fontWeight: 700, color: '#18181b',
+            lineHeight: 1.45, marginBottom: 12, wordBreak: 'keep-all',
+          }}>
+            [선착순 {earlybird.total}명 한정] 쇼츠 자동화 + AI 스크립트 도구 올인원 패키지
+          </Text>
+
+          {/* 프로모션 카운트다운 */}
+          {earlybird.currentTier !== 'ended' && (
+            <Box style={{
+              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              color: '#fff', padding: '10px 14px', borderRadius: 8,
+              marginBottom: 14,
+            }}>
+              <Text style={{
+                fontSize: '11px', fontWeight: 600, opacity: 0.85, marginBottom: 4,
+                letterSpacing: '-0.01em',
+              }}>
+                {floatingLabel} 마감까지
+              </Text>
+              <FloatingCountdown deadline={earlybirdSummary.tier1Deadline} />
+            </Box>
+          )}
+
+          {/* 메인 가격 — 12개월 할부 환산 */}
+          <Text style={{ fontSize: '11px', color: '#71717a', marginBottom: 2 }}>
+            12개월 할부 시
+          </Text>
+          <Group gap={8} align="baseline" wrap="nowrap" style={{ marginBottom: 14 }}>
+            <Text style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444', lineHeight: 1 }}>
+              {discountPct}%
+            </Text>
+            <Text style={{ fontSize: '22px', fontWeight: 800, color: '#18181b', lineHeight: 1, letterSpacing: '-0.02em' }}>
+              월 {monthly12Now.toLocaleString()}원
+            </Text>
+          </Group>
+
+          {/* 가격 표 */}
+          <Stack gap={5} style={{ fontSize: '12px', marginBottom: 14 }}>
+            <Group justify="space-between" wrap="nowrap">
+              <Text style={{ color: '#52525b', fontSize: '12px' }}>권장 소비자 가격</Text>
+              <Text style={{ color: '#a1a1aa', fontSize: '12px', textDecoration: 'line-through' }}>
+                {primaryProgram.listAmount.toLocaleString()}원
+              </Text>
+            </Group>
+            <Group justify="space-between" wrap="nowrap">
+              <Text style={{ color: '#52525b', fontSize: '12px' }}>할인 금액</Text>
+              <Text style={{ color: '#52525b', fontSize: '12px', fontWeight: 600 }}>
+                -{discountAmount.toLocaleString()}원
+              </Text>
+            </Group>
+            {earlybirdBonusValue > 0 && (
+              <Group justify="space-between" wrap="nowrap">
+                <Text style={{ color: '#8b5cf6', fontSize: '12px', fontWeight: 600 }}>
+                  💜 보너스 크레딧
                 </Text>
-                <Text style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444' }}>
-                  {discountPct}%
+                <Text style={{ color: '#8b5cf6', fontSize: '12px', fontWeight: 700 }}>
+                  +{earlybirdBonusValue.toLocaleString()}원 상당
                 </Text>
               </Group>
-              <Text style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6' }}>
-                ₩ {primaryProgram.amount.toLocaleString()}
+            )}
+            <Box style={{ height: 1, background: '#e4e4e7', margin: '6px 0 4px' }} />
+            <Group justify="space-between" wrap="nowrap">
+              <Text style={{ color: '#18181b', fontSize: '13px', fontWeight: 700 }}>할인 판매가</Text>
+              <Text style={{ color: '#18181b', fontSize: '15px', fontWeight: 800 }}>
+                {primaryProgram.amount.toLocaleString()}원
               </Text>
-              <Text style={{ fontSize: '13px', color: '#52525b' }}>
-                {earlybird.currentTier === 'ended'
-                  ? '얼리버드 혜택 종료'
-                  : `${earlybird.headline} · ${floatingCountLabel}`}
-              </Text>
-            </Stack>
-            <AuthAwareButton
-              authenticatedHref="/dashboard/lectures"
-              unauthenticatedHref="/login?redirect=/checkout/allinone"
-              unpaidAuthenticatedHref="/checkout/allinone"
-              activeAccessChildren="강의 보러가기"
-              size="sm" fullWidth radius="lg"
-              style={{
-                background: '#8b5cf6', fontWeight: 700, fontSize: '14px',
-                boxShadow: '0 2px 8px rgba(139,92,246,0.15)',
-              }}
-            >
-              신청하기
-            </AuthAwareButton>
+            </Group>
           </Stack>
+
+          {/* 신청 버튼 */}
+          <AuthAwareButton
+            authenticatedHref="/dashboard/lectures"
+            unauthenticatedHref="/login?redirect=/checkout/allinone"
+            unpaidAuthenticatedHref="/checkout/allinone"
+            activeAccessChildren="강의 보러가기"
+            size="md" fullWidth radius="md"
+            style={{
+              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', fontWeight: 800, fontSize: '15px',
+              boxShadow: '0 4px 14px rgba(139,92,246,0.35)',
+              height: 44,
+            }}
+          >
+            신청하기
+          </AuthAwareButton>
         </Paper>
       </motion.div>
     </Box>
+  );
+}
+
+function FloatingCountdown({ deadline }: { deadline: string }) {
+  const [now, setNow] = useState<number>(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const diff = Math.max(0, new Date(deadline).getTime() - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  return (
+    <Text style={{
+      fontSize: '18px', fontWeight: 800, color: '#fff',
+      fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em',
+      lineHeight: 1,
+    }}>
+      {days}일 {pad(hours)}:{pad(minutes)}:{pad(seconds)} 남음
+    </Text>
   );
 }
 
