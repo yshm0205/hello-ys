@@ -3322,7 +3322,7 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
           <Text style={{ fontSize: '11px', color: '#71717a', marginBottom: 2 }}>
             12개월 할부 시
           </Text>
-          <Group gap={8} align="baseline" wrap="nowrap" style={{ marginBottom: 14 }}>
+          <Group gap={8} align="baseline" wrap="nowrap" style={{ marginBottom: 12 }}>
             <Text style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444', lineHeight: 1 }}>
               {discountPct}%
             </Text>
@@ -3330,6 +3330,9 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
               월 {monthly12Now.toLocaleString()}원
             </Text>
           </Group>
+
+          {/* 가로 구분선 — 메인 가격 ↔ 가격 표 */}
+          <Box style={{ height: 1, background: '#e4e4e7', marginBottom: 12 }} />
 
           {/* 가격 표 */}
           <Stack gap={5} style={{ fontSize: '12px', marginBottom: 14 }}>
