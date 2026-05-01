@@ -29,10 +29,18 @@ export function useTossPay() {
       setNotice(null);
 
       try {
+        const { getMarketingSessionKeyFromBrowser, getMarketingTokenFromBrowser } = await import(
+          '@/lib/marketing/tracking'
+        );
         const res = await fetch('/api/tosspay/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ planType, ...buyerInfo }),
+          body: JSON.stringify({
+            planType,
+            ...buyerInfo,
+            sessionKey: getMarketingSessionKeyFromBrowser(),
+            marketingToken: getMarketingTokenFromBrowser(),
+          }),
         });
 
         const data = await res.json();

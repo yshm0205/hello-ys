@@ -214,6 +214,36 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
+
+    // 이벤트 trail 적재 (heartbeat 제외) — 실패해도 세션 upsert는 진행
+    if (eventType !== "heartbeat") {
+      const lastVisibleSectionForEvent = normalizeNullable(body.lastVisibleSection, 120);
+      const ctaIdForEvent = normalizeNullable(body.ctaId, 120);
+      const ctaLabelForEvent = normalizeNullable(body.ctaLabel, 160);
+      const ctaSectionForEvent = normalizeNullable(body.ctaSection, 120);
+      void supabase
+        .from("marketing_session_events")
+        .insert({
+          session_key: sessionKey,
+          marketing_token: body.marketingToken || null,
+          event_type: eventType,
+          page_path: pagePath,
+          section: lastVisibleSectionForEvent,
+          scroll_percent: clampScrollPercent(body.maxScrollPercent),
+          duration_seconds: clampDuration(body.durationSeconds),
+          cta_target: ctaTarget,
+          cta_id: ctaIdForEvent,
+          cta_label: ctaLabelForEvent,
+          cta_section: ctaSectionForEvent,
+          referrer: normalizeNullable(body.referrer, 500),
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.warn("[Marketing Session] events insert failed:", error.message);
+          }
+        });
+    }
+
     let supportsBehaviorFields = true;
 
     let { data: existing, error: fetchError } = (await supabase

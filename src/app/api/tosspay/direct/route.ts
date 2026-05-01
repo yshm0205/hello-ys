@@ -68,12 +68,28 @@ export async function POST(request: NextRequest) {
       buyerEmail: rawBuyerEmail,
       locale: rawLocale,
       couponCode: rawCouponCode,
+      sessionKey: rawSessionKey,
+      marketingToken: rawMarketingToken,
     } = body as {
       planType?: string;
       buyerEmail?: string;
       locale?: string;
       couponCode?: string | null;
+      sessionKey?: string;
+      marketingToken?: string;
     };
+
+    const SESSION_KEY_RE = /^[0-9a-f-]{36}$/i;
+    const sessionKey =
+      typeof rawSessionKey === 'string' && SESSION_KEY_RE.test(rawSessionKey)
+        ? rawSessionKey
+        : null;
+    const marketingToken =
+      typeof rawMarketingToken === 'string' &&
+      rawMarketingToken.length > 0 &&
+      rawMarketingToken.length <= 100
+        ? rawMarketingToken
+        : null;
 
     if (!planType || !isTossPayPlanType(planType)) {
       return NextResponse.json({ error: '유효하지 않은 플랜입니다.' }, { status: 400 });
@@ -152,6 +168,8 @@ export async function POST(request: NextRequest) {
       monthlyCredits: plan.monthlyCredits,
       months: plan.months,
       callbackSecret,
+      sessionKey,
+      marketingToken,
       ...couponMetadata,
       ...grantSnapshot,
     };
@@ -179,6 +197,8 @@ export async function POST(request: NextRequest) {
       credits: immediateGrantedCredits,
       status: 'PENDING',
       metadata,
+      session_key: sessionKey,
+      marketing_token: marketingToken,
     });
 
     if (insertError) {

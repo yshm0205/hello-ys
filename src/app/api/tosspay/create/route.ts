@@ -28,10 +28,29 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { planType, buyerEmail: rawBuyerEmail } = body as {
+    const {
+      planType,
+      buyerEmail: rawBuyerEmail,
+      sessionKey: rawSessionKey,
+      marketingToken: rawMarketingToken,
+    } = body as {
       planType?: string;
       buyerEmail?: string;
+      sessionKey?: string;
+      marketingToken?: string;
     };
+
+    const SESSION_KEY_RE = /^[0-9a-f-]{36}$/i;
+    const sessionKey =
+      typeof rawSessionKey === "string" && SESSION_KEY_RE.test(rawSessionKey)
+        ? rawSessionKey
+        : null;
+    const marketingToken =
+      typeof rawMarketingToken === "string" &&
+      rawMarketingToken.length > 0 &&
+      rawMarketingToken.length <= 100
+        ? rawMarketingToken
+        : null;
 
     if (!planType || !isTossPayPlanType(planType)) {
       return NextResponse.json(
@@ -69,6 +88,8 @@ export async function POST(request: NextRequest) {
       amount: plan.amount,
       credits: immediateGrantedCredits,
       status: "PENDING",
+      session_key: sessionKey,
+      marketing_token: marketingToken,
       metadata: {
         provider: "portone",
         pgProvider: "tosspay",
@@ -80,6 +101,8 @@ export async function POST(request: NextRequest) {
         earlybirdTier,
         monthlyCredits: plan.monthlyCredits,
         months: plan.months,
+        sessionKey,
+        marketingToken,
         ...buildGrantSnapshotMetadata({
           paymentKind: "initial_program",
           chargedAmount: plan.amount,

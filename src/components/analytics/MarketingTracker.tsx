@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-import { MARKETING_TOKEN_COOKIE } from "@/lib/marketing/tracking";
+import { MARKETING_SESSION_STORAGE_KEY, MARKETING_TOKEN_COOKIE } from "@/lib/marketing/tracking";
 
-const STORAGE_KEY = "flowspot_marketing_session";
+const STORAGE_KEY = MARKETING_SESSION_STORAGE_KEY;
 
 type MarketingTrackerProps = {
   pageType: "landing" | "pricing";

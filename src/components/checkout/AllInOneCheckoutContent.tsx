@@ -155,6 +155,9 @@ export function AllInOneCheckoutContent({
     setError(null);
 
     try {
+      const { getMarketingSessionKeyFromBrowser, getMarketingTokenFromBrowser } = await import(
+        '@/lib/marketing/tracking'
+      );
       const res = await fetch('/api/tosspay/direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -163,6 +166,8 @@ export function AllInOneCheckoutContent({
           buyerEmail: userEmail,
           locale,
           couponCode: appliedCoupon?.code || null,
+          sessionKey: getMarketingSessionKeyFromBrowser(),
+          marketingToken: getMarketingTokenFromBrowser(),
         }),
       });
       const data = await res.json();

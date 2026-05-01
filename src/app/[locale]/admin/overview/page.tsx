@@ -576,12 +576,21 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     (session) => (session.cta_clicks || 0) > 0,
   );
 
+  // 세션 단위 4분할 — 한 사람의 여정 중 어디서 떠났는가
+  // 주의: paymentAttempts는 결제건 단위, ctaUnique/landingSessions는 세션 단위라 정확 매칭은 2단계(session_key 보강)에서 가능
+  const droppedAtLanding = Math.max(0, periodSessions.length - ctaUnique);
+  const droppedAfterCta = Math.max(0, ctaUnique - periodPayments.length);
+  const droppedAtCheckout = pendingPayments.length;
+  const completed = completedPayments.length;
+
   return {
     openedAtLabel: getLaunchOpenAtLabel(),
     readDepthFromLabel: READ_DEPTH_TRACKING_FROM_LABEL,
     readDepthSessionCount: readDepthSessions.length,
     behaviorReliableFromLabel: BEHAVIOR_TRACKING_RELIABLE_FROM_LABEL,
     reliableBehaviorSessionCount: reliableBehaviorSessions.length,
+    reliableExitSessionCount: reliableExitSessions.length,
+    reliableCtaSessionCount: reliableCtaSessions.length,
     quickBounceSessions: quickBounceSessions.length,
     middleReadSessions: middleReadSessions.length,
     fullReadSessions: fullReadSessions.length,
@@ -593,6 +602,10 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     paymentAttempts: periodPayments.length,
     paymentPending: pendingPayments.length,
     paymentCompleted: completedPayments.length,
+    droppedAtLanding,
+    droppedAfterCta,
+    droppedAtCheckout,
+    completed,
     revenue: completedPayments.reduce((sum, payment) => sum + getNetRevenue(payment), 0),
     topReferrers: summarizeReferrers(periodSessions, 3),
     averageDurationSeconds,
@@ -823,11 +836,11 @@ export default async function AdminOverviewPage({
         <div>
           <h2 className="text-base font-semibold text-foreground">어디서 빠지는지</h2>
           <p className="text-xs text-muted-foreground">
-            가입보다 랜딩 기준 퍼널을 먼저 보면 됩니다.
+            전환율과 단계별 이탈자 수를 함께 봅니다. (결제↔세션 정확 매칭은 session_key 연동 후)
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">랜딩 → CTA</CardTitle>
@@ -866,6 +879,72 @@ export default async function AdminOverviewPage({
               </div>
               <p className="text-xs text-muted-foreground">
                 {periodStats.paymentAttempts}건 중 {periodStats.paymentCompleted}건
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card className="border-orange-500/30 bg-orange-500/[0.02]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-orange-200">
+                ① 랜딩에서 끝
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {periodStats.droppedAtLanding}명
+              </div>
+              <p className="text-xs text-muted-foreground">
+                CTA를 누르지 않고 떠남 · 아래 "이탈 위치"에서 어디서 떠났는지 확인
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-yellow-500/30 bg-yellow-500/[0.02]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-yellow-200">
+                ② CTA 후 결제 미시도
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {periodStats.droppedAfterCta}명
+              </div>
+              <p className="text-xs text-muted-foreground">
+                CTA를 눌렀지만 결제창에 안 옴 · 로그인/회원가입에서 막힘 의심
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-rose-500/30 bg-rose-500/[0.02]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-rose-200">
+                ③ 결제 시도 미완료
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {periodStats.droppedAtCheckout}건
+              </div>
+              <p className="text-xs text-muted-foreground">
+                결제창 진입 후 PENDING · 카드 한도/계좌 이체 망설임 의심
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-emerald-500/30 bg-emerald-500/[0.02]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-emerald-200">
+                ✓ 결제 완료
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {periodStats.completed}건
+              </div>
+              <p className="text-xs text-muted-foreground">
+                DONE / PARTIAL_CANCELLED 기준
               </p>
             </CardContent>
           </Card>
@@ -962,7 +1041,12 @@ export default async function AdminOverviewPage({
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">이탈 위치</CardTitle>
+              <div className="space-y-0.5">
+                <CardTitle className="text-sm font-medium">이탈 위치</CardTitle>
+                <p className="text-[11px] text-muted-foreground">
+                  CTA 안 누르고 떠난 {periodStats.reliableExitSessionCount}세션 기준
+                </p>
+              </div>
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -979,7 +1063,12 @@ export default async function AdminOverviewPage({
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">클릭 당시 본 구간</CardTitle>
+              <div className="space-y-0.5">
+                <CardTitle className="text-sm font-medium">클릭 당시 본 구간</CardTitle>
+                <p className="text-[11px] text-muted-foreground">
+                  CTA 누른 {periodStats.reliableCtaSessionCount}세션 기준
+                </p>
+              </div>
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -996,7 +1085,12 @@ export default async function AdminOverviewPage({
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">결제 CTA 클릭 위치</CardTitle>
+              <div className="space-y-0.5">
+                <CardTitle className="text-sm font-medium">결제 CTA 클릭 위치</CardTitle>
+                <p className="text-[11px] text-muted-foreground">
+                  CTA 누른 {periodStats.reliableCtaSessionCount}세션 기준
+                </p>
+              </div>
               <MousePointerClick className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -1016,6 +1110,9 @@ export default async function AdminOverviewPage({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">이탈 위치 TOP 3</CardTitle>
+              <p className="text-[11px] text-muted-foreground">
+                ① CTA 안 누르고 떠난 {periodStats.reliableExitSessionCount}세션 기준
+              </p>
             </CardHeader>
             <CardContent className="space-y-3">
               {periodStats.hasReliableExitSignals && periodStats.topExitSections.length ? (
@@ -1054,6 +1151,9 @@ export default async function AdminOverviewPage({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">클릭 당시 본 구간 TOP 3</CardTitle>
+              <p className="text-[11px] text-muted-foreground">
+                CTA 누른 {periodStats.reliableCtaSessionCount}세션 기준
+              </p>
             </CardHeader>
             <CardContent className="space-y-3">
               {periodStats.topCtaViewSections.length ? (
@@ -1089,6 +1189,9 @@ export default async function AdminOverviewPage({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">결제 클릭 위치 TOP 3</CardTitle>
+              <p className="text-[11px] text-muted-foreground">
+                CTA 누른 {periodStats.reliableCtaSessionCount}세션 기준
+              </p>
             </CardHeader>
             <CardContent className="space-y-3">
               {periodStats.topCtaSections.length ? (
