@@ -112,6 +112,19 @@ const SECTION_INFOS: Record<
     check: "마지막 CTA 문구와 마감감이 충분한지",
   },
 };
+const LANDING_SECTION_ORDER = [
+  "landing-hero",
+  "earlybird",
+  "loop-pain",
+  "pain",
+  "offer",
+  "compare",
+  "how-it-works",
+  "faq",
+  "cta",
+  "floating-cta-mobile",
+  "floating-cta-desktop",
+] as const;
 const BASE_SESSION_SELECT = "cta_clicks, referrer, first_seen_at, duration_seconds";
 const BEHAVIOR_SESSION_SELECT = `${BASE_SESSION_SELECT}, duration_seconds, max_scroll_percent, last_visible_section, last_clicked_cta_section`;
 
@@ -441,11 +454,6 @@ function getExitSectionLabel(section: LandingSectionSummary | null) {
   return section.exitLabel;
 }
 
-function getExitSectionHint(section: LandingSectionSummary | null) {
-  if (!section) return "아직 데이터 없음";
-  return `${section.count}세션 · ${section.range}`;
-}
-
 function isMissingBehaviorFieldError(error: unknown) {
   const message =
     typeof error === "object" && error && "message" in error
@@ -625,6 +633,11 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       (session) => session.last_visible_section,
       3,
     ),
+    allExitSections: summarizeTopSections(
+      reliableExitSessions,
+      (session) => session.last_visible_section,
+      20,
+    ),
     topCtaViewSection: summarizeTopSection(
       reliableCtaSessions,
       (session) => session.last_visible_section,
@@ -643,7 +656,217 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       (session) => session.last_clicked_cta_section,
       3,
     ),
+    allCtaSections: summarizeTopSections(
+      reliableCtaSessions,
+      (session) => session.last_clicked_cta_section,
+      20,
+    ),
   };
+}
+
+type PeriodStats = Awaited<ReturnType<typeof getPeriodStats>>;
+type InsightTone = "good" | "warning" | "danger" | "neutral";
+
+function getToneClassName(tone: InsightTone) {
+  if (tone === "good") return "border-emerald-200 bg-emerald-50 text-emerald-950";
+  if (tone === "danger") return "border-rose-200 bg-rose-50 text-rose-950";
+  if (tone === "warning") return "border-amber-200 bg-amber-50 text-amber-950";
+  return "border-slate-200 bg-slate-50 text-slate-950";
+}
+
+function getMutedToneClassName(tone: InsightTone) {
+  if (tone === "good") return "text-emerald-700/80";
+  if (tone === "danger") return "text-rose-700/80";
+  if (tone === "warning") return "text-amber-700/80";
+  return "text-slate-600";
+}
+
+function getPrimaryBottleneckInsight(stats: PeriodStats) {
+  const ctaRate = getRate(stats.ctaUnique, stats.landingSessions);
+  const ctaToPaymentRate = getRate(stats.paymentAttempts, stats.ctaUnique);
+  const paymentDoneRate = getRate(stats.paymentCompleted, stats.paymentAttempts);
+  const quickBounceRate = getRate(stats.quickBounceSessions, stats.readDepthSessionCount);
+
+  if (stats.landingSessions < 10) {
+    return {
+      title: "판단 보류",
+      value: "표본 부족",
+      tone: "neutral" as const,
+      body: `현재 ${stats.landingSessions}세션이라 결론보다 추적 누적이 먼저입니다.`,
+      action: "오늘은 유입 수와 결제 완료 여부만 확인하세요.",
+    };
+  }
+
+  if (stats.readDepthSessionCount >= 5 && quickBounceRate >= 45) {
+    return {
+      title: "가장 큰 병목",
+      value: "첫 화면 이탈",
+      tone: "danger" as const,
+      body: `바로 나감이 ${quickBounceRate}%입니다. 첫 화면에서 더 읽을 이유가 약할 수 있습니다.`,
+      action: "헤드라인, 첫 혜택 문구, 첫 CTA 주변 신뢰요소를 먼저 보세요.",
+      href: "/admin/sessions?stage=landing-only",
+    };
+  }
+
+  if (ctaRate < 8) {
+    return {
+      title: "가장 큰 병목",
+      value: "CTA 클릭 부족",
+      tone: "danger" as const,
+      body: `랜딩 방문 대비 CTA가 ${ctaRate}%입니다. 읽어도 신청 행동으로 잘 안 넘어갑니다.`,
+      action: "가격/혜택이 처음 30초 안에 이해되는지와 CTA 문구를 확인하세요.",
+      href: "/admin/sessions?stage=landing-only",
+    };
+  }
+
+  if (stats.ctaUnique >= 3 && ctaToPaymentRate < 60) {
+    return {
+      title: "가장 큰 병목",
+      value: "CTA 후 결제 미시도",
+      tone: "warning" as const,
+      body: `CTA 클릭 후 결제 시도 전환이 ${ctaToPaymentRate}%입니다.`,
+      action: "로그인/회원가입 화면 문구와 결제창 이동 흐름을 우선 확인하세요.",
+      href: "/admin/sessions?stage=cta-no-payment",
+    };
+  }
+
+  if (stats.paymentAttempts >= 3 && paymentDoneRate < 50) {
+    return {
+      title: "가장 큰 병목",
+      value: "결제창 미완료",
+      tone: "warning" as const,
+      body: `결제 시도 대비 완료가 ${paymentDoneRate}%입니다.`,
+      action: "카드/계좌이체 안내, 가격 확신, 쿠폰 적용 여부를 확인하세요.",
+      href: "/admin/sessions?stage=checkout-pending",
+    };
+  }
+
+  return {
+    title: "현재 판단",
+    value: stats.paymentCompleted > 0 ? "구매 흐름 작동" : "관망 구간",
+    tone: stats.paymentCompleted > 0 ? ("good" as const) : ("neutral" as const),
+    body:
+      stats.paymentCompleted > 0
+        ? `결제 완료 ${stats.paymentCompleted}건이 있어 흐름 자체는 작동 중입니다.`
+        : "큰 오류보다는 유입과 클릭 표본을 더 쌓아야 합니다.",
+    action: "가장 많이 이탈한 구간과 클릭이 나온 구간을 같이 비교하세요.",
+  };
+}
+
+function getPrioritySectionInsight(stats: PeriodStats) {
+  const section = stats.topExitSection;
+
+  if (section && stats.reliableExitSessionCount > 0) {
+    return {
+      title: "우선 확인 구간",
+      value: getExitSectionLabel(section),
+      tone: "warning" as const,
+      body: `${section.count}세션이 CTA 없이 이 구간에서 끝났습니다.`,
+      action: section.check,
+      href: "/admin/sessions?stage=landing-only",
+    };
+  }
+
+  if (stats.topCtaSection && stats.reliableCtaSessionCount > 0) {
+    return {
+      title: "클릭 발생 구간",
+      value: stats.topCtaSection.label,
+      tone: "good" as const,
+      body: `${stats.topCtaSection.count}세션이 이 구간 CTA를 눌렀습니다.`,
+      action: "클릭이 나온 구간의 문구와 구조를 다른 구간에도 재활용할 수 있는지 보세요.",
+    };
+  }
+
+  return {
+    title: "우선 확인 구간",
+    value: "위치 데이터 대기",
+    tone: "neutral" as const,
+    body: `${stats.behaviorReliableFromLabel} 이후 세션부터 정확히 표시됩니다.`,
+    action: "오늘은 랜딩 방문, CTA, 결제 시도만 먼저 보세요.",
+  };
+}
+
+function getTodayActionInsight(stats: PeriodStats) {
+  const readAndClickRate = getRate(stats.readAndClickSessions, stats.readDepthSessionCount);
+  const fullReadRate = getRate(stats.fullReadSessions, stats.readDepthSessionCount);
+
+  if (stats.readDepthSessionCount >= 5 && fullReadRate >= 40 && readAndClickRate < 15) {
+    return {
+      title: "오늘 할 일",
+      value: "읽었는데 안 누름",
+      tone: "warning" as const,
+      body: `끝까지 본 비율은 ${fullReadRate}%인데 읽고 클릭은 ${readAndClickRate}%입니다.`,
+      action: "후반부 가격 확신, 보너스 가치, 마지막 CTA 문구를 보강할지 검토하세요.",
+    };
+  }
+
+  if (stats.droppedAfterCta > stats.droppedAtLanding && stats.ctaUnique >= 3) {
+    return {
+      title: "오늘 할 일",
+      value: "결제 진입 확인",
+      tone: "warning" as const,
+      body: `CTA 후 결제 미시도가 ${stats.droppedAfterCta}명입니다.`,
+      action: "회원가입/로그인 뒤 결제창으로 제대로 복귀하는지 모바일 기준으로 다시 보세요.",
+      href: "/admin/sessions?stage=cta-no-payment",
+    };
+  }
+
+  return {
+    title: "오늘 할 일",
+    value: "구간별 비교",
+    tone: "neutral" as const,
+    body: "하나만 고치기보다 이탈 구간과 클릭 구간의 차이를 먼저 보세요.",
+    action: "아래 구간별 진단표에서 이탈은 높은데 클릭은 낮은 구간을 우선 확인하세요.",
+  };
+}
+
+function getInsightCards(stats: PeriodStats) {
+  return [
+    getPrimaryBottleneckInsight(stats),
+    getPrioritySectionInsight(stats),
+    getTodayActionInsight(stats),
+  ];
+}
+
+function getSectionCountMap(sections: LandingSectionSummary[]) {
+  return new Map(sections.map((section) => [section.raw, section.count]));
+}
+
+function getSectionDiagnosis(exitCount: number, clickCount: number) {
+  if (exitCount > 0 && clickCount === 0) {
+    return "읽고 멈춘 구간입니다. 문구가 길거나 다음 행동 이유가 약한지 확인";
+  }
+
+  if (exitCount > clickCount) {
+    return "이탈이 클릭보다 많습니다. 혜택·가격·불안 해소 문구 확인";
+  }
+
+  if (clickCount > 0) {
+    return "클릭이 나온 구간입니다. 잘 먹힌 문구를 다른 구간에 재활용 가능";
+  }
+
+  return "아직 판단할 표본이 적습니다.";
+}
+
+function getLandingSectionDiagnostics(stats: PeriodStats) {
+  const exitCounts = getSectionCountMap(stats.allExitSections);
+  const ctaCounts = getSectionCountMap(stats.allCtaSections);
+
+  return LANDING_SECTION_ORDER.map((raw) => {
+    const info = getSectionInfo(raw);
+    const exitCount = exitCounts.get(raw) || 0;
+    const clickCount = ctaCounts.get(raw) || 0;
+
+    return {
+      raw,
+      ...info,
+      exitCount,
+      clickCount,
+      exitShare: getRate(exitCount, stats.reliableExitSessionCount),
+      clickShare: getRate(clickCount, stats.reliableCtaSessionCount),
+      diagnosis: getSectionDiagnosis(exitCount, clickCount),
+    };
+  });
 }
 
 export default async function AdminOverviewPage({
@@ -664,6 +887,8 @@ export default async function AdminOverviewPage({
     marketingPeriod === "custom" && isValidDateInput(end)
       ? end
       : getDateInputValueFromIso(activeRange.endIso, 1);
+  const insightCards = getInsightCards(periodStats);
+  const sectionDiagnostics = getLandingSectionDiagnostics(periodStats);
 
   return (
     <div className="space-y-6">
@@ -721,6 +946,43 @@ export default async function AdminOverviewPage({
           </form>
         </div>
         <AdminOverviewLiveRefresh />
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">오늘 판단</h2>
+          <p className="text-xs text-muted-foreground">
+            숫자를 보고 바로 어떤 구간을 의심해야 하는지 자동으로 요약합니다.
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          {insightCards.map((insight) => (
+            <Card
+              key={`${insight.title}-${insight.value}`}
+              className={getToneClassName(insight.tone)}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">{insight.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="text-2xl font-bold">{insight.value}</div>
+                <p className={`text-xs leading-5 ${getMutedToneClassName(insight.tone)}`}>
+                  {insight.body}
+                </p>
+                <p className="text-xs font-semibold leading-5">해야 할 일: {insight.action}</p>
+                {insight.href && (
+                  <Link
+                    href={insight.href}
+                    className="inline-block text-xs font-semibold underline-offset-4 hover:underline"
+                  >
+                    관련 세션 보기 →
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -805,6 +1067,65 @@ export default async function AdminOverviewPage({
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">구간별 랜딩 진단표</CardTitle>
+            <p className="text-[11px] text-muted-foreground">
+              “이탈은 높은데 클릭은 낮은 구간”부터 보면 됩니다. 랜딩 수정 없이 어드민에서만
+              해석한 표입니다.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="border-b text-xs text-muted-foreground">
+                  <tr>
+                    <th className="py-2 pr-3 font-medium">구간</th>
+                    <th className="py-2 pr-3 font-medium">랜딩 위치</th>
+                    <th className="py-2 pr-3 font-medium">이탈</th>
+                    <th className="py-2 pr-3 font-medium">클릭</th>
+                    <th className="py-2 pr-3 font-medium">판단</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {sectionDiagnostics.map((section) => (
+                    <tr key={section.raw} className="align-top">
+                      <td className="py-3 pr-3">
+                        <p className="font-semibold text-foreground">{section.label}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          확인: {section.check}
+                        </p>
+                      </td>
+                      <td className="max-w-[280px] py-3 pr-3 text-xs leading-5 text-muted-foreground">
+                        {section.range}
+                      </td>
+                      <td className="py-3 pr-3">
+                        <p className="font-semibold text-foreground">
+                          {section.exitCount}세션
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          이탈 중 {section.exitShare}%
+                        </p>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <p className="font-semibold text-foreground">
+                          {section.clickCount}세션
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          클릭 중 {section.clickShare}%
+                        </p>
+                      </td>
+                      <td className="max-w-[260px] py-3 pr-3 text-xs leading-5 text-muted-foreground">
+                        {section.diagnosis}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-3">
