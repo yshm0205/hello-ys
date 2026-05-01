@@ -5,7 +5,6 @@ import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
-const VOD_THRESHOLD = 3;
 const WINDOW_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -66,7 +65,7 @@ export async function GET() {
       return NextResponse.json({
         eligible: false,
         reason: "unauthenticated",
-        vodThreshold: VOD_THRESHOLD,
+        vodThreshold: 0,
         windowDays: WINDOW_DAYS,
       });
     }
@@ -76,7 +75,7 @@ export async function GET() {
       return NextResponse.json({
         eligible: false,
         reason: "no-plan",
-        vodThreshold: VOD_THRESHOLD,
+        vodThreshold: 0,
         windowDays: WINDOW_DAYS,
       });
     }
@@ -88,7 +87,7 @@ export async function GET() {
       return NextResponse.json({
         eligible: false,
         reason: "no-anchor",
-        vodThreshold: VOD_THRESHOLD,
+        vodThreshold: 0,
         windowDays: WINDOW_DAYS,
       });
     }
@@ -109,13 +108,6 @@ export async function GET() {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    const { count } = await admin
-      .from("lecture_progress")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .not("completed_at", "is", null);
-
-    const vodsCompleted = count || 0;
     const alreadySubmitted = !!review;
 
     // 미확인 피드백 답변 수 (제출자만)
@@ -129,10 +121,9 @@ export async function GET() {
         .is("user_read_at", null);
       unreadFeedbackCount = unreadCount || 0;
     }
-    const reachedThreshold = vodsCompleted >= VOD_THRESHOLD;
-    // 제출 자격: 14일 윈도우 내 + 기준 강의 완료
-    const canSubmit = !alreadySubmitted && !windowClosed && reachedThreshold;
-    // 배너 노출: 윈도우 내면 항상 노출 (진행도 표시)
+    // 제출 자격: 구매자 전용 혜택 기간 안이면 바로 가능
+    const canSubmit = !alreadySubmitted && !windowClosed;
+    // 배너 노출: 윈도우 내면 항상 노출
     const eligible = !alreadySubmitted && !windowClosed;
 
     return NextResponse.json({
@@ -140,10 +131,10 @@ export async function GET() {
       canSubmit,
       windowClosed,
       alreadySubmitted,
-      reachedThreshold,
+      reachedThreshold: true,
       daysLeft,
-      vodsCompleted,
-      vodThreshold: VOD_THRESHOLD,
+      vodsCompleted: 0,
+      vodThreshold: 0,
       windowDays: WINDOW_DAYS,
       review: review
         ? {
@@ -161,7 +152,7 @@ export async function GET() {
     return NextResponse.json({
       eligible: false,
       reason: "error",
-      vodThreshold: VOD_THRESHOLD,
+      vodThreshold: 0,
       windowDays: WINDOW_DAYS,
     });
   }

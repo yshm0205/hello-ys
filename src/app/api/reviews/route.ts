@@ -32,7 +32,6 @@ const REVIEW_BENEFITS = {
   monthly_random_credit_draw: true,
 } as const;
 
-const REVIEW_VOD_THRESHOLD = 3;
 const REVIEW_WINDOW_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -65,17 +64,6 @@ async function resolveReviewWindowAnchor(userId: string): Promise<string | null>
     .maybeSingle();
 
   return planRow?.created_at ?? null;
-}
-
-async function countCompletedLectures(userId: string): Promise<number> {
-  const admin = createAdminClient();
-  const { count } = await admin
-    .from("lecture_progress")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .not("completed_at", "is", null);
-
-  return count || 0;
 }
 
 function getKakaoInviteUrl() {
@@ -203,16 +191,6 @@ export async function POST(request: NextRequest) {
     if (!isAdmin && Date.now() > windowEndMs) {
       return NextResponse.json(
         { error: `후기 이벤트 참여 기간은 결제 후 ${REVIEW_WINDOW_DAYS}일까지만 열립니다.` },
-        { status: 403 },
-      );
-    }
-
-    const completedLectures = await countCompletedLectures(user.id);
-    if (!isAdmin && completedLectures < REVIEW_VOD_THRESHOLD) {
-      return NextResponse.json(
-        {
-          error: `강의 ${REVIEW_VOD_THRESHOLD}개 완료 후 후기를 제출할 수 있습니다. 현재 ${completedLectures}개 완료 상태입니다.`,
-        },
         { status: 403 },
       );
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert, Badge, Box, Button, Card, Divider, Group, Progress, SimpleGrid, Stack, Text } from "@mantine/core";
+import { Alert, Badge, Box, Button, Card, Divider, Group, SimpleGrid, Stack, Text } from "@mantine/core";
 import { CheckCircle2, Gift, MessageCircle, MessageSquareText, Sparkles, Star, Ticket } from "lucide-react";
 
 import { Link } from "@/i18n/routing";
@@ -27,8 +27,8 @@ type EligibilityState = {
 };
 
 const benefits = [
-  { icon: MessageCircle, label: "비밀 카톡방 초대" },
-  { icon: Sparkles, label: "업데이트 얼리액세스" },
+  { icon: MessageCircle, label: "비밀 카카오톡방" },
+  { icon: Sparkles, label: "업데이트 우선 안내" },
   { icon: Ticket, label: "피드백권 3회" },
   { icon: Star, label: "월 1명 400크레딧" },
 ];
@@ -57,7 +57,6 @@ export function ReviewEventBanner() {
 
   if (!loaded || !state) return null;
 
-  // 이미 제출 완료 — 혜택 활성화됨 펼쳐진 패널
   if (state.alreadySubmitted && state.review) {
     const unread = state.unreadFeedbackCount ?? 0;
     return (
@@ -76,10 +75,10 @@ export function ReviewEventBanner() {
               <CheckCircle2 size={22} color="#16a34a" />
               <Box>
                 <Text fw={800} size="lg">
-                  후기 이벤트 혜택
+                  후기 혜택 활성화
                 </Text>
                 <Text size="sm" c="gray.6">
-                  후기 제출 완료 · 모든 혜택이 활성화됐어요
+                  후기 제출이 완료되어 구매자 전용 혜택이 열렸습니다.
                 </Text>
               </Box>
             </Group>
@@ -90,16 +89,16 @@ export function ReviewEventBanner() {
 
           <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="xs">
             <Badge color="violet" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
-              🎫 피드백권 {state.review.feedbackTicketsRemaining}회
+              피드백권 {state.review.feedbackTicketsRemaining}회
             </Badge>
             <Badge color="orange" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
-              💬 카톡방 입장
+              카카오톡방 입장
             </Badge>
             <Badge color="grape" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
-              ✨ 업데이트 얼리액세스
+              업데이트 우선 안내
             </Badge>
             <Badge color="yellow" variant="light" size="md" radius="md" style={{ justifyContent: "flex-start", padding: "10px 12px", height: "auto" }}>
-              ⭐ 월 400cr 추첨
+              400cr 추첨
             </Badge>
           </SimpleGrid>
 
@@ -112,7 +111,7 @@ export function ReviewEventBanner() {
             >
               <Group justify="space-between" align="center" wrap="nowrap">
                 <Text fw={700} c="green.8" size="sm">
-                  💬 피드백 답변 {unread}개가 도착했어요
+                  새 피드백 답변 {unread}개가 도착했습니다.
                 </Text>
                 <Button
                   component={Link}
@@ -157,7 +156,7 @@ export function ReviewEventBanner() {
               </Stack>
             ) : (
               <Alert color="violet" variant="light">
-                <Text size="xs">카톡방 초대는 운영진 확인 후 안내됩니다.</Text>
+                <Text size="xs">카카오톡방 초대 링크는 운영진 확인 후 안내됩니다.</Text>
               </Alert>
             )}
 
@@ -179,16 +178,7 @@ export function ReviewEventBanner() {
     );
   }
 
-  // 윈도우 종료 or 무자격 → 숨김
   if (!state.eligible) return null;
-
-  // 진행도 카드 (윈도우 내 항상 표시)
-  const progressValue = Math.min(100, (state.vodsCompleted / state.vodThreshold) * 100);
-  const thresholdReached = state.vodsCompleted >= state.vodThreshold;
-  const ctaLabel = state.canSubmit ? "혜택 해제하기" : "자세히 보기";
-  const progressLabel = thresholdReached
-    ? "3/3 수강 완료 — 해제 준비 완료"
-    : `강의 ${state.vodsCompleted}/${state.vodThreshold} 수강`;
 
   return (
     <Card
@@ -204,27 +194,23 @@ export function ReviewEventBanner() {
         <Box style={{ flex: 1, minWidth: 260 }}>
           <Group gap="xs" mb={8}>
             <Badge color="violet" variant="filled" radius="xl">
-              후기 이벤트
+              구매자 전용 혜택
             </Badge>
             <Badge color="pink" variant="light" radius="xl">
               D-{state.daysLeft}
             </Badge>
-            <Badge color={thresholdReached ? "green" : "gray"} variant="light" radius="xl">
-              {progressLabel}
+            <Badge color="green" variant="light" radius="xl">
+              바로 신청 가능
             </Badge>
           </Group>
           <Text fw={800} size="lg" style={{ color: "var(--mantine-color-text)" }}>
-            강의 듣고 후기 남기면 피드백권·400크레딧 추첨·카톡방이 해제돼요
+            구매자 전용 혜택을 확인해보세요
           </Text>
-          <Progress
-            value={progressValue}
-            color={thresholdReached ? "green" : "violet"}
-            size="sm"
-            radius="xl"
-            mt={10}
-            mb={6}
-          />
-          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={6} mt="xs">
+          <Text size="sm" c="gray.7" mt={6}>
+            간단한 후기를 남기면 비밀 카카오톡방, 피드백권 3회, 업데이트 우선 안내가 열립니다.
+            강의를 둘러본 뒤 편하게 남겨주셔도 됩니다.
+          </Text>
+          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={6} mt="sm">
             {benefits.map((benefit) => (
               <Group key={benefit.label} gap={6} wrap="nowrap">
                 <benefit.icon size={14} color="#8b5cf6" />
@@ -241,10 +227,10 @@ export function ReviewEventBanner() {
           prefetch={false}
           radius="xl"
           color="violet"
-          variant={state.canSubmit ? "filled" : "light"}
+          variant="filled"
           leftSection={<Gift size={16} />}
         >
-          {ctaLabel}
+          혜택 확인하기
         </Button>
       </Group>
     </Card>

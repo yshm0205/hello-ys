@@ -24,8 +24,6 @@ import {
 } from "@mantine/core";
 import { CheckCircle2, Gift, MessageCircle, Send, Sparkles, Star, Ticket } from "lucide-react";
 
-import { Link } from "@/i18n/routing";
-
 import { ReviewCelebrationModal } from "./ReviewCelebrationModal";
 
 type SubmittedReview = {
@@ -123,7 +121,7 @@ export function ReviewEventContent() {
             windowClosed: Boolean(eligibilityData.windowClosed),
             daysLeft: Number(eligibilityData.daysLeft ?? 0),
             vodsCompleted: Number(eligibilityData.vodsCompleted ?? 0),
-            vodThreshold: Number(eligibilityData.vodThreshold ?? 3),
+            vodThreshold: Number(eligibilityData.vodThreshold ?? 0),
             windowDays: Number(eligibilityData.windowDays ?? 7),
           });
         }
@@ -151,7 +149,7 @@ export function ReviewEventContent() {
     };
   }, [isPreview]);
 
-  const reviewLocked = !review && !!eligibility && !eligibility.canSubmit;
+  const reviewLocked = !review && !!eligibility && eligibility.windowClosed;
 
   async function submitReview() {
     setError(null);
@@ -237,14 +235,14 @@ export function ReviewEventContent() {
           <Group justify="space-between" align="flex-start" gap="lg">
             <Box style={{ maxWidth: 720 }}>
               <Badge color="violet" radius="xl" mb="sm">
-                수강생 후기 이벤트
+                구매자 전용 혜택
               </Badge>
               <Title order={2} style={{ color: "var(--mantine-color-text)" }}>
-                후기를 남기면, 운영진이 혜택을 바로 연결합니다.
+                혜택을 확인하고 편하게 후기 남겨주세요.
               </Title>
               <Text c="gray.6" mt="sm">
-                외부 폼으로 나가지 않고 FlowSpot 안에서 제출됩니다. 제출된 후기는 운영진 검수 후
-                익명 마케팅 소재와 서비스 개선에만 사용합니다.
+                강의를 전부 보지 않아도 괜찮습니다. 둘러본 첫인상, 기대되는 점, 좋았던 부분을
+                짧게 남기면 구매자 전용 혜택이 열립니다.
               </Text>
             </Box>
             <ThemeIcon size={56} radius="xl" color="violet" variant="light">
@@ -337,45 +335,16 @@ export function ReviewEventContent() {
               <Group justify="space-between" align="flex-start" gap="md">
                 <Box>
                   <Text fw={700} size="lg">
-                    {eligibility?.windowClosed
-                      ? "후기 이벤트 기간이 종료되었습니다"
-                      : `강의 ${eligibility?.vodThreshold ?? 3}개 완료 후 혜택이 열립니다`}
+                    후기 이벤트 기간이 종료되었습니다
                   </Text>
                   <Text size="sm" c="gray.6" mt={6}>
-                    {eligibility?.windowClosed
-                      ? `결제 후 ${eligibility?.windowDays ?? 7}일 동안만 후기 이벤트에 참여할 수 있습니다.`
-                      : `현재 완료 강의는 ${eligibility?.vodsCompleted ?? 0}/${eligibility?.vodThreshold ?? 3}개입니다. 기준을 채우면 후기 제출과 함께 카카오톡방, 피드백권 3개, 얼리액세스 혜택이 열립니다.`}
+                    결제 후 {eligibility?.windowDays ?? 14}일 동안만 후기 이벤트에 참여할 수 있습니다.
                   </Text>
-                  {!eligibility?.windowClosed && (
-                    <Text size="xs" c="gray.5" mt={8}>
-                      남은 기간: D-{eligibility?.daysLeft ?? 0}
-                    </Text>
-                  )}
                 </Box>
-                <Badge
-                  color={eligibility?.windowClosed ? "gray" : "violet"}
-                  variant="light"
-                  size="lg"
-                >
-                  {eligibility?.windowClosed
-                    ? "참여 종료"
-                    : `${eligibility?.vodsCompleted ?? 0}/${eligibility?.vodThreshold ?? 3} 완료`}
+                <Badge color="gray" variant="light" size="lg">
+                  참여 종료
                 </Badge>
               </Group>
-
-              {!eligibility?.windowClosed && (
-                <Group justify="flex-end">
-                  <Button
-                    component={Link}
-                    href="/dashboard/lectures"
-                    prefetch={false}
-                    color="violet"
-                    radius="xl"
-                  >
-                    강의 보러 가기
-                  </Button>
-                </Group>
-              )}
             </Stack>
           </Card>
         ) : (
@@ -390,11 +359,10 @@ export function ReviewEventContent() {
               <Group justify="space-between" align="center">
                 <Box>
                   <Text fw={700} size="lg">
-                    수강 후기 작성
+                    후기 남기고 혜택 받기
                   </Text>
                   <Text size="sm" c="gray.6">
-                    수강 전후 어떤 변화가 있었는지, 가장 기억에 남는 강의나 기능을 중심으로
-                    남겨주세요.
+                    강의를 둘러본 첫인상, 기대되는 점, 좋았던 부분만 간단히 남겨도 괜찮습니다.
                   </Text>
                 </Box>
                 <Rating value={rating} onChange={setRating} size="lg" color="yellow" />
@@ -411,7 +379,7 @@ export function ReviewEventContent() {
               <Textarea
                 label="후기 내용"
                 description="최소 30자 이상 작성해주세요."
-                placeholder="예) 수강 전에는 주제 찾느라 며칠이 걸렸는데, Part 3을 듣고 3일 만에 첫 영상을 올렸습니다. 스크립트 생성기 배치 기능이 특히 유용했어요."
+                placeholder="예) 아직 전부 보진 못했지만 구성과 자료가 기대 이상입니다. 특히 쇼츠 주제 잡기와 스크립트 흐름을 바로 적용해볼 수 있을 것 같아요."
                 value={content}
                 onChange={(event) => setContent(event.currentTarget.value)}
                 autosize
