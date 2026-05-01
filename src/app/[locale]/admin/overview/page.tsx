@@ -842,8 +842,8 @@ function getSectionCountMap(sections: LandingSectionSummary[]) {
   return new Map(sections.map((section) => [section.raw, section.count]));
 }
 
-function getSectionDiagnosis(exitCount: number, readClickCount: number, buttonClickCount: number) {
-  if (exitCount > 0 && readClickCount === 0 && buttonClickCount === 0) {
+function getSectionDiagnosis(exitCount: number, readClickCount: number) {
+  if (exitCount > 0 && readClickCount === 0) {
     return "읽고 멈춘 구간입니다. 문구가 길거나 다음 행동 이유가 약한지 확인";
   }
 
@@ -855,34 +855,26 @@ function getSectionDiagnosis(exitCount: number, readClickCount: number, buttonCl
     return "이 구간을 본 뒤 신청이 나온 구간입니다. 설득 문구를 다른 구간에 재활용 가능";
   }
 
-  if (buttonClickCount > 0) {
-    return "실제 신청 버튼이 눌린 위치입니다. 버튼 문구와 배치 유지 후보";
-  }
-
   return "아직 판단할 표본이 적습니다.";
 }
 
 function getLandingSectionDiagnostics(stats: PeriodStats) {
   const exitCounts = getSectionCountMap(stats.allExitSections);
   const readClickCounts = getSectionCountMap(stats.allCtaViewSections);
-  const buttonClickCounts = getSectionCountMap(stats.allCtaSections);
 
   return LANDING_SECTION_ORDER.map((raw) => {
     const info = getSectionInfo(raw);
     const exitCount = exitCounts.get(raw) || 0;
     const readClickCount = readClickCounts.get(raw) || 0;
-    const buttonClickCount = buttonClickCounts.get(raw) || 0;
 
     return {
       raw,
       ...info,
       exitCount,
       readClickCount,
-      buttonClickCount,
       exitShare: getRate(exitCount, stats.reliableExitSessionCount),
       readClickShare: getRate(readClickCount, stats.reliableCtaSessionCount),
-      buttonClickShare: getRate(buttonClickCount, stats.reliableCtaSessionCount),
-      diagnosis: getSectionDiagnosis(exitCount, readClickCount, buttonClickCount),
+      diagnosis: getSectionDiagnosis(exitCount, readClickCount),
     };
   });
 }
@@ -898,7 +890,7 @@ const OVERVIEW_READ_GUIDE = [
   },
   {
     title: "3. 마지막 구간표",
-    body: "구간별로 여기서 나감과 읽고 신청을 비교합니다. 이탈만 높은 줄부터 확인하세요.",
+    body: "구간별로 여기서 나감과 신청 직전 본 구간을 비교합니다. 이탈만 높은 줄부터 확인하세요.",
   },
 ] as const;
 
@@ -1123,20 +1115,18 @@ export default async function AdminOverviewPage({
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">랜딩 어느 부분을 고칠지</CardTitle>
             <p className="text-[11px] text-muted-foreground">
-              실제 랜딩 순서대로 봅니다. CTA를 누른 세션은 이탈로 세지 않고, “읽고 신청”에
-              따로 표시합니다.
+              실제 랜딩 순서대로 봅니다. 이탈과 신청 직전 본 구간만 비교하면 됩니다.
             </p>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[920px] text-left text-sm">
+              <table className="w-full min-w-[780px] text-left text-sm">
                 <thead className="border-b text-xs text-muted-foreground">
                   <tr>
                     <th className="py-2 pr-3 font-medium">랜딩 구간</th>
                     <th className="py-2 pr-3 font-medium">실제 위치</th>
                     <th className="py-2 pr-3 font-medium">여기서 나감</th>
-                    <th className="py-2 pr-3 font-medium">읽고 신청</th>
-                    <th className="py-2 pr-3 font-medium">버튼 클릭</th>
+                    <th className="py-2 pr-3 font-medium">신청 직전 본 구간</th>
                     <th className="py-2 pr-3 font-medium">해석</th>
                   </tr>
                 </thead>
@@ -1166,14 +1156,6 @@ export default async function AdminOverviewPage({
                         </p>
                         <p className="text-xs text-muted-foreground">
                           신청 중 {section.readClickShare}%
-                        </p>
-                      </td>
-                      <td className="py-3 pr-3">
-                        <p className="font-semibold text-foreground">
-                          {section.buttonClickCount}세션
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          버튼 중 {section.buttonClickShare}%
                         </p>
                       </td>
                       <td className="max-w-[260px] py-3 pr-3 text-xs leading-5 text-muted-foreground">
