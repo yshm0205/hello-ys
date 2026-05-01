@@ -2392,14 +2392,22 @@ function renderWithLinks(text: string): ReactNode {
 }
 
 function formatReviewDate(value: string) {
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(value));
+  const createdAt = new Date(value).getTime();
+  if (!Number.isFinite(createdAt)) return '';
+
+  const diffMs = Math.max(0, Date.now() - createdAt);
+  const minuteMs = 60 * 1000;
+  const hourMs = 60 * minuteMs;
+  const dayMs = 24 * hourMs;
+  const monthMs = 30 * dayMs;
+  const yearMs = 365 * dayMs;
+
+  if (diffMs < minuteMs) return '방금 전';
+  if (diffMs < hourMs) return `${Math.floor(diffMs / minuteMs)}분 전`;
+  if (diffMs < dayMs) return `${Math.floor(diffMs / hourMs)}시간 전`;
+  if (diffMs < monthMs) return `${Math.floor(diffMs / dayMs)}일 전`;
+  if (diffMs < yearMs) return `${Math.floor(diffMs / monthMs)}개월 전`;
+  return `${Math.floor(diffMs / yearMs)}년 전`;
 }
 
 function BuyerReviewSection({
@@ -2502,6 +2510,7 @@ function BuyerReviewSection({
                       {review.displayName}
                     </Text>
                     <Text
+                      suppressHydrationWarning
                       style={{
                         color: '#94a3b8',
                         fontSize: 'clamp(12px, 3vw, 14px)',
