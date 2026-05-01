@@ -3348,7 +3348,6 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
                 -{discountAmount.toLocaleString()}원
               </Text>
             </Group>
-            <Box style={{ height: 1, background: '#e4e4e7', margin: '6px 0 4px' }} />
             <Group justify="space-between" wrap="nowrap" align="baseline">
               <Text style={{ color: '#18181b', fontSize: '12px', fontWeight: 600 }}>할인 판매가</Text>
               <Text style={{ color: '#18181b', fontSize: '14px', fontWeight: 700 }}>
