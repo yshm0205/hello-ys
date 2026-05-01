@@ -1993,8 +1993,8 @@ function WhySpecialSection() {
 
             {/* ── 내는 돈 ── */}
             <Text style={{
-              fontSize: 12, fontWeight: 700, color: '#555',
-              letterSpacing: 2, marginBottom: 20,
+              fontSize: isMobile ? 18 : 22, fontWeight: 900, color: '#fff',
+              letterSpacing: '-0.5px', marginBottom: 24,
               paddingLeft: isMobile ? 0 : 184,
             }}>내는 돈</Text>
 
@@ -2040,16 +2040,19 @@ function WhySpecialSection() {
             {/* ── 구분선 ── */}
             <Box style={{
               display: 'flex', alignItems: 'center', gap: 16,
-              margin: '48px 0', paddingLeft: isMobile ? 0 : 184,
+              margin: '56px 0 40px', paddingLeft: isMobile ? 0 : 184,
             }}>
-              <Text style={{ fontSize: 11, fontWeight: 700, color: '#8b5cf6', letterSpacing: 2 }}>그런데</Text>
-              <Box style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(139,92,246,0.3), transparent)' }} />
+              <Text style={{
+                fontSize: isMobile ? 16 : 20, fontWeight: 900, color: '#a78bfa',
+                letterSpacing: '-0.5px',
+              }}>그런데</Text>
+              <Box style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(139,92,246,0.45), transparent)' }} />
             </Box>
 
             {/* ── 받는 것 ── */}
             <Text style={{
-              fontSize: 12, fontWeight: 700, color: '#555',
-              letterSpacing: 2, marginBottom: 20,
+              fontSize: isMobile ? 18 : 22, fontWeight: 900, color: '#fff',
+              letterSpacing: '-0.5px', marginBottom: 24,
               paddingLeft: isMobile ? 0 : 184,
             }}>받는 것</Text>
 
