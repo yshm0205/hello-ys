@@ -3797,7 +3797,7 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
                   </Text>
                   <EarlyBirdCountdown deadline="2026-05-14T23:59:59+09:00" isMobile={isMobile} />
                   <Text style={{ marginTop: 16, fontSize: isMobile ? 11.5 : 12, fontWeight: 500, color: 'rgba(255,255,255,.45)', letterSpacing: '-0.01em', wordBreak: 'keep-all' }}>
-                    * 인원이 빠르게 차면 14일 전이라도 조기 마감될 수 있습니다.
+                    * 인원이 빠르게 차면 이벤트는 조기 마감될 수 있습니다.
                   </Text>
                 </>
               )}
