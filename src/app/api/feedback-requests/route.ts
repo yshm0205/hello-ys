@@ -4,6 +4,7 @@ import { z } from "zod";
 import { isActiveAccessPlan } from "@/lib/plans/config";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { getResendClient } from "@/lib/resend/client";
+import { notifyTelegramFeedbackRequestSubmitted } from "@/lib/telegram/payments";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -349,6 +350,19 @@ export async function POST(request: NextRequest) {
       description: inserted.description,
       referenceUrl: inserted.reference_url,
       requestId: inserted.id,
+    });
+
+    void notifyTelegramFeedbackRequestSubmitted({
+      requestId: inserted.id,
+      userId: user.id,
+      email: user.email ?? null,
+      requestType: inserted.request_type,
+      requestTypeLabel: TYPE_LABELS[inserted.request_type] || inserted.request_type,
+      title: inserted.title,
+      description: inserted.description,
+      referenceUrl: inserted.reference_url,
+      feedbackTicketsRemaining: reservation.newRemaining,
+      submittedAt: inserted.created_at,
     });
 
     return NextResponse.json({

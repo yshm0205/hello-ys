@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { isActiveAccessPlan } from "@/lib/plans/config";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
+import { notifyTelegramStudentReviewSubmitted } from "@/lib/telegram/payments";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -243,6 +244,20 @@ export async function POST(request: NextRequest) {
       console.error("[Reviews API] Failed to submit review:", error);
       return NextResponse.json({ error: "후기 제출에 실패했습니다." }, { status: 500 });
     }
+
+    void notifyTelegramStudentReviewSubmitted({
+      reviewId: String(data.id),
+      userId: user.id,
+      email: user.email || "",
+      rating,
+      headline,
+      content,
+      channelName,
+      proofUrl,
+      marketingConsent,
+      feedbackTicketsGranted: REVIEW_BENEFITS.feedback_tickets,
+      submittedAt: String(data.created_at || new Date().toISOString()),
+    });
 
     return NextResponse.json({
       success: true,

@@ -28,6 +28,33 @@ type TelegramFeedbackReceivedPayload = {
   sentAt?: string;
 };
 
+type TelegramStudentReviewSubmittedPayload = {
+  reviewId: string;
+  userId: string;
+  email?: string;
+  rating: number;
+  headline?: string | null;
+  content: string;
+  channelName?: string | null;
+  proofUrl?: string | null;
+  marketingConsent?: boolean;
+  feedbackTicketsGranted?: number;
+  submittedAt?: string;
+};
+
+type TelegramFeedbackRequestSubmittedPayload = {
+  requestId: string;
+  userId: string;
+  email?: string | null;
+  requestType: string;
+  requestTypeLabel?: string;
+  title: string;
+  description: string;
+  referenceUrl?: string | null;
+  feedbackTicketsRemaining?: number;
+  submittedAt?: string;
+};
+
 function isConfigured() {
   return !!TELEGRAM_BOT_TOKEN && !!TELEGRAM_CHAT_ID;
 }
@@ -132,5 +159,64 @@ export async function notifyTelegramFeedbackReceived(
       clipText(payload.message),
     ],
     "feedback_received",
+  );
+}
+
+export async function notifyTelegramStudentReviewSubmitted(
+  payload: TelegramStudentReviewSubmittedPayload,
+): Promise<TelegramNotifyResult> {
+  const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://flowspot.kr"}/ko/admin/reviews`;
+
+  return notifyTelegram(
+    [
+      "새 수강 후기",
+      "",
+      `평점: ${"★".repeat(Math.max(1, Math.min(5, payload.rating)))} (${payload.rating}/5)`,
+      `이메일: ${pick(payload.email)}`,
+      `채널명: ${pick(payload.channelName)}`,
+      `마케팅 동의: ${payload.marketingConsent ? "동의" : "미동의"}`,
+      `피드백권 지급: ${(payload.feedbackTicketsGranted ?? 0).toLocaleString("ko-KR")}회`,
+      `후기ID: ${pick(payload.reviewId)}`,
+      `사용자ID: ${pick(payload.userId)}`,
+      `시각: ${formatDateTime(payload.submittedAt)}`,
+      "",
+      `제목: ${pick(payload.headline)}`,
+      "",
+      clipText(payload.content, 900),
+      ...(payload.proofUrl ? ["", `인증 링크: ${payload.proofUrl}`] : []),
+      "",
+      `관리: ${adminUrl}`,
+    ],
+    "student_review_submitted",
+  );
+}
+
+export async function notifyTelegramFeedbackRequestSubmitted(
+  payload: TelegramFeedbackRequestSubmittedPayload,
+): Promise<TelegramNotifyResult> {
+  const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://flowspot.kr"}/ko/admin/feedback-requests`;
+
+  return notifyTelegram(
+    [
+      "새 피드백 요청",
+      "",
+      `유형: ${pick(payload.requestTypeLabel || payload.requestType)}`,
+      `제목: ${payload.title}`,
+      `이메일: ${pick(payload.email)}`,
+      `남은 피드백권: ${
+        typeof payload.feedbackTicketsRemaining === "number"
+          ? `${payload.feedbackTicketsRemaining.toLocaleString("ko-KR")}회`
+          : "-"
+      }`,
+      `요청ID: ${pick(payload.requestId)}`,
+      `사용자ID: ${pick(payload.userId)}`,
+      `시각: ${formatDateTime(payload.submittedAt)}`,
+      "",
+      clipText(payload.description, 900),
+      ...(payload.referenceUrl ? ["", `참고 링크: ${payload.referenceUrl}`] : []),
+      "",
+      `관리: ${adminUrl}`,
+    ],
+    "feedback_request_submitted",
   );
 }
