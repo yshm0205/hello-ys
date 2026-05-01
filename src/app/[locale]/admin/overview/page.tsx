@@ -121,7 +121,6 @@ const LANDING_SECTION_ORDER = [
   "compare",
   "how-it-works",
   "faq",
-  "cta",
   "floating-cta-mobile",
   "floating-cta-desktop",
 ] as const;
