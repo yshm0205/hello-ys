@@ -3345,10 +3345,10 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
                 -{discountAmount.toLocaleString()}원
               </Text>
             </Group>
-            <Box style={{ height: 1, background: '#e4e4e7', margin: '6px 0 4px' }} />
-            <Group justify="space-between" wrap="nowrap">
-              <Text style={{ color: '#18181b', fontSize: '13px', fontWeight: 700 }}>할인 판매가</Text>
-              <Text style={{ color: '#18181b', fontSize: '15px', fontWeight: 800 }}>
+            <Box style={{ height: 1, background: '#e4e4e7', margin: '8px 0 6px' }} />
+            <Group justify="space-between" wrap="nowrap" align="baseline">
+              <Text style={{ color: '#18181b', fontSize: '14px', fontWeight: 700 }}>할인 판매가</Text>
+              <Text style={{ color: '#18181b', fontSize: '20px', fontWeight: 900, letterSpacing: '-0.02em' }}>
                 {primaryProgram.amount.toLocaleString()}원
               </Text>
             </Group>
