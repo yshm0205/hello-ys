@@ -476,6 +476,9 @@
       "joinedAt": "가입일",
       "noUsers": "사용자가 없습니다."
     },
+    "sessions": {
+      "title": "세션 탐색기"
+    },
     "lectures": {
       "title": "강의",
       "description": "강의 및 VOD 콘텐츠를 관리합니다.",

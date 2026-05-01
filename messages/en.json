@@ -476,6 +476,9 @@
       "joinedAt": "Joined",
       "noUsers": "No users found."
     },
+    "sessions": {
+      "title": "Session Explorer"
+    },
     "lectures": {
       "title": "Lectures",
       "description": "Manage lectures and VOD content.",
