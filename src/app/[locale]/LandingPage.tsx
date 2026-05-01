@@ -3267,12 +3267,13 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
   }
 
   const discountAmount = primaryProgram.listAmount - primaryProgram.amount;
-  const earlybirdBonusValue =
+  const phase2Deadline = '2026-05-14T23:59:59+09:00';
+  const activeDeadline =
     earlybird.currentTier === 'phase1'
-      ? 78000
+      ? earlybirdSummary.tier1Deadline
       : earlybird.currentTier === 'phase2'
-        ? 39000
-        : 0;
+        ? phase2Deadline
+        : null;
 
   return (
     <Box
@@ -3301,7 +3302,7 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
           </Text>
 
           {/* 프로모션 카운트다운 */}
-          {earlybird.currentTier !== 'ended' && (
+          {activeDeadline && (
             <Box style={{
               background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
               color: '#fff', padding: '10px 14px', borderRadius: 8,
@@ -3313,7 +3314,7 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
               }}>
                 {floatingLabel} 마감까지
               </Text>
-              <FloatingCountdown deadline={earlybirdSummary.tier1Deadline} />
+              <FloatingCountdown deadline={activeDeadline} />
             </Box>
           )}
 
@@ -3344,16 +3345,6 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
                 -{discountAmount.toLocaleString()}원
               </Text>
             </Group>
-            {earlybirdBonusValue > 0 && (
-              <Group justify="space-between" wrap="nowrap">
-                <Text style={{ color: '#8b5cf6', fontSize: '12px', fontWeight: 600 }}>
-                  💜 보너스 크레딧
-                </Text>
-                <Text style={{ color: '#8b5cf6', fontSize: '12px', fontWeight: 700 }}>
-                  +{earlybirdBonusValue.toLocaleString()}원 상당
-                </Text>
-              </Group>
-            )}
             <Box style={{ height: 1, background: '#e4e4e7', margin: '6px 0 4px' }} />
             <Group justify="space-between" wrap="nowrap">
               <Text style={{ color: '#18181b', fontSize: '13px', fontWeight: 700 }}>할인 판매가</Text>

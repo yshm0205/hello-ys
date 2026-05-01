@@ -93,13 +93,15 @@ export function resolveEarlybirdTier(
   now = new Date(),
 ): EarlybirdTier {
   const tier1Deadline = new Date(EARLYBIRD_CONFIG.phase1.hardDeadline);
-  const beforeTier1Deadline = now.getTime() <= tier1Deadline.getTime();
+  const tier2Deadline = new Date(EARLYBIRD_CONFIG.phase2.hardDeadline);
 
-  if (beforeTier1Deadline && summary.phase1SoldCount < EARLYBIRD_CONFIG.phase1.totalSlots) {
+  const beforeTier1 = now.getTime() <= tier1Deadline.getTime();
+  if (beforeTier1 && summary.phase1SoldCount < EARLYBIRD_CONFIG.phase1.totalSlots) {
     return "phase1";
   }
 
-  if (summary.phase2SoldCount < EARLYBIRD_CONFIG.phase2.totalSlots) {
+  const beforeTier2 = now.getTime() <= tier2Deadline.getTime();
+  if (beforeTier2 && summary.phase2SoldCount < EARLYBIRD_CONFIG.phase2.totalSlots) {
     return "phase2";
   }
 
