@@ -873,6 +873,12 @@ export default async function AdminOverviewPage({
               <p className="text-xs text-orange-700/80">
                 CTA 미클릭 · 아래 이탈 위치 TOP 3에서 어디서 떠났나 확인
               </p>
+              <Link
+                href="/admin/sessions?stage=landing-only"
+                className="mt-2 inline-block text-xs font-semibold text-orange-800 hover:underline"
+              >
+                이 {periodStats.droppedAtLanding}명 보기 →
+              </Link>
             </CardContent>
           </Card>
 
@@ -889,6 +895,12 @@ export default async function AdminOverviewPage({
               <p className="text-xs text-amber-700/80">
                 CTA 클릭했지만 결제창에 안 옴 · 로그인/회원가입 단계 의심
               </p>
+              <Link
+                href="/admin/sessions?stage=cta-no-payment"
+                className="mt-2 inline-block text-xs font-semibold text-amber-800 hover:underline"
+              >
+                이 {periodStats.droppedAfterCta}명 보기 →
+              </Link>
             </CardContent>
           </Card>
 
@@ -905,6 +917,12 @@ export default async function AdminOverviewPage({
               <p className="text-xs text-rose-700/80">
                 결제창 진입 후 PENDING · 카드 한도/이체 망설임 의심
               </p>
+              <Link
+                href="/admin/sessions?stage=checkout-pending"
+                className="mt-2 inline-block text-xs font-semibold text-rose-800 hover:underline"
+              >
+                이 {periodStats.droppedAtCheckout}건 보기 →
+              </Link>
             </CardContent>
           </Card>
 
@@ -921,6 +939,12 @@ export default async function AdminOverviewPage({
               <p className="text-xs text-emerald-700/80">
                 DONE / PARTIAL_CANCELLED 기준
               </p>
+              <Link
+                href="/admin/sessions?stage=completed"
+                className="mt-2 inline-block text-xs font-semibold text-emerald-800 hover:underline"
+              >
+                이 {periodStats.completed}건 보기 →
+              </Link>
             </CardContent>
           </Card>
         </div>
