@@ -2,7 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-import { MARKETING_SESSION_STORAGE_KEY, MARKETING_TOKEN_COOKIE } from "@/lib/marketing/tracking";
+import {
+  MARKETING_SESSION_COOKIE,
+  MARKETING_SESSION_STORAGE_KEY,
+  MARKETING_TOKEN_COOKIE,
+} from "@/lib/marketing/tracking";
 
 const STORAGE_KEY = MARKETING_SESSION_STORAGE_KEY;
 
@@ -12,10 +16,21 @@ type MarketingTrackerProps = {
 
 function getSessionKey() {
   const existing = window.localStorage.getItem(STORAGE_KEY);
-  if (existing) return existing;
+  if (existing) {
+    writeSessionCookie(existing);
+    return existing;
+  }
+
+  const cookieSession = readCookie(MARKETING_SESSION_COOKIE);
+  if (cookieSession) {
+    window.localStorage.setItem(STORAGE_KEY, cookieSession);
+    writeSessionCookie(cookieSession);
+    return cookieSession;
+  }
 
   const next = crypto.randomUUID();
   window.localStorage.setItem(STORAGE_KEY, next);
+  writeSessionCookie(next);
   return next;
 }
 
@@ -38,6 +53,11 @@ function getMarketingToken() {
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${MARKETING_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax${secure}`;
   return token;
+}
+
+function writeSessionCookie(sessionKey: string) {
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${MARKETING_SESSION_COOKIE}=${encodeURIComponent(sessionKey)}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax${secure}`;
 }
 
 function getUtmParams() {

@@ -3,6 +3,10 @@ import { randomBytes, randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getEarlybirdSummary } from '@/lib/marketing/earlybird';
+import {
+  MARKETING_SESSION_COOKIE,
+  MARKETING_TOKEN_COOKIE,
+} from '@/lib/marketing/tracking';
 import { validateCheckoutCoupon } from '@/lib/payments/coupons';
 import { buildGrantSnapshotMetadata } from '@/lib/payments/grant-snapshot';
 import { isActiveAccessPlan } from '@/lib/plans/config';
@@ -68,8 +72,8 @@ export async function POST(request: NextRequest) {
       buyerEmail: rawBuyerEmail,
       locale: rawLocale,
       couponCode: rawCouponCode,
-      sessionKey: rawSessionKey,
-      marketingToken: rawMarketingToken,
+      sessionKey: rawBodySessionKey,
+      marketingToken: rawBodyMarketingToken,
     } = body as {
       planType?: string;
       buyerEmail?: string;
@@ -79,6 +83,10 @@ export async function POST(request: NextRequest) {
       marketingToken?: string;
     };
 
+    const rawSessionKey =
+      rawBodySessionKey || request.cookies.get(MARKETING_SESSION_COOKIE)?.value;
+    const rawMarketingToken =
+      rawBodyMarketingToken || request.cookies.get(MARKETING_TOKEN_COOKIE)?.value;
     const SESSION_KEY_RE = /^[0-9a-f-]{36}$/i;
     const sessionKey =
       typeof rawSessionKey === 'string' && SESSION_KEY_RE.test(rawSessionKey)
