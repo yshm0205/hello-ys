@@ -244,7 +244,7 @@ export function AllInOneCheckoutContent({
                     </Badge>
                   </Group>
                   <Text size="sm" c="gray.6">
-                    강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달{' '}
+                    강의 {plan.months}개월 수강 + AI 스크립트 도구 {plan.months}개월 이용 + 매달{' '}
                     {plan.monthlyCredits.toLocaleString()}cr 지급(생성 {monthlyGenerationCount}편 분량)
                   </Text>
                 </Box>
@@ -308,12 +308,11 @@ export function AllInOneCheckoutContent({
                     </Group>
                     <List spacing={10} size="sm" center>
                       {[
-                        'VOD 강의 40강',
+                        'VOD 강의 40강 · 4개월 수강',
                         'AI 스크립트 도구 4개월 이용',
                         '월간 트렌드 채널 데이터',
                         '전자책',
                         '노션 운영 템플릿',
-                        '프로그램 4개월 참여',
                       ].map((item) => (
                         <List.Item
                           key={item}
