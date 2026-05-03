@@ -512,7 +512,7 @@ function HeroSection() {
                 fontSize: '14px',
               }}
             >
-              <b style={{ color: '#fafafa', fontWeight: 700 }}>얼리버드 특가</b> · 선착순 진행 중
+              <b style={{ color: '#fafafa', fontWeight: 700 }}>2차 얼리버드 진행 중</b> · 마감 후 할인 종료
             </Text>
           </Box>
 

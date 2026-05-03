@@ -15,7 +15,6 @@ import {
   List,
   Stack,
   Text,
-  TextInput,
   ThemeIcon,
   Title,
 } from '@mantine/core';
@@ -87,14 +86,14 @@ export function AllInOneCheckoutContent({
   const [confirmedSharing, setConfirmedSharing] = useState(false);
   const [confirmedRefund, setConfirmedRefund] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [couponLoading, setCouponLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [couponCode, setCouponCode] = useState(initialCouponCode.trim().toUpperCase());
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   const allConfirmed = confirmedDuration && confirmedSharing && confirmedRefund;
   const canCheckout = allConfirmed;
   const finalCheckoutAmount = appliedCoupon?.finalAmount ?? plan.amount;
+  const monthly12Original = Math.ceil(plan.listAmount / 12);
+  const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
 
   const toggleAll = (checked: boolean) => {
     setConfirmedDuration(checked);
@@ -102,8 +101,8 @@ export function AllInOneCheckoutContent({
     setConfirmedRefund(checked);
   };
 
-  const applyCoupon = async (rawCode?: string) => {
-    const normalizedCode = String(rawCode ?? couponCode).trim().toUpperCase();
+  const applyCoupon = async (rawCode: string) => {
+    const normalizedCode = rawCode.trim().toUpperCase();
 
     if (!normalizedCode) {
       setAppliedCoupon(null);
@@ -111,7 +110,6 @@ export function AllInOneCheckoutContent({
       return;
     }
 
-    setCouponLoading(true);
     setError(null);
 
     try {
@@ -132,14 +130,11 @@ export function AllInOneCheckoutContent({
         return;
       }
 
-      setCouponCode(data.coupon.code);
       setAppliedCoupon(data.coupon as AppliedCoupon);
     } catch (err) {
       const message = err instanceof Error ? err.message : '쿠폰 확인 중 오류가 발생했습니다.';
       setAppliedCoupon(null);
       setError(message);
-    } finally {
-      setCouponLoading(false);
     }
   };
 
@@ -147,7 +142,6 @@ export function AllInOneCheckoutContent({
     if (!initialCouponCode) return;
     void applyCoupon(initialCouponCode);
     // initial coupon is a one-time bootstrap value from the server-rendered URL.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCouponCode]);
 
   const handleTossPayCheckout = async () => {
@@ -245,12 +239,27 @@ export function AllInOneCheckoutContent({
                     <Text fw={700} size="xl" style={{ color: '#111827' }}>
                       올인원 패스
                     </Text>
+                    <Badge color="violet" variant="filled">
+                      2차 얼리버드
+                    </Badge>
                   </Group>
                   <Text size="sm" c="gray.6">
                     강의 {plan.months}개월 + 프로그램 {plan.months}개월 + 매달{' '}
                     {plan.monthlyCredits.toLocaleString()}cr 지급(생성 {monthlyGenerationCount}편 분량)
                   </Text>
                 </Box>
+
+                <Alert
+                  color="violet"
+                  radius="lg"
+                  variant="light"
+                  icon={<TicketPercent size={18} />}
+                  title="2차 얼리버드 혜택 적용 중"
+                >
+                  <Text size="sm" style={{ lineHeight: 1.6 }}>
+                    마감 후 할인 종료
+                  </Text>
+                </Alert>
 
                 <Group justify="space-between" align="flex-end">
                   <Box>
@@ -274,6 +283,13 @@ export function AllInOneCheckoutContent({
                         {formatWon(plan.amount)}
                       </Title>
                     )}
+                    <Text size="sm" c="gray.6" mt={4}>
+                      12개월 할부 시{' '}
+                      <span style={{ color: '#9ca3af', textDecoration: 'line-through' }}>
+                        월 {formatWon(monthly12Original)}
+                      </span>{' '}
+                      <strong style={{ color: '#7c3aed' }}>월 {formatWon(monthly12Final)}</strong>
+                    </Text>
                   </Box>
                   <Badge color="violet" variant="light">
                     총 {plan.totalCredits.toLocaleString()}cr / 생성 {totalGenerationCount}편 분량
@@ -296,7 +312,7 @@ export function AllInOneCheckoutContent({
                         'AI 스크립트 도구 4개월 이용',
                         '월간 트렌드 채널 데이터',
                         '전자책',
-                        '썸네일 운영 템플릿',
+                        '노션 운영 템플릿',
                         '프로그램 4개월 참여',
                       ].map((item) => (
                         <List.Item
@@ -388,55 +404,25 @@ export function AllInOneCheckoutContent({
                   </Text>
                 </Alert>
 
-                <Card padding="md" radius="lg" withBorder style={{ background: '#fcfcff' }}>
-                  <Stack gap="sm">
-                    <Group gap="xs">
-                      <TicketPercent size={18} color="#8b5cf6" />
-                      <Text fw={700} style={{ color: '#111827' }}>
-                        쿠폰 적용
+                {appliedCoupon && (
+                  <Alert color="green" radius="lg" variant="light">
+                    <Text size="sm" fw={600}>
+                      {appliedCoupon.label}
+                    </Text>
+                    <Text size="sm" c="gray.7">
+                      {appliedCoupon.description}
+                    </Text>
+                    <Text size="sm" c="gray.7">
+                      결제 금액: {formatWon(appliedCoupon.originalAmount)} →{' '}
+                      {formatWon(appliedCoupon.finalAmount)}
+                    </Text>
+                    {appliedCoupon.expiresAt && (
+                      <Text size="xs" c="gray.6">
+                        사용 기한: {formatDate(appliedCoupon.expiresAt)}
                       </Text>
-                    </Group>
-                    <Group align="flex-end">
-                      <TextInput
-                        flex={1}
-                        label="쿠폰 코드"
-                        placeholder="쿠폰 코드를 입력해 주세요"
-                        value={couponCode}
-                        onChange={(event) => {
-                          setCouponCode(event.currentTarget.value.toUpperCase());
-                          setAppliedCoupon(null);
-                        }}
-                      />
-                      <Button
-                        color="violet"
-                        radius="md"
-                        loading={couponLoading}
-                        onClick={() => void applyCoupon()}
-                      >
-                        적용
-                      </Button>
-                    </Group>
-                    {appliedCoupon && (
-                      <Alert color="green" radius="lg" variant="light">
-                        <Text size="sm" fw={600}>
-                          {appliedCoupon.label}
-                        </Text>
-                        <Text size="sm" c="gray.7">
-                          {appliedCoupon.description}
-                        </Text>
-                        <Text size="sm" c="gray.7">
-                          결제 금액: {formatWon(appliedCoupon.originalAmount)} →{' '}
-                          {formatWon(appliedCoupon.finalAmount)}
-                        </Text>
-                        {appliedCoupon.expiresAt && (
-                          <Text size="xs" c="gray.6">
-                            사용 기한: {formatDate(appliedCoupon.expiresAt)}
-                          </Text>
-                        )}
-                      </Alert>
                     )}
-                  </Stack>
-                </Card>
+                  </Alert>
+                )}
 
                 <Button
                   color="violet"
@@ -447,9 +433,7 @@ export function AllInOneCheckoutContent({
                   onClick={handleTossPayCheckout}
                   style={{ background: canCheckout ? '#8b5cf6' : undefined }}
                 >
-                  {finalCheckoutAmount === plan.amount
-                    ? `${formatWon(finalCheckoutAmount)} 결제하기`
-                    : `${formatWon(finalCheckoutAmount)}로 결제하기`}
+                  2차 얼리버드 혜택으로 {formatWon(finalCheckoutAmount)} 결제하기
                 </Button>
 
                 {!canCheckout && (
