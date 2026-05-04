@@ -1,6 +1,8 @@
+import { SettingsContent } from '@/components/dashboard/SettingsContent';
+import { getPlanLabel, isActiveAccessPlan } from '@/lib/plans/config';
+import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { SettingsContent } from '@/components/dashboard/SettingsContent';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -10,23 +12,12 @@ export default async function SettingsPage() {
     redirect('/login');
   }
 
-  // 구독 정보 가져오기
-  let subscription = null;
-  try {
-    const { data } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    subscription = data;
-  } catch {
-    // 구독 정보 없음
-  }
-
-  const mockSubscription = subscription || {
-    plan_name: 'Free Plan',
-    status: 'active',
-    current_period_end: undefined,
+  // 새 결제 흐름(toss_payments) 호환 — 올인원/월구독 모두 인식
+  const plan = await getEffectiveCreditInfo(user.id);
+  const subscription = {
+    plan_name: getPlanLabel(plan?.plan_type),
+    status: isActiveAccessPlan(plan?.plan_type, plan?.expires_at) ? 'active' : 'inactive',
+    current_period_end: plan?.expires_at ?? undefined,
   };
 
   return (
@@ -36,7 +27,7 @@ export default async function SettingsPage() {
         id: user.id,
         created_at: user.created_at || '',
       }}
-      subscription={mockSubscription}
+      subscription={subscription}
     />
   );
 }
