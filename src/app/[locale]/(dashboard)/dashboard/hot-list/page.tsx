@@ -1,6 +1,8 @@
+import { ChannelListContent } from '@/components/dashboard/ChannelListContent';
+import { isActiveAccessPlan } from '@/lib/plans/config';
+import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChannelListContent } from '@/components/dashboard/ChannelListContent';
 
 export default async function ChannelListPage() {
     const supabase = await createClient();
@@ -11,18 +13,9 @@ export default async function ChannelListPage() {
         redirect('/login');
     }
 
-    // 구독 상태 확인
-    let isSubscribed = false;
-    try {
-        const { data } = await supabase
-            .from('subscriptions')
-            .select('status')
-            .eq('user_id', user.id)
-            .single();
-        isSubscribed = data?.status === 'active';
-    } catch {
-        // 구독 정보 없음 → 비수강생
-    }
+    // 활성 구독자 확인 — toss_payments(올인원/월구독) 흐름 호환
+    const plan = await getEffectiveCreditInfo(user.id);
+    const isSubscribed = isActiveAccessPlan(plan?.plan_type, plan?.expires_at);
 
     return <ChannelListContent isSubscribed={isSubscribed} />;
 }
