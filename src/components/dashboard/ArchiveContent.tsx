@@ -67,6 +67,7 @@ const mono = { fontFamily: 'var(--font-geist-mono), ui-monospace, monospace' };
 const NICHE_LABELS: Record<string, string> = {
     knowledge: '지식',
     seollem: '설렘',
+    lifetips: '쇼핑',
     animal: '동물',
     history: '역사',
     place: '여행',
@@ -363,6 +364,7 @@ export function ArchiveContent() {
                             { label: '전체', value: 'all' },
                             { label: '지식', value: 'knowledge' },
                             { label: '설렘', value: 'seollem' },
+                            { label: '쇼핑', value: 'lifetips' },
                         ]}
                         radius="lg"
                         color="violet"

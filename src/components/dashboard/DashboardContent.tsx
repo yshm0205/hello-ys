@@ -66,6 +66,7 @@ interface ProjectItem {
 const NICHE_LABELS: Record<string, string> = {
     'knowledge': '지식',
     'seollem': '설렘',
+    'lifetips': '쇼핑',
     'animal': '동물',
     'history': '역사',
     'place': '여행',

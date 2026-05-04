@@ -91,18 +91,21 @@ interface RemoteBatchCurrentResponse {
 const NICHE_OPTIONS = [
     { value: 'knowledge', label: '잡학지식', desc: '놀라운 사실, 과학 원리', image: '/images/niches/knowledge.png', enabled: true },
     { value: 'seollem', label: '설렘/썰', desc: '연애·썸·고백 등 감성 스토리', image: '/images/niches/seollem.png', enabled: true },
+    { value: 'lifetips', label: '쇼핑 영상', desc: '꿀팁·아이템 리뷰·쇼핑 썰', image: null, enabled: true },
     { value: 'animal', label: '동물/자연', desc: '신기한 동물, 자연 현상', image: null, enabled: false },
 ];
 
 const NICHE_LABELS: Record<string, string> = {
     knowledge: '지식',
     seollem: '설렘/썰',
+    lifetips: '쇼핑',
     animal: '동물',
 };
 
 const NICHE_COLORS: Record<string, string> = {
     knowledge: 'violet',
     seollem: 'pink',
+    lifetips: 'orange',
     animal: 'green',
 };
 
