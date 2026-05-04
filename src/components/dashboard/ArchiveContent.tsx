@@ -74,6 +74,11 @@ const NICHE_LABELS: Record<string, string> = {
 };
 
 function getNicheLabel(item: ScriptItem): string {
+    if (item.niche?.startsWith('lifetips:')) {
+        const mode = item.niche.split(':')[1];
+        const modeLabel = mode === 'saga' ? '썰형' : mode === 'review' ? '리뷰형' : '';
+        return modeLabel ? `쇼핑 (${modeLabel})` : '쇼핑';
+    }
     if (item.niche && NICHE_LABELS[item.niche]) return NICHE_LABELS[item.niche];
     if (item.archetype === 'V2_PIPELINE') return item.niche || '기타';
     return '지식';

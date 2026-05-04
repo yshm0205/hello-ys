@@ -372,6 +372,16 @@ export async function POST(
       const handoffTimeout = setTimeout(() => handoffController.abort(), 60000);
       let handoffOk = false;
 
+      // lifetips + force_mode 인코딩 분리 ("lifetips:saga" → niche=lifetips, force_mode=saga)
+      const rawNiche = nextItem.niche || state.job.niche || "";
+      let actualNiche = rawNiche;
+      let actualForceMode = "";
+      if (rawNiche.startsWith("lifetips:")) {
+        const parts = rawNiche.split(":");
+        actualNiche = "lifetips";
+        actualForceMode = parts[1] || "";
+      }
+
       try {
         const renderRes = await fetch(`${RENDER_API_URL}/api/v2/batch-process`, {
           method: "POST",
@@ -383,8 +393,9 @@ export async function POST(
           },
           body: JSON.stringify({
             material: nextItem.material,
-            niche: nextItem.niche || state.job.niche,
+            niche: actualNiche,
             tone: "",
+            force_mode: actualForceMode,
             job_id: state.job.id,
             item_id: nextItem.id,
             user_id: `${actor.userId}_batch_${nextItem.id}`,

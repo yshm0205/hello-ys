@@ -110,7 +110,14 @@ const NICHE_COLORS: Record<string, string> = {
 };
 
 function getQueueNicheLabel(niche?: string) {
-    return NICHE_LABELS[niche ?? ''] ?? '지식';
+    if (!niche) return '지식';
+    // "lifetips:saga" → "쇼핑 (썰형)" 같은 형식으로 표시
+    if (niche.startsWith('lifetips:')) {
+        const mode = niche.split(':')[1];
+        const modeLabel = mode === 'saga' ? '썰형' : mode === 'review' ? '리뷰형' : '';
+        return modeLabel ? `쇼핑 (${modeLabel})` : '쇼핑';
+    }
+    return NICHE_LABELS[niche] ?? '지식';
 }
 
 function getQueueNicheColor(niche?: string) {
@@ -324,6 +331,7 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
 export function BatchGeneratorContent() {
     const { initialCredits } = useDashboardShell();
     const [niche, setNiche] = useState('knowledge');
+    const [forceMode, setForceMode] = useState<string>(''); // lifetips 전용: '' | 'saga' | 'review'
     const [materialInput, setMaterialInput] = useState('');
     const [queue, setQueue] = useState<QueueItem[]>([]);
     const [recentCompleted, setRecentCompleted] = useState<QueueItem[]>([]);
@@ -591,7 +599,11 @@ export function BatchGeneratorContent() {
             const res = await fetch('/api/batch-jobs/current', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ material, niche }),
+                body: JSON.stringify({
+                    material,
+                    niche,
+                    force_mode: niche === 'lifetips' ? forceMode : '',
+                }),
             });
             const data = await res.json() as RemoteBatchCurrentResponse & { error?: string };
 
@@ -790,6 +802,82 @@ export function BatchGeneratorContent() {
                         })}
                     </Box>
                 </Box>
+
+                {/* ──── lifetips 전용: 영상 스타일 모드 ──── */}
+                {niche === 'lifetips' && (
+                    <Box>
+                        <Text fw={600} size="sm" c="dimmed" mb="sm">영상 스타일</Text>
+                        <Box style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            gap: '12px',
+                            maxWidth: '780px',
+                        }}>
+                            {[
+                                {
+                                    value: '',
+                                    emoji: '✨',
+                                    label: '자동',
+                                    desc: 'AI가 소재 보고\n형식 자동 선택',
+                                    example: '추천: 처음 사용 시',
+                                },
+                                {
+                                    value: 'saga',
+                                    emoji: '📖',
+                                    label: '썰형 (스토리)',
+                                    desc: '반전·서사가 있는\n스토리텔링 형식',
+                                    example: '예: "결국 선을 넘어버린\n미국의 반찬통"',
+                                },
+                                {
+                                    value: 'review',
+                                    emoji: '🛍️',
+                                    label: '리뷰형 (꿀팁)',
+                                    desc: '제품 추천·꿀팁\n리뷰 형식',
+                                    example: '예: "이케아의 실수"\n"다이소의 실수"',
+                                },
+                            ].map((mode) => {
+                                const isSelected = forceMode === mode.value;
+                                return (
+                                    <Box
+                                        key={mode.value || 'auto'}
+                                        onClick={() => setForceMode(mode.value)}
+                                        style={{
+                                            padding: '14px 12px',
+                                            borderRadius: '10px',
+                                            border: isSelected ? '2px solid #8b5cf6' : '2px solid var(--mantine-color-default-border)',
+                                            background: isSelected ? 'rgba(139, 92, 246, 0.04)' : 'var(--mantine-color-body)',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            boxShadow: isSelected ? '0 0 0 2px #8b5cf6' : 'none',
+                                            textAlign: 'center',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isSelected) {
+                                                e.currentTarget.style.borderColor = '#8b5cf6';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isSelected) {
+                                                e.currentTarget.style.borderColor = 'var(--mantine-color-default-border)';
+                                            }
+                                        }}
+                                    >
+                                        <Text size="xl" mb={4}>{mode.emoji}</Text>
+                                        <Text fw={600} size="sm" style={{ color: isSelected ? '#8b5cf6' : 'var(--mantine-color-text)' }}>
+                                            {mode.label}
+                                        </Text>
+                                        <Text size="xs" c="dimmed" mt={4} style={{ whiteSpace: 'pre-line', lineHeight: 1.4 }}>
+                                            {mode.desc}
+                                        </Text>
+                                        <Text size="xs" mt={6} style={{ color: '#9ca3af', fontStyle: 'italic', whiteSpace: 'pre-line' }}>
+                                            {mode.example}
+                                        </Text>
+                                    </Box>
+                                );
+                            })}
+                        </Box>
+                    </Box>
+                )}
 
                 {/* ──── 소재 입력 + 생성 큐 (통합) ──── */}
                 <Card padding="lg" radius="lg" withBorder>

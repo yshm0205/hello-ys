@@ -39,11 +39,18 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json().catch(() => ({}));
         const material = typeof body.material === "string" ? body.material.trim() : "";
-        const niche = typeof body.niche === "string" && body.niche ? body.niche : "knowledge";
+        const rawNiche = typeof body.niche === "string" && body.niche ? body.niche : "knowledge";
+        const forceMode = typeof body.force_mode === "string" ? body.force_mode.trim() : "";
 
         if (!material) {
             return NextResponse.json({ error: "소재를 입력해 주세요." }, { status: 400 });
         }
+
+        // lifetips + force_mode → niche에 인코딩 ("lifetips:saga" 형식)
+        // 다른 niche는 force_mode 무시
+        const niche = (rawNiche === "lifetips" && (forceMode === "saga" || forceMode === "review"))
+            ? `lifetips:${forceMode}`
+            : rawNiche;
 
         const admin = createBatchAdminClient();
         let loaded = await getOrCreateActiveBatchJob(admin, user.id, niche);
