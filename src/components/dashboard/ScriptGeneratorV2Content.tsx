@@ -23,6 +23,7 @@ import {
     Transition,
     Loader,
     Modal,
+    SegmentedControl,
 } from '@mantine/core';
 import {
     Brain,
@@ -326,6 +327,7 @@ async function runBackgroundGeneration(params: {
     research_text: string;
     niche: string;
     tone: string;
+    force_mode?: string;
 }): Promise<V2Result | null> {
     try {
         const headers = await getAuthHeaders();
@@ -370,6 +372,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     // Step 1 state
     const [material, setMaterial] = useState('');
     const [selectedNiche, setSelectedNiche] = useState<string | null>('knowledge');
+    const [forceMode, setForceMode] = useState<string>(''); // lifetips 전용: '' | 'saga' | 'review'
 
     // Step 2 state (리서치)
     const [isResearching, setIsResearching] = useState(false);
@@ -587,6 +590,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
             research_text: researchResult?.research_text || '',
             niche: selectedNiche || 'knowledge',
             tone,
+            force_mode: selectedNiche === 'lifetips' ? forceMode : '',
         };
 
         // 백그라운드 생성 시작 (컴포넌트 언마운트돼도 완료+저장됨)
@@ -827,6 +831,30 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                     })}
                                 </Box>
                             </Box>
+
+                            {/* lifetips 전용: 모드 토글 (자동 / 썰형 / 리뷰형) */}
+                            {selectedNiche === 'lifetips' && (
+                                <Box>
+                                    <Text fw={500} size="sm" mb="xs">생성 모드</Text>
+                                    <SegmentedControl
+                                        value={forceMode || 'auto'}
+                                        onChange={(v) => setForceMode(v === 'auto' ? '' : v)}
+                                        data={[
+                                            { label: '자동 분기', value: 'auto' },
+                                            { label: '썰형', value: 'saga' },
+                                            { label: '리뷰형', value: 'review' },
+                                        ]}
+                                        color="violet"
+                                        radius="md"
+                                        disabled={isResearching || isGenerating}
+                                    />
+                                    <Text size="xs" c="dimmed" mt={6}>
+                                        {forceMode === 'saga' && '스토리텔링 썰 형식으로만 생성합니다.'}
+                                        {forceMode === 'review' && '제품 리뷰·꿀팁 형식으로만 생성합니다 (썰 제외).'}
+                                        {forceMode === '' && '소재에 맞춰 AI가 자동으로 형식을 선택합니다.'}
+                                    </Text>
+                                </Box>
+                            )}
 
                             {/* 리서치 로딩 */}
                             {isResearching && (
