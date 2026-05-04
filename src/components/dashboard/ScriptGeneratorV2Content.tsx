@@ -852,22 +852,22 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                                 value: '',
                                                 emoji: '✨',
                                                 label: '자동',
-                                                desc: 'AI가 소재 보고 형식 선택',
+                                                desc: 'AI가 소재 보고\n형식 자동 선택',
                                                 example: '추천: 처음 사용 시',
                                             },
                                             {
                                                 value: 'saga',
                                                 emoji: '📖',
                                                 label: '썰형 (스토리)',
-                                                desc: '"결국 선을 넘은 X" 같은\n반전·서사 형식',
-                                                example: '예: 코스트코 치즈 사연',
+                                                desc: '반전·서사가 있는\n스토리텔링 형식',
+                                                example: '예: "결국 선을 넘어버린\n미국의 반찬통"',
                                             },
                                             {
                                                 value: 'review',
                                                 emoji: '🛍️',
                                                 label: '리뷰형 (꿀팁)',
-                                                desc: '"이거 진짜 사야 해" 같은\n추천·꿀팁 형식',
-                                                example: '예: 다이소 꿀템 N가지',
+                                                desc: '제품 추천·꿀팁\n리뷰 형식',
+                                                example: '예: "이케아의 실수"\n"다이소의 실수"',
                                             },
                                         ].map((mode) => {
                                             const isSelected = forceMode === mode.value;
