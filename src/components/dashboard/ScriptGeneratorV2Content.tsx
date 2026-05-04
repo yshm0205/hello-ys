@@ -733,14 +733,18 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 styles={{ input: { fontSize: '15px', lineHeight: 1.7 } }}
                             />
 
-                            {/* 니치 선택 - 이미지 카드 (3열, 9:13 비율) */}
+                            {/* 니치 선택 - 이미지 카드 (가로 슬라이드, 9:13 비율) */}
                             <Box>
                                 <Text fw={500} size="sm" mb="xs">채널 니치</Text>
-                                <Box className="v2-niche-grid" style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                <Box className="v2-niche-scroll" style={{
+                                    display: 'flex',
+                                    flexWrap: 'nowrap',
                                     gap: '16px',
-                                    maxWidth: '780px',
+                                    overflowX: 'auto',
+                                    overflowY: 'hidden',
+                                    paddingBottom: '8px',
+                                    scrollbarWidth: 'thin',
+                                    WebkitOverflowScrolling: 'touch',
                                 }}>
                                     {NICHE_OPTIONS.map((niche) => {
                                         const isSelected = selectedNiche === niche.value;
@@ -750,6 +754,8 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                                 key={niche.value}
                                                 onClick={() => !isDisabled && setSelectedNiche(niche.value)}
                                                 style={{
+                                                    flex: '0 0 200px',
+                                                    width: '200px',
                                                     borderRadius: '12px',
                                                     border: isSelected ? '2px solid #8b5cf6' : niche.enabled ? '2px solid #e5e7eb' : '2px dashed #e5e7eb',
                                                     background: isSelected ? '#faf5ff' : '#fff',

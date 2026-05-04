@@ -711,10 +711,14 @@ export function BatchGeneratorContent() {
                 <Box>
                     <Text fw={600} size="sm" c="dimmed" mb="sm">채널 니치</Text>
                     <Box style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+                        display: 'flex',
+                        flexWrap: 'nowrap',
                         gap: '12px',
-                        maxWidth: '560px',
+                        overflowX: 'auto',
+                        overflowY: 'hidden',
+                        paddingBottom: '8px',
+                        scrollbarWidth: 'thin',
+                        WebkitOverflowScrolling: 'touch',
                     }}>
                         {NICHE_OPTIONS.map((opt) => {
                             const isSelected = niche === opt.value;
@@ -723,6 +727,8 @@ export function BatchGeneratorContent() {
                                     key={opt.value}
                                     onClick={() => opt.enabled && setNiche(opt.value)}
                                     style={{
+                                        flex: '0 0 160px',
+                                        width: '160px',
                                         borderRadius: '12px',
                                         border: isSelected ? '2px solid #8b5cf6' : opt.enabled ? '2px solid var(--mantine-color-default-border)' : '2px dashed var(--mantine-color-default-border)',
                                         background: isSelected ? 'rgba(139, 92, 246, 0.04)' : 'var(--mantine-color-body)',
