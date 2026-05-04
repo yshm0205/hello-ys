@@ -49,6 +49,11 @@ const LAUNCH_CHANGES = [
     title: "결제 후 강의실 자동 이동 및 구매자 CTA 분기",
     watch: "결제 완료 후 문의 / 홈 재방문 흐름",
   },
+  {
+    happenedAt: "5/2 밤",
+    title: "모바일 SSR 레이아웃 수정 — 첫 페인트부터 모바일로 표시",
+    watch: "모바일 ① 랜딩에서 끝 / 평균 체류 시간",
+  },
 ] as const;
 const SECTION_INFOS: Record<
   string,
