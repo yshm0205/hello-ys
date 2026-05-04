@@ -23,7 +23,6 @@ import {
     Transition,
     Loader,
     Modal,
-    SegmentedControl,
 } from '@mantine/core';
 import {
     Brain,
@@ -841,24 +840,78 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                             {/* lifetips 전용: 모드 토글 (자동 / 썰형 / 리뷰형) */}
                             {selectedNiche === 'lifetips' && (
                                 <Box>
-                                    <Text fw={500} size="sm" mb="xs">생성 모드</Text>
-                                    <SegmentedControl
-                                        value={forceMode || 'auto'}
-                                        onChange={(v) => setForceMode(v === 'auto' ? '' : v)}
-                                        data={[
-                                            { label: '자동 분기', value: 'auto' },
-                                            { label: '썰형', value: 'saga' },
-                                            { label: '리뷰형', value: 'review' },
-                                        ]}
-                                        color="violet"
-                                        radius="md"
-                                        disabled={isResearching || isGenerating}
-                                    />
-                                    <Text size="xs" c="dimmed" mt={6}>
-                                        {forceMode === 'saga' && '스토리텔링 썰 형식으로만 생성합니다.'}
-                                        {forceMode === 'review' && '제품 리뷰·꿀팁 형식으로만 생성합니다 (썰 제외).'}
-                                        {forceMode === '' && '소재에 맞춰 AI가 자동으로 형식을 선택합니다.'}
-                                    </Text>
+                                    <Text fw={500} size="sm" mb="xs">영상 스타일</Text>
+                                    <Box style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(3, 1fr)',
+                                        gap: '12px',
+                                        maxWidth: '780px',
+                                    }}>
+                                        {[
+                                            {
+                                                value: '',
+                                                emoji: '✨',
+                                                label: '자동',
+                                                desc: 'AI가 소재 보고 형식 선택',
+                                                example: '추천: 처음 사용 시',
+                                            },
+                                            {
+                                                value: 'saga',
+                                                emoji: '📖',
+                                                label: '썰형 (스토리)',
+                                                desc: '"결국 선을 넘은 X" 같은\n반전·서사 형식',
+                                                example: '예: 코스트코 치즈 사연',
+                                            },
+                                            {
+                                                value: 'review',
+                                                emoji: '🛍️',
+                                                label: '리뷰형 (꿀팁)',
+                                                desc: '"이거 진짜 사야 해" 같은\n추천·꿀팁 형식',
+                                                example: '예: 다이소 꿀템 N가지',
+                                            },
+                                        ].map((mode) => {
+                                            const isSelected = forceMode === mode.value;
+                                            const isDisabled = isResearching || isGenerating;
+                                            return (
+                                                <Box
+                                                    key={mode.value || 'auto'}
+                                                    onClick={() => !isDisabled && setForceMode(mode.value)}
+                                                    style={{
+                                                        padding: '14px 12px',
+                                                        borderRadius: '10px',
+                                                        border: isSelected ? '2px solid #8b5cf6' : '2px solid #e5e7eb',
+                                                        background: isSelected ? '#faf5ff' : '#fff',
+                                                        cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                        opacity: isDisabled ? 0.5 : 1,
+                                                        transition: 'all 0.15s ease',
+                                                        boxShadow: isSelected ? '0 0 0 2px #8b5cf6' : 'none',
+                                                        textAlign: 'center',
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        if (!isSelected && !isDisabled) {
+                                                            e.currentTarget.style.borderColor = '#8b5cf6';
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        if (!isSelected) {
+                                                            e.currentTarget.style.borderColor = '#e5e7eb';
+                                                        }
+                                                    }}
+                                                >
+                                                    <Text size="xl" mb={4}>{mode.emoji}</Text>
+                                                    <Text fw={600} size="sm" style={{ color: isSelected ? '#8b5cf6' : '#1f2937' }}>
+                                                        {mode.label}
+                                                    </Text>
+                                                    <Text size="xs" c="dimmed" mt={4} style={{ whiteSpace: 'pre-line', lineHeight: 1.4 }}>
+                                                        {mode.desc}
+                                                    </Text>
+                                                    <Text size="xs" mt={6} style={{ color: '#9ca3af', fontStyle: 'italic' }}>
+                                                        {mode.example}
+                                                    </Text>
+                                                </Box>
+                                            );
+                                        })}
+                                    </Box>
                                 </Box>
                             )}
 
