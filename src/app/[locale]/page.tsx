@@ -1,3 +1,5 @@
+import { headers } from 'next/headers';
+
 import {
   EARLYBIRD_FALLBACK_SUMMARY,
   getEarlybirdSummary,
@@ -9,6 +11,11 @@ import {
 import LandingPage from './LandingPage';
 
 export const dynamic = 'force-dynamic';
+
+function detectIsMobileFromUserAgent(ua: string | null): boolean {
+  if (!ua) return false;
+  return /Mobile|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|BlackBerry/i.test(ua);
+}
 
 export default async function Page() {
   let initialSummary;
@@ -27,5 +34,14 @@ export default async function Page() {
     initialReviews = MARKETING_REVIEWS_FALLBACK;
   }
 
-  return <LandingPage initialSummary={initialSummary} initialReviews={initialReviews} />;
+  const headerList = await headers();
+  const initialIsMobile = detectIsMobileFromUserAgent(headerList.get('user-agent'));
+
+  return (
+    <LandingPage
+      initialSummary={initialSummary}
+      initialReviews={initialReviews}
+      initialIsMobile={initialIsMobile}
+    />
+  );
 }

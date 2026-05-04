@@ -5,7 +5,7 @@
  * Refined Editorial: zinc neutrals, monospace data accents, intentional violet
  */
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import {
   Container,
   Title,
@@ -214,8 +214,12 @@ function getActiveEarlybirdView(summary: LandingEarlybirdSummary) {
 /* ═══════════════════════════════════════════════════════════════
    useIsMobile — 반응형 분기 훅
    ═══════════════════════════════════════════════════════════════ */
+// SSR 시점에 user-agent로 결정한 초기값 — page.tsx에서 Provider로 주입
+const InitialIsMobileContext = createContext<boolean>(false);
+
 function useIsMobile(bp = 768) {
-  const [m, setM] = useState(false);
+  const initial = useContext(InitialIsMobileContext);
+  const [m, setM] = useState(initial);
   useEffect(() => {
     const c = () => setM(window.innerWidth < bp);
     c(); window.addEventListener('resize', c);
@@ -4152,27 +4156,31 @@ function EbTier(p: EbTierProps) {
 export default function LandingPage({
   initialSummary,
   initialReviews = MARKETING_REVIEWS_EMPTY,
+  initialIsMobile = false,
 }: {
   initialSummary: LandingEarlybirdSummary;
   initialReviews?: PublicMarketingReviewsSummary;
+  initialIsMobile?: boolean;
 }) {
   const earlybirdSummary = useLandingEarlybirdSummary(initialSummary);
 
   return (
-    <main style={{ background: '#ffffff' }}>
-      <MarketingTracker pageType="landing" />
-      <LandingHeader />
-      <HeroSection />
-      <EarlyBirdSection earlybirdSummary={earlybirdSummary} />
-      <LoopPainSection />
-      <PainSection />
-      <ProductRevealSection />
-      <WhySpecialSection />
-      <HowItWorksSection />
-      <BuyerReviewSection initialReviews={initialReviews} />
-      <FAQSection />
-      <Footer />
-      <FloatingCTA earlybirdSummary={earlybirdSummary} />
-    </main>
+    <InitialIsMobileContext.Provider value={initialIsMobile}>
+      <main style={{ background: '#ffffff' }}>
+        <MarketingTracker pageType="landing" />
+        <LandingHeader />
+        <HeroSection />
+        <EarlyBirdSection earlybirdSummary={earlybirdSummary} />
+        <LoopPainSection />
+        <PainSection />
+        <ProductRevealSection />
+        <WhySpecialSection />
+        <HowItWorksSection />
+        <BuyerReviewSection initialReviews={initialReviews} />
+        <FAQSection />
+        <Footer />
+        <FloatingCTA earlybirdSummary={earlybirdSummary} />
+      </main>
+    </InitialIsMobileContext.Provider>
   );
 }
