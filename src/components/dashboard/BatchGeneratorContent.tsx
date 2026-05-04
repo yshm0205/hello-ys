@@ -817,22 +817,22 @@ export function BatchGeneratorContent() {
                                 {
                                     value: '',
                                     emoji: '✨',
-                                    label: '자동',
-                                    desc: 'AI가 소재 보고\n형식 자동 선택',
+                                    label: '혼합',
+                                    desc: '썰형·리뷰형\n섞어서 다양하게',
                                     example: '추천: 처음 사용 시',
                                 },
                                 {
                                     value: 'saga',
                                     emoji: '📖',
                                     label: '썰형 (스토리)',
-                                    desc: '반전·서사가 있는\n스토리텔링 형식',
+                                    desc: '제품 사연·반전 중심\n이야기로 풀어냄',
                                     example: '예: "결국 선을 넘어버린\n미국의 반찬통"',
                                 },
                                 {
                                     value: 'review',
                                     emoji: '🛍️',
-                                    label: '리뷰형 (꿀팁)',
-                                    desc: '제품 추천·꿀팁\n리뷰 형식',
+                                    label: '리뷰형 (제품)',
+                                    desc: '실제 제품 보여주며\n장점·활용법 설명',
                                     example: '예: "이케아의 실수"\n"다이소의 실수"',
                                 },
                             ].map((mode) => {
