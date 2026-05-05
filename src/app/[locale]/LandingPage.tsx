@@ -18,7 +18,7 @@ import {
   Accordion,
   Anchor,
 } from '@mantine/core';
-import { Check, Bot, ChevronDown, ArrowRight, Star, ChevronLeft, ChevronRight, Home, MessageSquare, Play, Share2 } from 'lucide-react';
+import { Check, Bot, ChevronDown, ArrowRight, Star, ChevronLeft, ChevronRight, Home } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { MarketingTracker } from '@/components/analytics/MarketingTracker';
@@ -411,25 +411,6 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
     scrollToSection('reviews');
   };
 
-  const handlePreviewClick = (e: ReactMouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    scrollToSection('how-it-works');
-  };
-
-  const handleShare = () => {
-    if (typeof window === 'undefined') return;
-
-    const url = window.location.href;
-    if (typeof navigator.share === 'function') {
-      void navigator.share({ title: document.title, url }).catch(() => undefined);
-      return;
-    }
-
-    if (navigator.clipboard?.writeText) {
-      void navigator.clipboard.writeText(url).catch(() => undefined);
-    }
-  };
-
   return (
     <Box
       component="section"
@@ -467,7 +448,7 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
           z-index: 2;
           max-width: 1080px;
           margin: 0 auto;
-          padding: 48px 24px 72px;
+          padding: 96px 24px 72px;
         }
         .fs-carousel-wrap {
           position: relative;
@@ -683,38 +664,8 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
         .fs-hero-cta-wrap {
           width: 100%;
         }
-        .fs-bottom-actions {
-          display: flex;
-          align-items: center;
-          justify-content: space-around;
-          margin-top: 20px;
-          padding-top: 20px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .fs-bottom-action {
-          appearance: none;
-          border: 0;
-          background: transparent;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 6px;
-          min-width: 84px;
-          padding: 4px 14px;
-          color: rgba(228, 228, 231, 0.66);
-          font-size: 12px;
-          font-weight: 650;
-          text-decoration: none;
-          cursor: pointer;
-          font-family: inherit;
-        }
-        .fs-bottom-action:hover,
-        .fs-bottom-action:focus-visible {
-          color: #ffffff;
-          outline: none;
-        }
         .fs-reviews-preview {
-          margin-top: 28px;
+          margin-top: 24px;
         }
         .fs-reviews-preview-header {
           display: flex;
@@ -796,7 +747,7 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
         @media (max-width: 768px) {
           .fs-hero-container {
             max-width: 100%;
-            padding: 24px 0 40px;
+            padding: 82px 0 40px;
           }
           .fs-content-wrap {
             padding: 0 16px;
@@ -852,16 +803,8 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
             margin-bottom: 18px;
             font-size: 13px;
           }
-          .fs-bottom-actions {
-            margin-top: 16px;
-            padding-top: 16px;
-          }
-          .fs-bottom-action {
-            min-width: 72px;
-            padding: 4px 8px;
-          }
           .fs-reviews-preview {
-            margin-top: 24px;
+            margin-top: 22px;
           }
           .fs-reviews-preview-cards {
             grid-template-columns: 1fr;
@@ -1022,21 +965,6 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
               >
                 올인원 패스 신청하기
               </AuthAwareButton>
-            </Box>
-
-            <Box className="fs-bottom-actions">
-              <button type="button" className="fs-bottom-action" onClick={handlePreviewClick}>
-                <Play size={22} strokeWidth={1.9} />
-                <span>미리보기</span>
-              </button>
-              <a href="#reviews" className="fs-bottom-action" onClick={handleScrollToReviews}>
-                <MessageSquare size={22} strokeWidth={1.9} />
-                <span>후기{reviewCount > 0 ? ` (${reviewCount})` : ''}</span>
-              </a>
-              <button type="button" className="fs-bottom-action" onClick={handleShare}>
-                <Share2 size={22} strokeWidth={1.9} />
-                <span>공유</span>
-              </button>
             </Box>
 
             <Box className="fs-reviews-preview">
