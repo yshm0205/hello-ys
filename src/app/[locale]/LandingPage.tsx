@@ -5,7 +5,7 @@
  * Refined Editorial: zinc neutrals, monospace data accents, intentional violet
  */
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode, type MouseEvent as ReactMouseEvent } from 'react';
 import {
   Container,
   Title,
@@ -18,7 +18,7 @@ import {
   Accordion,
   Anchor,
 } from '@mantine/core';
-import { Check, Bot, ChevronDown, ArrowRight } from 'lucide-react';
+import { Check, Bot, ChevronDown, ArrowRight, Star, ChevronLeft, ChevronRight, Home, MessageSquare, Play, Share2 } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { MarketingTracker } from '@/components/analytics/MarketingTracker';
@@ -270,7 +270,166 @@ function PricingBar({ name, price, nameColor, priceColor, barWidth, mobileBarWid
 /* ═══════════════════════════════════════════════════════════════
    섹션 1: Hero — Cinematic Dark 3D (풀블리드 모래시계)
    ═══════════════════════════════════════════════════════════════ */
-function HeroSection() {
+function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsSummary }) {
+  const heroSlides = [
+    {
+      src: '/images/reviews/review_1_revenue.png',
+      alt: '수강생 채널 분석 수익 인증',
+      badge: ['실제', '수강생'],
+      badgeTone: 'student',
+    },
+    {
+      src: '/images/reviews/review_3_kakao.png',
+      alt: '수강생 카카오톡 성과 인증',
+      badge: ['실제', '수강생'],
+      badgeTone: 'student',
+    },
+    {
+      src: '/images/reviews/review_6_youtube.png',
+      alt: '유튜브 쇼츠 조회수 인증',
+      badge: ['조회수', '인증'],
+      badgeTone: 'student',
+    },
+  ];
+  const carouselSlides = [
+    heroSlides[1],
+    heroSlides[2],
+    ...heroSlides,
+    heroSlides[0],
+    heroSlides[1],
+  ];
+  const carouselWrapRef = useRef<HTMLDivElement | null>(null);
+  const measureSlideRef = useRef<HTMLDivElement | null>(null);
+  const carouselLockRef = useRef(false);
+  const pointerStartXRef = useRef<number | null>(null);
+  const [slideStep, setSlideStep] = useState(0);
+  const [slideCenterOffset, setSlideCenterOffset] = useState(0);
+  const [carouselIndex, setCarouselIndex] = useState(2);
+  const [carouselTransition, setCarouselTransition] = useState(false);
+  const [carouselResetting, setCarouselResetting] = useState(false);
+
+  const reviewCount = reviewSummary.totalCount || reviewSummary.reviews.length;
+  const derivedAverage =
+    reviewSummary.averageRating > 0
+      ? reviewSummary.averageRating
+      : reviewSummary.reviews.length > 0
+        ? reviewSummary.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewSummary.reviews.length
+        : 5;
+  const ratingLabel = derivedAverage.toFixed(1);
+  const reviewCountText = reviewCount > 0 ? `${reviewCount}개` : '수강생 후기';
+  const previewReviews =
+    reviewSummary.reviews.length > 0
+      ? reviewSummary.reviews.slice(0, 2).map((review) => ({
+          id: review.id,
+          rating: review.rating,
+          displayName: review.displayName,
+          dateLabel: formatReviewDate(review.createdAt),
+          content: review.headline ? `${review.headline} ${review.content}` : review.content,
+        }))
+      : [
+          {
+            id: 'hero-fallback-review-1',
+            rating: 5,
+            displayName: '김OO**님',
+            dateLabel: '3주 전',
+            content:
+              '강의 들으면서 따라하니 채널 개설부터 영상 업로드까지 가능한 커리큘럼으로 구성되어 있습니다.',
+          },
+          {
+            id: 'hero-fallback-review-2',
+            rating: 5,
+            displayName: '박OO**님',
+            dateLabel: '2주 전',
+            content:
+              '막상 오픈하고 나서는 바빠서 듣기 소홀했다가 최근에 다시 수업 듣고 있습니다. 진짜 도움이 많이 됩니다.',
+          },
+        ];
+  const realCarouselIndex = ((carouselIndex - 2 + heroSlides.length) % heroSlides.length) + 1;
+
+  useEffect(() => {
+    const updateSlideStep = () => {
+      const slide = measureSlideRef.current;
+      const wrap = carouselWrapRef.current;
+      if (!slide || !wrap) return;
+
+      const wrapRect = wrap.getBoundingClientRect();
+      const style = window.getComputedStyle(slide);
+      const slideWidth = Number.parseFloat(style.width || '0');
+      const marginRight = Number.parseFloat(style.marginRight || '0');
+      setSlideStep(slideWidth + marginRight);
+      setSlideCenterOffset((wrapRect.width - slideWidth) / 2);
+    };
+
+    updateSlideStep();
+    const raf = window.requestAnimationFrame(() => setCarouselTransition(true));
+    window.addEventListener('resize', updateSlideStep);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener('resize', updateSlideStep);
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (carouselLockRef.current) return;
+      carouselLockRef.current = true;
+      setCarouselTransition(true);
+      setCarouselIndex((value) => value + 1);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const goSlide = (direction: -1 | 1) => {
+    if (carouselLockRef.current || slideStep <= 0) return;
+    carouselLockRef.current = true;
+    setCarouselTransition(true);
+    setCarouselIndex((value) => value + direction);
+  };
+
+  const resetCarouselPosition = (nextIndex: number) => {
+    setCarouselResetting(true);
+    setCarouselTransition(false);
+    setCarouselIndex(nextIndex);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setCarouselResetting(false);
+        setCarouselTransition(true);
+        carouselLockRef.current = false;
+      });
+    });
+  };
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleScrollToReviews = (e: ReactMouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    e.preventDefault();
+    scrollToSection('reviews');
+  };
+
+  const handlePreviewClick = (e: ReactMouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    scrollToSection('how-it-works');
+  };
+
+  const handleShare = () => {
+    if (typeof window === 'undefined') return;
+
+    const url = window.location.href;
+    if (typeof navigator.share === 'function') {
+      void navigator.share({ title: document.title, url }).catch(() => undefined);
+      return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(url).catch(() => undefined);
+    }
+  };
+
   return (
     <Box
       component="section"
@@ -278,265 +437,648 @@ function HeroSection() {
       style={{
         position: 'relative',
         width: '100%',
-        minHeight: '760px',
-        height: '100vh',
         overflow: 'hidden',
-        background: '#0a0a0f',
+        background: '#050507',
         color: '#f4f4f5',
         isolation: 'isolate',
       }}
     >
-      {/* Inline scoped styles for responsive image/overlay treatment */}
       <style>{`
-        .fs-hero-img {
+        .fs-class101-hero {
+          position: relative;
+          width: 100%;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 28%),
+            #050507;
+        }
+        .fs-class101-hero::before {
+          content: '';
           position: absolute;
           inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center right;
-          z-index: 0;
+          background-image:
+            linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+          background-size: 56px 56px;
+          mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 62%);
+          pointer-events: none;
+        }
+        .fs-hero-container {
+          position: relative;
+          z-index: 2;
+          max-width: 1080px;
+          margin: 0 auto;
+          padding: 48px 24px 72px;
+        }
+        .fs-carousel-wrap {
+          position: relative;
+          overflow: hidden;
+          margin-bottom: 24px;
+          touch-action: pan-y;
+        }
+        .fs-carousel-wrap::before,
+        .fs-carousel-wrap::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 14%;
+          z-index: 5;
+          pointer-events: none;
+        }
+        .fs-carousel-wrap::before {
+          left: 0;
+          background: linear-gradient(to right, #050507 0%, rgba(5, 5, 7, 0) 100%);
+        }
+        .fs-carousel-wrap::after {
+          right: 0;
+          background: linear-gradient(to left, #050507 0%, rgba(5, 5, 7, 0) 100%);
+        }
+        .fs-carousel-track {
+          display: flex;
+          align-items: center;
+          will-change: transform;
+        }
+        .fs-carousel-track[data-resetting="true"] .fs-carousel-slide {
+          transition: none;
+        }
+        .fs-carousel-slide {
+          position: relative;
+          width: 56%;
+          aspect-ratio: 16 / 9;
+          margin-right: 4%;
+          flex-shrink: 0;
+          overflow: hidden;
+          border-radius: 10px;
+          background: #18181b;
+          box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+          transition: opacity 500ms ease, transform 500ms ease;
+        }
+        .fs-carousel-slide:last-child {
+          margin-right: 22%;
+        }
+        .fs-carousel-slide[data-active="false"] {
+          opacity: 0.4;
+          transform: scale(0.92);
+        }
+        .fs-carousel-slide[data-active="true"] {
+          opacity: 1;
+          transform: scale(1);
+        }
+        .fs-carousel-image {
+          object-fit: contain;
+          object-position: center;
           user-select: none;
           -webkit-user-drag: none;
         }
-        .fs-hero-overlay {
+        .fs-slide-badge {
           position: absolute;
-          inset: 0;
-          z-index: 1;
-          pointer-events: none;
-          background: linear-gradient(to right,
-            rgba(10,10,15,0.88) 0%,
-            rgba(10,10,15,0.55) 40%,
-            rgba(10,10,15,0.0) 65%);
+          top: 16px;
+          left: 16px;
+          z-index: 3;
+          min-width: 58px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          background: #ef4444;
+          color: #ffffff;
+          font-size: 12px;
+          line-height: 1.3;
+          font-weight: 800;
+          text-align: center;
+          box-shadow: 0 6px 16px rgba(239, 68, 68, 0.38);
+        }
+        .fs-slide-badge[data-tone="author"] {
+          min-width: 116px;
+          background: #18181b;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.48);
+        }
+        .fs-carousel-counter {
+          position: absolute;
+          top: 18px;
+          right: calc(11% + 16px);
+          z-index: 6;
+          padding: 5px 12px;
+          border-radius: 999px;
+          background: rgba(0, 0, 0, 0.64);
+          color: #fafafa;
+          font-size: 12px;
+          font-weight: 800;
+          font-variant-numeric: tabular-nums;
+          backdrop-filter: blur(6px);
+        }
+        .fs-carousel-arrow {
+          position: absolute;
+          top: 50%;
+          z-index: 7;
+          width: 40px;
+          height: 40px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transform: translateY(-50%);
+          border: 0;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.96);
+          color: #18181b;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+          transition: background 180ms ease, transform 180ms ease;
+        }
+        .fs-carousel-arrow:hover {
+          background: #ffffff;
+          transform: translateY(-50%) scale(1.05);
+        }
+        .fs-carousel-arrow.prev {
+          left: 8px;
+        }
+        .fs-carousel-arrow.next {
+          right: 8px;
+        }
+        .fs-content-wrap {
+          position: relative;
+          max-width: 720px;
+          margin: 0 auto;
+          padding: 0 24px;
+        }
+        .fs-author-info {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        .fs-author-avatar {
+          width: 28px;
+          height: 28px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          background: #18181b;
+          color: #fafafa;
+          font-size: 12px;
+          font-weight: 850;
+        }
+        .fs-author-name {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          color: rgba(228, 228, 231, 0.9);
+          font-size: 13px;
+          font-weight: 800;
+        }
+        .fs-hero-title {
+          margin: 0 0 20px;
+          color: #fafafa;
+          font-size: 44px;
+          line-height: 1.08;
+          font-weight: 900;
+          letter-spacing: 0;
+          word-break: keep-all;
+        }
+        .fs-hero-title-sub {
+          display: block;
+          margin-bottom: 6px;
+          color: rgba(250, 250, 250, 0.76);
+          font-size: 30px;
+          font-weight: 650;
+          letter-spacing: 0;
+        }
+        .fs-hero-title-accent {
+          color: #c4b5fd;
+        }
+        .fs-trust-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-bottom: 24px;
+          color: rgba(228, 228, 231, 0.86);
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .fs-review-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: inherit;
+          text-decoration: none;
+        }
+        .fs-stars {
+          display: inline-flex;
+          align-items: center;
+          gap: 2px;
+          color: #fbbf24;
+        }
+        .fs-rating {
+          color: #fafafa;
+          font-weight: 850;
+        }
+        .fs-rank-signal {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          color: #fafafa;
+          font-weight: 800;
+        }
+        .fs-hero-cta-wrap {
+          width: 100%;
+        }
+        .fs-bottom-actions {
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .fs-bottom-action {
+          appearance: none;
+          border: 0;
+          background: transparent;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          min-width: 84px;
+          padding: 4px 14px;
+          color: rgba(228, 228, 231, 0.66);
+          font-size: 12px;
+          font-weight: 650;
+          text-decoration: none;
+          cursor: pointer;
+          font-family: inherit;
+        }
+        .fs-bottom-action:hover,
+        .fs-bottom-action:focus-visible {
+          color: #ffffff;
+          outline: none;
+        }
+        .fs-reviews-preview {
+          margin-top: 28px;
+        }
+        .fs-reviews-preview-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+        .fs-reviews-preview-title {
+          color: rgba(250, 250, 250, 0.86);
+          font-size: 15px;
+          font-weight: 800;
+        }
+        .fs-reviews-preview-cards {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+        .fs-review-card {
+          min-height: 134px;
+          padding: 16px 18px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.04);
+        }
+        .fs-review-card-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 10px;
+          color: rgba(228, 228, 231, 0.82);
+          font-size: 12px;
+        }
+        .fs-review-card-author {
+          font-weight: 800;
+        }
+        .fs-review-card-date {
+          margin-left: auto;
+          color: rgba(228, 228, 231, 0.46);
+          white-space: nowrap;
+        }
+        .fs-review-card-body {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          color: rgba(228, 228, 231, 0.86);
+          font-size: 13px;
+          line-height: 1.55;
+          word-break: keep-all;
+        }
+        .fs-reviews-more {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          margin-top: 12px;
+          min-height: 44px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.04);
+          color: #fafafa;
+          font-size: 13px;
+          font-weight: 700;
+          text-decoration: none;
+          transition: background 180ms ease, border-color 180ms ease;
+        }
+        .fs-reviews-more:hover {
+          background: rgba(139, 92, 246, 0.12);
+          border-color: rgba(167, 139, 250, 0.4);
+        }
+        .fs-hero-disclaimer {
+          margin-top: 14px;
+          color: rgba(228, 228, 231, 0.48);
+          font-size: 11px;
+          line-height: 1.55;
+          word-break: keep-all;
         }
         @media (max-width: 768px) {
-          .fs-hero-img {
+          .fs-hero-container {
+            max-width: 100%;
+            padding: 24px 0 40px;
+          }
+          .fs-content-wrap {
+            padding: 0 16px;
+          }
+          .fs-carousel-slide {
+            width: 90%;
+            margin-right: 5%;
+            border-radius: 8px;
+          }
+          .fs-carousel-slide:last-child {
+            margin-right: 5%;
+          }
+          .fs-carousel-slide[data-active="false"] {
             opacity: 0.35;
-            filter: blur(1.5px) brightness(0.55);
+            transform: scale(0.96);
           }
-          .fs-hero-overlay {
-            background:
-              radial-gradient(ellipse at center, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0) 70%),
-              rgba(10,10,15,0.78);
+          .fs-carousel-wrap::before,
+          .fs-carousel-wrap::after {
+            width: 6%;
           }
-        }
-        .fs-eyebrow-dot {
-          width: 6px; height: 6px; border-radius: 50%;
-          background: #a78bfa;
-          box-shadow: 0 0 10px #a78bfa, 0 0 20px #8b5cf6;
-          animation: fs-pulse 2.4s ease-in-out infinite;
-        }
-        @keyframes fs-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%      { opacity: 0.5; transform: scale(0.8); }
-        }
-        .fs-headline-accent::after {
-          content: '';
-          position: absolute;
-          left: 0; right: 0; bottom: -0.08em;
-          height: 0.08em;
-          background: linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent);
-          filter: blur(3px);
+          .fs-carousel-arrow {
+            display: none;
+          }
+          .fs-carousel-counter {
+            top: 14px;
+            right: calc(5% + 12px);
+            font-size: 11px;
+            padding: 4px 10px;
+          }
+          .fs-slide-badge {
+            top: 12px;
+            left: 12px;
+            min-width: 50px;
+            padding: 6px 10px;
+            font-size: 11px;
+          }
+          .fs-slide-badge[data-tone="author"] {
+            min-width: 104px;
+          }
+          .fs-author-info {
+            margin-top: 16px;
+          }
+          .fs-hero-title {
+            margin-bottom: 14px;
+            font-size: 28px;
+            line-height: 1.16;
+          }
+          .fs-hero-title-sub {
+            font-size: 19px;
+          }
+          .fs-trust-row {
+            gap: 8px;
+            margin-bottom: 18px;
+            font-size: 13px;
+          }
+          .fs-bottom-actions {
+            margin-top: 16px;
+            padding-top: 16px;
+          }
+          .fs-bottom-action {
+            min-width: 72px;
+            padding: 4px 8px;
+          }
+          .fs-reviews-preview {
+            margin-top: 24px;
+          }
+          .fs-reviews-preview-cards {
+            grid-template-columns: 1fr;
+          }
+          .fs-review-card {
+            min-height: 116px;
+          }
         }
       `}</style>
 
-      {/* Full-bleed background image */}
-      <Image
-        src="/images/hero-hourglass.webp"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="fs-hero-img"
-      />
-
-      {/* Overlay */}
-      <Box className="fs-hero-overlay" />
-
-      {/* Copy container */}
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.1, ease }}
-        style={{
-          position: 'relative',
-          zIndex: 5,
-          width: '100%',
-          maxWidth: '1440px',
-          margin: '0 auto',
-          padding: 'clamp(80px, 12vw, 140px) clamp(24px, 6vw, 80px) clamp(48px, 8vw, 120px)',
-          minHeight: '100%',
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        <Box
-          style={{
-            maxWidth: '560px',
-            width: '100%',
-            textAlign: 'left',
-          }}
-          className="fs-hero-copy"
+      <Box className="fs-class101-hero">
+        <motion.div
+          className="fs-hero-container"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease }}
         >
-          {/* Mobile center alignment via media query */}
-          <style>{`
-            @media (max-width: 768px) {
-              .fs-hero-copy { text-align: center; margin: 0 auto; max-width: 340px; }
-              .fs-hero-copy .fs-ctas, .fs-hero-copy .fs-social { justify-content: center; }
-              .fs-hero-copy .fs-sub { margin-left: auto; margin-right: auto; }
-            }
-          `}</style>
-
-          {/* Eyebrow pill */}
           <Box
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 16px 8px 14px',
-              borderRadius: '9999px',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: 'rgba(250,250,250,0.88)',
-              background: 'linear-gradient(180deg, rgba(139,92,246,0.14), rgba(139,92,246,0.06))',
-              border: '1px solid rgba(167,139,250,0.35)',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.02) inset, 0 0 24px rgba(139,92,246,0.25)',
-              marginBottom: '28px',
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
+            className="fs-carousel-wrap"
+            ref={carouselWrapRef}
+            onPointerDown={(event) => {
+              pointerStartXRef.current = event.clientX;
+            }}
+            onPointerUp={(event) => {
+              if (pointerStartXRef.current === null) return;
+              const delta = event.clientX - pointerStartXRef.current;
+              pointerStartXRef.current = null;
+              if (Math.abs(delta) < 42) return;
+              goSlide(delta > 0 ? -1 : 1);
+            }}
+            onPointerCancel={() => {
+              pointerStartXRef.current = null;
             }}
           >
-            <span className="fs-eyebrow-dot" />
-            <span>AI 스크립트 · 트렌드 데이터 · VOD 40강 · 전자책 · 노션 템플릿</span>
+            <Box
+              className="fs-carousel-track"
+              data-resetting={carouselResetting}
+              style={{
+                opacity: slideStep > 0 ? 1 : 0,
+                transform: `translateX(${slideCenterOffset - slideStep * carouselIndex}px)`,
+                transition:
+                  slideStep > 0 && carouselTransition
+                    ? 'transform 600ms cubic-bezier(0.25, 0.1, 0.25, 1)'
+                    : 'none',
+              }}
+              onTransitionEnd={(event) => {
+                if (event.target !== event.currentTarget || event.propertyName !== 'transform') return;
+
+                if (carouselIndex === 1) {
+                  resetCarouselPosition(heroSlides.length + 1);
+                  return;
+                } else if (carouselIndex === heroSlides.length + 2) {
+                  resetCarouselPosition(2);
+                  return;
+                }
+
+                carouselLockRef.current = false;
+              }}
+            >
+              {carouselSlides.map((slide, index) => (
+                <Box
+                  key={`${slide.src}-${index}`}
+                  ref={index === 0 ? measureSlideRef : undefined}
+                  className="fs-carousel-slide"
+                  data-active={index === carouselIndex}
+                >
+                  <span className="fs-slide-badge" data-tone={slide.badgeTone}>
+                    {slide.badge.map((line) => (
+                      <span key={line} style={{ display: 'block' }}>
+                        {line}
+                      </span>
+                    ))}
+                  </span>
+                  <Image
+                    src={slide.src}
+                    alt={slide.alt}
+                    fill
+                    priority={index === 1}
+                    sizes="(max-width: 768px) 90vw, 56vw"
+                    className="fs-carousel-image"
+                  />
+                </Box>
+              ))}
+            </Box>
+
+            <span className="fs-carousel-counter">
+              {realCarouselIndex} / {heroSlides.length}
+            </span>
+            <button
+              type="button"
+              className="fs-carousel-arrow prev"
+              aria-label="이전 이미지"
+              onClick={() => goSlide(-1)}
+            >
+              <ChevronLeft size={18} strokeWidth={2.5} />
+            </button>
+            <button
+              type="button"
+              className="fs-carousel-arrow next"
+              aria-label="다음 이미지"
+              onClick={() => goSlide(1)}
+            >
+              <ChevronRight size={18} strokeWidth={2.5} />
+            </button>
           </Box>
 
-          {/* Headline */}
-          <Title
-            order={1}
-            style={{
-              margin: 0,
-              fontWeight: 900,
-              lineHeight: 1.02,
-              letterSpacing: '-0.035em',
-              color: '#fafafa',
-              fontSize: 'clamp(44px, 7vw, 78px)',
-            }}
-          >
-            <Box
-              component="span"
-              style={{
-                display: 'block',
-                color: 'rgba(250,250,250,0.75)',
-                fontWeight: 500,
-                letterSpacing: '-0.02em',
-                fontSize: 'clamp(32px, 5vw, 62px)',
-                marginBottom: '8px',
-              }}
-            >
-              하루 30분 월 200만원
+          <Box className="fs-content-wrap">
+            <Box className="fs-author-info">
+              <span className="fs-author-avatar">원</span>
+              <span className="fs-author-name">
+                원초적인사이트
+                <Home size={13} strokeWidth={2.2} aria-hidden="true" />
+              </span>
             </Box>
-            <Box
-              component="span"
-              style={{
-                display: 'block',
-                background: 'linear-gradient(180deg, #ffffff 0%, #d4d4d8 100%)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent',
-              }}
-            >
-              <Box
-                component="span"
-                className="fs-headline-accent"
+
+            <Title order={1} className="fs-hero-title">
+              <span className="fs-hero-title-sub">하루 30분 월 200만원</span>
+              <span className="fs-hero-title-accent">최단거리</span> 패키지
+            </Title>
+
+            <Box className="fs-trust-row">
+              <a href="#reviews" className="fs-review-link" onClick={handleScrollToReviews}>
+                <span className="fs-stars" aria-hidden="true">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Star key={i} size={14} fill="currentColor" stroke="currentColor" />
+                  ))}
+                </span>
+                <span className="fs-rating">{ratingLabel}</span>
+                <span>({reviewCountText})</span>
+              </a>
+              <span style={{ color: 'rgba(228, 228, 231, 0.26)' }}>·</span>
+              <span className="fs-rank-signal">AI 스크립트 · 트렌드 데이터 · VOD · 전자책 · 노션 템플릿</span>
+            </Box>
+
+            <Box className="fs-hero-cta-wrap">
+              <AuthAwareButton
+                id="hero-cta"
+                authenticatedHref="/dashboard/lectures"
+                unauthenticatedHref="/login?redirect=/checkout/allinone"
+                unpaidAuthenticatedHref="/checkout/allinone"
+                activeAccessChildren="강의 보러가기"
+                size="xl"
+                radius="md"
+                rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
                 style={{
-                  position: 'relative',
-                  background: 'linear-gradient(120deg, #c4b5fd 0%, #8b5cf6 40%, #f0abfc 100%)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  color: 'transparent',
+                  width: '100%',
+                  minHeight: 58,
+                  background: 'linear-gradient(180deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%)',
+                  color: '#fff',
+                  fontSize: '16px',
+                  fontWeight: 800,
+                  padding: '18px 28px',
+                  border: 'none',
+                  letterSpacing: 0,
+                  boxShadow:
+                    '0 0 0 1px rgba(167,139,250,0.6) inset, 0 1px 0 rgba(255,255,255,0.4) inset, 0 8px 24px rgba(139,92,246,0.4)',
                 }}
               >
-                최단거리
-              </Box>
-              {' '}패키지
+                올인원 패스 신청하기
+              </AuthAwareButton>
             </Box>
-          </Title>
 
-          {/* CTA */}
-          <Box
-            className="fs-ctas"
-            style={{
-              display: 'flex',
-              gap: '12px',
-              marginTop: 'clamp(28px, 4vw, 40px)',
-              flexWrap: 'wrap',
-            }}
-          >
-            <AuthAwareButton
-              id="hero-cta"
-              authenticatedHref="/dashboard/lectures"
-              unauthenticatedHref="/login?redirect=/checkout/allinone"
-              unpaidAuthenticatedHref="/checkout/allinone"
-              activeAccessChildren="강의 보러가기"
-              size="xl"
-              radius="md"
-              rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
-              style={{
-                background: 'linear-gradient(180deg, #a78bfa 0%, #8b5cf6 45%, #7c3aed 100%)',
-                color: '#fff',
-                fontSize: '16px',
-                fontWeight: 600,
-                padding: '16px 26px',
-                height: 'auto',
-                border: 'none',
-                letterSpacing: '-0.01em',
-                boxShadow:
-                  '0 0 0 1px rgba(167,139,250,0.6) inset, 0 1px 0 rgba(255,255,255,0.4) inset, 0 0 24px rgba(139,92,246,0.45), 0 8px 28px rgba(139,92,246,0.35)',
-              }}
-            >
-              올인원 패스 신청하기
-            </AuthAwareButton>
-          </Box>
+            <Box className="fs-bottom-actions">
+              <button type="button" className="fs-bottom-action" onClick={handlePreviewClick}>
+                <Play size={22} strokeWidth={1.9} />
+                <span>미리보기</span>
+              </button>
+              <a href="#reviews" className="fs-bottom-action" onClick={handleScrollToReviews}>
+                <MessageSquare size={22} strokeWidth={1.9} />
+                <span>후기{reviewCount > 0 ? ` (${reviewCount})` : ''}</span>
+              </a>
+              <button type="button" className="fs-bottom-action" onClick={handleShare}>
+                <Share2 size={22} strokeWidth={1.9} />
+                <span>공유</span>
+              </button>
+            </Box>
 
-          {/* Social proof */}
-          <Box
-            className="fs-social"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '14px',
-              marginTop: 'clamp(28px, 4vw, 40px)',
-            }}
-          >
-            <Text
-              style={{
-                color: 'rgba(228,228,231,0.7)',
-                fontSize: '14px',
-              }}
-            >
-              <b style={{ color: '#fafafa', fontWeight: 700 }}>2차 얼리버드 진행 중</b> · 마감 후 할인 종료
+            <Box className="fs-reviews-preview">
+              <Box className="fs-reviews-preview-header">
+                <span className="fs-reviews-preview-title">수강생 후기</span>
+              </Box>
+
+              <Box className="fs-reviews-preview-cards">
+                {previewReviews.map((review) => (
+                  <Box key={review.id} className="fs-review-card">
+                    <Box className="fs-review-card-meta">
+                      <span className="fs-stars" aria-hidden="true">
+                        {[0, 1, 2, 3, 4].map((i) => (
+                          <Star
+                            key={i}
+                            size={12}
+                            fill="currentColor"
+                            stroke="currentColor"
+                            opacity={i < Math.max(1, Math.min(5, Math.round(review.rating))) ? 1 : 0.28}
+                          />
+                        ))}
+                      </span>
+                      <span className="fs-review-card-author">{review.displayName}</span>
+                      {review.dateLabel && <span className="fs-review-card-date">{review.dateLabel}</span>}
+                    </Box>
+                    <Text className="fs-review-card-body">{review.content}</Text>
+                  </Box>
+                ))}
+              </Box>
+
+              <a href="#reviews" className="fs-reviews-more" onClick={handleScrollToReviews}>
+                전체 후기 보기
+                <ArrowRight size={14} strokeWidth={2.4} />
+              </a>
+            </Box>
+
+            <Text className="fs-hero-disclaimer">
+              * 수강생 사례 기준이며 결과는 개인의 노력과 실행 정도에 따라 다를 수 있습니다.
             </Text>
           </Box>
-
-          {/* 광고법 완충 주석 — 결과 단언 방어선 */}
-          <Text
-            className="fs-disclaimer"
-            style={{
-              color: 'rgba(228,228,231,0.45)',
-              fontSize: '11px',
-              fontWeight: 400,
-              lineHeight: 1.5,
-              marginTop: '14px',
-              maxWidth: '420px',
-              wordBreak: 'keep-all',
-            }}
-          >
-            * 수강생 사례 기준 · 결과는 개인의 노력·실행 정도에 따라 다를 수 있습니다.
-          </Text>
-        </Box>
-      </motion.div>
+        </motion.div>
+      </Box>
     </Box>
   );
 }
@@ -4169,7 +4711,7 @@ export default function LandingPage({
       <main style={{ background: '#ffffff' }}>
         <MarketingTracker pageType="landing" />
         <LandingHeader />
-        <HeroSection />
+        <HeroSection reviewSummary={initialReviews} />
         <EarlyBirdSection earlybirdSummary={earlybirdSummary} />
         <LoopPainSection />
         <PainSection />
