@@ -100,20 +100,6 @@ function formatDeadline(value: string) {
   return `${date.getFullYear()}.${month}.${day} ${hour}:${minute} 종료`;
 }
 
-function ProductRow({ item }: { item: (typeof checkoutItems)[number] }) {
-  return (
-    <article className="fs-checkout-item">
-      <div className="fs-checkout-thumb">
-        <Image src={item.image} alt="" width={76} height={62} unoptimized />
-      </div>
-      <div>
-        <h3>{item.title}</h3>
-        <p>{item.description}</p>
-      </div>
-    </article>
-  );
-}
-
 function PolicyCard({
   title,
   teaser,
@@ -334,6 +320,26 @@ export function AllInOneCheckoutContent({
           width: min(620px, 100%);
         }
 
+        .fs-select-title {
+          margin: 0 0 26px;
+        }
+
+        .fs-select-title h1 {
+          margin: 0;
+          font-size: 26px;
+          line-height: 1.2;
+          font-weight: 950;
+          letter-spacing: 0;
+        }
+
+        .fs-select-title p {
+          margin: 8px 0 0;
+          color: #71717a;
+          font-size: 14px;
+          line-height: 1.5;
+          font-weight: 650;
+        }
+
         .fs-select-section + .fs-select-section {
           margin-top: 34px;
         }
@@ -359,6 +365,20 @@ export function AllInOneCheckoutContent({
           background: #fff;
           color: #111217;
           text-align: left;
+        }
+
+        .fs-select-badge {
+          display: inline-flex;
+          align-items: center;
+          width: fit-content;
+          margin-bottom: 9px;
+          padding: 5px 9px;
+          border-radius: 999px;
+          background: #f5f3ff;
+          color: #6d28d9;
+          font-size: 12px;
+          line-height: 1.2;
+          font-weight: 900;
         }
 
         .fs-select-option-title {
@@ -431,6 +451,120 @@ export function AllInOneCheckoutContent({
           color: #6d28d9;
           font-size: 12px;
           font-weight: 900;
+        }
+
+        .fs-select-benefits {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .fs-select-benefit {
+          min-width: 0;
+          padding: 12px;
+          border: 1px solid #ddd6fe;
+          border-radius: 12px;
+          background: #faf5ff;
+        }
+
+        .fs-select-benefit span {
+          display: block;
+          color: #6d28d9;
+          font-size: 12px;
+          line-height: 1.25;
+          font-weight: 850;
+        }
+
+        .fs-select-benefit strong {
+          display: block;
+          margin-top: 5px;
+          color: #18181b;
+          font-size: 13px;
+          line-height: 1.35;
+          font-weight: 900;
+          overflow-wrap: anywhere;
+        }
+
+        .fs-select-details {
+          margin-top: 12px;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          background: #fff;
+        }
+
+        .fs-select-details summary {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          padding: 15px 18px;
+          color: #18181b;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 900;
+          list-style: none;
+        }
+
+        .fs-select-details summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .fs-select-details summary::after {
+          content: '+';
+          color: #7c3aed;
+          font-size: 18px;
+          line-height: 1;
+          font-weight: 900;
+        }
+
+        .fs-select-details[open] summary::after {
+          content: '-';
+        }
+
+        .fs-select-detail-list {
+          display: grid;
+          gap: 10px;
+          padding: 0 18px 16px;
+        }
+
+        .fs-select-detail-item {
+          display: grid;
+          grid-template-columns: 44px minmax(0, 1fr);
+          gap: 10px;
+          align-items: center;
+        }
+
+        .fs-select-detail-thumb {
+          overflow: hidden;
+          width: 44px;
+          height: 36px;
+          border: 1px solid #e5e7eb;
+          border-radius: 9px;
+          background: #f4f4f5;
+        }
+
+        .fs-select-detail-thumb img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .fs-select-detail-item strong {
+          display: block;
+          color: #18181b;
+          font-size: 13px;
+          line-height: 1.3;
+          font-weight: 900;
+        }
+
+        .fs-select-detail-item span {
+          display: block;
+          margin-top: 2px;
+          color: #71717a;
+          font-size: 12px;
+          line-height: 1.35;
         }
 
         .fs-select-bottom {
@@ -596,34 +730,6 @@ export function AllInOneCheckoutContent({
           color: #71717a;
           font-size: 13px;
           line-height: 1.45;
-        }
-
-        .fs-benefit-panel {
-          padding: 12px;
-        }
-
-        .fs-benefit-box {
-          display: grid;
-          gap: 10px;
-          padding: 14px;
-          border: 1px solid #fed7aa;
-          border-radius: 12px;
-          background: #fff7ed;
-        }
-
-        .fs-benefit-line {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          color: #57534e;
-          font-size: 14px;
-          line-height: 1.35;
-        }
-
-        .fs-benefit-line strong {
-          color: #c2410c;
-          text-align: right;
         }
 
         .fs-summary-panel {
@@ -907,6 +1013,14 @@ export function AllInOneCheckoutContent({
             padding: 24px 0 174px;
           }
 
+          .fs-select-title {
+            margin-bottom: 22px;
+          }
+
+          .fs-select-title h1 {
+            font-size: 24px;
+          }
+
           .fs-select-section + .fs-select-section {
             margin-top: 26px;
           }
@@ -932,6 +1046,25 @@ export function AllInOneCheckoutContent({
             height: 28px;
             padding: 0 9px;
             font-size: 11px;
+          }
+
+          .fs-select-benefits {
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 12px;
+          }
+
+          .fs-select-benefit {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+          }
+
+          .fs-select-benefit strong {
+            margin-top: 0;
+            text-align: right;
           }
 
           .fs-select-option-title {
@@ -1009,41 +1142,6 @@ export function AllInOneCheckoutContent({
           .fs-checkout-thumb {
             width: 64px;
             height: 52px;
-          }
-
-          .fs-benefit-panel {
-            padding: 12px;
-          }
-
-          .fs-benefit-box {
-            gap: 6px;
-            padding: 10px;
-            overflow: hidden;
-            border: 0;
-            background: transparent;
-          }
-
-          .fs-benefit-line {
-            min-width: 0;
-            gap: 8px;
-            padding: 8px 10px;
-            border: 1px solid #fed7aa;
-            border-radius: 10px;
-            background: #fff7ed;
-            font-size: 12px;
-            line-height: 1.2;
-          }
-
-          .fs-benefit-line span {
-            flex: 0 0 auto;
-            color: #9a3412;
-            font-weight: 750;
-          }
-
-          .fs-benefit-line strong {
-            min-width: 0;
-            font-size: 12px;
-            overflow-wrap: anywhere;
           }
 
           .fs-summary-panel {
@@ -1135,11 +1233,17 @@ export function AllInOneCheckoutContent({
           <>
             <section className="fs-select-wrap">
               <div className="fs-select-content">
+                <div className="fs-select-title">
+                  <h1>올인원 패스 선택</h1>
+                  <p>2차 얼리버드 혜택이 적용된 단일 구성입니다.</p>
+                </div>
+
                 <div className="fs-select-section">
                   <h1 className="fs-select-heading">수강권</h1>
                   <button type="button" className="fs-select-option" onClick={redirectToLogin}>
                     <span>
-                      <span className="fs-select-option-title">올인원 패스</span>
+                      <span className="fs-select-badge">2차 얼리버드 적용 중</span>
+                      <span className="fs-select-option-title">4개월 올인원 패스</span>
                       <span className="fs-select-option-sub">VOD 40강 · AI 도구 4개월 · 자료 패키지 포함</span>
                     </span>
                     <span className="fs-select-price">
@@ -1149,6 +1253,21 @@ export function AllInOneCheckoutContent({
                       </strong>
                     </span>
                   </button>
+
+                  <div className="fs-select-benefits">
+                    <div className="fs-select-benefit">
+                      <span>마감</span>
+                      <strong>{earlybirdDeadline}</strong>
+                    </div>
+                    <div className="fs-select-benefit">
+                      <span>추가 자료</span>
+                      <strong>{formatWon(ADDITIONAL_BENEFIT_VALUE)} 상당 포함</strong>
+                    </div>
+                    <div className="fs-select-benefit">
+                      <span>첫 지급 크레딧</span>
+                      <strong>{plan.initialCredits.toLocaleString()}cr 지급</strong>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="fs-select-section">
@@ -1162,6 +1281,23 @@ export function AllInOneCheckoutContent({
                     </span>
                     <span className="fs-included-tag">포함</span>
                   </div>
+
+                  <details className="fs-select-details">
+                    <summary>포함 혜택 보기</summary>
+                    <div className="fs-select-detail-list">
+                      {checkoutItems.map((item) => (
+                        <div className="fs-select-detail-item" key={item.title}>
+                          <div className="fs-select-detail-thumb">
+                            <Image src={item.image} alt="" width={44} height={36} unoptimized />
+                          </div>
+                          <div>
+                            <strong>{item.title}</strong>
+                            <span>{item.description}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
                 </div>
               </div>
             </section>
@@ -1214,28 +1350,17 @@ export function AllInOneCheckoutContent({
               <div className="fs-checkout-main">
                 <section className="fs-panel fs-panel-section">
                   <h2 className="fs-section-title">주문 정보</h2>
-                  <p className="fs-section-subtitle">선택한 구성품</p>
+                  <p className="fs-section-subtitle">선택한 상품</p>
                   <div className="fs-checkout-items">
-                    {checkoutItems.map((item) => (
-                      <ProductRow key={item.title} item={item} />
-                    ))}
-                  </div>
-                </section>
-
-                <section className="fs-panel fs-benefit-panel">
-                  <div className="fs-benefit-box">
-                    <div className="fs-benefit-line">
-                      <span>2차 얼리버드</span>
-                      <strong>{earlybirdDeadline}</strong>
-                    </div>
-                    <div className="fs-benefit-line">
-                      <span>추가 자료</span>
-                      <strong>{formatWon(ADDITIONAL_BENEFIT_VALUE)} 상당 포함</strong>
-                    </div>
-                    <div className="fs-benefit-line">
-                      <span>첫 지급 크레딧</span>
-                      <strong>{plan.initialCredits.toLocaleString()}cr + 얼리버드 보너스</strong>
-                    </div>
+                    <article className="fs-checkout-item">
+                      <div className="fs-checkout-thumb">
+                        <Image src="/images/product-vod.gif" alt="" width={76} height={62} unoptimized />
+                      </div>
+                      <div>
+                        <h3>원초적 인사이트 올인원 패스</h3>
+                        <p>VOD 40강 · AI 도구 4개월 · 자료 패키지 포함</p>
+                      </div>
+                    </article>
                   </div>
                 </section>
               </div>
