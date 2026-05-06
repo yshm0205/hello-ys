@@ -23,7 +23,7 @@ const checkoutItems = [
   {
     title: 'VOD 강의 40강',
     description: '4개월 수강권',
-    image: '/images/product-vod.gif',
+    image: '/images/youtube-lightbulb-profile.jpg',
   },
   {
     title: 'AI 스크립트 도구',
@@ -906,43 +906,6 @@ export function AllInOneCheckoutContent({
           margin: 0 20px 20px;
         }
 
-        .fs-mobile-bar {
-          position: fixed;
-          right: 0;
-          bottom: 0;
-          left: 0;
-          z-index: 20;
-          display: none;
-          grid-template-columns: minmax(0, 1fr) 152px;
-          gap: 12px;
-          align-items: center;
-          padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-          border-top: 1px solid #e5e7eb;
-          background: rgba(255, 255, 255, 0.96);
-          box-shadow: 0 -12px 34px rgba(15, 23, 42, 0.1);
-          backdrop-filter: blur(14px);
-        }
-
-        .fs-mobile-price small {
-          display: block;
-          color: #71717a;
-          font-size: 12px;
-          line-height: 1.2;
-        }
-
-        .fs-mobile-price strong {
-          display: block;
-          margin-top: 2px;
-          font-size: 17px;
-          line-height: 1.1;
-          font-weight: 950;
-        }
-
-        .fs-mobile-bar .fs-pay-button {
-          min-height: 48px;
-          font-size: 14px;
-        }
-
         @media (max-width: 820px) {
           .fs-checkout-page {
             padding: 16px 0 104px;
@@ -1151,9 +1114,6 @@ export function AllInOneCheckoutContent({
             padding: 0 16px 18px;
           }
 
-          .fs-mobile-bar {
-            display: grid;
-          }
         }
       `}</style>
 
@@ -1276,7 +1236,7 @@ export function AllInOneCheckoutContent({
                   <div className="fs-checkout-items">
                     <article className="fs-checkout-item">
                       <div className="fs-checkout-thumb">
-                        <Image src="/images/product-vod.gif" alt="" width={76} height={62} unoptimized />
+                        <Image src="/images/youtube-lightbulb-profile.jpg" alt="" width={76} height={62} unoptimized />
                       </div>
                       <div>
                         <h3>원초적 인사이트 올인원 패스</h3>
@@ -1400,20 +1360,6 @@ export function AllInOneCheckoutContent({
               </aside>
                 </div>
 
-                <div className="fs-mobile-bar">
-                  <div className="fs-mobile-price">
-                    <small>12개월 할부 시 월 {formatWon(monthly12Final)}</small>
-                    <strong>{formatWon(finalCheckoutAmount)}</strong>
-                  </div>
-                  <button
-                    type="button"
-                    className="fs-pay-button"
-                    disabled={primaryDisabled || loading}
-                    onClick={handlePrimaryAction}
-                  >
-                    결제하기
-                  </button>
-                </div>
               </>
             )}
           </>
