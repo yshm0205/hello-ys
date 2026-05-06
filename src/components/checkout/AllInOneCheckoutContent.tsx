@@ -354,7 +354,7 @@ export function AllInOneCheckoutContent({
           justify-content: space-between;
           gap: 20px;
           padding: 22px 24px;
-          border: 1.5px solid #ea580c;
+          border: 1.5px solid #7c3aed;
           border-radius: 12px;
           background: #fff;
           color: #111217;
@@ -400,8 +400,37 @@ export function AllInOneCheckoutContent({
         }
 
         .fs-select-price em {
-          color: #e95f24;
+          color: #7c3aed;
           font-style: normal;
+        }
+
+        .fs-included-card {
+          width: 100%;
+          min-height: 88px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          padding: 20px 24px;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          background: #fff;
+          color: #111217;
+        }
+
+        .fs-included-tag {
+          flex: 0 0 auto;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 54px;
+          height: 30px;
+          padding: 0 11px;
+          border-radius: 999px;
+          background: #f5f3ff;
+          color: #6d28d9;
+          font-size: 12px;
+          font-weight: 900;
         }
 
         .fs-select-bottom {
@@ -466,7 +495,7 @@ export function AllInOneCheckoutContent({
         }
 
         .fs-select-bottom-price em {
-          color: #e95f24;
+          color: #7c3aed;
           font-style: normal;
         }
 
@@ -475,80 +504,11 @@ export function AllInOneCheckoutContent({
           min-height: 64px;
           border: 0;
           border-radius: 14px;
-          background: #e95f24;
+          background: #7c3aed;
           color: #fff;
           font-size: 22px;
           font-weight: 950;
           cursor: pointer;
-        }
-
-        .fs-confirm-hero {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 18px;
-          align-items: end;
-          margin-bottom: 18px;
-          padding: 24px;
-          border: 1px solid #fed7aa;
-          border-radius: 18px;
-          background:
-            linear-gradient(135deg, rgba(255, 247, 237, 0.95), rgba(255, 255, 255, 0.96)),
-            #fff;
-          box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
-        }
-
-        .fs-confirm-kicker {
-          display: inline-flex;
-          margin-bottom: 10px;
-          color: #c2410c;
-          font-size: 12px;
-          line-height: 1.2;
-          font-weight: 950;
-          letter-spacing: 0;
-        }
-
-        .fs-confirm-hero h1 {
-          margin: 0;
-          font-size: 28px;
-          line-height: 1.18;
-          font-weight: 950;
-          letter-spacing: 0;
-        }
-
-        .fs-confirm-hero p {
-          max-width: 560px;
-          margin: 8px 0 0;
-          color: #57534e;
-          font-size: 14px;
-          line-height: 1.55;
-        }
-
-        .fs-confirm-status {
-          display: grid;
-          gap: 8px;
-          min-width: 168px;
-        }
-
-        .fs-confirm-status span {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          padding: 9px 11px;
-          border: 1px solid #fed7aa;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.72);
-          color: #9a3412;
-          font-size: 12px;
-          font-weight: 850;
-        }
-
-        .fs-confirm-status span::after {
-          content: '';
-          width: 7px;
-          height: 7px;
-          border-radius: 999px;
-          background: #22c55e;
         }
 
         .fs-checkout-grid {
@@ -961,6 +921,19 @@ export function AllInOneCheckoutContent({
             gap: 12px;
           }
 
+          .fs-included-card {
+            min-height: 78px;
+            padding: 16px;
+            gap: 12px;
+          }
+
+          .fs-included-tag {
+            min-width: 46px;
+            height: 28px;
+            padding: 0 9px;
+            font-size: 11px;
+          }
+
           .fs-select-option-title {
             font-size: 18px;
           }
@@ -999,32 +972,6 @@ export function AllInOneCheckoutContent({
             min-height: 56px;
             border-radius: 13px;
             font-size: 19px;
-          }
-
-          .fs-confirm-hero {
-            grid-template-columns: 1fr;
-            align-items: start;
-            margin-bottom: 12px;
-            padding: 18px;
-            border-radius: 16px;
-          }
-
-          .fs-confirm-hero h1 {
-            font-size: 24px;
-          }
-
-          .fs-confirm-status {
-            grid-template-columns: 1fr 1fr;
-            min-width: 0;
-          }
-
-          .fs-confirm-status span {
-            justify-content: center;
-            padding: 8px 10px;
-          }
-
-          .fs-confirm-status span::after {
-            display: none;
           }
 
           .fs-checkout-titlebar {
@@ -1205,15 +1152,16 @@ export function AllInOneCheckoutContent({
                 </div>
 
                 <div className="fs-select-section">
-                  <h2 className="fs-select-heading">패키지</h2>
-                  <button type="button" className="fs-select-option" onClick={redirectToLogin}>
+                  <h2 className="fs-select-heading">포함 구성</h2>
+                  <div className="fs-included-card">
                     <span>
                       <span className="fs-select-option-title">올인원 구성 포함</span>
                       <span className="fs-select-option-sub">
                         전자책 · 노션 템플릿 · 트렌드 채널 데이터 · 크레딧
                       </span>
                     </span>
-                  </button>
+                    <span className="fs-included-tag">포함</span>
+                  </div>
                 </div>
               </div>
             </section>
@@ -1241,22 +1189,6 @@ export function AllInOneCheckoutContent({
           </>
         ) : (
           <>
-            <section className="fs-confirm-hero">
-              <div>
-                <span className="fs-confirm-kicker">FLOWSPOT CHECKOUT</span>
-                <h1>올인원 패스 활성화 전 마지막 확인</h1>
-                <p>
-                  로그인은 완료되었습니다. 포함 구성, 적용 혜택, 환불 안내를 한 번만 확인하면 토스 결제창으로
-                  이어집니다.
-                </p>
-              </div>
-              <div className="fs-confirm-status" aria-label="결제 진행 상태">
-                <span>로그인 완료</span>
-                <span>혜택 적용</span>
-                <span>토스 결제 대기</span>
-              </div>
-            </section>
-
             {wasCancelled && (
               <Alert mb="md" color="orange" radius="lg" variant="light" icon={<AlertCircle size={18} />}>
                 결제가 취소되었습니다. 혜택은 아직 적용 중이니 다시 결제할 수 있습니다.
