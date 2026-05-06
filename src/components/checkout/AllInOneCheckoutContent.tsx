@@ -251,7 +251,7 @@ export function AllInOneCheckoutContent({
       <style>{`
         .fs-checkout-page {
           min-height: 100vh;
-          padding: 28px 0 112px;
+          padding: 28px 0 56px;
           background: #f6f7fb;
           color: #111217;
         }
@@ -299,13 +299,12 @@ export function AllInOneCheckoutContent({
 
         .fs-select-wrap {
           display: grid;
-          min-height: calc(100vh - 150px);
-          place-items: center;
-          padding: 28px 0 142px;
+          place-items: start center;
+          padding: 28px 0 0;
         }
 
         .fs-select-content {
-          width: min(620px, 100%);
+          width: min(640px, 100%);
         }
 
         .fs-select-title {
@@ -523,21 +522,18 @@ export function AllInOneCheckoutContent({
         }
 
         .fs-select-bottom {
-          position: fixed;
-          right: 0;
-          bottom: 0;
-          left: 0;
-          z-index: 30;
           display: flex;
           justify-content: center;
-          padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
-          border-top: 1px solid #f1f5f9;
-          background: rgba(255, 255, 255, 0.98);
-          box-shadow: 0 -12px 34px rgba(15, 23, 42, 0.08);
+          margin-top: 28px;
         }
 
         .fs-select-bottom-inner {
-          width: min(620px, 100%);
+          width: min(640px, 100%);
+          padding: 20px 22px 22px;
+          border: 1px solid #e5e7eb;
+          border-radius: 14px;
+          background: #fff;
+          box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
         }
 
         .fs-select-bottom-summary {
@@ -602,9 +598,11 @@ export function AllInOneCheckoutContent({
 
         .fs-checkout-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 384px;
-          gap: 20px;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 14px;
           align-items: start;
+          width: min(680px, 100%);
+          margin: 0 auto;
         }
 
         .fs-checkout-main {
@@ -688,8 +686,7 @@ export function AllInOneCheckoutContent({
         }
 
         .fs-summary-panel {
-          position: sticky;
-          top: 22px;
+          position: static;
           overflow: hidden;
         }
 
@@ -908,7 +905,7 @@ export function AllInOneCheckoutContent({
 
         @media (max-width: 820px) {
           .fs-checkout-page {
-            padding: 16px 0 104px;
+            padding: 16px 0 36px;
           }
 
           .fs-checkout-shell {
@@ -926,9 +923,7 @@ export function AllInOneCheckoutContent({
           }
 
           .fs-select-wrap {
-            min-height: calc(100vh - 120px);
-            align-items: start;
-            padding: 24px 0 174px;
+            padding: 24px 0 0;
           }
 
           .fs-select-title {
@@ -979,7 +974,11 @@ export function AllInOneCheckoutContent({
           }
 
           .fs-select-bottom {
-            padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+            margin-top: 18px;
+          }
+
+          .fs-select-bottom-inner {
+            padding: 16px;
           }
 
           .fs-select-bottom-summary {

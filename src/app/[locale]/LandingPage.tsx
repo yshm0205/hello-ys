@@ -3606,9 +3606,9 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
         return;
       }
 
-      const heroEl = document.getElementById('landing-hero');
-      if (heroEl) {
-        setIsVisible(heroEl.getBoundingClientRect().bottom < 0);
+      const earlybirdEl = document.getElementById('earlybird');
+      if (earlybirdEl) {
+        setIsVisible(earlybirdEl.getBoundingClientRect().bottom < 0);
         return;
       }
 
