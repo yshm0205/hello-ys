@@ -9,7 +9,6 @@ import { AlertCircle, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-reac
 
 import { Link } from '@/i18n/routing';
 import {
-  EARLYBIRD_CONFIG,
   isActiveAccessPlan,
   isInitialProgramPlan,
   isMonthlySubscriberPlan,
@@ -19,7 +18,6 @@ import {
 
 const REFUND_FORM_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform';
-const ADDITIONAL_BENEFIT_VALUE = 178000;
 
 const checkoutItems = [
   {
@@ -91,15 +89,6 @@ function formatWon(amount: number) {
   return `${amount.toLocaleString()}원`;
 }
 
-function formatDeadline(value: string) {
-  const date = new Date(value);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hour = String(date.getHours()).padStart(2, '0');
-  const minute = String(date.getMinutes()).padStart(2, '0');
-  return `${date.getFullYear()}.${month}.${day} ${hour}:${minute} 종료`;
-}
-
 function PolicyCard({
   title,
   teaser,
@@ -145,7 +134,6 @@ export function AllInOneCheckoutContent({
   const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
   const totalDiscountAmount = Math.max(0, plan.listAmount - finalCheckoutAmount);
   const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
-  const earlybirdDeadline = formatDeadline(EARLYBIRD_CONFIG.phase2.hardDeadline);
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
   const primaryLabel = isAuthenticated
@@ -451,39 +439,6 @@ export function AllInOneCheckoutContent({
           color: #6d28d9;
           font-size: 12px;
           font-weight: 900;
-        }
-
-        .fs-select-benefits {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 14px;
-        }
-
-        .fs-select-benefit {
-          min-width: 0;
-          padding: 12px;
-          border: 1px solid #ddd6fe;
-          border-radius: 12px;
-          background: #faf5ff;
-        }
-
-        .fs-select-benefit span {
-          display: block;
-          color: #6d28d9;
-          font-size: 12px;
-          line-height: 1.25;
-          font-weight: 850;
-        }
-
-        .fs-select-benefit strong {
-          display: block;
-          margin-top: 5px;
-          color: #18181b;
-          font-size: 13px;
-          line-height: 1.35;
-          font-weight: 900;
-          overflow-wrap: anywhere;
         }
 
         .fs-select-details {
@@ -1048,25 +1003,6 @@ export function AllInOneCheckoutContent({
             font-size: 11px;
           }
 
-          .fs-select-benefits {
-            grid-template-columns: 1fr;
-            gap: 8px;
-            margin-top: 12px;
-          }
-
-          .fs-select-benefit {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 10px 12px;
-          }
-
-          .fs-select-benefit strong {
-            margin-top: 0;
-            text-align: right;
-          }
-
           .fs-select-option-title {
             font-size: 18px;
           }
@@ -1254,20 +1190,6 @@ export function AllInOneCheckoutContent({
                     </span>
                   </button>
 
-                  <div className="fs-select-benefits">
-                    <div className="fs-select-benefit">
-                      <span>마감</span>
-                      <strong>{earlybirdDeadline}</strong>
-                    </div>
-                    <div className="fs-select-benefit">
-                      <span>추가 자료</span>
-                      <strong>{formatWon(ADDITIONAL_BENEFIT_VALUE)} 상당 포함</strong>
-                    </div>
-                    <div className="fs-select-benefit">
-                      <span>첫 지급 크레딧</span>
-                      <strong>{plan.initialCredits.toLocaleString()}cr 지급</strong>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="fs-select-section">
