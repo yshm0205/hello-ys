@@ -125,7 +125,7 @@ export default function PricingPage() {
                 </List>
 
                 <Button
-                  component={Link} href="/checkout/allinone"
+                  component={Link} href="/checkout/allinone?intent=pay"
                   radius="lg" fullWidth
                   style={{
                     height: 48, fontSize: '16px',

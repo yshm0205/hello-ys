@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 
 interface AllInOneCheckoutPageProps {
     params: Promise<{ locale: string }>;
-    searchParams?: Promise<{ coupon?: string }>;
+    searchParams?: Promise<{ coupon?: string; intent?: string; cancelled?: string }>;
 }
 
 export default async function AllInOneCheckoutPage({
@@ -23,12 +23,20 @@ export default async function AllInOneCheckoutPage({
         typeof resolvedSearchParams?.coupon === 'string'
             ? resolvedSearchParams.coupon
             : '';
+    const checkoutIntent =
+        typeof resolvedSearchParams?.intent === 'string'
+            ? resolvedSearchParams.intent
+            : '';
+    const wasCancelled = resolvedSearchParams?.cancelled === '1';
 
     if (!user) {
-        const redirectTarget = initialCouponCode
-            ? `/checkout/allinone?coupon=${encodeURIComponent(initialCouponCode)}`
-            : '/checkout/allinone';
+        const redirectParams = new URLSearchParams();
+        redirectParams.set('intent', checkoutIntent || 'pay');
+        if (initialCouponCode) {
+            redirectParams.set('coupon', initialCouponCode);
+        }
 
+        const redirectTarget = `/checkout/allinone?${redirectParams.toString()}`;
         redirect(`/${locale}/login?redirect=${encodeURIComponent(redirectTarget)}`);
     }
 
@@ -36,9 +44,12 @@ export default async function AllInOneCheckoutPage({
 
     return (
         <AllInOneCheckoutContent
-            userEmail={user.email}
+            userEmail={user?.email}
             creditInfo={creditInfo}
             initialCouponCode={initialCouponCode}
+            isAuthenticated
+            checkoutIntent={checkoutIntent}
+            wasCancelled={wasCancelled}
         />
     );
 }

@@ -112,7 +112,7 @@ export function LandingHeader() {
               <AuthAwareButton
                 authenticatedHref="/dashboard"
                 unauthenticatedHref="/login"
-                unpaidAuthenticatedHref="/checkout/allinone"
+                unpaidAuthenticatedHref="/checkout/allinone?intent=pay"
                 radius="lg"
                 style={{
                   background: '#8b5cf6',
@@ -188,7 +188,7 @@ export function LandingHeader() {
             <AuthAwareButton
               authenticatedHref="/dashboard"
               unauthenticatedHref="/login"
-              unpaidAuthenticatedHref="/checkout/allinone"
+              unpaidAuthenticatedHref="/checkout/allinone?intent=pay"
               fullWidth
               size="lg"
               radius="lg"
