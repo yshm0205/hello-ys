@@ -141,7 +141,6 @@ export function AllInOneCheckoutContent({
   creditInfo,
   initialCouponCode = '',
   isAuthenticated = Boolean(userEmail),
-  checkoutIntent = '',
   wasCancelled = false,
 }: AllInOneCheckoutContentProps) {
   const locale = useLocale();
@@ -481,6 +480,75 @@ export function AllInOneCheckoutContent({
           font-size: 22px;
           font-weight: 950;
           cursor: pointer;
+        }
+
+        .fs-confirm-hero {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 18px;
+          align-items: end;
+          margin-bottom: 18px;
+          padding: 24px;
+          border: 1px solid #fed7aa;
+          border-radius: 18px;
+          background:
+            linear-gradient(135deg, rgba(255, 247, 237, 0.95), rgba(255, 255, 255, 0.96)),
+            #fff;
+          box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+        }
+
+        .fs-confirm-kicker {
+          display: inline-flex;
+          margin-bottom: 10px;
+          color: #c2410c;
+          font-size: 12px;
+          line-height: 1.2;
+          font-weight: 950;
+          letter-spacing: 0;
+        }
+
+        .fs-confirm-hero h1 {
+          margin: 0;
+          font-size: 28px;
+          line-height: 1.18;
+          font-weight: 950;
+          letter-spacing: 0;
+        }
+
+        .fs-confirm-hero p {
+          max-width: 560px;
+          margin: 8px 0 0;
+          color: #57534e;
+          font-size: 14px;
+          line-height: 1.55;
+        }
+
+        .fs-confirm-status {
+          display: grid;
+          gap: 8px;
+          min-width: 168px;
+        }
+
+        .fs-confirm-status span {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 9px 11px;
+          border: 1px solid #fed7aa;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.72);
+          color: #9a3412;
+          font-size: 12px;
+          font-weight: 850;
+        }
+
+        .fs-confirm-status span::after {
+          content: '';
+          width: 7px;
+          height: 7px;
+          border-radius: 999px;
+          background: #22c55e;
         }
 
         .fs-checkout-grid {
@@ -933,6 +1001,32 @@ export function AllInOneCheckoutContent({
             font-size: 19px;
           }
 
+          .fs-confirm-hero {
+            grid-template-columns: 1fr;
+            align-items: start;
+            margin-bottom: 12px;
+            padding: 18px;
+            border-radius: 16px;
+          }
+
+          .fs-confirm-hero h1 {
+            font-size: 24px;
+          }
+
+          .fs-confirm-status {
+            grid-template-columns: 1fr 1fr;
+            min-width: 0;
+          }
+
+          .fs-confirm-status span {
+            justify-content: center;
+            padding: 8px 10px;
+          }
+
+          .fs-confirm-status span::after {
+            display: none;
+          }
+
           .fs-checkout-titlebar {
             margin-bottom: 12px;
             padding: 14px 16px;
@@ -1147,16 +1241,20 @@ export function AllInOneCheckoutContent({
           </>
         ) : (
           <>
-            <section className="fs-checkout-titlebar">
+            <section className="fs-confirm-hero">
               <div>
-                <h1>결제하기</h1>
-                <p className="fs-section-subtitle">
-                  {checkoutIntent === 'pay'
-                    ? '로그인이 완료되었습니다. 주문 정보와 결제 금액을 확인해 주세요.'
-                    : '주문 정보와 결제 금액을 확인해 주세요.'}
+                <span className="fs-confirm-kicker">FLOWSPOT CHECKOUT</span>
+                <h1>올인원 패스 활성화 전 마지막 확인</h1>
+                <p>
+                  로그인은 완료되었습니다. 포함 구성, 적용 혜택, 환불 안내를 한 번만 확인하면 토스 결제창으로
+                  이어집니다.
                 </p>
               </div>
-              <span className="fs-checkout-secure">토스 결제창 이동</span>
+              <div className="fs-confirm-status" aria-label="결제 진행 상태">
+                <span>로그인 완료</span>
+                <span>혜택 적용</span>
+                <span>토스 결제 대기</span>
+              </div>
             </section>
 
             {wasCancelled && (
