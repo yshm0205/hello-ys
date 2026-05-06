@@ -159,6 +159,7 @@ export function AllInOneCheckoutContent({
   const finalCheckoutAmount = appliedCoupon?.finalAmount ?? plan.amount;
   const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
   const totalDiscountAmount = Math.max(0, plan.listAmount - finalCheckoutAmount);
+  const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
   const earlybirdDeadline = formatDeadline(EARLYBIRD_CONFIG.phase2.hardDeadline);
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
@@ -321,6 +322,165 @@ export function AllInOneCheckoutContent({
           color: #52525b;
           font-size: 13px;
           font-weight: 750;
+        }
+
+        .fs-select-wrap {
+          display: grid;
+          min-height: calc(100vh - 150px);
+          place-items: center;
+          padding: 28px 0 142px;
+        }
+
+        .fs-select-content {
+          width: min(620px, 100%);
+        }
+
+        .fs-select-section + .fs-select-section {
+          margin-top: 34px;
+        }
+
+        .fs-select-heading {
+          margin: 0 0 12px;
+          font-size: 22px;
+          line-height: 1.25;
+          font-weight: 950;
+          letter-spacing: 0;
+        }
+
+        .fs-select-option {
+          width: 100%;
+          min-height: 96px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          padding: 22px 24px;
+          border: 1.5px solid #ea580c;
+          border-radius: 12px;
+          background: #fff;
+          color: #111217;
+          text-align: left;
+        }
+
+        .fs-select-option-title {
+          display: block;
+          font-size: 20px;
+          line-height: 1.25;
+          font-weight: 950;
+        }
+
+        .fs-select-option-sub {
+          display: block;
+          margin-top: 6px;
+          color: #71717a;
+          font-size: 13px;
+          line-height: 1.45;
+          font-weight: 650;
+        }
+
+        .fs-select-price {
+          flex: 0 0 auto;
+          text-align: right;
+        }
+
+        .fs-select-price s {
+          display: block;
+          color: #71717a;
+          font-size: 16px;
+          line-height: 1.1;
+        }
+
+        .fs-select-price strong {
+          display: block;
+          margin-top: 6px;
+          color: #111217;
+          font-size: 21px;
+          line-height: 1.1;
+          font-weight: 950;
+          white-space: nowrap;
+        }
+
+        .fs-select-price em {
+          color: #e95f24;
+          font-style: normal;
+        }
+
+        .fs-select-bottom {
+          position: fixed;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          z-index: 30;
+          display: flex;
+          justify-content: center;
+          padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
+          border-top: 1px solid #f1f5f9;
+          background: rgba(255, 255, 255, 0.98);
+          box-shadow: 0 -12px 34px rgba(15, 23, 42, 0.08);
+        }
+
+        .fs-select-bottom-inner {
+          width: min(620px, 100%);
+        }
+
+        .fs-select-bottom-summary {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 18px;
+          margin-bottom: 18px;
+        }
+
+        .fs-select-benefit-label {
+          color: #111217;
+          font-size: 17px;
+          line-height: 1.3;
+          font-weight: 850;
+        }
+
+        .fs-select-bottom-price {
+          text-align: right;
+        }
+
+        .fs-select-bottom-price s {
+          color: #71717a;
+          font-size: 16px;
+        }
+
+        .fs-select-bottom-price .arrow {
+          color: #71717a;
+          margin: 0 6px;
+        }
+
+        .fs-select-bottom-price .sale {
+          color: #52525b;
+          font-size: 18px;
+        }
+
+        .fs-select-bottom-price strong {
+          display: block;
+          margin-top: 6px;
+          color: #111217;
+          font-size: 24px;
+          line-height: 1.1;
+          font-weight: 950;
+        }
+
+        .fs-select-bottom-price em {
+          color: #e95f24;
+          font-style: normal;
+        }
+
+        .fs-select-purchase-button {
+          width: 100%;
+          min-height: 64px;
+          border: 0;
+          border-radius: 14px;
+          background: #e95f24;
+          color: #fff;
+          font-size: 22px;
+          font-weight: 950;
+          cursor: pointer;
         }
 
         .fs-checkout-grid {
@@ -713,6 +873,66 @@ export function AllInOneCheckoutContent({
             display: none;
           }
 
+          .fs-select-wrap {
+            min-height: calc(100vh - 120px);
+            align-items: start;
+            padding: 24px 0 174px;
+          }
+
+          .fs-select-section + .fs-select-section {
+            margin-top: 26px;
+          }
+
+          .fs-select-heading {
+            font-size: 20px;
+          }
+
+          .fs-select-option {
+            min-height: 86px;
+            padding: 18px 16px;
+            gap: 12px;
+          }
+
+          .fs-select-option-title {
+            font-size: 18px;
+          }
+
+          .fs-select-price s {
+            font-size: 13px;
+          }
+
+          .fs-select-price strong {
+            font-size: 17px;
+          }
+
+          .fs-select-bottom {
+            padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+          }
+
+          .fs-select-bottom-summary {
+            gap: 12px;
+            margin-bottom: 14px;
+          }
+
+          .fs-select-benefit-label {
+            font-size: 15px;
+          }
+
+          .fs-select-bottom-price s,
+          .fs-select-bottom-price .sale {
+            font-size: 13px;
+          }
+
+          .fs-select-bottom-price strong {
+            font-size: 20px;
+          }
+
+          .fs-select-purchase-button {
+            min-height: 56px;
+            border-radius: 13px;
+            font-size: 19px;
+          }
+
           .fs-checkout-titlebar {
             margin-bottom: 12px;
             padding: 14px 16px;
@@ -870,40 +1090,97 @@ export function AllInOneCheckoutContent({
           <span className="fs-checkout-secure">토스 보안 결제</span>
         </Group>
 
-        <section className="fs-checkout-titlebar">
-          <div>
-            <h1>결제하기</h1>
-            <p className="fs-section-subtitle">
-              {checkoutIntent === 'pay' && isAuthenticated
-                ? '로그인이 완료되었습니다. 주문 정보와 결제 금액을 확인해 주세요.'
-                : '주문 정보와 결제 금액을 확인해 주세요.'}
-            </p>
-          </div>
-          <span className="fs-checkout-secure">토스 결제창 이동</span>
-        </section>
+        {!isAuthenticated ? (
+          <>
+            <section className="fs-select-wrap">
+              <div className="fs-select-content">
+                <div className="fs-select-section">
+                  <h1 className="fs-select-heading">수강권</h1>
+                  <button type="button" className="fs-select-option" onClick={redirectToLogin}>
+                    <span>
+                      <span className="fs-select-option-title">올인원 패스</span>
+                      <span className="fs-select-option-sub">VOD 40강 · AI 도구 4개월 · 자료 패키지 포함</span>
+                    </span>
+                    <span className="fs-select-price">
+                      <s>{formatWon(plan.listAmount)}</s>
+                      <strong>
+                        <em>{discountRate}%</em> {formatWon(finalCheckoutAmount)}
+                      </strong>
+                    </span>
+                  </button>
+                </div>
 
-        {wasCancelled && (
-          <Alert mb="md" color="orange" radius="lg" variant="light" icon={<AlertCircle size={18} />}>
-            결제가 취소되었습니다. 혜택은 아직 적용 중이니 다시 결제할 수 있습니다.
-          </Alert>
-        )}
+                <div className="fs-select-section">
+                  <h2 className="fs-select-heading">패키지</h2>
+                  <button type="button" className="fs-select-option" onClick={redirectToLogin}>
+                    <span>
+                      <span className="fs-select-option-title">올인원 구성 포함</span>
+                      <span className="fs-select-option-sub">
+                        전자책 · 노션 템플릿 · 트렌드 채널 데이터 · 크레딧
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </section>
 
-        {hasActiveAccess ? (
-          <Alert
-            color="violet"
-            radius="xl"
-            variant="light"
-            icon={<ShieldCheck size={18} />}
-            title="이미 올인원 패스를 이용 중입니다"
-          >
-            이용 기간은 {formatDate(creditInfo?.expires_at)}까지입니다.
-            {isInitialProgram && ' 이용권이 만료되기 전에는 중복 결제가 제한됩니다.'}
-            {isMonthlySubscriber &&
-              ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
-          </Alert>
+            <div className="fs-select-bottom">
+              <div className="fs-select-bottom-inner">
+                <div className="fs-select-bottom-summary">
+                  <div className="fs-select-benefit-label">최대 혜택 적용 금액</div>
+                  <div className="fs-select-bottom-price">
+                    <div>
+                      <s>{formatWon(plan.listAmount)}</s>
+                      <span className="arrow">→</span>
+                      <span className="sale">{formatWon(finalCheckoutAmount)}</span>
+                    </div>
+                    <strong>
+                      <em>{discountRate}%</em> 월 {formatWon(monthly12Final)}
+                    </strong>
+                  </div>
+                </div>
+                <button type="button" className="fs-select-purchase-button" onClick={redirectToLogin}>
+                  구매하기
+                </button>
+              </div>
+            </div>
+          </>
         ) : (
           <>
-            <div className="fs-checkout-grid">
+            <section className="fs-checkout-titlebar">
+              <div>
+                <h1>결제하기</h1>
+                <p className="fs-section-subtitle">
+                  {checkoutIntent === 'pay'
+                    ? '로그인이 완료되었습니다. 주문 정보와 결제 금액을 확인해 주세요.'
+                    : '주문 정보와 결제 금액을 확인해 주세요.'}
+                </p>
+              </div>
+              <span className="fs-checkout-secure">토스 결제창 이동</span>
+            </section>
+
+            {wasCancelled && (
+              <Alert mb="md" color="orange" radius="lg" variant="light" icon={<AlertCircle size={18} />}>
+                결제가 취소되었습니다. 혜택은 아직 적용 중이니 다시 결제할 수 있습니다.
+              </Alert>
+            )}
+
+            {hasActiveAccess ? (
+              <Alert
+                color="violet"
+                radius="xl"
+                variant="light"
+                icon={<ShieldCheck size={18} />}
+                title="이미 올인원 패스를 이용 중입니다"
+              >
+                이용 기간은 {formatDate(creditInfo?.expires_at)}까지입니다.
+                {isInitialProgram && ' 이용권이 만료되기 전에는 중복 결제가 제한됩니다.'}
+                {isMonthlySubscriber &&
+                  ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
+              </Alert>
+            ) : (
+              <>
+                <div className="fs-checkout-grid">
               <div className="fs-checkout-main">
                 <section className="fs-panel fs-panel-section">
                   <h2 className="fs-section-title">주문 정보</h2>
@@ -1044,22 +1321,24 @@ export function AllInOneCheckoutContent({
                   </Alert>
                 )}
               </aside>
-            </div>
+                </div>
 
-            <div className="fs-mobile-bar">
-              <div className="fs-mobile-price">
-                <small>12개월 할부 시 월 {formatWon(monthly12Final)}</small>
-                <strong>{formatWon(finalCheckoutAmount)}</strong>
-              </div>
-              <button
-                type="button"
-                className="fs-pay-button"
-                disabled={primaryDisabled || loading}
-                onClick={handlePrimaryAction}
-              >
-                {isAuthenticated ? '결제하기' : '로그인'}
-              </button>
-            </div>
+                <div className="fs-mobile-bar">
+                  <div className="fs-mobile-price">
+                    <small>12개월 할부 시 월 {formatWon(monthly12Final)}</small>
+                    <strong>{formatWon(finalCheckoutAmount)}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    className="fs-pay-button"
+                    disabled={primaryDisabled || loading}
+                    onClick={handlePrimaryAction}
+                  >
+                    결제하기
+                  </button>
+                </div>
+              </>
+            )}
           </>
         )}
 

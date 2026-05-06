@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
 const PUBLIC_SESSION_SKIP_PATHS = new Set(["/", "/pricing"]);
+const AUTH_OPTIONAL_PATHS = new Set(["/checkout/allinone"]);
 const PROTECTED_PATH_PREFIXES = ["/dashboard", "/settings", "/subscription", "/admin", "/checkout"];
 
 function normalizePathname(pathname: string) {
@@ -44,7 +45,7 @@ export async function middleware(request: NextRequest) {
   // 2. Run Supabase session update (copies cookies to response)
   const { response: supabaseResponse, user } = await updateSession(request, response);
 
-  if (!user && isProtectedPath(normalizedPath)) {
+  if (!user && isProtectedPath(normalizedPath) && !AUTH_OPTIONAL_PATHS.has(normalizedPath)) {
     const locale = getRequestLocale(request.nextUrl.pathname);
     const redirectTarget = `${normalizedPath}${request.nextUrl.search}`;
     const loginUrl = new URL(`/${locale}/login`, request.url);
