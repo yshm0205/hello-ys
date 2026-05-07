@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import { AlertCircle, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react';
 
+import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import { Link } from '@/i18n/routing';
 import {
   isActiveAccessPlan,
@@ -248,6 +249,7 @@ export function AllInOneCheckoutContent({
 
   return (
     <Box className="fs-checkout-page">
+      <MarketingTracker pageType="checkout" />
       <style>{`
         .fs-checkout-page {
           min-height: 100vh;
@@ -1126,7 +1128,7 @@ export function AllInOneCheckoutContent({
 
         {!isAuthenticated ? (
           <>
-            <section className="fs-select-wrap">
+            <section className="fs-select-wrap" data-marketing-section="checkout-select">
               <div className="fs-select-content">
                 <div className="fs-select-title">
                   <h1>올인원 패스 선택</h1>
@@ -1135,7 +1137,15 @@ export function AllInOneCheckoutContent({
 
                 <div className="fs-select-section">
                   <h1 className="fs-select-heading">수강권</h1>
-                  <button type="button" className="fs-select-option" onClick={redirectToLogin}>
+                  <button
+                    type="button"
+                    className="fs-select-option"
+                    data-marketing-cta="purchase"
+                    data-cta-id="checkout-select-option"
+                    data-cta-label="체크아웃 상품 선택"
+                    data-cta-target={buildCheckoutRedirectTarget()}
+                    onClick={redirectToLogin}
+                  >
                     <span>
                       <span className="fs-select-badge">2차 얼리버드 적용 중</span>
                       <span className="fs-select-option-title">4개월 올인원 패스</span>
@@ -1183,7 +1193,7 @@ export function AllInOneCheckoutContent({
               </div>
             </section>
 
-            <div className="fs-select-bottom">
+            <div className="fs-select-bottom" data-marketing-section="checkout-select">
               <div className="fs-select-bottom-inner">
                 <div className="fs-select-bottom-summary">
                   <div className="fs-select-benefit-label">최대 혜택 적용 금액</div>
@@ -1198,7 +1208,15 @@ export function AllInOneCheckoutContent({
                     </strong>
                   </div>
                 </div>
-                <button type="button" className="fs-select-purchase-button" onClick={redirectToLogin}>
+                <button
+                  type="button"
+                  className="fs-select-purchase-button"
+                  data-marketing-cta="purchase"
+                  data-cta-id="checkout-select-purchase"
+                  data-cta-label="체크아웃 구매하기"
+                  data-cta-target={buildCheckoutRedirectTarget()}
+                  onClick={redirectToLogin}
+                >
                   구매하기
                 </button>
               </div>
@@ -1227,7 +1245,7 @@ export function AllInOneCheckoutContent({
               </Alert>
             ) : (
               <>
-                <div className="fs-checkout-grid">
+                <div className="fs-checkout-grid" data-marketing-section="checkout-confirm">
               <div className="fs-checkout-main">
                 <section className="fs-panel fs-panel-section">
                   <h2 className="fs-section-title">주문 정보</h2>
@@ -1336,6 +1354,10 @@ export function AllInOneCheckoutContent({
                   <button
                     type="button"
                     className="fs-pay-button"
+                    data-marketing-cta="purchase"
+                    data-cta-id="checkout-confirm-pay"
+                    data-cta-label="토스 결제창 열기"
+                    data-cta-target="/api/tosspay/direct"
                     disabled={primaryDisabled || loading}
                     onClick={handlePrimaryAction}
                   >

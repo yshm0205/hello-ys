@@ -54,6 +54,11 @@ const LAUNCH_CHANGES = [
     title: "모바일 SSR 레이아웃 수정 — 첫 페인트부터 모바일로 표시",
     watch: "모바일 ① 랜딩에서 끝 / 평균 체류 시간",
   },
+  {
+    happenedAt: "5/6 밤",
+    title: "체크아웃 흐름 변경 — 선택 화면과 결제 확인 화면 분리",
+    watch: "체크아웃 선택 클릭 / 결제 확인 클릭 / 결제 시도",
+  },
 ] as const;
 const SECTION_INFOS: Record<
   string,
@@ -116,6 +121,16 @@ const SECTION_INFOS: Record<
     range: "PC 화면 오른쪽에 고정된 얼리버드 신청 카드",
     check: "우측 고정 버튼이 방해보다 클릭을 만들고 있는지",
   },
+  "checkout-select": {
+    label: "체크아웃 선택",
+    range: "구매하기 직후 수강권, 포함 구성, 최종 금액을 확인하는 첫 체크아웃 화면",
+    check: "구매 직전 확신을 주는지, 로그인 이동 전에 불안 요소가 없는지",
+  },
+  "checkout-confirm": {
+    label: "결제 확인",
+    range: "로그인 후 주문 정보, 결제 금액, 환불 안내, 동의 체크를 확인하는 화면",
+    check: "결제하기 버튼 전 환불/가격/결제수단 안내가 충분한지",
+  },
   cta: {
     label: "마지막 신청",
     range: "마지막 시작 문구부터 최종 신청 버튼까지",
@@ -134,6 +149,8 @@ const LANDING_SECTION_ORDER = [
   "faq",
   "floating-cta-mobile",
   "floating-cta-desktop",
+  "checkout-select",
+  "checkout-confirm",
 ] as const;
 const BASE_SESSION_SELECT = "cta_clicks, referrer, first_seen_at, duration_seconds";
 const BEHAVIOR_SESSION_SELECT = `${BASE_SESSION_SELECT}, duration_seconds, max_scroll_percent, last_visible_section, last_clicked_cta_section`;
@@ -172,6 +189,14 @@ interface PaymentRow {
   user_id: string;
   status: string;
   metadata: Record<string, unknown> | null;
+}
+
+interface MarketingSessionEventRow {
+  session_key: string;
+  event_type: string;
+  cta_id: string | null;
+  cta_section: string | null;
+  created_at: string;
 }
 
 function getKstDateParts(date = new Date()) {
@@ -508,7 +533,7 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       .lt("first_seen_at", range.endIso)) as typeof sessionsResponse;
   }
 
-  const [{ data: users }, { data: payments }] = await Promise.all([
+  const [{ data: users }, { data: payments }, eventsResponse] = await Promise.all([
     supabase
       .from("users")
       .select("id, created_at")
@@ -517,6 +542,12 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     supabase
       .from("toss_payments")
       .select("id, amount, created_at, user_id, status, metadata")
+      .gte("created_at", range.startIso)
+      .lt("created_at", range.endIso),
+    supabase
+      .from("marketing_session_events")
+      .select("session_key, event_type, cta_id, cta_section, created_at")
+      .eq("event_type", "cta_click")
       .gte("created_at", range.startIso)
       .lt("created_at", range.endIso),
   ]);
@@ -544,6 +575,9 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       !internalAdminIds.has(payment.user_id) &&
       payment.metadata?.provider === "tosspay-direct",
   );
+  const periodCtaEvents = eventsResponse.error
+    ? []
+    : ((eventsResponse.data || []) as MarketingSessionEventRow[]);
 
   const completedPayments = periodPayments.filter((payment) =>
     (SALES_STATUSES as readonly string[]).includes(payment.status),
@@ -552,6 +586,15 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     (payment) => payment.status === "PENDING",
   );
   const ctaUnique = periodSessions.filter((session) => (session.cta_clicks || 0) > 0).length;
+  const getUniqueCtaEventSessions = (section: string) =>
+    new Set(
+      periodCtaEvents
+        .filter((event) => event.cta_section === section)
+        .map((event) => event.session_key),
+    ).size;
+  const checkoutSelectSessions = getUniqueCtaEventSessions("checkout-select");
+  const checkoutConfirmSessions = getUniqueCtaEventSessions("checkout-confirm");
+  const hasCheckoutStepSignals = checkoutSelectSessions > 0 || checkoutConfirmSessions > 0;
   const readDepthSessions = periodSessions.filter(isReadDepthSession);
 
   const averageDurationSeconds = readDepthSessions.length
@@ -619,6 +662,9 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     landingSessions: periodSessions.length,
     ctaUnique,
     ctaClicks: periodSessions.reduce((sum, session) => sum + (session.cta_clicks || 0), 0),
+    checkoutSelectSessions,
+    checkoutConfirmSessions,
+    hasCheckoutStepSignals,
     signups: periodUsers.length,
     paymentAttempts: periodPayments.length,
     paymentPending: pendingPayments.length,
@@ -700,6 +746,7 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
   const ctaRate = getRate(stats.ctaUnique, stats.landingSessions);
   const ctaToPaymentRate = getRate(stats.paymentAttempts, stats.ctaUnique);
   const paymentDoneRate = getRate(stats.paymentCompleted, stats.paymentAttempts);
+  const checkoutConfirmRate = getRate(stats.checkoutConfirmSessions, stats.checkoutSelectSessions);
   const quickBounceRate = getRate(stats.quickBounceSessions, stats.readDepthSessionCount);
 
   if (stats.landingSessions < 10) {
@@ -731,6 +778,21 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
       body: `랜딩 방문 대비 CTA가 ${ctaRate}%입니다. 읽어도 신청 행동으로 잘 안 넘어갑니다.`,
       action: "가격/혜택이 처음 30초 안에 이해되는지와 CTA 문구를 확인하세요.",
       href: "/admin/sessions?stage=landing-only",
+    };
+  }
+
+  if (
+    stats.hasCheckoutStepSignals &&
+    stats.checkoutSelectSessions >= 3 &&
+    checkoutConfirmRate < 60
+  ) {
+    return {
+      title: "가장 큰 병목",
+      value: "체크아웃/로그인 이탈",
+      tone: "warning" as const,
+      body: `체크아웃 선택 후 결제 확인까지 온 비율이 ${checkoutConfirmRate}%입니다.`,
+      action: "선택 화면 구매하기, 로그인 복귀, 결제 확인 화면 연결을 우선 확인하세요.",
+      href: "/admin/sessions?stage=cta-no-payment",
     };
   }
 
@@ -891,11 +953,11 @@ const OVERVIEW_READ_GUIDE = [
   },
   {
     title: "2. 다음 퍼널",
-    body: "방문 → 신청 버튼 → 결제 시도 → 결제 완료 중 어느 단계에서 많이 빠지는지 봅니다.",
+    body: "방문 → 신청 버튼 → 체크아웃 선택 → 결제 확인 → 결제 완료 중 어느 단계에서 많이 빠지는지 봅니다.",
   },
   {
     title: "3. 마지막 구간표",
-    body: "구간별로 여기서 나감과 신청 직전 본 구간을 비교합니다. 이탈만 높은 줄부터 확인하세요.",
+    body: "랜딩 구간과 체크아웃 구간을 같이 봅니다. 이탈만 높거나 결제 전 클릭이 낮은 줄부터 확인하세요.",
   },
 ] as const;
 
@@ -924,10 +986,10 @@ export default async function AdminOverviewPage({
     <div className="space-y-6">
       <div className="space-y-3">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          랜딩 문제 진단
+          랜딩/체크아웃 문제 진단
         </h1>
         <p className="text-sm text-muted-foreground">
-          숫자만 보는 화면이 아니라, 어느 구간을 고쳐야 하는지 판단하는 화면입니다.
+          숫자만 보는 화면이 아니라, 랜딩부터 결제 직전까지 어느 구간을 고쳐야 하는지 판단하는 화면입니다.
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="inline-flex rounded-lg border bg-background p-1">
@@ -1118,9 +1180,9 @@ export default async function AdminOverviewPage({
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">랜딩 어느 부분을 고칠지</CardTitle>
+            <CardTitle className="text-sm font-medium">랜딩/체크아웃 어느 부분을 고칠지</CardTitle>
             <p className="text-[11px] text-muted-foreground">
-              실제 랜딩 순서대로 봅니다. 이탈과 신청 직전 본 구간만 비교하면 됩니다.
+              실제 흐름 순서대로 봅니다. 이탈과 신청 직전 본 구간만 비교하면 됩니다.
             </p>
           </CardHeader>
           <CardContent>
@@ -1128,7 +1190,7 @@ export default async function AdminOverviewPage({
               <table className="w-full min-w-[780px] text-left text-sm">
                 <thead className="border-b text-xs text-muted-foreground">
                   <tr>
-                    <th className="py-2 pr-3 font-medium">랜딩 구간</th>
+                    <th className="py-2 pr-3 font-medium">구간</th>
                     <th className="py-2 pr-3 font-medium">실제 위치</th>
                     <th className="py-2 pr-3 font-medium">여기서 나감</th>
                     <th className="py-2 pr-3 font-medium">신청 직전 본 구간</th>
@@ -1226,6 +1288,55 @@ export default async function AdminOverviewPage({
             </CardContent>
           </Card>
         </div>
+
+        <Card className="border-violet-200 bg-violet-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-violet-900">
+              새 체크아웃 단계
+            </CardTitle>
+            <p className="text-[11px] text-violet-700/80">
+              구매하기 이후 화면을 따로 봅니다. 새 추적이 붙은 이후 데이터부터 누적됩니다.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {periodStats.hasCheckoutStepSignals ? (
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg bg-white px-4 py-3">
+                  <p className="text-xs font-medium text-violet-700">체크아웃 선택 클릭</p>
+                  <p className="mt-1 text-2xl font-bold text-violet-950">
+                    {periodStats.checkoutSelectSessions}명
+                  </p>
+                  <p className="mt-1 text-xs text-violet-700/80">
+                    비로그인 구매하기/상품 선택 클릭
+                  </p>
+                </div>
+                <div className="rounded-lg bg-white px-4 py-3">
+                  <p className="text-xs font-medium text-violet-700">결제 확인 클릭</p>
+                  <p className="mt-1 text-2xl font-bold text-violet-950">
+                    {periodStats.checkoutConfirmSessions}명
+                  </p>
+                  <p className="mt-1 text-xs text-violet-700/80">
+                    로그인 후 결제하기 버튼 클릭
+                  </p>
+                </div>
+                <div className="rounded-lg bg-white px-4 py-3">
+                  <p className="text-xs font-medium text-violet-700">결제 시도</p>
+                  <p className="mt-1 text-2xl font-bold text-violet-950">
+                    {periodStats.paymentAttempts}건
+                  </p>
+                  <p className="mt-1 text-xs text-violet-700/80">
+                    토스 결제 주문 생성 기준
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs leading-5 text-violet-700/80">
+                아직 새 체크아웃 클릭 데이터가 없습니다. 지금부터 체크아웃 선택 화면과
+                결제 확인 화면의 버튼 클릭이 따로 잡힙니다.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="border-orange-200 bg-orange-50">

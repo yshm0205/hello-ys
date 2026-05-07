@@ -11,7 +11,7 @@ import {
 const STORAGE_KEY = MARKETING_SESSION_STORAGE_KEY;
 
 type MarketingTrackerProps = {
-  pageType: "landing" | "pricing";
+  pageType: "landing" | "pricing" | "checkout";
 };
 
 function getSessionKey() {
@@ -242,16 +242,26 @@ export function MarketingTracker({ pageType }: MarketingTrackerProps) {
 
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
-      if (!anchor) return;
+      const ctaElement = target?.closest<HTMLElement>(
+        "a[href], button[data-marketing-cta], [role='button'][data-marketing-cta]",
+      );
+      if (!ctaElement) return;
 
-      const href = anchor.getAttribute("href") || "";
-      if (!href.startsWith("/")) return;
-      if (!isPurchaseCtaHref(href)) return;
+      const anchor = ctaElement instanceof HTMLAnchorElement ? ctaElement : null;
+      const href =
+        anchor?.getAttribute("href") ||
+        ctaElement.dataset.ctaTarget ||
+        window.location.pathname;
+      const isMarkedPurchaseCta = ctaElement.dataset.marketingCta === "purchase";
+      if (anchor && (!href.startsWith("/") || !isPurchaseCtaHref(href))) return;
+      if (!anchor && !isMarkedPurchaseCta) return;
 
-      const ctaSection = getNearestSectionName(anchor);
-      const ctaId = anchor.id || anchor.getAttribute("data-cta-id") || null;
-      const ctaLabel = anchor.textContent?.replace(/\s+/g, " ").trim() || null;
+      const ctaSection = getNearestSectionName(ctaElement);
+      const ctaId = ctaElement.id || ctaElement.getAttribute("data-cta-id") || null;
+      const ctaLabel =
+        ctaElement.getAttribute("data-cta-label") ||
+        ctaElement.textContent?.replace(/\s+/g, " ").trim() ||
+        null;
 
       void postEvent(
         {
