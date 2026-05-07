@@ -408,6 +408,15 @@ function getRate(numerator: number, denominator: number) {
   return Math.round((numerator / denominator) * 1000) / 10;
 }
 
+function getDropOffRate(current: number, previous: number) {
+  if (!previous) return 0;
+  return Math.max(0, getRate(previous - current, previous));
+}
+
+function formatPercent(value: number) {
+  return `${value.toLocaleString("ko-KR")}%`;
+}
+
 function normalizeReferrer(raw: string | null) {
   if (!raw) return "direct";
 
@@ -981,6 +990,64 @@ export default async function AdminOverviewPage({
       : getDateInputValueFromIso(activeRange.endIso, 1);
   const insightCards = getInsightCards(periodStats);
   const sectionDiagnostics = getLandingSectionDiagnostics(periodStats);
+  const paymentAttemptPreviousCount = periodStats.hasCheckoutStepSignals
+    ? periodStats.checkoutConfirmSessions
+    : periodStats.ctaUnique;
+  const paymentAttemptPreviousLabel = periodStats.hasCheckoutStepSignals
+    ? "결제 확인 대비"
+    : "신청 버튼 대비";
+  const funnelSteps = [
+    {
+      title: "방문",
+      count: periodStats.landingSessions,
+      unit: "세션",
+      previousCount: periodStats.landingSessions,
+      previousLabel: "시작 기준",
+      description: "랜딩 들어온 세션",
+    },
+    {
+      title: "신청 버튼",
+      count: periodStats.ctaUnique,
+      unit: "명",
+      previousCount: periodStats.landingSessions,
+      previousLabel: "방문 대비",
+      description: "랜딩 CTA 클릭 세션",
+    },
+    {
+      title: "체크아웃 선택",
+      count: periodStats.checkoutSelectSessions,
+      unit: "명",
+      previousCount: periodStats.ctaUnique,
+      previousLabel: "신청 버튼 대비",
+      description: "구매하기/상품 선택 클릭",
+      requiresCheckoutSignals: true,
+    },
+    {
+      title: "결제 확인",
+      count: periodStats.checkoutConfirmSessions,
+      unit: "명",
+      previousCount: periodStats.checkoutSelectSessions,
+      previousLabel: "체크아웃 선택 대비",
+      description: "로그인 후 결제하기 클릭",
+      requiresCheckoutSignals: true,
+    },
+    {
+      title: "결제 시도",
+      count: periodStats.paymentAttempts,
+      unit: "건",
+      previousCount: paymentAttemptPreviousCount,
+      previousLabel: paymentAttemptPreviousLabel,
+      description: "토스 주문 생성 기준",
+    },
+    {
+      title: "결제 완료",
+      count: periodStats.paymentCompleted,
+      unit: "건",
+      previousCount: periodStats.paymentAttempts,
+      previousLabel: "결제 시도 대비",
+      description: "DONE / 부분취소 포함",
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -1241,52 +1308,60 @@ export default async function AdminOverviewPage({
         <div>
           <h2 className="text-base font-semibold text-foreground">어디서 빠지는지</h2>
           <p className="text-xs text-muted-foreground">
-            전환율과 단계별 이탈자 수를 함께 봅니다. (결제↔세션 정확 매칭은 session_key 연동 후)
+            큰 숫자는 해당 단계 도달 수, 아래 퍼센트는 이전 단계 대비·전체 방문 대비·이탈률입니다.
+            결제 시도는 주문 생성 건 기준입니다.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">랜딩 → CTA</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.ctaUnique, periodStats.landingSessions)}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {periodStats.landingSessions}명 중 {periodStats.ctaUnique}명
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+          {funnelSteps.map((step, index) => {
+            const hasStepData =
+              !step.requiresCheckoutSignals || periodStats.hasCheckoutStepSignals;
+            const previousRate = index === 0 ? 100 : getRate(step.count, step.previousCount);
+            const totalRate =
+              index === 0 ? 100 : getRate(step.count, periodStats.landingSessions);
+            const dropRate = index === 0 ? 0 : getDropOffRate(step.count, step.previousCount);
+            const previousRateLabel = hasStepData ? formatPercent(previousRate) : "-";
+            const totalRateLabel = hasStepData ? formatPercent(totalRate) : "-";
+            const dropRateLabel = hasStepData ? formatPercent(dropRate) : "-";
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">CTA → 결제 시도</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.paymentAttempts, periodStats.ctaUnique)}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {periodStats.ctaUnique}명 중 {periodStats.paymentAttempts}건
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">결제 시도 → 완료</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {getRate(periodStats.paymentCompleted, periodStats.paymentAttempts)}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {periodStats.paymentAttempts}건 중 {periodStats.paymentCompleted}건
-              </p>
-            </CardContent>
-          </Card>
+            return (
+              <Card key={step.title}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">{step.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {step.count.toLocaleString("ko-KR")}
+                      <span className="ml-1 text-sm font-semibold text-muted-foreground">
+                        {step.unit}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {hasStepData ? step.description : "새 추적 데이터 대기"}
+                    </p>
+                  </div>
+                  <div className="space-y-1 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                    <p className="flex justify-between gap-2 text-muted-foreground">
+                      <span>{step.previousLabel}</span>
+                      <strong className="text-foreground">{previousRateLabel}</strong>
+                    </p>
+                    <p className="flex justify-between gap-2 text-muted-foreground">
+                      <span>전체 방문 대비</span>
+                      <strong className="text-foreground">{totalRateLabel}</strong>
+                    </p>
+                    {index > 0 && (
+                      <p className="flex justify-between gap-2 text-rose-700">
+                        <span>이탈</span>
+                        <strong>{dropRateLabel}</strong>
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         <Card className="border-violet-200 bg-violet-50">
@@ -1306,27 +1381,60 @@ export default async function AdminOverviewPage({
                   <p className="mt-1 text-2xl font-bold text-violet-950">
                     {periodStats.checkoutSelectSessions}명
                   </p>
-                  <p className="mt-1 text-xs text-violet-700/80">
-                    비로그인 구매하기/상품 선택 클릭
-                  </p>
+                  <div className="mt-2 space-y-1 text-xs text-violet-700/80">
+                    <p>
+                      신청 버튼 대비{" "}
+                      <strong>{formatPercent(getRate(periodStats.checkoutSelectSessions, periodStats.ctaUnique))}</strong>
+                    </p>
+                    <p>
+                      전체 방문 대비{" "}
+                      <strong>{formatPercent(getRate(periodStats.checkoutSelectSessions, periodStats.landingSessions))}</strong>
+                    </p>
+                    <p>
+                      이탈{" "}
+                      <strong>{formatPercent(getDropOffRate(periodStats.checkoutSelectSessions, periodStats.ctaUnique))}</strong>
+                    </p>
+                  </div>
                 </div>
                 <div className="rounded-lg bg-white px-4 py-3">
                   <p className="text-xs font-medium text-violet-700">결제 확인 클릭</p>
                   <p className="mt-1 text-2xl font-bold text-violet-950">
                     {periodStats.checkoutConfirmSessions}명
                   </p>
-                  <p className="mt-1 text-xs text-violet-700/80">
-                    로그인 후 결제하기 버튼 클릭
-                  </p>
+                  <div className="mt-2 space-y-1 text-xs text-violet-700/80">
+                    <p>
+                      체크아웃 선택 대비{" "}
+                      <strong>{formatPercent(getRate(periodStats.checkoutConfirmSessions, periodStats.checkoutSelectSessions))}</strong>
+                    </p>
+                    <p>
+                      전체 방문 대비{" "}
+                      <strong>{formatPercent(getRate(periodStats.checkoutConfirmSessions, periodStats.landingSessions))}</strong>
+                    </p>
+                    <p>
+                      이탈{" "}
+                      <strong>{formatPercent(getDropOffRate(periodStats.checkoutConfirmSessions, periodStats.checkoutSelectSessions))}</strong>
+                    </p>
+                  </div>
                 </div>
                 <div className="rounded-lg bg-white px-4 py-3">
                   <p className="text-xs font-medium text-violet-700">결제 시도</p>
                   <p className="mt-1 text-2xl font-bold text-violet-950">
                     {periodStats.paymentAttempts}건
                   </p>
-                  <p className="mt-1 text-xs text-violet-700/80">
-                    토스 결제 주문 생성 기준
-                  </p>
+                  <div className="mt-2 space-y-1 text-xs text-violet-700/80">
+                    <p>
+                      결제 확인 대비{" "}
+                      <strong>{formatPercent(getRate(periodStats.paymentAttempts, periodStats.checkoutConfirmSessions))}</strong>
+                    </p>
+                    <p>
+                      전체 방문 대비{" "}
+                      <strong>{formatPercent(getRate(periodStats.paymentAttempts, periodStats.landingSessions))}</strong>
+                    </p>
+                    <p>
+                      이탈{" "}
+                      <strong>{formatPercent(getDropOffRate(periodStats.paymentAttempts, periodStats.checkoutConfirmSessions))}</strong>
+                    </p>
+                  </div>
                 </div>
               </div>
             ) : (
