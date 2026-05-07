@@ -22,6 +22,7 @@ const READ_DEPTH_TRACKING_FROM_KST = "2026-04-28T22:22:00+09:00";
 const READ_DEPTH_TRACKING_FROM_LABEL = "4/28 22:22 이후";
 const BEHAVIOR_TRACKING_RELIABLE_FROM_KST = "2026-04-30T12:40:00+09:00";
 const BEHAVIOR_TRACKING_RELIABLE_FROM_LABEL = "4/30 12:40 이후";
+const CHECKOUT_FLOW_TRACKING_FROM_LABEL = "5/7 반영 이후";
 const PERIOD_CONFIG = {
   launch: { label: "런칭 이후", caption: "오픈 이후 누적" },
   today: { label: "오늘", caption: "오늘 기준" },
@@ -32,17 +33,17 @@ const LAUNCH_CHANGES = [
   {
     happenedAt: "4/25 새벽",
     title: "로그인·회원가입 후 체크아웃 복귀 수정",
-    watch: "CTA → 결제 시도",
+    watch: "신청 클릭 → 토스창 열림",
   },
   {
     happenedAt: "4/26 오전",
     title: "전자책 쿠폰 EBOOK50 적용",
-    watch: "결제 시도 / 결제 완료",
+    watch: "토스창 열림 / 결제 완료",
   },
   {
     happenedAt: "4/26 저녁",
     title: "로그인 화면 압축 및 안내 문구 보강",
-    watch: "CTA → 결제 시도",
+    watch: "신청 클릭 → 토스창 열림",
   },
   {
     happenedAt: "4/27 오후",
@@ -55,9 +56,9 @@ const LAUNCH_CHANGES = [
     watch: "모바일 ① 랜딩에서 끝 / 평균 체류 시간",
   },
   {
-    happenedAt: "5/6 밤",
-    title: "체크아웃 흐름 변경 — 선택 화면과 결제 확인 화면 분리",
-    watch: "체크아웃 선택 클릭 / 결제 확인 클릭 / 결제 시도",
+    happenedAt: "5/7",
+    title: "구매하기 이후 흐름 추적 추가",
+    watch: "구매 화면 클릭 / 결제하기 클릭 / 토스창 열림",
   },
 ] as const;
 const SECTION_INFOS: Record<
@@ -112,24 +113,24 @@ const SECTION_INFOS: Record<
     check: "불안 요소가 FAQ에서 해소되는지",
   },
   "floating-cta-mobile": {
-    label: "고정 CTA(모바일 하단)",
+    label: "고정 신청 버튼(모바일)",
     range: "모바일 화면 하단에 고정된 얼리버드 신청 버튼",
     check: "하단 고정 버튼이 실제 결제 클릭을 만들고 있는지",
   },
   "floating-cta-desktop": {
-    label: "고정 CTA(PC 우측)",
+    label: "고정 신청 카드(PC)",
     range: "PC 화면 오른쪽에 고정된 얼리버드 신청 카드",
     check: "우측 고정 버튼이 방해보다 클릭을 만들고 있는지",
   },
   "checkout-select": {
-    label: "체크아웃 선택",
-    range: "구매하기 직후 수강권, 포함 구성, 최종 금액을 확인하는 첫 체크아웃 화면",
-    check: "구매 직전 확신을 주는지, 로그인 이동 전에 불안 요소가 없는지",
+    label: "구매 화면 클릭",
+    range: "랜딩에서 구매하기를 누른 뒤, 로그인 전에 상품과 가격을 다시 보는 화면",
+    check: "구매 직전 확신이 충분한지, 로그인 이동 전에 불안 요소가 없는지",
   },
   "checkout-confirm": {
-    label: "결제 확인",
-    range: "로그인 후 주문 정보, 결제 금액, 환불 안내, 동의 체크를 확인하는 화면",
-    check: "결제하기 버튼 전 환불/가격/결제수단 안내가 충분한지",
+    label: "결제하기 클릭",
+    range: "로그인 후 주문 정보, 환불 안내, 동의 체크를 보고 결제하기를 누르는 화면",
+    check: "결제하기 직전 가격·환불·결제수단 안내가 충분한지",
   },
   cta: {
     label: "마지막 신청",
@@ -782,10 +783,10 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
   if (ctaRate < 8) {
     return {
       title: "가장 큰 병목",
-      value: "CTA 클릭 부족",
+      value: "신청 클릭 부족",
       tone: "danger" as const,
-      body: `랜딩 방문 대비 CTA가 ${ctaRate}%입니다. 읽어도 신청 행동으로 잘 안 넘어갑니다.`,
-      action: "가격/혜택이 처음 30초 안에 이해되는지와 CTA 문구를 확인하세요.",
+      body: `랜딩 방문 대비 신청 클릭이 ${ctaRate}%입니다. 읽어도 신청 행동으로 잘 안 넘어갑니다.`,
+      action: "가격/혜택이 처음 30초 안에 이해되는지와 신청 버튼 문구를 확인하세요.",
       href: "/admin/sessions?stage=landing-only",
     };
   }
@@ -799,8 +800,8 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
       title: "가장 큰 병목",
       value: "체크아웃/로그인 이탈",
       tone: "warning" as const,
-      body: `체크아웃 선택 후 결제 확인까지 온 비율이 ${checkoutConfirmRate}%입니다.`,
-      action: "선택 화면 구매하기, 로그인 복귀, 결제 확인 화면 연결을 우선 확인하세요.",
+      body: `구매 화면 클릭 후 결제하기 클릭까지 온 비율이 ${checkoutConfirmRate}%입니다.`,
+      action: "구매 화면, 로그인 복귀, 결제하기 버튼까지의 연결을 우선 확인하세요.",
       href: "/admin/sessions?stage=cta-no-payment",
     };
   }
@@ -808,9 +809,9 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
   if (stats.ctaUnique >= 3 && ctaToPaymentRate < 60) {
     return {
       title: "가장 큰 병목",
-      value: "CTA 후 결제 미시도",
+      value: "신청 후 토스창 미진입",
       tone: "warning" as const,
-      body: `CTA 클릭 후 결제 시도 전환이 ${ctaToPaymentRate}%입니다.`,
+      body: `랜딩 신청 클릭 후 토스창 열림까지의 전환이 ${ctaToPaymentRate}%입니다.`,
       action: "로그인/회원가입 화면 문구와 결제창 이동 흐름을 우선 확인하세요.",
       href: "/admin/sessions?stage=cta-no-payment",
     };
@@ -821,7 +822,7 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
       title: "가장 큰 병목",
       value: "결제창 미완료",
       tone: "warning" as const,
-      body: `결제 시도 대비 완료가 ${paymentDoneRate}%입니다.`,
+      body: `토스창 열림 대비 결제 완료가 ${paymentDoneRate}%입니다.`,
       action: "카드/계좌이체 안내, 가격 확신, 쿠폰 적용 여부를 확인하세요.",
       href: "/admin/sessions?stage=checkout-pending",
     };
@@ -847,7 +848,7 @@ function getPrioritySectionInsight(stats: PeriodStats) {
       title: "우선 확인 구간",
       value: getExitSectionLabel(section),
       tone: "warning" as const,
-      body: `${section.count}세션이 CTA 없이 이 구간에서 끝났습니다.`,
+      body: `${section.count}세션이 신청 버튼을 누르지 않고 이 구간에서 끝났습니다.`,
       action: section.check,
       href: "/admin/sessions?stage=landing-only",
     };
@@ -858,7 +859,7 @@ function getPrioritySectionInsight(stats: PeriodStats) {
       title: "클릭 발생 구간",
       value: stats.topCtaSection.label,
       tone: "good" as const,
-      body: `${stats.topCtaSection.count}세션이 이 구간 CTA를 눌렀습니다.`,
+      body: `${stats.topCtaSection.count}세션이 이 구간에서 신청 버튼을 눌렀습니다.`,
       action: "클릭이 나온 구간의 문구와 구조를 다른 구간에도 재활용할 수 있는지 보세요.",
     };
   }
@@ -868,7 +869,7 @@ function getPrioritySectionInsight(stats: PeriodStats) {
     value: "위치 데이터 대기",
     tone: "neutral" as const,
     body: `${stats.behaviorReliableFromLabel} 이후 세션부터 정확히 표시됩니다.`,
-    action: "오늘은 랜딩 방문, CTA, 결제 시도만 먼저 보세요.",
+    action: "오늘은 랜딩 방문, 신청 클릭, 토스창 열림만 먼저 보세요.",
   };
 }
 
@@ -889,9 +890,9 @@ function getTodayActionInsight(stats: PeriodStats) {
   if (stats.droppedAfterCta > stats.droppedAtLanding && stats.ctaUnique >= 3) {
     return {
       title: "오늘 할 일",
-      value: "결제 진입 확인",
+      value: "토스창 진입 확인",
       tone: "warning" as const,
-      body: `CTA 후 결제 미시도가 ${stats.droppedAfterCta}명입니다.`,
+      body: `신청 클릭 후 토스창까지 가지 않은 사람이 ${stats.droppedAfterCta}명입니다.`,
       action: "회원가입/로그인 뒤 결제창으로 제대로 복귀하는지 모바일 기준으로 다시 보세요.",
       href: "/admin/sessions?stage=cta-no-payment",
     };
@@ -962,7 +963,7 @@ const OVERVIEW_READ_GUIDE = [
   },
   {
     title: "2. 다음 퍼널",
-    body: "방문 → 신청 버튼 → 체크아웃 선택 → 결제 확인 → 결제 완료 중 어느 단계에서 많이 빠지는지 봅니다.",
+    body: "방문 → 랜딩 신청 클릭 → 구매 화면 클릭 → 결제하기 클릭 → 토스창 열림 → 결제 완료 중 어디서 빠지는지 봅니다.",
   },
   {
     title: "3. 마지막 구간표",
@@ -994,8 +995,8 @@ export default async function AdminOverviewPage({
     ? periodStats.checkoutConfirmSessions
     : periodStats.ctaUnique;
   const paymentAttemptPreviousLabel = periodStats.hasCheckoutStepSignals
-    ? "결제 확인 대비"
-    : "신청 버튼 대비";
+    ? "결제하기 클릭 대비"
+    : "랜딩 신청 클릭 대비";
   const funnelSteps = [
     {
       title: "방문",
@@ -1006,33 +1007,33 @@ export default async function AdminOverviewPage({
       description: "랜딩 들어온 세션",
     },
     {
-      title: "신청 버튼",
+      title: "랜딩 신청 클릭",
       count: periodStats.ctaUnique,
       unit: "명",
       previousCount: periodStats.landingSessions,
       previousLabel: "방문 대비",
-      description: "랜딩 CTA 클릭 세션",
+      description: "랜딩에서 구매하기를 누른 사람",
     },
     {
-      title: "체크아웃 선택",
+      title: "구매 화면 클릭",
       count: periodStats.checkoutSelectSessions,
       unit: "명",
       previousCount: periodStats.ctaUnique,
-      previousLabel: "신청 버튼 대비",
-      description: "구매하기/상품 선택 클릭",
+      previousLabel: "랜딩 신청 클릭 대비",
+      description: "로그인 전에 상품/가격 화면에서 누른 사람",
       requiresCheckoutSignals: true,
     },
     {
-      title: "결제 확인",
+      title: "결제하기 클릭",
       count: periodStats.checkoutConfirmSessions,
       unit: "명",
       previousCount: periodStats.checkoutSelectSessions,
-      previousLabel: "체크아웃 선택 대비",
-      description: "로그인 후 결제하기 클릭",
+      previousLabel: "구매 화면 클릭 대비",
+      description: "로그인 후 결제하기를 누른 사람",
       requiresCheckoutSignals: true,
     },
     {
-      title: "결제 시도",
+      title: "토스창 열림",
       count: periodStats.paymentAttempts,
       unit: "건",
       previousCount: paymentAttemptPreviousCount,
@@ -1044,7 +1045,7 @@ export default async function AdminOverviewPage({
       count: periodStats.paymentCompleted,
       unit: "건",
       previousCount: periodStats.paymentAttempts,
-      previousLabel: "결제 시도 대비",
+      previousLabel: "토스창 대비",
       description: "DONE / 부분취소 포함",
     },
   ];
@@ -1218,7 +1219,7 @@ export default async function AdminOverviewPage({
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">신청 버튼 누른 세션</CardTitle>
+              <CardTitle className="text-sm font-medium">랜딩 신청 클릭 세션</CardTitle>
               <MousePointerClick className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -1239,7 +1240,7 @@ export default async function AdminOverviewPage({
                 {formatCurrency(periodStats.revenue)}
               </div>
               <p className="text-xs text-muted-foreground">
-                결제 시도 {periodStats.paymentAttempts} · 완료 {periodStats.paymentCompleted}건
+                토스창 열림 {periodStats.paymentAttempts} · 완료 {periodStats.paymentCompleted}건
               </p>
             </CardContent>
           </Card>
@@ -1307,13 +1308,13 @@ export default async function AdminOverviewPage({
       <div className="space-y-3">
         <div>
           <h2 className="text-base font-semibold text-foreground">어디서 빠지는지</h2>
-          <p className="text-xs text-muted-foreground">
-            큰 숫자는 해당 단계 도달 수, 아래 퍼센트는 이전 단계 대비·전체 방문 대비·이탈률입니다.
-            결제 시도는 주문 생성 건 기준입니다.
+          <p className="max-w-3xl text-xs leading-5 text-muted-foreground">
+            큰 숫자는 해당 단계에 도달한 수입니다. 아래에는 직전 단계 대비,
+            전체 방문 대비, 이탈률을 함께 표시합니다. 토스창 열림은 결제 주문 생성 기준입니다.
           </p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {funnelSteps.map((step, index) => {
             const hasStepData =
               !step.requiresCheckoutSignals || periodStats.hasCheckoutStepSignals;
@@ -1342,17 +1343,17 @@ export default async function AdminOverviewPage({
                       {hasStepData ? step.description : "새 추적 데이터 대기"}
                     </p>
                   </div>
-                  <div className="space-y-1 rounded-lg bg-slate-50 px-3 py-2 text-xs">
-                    <p className="flex justify-between gap-2 text-muted-foreground">
+                  <div className="space-y-1.5 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                    <p className="flex items-center justify-between gap-3 text-muted-foreground">
                       <span>{step.previousLabel}</span>
                       <strong className="text-foreground">{previousRateLabel}</strong>
                     </p>
-                    <p className="flex justify-between gap-2 text-muted-foreground">
+                    <p className="flex items-center justify-between gap-3 text-muted-foreground">
                       <span>전체 방문 대비</span>
                       <strong className="text-foreground">{totalRateLabel}</strong>
                     </p>
                     {index > 0 && (
-                      <p className="flex justify-between gap-2 text-rose-700">
+                      <p className="flex items-center justify-between gap-3 text-rose-700">
                         <span>이탈</span>
                         <strong>{dropRateLabel}</strong>
                       </p>
@@ -1367,23 +1368,24 @@ export default async function AdminOverviewPage({
         <Card className="border-violet-200 bg-violet-50">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-violet-900">
-              새 체크아웃 단계
+              구매하기 이후 흐름
             </CardTitle>
-            <p className="text-[11px] text-violet-700/80">
-              구매하기 이후 화면을 따로 봅니다. 새 추적이 붙은 이후 데이터부터 누적됩니다.
+            <p className="max-w-3xl text-[11px] leading-5 text-violet-700/80">
+              {CHECKOUT_FLOW_TRACKING_FROM_LABEL} 데이터입니다. 랜딩에서 구매하기를 누른 뒤,
+              로그인 전/후 어디서 멈추는지 따로 봅니다.
             </p>
           </CardHeader>
           <CardContent>
             {periodStats.hasCheckoutStepSignals ? (
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg bg-white px-4 py-3">
-                  <p className="text-xs font-medium text-violet-700">체크아웃 선택 클릭</p>
+                  <p className="text-xs font-medium text-violet-700">구매 화면 클릭</p>
                   <p className="mt-1 text-2xl font-bold text-violet-950">
                     {periodStats.checkoutSelectSessions}명
                   </p>
                   <div className="mt-2 space-y-1 text-xs text-violet-700/80">
                     <p>
-                      신청 버튼 대비{" "}
+                      랜딩 신청 클릭 대비{" "}
                       <strong>{formatPercent(getRate(periodStats.checkoutSelectSessions, periodStats.ctaUnique))}</strong>
                     </p>
                     <p>
@@ -1397,13 +1399,13 @@ export default async function AdminOverviewPage({
                   </div>
                 </div>
                 <div className="rounded-lg bg-white px-4 py-3">
-                  <p className="text-xs font-medium text-violet-700">결제 확인 클릭</p>
+                  <p className="text-xs font-medium text-violet-700">결제하기 클릭</p>
                   <p className="mt-1 text-2xl font-bold text-violet-950">
                     {periodStats.checkoutConfirmSessions}명
                   </p>
                   <div className="mt-2 space-y-1 text-xs text-violet-700/80">
                     <p>
-                      체크아웃 선택 대비{" "}
+                      구매 화면 클릭 대비{" "}
                       <strong>{formatPercent(getRate(periodStats.checkoutConfirmSessions, periodStats.checkoutSelectSessions))}</strong>
                     </p>
                     <p>
@@ -1417,13 +1419,13 @@ export default async function AdminOverviewPage({
                   </div>
                 </div>
                 <div className="rounded-lg bg-white px-4 py-3">
-                  <p className="text-xs font-medium text-violet-700">결제 시도</p>
+                  <p className="text-xs font-medium text-violet-700">토스창 열림</p>
                   <p className="mt-1 text-2xl font-bold text-violet-950">
                     {periodStats.paymentAttempts}건
                   </p>
                   <div className="mt-2 space-y-1 text-xs text-violet-700/80">
                     <p>
-                      결제 확인 대비{" "}
+                      결제하기 클릭 대비{" "}
                       <strong>{formatPercent(getRate(periodStats.paymentAttempts, periodStats.checkoutConfirmSessions))}</strong>
                     </p>
                     <p>
@@ -1439,8 +1441,8 @@ export default async function AdminOverviewPage({
               </div>
             ) : (
               <p className="text-xs leading-5 text-violet-700/80">
-                아직 새 체크아웃 클릭 데이터가 없습니다. 지금부터 체크아웃 선택 화면과
-                결제 확인 화면의 버튼 클릭이 따로 잡힙니다.
+                아직 {CHECKOUT_FLOW_TRACKING_FROM_LABEL} 구매 화면 클릭 데이터가 없습니다.
+                이제부터 구매 화면 클릭과 결제하기 클릭이 따로 잡힙니다.
               </p>
             )}
           </CardContent>
@@ -1458,7 +1460,7 @@ export default async function AdminOverviewPage({
                 {periodStats.droppedAtLanding}명
               </div>
               <p className="text-xs text-orange-700/80">
-                CTA 미클릭 · 아래 이탈 위치 TOP 3에서 어디서 떠났나 확인
+                신청 버튼 미클릭 · 아래 이탈 위치 TOP 3에서 어디서 떠났나 확인
               </p>
               <Link
                 href="/admin/sessions?stage=landing-only"
@@ -1472,7 +1474,7 @@ export default async function AdminOverviewPage({
           <Card className="border-amber-200 bg-amber-50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-amber-800">
-                ② CTA 후 결제 미시도
+                ② 신청 후 토스창 미진입
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1480,7 +1482,7 @@ export default async function AdminOverviewPage({
                 {periodStats.droppedAfterCta}명
               </div>
               <p className="text-xs text-amber-700/80">
-                CTA 클릭했지만 결제창에 안 옴 · 로그인/회원가입 단계 의심
+                신청은 눌렀지만 토스창까지 안 옴 · 로그인/회원가입 단계 의심
               </p>
               <Link
                 href="/admin/sessions?stage=cta-no-payment"
@@ -1494,7 +1496,7 @@ export default async function AdminOverviewPage({
           <Card className="border-rose-200 bg-rose-50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-rose-800">
-                ③ 결제 시도 미완료
+                ③ 토스창 이후 미완료
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1631,7 +1633,7 @@ export default async function AdminOverviewPage({
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">이탈 위치 TOP 3</CardTitle>
               <p className="text-[11px] text-muted-foreground">
-                ① CTA 안 누르고 떠난 {periodStats.reliableExitSessionCount}세션 기준
+                ① 신청 버튼 안 누르고 떠난 {periodStats.reliableExitSessionCount}세션 기준
               </p>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -1650,7 +1652,7 @@ export default async function AdminOverviewPage({
                           본 구간: {section.range}
                         </p>
                         <p className="text-xs leading-5 text-muted-foreground">
-                          확인: CTA를 누르지 않고 여기서 끝난 이유
+                          확인: 신청 버튼을 누르지 않고 여기서 끝난 이유
                         </p>
                       </div>
                       <span className="shrink-0 text-sm font-semibold text-foreground">
@@ -1670,9 +1672,9 @@ export default async function AdminOverviewPage({
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">결제 클릭 위치 TOP 3</CardTitle>
+              <CardTitle className="text-sm font-medium">신청 클릭 위치 TOP 3</CardTitle>
               <p className="text-[11px] text-muted-foreground">
-                ✓ CTA 누른 {periodStats.reliableCtaSessionCount}세션 기준
+                ✓ 신청 버튼 누른 {periodStats.reliableCtaSessionCount}세션 기준
               </p>
             </CardHeader>
             <CardContent className="space-y-3">
