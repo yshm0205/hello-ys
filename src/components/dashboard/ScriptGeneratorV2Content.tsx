@@ -39,6 +39,13 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
+import {
+    LifetipsStructuredInput,
+    type LifetipsStructuredValue,
+    emptyLifetipsStructured,
+    assembleLifetipsMaterial,
+    isLifetipsStructuredValid,
+} from '@/components/dashboard/LifetipsStructuredInput';
 
 // ============ 타입 ============
 
@@ -372,6 +379,9 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     const [material, setMaterial] = useState('');
     const [selectedNiche, setSelectedNiche] = useState<string | null>('knowledge');
     const [forceMode, setForceMode] = useState<string>(''); // lifetips 전용: '' | 'saga' | 'review'
+    // lifetips 전용: 상세 입력 모드
+    const [inputMode, setInputMode] = useState<'simple' | 'detailed'>('simple');
+    const [structuredInput, setStructuredInput] = useState<LifetipsStructuredValue>(emptyLifetipsStructured);
 
     // Step 2 state (리서치)
     const [isResearching, setIsResearching] = useState(false);
@@ -472,6 +482,20 @@ export function ScriptGeneratorV2Content({ user }: Props) {
         return () => clearInterval(timer);
     }, [isGenerating]);
 
+    // lifetips 상세 모드: 구조화 입력 → 조립된 material에 sync
+    useEffect(() => {
+        if (selectedNiche === 'lifetips' && inputMode === 'detailed') {
+            setMaterial(assembleLifetipsMaterial(structuredInput));
+        }
+    }, [structuredInput, inputMode, selectedNiche]);
+
+    // 니치 변경 시 상세 모드 → 간단 모드 자동 전환
+    useEffect(() => {
+        if (selectedNiche !== 'lifetips' && inputMode === 'detailed') {
+            setInputMode('simple');
+        }
+    }, [selectedNiche, inputMode]);
+
     // 생성 단계 시뮬레이션
     useEffect(() => {
         if (!isGenerating) return;
@@ -526,7 +550,13 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     };
 
     const handleResearch = async () => {
-        if (!material.trim() || material.length < 10) {
+        // detailed 모드면 구조화 입력 필수 체크
+        if (selectedNiche === 'lifetips' && inputMode === 'detailed') {
+            if (!isLifetipsStructuredValid(structuredInput)) {
+                setError('제품명과 리뷰는 필수 입력입니다.');
+                return;
+            }
+        } else if (!material.trim() || material.length < 10) {
             setError('소재를 10자 이상 입력해주세요.');
             return;
         }
@@ -720,17 +750,56 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                 소재 또는 참고 스크립트 입력
                             </Title>
 
-                            <Textarea
-                                placeholder="예: 시카고 강에 '마운틴 듀'라는 음료수를 붓으면 안 되는 이유가 있다고 합니다..."
-                                description="만들고 싶은 영상의 소재를 입력하세요 (최소 10자)"
-                                minRows={4}
-                                maxRows={8}
-                                autosize
-                                value={material}
-                                onChange={(e) => setMaterial(e.currentTarget.value)}
-                                disabled={isResearching || isGenerating}
-                                styles={{ input: { fontSize: '15px', lineHeight: 1.7 } }}
-                            />
+                            {/* lifetips 전용: 입력 방식 토글 */}
+                            {selectedNiche === 'lifetips' && (
+                                <Group gap={6}>
+                                    {[
+                                        { value: 'simple', label: '간단 입력' },
+                                        { value: 'detailed', label: '상세 입력 (권장)' },
+                                    ].map((tab) => {
+                                        const selected = inputMode === tab.value;
+                                        return (
+                                            <Box
+                                                key={tab.value}
+                                                onClick={() => !(isResearching || isGenerating) && setInputMode(tab.value as 'simple' | 'detailed')}
+                                                style={{
+                                                    padding: '6px 14px',
+                                                    borderRadius: '8px',
+                                                    border: selected ? '1.5px solid #8b5cf6' : '1.5px solid var(--mantine-color-default-border)',
+                                                    background: selected ? 'rgba(139, 92, 246, 0.08)' : 'transparent',
+                                                    cursor: (isResearching || isGenerating) ? 'not-allowed' : 'pointer',
+                                                    opacity: (isResearching || isGenerating) ? 0.5 : 1,
+                                                    fontSize: '13px',
+                                                    fontWeight: 600,
+                                                    color: selected ? '#8b5cf6' : 'var(--mantine-color-text)',
+                                                    transition: 'all 0.15s ease',
+                                                }}
+                                            >
+                                                {tab.label}
+                                            </Box>
+                                        );
+                                    })}
+                                </Group>
+                            )}
+
+                            {selectedNiche === 'lifetips' && inputMode === 'detailed' ? (
+                                <LifetipsStructuredInput
+                                    value={structuredInput}
+                                    onChange={setStructuredInput}
+                                />
+                            ) : (
+                                <Textarea
+                                    placeholder="예: 시카고 강에 '마운틴 듀'라는 음료수를 붓으면 안 되는 이유가 있다고 합니다..."
+                                    description="만들고 싶은 영상의 소재를 입력하세요 (최소 10자)"
+                                    minRows={4}
+                                    maxRows={8}
+                                    autosize
+                                    value={material}
+                                    onChange={(e) => setMaterial(e.currentTarget.value)}
+                                    disabled={isResearching || isGenerating}
+                                    styles={{ input: { fontSize: '15px', lineHeight: 1.7 } }}
+                                />
+                            )}
 
                             {/* 니치 선택 - 이미지 카드 (가로 슬라이드, 9:13 비율) */}
                             <Box>
@@ -1078,7 +1147,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                             <Button
                                                 size="lg" radius="lg"
                                                 onClick={handleResearch}
-                                                disabled={isResearching || isGenerating || material.length < 10}
+                                                disabled={isResearching || isGenerating || (selectedNiche === 'lifetips' && inputMode === 'detailed' ? !isLifetipsStructuredValid(structuredInput) : material.length < 10)}
                                                 loading={isResearching}
                                                 leftSection={isResearching ? undefined : <Search size={20} />}
                                                 color="violet"
@@ -1088,7 +1157,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                             <Button
                                                 size="lg" radius="lg"
                                                 onClick={handleSkipResearch}
-                                                disabled={isGenerating || material.length < 10}
+                                                disabled={isGenerating || (selectedNiche === 'lifetips' && inputMode === 'detailed' ? !isLifetipsStructuredValid(structuredInput) : material.length < 10)}
                                                 loading={isGenerating}
                                                 leftSection={isGenerating ? undefined : <Sparkles size={20} />}
                                                 variant="light" color="gray"

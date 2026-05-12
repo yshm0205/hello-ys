@@ -41,6 +41,13 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
+import {
+    LifetipsStructuredInput,
+    type LifetipsStructuredValue,
+    emptyLifetipsStructured,
+    assembleLifetipsMaterial,
+    isLifetipsStructuredValid,
+} from '@/components/dashboard/LifetipsStructuredInput';
 
 // ============ 타입 ============
 
@@ -333,6 +340,9 @@ export function BatchGeneratorContent() {
     const [niche, setNiche] = useState('knowledge');
     const [forceMode, setForceMode] = useState<string>(''); // lifetips 전용: '' | 'saga' | 'review'
     const [materialInput, setMaterialInput] = useState('');
+    // lifetips 전용: 상세 입력 모드 (제품명/브랜드/리뷰/추가정보)
+    const [inputMode, setInputMode] = useState<'simple' | 'detailed'>('simple');
+    const [structuredInput, setStructuredInput] = useState<LifetipsStructuredValue>(emptyLifetipsStructured);
     const [queue, setQueue] = useState<QueueItem[]>([]);
     const [recentCompleted, setRecentCompleted] = useState<QueueItem[]>([]);
     const [jobId, setJobId] = useState<string | null>(null);
@@ -586,13 +596,20 @@ export function BatchGeneratorContent() {
     }, [fetchCurrentJob, jobId, jobStatus, processNext]);
 
     const addToQueue = useCallback(async () => {
-        const material = materialInput.trim();
-        if (!material) return;
+        // lifetips 상세 모드: 4개 필드 → 표준 텍스트로 조립
+        const isDetailedMode = niche === 'lifetips' && inputMode === 'detailed';
+        let material: string;
+        if (isDetailedMode) {
+            if (!isLifetipsStructuredValid(structuredInput)) return;
+            material = assembleLifetipsMaterial(structuredInput);
+        } else {
+            material = materialInput.trim();
+            if (!material) return;
+        }
 
-        // 낙관적 UI: 즉시 큐에 추가
+        // 낙관적 UI: 즉시 큐에 추가 (입력 폼은 응답 후 reset)
         const tempId = `temp_${Date.now()}`;
         setQueue(prev => [...prev, { id: tempId, material, niche, status: 'waiting' as const }]);
-        setMaterialInput('');
         setCreditError(null);
 
         try {
@@ -608,20 +625,24 @@ export function BatchGeneratorContent() {
             const data = await res.json() as RemoteBatchCurrentResponse & { error?: string };
 
             if (!res.ok) {
-                // 실패 시 롤백
+                // 실패 시 롤백 — 폼 데이터는 그대로 유지
                 setQueue(prev => prev.filter(q => q.id !== tempId));
-                setMaterialInput(material);
                 setCreditError(data.error || '큐에 추가하지 못했습니다.');
                 return;
             }
 
+            // 성공 시에만 입력 reset
+            if (isDetailedMode) {
+                setStructuredInput(emptyLifetipsStructured);
+            } else {
+                setMaterialInput('');
+            }
             applyBatchState((data.job ?? null) as RemoteBatchJob | null, data.recentCompleted ?? []);
         } catch {
             setQueue(prev => prev.filter(q => q.id !== tempId));
-            setMaterialInput(material);
             setCreditError('큐에 추가하지 못했습니다.');
         }
-    }, [applyBatchState, materialInput, niche]);
+    }, [applyBatchState, materialInput, niche, inputMode, structuredInput, forceMode]);
 
     const removeFromQueue = useCallback(async (id: string) => {
         try {
@@ -876,27 +897,77 @@ export function BatchGeneratorContent() {
                 {/* ──── 소재 입력 + 생성 큐 (통합) ──── */}
                 <Card padding="lg" radius="lg" withBorder>
                     <Stack gap="md">
-                        {/* 소재 입력 — 항상 상단 */}
-                        <Textarea
-                            placeholder="YouTube Shorts 소재를 입력하세요..."
-                            minRows={2}
-                            maxRows={5}
-                            autosize
-                            value={materialInput}
-                            onChange={(e) => setMaterialInput(e.currentTarget.value)}
-                            styles={{
-                                input: {
-                                    border: '1.5px solid var(--mantine-color-default-border)',
-                                    fontSize: '15px',
-                                    lineHeight: 1.7,
-                                },
-                            }}
-                        />
+                        {/* lifetips 전용: 입력 방식 토글 (간단/상세) */}
+                        {niche === 'lifetips' && (
+                            <Group gap={6}>
+                                {[
+                                    { value: 'simple', label: '간단 입력' },
+                                    { value: 'detailed', label: '상세 입력 (권장)' },
+                                ].map((tab) => {
+                                    const selected = inputMode === tab.value;
+                                    return (
+                                        <Box
+                                            key={tab.value}
+                                            onClick={() => setInputMode(tab.value as 'simple' | 'detailed')}
+                                            style={{
+                                                padding: '6px 14px',
+                                                borderRadius: '8px',
+                                                border: selected ? '1.5px solid #8b5cf6' : '1.5px solid var(--mantine-color-default-border)',
+                                                background: selected ? 'rgba(139, 92, 246, 0.08)' : 'transparent',
+                                                cursor: 'pointer',
+                                                fontSize: '13px',
+                                                fontWeight: 600,
+                                                color: selected ? '#8b5cf6' : 'var(--mantine-color-text)',
+                                                transition: 'all 0.15s ease',
+                                            }}
+                                        >
+                                            {tab.label}
+                                        </Box>
+                                    );
+                                })}
+                            </Group>
+                        )}
+
+                        {/* 소재 입력 — 입력 모드별 분기 */}
+                        {niche === 'lifetips' && inputMode === 'detailed' ? (
+                            <LifetipsStructuredInput
+                                value={structuredInput}
+                                onChange={setStructuredInput}
+                            />
+                        ) : (
+                            <Textarea
+                                placeholder="YouTube Shorts 소재를 입력하세요..."
+                                minRows={2}
+                                maxRows={5}
+                                autosize
+                                value={materialInput}
+                                onChange={(e) => setMaterialInput(e.currentTarget.value)}
+                                styles={{
+                                    input: {
+                                        border: '1.5px solid var(--mantine-color-default-border)',
+                                        fontSize: '15px',
+                                        lineHeight: 1.7,
+                                    },
+                                }}
+                            />
+                        )}
                         <Group justify="space-between">
-                            <Text size="xs" c={materialInput.trim().length > 0 && materialInput.trim().length < 10 ? "red.5" : "gray.5"}>
-                                {materialInput.trim().length > 0 && materialInput.trim().length < 10
-                                    ? `소재를 10자 이상 입력해 주세요 (현재 ${materialInput.trim().length}자)`
-                                    : <>1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}</>
+                            <Text size="xs" c={
+                                niche === 'lifetips' && inputMode === 'detailed'
+                                    ? (!isLifetipsStructuredValid(structuredInput) && (structuredInput.product.trim() || structuredInput.reviews.trim()) ? "red.5" : "gray.5")
+                                    : (materialInput.trim().length > 0 && materialInput.trim().length < 10 ? "red.5" : "gray.5")
+                            }>
+                                {niche === 'lifetips' && inputMode === 'detailed'
+                                    ? (
+                                        !isLifetipsStructuredValid(structuredInput) && (structuredInput.product.trim() || structuredInput.reviews.trim())
+                                            ? '제품명과 리뷰는 필수 입력입니다'
+                                            : <>1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}</>
+                                    )
+                                    : (
+                                        materialInput.trim().length > 0 && materialInput.trim().length < 10
+                                            ? `소재를 10자 이상 입력해 주세요 (현재 ${materialInput.trim().length}자)`
+                                            : <>1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}</>
+                                    )
                                 }
                             </Text>
                             <Group gap="xs">
@@ -907,7 +978,11 @@ export function BatchGeneratorContent() {
                                     radius="lg"
                                     size="sm"
                                     onClick={addToQueue}
-                                    disabled={!materialInput.trim() || materialInput.trim().length < 10 || activeSlotCount >= MAX_QUEUE}
+                                    disabled={
+                                        niche === 'lifetips' && inputMode === 'detailed'
+                                            ? (!isLifetipsStructuredValid(structuredInput) || activeSlotCount >= MAX_QUEUE)
+                                            : (!materialInput.trim() || materialInput.trim().length < 10 || activeSlotCount >= MAX_QUEUE)
+                                    }
                                 >
                                     추가 ({activeSlotCount}/{MAX_QUEUE})
                                 </Button>
