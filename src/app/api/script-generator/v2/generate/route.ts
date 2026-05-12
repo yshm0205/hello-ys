@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { deductUserCredits, refundUserCredits } from "@/lib/credits/server";
+import { type CreditAction, deductUserCredits, refundUserCredits } from "@/lib/credits/server";
 import {
   getAuthenticatedUser,
   postToScriptGenerator,
@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     typeof body.research_text === "string" ? body.research_text : "";
   const niche = typeof body.niche === "string" ? body.niche : "";
   const tone = typeof body.tone === "string" ? body.tone : "";
+  const forceMode = typeof body.force_mode === "string" ? body.force_mode : "";
 
   if (material.length < 10) {
     return NextResponse.json(
@@ -32,13 +33,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const referenceId = `generate_skip:${user.id}:${randomUUID()}`;
-  const deduction = await deductUserCredits(user.id, "generate_skip", {
+  // saga 모드는 SceneExpander 추가로 +2cr
+  const creditAction: CreditAction =
+    niche === "lifetips" && forceMode === "saga" ? "generate_skip_saga" : "generate_skip";
+
+  const referenceId = `${creditAction}:${user.id}:${randomUUID()}`;
+  const deduction = await deductUserCredits(user.id, creditAction, {
     referenceId,
     metadata: {
       source: "v2_generate_route",
       niche,
       tone,
+      forceMode,
     },
   });
 
@@ -59,6 +65,7 @@ export async function POST(request: NextRequest) {
       research_text: researchText,
       niche,
       tone,
+      force_mode: forceMode,
       user_id: user.id,
     });
 
