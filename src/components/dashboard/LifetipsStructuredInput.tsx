@@ -54,7 +54,7 @@ export function LifetipsStructuredInput({ value, onChange }: Props) {
                     </Text>
                 </Text>
                 <TextInput
-                    placeholder="예: 진공 압축 백팩 / VacPack-Elite"
+                    placeholder="예: 이동식 3단 서랍 / 진공 압축 백팩"
                     value={value.product}
                     onChange={(e) => update({ product: e.currentTarget.value })}
                 />
