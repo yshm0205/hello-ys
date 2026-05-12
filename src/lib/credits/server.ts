@@ -4,9 +4,9 @@ import { createAdminClient } from "@/utils/supabase/admin";
 export const CREDIT_COSTS = {
   generate_full: 10,
   generate_batch: 10,
-  generate_batch_saga: 12,    // lifetips 썰형 (SceneExpander 추가로 LLM 호출 +1)
+  generate_batch_saga: 10,    // SceneExpander 비활성으로 base와 동일
   generate_skip: 7,
-  generate_skip_saga: 9,      // 동일 이유
+  generate_skip_saga: 7,      // SceneExpander 비활성으로 base와 동일
   research: 3,
   rewrite: 2,
 } as const;
