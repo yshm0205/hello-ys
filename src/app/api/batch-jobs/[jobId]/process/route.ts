@@ -9,7 +9,7 @@ import {
   toBatchJobPayload,
   updateBatchJobCounts,
 } from "@/lib/batch-jobs/server";
-import { deductUserCredits, refundUserCredits } from "@/lib/credits/server";
+import { type CreditAction, deductUserCredits, refundUserCredits } from "@/lib/credits/server";
 import { createClient } from "@/utils/supabase/server";
 
 const RENDER_API_URL =
@@ -142,16 +142,20 @@ async function deductBatchCreditsWithRetry(
   jobId: string,
   itemId: string,
   attempt: number,
+  forceMode: string,
 ) {
   const referenceId = `batch_item_${itemId}_attempt_${attempt}`;
+  // saga 모드는 SceneExpander 추가로 LLM 호출 +1, 시간 +50% → 12cr
+  const action: CreditAction = forceMode === "saga" ? "generate_batch_saga" : "generate_batch";
 
   for (let retry = 0; retry < MAX_CREDIT_DEDUCT_RETRIES; retry += 1) {
-    const creditResult = await deductUserCredits(userId, "generate_batch", {
+    const creditResult = await deductUserCredits(userId, action, {
       referenceId,
       metadata: {
         jobId,
         itemId,
         attempt,
+        forceMode,
       },
     });
 
@@ -162,12 +166,13 @@ async function deductBatchCreditsWithRetry(
     await sleep(200 * (retry + 1));
   }
 
-  const creditResult = await deductUserCredits(userId, "generate_batch", {
+  const creditResult = await deductUserCredits(userId, action, {
     referenceId,
     metadata: {
       jobId,
       itemId,
       attempt,
+      forceMode,
     },
   });
 
@@ -302,11 +307,19 @@ export async function POST(
       }
 
       const newAttempt = (nextItem.attempt_count || 0) + 1;
+      // lifetips + force_mode 인코딩 디코드 (saga 가격 차등용)
+      const rawNicheForCost = nextItem.niche || state.job.niche || "";
+      let forceModeForCost = "";
+      if (rawNicheForCost.startsWith("lifetips:")) {
+        const parts = rawNicheForCost.split(":");
+        forceModeForCost = parts[1] || "";
+      }
       const { creditResult, referenceId } = await deductBatchCreditsWithRetry(
         actor.userId,
         state.job.id,
         nextItem.id,
         newAttempt,
+        forceModeForCost,
       );
 
       if (!creditResult.success) {
