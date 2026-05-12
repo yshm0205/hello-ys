@@ -26,7 +26,7 @@ import { AuthAwareButton } from '@/components/landing/AuthAwareButton';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
-import type { PublicMarketingReviewsSummary } from '@/lib/marketing/reviews';
+import type { PublicMarketingReview, PublicMarketingReviewsSummary } from '@/lib/marketing/reviews';
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
@@ -64,6 +64,56 @@ const MARKETING_REVIEWS_EMPTY: PublicMarketingReviewsSummary = {
   totalCount: 0,
   averageRating: 0,
 };
+
+type LandingReview = PublicMarketingReview & {
+  sourceLabel?: string;
+  dateLabel?: string;
+};
+
+const YOUTUBE_COMMENT_REVIEWS: LandingReview[] = [
+  {
+    id: 'youtube-comment-life-temperature-20260511',
+    rating: 5,
+    headline: null,
+    content: '49만원에 이 내용이면 정말 대단합니다 돈이 아깝지 않아요 감사합니다^^',
+    displayName: '@인생온도-m4q1x',
+    createdAt: '2026-05-11T09:00:00+09:00',
+    dateLabel: '1일 전',
+    sourceLabel: '유튜브',
+  },
+];
+
+function getLandingReviewItems(summary: PublicMarketingReviewsSummary): LandingReview[] {
+  return [...YOUTUBE_COMMENT_REVIEWS, ...summary.reviews].sort((a, b) => {
+    const aTime = new Date(a.createdAt).getTime();
+    const bTime = new Date(b.createdAt).getTime();
+    return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
+  });
+}
+
+function getLandingReviewCount(summary: PublicMarketingReviewsSummary) {
+  const baseCount = summary.totalCount || summary.reviews.length;
+  return baseCount + YOUTUBE_COMMENT_REVIEWS.length;
+}
+
+function getLandingAverageRating(summary: PublicMarketingReviewsSummary) {
+  const baseCount = summary.totalCount || summary.reviews.length;
+  const baseAverage =
+    summary.averageRating > 0
+      ? summary.averageRating
+      : summary.reviews.length > 0
+        ? summary.reviews.reduce((sum, review) => sum + review.rating, 0) / summary.reviews.length
+        : 0;
+  const staticTotal = YOUTUBE_COMMENT_REVIEWS.reduce((sum, review) => sum + review.rating, 0);
+  const totalCount = baseCount + YOUTUBE_COMMENT_REVIEWS.length;
+
+  if (totalCount === 0) return 5;
+  return (baseAverage * baseCount + staticTotal) / totalCount;
+}
+
+function getLandingReviewDateLabel(review: LandingReview) {
+  return review.dateLabel || formatReviewDate(review.createdAt);
+}
 
 const EARLYBIRD_FALLBACK_SUMMARY: LandingEarlybirdSummary = {
   currentTier: 'phase1',
@@ -307,30 +357,24 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
   const [carouselIndex, setCarouselIndex] = useState(2);
   const [carouselTransition, setCarouselTransition] = useState(false);
   const [carouselResetting, setCarouselResetting] = useState(false);
+  const [reviewPage, setReviewPage] = useState(0);
 
-  const reviewCount = reviewSummary.totalCount || reviewSummary.reviews.length;
-  const derivedAverage =
-    reviewSummary.averageRating > 0
-      ? reviewSummary.averageRating
-      : reviewSummary.reviews.length > 0
-        ? reviewSummary.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewSummary.reviews.length
-        : 5;
+  const reviewCount = getLandingReviewCount(reviewSummary);
+  const derivedAverage = getLandingAverageRating(reviewSummary);
   const ratingLabel = derivedAverage.toFixed(1);
-  const reviewCountText = reviewCount > 0 ? `${reviewCount}개` : '수강생 후기';
-  const previewReviews =
+  const reviewCountText = `${reviewCount}개`;
+  const landingReviews = getLandingReviewItems(reviewSummary);
+  const previewSourceReviews: LandingReview[] =
     reviewSummary.reviews.length > 0
-      ? reviewSummary.reviews.slice(0, 2).map((review) => ({
-          id: review.id,
-          rating: review.rating,
-          displayName: review.displayName,
-          dateLabel: formatReviewDate(review.createdAt),
-          content: review.headline ? `${review.headline} ${review.content}` : review.content,
-        }))
+      ? landingReviews
       : [
+          ...landingReviews,
           {
             id: 'hero-fallback-review-1',
             rating: 5,
+            headline: null,
             displayName: '김OO**님',
+            createdAt: '2026-04-21T09:00:00+09:00',
             dateLabel: '3주 전',
             content:
               '강의 들으면서 따라하니 채널 개설부터 영상 업로드까지 가능한 커리큘럼으로 구성되어 있습니다.',
@@ -338,12 +382,33 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
           {
             id: 'hero-fallback-review-2',
             rating: 5,
+            headline: null,
             displayName: '박OO**님',
+            createdAt: '2026-04-28T09:00:00+09:00',
             dateLabel: '2주 전',
             content:
               '막상 오픈하고 나서는 바빠서 듣기 소홀했다가 최근에 다시 수업 듣고 있습니다. 진짜 도움이 많이 됩니다.',
           },
         ];
+  const previewReviews = previewSourceReviews.map((review) => ({
+    id: review.id,
+    rating: review.rating,
+    displayName: review.displayName,
+    dateLabel: getLandingReviewDateLabel(review),
+    sourceLabel: review.sourceLabel,
+    content: review.headline ? `${review.headline} ${review.content}` : review.content,
+  }));
+  const previewReviewsPerPage = 2;
+  const reviewPageCount = Math.max(1, Math.ceil(previewReviews.length / previewReviewsPerPage));
+  const currentReviewPage = ((reviewPage % reviewPageCount) + reviewPageCount) % reviewPageCount;
+  const visiblePreviewReviews = previewReviews.slice(
+    currentReviewPage * previewReviewsPerPage,
+    currentReviewPage * previewReviewsPerPage + previewReviewsPerPage,
+  );
+  const canPageReviews = previewReviews.length > previewReviewsPerPage;
+  const goReviewPage = (direction: number) => {
+    setReviewPage((value) => (value + direction + reviewPageCount) % reviewPageCount);
+  };
   const realCarouselIndex = ((carouselIndex - 2 + heroSlides.length) % heroSlides.length) + 1;
 
   useEffect(() => {
@@ -675,9 +740,46 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
           margin-bottom: 14px;
         }
         .fs-reviews-preview-title {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
           color: rgba(250, 250, 250, 0.86);
-          font-size: 15px;
+          font-size: 17px;
           font-weight: 800;
+          letter-spacing: 0;
+        }
+        .fs-reviews-preview-title .fs-stars {
+          color: #fbbf24;
+        }
+        .fs-review-title-dot {
+          color: rgba(228, 228, 231, 0.26);
+        }
+        .fs-reviews-preview-controls {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .fs-review-nav {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 34px;
+          height: 34px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.04);
+          color: rgba(250, 250, 250, 0.86);
+          cursor: pointer;
+          transition: background 180ms ease, border-color 180ms ease, color 180ms ease, opacity 180ms ease;
+        }
+        .fs-review-nav:hover:not(:disabled) {
+          background: rgba(139, 92, 246, 0.12);
+          border-color: rgba(167, 139, 250, 0.4);
+          color: #ffffff;
+        }
+        .fs-review-nav:disabled {
+          cursor: default;
+          opacity: 0.36;
         }
         .fs-reviews-preview-cards {
           display: grid;
@@ -700,7 +802,22 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
           font-size: 12px;
         }
         .fs-review-card-author {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
           font-weight: 800;
+        }
+        .fs-review-source-badge {
+          flex-shrink: 0;
+          padding: 3px 7px;
+          border: 1px solid rgba(248, 113, 113, 0.3);
+          border-radius: 999px;
+          background: rgba(239, 68, 68, 0.14);
+          color: #fecaca;
+          font-size: 10px;
+          font-weight: 850;
+          line-height: 1;
         }
         .fs-review-card-date {
           margin-left: auto;
@@ -969,11 +1086,38 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
 
             <Box className="fs-reviews-preview">
               <Box className="fs-reviews-preview-header">
-                <span className="fs-reviews-preview-title">수강생 후기</span>
+                <span className="fs-reviews-preview-title">
+                  <span className="fs-stars" aria-hidden="true">
+                    <Star size={18} fill="currentColor" stroke="currentColor" />
+                  </span>
+                  리뷰 {ratingLabel}
+                  <span className="fs-review-title-dot">·</span>
+                  {reviewCountText}
+                </span>
+                <span className="fs-reviews-preview-controls">
+                  <button
+                    type="button"
+                    className="fs-review-nav"
+                    aria-label="이전 리뷰 보기"
+                    disabled={!canPageReviews}
+                    onClick={() => goReviewPage(-1)}
+                  >
+                    <ChevronLeft size={18} strokeWidth={2.4} />
+                  </button>
+                  <button
+                    type="button"
+                    className="fs-review-nav"
+                    aria-label="다음 리뷰 보기"
+                    disabled={!canPageReviews}
+                    onClick={() => goReviewPage(1)}
+                  >
+                    <ChevronRight size={18} strokeWidth={2.4} />
+                  </button>
+                </span>
               </Box>
 
               <Box className="fs-reviews-preview-cards">
-                {previewReviews.map((review) => (
+                {visiblePreviewReviews.map((review) => (
                   <Box key={review.id} className="fs-review-card">
                     <Box className="fs-review-card-meta">
                       <span className="fs-stars" aria-hidden="true">
@@ -988,6 +1132,7 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
                         ))}
                       </span>
                       <span className="fs-review-card-author">{review.displayName}</span>
+                      {review.sourceLabel && <span className="fs-review-source-badge">{review.sourceLabel}</span>}
                       {review.dateLabel && <span className="fs-review-card-date">{review.dateLabel}</span>}
                     </Box>
                     <Text className="fs-review-card-body">{review.content}</Text>
@@ -996,7 +1141,7 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
               </Box>
 
               <a href="#reviews" className="fs-reviews-more" onClick={handleScrollToReviews}>
-                전체 후기 보기
+                리뷰 전체 보기
                 <ArrowRight size={14} strokeWidth={2.4} />
               </a>
             </Box>
@@ -2894,16 +3039,14 @@ function BuyerReviewSection({
 }) {
   const reviewSummary = useLandingMarketingReviews(initialReviews);
   const [expanded, setExpanded] = useState(false);
-  const reviews = reviewSummary.reviews;
+  const reviews = getLandingReviewItems(reviewSummary);
 
   if (reviews.length === 0) return null;
 
-  const showCollectionUi = reviewSummary.totalCount >= 3;
+  const totalReviewCount = getLandingReviewCount(reviewSummary);
+  const showCollectionUi = totalReviewCount >= 3;
   const visibleReviews = expanded || !showCollectionUi ? reviews : reviews.slice(0, 3);
-  const averageRating =
-    reviewSummary.averageRating > 0
-      ? reviewSummary.averageRating
-      : reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+  const averageRating = getLandingAverageRating(reviewSummary);
   const ratingText = averageRating.toFixed(1);
 
   return (
@@ -2939,7 +3082,7 @@ function BuyerReviewSection({
                   fontWeight: 800,
                 }}
               >
-                전체 {reviewSummary.totalCount}건
+                전체 {totalReviewCount}건
               </Text>
               <Group gap={10} wrap="nowrap">
                 <Text
@@ -2995,8 +3138,23 @@ function BuyerReviewSection({
                         fontWeight: 600,
                       }}
                     >
-                      {formatReviewDate(review.createdAt)}
+                      {getLandingReviewDateLabel(review)}
                     </Text>
+                    {review.sourceLabel && (
+                      <Text
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: 999,
+                          background: '#fef2f2',
+                          color: '#dc2626',
+                          fontSize: '12px',
+                          fontWeight: 850,
+                          lineHeight: 1,
+                        }}
+                      >
+                        {review.sourceLabel}
+                      </Text>
+                    )}
                     <Text
                       style={{
                         color: '#fb7185',
