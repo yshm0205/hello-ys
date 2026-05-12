@@ -68,7 +68,7 @@ export function LifetipsStructuredInput({ value, onChange }: Props) {
                     </Text>
                 </Text>
                 <TextInput
-                    placeholder="예: Airback, EasyPack"
+                    placeholder="예: 이케아, 다이소, 한샘"
                     value={value.brand}
                     onChange={(e) => update({ brand: e.currentTarget.value })}
                 />
