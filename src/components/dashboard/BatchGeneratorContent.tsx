@@ -442,6 +442,13 @@ export function BatchGeneratorContent() {
         }
     }, [initialCredits]);
 
+    // 니치가 lifetips 아니면 상세 모드 자동 해제 (간단 모드 유지)
+    useEffect(() => {
+        if (niche !== 'lifetips' && inputMode === 'detailed') {
+            setInputMode('simple');
+        }
+    }, [niche, inputMode]);
+
     const fetchCurrentJob = useCallback(async () => {
         try {
             const res = await fetch('/api/batch-jobs/current', { cache: 'no-store' });

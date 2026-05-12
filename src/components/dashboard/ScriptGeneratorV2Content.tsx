@@ -605,6 +605,17 @@ export function ScriptGeneratorV2Content({ user }: Props) {
     const handleGenerate = async () => {
         setError(null);
 
+        // detailed 모드면 구조화 입력 필수 체크
+        if (selectedNiche === 'lifetips' && inputMode === 'detailed') {
+            if (!isLifetipsStructuredValid(structuredInput)) {
+                setError('제품명과 리뷰는 필수 입력입니다.');
+                return;
+            }
+        } else if (!material.trim() || material.length < 10) {
+            setError('소재를 10자 이상 입력해주세요.');
+            return;
+        }
+
         if (!ensureAvailableCredits(7)) return;
 
         setIsGenerating(true);
