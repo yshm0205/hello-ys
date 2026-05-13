@@ -1951,6 +1951,56 @@ function PainSection() {
           }}>
             (판매된 채널의 성과는 포함하지 않았습니다)
           </Text>
+
+          {/* ── 전체 누적 (유튜브 + 네이버 클립) ── */}
+          <Box style={{
+            marginTop: 'clamp(56px, 10vw, 80px)',
+            maxWidth: '480px',
+            margin: 'clamp(56px, 10vw, 80px) auto 0',
+            padding: 'clamp(28px, 6vw, 40px) clamp(24px, 5vw, 32px)',
+            borderRadius: '20px',
+            background: 'linear-gradient(180deg, rgba(34,197,94,0.10) 0%, rgba(34,197,94,0.02) 100%)',
+            border: '1.5px solid rgba(34,197,94,0.35)',
+            boxShadow: '0 0 32px rgba(34,197,94,0.12)',
+            textAlign: 'center',
+          }}>
+            <Text style={{
+              fontSize: 'clamp(13px, 3.2vw, 15px)',
+              fontWeight: 700, color: 'rgba(255,255,255,0.65)',
+              letterSpacing: '0.02em',
+              marginBottom: '12px',
+            }}>
+              유튜브 + 네이버 클립 누적 수익
+            </Text>
+            <Text style={{
+              fontSize: 'clamp(42px, 12vw, 64px)',
+              fontWeight: 900, color: '#22c55e',
+              lineHeight: 1.1,
+              marginBottom: '16px',
+            }}>
+              8,277만원
+            </Text>
+            <Group justify="center" gap="xs" wrap="nowrap">
+              <Text style={{
+                fontSize: 'clamp(12px, 2.9vw, 14px)',
+                fontWeight: 600, color: 'rgba(255,255,255,0.55)',
+              }}>
+                유튜브 4개 채널 6,332만원
+              </Text>
+              <Text style={{
+                fontSize: 'clamp(12px, 2.9vw, 14px)',
+                color: 'rgba(255,255,255,0.35)',
+              }}>
+                +
+              </Text>
+              <Text style={{
+                fontSize: 'clamp(12px, 2.9vw, 14px)',
+                fontWeight: 600, color: 'rgba(255,255,255,0.55)',
+              }}>
+                네이버 클립 1,945만원
+              </Text>
+            </Group>
+          </Box>
         </motion.div>
 
         {/* ── 반론 제기 + 수강생 후기 ── */}
