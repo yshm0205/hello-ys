@@ -1297,6 +1297,20 @@ export function AllInOneCheckoutContent({
                 <div className="fs-payment-note">
                   <strong>토스 보안 결제창에서 결제합니다</strong>
                   <span>카드, 토스머니, 계좌이체 등 실제 결제수단은 토스 화면에서 선택합니다.</span>
+                  <a
+                    href="/help/payment"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      marginTop: '8px',
+                      fontSize: '13px',
+                      color: '#8b5cf6',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    토스페이 처음 사용하시나요? 안내 보기 →
+                  </a>
                 </div>
 
                 <div className="fs-policy-list">
