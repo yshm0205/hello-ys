@@ -1605,10 +1605,10 @@ function PainSection() {
         {/* 성과 카드들 — 체크 + 수익 + 풀 스크린샷 */}
         <Stack gap={48} style={{ maxWidth: '560px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
-            { label: '채널A 게임', amount: '1,567만원', views: '5,937만회', src: '/images/success-ch-b.png' },
-            { label: '채널B 해외반응', amount: '923만원', views: '2,375만회', src: '/images/success-ch-c.png' },
-            { label: '채널C 해외반응', amount: '488만원', views: '3,005만회', src: '/images/success-ch-d.png' },
-            { label: '채널D 지식/정보', amount: '159만원', views: '46만회', src: '/images/success-ch-a.png' },
+            { label: '채널A 해외반응', amount: '2,957만원', views: '1.01억회', src: '/images/success-ch-a.png' },
+            { label: '채널B 게임', amount: '2,388만원', views: '4,036만회', src: '/images/success-ch-b.png' },
+            { label: '채널C 지식/정보', amount: '725만원', views: '4,048만회', src: '/images/success-ch-c.png' },
+            { label: '채널D 지식/정보', amount: '261만원', views: '65만회', src: '/images/success-ch-d.png' },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -1904,7 +1904,7 @@ function PainSection() {
             fontSize: 'clamp(15px, 3.8vw, 17px)',
             fontWeight: 600, color: 'rgba(255,255,255,0.4)',
           }}>
-            5개 채널 총 성과
+            4개 채널 총 성과
           </Text>
           <Group justify="center" gap="clamp(24px, 6vw, 48px)" mt={6}>
             <Box style={{ textAlign: 'center' }}>
@@ -1913,7 +1913,7 @@ function PainSection() {
                 fontWeight: 900, color: '#ffffff',
                 lineHeight: 1.2,
               }}>
-                5,082만원
+                6,332만원
               </Text>
               <Text style={{
                 fontSize: 'clamp(12px, 3vw, 14px)',
@@ -1933,7 +1933,7 @@ function PainSection() {
                 fontWeight: 900, color: '#ffffff',
                 lineHeight: 1.2,
               }}>
-                1.1억회
+                1.82억회
               </Text>
               <Text style={{
                 fontSize: 'clamp(12px, 3vw, 14px)',
