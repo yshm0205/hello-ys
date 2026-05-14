@@ -12,10 +12,7 @@ export default function PaymentHelpPage() {
     <div className="flex min-h-screen flex-col bg-white dark:bg-black">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-16 max-w-3xl">
-        <h1 className="text-4xl font-bold mb-4">결제 안내</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-          토스페이로 처음 결제하시나요? 결제 흐름이 익숙하지 않으면 당황하실 수 있어서 미리 안내해드려요.
-        </p>
+        <h1 className="text-4xl font-bold mb-8">결제 안내</h1>
 
         {/* ── 핵심 안심 박스 (가장 먼저 보이게) ── */}
         <div className="mb-12 rounded-2xl border-2 border-amber-400/50 bg-amber-50 p-6 dark:bg-amber-500/10">
