@@ -83,6 +83,7 @@ declare global {
                     addEventListener: (event: string, handler: () => void) => void;
                     removeEventListener: (event: string, handler: () => void) => void;
                     play: () => void;
+                    pause?: () => void;
                 };
                 api: {
                     getTotalCovered: () => Promise<number>;
@@ -100,6 +101,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
     const [showList, setShowList] = useState(true);
     const [videoOtp, setVideoOtp] = useState<string | null>(null);
     const [playbackInfo, setPlaybackInfo] = useState<string | null>(null);
+    const [videoSourceVodId, setVideoSourceVodId] = useState<string | null>(null);
     const [isVideoLoading, setIsVideoLoading] = useState(false);
     const [videoError, setVideoError] = useState<string | null>(null);
 
@@ -138,6 +140,8 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
             setOpenChapters((prev) => ({ ...prev, [currentVod.chapterId]: true }));
         }
         autoCompletedRef.current = false;
+        currentPositionRef.current = 0;
+        lastSaveRef.current = 0;
         setCountdown(null);
         if (countdownTimerRef.current) {
             clearInterval(countdownTimerRef.current);
@@ -169,6 +173,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
     useEffect(() => {
         setVideoOtp(null);
         setPlaybackInfo(null);
+        setVideoSourceVodId(null);
         setVideoError(null);
 
         if (!currentVod?.isPlayable) return;
@@ -184,6 +189,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                 if (data.otp && data.playbackInfo) {
                     setVideoOtp(data.otp);
                     setPlaybackInfo(data.playbackInfo);
+                    setVideoSourceVodId(vodId);
                 } else {
                     setVideoError('영상을 불러올 수 없습니다');
                 }
@@ -251,10 +257,11 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
 
     // VdoPlayer 인스턴스 + 이벤트 바인딩
     useEffect(() => {
-        if (!videoOtp || !iframeRef.current) return;
+        if (!videoOtp || !playbackInfo || videoSourceVodId !== vodId || !iframeRef.current) return;
 
         const iframe = iframeRef.current;
         let cleanedUp = false;
+        let cleanupPlayer: (() => void) | null = null;
 
         // api.js 로드 대기 후 플레이어 초기화
         const waitForApi = setInterval(() => {
@@ -264,23 +271,24 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
 
             try {
                 const player = window.VdoPlayer.getInstance(iframe);
+                const { video } = player;
 
                 // 이어서 듣기: loadedmetadata 후 저장된 위치로 seek
                 const savedPos = positions[vodId] || 0;
-                player.video.addEventListener('loadedmetadata', () => {
+                const handleLoadedMetadata = () => {
                     if (savedPos > 5) {
                         // 끝에서 5초 이내면 처음부터
-                        const dur = player.video.duration;
+                        const dur = video.duration;
                         if (dur > 0 && savedPos < dur - 5) {
-                            player.video.currentTime = savedPos;
+                            video.currentTime = savedPos;
                         }
                     }
-                });
+                };
 
                 // 15초마다 진도 저장 + 90% 자동 완료 체크
-                player.video.addEventListener('timeupdate', () => {
-                    const current = player.video.currentTime;
-                    const duration = player.video.duration;
+                const handleTimeUpdate = () => {
+                    const current = video.currentTime;
+                    const duration = video.duration;
                     currentPositionRef.current = current;
 
                     // 15초마다 위치 저장
@@ -295,21 +303,35 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                         autoCompletedRef.current = true;
                         markComplete(current);
                     }
-                });
+                };
 
                 // 영상 끝: 완료 처리 + 다음 강의 카운트다운
-                player.video.addEventListener('ended', () => {
+                const handleEnded = () => {
                     // 완료 처리
                     if (!autoCompletedRef.current) {
                         autoCompletedRef.current = true;
-                        markComplete(player.video.duration || player.video.currentTime);
+                        markComplete(video.duration || video.currentTime);
                     }
 
                     // 다음 강의 카운트다운 시작
                     if (nextVod) {
+                        setVideoOtp(null);
+                        setPlaybackInfo(null);
+                        setVideoSourceVodId(null);
                         setCountdown(5);
                     }
-                });
+                };
+
+                video.addEventListener('loadedmetadata', handleLoadedMetadata);
+                video.addEventListener('timeupdate', handleTimeUpdate);
+                video.addEventListener('ended', handleEnded);
+
+                cleanupPlayer = () => {
+                    video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+                    video.removeEventListener('timeupdate', handleTimeUpdate);
+                    video.removeEventListener('ended', handleEnded);
+                    video.pause?.();
+                };
             } catch {
                 // VdoPlayer 초기화 실패 — 무시 (DRM 미지원 브라우저 등)
             }
@@ -318,10 +340,12 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
         return () => {
             cleanedUp = true;
             clearInterval(waitForApi);
+            cleanupPlayer?.();
+            iframe.src = 'about:blank';
         };
     // positions는 초기 로드 후 변하지 않으므로 deps에서 제외 (stale closure 의도)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [videoOtp, vodId, savePosition, markComplete, nextVod]);
+    }, [videoOtp, playbackInfo, videoSourceVodId, vodId, savePosition, markComplete, nextVod]);
 
     // 카운트다운 타이머
     useEffect(() => {
@@ -457,8 +481,9 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                         >
                                             <Text c="gray.5" size="sm">{videoError}</Text>
                                         </div>
-                                    ) : videoOtp && playbackInfo ? (
+                                    ) : videoOtp && playbackInfo && videoSourceVodId === vodId ? (
                                         <iframe
+                                            key={`${videoSourceVodId}:${videoOtp}`}
                                             ref={iframeRef}
                                             src={`https://player.vdocipher.com/v2/?otp=${videoOtp}&playbackInfo=${playbackInfo}&primaryColor=8B5CF6`}
                                             style={{
