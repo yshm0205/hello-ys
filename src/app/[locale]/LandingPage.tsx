@@ -237,10 +237,10 @@ function getActiveEarlybirdView(summary: LandingEarlybirdSummary) {
       claimed: summary.phase2Total,
       claimedPct: 100,
       isUrgent: false,
-      badgeLabel: '얼리버드 종료',
-      bonusValue: '혜택 종료',
-      headline: '얼리버드 종료',
-      progressHint: '이제 정가 구성으로만 신청할 수 있습니다.',
+      badgeLabel: '상시 판매',
+      bonusValue: '올인원 패스',
+      headline: '올인원 패스',
+      progressHint: '49.9만원 구성으로 계속 신청할 수 있습니다.',
     };
   }
 
@@ -3324,7 +3324,7 @@ function FAQSection() {
         },
         {
           q: '크레딧 만료가 있나요?',
-          a: '얼리버드 보너스 크레딧은 만료 없이 영구 보존됩니다.\n\n반면 매달 정기 지급되는 400cr와 월 구독 크레딧은 다음 지급일에 리셋되며, 미사용분은 이월되지 않습니다.\n\n즉 보너스만 평생 사용 가능, 정기 지급분은 그 달 안에 사용해주세요.',
+          a: '매달 정기 지급되는 400cr와 월 구독 크레딧은 다음 지급일에 리셋되며, 미사용분은 이월되지 않습니다.\n\n월별 지급분은 그 달 안에 사용해 주세요. 추가로 구매한 크레딧은 별도 정책에 따라 보존됩니다.',
         },
         {
           q: '크레딧이 부족하면 어떻게 되나요?',
@@ -3837,15 +3837,18 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
   const monthly12Orig = Math.ceil(primaryProgram.listAmount / 12);
   const monthly12Now = Math.ceil(primaryProgram.amount / 12);
   const discountPct = Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100);
+  const earlybirdEnded = earlybird.currentTier === 'ended';
   const floatingLabel =
-    earlybird.currentTier === 'phase1'
+    earlybirdEnded
+      ? '올인원 패스'
+      : earlybird.currentTier === 'phase1'
       ? '1차 얼리버드'
       : earlybird.currentTier === 'phase2'
         ? '2차 얼리버드'
-        : '얼리버드 종료';
+        : '올인원 패스';
   const floatingCountLabel =
-    earlybird.currentTier === 'ended'
-      ? '혜택 종료'
+    earlybirdEnded
+      ? '상시 판매 중'
       : `선착순 ${earlybird.total}명 한정`;
 
   if (isMobile) {
@@ -3981,7 +3984,9 @@ function FloatingCTA({ earlybirdSummary }: { earlybirdSummary: LandingEarlybirdS
             fontSize: '13px', fontWeight: 700, color: '#18181b',
             lineHeight: 1.45, marginBottom: 12, wordBreak: 'keep-all',
           }}>
-            [선착순 {earlybird.total}명 한정] 쇼츠 자동화 + AI 스크립트 도구 올인원 패키지
+            {earlybirdEnded
+              ? '쇼츠 자동화 + AI 스크립트 도구 올인원 패키지'
+              : `[선착순 ${earlybird.total}명 한정] 쇼츠 자동화 + AI 스크립트 도구 올인원 패키지`}
           </Text>
 
           {/* 프로모션 카운트다운 */}
@@ -4369,6 +4374,9 @@ function EarlyBirdSection({ earlybirdSummary }: { earlybirdSummary: LandingEarly
   const phase1IsLive = earlybird.currentTier === 'phase1';
   const phase2IsLive = earlybird.currentTier === 'phase2';
   const earlybirdEnded = earlybird.currentTier === 'ended';
+
+  if (earlybirdEnded) return null;
+
   const currentStageLabel = phase1IsLive
     ? '1차 얼리버드'
     : phase2IsLive

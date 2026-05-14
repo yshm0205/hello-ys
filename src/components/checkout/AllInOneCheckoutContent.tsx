@@ -138,7 +138,7 @@ export function AllInOneCheckoutContent({
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
   const primaryLabel = isAuthenticated
-    ? `2차 얼리버드로 ${formatWon(finalCheckoutAmount)} 결제하기`
+    ? `${formatWon(finalCheckoutAmount)} 결제하기`
     : '로그인하고 결제 계속하기';
 
   const buildCheckoutRedirectTarget = () => {
@@ -1132,7 +1132,7 @@ export function AllInOneCheckoutContent({
               <div className="fs-select-content">
                 <div className="fs-select-title">
                   <h1>올인원 패스 선택</h1>
-                  <p>2차 얼리버드 혜택이 적용된 단일 구성입니다.</p>
+                  <p>VOD와 AI 도구가 포함된 단일 구성입니다.</p>
                 </div>
 
                 <div className="fs-select-section">
@@ -1147,7 +1147,7 @@ export function AllInOneCheckoutContent({
                     onClick={redirectToLogin}
                   >
                     <span>
-                      <span className="fs-select-badge">2차 얼리버드 적용 중</span>
+                      <span className="fs-select-badge">올인원 패스</span>
                       <span className="fs-select-option-title">4개월 올인원 패스</span>
                       <span className="fs-select-option-sub">VOD 40강 · AI 도구 4개월 · 자료 패키지 포함</span>
                     </span>
@@ -1282,7 +1282,7 @@ export function AllInOneCheckoutContent({
                     <span>{formatWon(plan.listAmount)}</span>
                   </div>
                   <div className="fs-price-row discount">
-                    <span>{appliedCoupon ? appliedCoupon.label : '얼리버드 혜택'}</span>
+                    <span>{appliedCoupon ? appliedCoupon.label : '할인 혜택'}</span>
                     <span>-{formatWon(totalDiscountAmount)}</span>
                   </div>
                   <div className="fs-total">
