@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminSearch } from "@/components/admin/AdminSearch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -34,6 +35,8 @@ interface ChannelListItem {
   format: string;
   channel_url: string;
   first_upload_date: string | null;
+  profile_image_url: string | null;
+  total_video_count: number | null;
 }
 
 async function getAvailableMonths() {
@@ -88,6 +91,10 @@ function formatDate(value: string | null | undefined) {
   if (!value) return "-";
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
   return match ? `${match[1]}.${match[2]}.${match[3]}` : value;
+}
+
+function getInitial(value: string) {
+  return value.trim().charAt(0) || "?";
 }
 
 function buildQueryString(
@@ -225,6 +232,7 @@ export default async function AdminHotListPage({
                     <TableHead className="text-right">구독자</TableHead>
                     <TableHead className="text-right">평균 조회수</TableHead>
                     <TableHead className="text-right">중위 조회수</TableHead>
+                    <TableHead className="text-right">영상 수</TableHead>
                     <TableHead>첫 업로드</TableHead>
                     <TableHead className="w-[120px]">관리</TableHead>
                   </TableRow>
@@ -233,12 +241,24 @@ export default async function AdminHotListPage({
                   {hotList.data.map((channel) => (
                     <TableRow key={channel.id}>
                       <TableCell>
-                        <div className="font-medium text-foreground">{channel.title}</div>
-                        {channel.channel_id && (
-                          <div className="text-xs text-muted-foreground">
-                            {channel.channel_id}
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9">
+                            {channel.profile_image_url && (
+                              <AvatarImage src={channel.profile_image_url} alt={channel.title} />
+                            )}
+                            <AvatarFallback className="bg-violet-100 text-sm font-semibold text-violet-700">
+                              {getInitial(channel.title)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium text-foreground">{channel.title}</div>
+                            {channel.channel_id && (
+                              <div className="text-xs text-muted-foreground">
+                                {channel.channel_id}
+                              </div>
+                            )}
                           </div>
-                        )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm">
                         {channel.category ? (
@@ -256,6 +276,9 @@ export default async function AdminHotListPage({
                       <TableCell className="text-right text-sm">
                         {formatNumber(channel.median_views)}
                       </TableCell>
+                      <TableCell className="text-right text-sm">
+                        {channel.total_video_count ? formatNumber(channel.total_video_count) : "-"}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDate(channel.first_upload_date)}
                       </TableCell>
@@ -271,7 +294,7 @@ export default async function AdminHotListPage({
                   ))}
                   {!hotList.data.length && (
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
+                      <TableCell colSpan={8} className="h-24 text-center">
                         채널 데이터가 없습니다. 엑셀 업로드로 등록해 주세요.
                       </TableCell>
                     </TableRow>

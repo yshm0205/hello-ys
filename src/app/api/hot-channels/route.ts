@@ -19,13 +19,17 @@ type ChannelListRow = {
   format: string | null;
   channel_url: string | null;
   first_upload_date?: string | null;
+  profile_image_url?: string | null;
+  total_video_count?: number | null;
 };
 
-function isMissingFirstUploadColumn(error: { message?: string; code?: string } | null) {
+function isMissingChannelMetaColumn(error: { message?: string; code?: string } | null) {
   return Boolean(
     error &&
       (error.code === "42703" ||
         error.message?.includes("first_upload_date") ||
+        error.message?.includes("profile_image_url") ||
+        error.message?.includes("total_video_count") ||
         error.message?.includes("schema cache")),
   );
 }
@@ -53,13 +57,13 @@ export async function GET(request: NextRequest) {
 
   const result = await supabase
     .from("channel_list")
-    .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url, first_upload_date")
+    .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url, first_upload_date, profile_image_url, total_video_count")
     .eq("month", selectedMonth)
     .order("avg_view_count", { ascending: false });
   let data = result.data as ChannelListRow[] | null;
   let error = result.error;
 
-  if (isMissingFirstUploadColumn(error)) {
+  if (isMissingChannelMetaColumn(error)) {
     const fallback = await supabase
       .from("channel_list")
       .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url")
@@ -84,6 +88,8 @@ export async function GET(request: NextRequest) {
     format: ch.format || "",
     channel_url: ch.channel_url || "",
     first_upload_date: "first_upload_date" in ch ? ch.first_upload_date || null : null,
+    profile_image_url: "profile_image_url" in ch ? ch.profile_image_url || "" : "",
+    total_video_count: "total_video_count" in ch ? ch.total_video_count || 0 : 0,
   }));
 
   return NextResponse.json({

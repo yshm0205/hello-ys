@@ -114,6 +114,8 @@ export function EditChannelListButton({ channel }: { channel: Record<string, unk
       format: fd.get("format") || "",
       channel_url: fd.get("channel_url") || "",
       first_upload_date: normalizeDateInput(fd.get("first_upload_date")),
+      profile_image_url: fd.get("profile_image_url") || "",
+      total_video_count: parseInt(fd.get("total_video_count") as string) || 0,
     };
 
     const res = await fetch("/api/admin/channel-list", {
@@ -150,13 +152,23 @@ export function EditChannelListButton({ channel }: { channel: Record<string, unk
             <Input id="channel_url" name="channel_url" defaultValue={(channel.channel_url as string) || ""} />
           </div>
           <div>
-            <Label htmlFor="first_upload_date">첫 영상 업로드일</Label>
-            <Input
-              id="first_upload_date"
-              name="first_upload_date"
-              type="date"
-              defaultValue={formatDateInput(channel.first_upload_date)}
-            />
+            <Label htmlFor="profile_image_url">채널 프로필 이미지 URL</Label>
+            <Input id="profile_image_url" name="profile_image_url" defaultValue={(channel.profile_image_url as string) || ""} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="first_upload_date">첫 영상 업로드일</Label>
+              <Input
+                id="first_upload_date"
+                name="first_upload_date"
+                type="date"
+                defaultValue={formatDateInput(channel.first_upload_date)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="total_video_count">총 영상 수</Label>
+              <Input id="total_video_count" name="total_video_count" type="number" defaultValue={(channel.total_video_count as number) || 0} />
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -274,7 +286,7 @@ export function BulkUploadButton() {
     for (let i = 0; i < rows.length; i += 10) {
       const batch = rows.slice(i, i + 10);
       const promises = batch.map(async (cols) => {
-        const [name, subs, avg, median, category, subcategory, format, channelUrl, firstUploadDate] = cols;
+        const [name, subs, avg, median, category, subcategory, format, channelUrl, firstUploadDate, totalVideoCount, profileImageUrl] = cols;
         if (!name) return;
 
         const handle = channelUrl?.match(/@([^/,]+)/)?.[1] || name.replace(/\s+/g, "_");
@@ -290,6 +302,8 @@ export function BulkUploadButton() {
           format: format || "",
           channel_url: channelUrl || "",
           first_upload_date: normalizeDateInput(firstUploadDate),
+          total_video_count: parseInt((totalVideoCount || "0").replace(/,/g, "")) || 0,
+          profile_image_url: profileImageUrl || "",
         };
 
         const res = await fetch("/api/admin/channel-list", {
@@ -355,13 +369,13 @@ export function BulkUploadButton() {
           <div>
             <Label htmlFor="bulk_text">또는 직접 붙여넣기 (탭/쉼표 구분)</Label>
             <p className="text-xs text-muted-foreground mb-1">
-              컬럼: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL, 첫영상업로드일
+              컬럼: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL, 첫영상업로드일, 총영상수, 프로필이미지URL
             </p>
             <Textarea
               id="bulk_text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://...\t2025-03-14\n셀럽뿅감독\t66300\t4759535\t...`}
+              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://...\t2025-03-14\t198\thttps://...\n셀럽뿅감독\t66300\t4759535\t...`}
               rows={8}
               className="font-mono text-xs"
             />

@@ -10,6 +10,7 @@ import {
     TextInput,
     Table,
     Badge,
+    Avatar,
     Skeleton,
     Card,
     Anchor,
@@ -29,6 +30,8 @@ interface Channel {
     format: string;
     channel_url: string;
     first_upload_date: string | null;
+    profile_image_url: string;
+    total_video_count: number;
 }
 
 interface ChannelData {
@@ -97,10 +100,18 @@ function formatSubs(n: number): string {
 }
 
 function formatDateLabel(value: string | null): string {
-    if (!value) return '';
+    if (!value) return '-';
     const match = value.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/);
     if (!match) return value;
     return match[3] ? `${match[1]}.${match[2]}.${match[3]}` : `${match[1]}.${match[2]}`;
+}
+
+function formatVideoCount(value: number): string {
+    return value > 0 ? `${formatCount(value)}개` : '-';
+}
+
+function getInitial(value: string): string {
+    return value.trim().charAt(0) || '?';
 }
 
 function getChannelAgeMonths(value: string | null): number | null {
@@ -674,27 +685,36 @@ function ChannelTable({
                 {channels.map((ch, idx) => (
                     <Table.Tr key={`${idx}-${ch.channel_url}`}>
                         <Table.Td>
-                            <Stack gap={2}>
-                                <Anchor
-                                    href={ch.channel_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    size="sm"
-                                    fw={500}
-                                    c="dark"
-                                    style={{ textDecoration: 'none' }}
+                            <Group gap="sm" wrap="nowrap">
+                                <Avatar
+                                    src={ch.profile_image_url || undefined}
+                                    alt={ch.name}
+                                    size={42}
+                                    radius="xl"
+                                    color="violet"
                                 >
-                                    <Group gap={4} wrap="nowrap">
-                                        {ch.name}
-                                        <ExternalLink size={13} color="#9ca3af" />
-                                    </Group>
-                                </Anchor>
-                                {ch.first_upload_date && (
+                                    {getInitial(ch.name)}
+                                </Avatar>
+                                <Stack gap={2}>
+                                    <Anchor
+                                        href={ch.channel_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        size="sm"
+                                        fw={500}
+                                        c="dark"
+                                        style={{ textDecoration: 'none' }}
+                                    >
+                                        <Group gap={4} wrap="nowrap">
+                                            {ch.name}
+                                            <ExternalLink size={13} color="#9ca3af" />
+                                        </Group>
+                                    </Anchor>
                                     <Text size="xs" c="dimmed">
-                                        첫 업로드 {formatDateLabel(ch.first_upload_date)}
+                                        구독 {formatSubs(ch.subscribers)} · 영상 {formatVideoCount(ch.total_video_count)} · 첫 업로드 {formatDateLabel(ch.first_upload_date)}
                                     </Text>
-                                )}
-                            </Stack>
+                                </Stack>
+                            </Group>
                         </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>
                             <Badge variant="light" color={getGradeColor(getPerformanceGrade(ch, performanceThresholds))} size="sm">
@@ -746,36 +766,36 @@ function ChannelCard({
     return (
         <Card padding="sm" radius="md" withBorder>
             <Group justify="space-between" mb={4}>
-                <Text fw={600} size="sm">
-                    {ch.name}
-                </Text>
+                <Group gap="sm" wrap="nowrap">
+                    <Avatar
+                        src={ch.profile_image_url || undefined}
+                        alt={ch.name}
+                        size={38}
+                        radius="xl"
+                        color="violet"
+                    >
+                        {getInitial(ch.name)}
+                    </Avatar>
+                    <Stack gap={1}>
+                        <Text fw={600} size="sm">
+                            {ch.name}
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                            구독 {formatSubs(ch.subscribers)} · 영상 {formatVideoCount(ch.total_video_count)} · 첫 업로드 {formatDateLabel(ch.first_upload_date)}
+                        </Text>
+                    </Stack>
+                </Group>
                 <Anchor href={ch.channel_url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink size={16} color="#8b5cf6" />
                 </Anchor>
             </Group>
             <Group gap="xs" mb={4}>
-                <Text size="xs" c="dimmed">
-                    구독 {formatSubs(ch.subscribers)}
-                </Text>
-                <Text size="xs" c="dimmed">
-                    ·
-                </Text>
                 <Badge variant="light" color={getCategoryColor(ch.category)} size="xs">
                     {ch.category}
                 </Badge>
                 <Badge variant="light" color="gray" size="xs">
                     {ch.subcategory}
                 </Badge>
-                {ch.first_upload_date && (
-                    <>
-                        <Text size="xs" c="dimmed">
-                            ·
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                            첫 업로드 {formatDateLabel(ch.first_upload_date)}
-                        </Text>
-                    </>
-                )}
             </Group>
             <Group gap="xs" mb={2}>
                 <Badge variant="light" color={getGradeColor(grade)} size="xs">

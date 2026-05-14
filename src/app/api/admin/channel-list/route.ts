@@ -4,11 +4,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
 
-function isMissingFirstUploadColumn(error: { message?: string; code?: string } | null) {
+function isMissingChannelMetaColumn(error: { message?: string; code?: string } | null) {
   return Boolean(
     error &&
       (error.code === "42703" ||
         error.message?.includes("first_upload_date") ||
+        error.message?.includes("profile_image_url") ||
+        error.message?.includes("total_video_count") ||
         error.message?.includes("schema cache")),
   );
 }
@@ -28,6 +30,16 @@ function normalizeDateInput(value: unknown): string | null {
   return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
 
+function normalizeTextInput(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeNumberInput(value: unknown): number {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value !== "string") return 0;
+  return parseInt(value.replace(/,/g, ""), 10) || 0;
+}
+
 async function checkAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -41,7 +53,21 @@ export async function POST(request: NextRequest) {
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await request.json();
-  const { id, month, title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url, first_upload_date } = body;
+  const {
+    id,
+    month,
+    title,
+    subscriber_count,
+    avg_view_count,
+    median_views,
+    category,
+    subcategory,
+    format,
+    channel_url,
+    first_upload_date,
+    profile_image_url,
+    total_video_count,
+  } = body;
 
   if (!id || !title || !month) {
     return NextResponse.json({ error: "ID, 채널명, 월은 필수입니다." }, { status: 400 });
@@ -52,13 +78,13 @@ export async function POST(request: NextRequest) {
     id,
     month,
     title,
-    subscriber_count: subscriber_count || 0,
-    avg_view_count: avg_view_count || 0,
-    median_views: median_views || 0,
-    category: category || "",
-    subcategory: subcategory || "",
-    format: format || "",
-    channel_url: channel_url || "",
+    subscriber_count: normalizeNumberInput(subscriber_count),
+    avg_view_count: normalizeNumberInput(avg_view_count),
+    median_views: normalizeNumberInput(median_views),
+    category: normalizeTextInput(category),
+    subcategory: normalizeTextInput(subcategory),
+    format: normalizeTextInput(format),
+    channel_url: normalizeTextInput(channel_url),
   };
 
   let { data, error } = await supabase
@@ -66,11 +92,13 @@ export async function POST(request: NextRequest) {
     .upsert({
       ...basePayload,
       first_upload_date: normalizeDateInput(first_upload_date),
+      profile_image_url: normalizeTextInput(profile_image_url),
+      total_video_count: normalizeNumberInput(total_video_count),
     }, { onConflict: "id" })
     .select()
     .single();
 
-  if (isMissingFirstUploadColumn(error)) {
+  if (isMissingChannelMetaColumn(error)) {
     const fallback = await supabase
       .from("channel_list")
       .upsert(basePayload, { onConflict: "id" })
@@ -104,6 +132,12 @@ export async function PUT(request: NextRequest) {
   if ("first_upload_date" in updates) {
     updates.first_upload_date = normalizeDateInput(updates.first_upload_date);
   }
+  if ("profile_image_url" in updates) {
+    updates.profile_image_url = normalizeTextInput(updates.profile_image_url);
+  }
+  if ("total_video_count" in updates) {
+    updates.total_video_count = normalizeNumberInput(updates.total_video_count);
+  }
   let { data, error } = await supabase
     .from("channel_list")
     .update(updates)
@@ -111,9 +145,11 @@ export async function PUT(request: NextRequest) {
     .select()
     .single();
 
-  if (isMissingFirstUploadColumn(error)) {
+  if (isMissingChannelMetaColumn(error)) {
     const fallbackUpdates = { ...updates };
     delete fallbackUpdates.first_upload_date;
+    delete fallbackUpdates.profile_image_url;
+    delete fallbackUpdates.total_video_count;
     const fallback = await supabase
       .from("channel_list")
       .update(fallbackUpdates)
