@@ -78,7 +78,6 @@ const YOUTUBE_COMMENT_REVIEWS: LandingReview[] = [
     content: '49만원에 이 내용이면 정말 대단합니다 돈이 아깝지 않아요 감사합니다^^',
     displayName: '@인생온도-m4q1x',
     createdAt: '2026-05-11T09:00:00+09:00',
-    dateLabel: '1일 전',
     sourceLabel: '유튜브',
   },
 ];
