@@ -98,11 +98,13 @@ export async function GET() {
       .eq("user_id", user.id);
     if (error) {
       console.error("[Lectures API] DB Error:", error);
-      return NextResponse.json({ success: true, completedVods: [], positions: {} });
+      return NextResponse.json({ success: true, completedVods: [], startedVods: [], positions: {} });
     }
     const completedVods: string[] = [];
+    const startedVods: string[] = [];
     const positions: Record<string, number> = {};
     for (const row of data || []) {
+      startedVods.push(row.vod_id);
       if (row.completed_at) {
         completedVods.push(row.vod_id);
       }
@@ -110,10 +112,10 @@ export async function GET() {
         positions[row.vod_id] = row.last_position;
       }
     }
-    return NextResponse.json({ success: true, completedVods, positions });
+    return NextResponse.json({ success: true, completedVods, startedVods, positions });
   } catch (err) {
     console.error("[Lectures API] GET Error:", err);
-    return NextResponse.json({ success: true, completedVods: [], positions: {} });
+    return NextResponse.json({ success: true, completedVods: [], startedVods: [], positions: {} });
   }
 }
 
@@ -151,6 +153,7 @@ export async function POST(request: NextRequest) {
 
     const durationSeconds = Math.max(0, Math.round((lectureVideo.durationMinutes || 0) * 60));
     const requestedPosition = clampPosition(body.last_position, durationSeconds);
+    const isStartOnly = body.started === true && !body.completed && requestedPosition === null;
 
     const admin = createAdminClient();
     let progressState: Awaited<ReturnType<typeof loadProgressRow>>;
@@ -176,10 +179,12 @@ export async function POST(request: NextRequest) {
         ? Math.min(durationSeconds, previousPosition + allowedIncrement)
         : previousPosition + allowedIncrement;
     const nextPosition =
-      requestedPosition === null
+      isStartOnly || requestedPosition === null
         ? previousPosition
         : Math.max(previousPosition, Math.min(requestedPosition, maximumTrustedPosition));
-    const nextWatchedSeconds = Math.max(previousWatchedSeconds, nextPosition);
+    const nextWatchedSeconds = isStartOnly
+      ? previousWatchedSeconds
+      : Math.max(previousWatchedSeconds, nextPosition);
     const completedByPosition =
       durationSeconds > 0 && nextWatchedSeconds >= Math.ceil(durationSeconds * COMPLETION_THRESHOLD);
     const shouldComplete = Boolean(existing?.completed_at) || (Boolean(body.completed) && completedByPosition);
@@ -190,7 +195,7 @@ export async function POST(request: NextRequest) {
       last_position: nextPosition,
     };
 
-    if (supportsAuditColumns) {
+    if (supportsAuditColumns && !isStartOnly) {
       upsertData.watched_seconds = nextWatchedSeconds;
       upsertData.last_progress_at = now.toISOString();
     }
@@ -209,6 +214,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      started: true,
       completed: shouldComplete,
       position: nextPosition,
       progressPercent: getProgressPercent(nextPosition, durationSeconds),

@@ -248,7 +248,7 @@ async function countStartedLectures(
   const started = new Set<string>();
 
   for (const row of (data || []) as LectureProgressRow[]) {
-    if (row.completed_at || (row.last_position ?? 0) > 0) {
+    if (row.vod_id) {
       started.add(row.vod_id);
     }
   }

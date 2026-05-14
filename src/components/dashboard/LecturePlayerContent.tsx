@@ -2,7 +2,7 @@
 
 /**
  * 강의 시청 페이지 컴포넌트
- * 왼쪽: VdoCipher 플레이어 + 수강 완료 + 이전/다음
+ * 왼쪽: VdoCipher 플레이어 + 수강 상태 + 이전/다음
  * 오른쪽: 챕터별 강의 목록 사이드 패널
  *
  * VdoCipher api.js 연동:
@@ -48,6 +48,7 @@ import {
 import { Link, useRouter } from '@/i18n/routing';
 import { VideoWatermark } from './VideoWatermark';
 import type { LectureCatalogChapter } from '@/lib/lectures/types';
+import { recordLectureStart } from '@/lib/lectures/progress-client';
 import { ReviewEventBanner } from './ReviewEventBanner';
 
 interface LecturePlayerContentProps {
@@ -96,7 +97,6 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
     const router = useRouter();
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [positions, setPositions] = useState<Record<string, number>>({});
-    const [isMarking, setIsMarking] = useState(false);
     const [showList, setShowList] = useState(true);
     const [videoOtp, setVideoOtp] = useState<string | null>(null);
     const [playbackInfo, setPlaybackInfo] = useState<string | null>(null);
@@ -212,6 +212,12 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
         }
         fetchProgress();
     }, []);
+
+    // 강의 화면에 들어온 시점부터 열람 기록을 남긴다.
+    useEffect(() => {
+        if (!currentVod?.isPlayable) return;
+        recordLectureStart(vodId);
+    }, [vodId, currentVod?.isPlayable]);
 
     // 진도 저장 함수
     const savePosition = useCallback((position: number) => {
@@ -333,28 +339,6 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
     // 카운트다운 취소
     const cancelCountdown = () => {
         setCountdown(null);
-    };
-
-    // 수강 완료 처리 (수동 버튼)
-    const handleMarkComplete = async () => {
-        if (isMarking || isCompleted) return;
-        setIsMarking(true);
-        try {
-            const position = currentPositionRef.current || positions[vodId] || 0;
-            const res = await fetch('/api/lectures/progress', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ vod_id: vodId, completed: true, last_position: position }),
-            });
-            const data = await res.json();
-            if (data.success && data.completed) {
-                setCompletedVods((prev) => (prev.includes(vodId) ? prev : [...prev, vodId]));
-            }
-        } catch {
-            // 에러 무시
-        } finally {
-            setIsMarking(false);
-        }
     };
 
     const toggleChapter = (chId: string) => {
@@ -542,33 +526,6 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                 {/* 동적 워터마크 오버레이 */}
                                 {userEmail && <VideoWatermark email={userEmail} />}
                             </div>
-                        </Card>
-
-                        {/* 수강 완료 버튼 */}
-                        <Card padding="lg" radius="lg" withBorder>
-                            <Group justify="space-between" align="center">
-                                <Group gap="sm">
-                                    {isCompleted ? (
-                                        <CheckCircle2 size={22} color="#8b5cf6" fill="#8b5cf6" strokeWidth={0} />
-                                    ) : (
-                                        <Circle size={22} color="#d1d5db" />
-                                    )}
-                                    <Text fw={500} c={isCompleted ? 'gray.6' : 'gray.8'}>
-                                        {isCompleted ? '이 강의를 수강 완료했습니다' : '강의를 다 들으셨나요?'}
-                                    </Text>
-                                </Group>
-                                {!isCompleted && (
-                                    <Button
-                                        color="violet"
-                                        radius="lg"
-                                        onClick={handleMarkComplete}
-                                        loading={isMarking}
-                                        leftSection={<CheckCircle2 size={16} />}
-                                    >
-                                        수강 완료
-                                    </Button>
-                                )}
-                            </Group>
                         </Card>
 
                         {/* 수업 자료 */}

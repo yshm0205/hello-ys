@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { LectureCatalogChapter } from '@/lib/lectures/types';
+import { recordLectureStart } from '@/lib/lectures/progress-client';
 import { ReviewEventBanner } from './ReviewEventBanner';
 
 // ─── 강의 데이터 ───────────────────────────────────────────
@@ -157,6 +158,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
     const lectureChapters = chapters?.length ? chapters : CHAPTERS;
     const isMobile = useMediaQuery('(max-width: 48em)');
     const [completedVods, setCompletedVods] = useState<string[]>([]);
+    const [startedVods, setStartedVods] = useState<string[]>([]);
     const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({
         [lectureChapters[0]?.id || 'ch0']: true,
     });
@@ -169,6 +171,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                 const data = await res.json();
                 if (data.success) {
                     setCompletedVods(data.completedVods || []);
+                    setStartedVods(data.startedVods || []);
                 }
             } catch {
                 // 에러 시 빈 배열 유지
@@ -320,11 +323,17 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                             {chapter.vods.map((vod) => {
                                                 const isDone = completedVods.includes(vod.id);
                                                 const isReady = !!vod.isPlayable;
+                                                const isStarted = isReady && !isDone && startedVods.includes(vod.id);
 
                                                 const rowMeta = (
                                                     <Group gap="xs" wrap="wrap">
                                                         {vod.hasMaterials && (
                                                             <Paperclip size={13} color="#8b5cf6" aria-label="수업 자료 있음" />
+                                                        )}
+                                                        {isStarted && (
+                                                            <Badge variant="light" color="blue" size="xs">
+                                                                시청 중
+                                                            </Badge>
                                                         )}
                                                         {!isReady ? (
                                                             <Badge variant="light" color="gray" size="xs">
@@ -402,6 +411,12 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                         component={Link}
                                                         href={`/dashboard/lectures/${vod.id}`}
                                                         prefetch={false}
+                                                        onClick={() => {
+                                                            recordLectureStart(vod.id);
+                                                            setStartedVods((prev) =>
+                                                                prev.includes(vod.id) ? prev : [...prev, vod.id]
+                                                            );
+                                                        }}
                                                         style={{
                                                             display: 'block',
                                                             width: '100%',
