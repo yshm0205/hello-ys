@@ -115,16 +115,16 @@ export default function PaymentHelpPage() {
         {/* ── 랜딩 CTA ── */}
         <div className="mt-16 rounded-2xl border border-violet-500/30 bg-gradient-to-b from-violet-500/10 to-violet-500/[0.02] p-8 text-center">
           <p className="mb-2 text-lg font-bold text-black dark:text-white">
-            FlowSpot이 처음이신가요?
+            강의가 궁금하신가요?
           </p>
           <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-            AI로 쇼츠 스크립트를 30초 만에. 어떤 서비스인지 먼저 둘러보세요.
+            채널 성과와 커리큘럼을 확인하고 강의를 신청해보세요.
           </p>
           <a
             href="/"
             className="inline-block rounded-xl bg-violet-600 px-8 py-3 text-base font-semibold text-white transition-colors hover:bg-violet-700"
           >
-            FlowSpot 둘러보기 →
+            강의 신청하러 가기 →
           </a>
         </div>
       </main>
