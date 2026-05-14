@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
@@ -42,21 +43,29 @@ export function AdminFilter({
   }
 
   return (
-    <Select
-      defaultValue={searchParams.get(name) || "all"}
-      onValueChange={handleFilter}
-    >
-      <SelectTrigger className="w-[180px] h-9">
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">{placeholder}</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="flex items-center gap-2">
+      <Select
+        defaultValue={searchParams.get(name) || "all"}
+        onValueChange={handleFilter}
+      >
+        <SelectTrigger className={`w-[180px] h-9 ${isPending ? "opacity-75" : ""}`}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{placeholder}</SelectItem>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {isPending && (
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          적용 중
+        </span>
+      )}
+    </div>
   );
 }

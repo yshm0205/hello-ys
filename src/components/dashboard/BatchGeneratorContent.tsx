@@ -765,6 +765,7 @@ export function BatchGeneratorContent() {
                             return (
                                 <Box
                                     key={opt.value}
+                                    className="batch-pressable"
                                     onClick={() => opt.enabled && setNiche(opt.value)}
                                     style={{
                                         flex: '0 0 160px',
@@ -865,6 +866,7 @@ export function BatchGeneratorContent() {
                                 return (
                                     <Box
                                         key={mode.value || 'auto'}
+                                        className="batch-pressable"
                                         onClick={() => setForceMode(mode.value)}
                                         style={{
                                             padding: '14px 12px',
@@ -915,6 +917,7 @@ export function BatchGeneratorContent() {
                                     return (
                                         <Box
                                             key={tab.value}
+                                            className="batch-pressable"
                                             onClick={() => setInputMode(tab.value as 'simple' | 'detailed')}
                                             style={{
                                                 padding: '6px 14px',
@@ -1052,6 +1055,7 @@ export function BatchGeneratorContent() {
                                     {queue.map((item, index) => (
                                         <Paper
                                             key={item.id}
+                                            className="batch-pressable"
                                             p="xs"
                                             radius="md"
                                             style={{
@@ -1269,6 +1273,13 @@ export function BatchGeneratorContent() {
 
                 {/* CSS */}
                 <style>{`
+                    .batch-pressable {
+                        transform: translateY(0) scale(1);
+                        touch-action: manipulation;
+                    }
+                    .batch-pressable:active {
+                        transform: translateY(1px) scale(0.985);
+                    }
                     @keyframes spin {
                         from { transform: rotate(0deg); }
                         to { transform: rotate(360deg); }

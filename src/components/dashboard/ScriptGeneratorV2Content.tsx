@@ -772,6 +772,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                         return (
                                             <Box
                                                 key={tab.value}
+                                                className="v2-pressable"
                                                 onClick={() => !(isResearching || isGenerating) && setInputMode(tab.value as 'simple' | 'detailed')}
                                                 style={{
                                                     padding: '6px 14px',
@@ -831,6 +832,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                         return (
                                             <Box
                                                 key={niche.value}
+                                                className="v2-pressable"
                                                 onClick={() => !isDisabled && setSelectedNiche(niche.value)}
                                                 style={{
                                                     flex: '0 0 200px',
@@ -952,6 +954,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                             return (
                                                 <Box
                                                     key={mode.value || 'auto'}
+                                                    className="v2-pressable"
                                                     onClick={() => !isDisabled && setForceMode(mode.value)}
                                                     style={{
                                                         padding: '14px 12px',
@@ -1076,6 +1079,7 @@ export function ScriptGeneratorV2Content({ user }: Props) {
                                             return (
                                                 <Box
                                                     key={tone.value}
+                                                    className="v2-pressable"
                                                     onClick={() => !isGenerating && setSelectedTone(tone.value)}
                                                     style={{
                                                         padding: '16px 12px',
@@ -1380,6 +1384,13 @@ export function ScriptGeneratorV2Content({ user }: Props) {
 
             {/* 반응형 CSS */}
             <style>{`
+                .v2-pressable {
+                    transform: translateY(0) scale(1);
+                    touch-action: manipulation;
+                }
+                .v2-pressable:active {
+                    transform: translateY(1px) scale(0.985);
+                }
                 @media (max-width: 768px) {
                     .v2-tone-grid {
                         grid-template-columns: repeat(2, 1fr) !important;

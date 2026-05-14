@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 
 type AdminFeedbackRow = {
   id: string;
@@ -52,7 +53,7 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: "반려",
 };
 
-const STATUS_ORDER = ["submitted", "in_progress", "answered", "closed", "rejected"] as const;
+type FeedbackStatus = "submitted" | "in_progress" | "answered" | "closed" | "rejected";
 
 function formatDate(value: string | null) {
   if (!value) return "-";
@@ -69,7 +70,7 @@ export function FeedbackRequestsAdminClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, { response: string; note: string }>>({});
-  const [saving, setSaving] = useState<string | null>(null);
+  const [saving, setSaving] = useState<{ id: string; status: FeedbackStatus } | null>(null);
 
   async function load() {
     try {
@@ -93,10 +94,10 @@ export function FeedbackRequestsAdminClient() {
 
   async function patch(
     id: string,
-    status: (typeof STATUS_ORDER)[number],
+    status: FeedbackStatus,
     opts: { response?: string; note?: string } = {},
   ) {
-    setSaving(id);
+    setSaving({ id, status });
     try {
       const res = await fetch("/api/admin/feedback-requests", {
         method: "PATCH",
@@ -180,6 +181,8 @@ export function FeedbackRequestsAdminClient() {
               response: row.admin_response || "",
               note: row.admin_note || "",
             };
+            const isSavingRow = saving?.id === row.id;
+            const savingStatus = isSavingRow ? saving.status : null;
             return (
               <Card key={row.id}>
                 <CardHeader>
@@ -256,7 +259,7 @@ export function FeedbackRequestsAdminClient() {
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={saving === row.id}
+                      disabled={isSavingRow}
                       onClick={() =>
                         patch(row.id, "in_progress", {
                           response: draft.response,
@@ -264,11 +267,18 @@ export function FeedbackRequestsAdminClient() {
                         })
                       }
                     >
-                      검토 중으로 이동
+                      {savingStatus === "in_progress" ? (
+                        <>
+                          <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                          처리 중...
+                        </>
+                      ) : (
+                        "검토 중으로 이동"
+                      )}
                     </Button>
                     <Button
                       size="sm"
-                      disabled={saving === row.id}
+                      disabled={isSavingRow}
                       onClick={() =>
                         patch(row.id, "answered", {
                           response: draft.response,
@@ -276,27 +286,48 @@ export function FeedbackRequestsAdminClient() {
                         })
                       }
                     >
-                      답변 완료 처리
+                      {savingStatus === "answered" ? (
+                        <>
+                          <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                          처리 중...
+                        </>
+                      ) : (
+                        "답변 완료 처리"
+                      )}
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      disabled={saving === row.id}
+                      disabled={isSavingRow}
                       onClick={() =>
                         patch(row.id, "closed", { response: draft.response, note: draft.note })
                       }
                     >
-                      종료
+                      {savingStatus === "closed" ? (
+                        <>
+                          <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                          처리 중...
+                        </>
+                      ) : (
+                        "종료"
+                      )}
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      disabled={saving === row.id}
+                      disabled={isSavingRow}
                       onClick={() =>
                         patch(row.id, "rejected", { response: draft.response, note: draft.note })
                       }
                     >
-                      반려
+                      {savingStatus === "rejected" ? (
+                        <>
+                          <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                          처리 중...
+                        </>
+                      ) : (
+                        "반려"
+                      )}
                     </Button>
                   </div>
                 </CardContent>
