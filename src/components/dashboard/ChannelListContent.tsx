@@ -28,6 +28,7 @@ interface Channel {
     subcategory: string;
     format: string;
     channel_url: string;
+    first_upload_date: string | null;
 }
 
 interface ChannelData {
@@ -93,6 +94,23 @@ function formatSubs(n: number): string {
     if (n >= 1_000_000) return `${(n / 10_000).toFixed(0)}만`;
     if (n >= 10_000) return `${(n / 10_000).toFixed(1)}만`;
     return n.toLocaleString();
+}
+
+function formatDateLabel(value: string | null): string {
+    if (!value) return '';
+    const match = value.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/);
+    if (!match) return value;
+    return match[3] ? `${match[1]}.${match[2]}.${match[3]}` : `${match[1]}.${match[2]}`;
+}
+
+function getChannelAgeMonths(value: string | null): number | null {
+    if (!value) return null;
+    const match = value.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/);
+    if (!match) return null;
+    const started = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3] || '1'));
+    if (Number.isNaN(started.getTime())) return null;
+    const now = new Date();
+    return (now.getFullYear() - started.getFullYear()) * 12 + now.getMonth() - started.getMonth();
 }
 
 function getCategoryColor(category: string): string {
@@ -171,7 +189,11 @@ function matchesFormFilter(ch: Channel, formFilter: FormFilter): boolean {
 function getInsight(ch: Channel, thresholds: ReturnType<typeof getPerformanceThresholds>): string {
     const grade = getPerformanceGrade(ch, thresholds);
     const stability = getStability(ch);
+    const ageMonths = getChannelAgeMonths(ch.first_upload_date);
 
+    if (ageMonths !== null && ageMonths <= 12 && (grade === 'Great' || grade === 'Good')) {
+        return '첫 업로드 이후 빠르게 성과가 나는 채널';
+    }
     if (grade === 'Great') return '구독자 대비 조회수와 중위값이 모두 강함';
     if (grade === 'Good') return '선택한 월 안에서 성과 지표가 좋은 편';
     if (stability >= 0.6) return '조회수 편차가 비교적 안정적';
@@ -652,20 +674,27 @@ function ChannelTable({
                 {channels.map((ch, idx) => (
                     <Table.Tr key={`${idx}-${ch.channel_url}`}>
                         <Table.Td>
-                            <Anchor
-                                href={ch.channel_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                size="sm"
-                                fw={500}
-                                c="dark"
-                                style={{ textDecoration: 'none' }}
-                            >
-                                <Group gap={4} wrap="nowrap">
-                                    {ch.name}
-                                    <ExternalLink size={13} color="#9ca3af" />
-                                </Group>
-                            </Anchor>
+                            <Stack gap={2}>
+                                <Anchor
+                                    href={ch.channel_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    size="sm"
+                                    fw={500}
+                                    c="dark"
+                                    style={{ textDecoration: 'none' }}
+                                >
+                                    <Group gap={4} wrap="nowrap">
+                                        {ch.name}
+                                        <ExternalLink size={13} color="#9ca3af" />
+                                    </Group>
+                                </Anchor>
+                                {ch.first_upload_date && (
+                                    <Text size="xs" c="dimmed">
+                                        첫 업로드 {formatDateLabel(ch.first_upload_date)}
+                                    </Text>
+                                )}
+                            </Stack>
                         </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>
                             <Badge variant="light" color={getGradeColor(getPerformanceGrade(ch, performanceThresholds))} size="sm">
@@ -737,6 +766,16 @@ function ChannelCard({
                 <Badge variant="light" color="gray" size="xs">
                     {ch.subcategory}
                 </Badge>
+                {ch.first_upload_date && (
+                    <>
+                        <Text size="xs" c="dimmed">
+                            ·
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                            첫 업로드 {formatDateLabel(ch.first_upload_date)}
+                        </Text>
+                    </>
+                )}
             </Group>
             <Group gap="xs" mb={2}>
                 <Badge variant="light" color={getGradeColor(grade)} size="xs">

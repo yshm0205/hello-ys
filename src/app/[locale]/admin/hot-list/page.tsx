@@ -14,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { HotListTriggerButton } from "@/components/admin/HotListTriggerButton";
 import {
   BulkUploadButton,
   DeleteChannelListButton,
@@ -34,6 +33,7 @@ interface ChannelListItem {
   subcategory: string;
   format: string;
   channel_url: string;
+  first_upload_date: string | null;
 }
 
 async function getAvailableMonths() {
@@ -84,6 +84,12 @@ function formatNumber(value: number | null | undefined) {
   return (value || 0).toLocaleString("ko-KR");
 }
 
+function formatDate(value: string | null | undefined) {
+  if (!value) return "-";
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? `${match[1]}.${match[2]}.${match[3]}` : value;
+}
+
 function buildQueryString(
   current: { q?: string; page?: string; month?: string },
   next: Partial<{ q?: string; page?: string; month?: string }>,
@@ -130,7 +136,6 @@ export default async function AdminHotListPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <BulkUploadButton />
-          <HotListTriggerButton />
         </div>
       </div>
 
@@ -220,6 +225,7 @@ export default async function AdminHotListPage({
                     <TableHead className="text-right">구독자</TableHead>
                     <TableHead className="text-right">평균 조회수</TableHead>
                     <TableHead className="text-right">중위 조회수</TableHead>
+                    <TableHead>첫 업로드</TableHead>
                     <TableHead className="w-[120px]">관리</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -250,6 +256,9 @@ export default async function AdminHotListPage({
                       <TableCell className="text-right text-sm">
                         {formatNumber(channel.median_views)}
                       </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDate(channel.first_upload_date)}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <EditChannelListButton
@@ -262,7 +271,7 @@ export default async function AdminHotListPage({
                   ))}
                   {!hotList.data.length && (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={7} className="h-24 text-center">
                         채널 데이터가 없습니다. 엑셀 업로드로 등록해 주세요.
                       </TableCell>
                     </TableRow>

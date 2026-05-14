@@ -9,6 +9,27 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+type ChannelListRow = {
+  title: string;
+  subscriber_count: number | null;
+  avg_view_count: number | null;
+  median_views: number | null;
+  category: string | null;
+  subcategory: string | null;
+  format: string | null;
+  channel_url: string | null;
+  first_upload_date?: string | null;
+};
+
+function isMissingFirstUploadColumn(error: { message?: string; code?: string } | null) {
+  return Boolean(
+    error &&
+      (error.code === "42703" ||
+        error.message?.includes("first_upload_date") ||
+        error.message?.includes("schema cache")),
+  );
+}
+
 export async function GET(request: NextRequest) {
   if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.json({ months: [], channels: [], total: 0 });
@@ -30,11 +51,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ months: [], channels: [], total: 0 });
   }
 
-  const { data, error } = await supabase
+  const result = await supabase
     .from("channel_list")
-    .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url")
+    .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url, first_upload_date")
     .eq("month", selectedMonth)
     .order("avg_view_count", { ascending: false });
+  let data = result.data as ChannelListRow[] | null;
+  let error = result.error;
+
+  if (isMissingFirstUploadColumn(error)) {
+    const fallback = await supabase
+      .from("channel_list")
+      .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url")
+      .eq("month", selectedMonth)
+      .order("avg_view_count", { ascending: false });
+
+    data = fallback.data as ChannelListRow[] | null;
+    error = fallback.error;
+  }
 
   if (error) {
     return NextResponse.json({ months, month: selectedMonth, channels: [], total: 0 });
@@ -49,6 +83,7 @@ export async function GET(request: NextRequest) {
     subcategory: ch.subcategory || "",
     format: ch.format || "",
     channel_url: ch.channel_url || "",
+    first_upload_date: "first_upload_date" in ch ? ch.first_upload_date || null : null,
   }));
 
   return NextResponse.json({

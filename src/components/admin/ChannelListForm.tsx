@@ -71,6 +71,27 @@ function getMonthOptions() {
   return opts;
 }
 
+function formatDateInput(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? `${match[1]}-${match[2]}-${match[3]}` : "";
+}
+
+function normalizeDateInput(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const raw = value.trim();
+  if (!raw) return null;
+
+  const compact = raw.match(/^(\d{4})(\d{2})(\d{2})$/);
+  if (compact) return `${compact[1]}-${compact[2]}-${compact[3]}`;
+
+  const separated = raw.match(/^(\d{4})[./-](\d{1,2})(?:[./-](\d{1,2}))?$/);
+  if (!separated) return null;
+
+  const [, year, month, day = "1"] = separated;
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
 // ── 수정 ──
 export function EditChannelListButton({ channel }: { channel: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
@@ -92,6 +113,7 @@ export function EditChannelListButton({ channel }: { channel: Record<string, unk
       subcategory: fd.get("subcategory") || "",
       format: fd.get("format") || "",
       channel_url: fd.get("channel_url") || "",
+      first_upload_date: normalizeDateInput(fd.get("first_upload_date")),
     };
 
     const res = await fetch("/api/admin/channel-list", {
@@ -126,6 +148,15 @@ export function EditChannelListButton({ channel }: { channel: Record<string, unk
           <div>
             <Label htmlFor="channel_url">채널 URL</Label>
             <Input id="channel_url" name="channel_url" defaultValue={(channel.channel_url as string) || ""} />
+          </div>
+          <div>
+            <Label htmlFor="first_upload_date">첫 영상 업로드일</Label>
+            <Input
+              id="first_upload_date"
+              name="first_upload_date"
+              type="date"
+              defaultValue={formatDateInput(channel.first_upload_date)}
+            />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -243,7 +274,7 @@ export function BulkUploadButton() {
     for (let i = 0; i < rows.length; i += 10) {
       const batch = rows.slice(i, i + 10);
       const promises = batch.map(async (cols) => {
-        const [name, subs, avg, median, category, subcategory, format, channelUrl] = cols;
+        const [name, subs, avg, median, category, subcategory, format, channelUrl, firstUploadDate] = cols;
         if (!name) return;
 
         const handle = channelUrl?.match(/@([^/,]+)/)?.[1] || name.replace(/\s+/g, "_");
@@ -258,6 +289,7 @@ export function BulkUploadButton() {
           subcategory: subcategory || "",
           format: format || "",
           channel_url: channelUrl || "",
+          first_upload_date: normalizeDateInput(firstUploadDate),
         };
 
         const res = await fetch("/api/admin/channel-list", {
@@ -323,13 +355,13 @@ export function BulkUploadButton() {
           <div>
             <Label htmlFor="bulk_text">또는 직접 붙여넣기 (탭/쉼표 구분)</Label>
             <p className="text-xs text-muted-foreground mb-1">
-              컬럼: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL
+              컬럼: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL, 첫영상업로드일
             </p>
             <Textarea
               id="bulk_text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://...\n셀럽뿅감독\t66300\t4759535\t...`}
+              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://...\t2025-03-14\n셀럽뿅감독\t66300\t4759535\t...`}
               rows={8}
               className="font-mono text-xs"
             />
