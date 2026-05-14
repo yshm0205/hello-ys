@@ -81,14 +81,18 @@ export function EnrichChannelListButton({ month }: { month: string }) {
 
         if (!res.ok) {
           alert(data.error || "YouTube 정보 보강 실패");
-          break;
+          return;
         }
 
         totalUpdated += data.updated || 0;
         totalFailed += data.failed || 0;
         remaining = data.remaining || 0;
 
-        if (!remaining || ((data.updated || 0) === 0 && (data.failed || 0) === 0)) break;
+        if (
+          !remaining ||
+          ((data.updated || 0) === 0 && (data.failed || 0) === 0) ||
+          ((data.updated || 0) === 0 && (data.failed || 0) > 0)
+        ) break;
       }
 
       router.refresh();

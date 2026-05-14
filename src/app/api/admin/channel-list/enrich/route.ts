@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { fetchYoutubeChannelMetadata } from "@/lib/youtube/channel-metadata";
+import { fetchYoutubeChannelMetadata, YoutubeMetadataError } from "@/lib/youtube/channel-metadata";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -64,7 +64,20 @@ export async function POST(request: NextRequest) {
   let failed = 0;
 
   for (const row of targetRows) {
-    const metadata = await fetchYoutubeChannelMetadata(row.channel_url || "", row.title || "");
+    let metadata = null;
+    try {
+      metadata = await fetchYoutubeChannelMetadata(row.channel_url || "", row.title || "", {
+        throwOnApiError: true,
+      });
+    } catch (error) {
+      if (error instanceof YoutubeMetadataError) {
+        return NextResponse.json(
+          { error: `YouTube API error: ${error.message}` },
+          { status: 502 },
+        );
+      }
+      throw error;
+    }
     if (!metadata) {
       failed += 1;
       continue;

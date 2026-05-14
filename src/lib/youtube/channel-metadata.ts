@@ -6,6 +6,13 @@ export type YoutubeChannelMetadata = {
   firstUploadDate: string | null;
 };
 
+export class YoutubeMetadataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "YoutubeMetadataError";
+  }
+}
+
 type YoutubeApiChannel = {
   id: string;
   snippet?: {
@@ -79,7 +86,9 @@ function getChannelLookup(channelUrl: string, fallbackQuery: string): ChannelLoo
 
 async function youtubeGet(path: string, params: Record<string, string>) {
   const apiKey = getApiKey();
-  if (!apiKey) return null;
+  if (!apiKey) {
+    throw new YoutubeMetadataError("YOUTUBE_API_KEY is not configured.");
+  }
 
   const url = new URL(`${YOUTUBE_API_BASE}/${path}`);
   for (const [key, value] of Object.entries(params)) {
@@ -91,8 +100,7 @@ async function youtubeGet(path: string, params: Record<string, string>) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok || data?.error) {
-    console.warn("[YouTube Metadata] API error", data?.error?.message || response.statusText);
-    return null;
+    throw new YoutubeMetadataError(data?.error?.message || response.statusText);
   }
 
   return data;
@@ -176,9 +184,10 @@ async function fetchFirstUploadDate(uploadsPlaylistId: string | undefined) {
 export async function fetchYoutubeChannelMetadata(
   channelUrl: string,
   fallbackQuery = "",
+  options: { throwOnApiError?: boolean } = {},
 ): Promise<YoutubeChannelMetadata | null> {
   const lookup = getChannelLookup(channelUrl, fallbackQuery);
-  if (!lookup || !getApiKey()) return null;
+  if (!lookup) return null;
 
   try {
     const channel = await resolveChannel(lookup);
@@ -200,6 +209,9 @@ export async function fetchYoutubeChannelMetadata(
       firstUploadDate,
     };
   } catch (error) {
+    if (options.throwOnApiError && error instanceof YoutubeMetadataError) {
+      throw error;
+    }
     console.warn("[YouTube Metadata] Failed to fetch channel metadata", error);
     return null;
   }
