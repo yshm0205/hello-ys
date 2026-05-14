@@ -59,13 +59,21 @@ function normalizeChannelUrl(value: string) {
   return `https://${raw}`;
 }
 
+function safeDecodeURIComponent(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function getChannelLookup(channelUrl: string, fallbackQuery: string): ChannelLookup | null {
   const normalizedUrl = normalizeChannelUrl(channelUrl);
 
   if (normalizedUrl) {
     try {
       const url = new URL(normalizedUrl);
-      const segments = url.pathname.split("/").filter(Boolean);
+      const segments = url.pathname.split("/").filter(Boolean).map(safeDecodeURIComponent);
       const first = segments[0] || "";
       const second = segments[1] || "";
 
