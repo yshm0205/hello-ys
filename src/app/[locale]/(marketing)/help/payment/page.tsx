@@ -13,9 +13,20 @@ export default function PaymentHelpPage() {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-16 max-w-3xl">
         <h1 className="text-4xl font-bold mb-4">결제 안내</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-12">
+        <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
           토스페이로 처음 결제하시나요? 결제 흐름이 익숙하지 않으면 당황하실 수 있어서 미리 안내해드려요.
         </p>
+
+        {/* ── 핵심 안심 박스 (가장 먼저 보이게) ── */}
+        <div className="mb-12 rounded-2xl border-2 border-amber-400/50 bg-amber-50 p-6 dark:bg-amber-500/10">
+          <p className="mb-2 text-lg font-bold text-amber-900 dark:text-amber-200">
+            ⚠️ 토스페이 눌렀더니 &ldquo;토스 앱 설치&rdquo; 창이 떴나요?
+          </p>
+          <p className="text-base leading-relaxed text-amber-800 dark:text-amber-100/90">
+            <strong>정상입니다. 당황하지 마세요.</strong> 토스 앱을 설치하고 이어서 결제하면 돼요.
+            아래에서 모바일·PC 단계별로 안내해드릴게요.
+          </p>
+        </div>
 
         {/* ── 결제 흐름 안내 ── */}
         <div className="prose dark:prose-invert max-w-none prose-headings:text-black dark:prose-headings:text-white prose-p:text-black dark:prose-p:text-white prose-li:text-black dark:prose-li:text-white prose-strong:text-black dark:prose-strong:text-white">
