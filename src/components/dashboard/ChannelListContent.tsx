@@ -7,6 +7,7 @@ import {
     Group,
     Stack,
     Select,
+    TextInput,
     Table,
     Badge,
     Skeleton,
@@ -14,9 +15,8 @@ import {
     Anchor,
     Button,
     NumberInput,
-    ActionIcon,
 } from '@mantine/core';
-import { ExternalLink, Lock, BarChart3, ArrowUp, ArrowDown, ArrowUpDown, X } from 'lucide-react';
+import { ExternalLink, Lock, BarChart3, ArrowUp, ArrowDown, ArrowUpDown, Search, Sparkles, X } from 'lucide-react';
 
 // ── 타입 ──
 interface Channel {
@@ -37,7 +37,7 @@ interface ChannelData {
     channels: Channel[];
 }
 
-type SortColumn = 'subscribers' | 'avg_views' | 'median_views';
+type SortColumn = 'opportunity' | 'subscribers' | 'avg_views' | 'median_views';
 type SortDir = 'asc' | 'desc';
 
 interface SortState {
@@ -62,6 +62,15 @@ type CategoryFilter = (typeof MAIN_CATEGORIES)[number];
 const MINOR_CATEGORIES = ['푸드/뷰티', '방송/영상', '글로벌/문화', '쇼핑 쇼츠', '음악/댄스'];
 
 const FREE_PREVIEW_COUNT = 5;
+type QuickFilter = 'starter' | 'small_win' | 'low_lift' | 'ai' | 'all';
+
+const QUICK_FILTERS: { value: QuickFilter; label: string }[] = [
+    { value: 'starter', label: '입문자용' },
+    { value: 'small_win', label: '저구독 고조회' },
+    { value: 'low_lift', label: '얼굴 부담 낮음' },
+    { value: 'ai', label: 'AI 가능' },
+    { value: 'all', label: '전체' },
+];
 
 const EMPTY_FILTER: RangeFilter = {
     subsMin: '', subsMax: '',
@@ -102,19 +111,65 @@ function hasActiveFilter(f: RangeFilter): boolean {
     return Object.values(f).some((v) => v !== '');
 }
 
+function normalizeText(value: string): string {
+    return value.trim().toLowerCase();
+}
+
+function getOpportunityScore(ch: Channel): number {
+    const subscriberBase = Math.max(ch.subscribers, 1000);
+    const viewPower = ch.avg_views / subscriberBase;
+    const stability = ch.avg_views > 0 ? Math.min(ch.median_views / ch.avg_views, 1) : 0;
+    const formatBoost = isLowLiftChannel(ch) ? 1.25 : 1;
+
+    return viewPower * (0.75 + stability * 0.25) * formatBoost;
+}
+
+function isSmallHighViewChannel(ch: Channel): boolean {
+    return ch.subscribers <= 100_000 && ch.avg_views >= 100_000;
+}
+
+function isLowLiftChannel(ch: Channel): boolean {
+    const text = `${ch.format} ${ch.subcategory}`.toLowerCase();
+    return ['ai', '짜집기', '커뮤니티', '랭킹', '해설'].some((keyword) => text.includes(keyword));
+}
+
+function isBeginnerFriendlyChannel(ch: Channel): boolean {
+    return isSmallHighViewChannel(ch) && isLowLiftChannel(ch);
+}
+
+function matchesQuickFilter(ch: Channel, quickFilter: QuickFilter): boolean {
+    if (quickFilter === 'all') return true;
+    if (quickFilter === 'starter') return isBeginnerFriendlyChannel(ch);
+    if (quickFilter === 'small_win') return isSmallHighViewChannel(ch);
+    if (quickFilter === 'low_lift') return isLowLiftChannel(ch);
+    if (quickFilter === 'ai') return `${ch.format} ${ch.subcategory}`.toLowerCase().includes('ai');
+    return true;
+}
+
+function getInsight(ch: Channel): string {
+    const medianRatio = ch.avg_views > 0 ? ch.median_views / ch.avg_views : 0;
+
+    if (isBeginnerFriendlyChannel(ch)) return '입문자가 참고하기 쉬운 제작 형식에서 조회수가 높음';
+    if (isSmallHighViewChannel(ch)) return '구독자 대비 평균 조회수가 높음';
+    if (isLowLiftChannel(ch)) return '촬영 부담이 낮은 제작 방식';
+    if (medianRatio >= 0.6) return '한두 개만 터진 채널보다 조회수가 안정적';
+    return '참고 후보';
+}
+
 // ── 컴포넌트 ──
 export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) {
     const [months, setMonths] = useState<string[]>([]);
     const [month, setMonth] = useState('');
     const [data, setData] = useState<ChannelData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [sort, setSort] = useState<SortState>({ column: 'avg_views', dir: 'desc' });
+    const [sort, setSort] = useState<SortState>({ column: 'opportunity', dir: 'desc' });
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('전체');
+    const [quickFilter, setQuickFilter] = useState<QuickFilter>('starter');
+    const [query, setQuery] = useState('');
     const [filter, setFilter] = useState<RangeFilter>(EMPTY_FILTER);
 
     // Supabase 데이터 fetch (월별)
     useEffect(() => {
-        setLoading(true);
         const url = month ? `/api/hot-channels?month=${month}` : '/api/hot-channels';
         fetch(url)
             .then((r) => r.json())
@@ -145,6 +200,17 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
         if (!data) return [];
         let list = data.channels;
 
+        if (isSubscribed && quickFilter !== 'all') {
+            list = list.filter((c) => matchesQuickFilter(c, quickFilter));
+        }
+
+        const normalizedQuery = normalizeText(query);
+        if (isSubscribed && normalizedQuery) {
+            list = list.filter((c) =>
+                normalizeText(`${c.name} ${c.category} ${c.subcategory} ${c.format}`).includes(normalizedQuery)
+            );
+        }
+
         // 대분류 필터
         if (isSubscribed && categoryFilter !== '전체') {
             if (categoryFilter === '기타') {
@@ -170,13 +236,28 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
         // 정렬 (stable sort with index fallback)
         const sorted = list.map((ch, i) => ({ ch, i }));
         sorted.sort((a, b) => {
+            const aValue = sort.column === 'opportunity' ? getOpportunityScore(a.ch) : a.ch[sort.column];
+            const bValue = sort.column === 'opportunity' ? getOpportunityScore(b.ch) : b.ch[sort.column];
             const diff = sort.dir === 'desc'
-                ? b.ch[sort.column] - a.ch[sort.column]
-                : a.ch[sort.column] - b.ch[sort.column];
+                ? bValue - aValue
+                : aValue - bValue;
             return diff !== 0 ? diff : a.i - b.i; // stable
         });
         return sorted.map((s) => s.ch);
-    }, [data, categoryFilter, filter, sort, isSubscribed]);
+    }, [data, categoryFilter, filter, quickFilter, query, sort, isSubscribed]);
+
+    const hasControlFilter =
+        quickFilter !== 'starter' ||
+        categoryFilter !== '전체' ||
+        query.trim() !== '' ||
+        hasActiveFilter(filter);
+
+    const resetFilters = () => {
+        setQuickFilter('starter');
+        setCategoryFilter('전체');
+        setQuery('');
+        setFilter(EMPTY_FILTER);
+    };
 
     return (
         <Stack gap="md">
@@ -223,7 +304,11 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                                         return { value: m, label: `${y}년 ${parseInt(mo)}월` };
                                     })}
                                     value={month}
-                                    onChange={(v) => v && setMonth(v)}
+                                    onChange={(v) => {
+                                        if (!v) return;
+                                        setLoading(true);
+                                        setMonth(v);
+                                    }}
                                     size="xs"
                                     w={140}
                                     allowDeselect={false}
@@ -271,13 +356,13 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                             </Group>
 
                             {/* 필터 초기화 (수강생만) */}
-                            {isSubscribed && hasActiveFilter(filter) && (
+                            {isSubscribed && hasControlFilter && (
                                 <Button
                                     size="compact-xs"
                                     variant="subtle"
                                     color="gray"
                                     leftSection={<X size={12} />}
-                                    onClick={() => setFilter(EMPTY_FILTER)}
+                                    onClick={resetFilters}
                                 >
                                     필터 초기화
                                 </Button>
@@ -286,8 +371,40 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
 
                         {/* 범위 필터 (수강생만) */}
                         {isSubscribed && (
-                            <Box mt="sm">
-                                <Group gap="md" wrap="wrap">
+                            <Stack gap="sm" mt="sm">
+                                <Group gap={6} wrap="wrap">
+                                    {QUICK_FILTERS.map((item) => (
+                                        <Button
+                                            key={item.value}
+                                            size="compact-xs"
+                                            radius="md"
+                                            variant={quickFilter === item.value ? 'filled' : 'default'}
+                                            color={quickFilter === item.value ? 'violet' : 'gray'}
+                                            leftSection={item.value === 'starter' ? <Sparkles size={12} /> : undefined}
+                                            onClick={() => setQuickFilter(item.value)}
+                                            styles={{
+                                                root: quickFilter !== item.value ? {
+                                                    background: '#fff',
+                                                    borderColor: '#e5e7eb',
+                                                } : {},
+                                            }}
+                                        >
+                                            {item.label}
+                                        </Button>
+                                    ))}
+                                </Group>
+
+                                <Group gap="md" wrap="wrap" align="end">
+                                    <TextInput
+                                        label="검색"
+                                        placeholder="채널명, 분야, 제작형식"
+                                        value={query}
+                                        onChange={(event) => setQuery(event.currentTarget.value)}
+                                        leftSection={<Search size={14} />}
+                                        size="xs"
+                                        w={240}
+                                        styles={{ input: { background: '#fff', fontSize: 12 } }}
+                                    />
                                     <RangeInput
                                         label="구독자"
                                         min={filter.subsMin}
@@ -313,7 +430,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                                         placeholder="회"
                                     />
                                 </Group>
-                            </Box>
+                            </Stack>
                         )}
                     </Box>
                 </Stack>
@@ -331,29 +448,47 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
             {/* 데이터 */}
             {!loading && data && (
                 <Box pos="relative">
-                    {/* PC 테이블 (sm 이상) */}
-                    <Box visibleFrom="sm">
-                        <ChannelTable
-                            channels={isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)}
-                            sort={sort}
-                            onSort={isSubscribed ? toggleSort : undefined}
-                        />
-                    </Box>
+                    {filtered.length === 0 ? (
+                        <Card padding="xl" radius="lg" withBorder style={{ textAlign: 'center' }}>
+                            <Stack gap="sm" align="center">
+                                <Text fw={700}>조건에 맞는 채널이 없습니다</Text>
+                                <Text size="sm" c="dimmed">
+                                    필터를 넓히면 더 많은 참고 채널을 볼 수 있습니다.
+                                </Text>
+                                {isSubscribed && (
+                                    <Button variant="light" color="violet" size="xs" onClick={resetFilters}>
+                                        필터 초기화
+                                    </Button>
+                                )}
+                            </Stack>
+                        </Card>
+                    ) : (
+                        <>
+                            {/* PC 테이블 (sm 이상) */}
+                            <Box visibleFrom="sm">
+                                <ChannelTable
+                                    channels={isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)}
+                                    sort={sort}
+                                    onSort={isSubscribed ? toggleSort : undefined}
+                                />
+                            </Box>
 
-                    {/* 모바일 카드 (sm 미만) */}
-                    <Box hiddenFrom="sm">
-                        <Stack gap="sm">
-                            {(isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)).map(
-                                (ch, idx) => (
-                                    <ChannelCard key={`${idx}-${ch.channel_url}`} channel={ch} />
-                                )
+                            {/* 모바일 카드 (sm 미만) */}
+                            <Box hiddenFrom="sm">
+                                <Stack gap="sm">
+                                    {(isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)).map(
+                                        (ch, idx) => (
+                                            <ChannelCard key={`${idx}-${ch.channel_url}`} channel={ch} />
+                                        )
+                                    )}
+                                </Stack>
+                            </Box>
+
+                            {/* 비수강생 블러 + CTA */}
+                            {!isSubscribed && filtered.length > FREE_PREVIEW_COUNT && (
+                                <BlurOverlay total={filtered.length} />
                             )}
-                        </Stack>
-                    </Box>
-
-                    {/* 비수강생 블러 + CTA */}
-                    {!isSubscribed && filtered.length > FREE_PREVIEW_COUNT && (
-                        <BlurOverlay total={filtered.length} />
+                        </>
                     )}
                 </Box>
             )}
@@ -448,6 +583,15 @@ function ChannelTable({
                     <Table.Th>채널명</Table.Th>
                     <Table.Th
                         style={{ textAlign: 'right', ...sortableStyle }}
+                        onClick={() => onSort?.('opportunity')}
+                    >
+                        <Group gap={4} justify="flex-end" wrap="nowrap">
+                            참고도
+                            {onSort && <SortIcon column="opportunity" sort={sort} />}
+                        </Group>
+                    </Table.Th>
+                    <Table.Th
+                        style={{ textAlign: 'right', ...sortableStyle }}
                         onClick={() => onSort?.('subscribers')}
                     >
                         <Group gap={4} justify="flex-end" wrap="nowrap">
@@ -476,6 +620,7 @@ function ChannelTable({
                     <Table.Th>대분류</Table.Th>
                     <Table.Th>소분류</Table.Th>
                     <Table.Th>제작형식</Table.Th>
+                    <Table.Th>참고 포인트</Table.Th>
                 </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -497,6 +642,9 @@ function ChannelTable({
                                 </Group>
                             </Anchor>
                         </Table.Td>
+                        <Table.Td style={{ textAlign: 'right', fontWeight: 600 }}>
+                            {getOpportunityScore(ch).toFixed(1)}
+                        </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>{formatSubs(ch.subscribers)}</Table.Td>
                         <Table.Td style={{ textAlign: 'right', fontWeight: 600 }}>
                             {formatCount(ch.avg_views)}
@@ -515,6 +663,11 @@ function ChannelTable({
                         <Table.Td>
                             <Text size="xs" c="dimmed">
                                 {ch.format}
+                            </Text>
+                        </Table.Td>
+                        <Table.Td>
+                            <Text size="xs" c="gray.7">
+                                {getInsight(ch)}
                             </Text>
                         </Table.Td>
                     </Table.Tr>
@@ -552,6 +705,12 @@ function ChannelCard({ channel: ch }: { channel: Channel }) {
             </Group>
             <Group gap="xs" mb={2}>
                 <Text size="xs">
+                    참고도 <b>{getOpportunityScore(ch).toFixed(1)}</b>
+                </Text>
+                <Text size="xs" c="dimmed">
+                    ·
+                </Text>
+                <Text size="xs">
                     평균 <b>{formatCount(ch.avg_views)}</b>
                 </Text>
                 <Text size="xs" c="dimmed">
@@ -563,6 +722,9 @@ function ChannelCard({ channel: ch }: { channel: Channel }) {
             </Group>
             <Text size="xs" c="dimmed">
                 {ch.format}
+            </Text>
+            <Text size="xs" c="gray.7" mt={4}>
+                {getInsight(ch)}
             </Text>
         </Card>
     );
