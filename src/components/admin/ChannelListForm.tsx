@@ -209,7 +209,7 @@ export function EditChannelListButton({ channel }: { channel: Record<string, unk
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="first_upload_date">첫 영상 업로드일</Label>
+              <Label htmlFor="first_upload_date">첫 쇼츠 업로드일</Label>
               <Input
                 id="first_upload_date"
                 name="first_upload_date"
@@ -420,7 +420,7 @@ export function BulkUploadButton() {
             <p className="text-xs text-muted-foreground mb-1">
               컬럼: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL
               <br />
-              채널 URL이 있으면 프로필, 총 영상 수, 첫 업로드일은 YouTube API로 자동 보강됩니다.
+              채널 URL이 있으면 프로필, 총 영상 수, 첫 쇼츠 업로드일은 YouTube API로 자동 보강됩니다.
             </p>
             <Textarea
               id="bulk_text"

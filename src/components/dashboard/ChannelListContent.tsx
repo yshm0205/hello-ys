@@ -7,7 +7,7 @@ import {
     Group,
     Stack,
     Select,
-    TextInput,
+    SegmentedControl,
     Table,
     Badge,
     Avatar,
@@ -15,9 +15,8 @@ import {
     Card,
     Anchor,
     Button,
-    NumberInput,
 } from '@mantine/core';
-import { ExternalLink, Lock, BarChart3, ArrowUp, ArrowDown, ArrowUpDown, Search, X } from 'lucide-react';
+import { ExternalLink, Lock, BarChart3, ArrowUp, ArrowDown, ArrowUpDown, X } from 'lucide-react';
 
 // ── 타입 ──
 interface Channel {
@@ -49,15 +48,6 @@ interface SortState {
     dir: SortDir;
 }
 
-interface RangeFilter {
-    subsMin: number | '';
-    subsMax: number | '';
-    avgMin: number | '';
-    avgMax: number | '';
-    medianMin: number | '';
-    medianMax: number | '';
-}
-
 // ── 상수 ──
 
 const MAIN_CATEGORIES = ['전체', '지식/정보', '취미/덕질', '연예/팬덤', '일상/공감', '기타'] as const;
@@ -67,6 +57,7 @@ const MINOR_CATEGORIES = ['푸드/뷰티', '방송/영상', '글로벌/문화', 
 const FREE_PREVIEW_COUNT = 5;
 type FormFilter = 'all' | 'ai' | 'shooting' | 'edit' | 'explain' | 'ranking' | 'community' | 'story';
 type PerformanceGrade = 'Great' | 'Good' | 'Normal';
+type PerformanceFilter = 'all' | PerformanceGrade;
 
 const FORM_FILTERS: { value: FormFilter; label: string; keywords: string[] }[] = [
     { value: 'all', label: '전체 폼', keywords: [] },
@@ -79,11 +70,12 @@ const FORM_FILTERS: { value: FormFilter; label: string; keywords: string[] }[] =
     { value: 'story', label: '썰형', keywords: ['썰'] },
 ];
 
-const EMPTY_FILTER: RangeFilter = {
-    subsMin: '', subsMax: '',
-    avgMin: '', avgMax: '',
-    medianMin: '', medianMax: '',
-};
+const PERFORMANCE_FILTERS: { value: PerformanceFilter; label: string }[] = [
+    { value: 'all', label: '전체' },
+    { value: 'Great', label: 'Great만' },
+    { value: 'Good', label: 'Good만' },
+    { value: 'Normal', label: 'Normal' },
+];
 
 // ── 포맷 유틸 ──
 function formatCount(n: number): string {
@@ -139,14 +131,6 @@ function getCategoryColor(category: string): string {
     }
 }
 
-function hasActiveFilter(f: RangeFilter): boolean {
-    return Object.values(f).some((v) => v !== '');
-}
-
-function normalizeText(value: string): string {
-    return value.trim().toLowerCase();
-}
-
 function getOpportunityScore(ch: Channel): number {
     const subscriberBase = Math.max(ch.subscribers, 1000);
     const viewPower = ch.avg_views / subscriberBase;
@@ -183,12 +167,6 @@ function getPerformanceGrade(ch: Channel, thresholds: ReturnType<typeof getPerfo
     return 'Normal';
 }
 
-function getGradeColor(grade: PerformanceGrade): string {
-    if (grade === 'Great') return 'green';
-    if (grade === 'Good') return 'lime';
-    return 'gray';
-}
-
 function matchesFormFilter(ch: Channel, formFilter: FormFilter): boolean {
     if (formFilter === 'all') return true;
     const selected = FORM_FILTERS.find((item) => item.value === formFilter);
@@ -203,12 +181,41 @@ function getInsight(ch: Channel, thresholds: ReturnType<typeof getPerformanceThr
     const ageMonths = getChannelAgeMonths(ch.first_upload_date);
 
     if (ageMonths !== null && ageMonths <= 12 && (grade === 'Great' || grade === 'Good')) {
-        return '첫 업로드 이후 빠르게 성과가 나는 채널';
+        return '첫 쇼츠 이후 빠르게 성과가 나는 채널';
     }
     if (grade === 'Great') return '구독자 대비 조회수와 중위값이 모두 강함';
     if (grade === 'Good') return '선택한 월 안에서 성과 지표가 좋은 편';
     if (stability >= 0.6) return '조회수 편차가 비교적 안정적';
     return '참고 후보';
+}
+
+function getGradeStyle(grade: PerformanceGrade) {
+    if (grade === 'Great') {
+        return { background: '#047857', color: '#fff', borderColor: '#047857' };
+    }
+    if (grade === 'Good') {
+        return { background: '#2563eb', color: '#fff', borderColor: '#2563eb' };
+    }
+    return { background: '#f3f4f6', color: '#374151', borderColor: '#d1d5db' };
+}
+
+function GradeBadge({ grade, size = 'sm' }: { grade: PerformanceGrade; size?: 'xs' | 'sm' }) {
+    return (
+        <Badge
+            variant="filled"
+            size={size}
+            radius="sm"
+            style={{
+                ...getGradeStyle(grade),
+                minWidth: size === 'xs' ? 64 : 78,
+                fontWeight: 800,
+                letterSpacing: 0,
+                justifyContent: 'center',
+            }}
+        >
+            {grade}
+        </Badge>
+    );
 }
 
 // ── 컴포넌트 ──
@@ -220,8 +227,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
     const [sort, setSort] = useState<SortState>({ column: 'opportunity', dir: 'desc' });
     const [categoryFilter, setCategoryFilter] = useState<string>('전체');
     const [formFilter, setFormFilter] = useState<FormFilter>('all');
-    const [query, setQuery] = useState('');
-    const [filter, setFilter] = useState<RangeFilter>(EMPTY_FILTER);
+    const [performanceFilter, setPerformanceFilter] = useState<PerformanceFilter>('all');
 
     // Supabase 데이터 fetch (월별)
     useEffect(() => {
@@ -285,24 +291,8 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
             list = list.filter((c) => matchesFormFilter(c, formFilter));
         }
 
-        const normalizedQuery = normalizeText(query);
-        if (isSubscribed && normalizedQuery) {
-            list = list.filter((c) =>
-                normalizeText(`${c.name} ${c.category} ${c.subcategory} ${c.format}`).includes(normalizedQuery)
-            );
-        }
-
-        // 범위 필터
-        if (isSubscribed && hasActiveFilter(filter)) {
-            list = list.filter((c) => {
-                if (filter.subsMin !== '' && c.subscribers < filter.subsMin) return false;
-                if (filter.subsMax !== '' && c.subscribers > filter.subsMax) return false;
-                if (filter.avgMin !== '' && c.avg_views < filter.avgMin) return false;
-                if (filter.avgMax !== '' && c.avg_views > filter.avgMax) return false;
-                if (filter.medianMin !== '' && c.median_views < filter.medianMin) return false;
-                if (filter.medianMax !== '' && c.median_views > filter.medianMax) return false;
-                return true;
-            });
+        if (isSubscribed && performanceFilter !== 'all') {
+            list = list.filter((c) => getPerformanceGrade(c, performanceThresholds) === performanceFilter);
         }
 
         // 정렬 (stable sort with index fallback)
@@ -316,19 +306,17 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
             return diff !== 0 ? diff : a.i - b.i; // stable
         });
         return sorted.map((s) => s.ch);
-    }, [data, categoryFilter, filter, formFilter, query, sort, isSubscribed]);
+    }, [data, categoryFilter, formFilter, performanceFilter, performanceThresholds, sort, isSubscribed]);
 
     const hasControlFilter =
         categoryFilter !== '전체' ||
         formFilter !== 'all' ||
-        query.trim() !== '' ||
-        hasActiveFilter(filter);
+        performanceFilter !== 'all';
 
     const resetFilters = () => {
         setCategoryFilter('전체');
         setFormFilter('all');
-        setQuery('');
-        setFilter(EMPTY_FILTER);
+        setPerformanceFilter('all');
     };
 
     return (
@@ -393,7 +381,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                                     }}
                                 />
 
-                                {/* 주제/제작 폼 필터 (수강생만) */}
+                                {/* 주제/제작 폼/성과 필터 (수강생만) */}
                                 {isSubscribed && (
                                     <>
                                         <Box
@@ -424,6 +412,36 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                                             allowDeselect={false}
                                             styles={{ input: { background: '#fff', fontWeight: 600 } }}
                                         />
+                                        <Stack gap={4}>
+                                            <Text size="xs" fw={600} c="#374151">
+                                                성과
+                                            </Text>
+                                            <SegmentedControl
+                                                data={PERFORMANCE_FILTERS}
+                                                value={performanceFilter}
+                                                onChange={(v) => setPerformanceFilter(v as PerformanceFilter)}
+                                                size="xs"
+                                                radius="md"
+                                                styles={{
+                                                    root: {
+                                                        background: '#fff',
+                                                        border: '1px solid #e5e7eb',
+                                                        padding: 3,
+                                                    },
+                                                    label: {
+                                                        color: '#374151',
+                                                        fontSize: 12,
+                                                        fontWeight: 800,
+                                                        letterSpacing: 0,
+                                                    },
+                                                    indicator: {
+                                                        background: '#dbeafe',
+                                                        border: '1px solid #60a5fa',
+                                                        boxShadow: '0 1px 4px rgba(37, 99, 235, 0.14)',
+                                                    },
+                                                }}
+                                            />
+                                        </Stack>
                                     </>
                                 )}
                             </Group>
@@ -441,48 +459,6 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                                 </Button>
                             )}
                         </Group>
-
-                        {/* 범위 필터 (수강생만) */}
-                        {isSubscribed && (
-                            <Stack gap="sm" mt="sm">
-                                <Group gap="md" wrap="wrap" align="end">
-                                    <TextInput
-                                        label="검색"
-                                        placeholder="채널명, 세부 주제"
-                                        value={query}
-                                        onChange={(event) => setQuery(event.currentTarget.value)}
-                                        leftSection={<Search size={14} />}
-                                        size="xs"
-                                        w={240}
-                                        styles={{ input: { background: '#fff', fontSize: 12 } }}
-                                    />
-                                    <RangeInput
-                                        label="구독자"
-                                        min={filter.subsMin}
-                                        max={filter.subsMax}
-                                        onMinChange={(v) => setFilter((f) => ({ ...f, subsMin: v }))}
-                                        onMaxChange={(v) => setFilter((f) => ({ ...f, subsMax: v }))}
-                                        placeholder="명"
-                                    />
-                                    <RangeInput
-                                        label="평균 조회수"
-                                        min={filter.avgMin}
-                                        max={filter.avgMax}
-                                        onMinChange={(v) => setFilter((f) => ({ ...f, avgMin: v }))}
-                                        onMaxChange={(v) => setFilter((f) => ({ ...f, avgMax: v }))}
-                                        placeholder="회"
-                                    />
-                                    <RangeInput
-                                        label="중위값"
-                                        min={filter.medianMin}
-                                        max={filter.medianMax}
-                                        onMinChange={(v) => setFilter((f) => ({ ...f, medianMin: v }))}
-                                        onMaxChange={(v) => setFilter((f) => ({ ...f, medianMax: v }))}
-                                        placeholder="회"
-                                    />
-                                </Group>
-                            </Stack>
-                        )}
                     </Box>
                 </Stack>
             </Card>
@@ -552,54 +528,6 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
     );
 }
 
-// ── 범위 입력 ──
-function RangeInput({
-    label,
-    min,
-    max,
-    onMinChange,
-    onMaxChange,
-    placeholder,
-}: {
-    label: string;
-    min: number | '';
-    max: number | '';
-    onMinChange: (v: number | '') => void;
-    onMaxChange: (v: number | '') => void;
-    placeholder: string;
-}) {
-    return (
-        <Group gap={6} align="end">
-            <Text size="xs" fw={600} c="gray.7" style={{ minWidth: 60 }}>
-                {label}
-            </Text>
-            <NumberInput
-                size="xs"
-                w={100}
-                placeholder={`최소 (${placeholder})`}
-                value={min}
-                onChange={(v) => onMinChange(v === '' ? '' : Number(v))}
-                min={0}
-                thousandSeparator=","
-                hideControls
-                styles={{ input: { background: '#fff', fontSize: 12 } }}
-            />
-            <Text size="xs" c="dimmed">~</Text>
-            <NumberInput
-                size="xs"
-                w={100}
-                placeholder={`최대 (${placeholder})`}
-                value={max}
-                onChange={(v) => onMaxChange(v === '' ? '' : Number(v))}
-                min={0}
-                thousandSeparator=","
-                hideControls
-                styles={{ input: { background: '#fff', fontSize: 12 } }}
-            />
-        </Group>
-    );
-}
-
 // ── 정렬 아이콘 ──
 function SortIcon({ column, sort }: { column: SortColumn; sort: SortState }) {
     if (sort.column !== column) return <ArrowUpDown size={12} color="#9ca3af" />;
@@ -631,9 +559,9 @@ function ChannelTable({
             withTableBorder
             withColumnBorders={false}
             styles={{
-                table: { fontSize: 14, borderRadius: 12, overflow: 'hidden' },
-                th: { background: '#F3F0FF', fontWeight: 600, color: '#5b21b6', padding: '12px 14px', fontSize: 13 },
-                td: { padding: '11px 14px' },
+                table: { fontSize: 14, borderRadius: 12, overflow: 'hidden', color: '#111827' },
+                th: { background: '#f8fafc', fontWeight: 800, color: '#1f2937', padding: '12px 14px', fontSize: 13 },
+                td: { padding: '12px 14px', color: '#111827', verticalAlign: 'middle' },
             }}
         >
             <Table.Thead>
@@ -701,8 +629,8 @@ function ChannelTable({
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         size="sm"
-                                        fw={500}
-                                        c="dark"
+                                        fw={700}
+                                        c="#111827"
                                         style={{ textDecoration: 'none' }}
                                     >
                                         <Group gap={4} wrap="nowrap">
@@ -710,16 +638,14 @@ function ChannelTable({
                                             <ExternalLink size={13} color="#9ca3af" />
                                         </Group>
                                     </Anchor>
-                                    <Text size="xs" c="dimmed">
-                                        구독 {formatSubs(ch.subscribers)} · 영상 {formatVideoCount(ch.total_video_count)} · 첫 업로드 {formatDateLabel(ch.first_upload_date)}
+                                    <Text size="xs" c="#4b5563">
+                                        구독 {formatSubs(ch.subscribers)} · 영상 {formatVideoCount(ch.total_video_count)} · 첫 쇼츠 {formatDateLabel(ch.first_upload_date)}
                                     </Text>
                                 </Stack>
                             </Group>
                         </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>
-                            <Badge variant="light" color={getGradeColor(getPerformanceGrade(ch, performanceThresholds))} size="sm">
-                                {getPerformanceGrade(ch, performanceThresholds)}
-                            </Badge>
+                            <GradeBadge grade={getPerformanceGrade(ch, performanceThresholds)} />
                         </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>{formatSubs(ch.subscribers)}</Table.Td>
                         <Table.Td style={{ textAlign: 'right', fontWeight: 600 }}>
@@ -737,12 +663,12 @@ function ChannelTable({
                             </Badge>
                         </Table.Td>
                         <Table.Td>
-                            <Text size="xs" c="dimmed">
+                            <Text size="xs" c="#374151" fw={500}>
                                 {ch.format}
                             </Text>
                         </Table.Td>
                         <Table.Td>
-                            <Text size="xs" c="gray.7">
+                            <Text size="xs" c="#374151">
                                 {getInsight(ch, performanceThresholds)}
                             </Text>
                         </Table.Td>
@@ -777,11 +703,11 @@ function ChannelCard({
                         {getInitial(ch.name)}
                     </Avatar>
                     <Stack gap={1}>
-                        <Text fw={600} size="sm">
+                        <Text fw={700} size="sm" c="#111827">
                             {ch.name}
                         </Text>
-                        <Text size="xs" c="dimmed">
-                            구독 {formatSubs(ch.subscribers)} · 영상 {formatVideoCount(ch.total_video_count)} · 첫 업로드 {formatDateLabel(ch.first_upload_date)}
+                        <Text size="xs" c="#4b5563">
+                            구독 {formatSubs(ch.subscribers)} · 영상 {formatVideoCount(ch.total_video_count)} · 첫 쇼츠 {formatDateLabel(ch.first_upload_date)}
                         </Text>
                     </Stack>
                 </Group>
@@ -798,9 +724,7 @@ function ChannelCard({
                 </Badge>
             </Group>
             <Group gap="xs" mb={2}>
-                <Badge variant="light" color={getGradeColor(grade)} size="xs">
-                    {grade}
-                </Badge>
+                <GradeBadge grade={grade} size="xs" />
                 <Text size="xs" c="dimmed">
                     ·
                 </Text>
@@ -814,10 +738,10 @@ function ChannelCard({
                     중위 <b>{formatCount(ch.median_views)}</b>
                 </Text>
             </Group>
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="#374151">
                 {ch.format}
             </Text>
-            <Text size="xs" c="gray.7" mt={4}>
+            <Text size="xs" c="#374151" mt={4}>
                 {getInsight(ch, performanceThresholds)}
             </Text>
         </Card>

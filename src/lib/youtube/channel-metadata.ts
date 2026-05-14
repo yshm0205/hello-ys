@@ -34,6 +34,26 @@ type YoutubeApiChannel = {
   };
 };
 
+type YoutubeApiPlaylistItem = {
+  contentDetails?: {
+    videoId?: string;
+    videoPublishedAt?: string;
+  };
+  snippet?: {
+    publishedAt?: string;
+  };
+};
+
+type YoutubeApiVideo = {
+  id: string;
+  contentDetails?: {
+    duration?: string;
+  };
+  snippet?: {
+    publishedAt?: string;
+  };
+};
+
 type ChannelLookup =
   | { type: "id"; value: string }
   | { type: "handle"; value: string }
@@ -42,6 +62,7 @@ type ChannelLookup =
 
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 const MAX_UPLOAD_PLAYLIST_PAGES = 80;
+const SHORTS_MAX_SECONDS = 180;
 
 function getApiKey() {
   return process.env.YOUTUBE_API_KEY || process.env.GOOGLE_API_KEY || "";
@@ -49,6 +70,22 @@ function getApiKey() {
 
 function parseNumber(value: string | undefined) {
   return parseInt(value || "0", 10) || 0;
+}
+
+function parseIsoDurationSeconds(value: string | undefined) {
+  if (!value) return 0;
+  const match = value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+  if (!match) return 0;
+  return (
+    parseNumber(match[1]) * 60 * 60 +
+    parseNumber(match[2]) * 60 +
+    parseNumber(match[3])
+  );
+}
+
+function isLikelyShort(video: YoutubeApiVideo) {
+  const seconds = parseIsoDurationSeconds(video.contentDetails?.duration);
+  return seconds > 0 && seconds <= SHORTS_MAX_SECONDS;
 }
 
 function normalizeChannelUrl(value: string) {
@@ -159,11 +196,24 @@ async function resolveChannel(lookup: ChannelLookup): Promise<YoutubeApiChannel 
   return channelId ? fetchChannelById(channelId) : null;
 }
 
-async function fetchFirstUploadDate(uploadsPlaylistId: string | undefined) {
+async function fetchVideoDetails(videoIds: string[]) {
+  if (videoIds.length === 0) return [];
+
+  const data = await youtubeGet("videos", {
+    part: "snippet,contentDetails",
+    id: videoIds.join(","),
+    maxResults: "50",
+  });
+
+  return (data?.items || []) as YoutubeApiVideo[];
+}
+
+async function fetchFirstShortUploadDate(uploadsPlaylistId: string | undefined) {
   if (!uploadsPlaylistId) return null;
 
   let nextPageToken = "";
-  let oldestPublishedAt: string | null = null;
+  let oldestShortPublishedAt: string | null = null;
+  let oldestAnyPublishedAt: string | null = null;
   let page = 0;
 
   do {
@@ -176,17 +226,38 @@ async function fetchFirstUploadDate(uploadsPlaylistId: string | undefined) {
 
     if (!data?.items?.length) break;
 
-    for (const item of data.items) {
+    const items = data.items as YoutubeApiPlaylistItem[];
+    const publishedByVideoId = new Map<string, string>();
+    const videoIds: string[] = [];
+
+    for (const item of items) {
       const publishedAt =
         item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt || null;
-      if (publishedAt) oldestPublishedAt = publishedAt;
+      if (publishedAt) oldestAnyPublishedAt = publishedAt;
+
+      const videoId = item.contentDetails?.videoId;
+      if (videoId) {
+        videoIds.push(videoId);
+        if (publishedAt) publishedByVideoId.set(videoId, publishedAt);
+      }
+    }
+
+    const videos = await fetchVideoDetails(videoIds);
+    const videosById = new Map(videos.map((video) => [video.id, video]));
+
+    for (const videoId of videoIds) {
+      const video = videosById.get(videoId);
+      if (!video || !isLikelyShort(video)) continue;
+      oldestShortPublishedAt =
+        video.snippet?.publishedAt || publishedByVideoId.get(videoId) || oldestShortPublishedAt;
     }
 
     nextPageToken = data.nextPageToken || "";
     page += 1;
   } while (nextPageToken && page < MAX_UPLOAD_PLAYLIST_PAGES);
 
-  return oldestPublishedAt ? oldestPublishedAt.slice(0, 10) : null;
+  const firstRelevantDate = oldestShortPublishedAt || oldestAnyPublishedAt;
+  return firstRelevantDate ? firstRelevantDate.slice(0, 10) : null;
 }
 
 export async function fetchYoutubeChannelMetadata(
@@ -201,7 +272,7 @@ export async function fetchYoutubeChannelMetadata(
     const channel = await resolveChannel(lookup);
     if (!channel) return null;
 
-    const firstUploadDate = await fetchFirstUploadDate(
+    const firstUploadDate = await fetchFirstShortUploadDate(
       channel.contentDetails?.relatedPlaylists?.uploads,
     );
 

@@ -235,7 +235,7 @@ export default async function AdminHotListPage({
                     <TableHead className="text-right">평균 조회수</TableHead>
                     <TableHead className="text-right">중위 조회수</TableHead>
                     <TableHead className="text-right">영상 수</TableHead>
-                    <TableHead>첫 업로드</TableHead>
+                    <TableHead>첫 쇼츠</TableHead>
                     <TableHead className="w-[120px]">관리</TableHead>
                   </TableRow>
                 </TableHeader>
