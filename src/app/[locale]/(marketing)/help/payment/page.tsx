@@ -17,6 +17,7 @@ export default function PaymentHelpPage() {
           토스페이로 처음 결제하시나요? 결제 흐름이 익숙하지 않으면 당황하실 수 있어서 미리 안내해드려요.
         </p>
 
+        {/* ── 결제 흐름 안내 ── */}
         <div className="prose dark:prose-invert max-w-none prose-headings:text-black dark:prose-headings:text-white prose-p:text-black dark:prose-p:text-white prose-li:text-black dark:prose-li:text-white prose-strong:text-black dark:prose-strong:text-white">
 
           <h2>🟣 토스페이가 뭐예요?</h2>
@@ -53,6 +54,27 @@ export default function PaymentHelpPage() {
             </a>{" "}
             로 토스 앱을 설치해주세요.
           </p>
+        </div>
+
+        {/* ── 랜딩 CTA (결제 흐름 안내 직후, FAQ 위) ── */}
+        <div className="my-12 rounded-2xl border border-violet-500/30 bg-gradient-to-b from-violet-500/10 to-violet-500/[0.02] p-8 text-center">
+          <p className="mb-2 text-xl font-bold text-black dark:text-white">
+            강의가 궁금하신가요?
+          </p>
+          <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
+            채널 성과와 커리큘럼을 확인하고 강의를 신청해보세요.
+          </p>
+          <a
+            href="/"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-violet-500/30 transition-all hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-xl hover:shadow-violet-500/40 sm:w-auto"
+          >
+            강의 신청하러 가기
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </a>
+        </div>
+
+        {/* ── FAQ + 도움 + 토스 공식 안내 ── */}
+        <div className="prose dark:prose-invert max-w-none prose-headings:text-black dark:prose-headings:text-white prose-p:text-black dark:prose-p:text-white prose-li:text-black dark:prose-li:text-white prose-strong:text-black dark:prose-strong:text-white">
 
           <h2>❓ 자주 묻는 질문</h2>
 
@@ -110,22 +132,6 @@ export default function PaymentHelpPage() {
               </a>
             </li>
           </ul>
-        </div>
-
-        {/* ── 랜딩 CTA ── */}
-        <div className="mt-16 rounded-2xl border border-violet-500/30 bg-gradient-to-b from-violet-500/10 to-violet-500/[0.02] p-8 text-center">
-          <p className="mb-2 text-lg font-bold text-black dark:text-white">
-            강의가 궁금하신가요?
-          </p>
-          <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-            채널 성과와 커리큘럼을 확인하고 강의를 신청해보세요.
-          </p>
-          <a
-            href="/"
-            className="inline-block rounded-xl bg-violet-600 px-8 py-3 text-base font-semibold text-white transition-colors hover:bg-violet-700"
-          >
-            강의 신청하러 가기 →
-          </a>
         </div>
       </main>
     </div>
