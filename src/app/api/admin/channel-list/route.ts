@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { fetchYoutubeChannelMetadata } from "@/lib/youtube/channel-metadata";
 import { NextRequest, NextResponse } from "next/server";
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
@@ -74,11 +75,17 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createAdminClient();
+  const youtubeMetadata = await fetchYoutubeChannelMetadata(channel_url || "", title || "");
+  const normalizedSubscriberCount = normalizeNumberInput(subscriber_count);
+  const normalizedTotalVideoCount = normalizeNumberInput(total_video_count);
+  const normalizedFirstUploadDate = normalizeDateInput(first_upload_date);
+  const normalizedProfileImageUrl = normalizeTextInput(profile_image_url);
+
   const basePayload = {
     id,
     month,
-    title,
-    subscriber_count: normalizeNumberInput(subscriber_count),
+    title: title || youtubeMetadata?.title || "",
+    subscriber_count: normalizedSubscriberCount || youtubeMetadata?.subscriberCount || 0,
     avg_view_count: normalizeNumberInput(avg_view_count),
     median_views: normalizeNumberInput(median_views),
     category: normalizeTextInput(category),
@@ -91,9 +98,9 @@ export async function POST(request: NextRequest) {
     .from("channel_list")
     .upsert({
       ...basePayload,
-      first_upload_date: normalizeDateInput(first_upload_date),
-      profile_image_url: normalizeTextInput(profile_image_url),
-      total_video_count: normalizeNumberInput(total_video_count),
+      first_upload_date: normalizedFirstUploadDate || youtubeMetadata?.firstUploadDate || null,
+      profile_image_url: normalizedProfileImageUrl || youtubeMetadata?.profileImageUrl || "",
+      total_video_count: normalizedTotalVideoCount || youtubeMetadata?.totalVideoCount || 0,
     }, { onConflict: "id" })
     .select()
     .single();
@@ -129,6 +136,18 @@ export async function PUT(request: NextRequest) {
   }
 
   const supabase = createAdminClient();
+  const youtubeMetadata = await fetchYoutubeChannelMetadata(
+    typeof updates.channel_url === "string" ? updates.channel_url : "",
+    typeof updates.title === "string" ? updates.title : "",
+  );
+
+  if (youtubeMetadata) {
+    if (!updates.subscriber_count) updates.subscriber_count = youtubeMetadata.subscriberCount;
+    if (!updates.first_upload_date) updates.first_upload_date = youtubeMetadata.firstUploadDate;
+    if (!updates.profile_image_url) updates.profile_image_url = youtubeMetadata.profileImageUrl;
+    if (!updates.total_video_count) updates.total_video_count = youtubeMetadata.totalVideoCount;
+  }
+
   if ("first_upload_date" in updates) {
     updates.first_upload_date = normalizeDateInput(updates.first_upload_date);
   }

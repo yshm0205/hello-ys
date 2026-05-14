@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil, Trash2, Upload, CalendarX2 } from "lucide-react";
+import { Pencil, Trash2, Upload, CalendarX2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 // ── 월별 일괄 삭제 ──
@@ -54,6 +54,54 @@ export function DeleteMonthButton({ month }: { month: string }) {
     >
       <CalendarX2 className="h-4 w-4 mr-2" />
       {loading ? "삭제 중..." : `${month} 전체 삭제`}
+    </Button>
+  );
+}
+
+export function EnrichChannelListButton({ month }: { month: string }) {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleEnrich() {
+    if (!month || loading) return;
+
+    setLoading(true);
+    let totalUpdated = 0;
+    let totalFailed = 0;
+    let remaining = 0;
+
+    try {
+      for (let i = 0; i < 120; i++) {
+        const res = await fetch("/api/admin/channel-list/enrich", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ month, limit: 5 }),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert(data.error || "YouTube 정보 보강 실패");
+          break;
+        }
+
+        totalUpdated += data.updated || 0;
+        totalFailed += data.failed || 0;
+        remaining = data.remaining || 0;
+
+        if (!remaining || ((data.updated || 0) === 0 && (data.failed || 0) === 0)) break;
+      }
+
+      router.refresh();
+      alert(`API 정보 보강 완료\n업데이트: ${totalUpdated}개\n실패: ${totalFailed}개${remaining ? `\n남은 항목: ${remaining}개` : ""}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button variant="outline" onClick={handleEnrich} disabled={loading || !month}>
+      <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+      {loading ? "API 정보 채우는 중..." : "API 정보 채우기"}
     </Button>
   );
 }
@@ -286,7 +334,7 @@ export function BulkUploadButton() {
     for (let i = 0; i < rows.length; i += 10) {
       const batch = rows.slice(i, i + 10);
       const promises = batch.map(async (cols) => {
-        const [name, subs, avg, median, category, subcategory, format, channelUrl, firstUploadDate, totalVideoCount, profileImageUrl] = cols;
+        const [name, subs, avg, median, category, subcategory, format, channelUrl] = cols;
         if (!name) return;
 
         const handle = channelUrl?.match(/@([^/,]+)/)?.[1] || name.replace(/\s+/g, "_");
@@ -301,9 +349,6 @@ export function BulkUploadButton() {
           subcategory: subcategory || "",
           format: format || "",
           channel_url: channelUrl || "",
-          first_upload_date: normalizeDateInput(firstUploadDate),
-          total_video_count: parseInt((totalVideoCount || "0").replace(/,/g, "")) || 0,
-          profile_image_url: profileImageUrl || "",
         };
 
         const res = await fetch("/api/admin/channel-list", {
@@ -369,13 +414,15 @@ export function BulkUploadButton() {
           <div>
             <Label htmlFor="bulk_text">또는 직접 붙여넣기 (탭/쉼표 구분)</Label>
             <p className="text-xs text-muted-foreground mb-1">
-              컬럼: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL, 첫영상업로드일, 총영상수, 프로필이미지URL
+              컬럼: 채널명, 구독자, 평균조회수, 중위조회수, 대분류, 소분류, 제작형식, 채널URL
+              <br />
+              채널 URL이 있으면 프로필, 총 영상 수, 첫 업로드일은 YouTube API로 자동 보강됩니다.
             </p>
             <Textarea
               id="bulk_text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://...\t2025-03-14\t198\thttps://...\n셀럽뿅감독\t66300\t4759535\t...`}
+              placeholder={`제로비\t740000\t10469095\t9215350\t지식/정보\t정보 (원가 계산)\t촬영\thttps://...\n셀럽뿅감독\t66300\t4759535\t...`}
               rows={8}
               className="font-mono text-xs"
             />

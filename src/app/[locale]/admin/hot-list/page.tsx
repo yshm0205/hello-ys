@@ -19,6 +19,7 @@ import {
   BulkUploadButton,
   DeleteChannelListButton,
   DeleteMonthButton,
+  EnrichChannelListButton,
   EditChannelListButton,
 } from "@/components/admin/ChannelListForm";
 
@@ -143,6 +144,7 @@ export default async function AdminHotListPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <BulkUploadButton />
+          <EnrichChannelListButton month={selectedMonth} />
         </div>
       </div>
 
