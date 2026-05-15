@@ -43,8 +43,9 @@ const checkoutItems = [
   },
   {
     title: '노션 운영 템플릿',
-    description: '콘텐츠 관리 템플릿',
+    description: '조회수 1억회 채널 운영 시스템',
     image: '/images/product-notion.gif',
+    badge: '선착순 혜택',
   },
 ];
 
@@ -442,6 +443,19 @@ export function AllInOneCheckoutContent({
           font-weight: 900;
         }
 
+        .fs-included-bonus {
+          display: inline-flex;
+          width: fit-content;
+          margin-top: 8px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: #ecfdf5;
+          color: #047857;
+          font-size: 12px;
+          line-height: 1;
+          font-weight: 900;
+        }
+
         .fs-select-details {
           margin-top: 12px;
           border: 1px solid #e5e7eb;
@@ -508,10 +522,25 @@ export function AllInOneCheckoutContent({
         }
 
         .fs-select-detail-item strong {
-          display: block;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 6px;
           color: #18181b;
           font-size: 13px;
           line-height: 1.3;
+          font-weight: 900;
+        }
+
+        .fs-detail-badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 3px 7px;
+          border-radius: 999px;
+          background: #ecfdf5;
+          color: #047857;
+          font-size: 11px;
+          line-height: 1;
           font-weight: 900;
         }
 
@@ -706,6 +735,41 @@ export function AllInOneCheckoutContent({
           color: #6d28d9;
           font-size: 12px;
           font-weight: 850;
+        }
+
+        .fs-summary-bonus {
+          margin-top: 14px;
+          padding: 13px 14px;
+          border: 1px solid #bbf7d0;
+          border-radius: 12px;
+          background: #f0fdf4;
+        }
+
+        .fs-summary-bonus span {
+          display: inline-flex;
+          margin-bottom: 6px;
+          padding: 5px 8px;
+          border-radius: 999px;
+          background: #dcfce7;
+          color: #047857;
+          font-size: 11px;
+          line-height: 1;
+          font-weight: 900;
+        }
+
+        .fs-summary-bonus strong {
+          display: block;
+          color: #111217;
+          font-size: 14px;
+          line-height: 1.35;
+          font-weight: 900;
+        }
+
+        .fs-summary-bonus p {
+          margin: 3px 0 0;
+          color: #3f3f46;
+          font-size: 12px;
+          line-height: 1.45;
         }
 
         .fs-price-block {
@@ -1167,10 +1231,11 @@ export function AllInOneCheckoutContent({
                     <span>
                       <span className="fs-select-option-title">올인원 구성 포함</span>
                       <span className="fs-select-option-sub">
-                        전자책 · 노션 템플릿 · 트렌드 채널 데이터 · 크레딧
+                        전자책 · 트렌드 채널 데이터 · 크레딧
                       </span>
+                      <span className="fs-included-bonus">노션 운영 템플릿 · 선착순 혜택</span>
                     </span>
-                    <span className="fs-included-tag">포함</span>
+                    <span className="fs-included-tag">혜택</span>
                   </div>
 
                   <details className="fs-select-details">
@@ -1182,7 +1247,10 @@ export function AllInOneCheckoutContent({
                             <Image src={item.image} alt="" width={44} height={36} unoptimized />
                           </div>
                           <div>
-                            <strong>{item.title}</strong>
+                            <strong>
+                              {item.title}
+                              {item.badge && <em className="fs-detail-badge">{item.badge}</em>}
+                            </strong>
                             <span>{item.description}</span>
                           </div>
                         </div>
@@ -1217,7 +1285,7 @@ export function AllInOneCheckoutContent({
                   data-cta-target={buildCheckoutRedirectTarget()}
                   onClick={redirectToLogin}
                 >
-                  구매하기
+                  올인원 패스 신청하기
                 </button>
               </div>
             </div>
@@ -1268,7 +1336,12 @@ export function AllInOneCheckoutContent({
                 <div className="fs-summary-head">
                   <span className="fs-summary-badge">결제 요약</span>
                   <h2 className="fs-section-title">원초적 인사이트 올인원 패스</h2>
-                  <p className="fs-section-subtitle">VOD + AI 도구 + 데이터 + 전자책 + 노션 템플릿</p>
+                  <p className="fs-section-subtitle">VOD + AI 도구 + 데이터 + 전자책</p>
+                  <div className="fs-summary-bonus">
+                    <span>선착순 혜택</span>
+                    <strong>노션 운영 템플릿</strong>
+                    <p>조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.</p>
+                  </div>
                   {userEmail && (
                     <Text mt={8} size="xs" c="gray.6">
                       로그인 계정: {userEmail}
