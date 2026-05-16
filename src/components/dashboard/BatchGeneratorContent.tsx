@@ -38,6 +38,7 @@ import {
     Brain,
     FolderOpen,
     RotateCcw,
+    ExternalLink,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
@@ -48,6 +49,8 @@ import {
     assembleLifetipsMaterial,
     isLifetipsStructuredValid,
 } from '@/components/dashboard/LifetipsStructuredInput';
+
+const FLOWSPOT_GUIDE_URL = 'https://www.notion.so/FlowSpot-362847bd025f8050b03ce759b7ac39b0';
 
 // ============ 타입 ============
 
@@ -741,6 +744,20 @@ export function BatchGeneratorContent() {
                     <Group gap="sm" mb={4}>
                         <Zap size={24} color="#8b5cf6" />
                         <Title order={2} style={{ color: 'var(--mantine-color-text)' }}>스크립트 생성</Title>
+                        <Button
+                            component="a"
+                            href={FLOWSPOT_GUIDE_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            variant="light"
+                            color="violet"
+                            radius="xl"
+                            size="xs"
+                            rightSection={<ExternalLink size={13} />}
+                            style={{ height: 30, fontWeight: 700 }}
+                        >
+                            이용 가이드
+                        </Button>
                     </Group>
                     <Text size="sm" c="gray.6">
                         소재를 추가하고 한 번에 생성하세요
