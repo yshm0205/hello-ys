@@ -2270,7 +2270,6 @@ function ProductRevealSection() {
       num: '05',
       title: '노션 운영 템플릿',
       timeSave: '월 10시간 절약',
-      bonusBadge: '선착순 혜택',
       desc: '조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.',
       features: ['개인 운영', '편집자 협업', '제작 프로세스', '업로드 일정'],
       src: '/images/product-notion.gif',
@@ -2359,18 +2358,6 @@ function ProductRevealSection() {
                   }}>
                     {item.title}
                   </Text>
-                  {item.bonusBadge && (
-                    <Badge size="sm" variant="filled" radius="xl" style={{
-                      background: '#8b5cf6',
-                      color: '#fff',
-                      border: 'none',
-                      fontWeight: 800,
-                      fontSize: '11px',
-                      marginBottom: '8px',
-                    }}>
-                      {item.bonusBadge}
-                    </Badge>
-                  )}
                   {/* 시간 절약 강조 */}
                   {item.timeSave && (
                     <Box style={{
@@ -2765,7 +2752,7 @@ function WhySpecialSection() {
                   { label: '전자책', flex: 1.3, bg: '#8b5cf6', color: '#fff' },
                   { label: 'FlowSpot', sublabel: '(AI 스크립트 도구)', flex: 2.2, bg: '#a78bfa', color: '#1a1a2e', bold: true },
                   { label: '채널 트렌드 데이터', sublabel: '(매달 업데이트)', flex: 2, bg: '#a78bfa', color: '#1a1a2e', bold: true },
-                  { label: '노션 템플릿', sublabel: '(선착순 혜택)', flex: 1.5, bg: '#8b5cf6', color: '#fff' },
+                  { label: '노션 템플릿', flex: 1.5, bg: '#8b5cf6', color: '#fff' },
                 ]}
               />
             </Box>
@@ -2887,7 +2874,7 @@ function HowItWorksSection() {
       qNum: 'Q3', question: '혼자 하려니 지치셨나요?',
       label: '시스템화', color: '#3b82f6',
       answer: '반복 작업은 AI에게. 당신은 기획만 하세요.',
-      includes: ['노션 운영 템플릿(선착순)', 'AI 스크립트', '채널 리스트'],
+      includes: ['노션 운영 템플릿', 'AI 스크립트', '채널 리스트'],
     },
   ];
 
@@ -3812,7 +3799,6 @@ function LegacyFloatingCTA_DoNotUse({ earlybirdSummary }: { earlybirdSummary: La
 function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -3861,62 +3847,7 @@ function FloatingCTA() {
         boxShadow: '0 -2px 16px rgba(0,0,0,0.08)',
         }}
       >
-        <Box
-          onClick={() => setIsExpanded((prev) => !prev)}
-          style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            padding: '6px 0 2px', cursor: 'pointer',
-          }}
-        >
-          <ChevronDown
-            size={20}
-            color="#a1a1aa"
-            style={{
-              transform: isExpanded ? 'rotate(0deg)' : 'rotate(180deg)',
-              transition: 'transform 200ms ease',
-            }}
-          />
-        </Box>
-
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease }}
-              style={{ overflow: 'hidden' }}
-            >
-              <Box style={{ padding: '0 16px 14px' }}>
-                <Box style={{
-                  background: '#f4f4f5', borderRadius: '10px',
-                  padding: '14px 16px',
-                }}>
-                  <Group justify="space-between" align="baseline" wrap="nowrap" mb={8}>
-                    <Text style={{ fontSize: '12px', fontWeight: 700, color: '#52525b' }}>
-                      선착순 혜택
-                    </Text>
-                    <Text style={{
-                      fontSize: '13px', fontWeight: 800, color: '#8b5cf6',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}>
-                      노션 운영 템플릿
-                    </Text>
-                  </Group>
-                  <Text style={{
-                    fontSize: '11.5px', color: '#71717a',
-                    textAlign: 'center', lineHeight: 1.45,
-                    wordBreak: 'keep-all',
-                  }}>
-                    조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.
-                  </Text>
-                </Box>
-              </Box>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <Box style={{ padding: '4px 16px 12px' }}>
+        <Box style={{ padding: '12px 16px' }}>
           <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
             <Box style={{ flex: 1, minWidth: 0 }}>
               <Text style={{ fontSize: '11px', color: '#71717a', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
@@ -4014,21 +3945,6 @@ function FloatingCTA() {
             </Group>
           </Stack>
 
-          <Box style={{
-            background: '#f5f3ff',
-            border: '1px solid #ddd6fe',
-            borderRadius: 10,
-            padding: '10px 12px',
-            marginBottom: 14,
-          }}>
-            <Text style={{ fontSize: '11px', fontWeight: 800, color: '#7c3aed', marginBottom: 3 }}>
-              선착순 혜택
-            </Text>
-            <Text style={{ fontSize: '12px', fontWeight: 700, color: '#18181b', lineHeight: 1.45 }}>
-              노션 운영 템플릿 제공
-            </Text>
-          </Box>
-
           {/* 구매 버튼 */}
           <AuthAwareButton
             authenticatedHref="/dashboard/lectures"
@@ -4073,141 +3989,6 @@ function FloatingCountdown({ deadline }: { deadline: string }) {
     }}>
       {days}일 {pad(hours)}:{pad(minutes)}:{pad(seconds)} 남음
     </Text>
-  );
-}
-
-function OfferPriceSection() {
-  const isMobile = useIsMobile(900);
-  const monthly12Now = Math.ceil(primaryProgram.amount / 12);
-  const discountAmount = primaryProgram.listAmount - primaryProgram.amount;
-  const discountPct = Math.round((1 - primaryProgram.amount / primaryProgram.listAmount) * 100);
-
-  return (
-    <Box component="section" id="earlybird" style={{
-      background: '#0a0a0f',
-      padding: 'clamp(20px, 4vw, 36px) 0 clamp(56px, 9vw, 100px)',
-    }}>
-      <Container size="lg">
-        <Box style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr',
-          gap: isMobile ? 28 : 48,
-          alignItems: 'center',
-          background: '#0f0b18',
-          border: '1px solid rgba(167,139,250,.22)',
-          borderRadius: 'clamp(20px, 2.5vw, 28px)',
-          padding: isMobile ? '32px 20px' : '56px',
-          boxShadow: '0 30px 80px -20px rgba(24,24,27,.42)',
-        }}>
-          <Stack gap={18}>
-            <Badge variant="filled" radius="xl" style={{
-              width: 'fit-content',
-              background: 'rgba(139,92,246,.18)',
-              color: '#c4b5fd',
-              border: '1px solid rgba(167,139,250,.24)',
-              fontWeight: 800,
-            }}>
-              올인원 패스
-            </Badge>
-            <Title order={2} style={{
-              color: '#fff',
-              fontSize: 'clamp(28px, 7vw, 44px)',
-              lineHeight: 1.18,
-              letterSpacing: '-0.04em',
-              fontWeight: 900,
-            }}>
-              강의부터 AI 도구,<br />
-              채널 리스트까지 한 번에.
-            </Title>
-            <Text style={{
-              color: 'rgba(255,255,255,.72)',
-              fontSize: 'clamp(15px, 3.5vw, 18px)',
-              lineHeight: 1.7,
-              wordBreak: 'keep-all',
-              maxWidth: 520,
-            }}>
-              지금 신청하시는 분들께는 노션 운영 템플릿을 선착순 혜택으로 함께 제공합니다.
-            </Text>
-            <Box style={{
-              background: 'rgba(139,92,246,.12)',
-              border: '1px solid rgba(167,139,250,.28)',
-              borderRadius: 14,
-              padding: '14px 16px',
-              maxWidth: 440,
-            }}>
-              <Group gap={8} align="center" mb={6}>
-                <Text style={{ color: '#fff', fontSize: 15, fontWeight: 800 }}>
-                  노션 운영 템플릿
-                </Text>
-                <Badge size="sm" variant="filled" radius="xl" style={{ background: '#8b5cf6', color: '#fff', fontWeight: 800 }}>
-                  선착순 혜택
-                </Badge>
-              </Group>
-              <Text style={{ color: 'rgba(255,255,255,.72)', fontSize: 13.5, lineHeight: 1.55 }}>
-                조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.
-              </Text>
-            </Box>
-          </Stack>
-
-          <Box style={{
-            background: '#fff',
-            borderRadius: 18,
-            padding: isMobile ? '24px 18px' : '28px',
-            boxShadow: '0 18px 50px rgba(0,0,0,.24)',
-          }}>
-            <Text style={{ color: '#71717a', fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
-              12개월 할부 시
-            </Text>
-            <Group gap={10} align="baseline" wrap="nowrap" mb={18}>
-              <Text style={{ color: '#ef4444', fontSize: 22, fontWeight: 900, lineHeight: 1 }}>
-                {discountPct}%
-              </Text>
-              <Text style={{ color: '#18181b', fontSize: 'clamp(28px, 7vw, 38px)', fontWeight: 900, lineHeight: 1 }}>
-                월 {monthly12Now.toLocaleString()}원
-              </Text>
-            </Group>
-            <Stack gap={10} mb={20}>
-              <Group justify="space-between" wrap="nowrap">
-                <Text style={{ color: '#52525b', fontSize: 13 }}>권장 소비자 가격</Text>
-                <Text style={{ color: '#a1a1aa', fontSize: 13, textDecoration: 'line-through' }}>
-                  {primaryProgram.listAmount.toLocaleString()}원
-                </Text>
-              </Group>
-              <Group justify="space-between" wrap="nowrap">
-                <Text style={{ color: '#52525b', fontSize: 13 }}>할인 금액</Text>
-                <Text style={{ color: '#52525b', fontSize: 13, fontWeight: 700 }}>
-                  -{discountAmount.toLocaleString()}원
-                </Text>
-              </Group>
-              <Group justify="space-between" wrap="nowrap" align="baseline">
-                <Text style={{ color: '#18181b', fontSize: 13, fontWeight: 800 }}>할인 판매가</Text>
-                <Text style={{ color: '#18181b', fontSize: 20, fontWeight: 900 }}>
-                  {primaryProgram.amount.toLocaleString()}원
-                </Text>
-              </Group>
-            </Stack>
-            <AuthAwareButton
-              authenticatedHref="/dashboard/lectures"
-              unauthenticatedHref="/checkout/allinone?intent=pay"
-              unpaidAuthenticatedHref="/checkout/allinone?intent=pay"
-              activeAccessChildren="강의 보러가기"
-              size="lg"
-              fullWidth
-              radius="md"
-              rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
-              style={{
-                background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                fontWeight: 900,
-                height: 52,
-                boxShadow: '0 6px 18px rgba(139,92,246,.32)',
-              }}
-            >
-              올인원 패스 신청하기
-            </AuthAwareButton>
-          </Box>
-        </Box>
-      </Container>
-    </Box>
   );
 }
 
@@ -4976,7 +4757,6 @@ export default function LandingPage({
         <MarketingTracker pageType="landing" />
         <LandingHeader />
         <HeroSection reviewSummary={initialReviews} />
-        <OfferPriceSection />
         <LoopPainSection />
         <PainSection />
         <ProductRevealSection />
