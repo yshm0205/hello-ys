@@ -650,6 +650,7 @@ export function ScriptGeneratorContent({ user }: ScriptGeneratorContentProps) {
                         full_script: editedScript,
                     } : null,
                     scripts: result.scripts,
+                    token_usage: result.token_usage,
                 }),
             });
 

@@ -46,18 +46,29 @@ function formatDate(value: string) {
 
 export default async function AdminReviewsPage() {
   const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("student_reviews")
-    .select(
-      "id, user_id, email, rating, headline, content, channel_name, proof_url, status, marketing_consent, feedback_tickets_granted, feedback_tickets_remaining, monthly_draw_eligible, created_at",
-    )
-    .order("created_at", { ascending: false })
-    .limit(100);
+  const [
+    { data, error },
+    { count: submittedCount },
+    { count: consentCount },
+    { data: ticketRows },
+  ] = await Promise.all([
+    admin
+      .from("student_reviews")
+      .select(
+        "id, user_id, email, rating, headline, content, channel_name, proof_url, status, marketing_consent, feedback_tickets_granted, feedback_tickets_remaining, monthly_draw_eligible, created_at",
+      )
+      .order("created_at", { ascending: false })
+      .limit(100),
+    admin.from("student_reviews").select("id", { count: "exact", head: true }),
+    admin
+      .from("student_reviews")
+      .select("id", { count: "exact", head: true })
+      .eq("marketing_consent", true),
+    admin.from("student_reviews").select("feedback_tickets_remaining"),
+  ]);
 
   const reviews = (data || []) as StudentReview[];
-  const submittedCount = reviews.length;
-  const consentCount = reviews.filter((review) => review.marketing_consent).length;
-  const ticketCount = reviews.reduce(
+  const ticketCount = (ticketRows || []).reduce(
     (sum, review) => sum + (review.feedback_tickets_remaining || 0),
     0,
   );
@@ -65,10 +76,8 @@ export default async function AdminReviewsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">수강 후기</h1>
-        <p className="text-muted-foreground">
-          후기 이벤트 제출 내역과 혜택 지급 대상을 확인합니다.
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">수강생 후기</h1>
+        <p className="text-muted-foreground">후기 제출 현황과 혜택 지급 상태를 확인합니다.</p>
       </div>
 
       {error && (
@@ -76,7 +85,9 @@ export default async function AdminReviewsPage() {
           <CardHeader>
             <CardTitle>후기 테이블을 불러오지 못했습니다.</CardTitle>
             <CardDescription>
-              Supabase 마이그레이션 `20260423_create_student_reviews.sql` 적용 여부를 확인하세요.
+              Supabase 마이그레이션
+              <code className="mx-1">20260423_create_student_reviews.sql</code>
+              적용 여부를 확인해 주세요.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -85,19 +96,19 @@ export default async function AdminReviewsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardDescription>제출 후기</CardDescription>
-            <CardTitle>{submittedCount}건</CardTitle>
+            <CardDescription>전체 제출 후기</CardDescription>
+            <CardTitle>{submittedCount || 0}건</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
             <CardDescription>마케팅 활용 동의</CardDescription>
-            <CardTitle>{consentCount}건</CardTitle>
+            <CardTitle>{consentCount || 0}건</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>잔여 피드백권</CardDescription>
+            <CardDescription>남은 피드백권</CardDescription>
             <CardTitle>{ticketCount}개</CardTitle>
           </CardHeader>
         </Card>
@@ -106,7 +117,7 @@ export default async function AdminReviewsPage() {
       <Card>
         <CardHeader>
           <CardTitle>최근 후기</CardTitle>
-          <CardDescription>최대 100건까지 최신순으로 표시합니다.</CardDescription>
+          <CardDescription>최근 100건을 최신순으로 보여줍니다.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -146,7 +157,7 @@ export default async function AdminReviewsPage() {
                             rel="noopener noreferrer"
                             className="text-xs text-blue-600 hover:underline"
                           >
-                            작업물 링크
+                            인증 링크
                           </a>
                         )}
                       </TableCell>
@@ -167,7 +178,7 @@ export default async function AdminReviewsPage() {
                             <Badge variant="outline">월간 크레딧 추첨</Badge>
                           )}
                           {review.marketing_consent && (
-                            <Badge variant="outline">마케팅 동의</Badge>
+                            <Badge variant="outline">마케팅 활용 동의</Badge>
                           )}
                         </div>
                       </TableCell>

@@ -73,7 +73,7 @@ export default function PaymentHelpPage() {
             채널 성과와 커리큘럼을 확인하고 강의를 신청해보세요.
           </p>
           <a
-            href="/"
+            href="https://bit.ly/4u5sKc0"
             className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-violet-500/30 transition-all hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-xl hover:shadow-violet-500/40 sm:w-auto"
           >
             강의 신청하러 가기
