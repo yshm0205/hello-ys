@@ -110,6 +110,7 @@ async function sendTelegramMessage(text: string) {
 
 async function notifyTelegram(lines: string[], logLabel: string): Promise<TelegramNotifyResult> {
   if (!isConfigured()) {
+    console.warn(`[Telegram] ${logLabel} notify skipped: not configured`);
     return { skipped: true, reason: "not_configured" };
   }
 

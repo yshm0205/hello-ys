@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "후기 제출에 실패했습니다." }, { status: 500 });
     }
 
-    void notifyTelegramStudentReviewSubmitted({
+    const telegramResult = await notifyTelegramStudentReviewSubmitted({
       reviewId: String(data.id),
       userId: user.id,
       email: user.email || "",
@@ -258,6 +258,9 @@ export async function POST(request: NextRequest) {
       feedbackTicketsGranted: REVIEW_BENEFITS.feedback_tickets,
       submittedAt: String(data.created_at || new Date().toISOString()),
     });
+    if ("skipped" in telegramResult) {
+      console.warn("[Reviews API] Telegram notification skipped:", telegramResult.reason);
+    }
 
     return NextResponse.json({
       success: true,
