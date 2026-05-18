@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { recordCreditTransaction } from "@/lib/credits/server";
+import { PLAN_TYPE } from "@/lib/plans/config";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 function verifyCronSecret(request: NextRequest): boolean {
@@ -31,6 +32,16 @@ type DuePlanRow = {
   monthly_credit_amount: number;
   monthly_credit_total_cycles: number | null;
   monthly_credit_granted_cycles: number;
+  next_credit_at: string | null;
+};
+
+type ExpiredProgramPlanRow = {
+  user_id: string;
+  credits: number;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
+  plan_type: string;
+  expires_at: string | null;
   next_credit_at: string | null;
 };
 
@@ -70,7 +81,77 @@ export async function GET(request: NextRequest) {
 
     let granted = 0;
     let skipped = 0;
+    let expiredCleaned = 0;
     const failures: Array<{ userId: string; reason: string }> = [];
+
+    const { data: expiredRows, error: expiredError } = await admin
+      .from("user_plans")
+      .select("user_id, credits, subscription_credits, purchased_credits, plan_type, expires_at, next_credit_at")
+      .eq("plan_type", PLAN_TYPE.STUDENT_4M)
+      .not("expires_at", "is", null)
+      .lt("expires_at", now.toISOString())
+      .or("subscription_credits.gt.0,next_credit_at.not.is.null");
+
+    if (expiredError) {
+      console.error("[Cron] Failed to load expired program plans:", expiredError);
+      return NextResponse.json({ error: "Failed to load expired plans" }, { status: 500 });
+    }
+
+    for (const plan of (expiredRows || []) as ExpiredProgramPlanRow[]) {
+      const previousSubscriptionCredits = plan.subscription_credits ?? 0;
+      const purchasedCredits = plan.purchased_credits ?? 0;
+
+      let cleanupQuery = admin
+        .from("user_plans")
+        .update({
+          credits: purchasedCredits,
+          subscription_credits: 0,
+          purchased_credits: purchasedCredits,
+          next_credit_at: null,
+        })
+        .eq("user_id", plan.user_id)
+        .eq("plan_type", plan.plan_type)
+        .eq("expires_at", plan.expires_at);
+
+      cleanupQuery =
+        plan.subscription_credits === null
+          ? cleanupQuery.is("subscription_credits", null)
+          : cleanupQuery.eq("subscription_credits", previousSubscriptionCredits);
+
+      cleanupQuery =
+        plan.purchased_credits === null
+          ? cleanupQuery.is("purchased_credits", null)
+          : cleanupQuery.eq("purchased_credits", purchasedCredits);
+
+      const { data: updated, error: updateError } = await cleanupQuery.select("credits").single();
+
+      if (updateError || !updated) {
+        failures.push({
+          userId: plan.user_id,
+          reason: updateError?.message || "expired_program_cleanup_failed",
+        });
+        continue;
+      }
+
+      if (previousSubscriptionCredits > 0) {
+        await recordCreditTransaction({
+          userId: plan.user_id,
+          type: "manual_deduct",
+          amount: -previousSubscriptionCredits,
+          balanceAfter: updated.credits,
+          description: `program expired subscription credits: ${plan.plan_type}`,
+          referenceId: `program_expired:${plan.user_id}:${plan.expires_at}`,
+          metadata: {
+            planType: plan.plan_type,
+            accessExpiresAt: plan.expires_at,
+            expiredSubscriptionCredits: previousSubscriptionCredits,
+            purchasedCreditsRemaining: purchasedCredits,
+          },
+        });
+      }
+
+      expiredCleaned += 1;
+    }
 
     for (const plan of (rows || []) as DuePlanRow[]) {
       if (!plan.next_credit_at || plan.monthly_credit_amount <= 0) {
@@ -169,6 +250,7 @@ export async function GET(request: NextRequest) {
       checked: rows?.length || 0,
       granted,
       skipped,
+      expiredCleaned,
       failures,
     });
   } catch (err) {
