@@ -2270,6 +2270,7 @@ function ProductRevealSection() {
       num: '05',
       title: '노션 운영 템플릿',
       timeSave: '월 10시간 절약',
+      bonusBadge: '선착순 혜택',
       desc: '조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.',
       features: ['개인 운영', '편집자 협업', '제작 프로세스', '업로드 일정'],
       src: '/images/product-notion.gif',
@@ -2358,6 +2359,18 @@ function ProductRevealSection() {
                   }}>
                     {item.title}
                   </Text>
+                  {item.bonusBadge && (
+                    <Badge size="sm" variant="filled" radius="xl" style={{
+                      background: '#8b5cf6',
+                      color: '#fff',
+                      border: 'none',
+                      fontWeight: 800,
+                      fontSize: '11px',
+                      marginBottom: '8px',
+                    }}>
+                      {item.bonusBadge}
+                    </Badge>
+                  )}
                   {/* 시간 절약 강조 */}
                   {item.timeSave && (
                     <Box style={{
@@ -2752,7 +2765,7 @@ function WhySpecialSection() {
                   { label: '전자책', flex: 1.3, bg: '#8b5cf6', color: '#fff' },
                   { label: 'FlowSpot', sublabel: '(AI 스크립트 도구)', flex: 2.2, bg: '#a78bfa', color: '#1a1a2e', bold: true },
                   { label: '채널 트렌드 데이터', sublabel: '(매달 업데이트)', flex: 2, bg: '#a78bfa', color: '#1a1a2e', bold: true },
-                  { label: '노션 템플릿', flex: 1.5, bg: '#8b5cf6', color: '#fff' },
+                  { label: '노션 템플릿', sublabel: '(선착순 혜택)', flex: 1.5, bg: '#8b5cf6', color: '#fff' },
                 ]}
               />
             </Box>
@@ -2874,7 +2887,7 @@ function HowItWorksSection() {
       qNum: 'Q3', question: '혼자 하려니 지치셨나요?',
       label: '시스템화', color: '#3b82f6',
       answer: '반복 작업은 AI에게. 당신은 기획만 하세요.',
-      includes: ['노션 운영 템플릿', 'AI 스크립트', '채널 리스트'],
+      includes: ['노션 운영 템플릿(선착순)', 'AI 스크립트', '채널 리스트'],
     },
   ];
 
@@ -3799,6 +3812,7 @@ function LegacyFloatingCTA_DoNotUse({ earlybirdSummary }: { earlybirdSummary: La
 function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -3847,7 +3861,62 @@ function FloatingCTA() {
         boxShadow: '0 -2px 16px rgba(0,0,0,0.08)',
         }}
       >
-        <Box style={{ padding: '12px 16px' }}>
+        <Box
+          onClick={() => setIsExpanded((prev) => !prev)}
+          style={{
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            padding: '6px 0 2px', cursor: 'pointer',
+          }}
+        >
+          <ChevronDown
+            size={20}
+            color="#a1a1aa"
+            style={{
+              transform: isExpanded ? 'rotate(0deg)' : 'rotate(180deg)',
+              transition: 'transform 200ms ease',
+            }}
+          />
+        </Box>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease }}
+              style={{ overflow: 'hidden' }}
+            >
+              <Box style={{ padding: '0 16px 14px' }}>
+                <Box style={{
+                  background: '#f4f4f5', borderRadius: '10px',
+                  padding: '14px 16px',
+                }}>
+                  <Group justify="space-between" align="baseline" wrap="nowrap" mb={8}>
+                    <Text style={{ fontSize: '12px', fontWeight: 700, color: '#52525b' }}>
+                      선착순 혜택
+                    </Text>
+                    <Text style={{
+                      fontSize: '13px', fontWeight: 800, color: '#8b5cf6',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>
+                      노션 운영 템플릿
+                    </Text>
+                  </Group>
+                  <Text style={{
+                    fontSize: '11.5px', color: '#71717a',
+                    textAlign: 'center', lineHeight: 1.45,
+                    wordBreak: 'keep-all',
+                  }}>
+                    조회수 1억회 채널을 운영하는 시스템 그대로 드립니다.
+                  </Text>
+                </Box>
+              </Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <Box style={{ padding: '4px 16px 12px' }}>
           <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
             <Box style={{ flex: 1, minWidth: 0 }}>
               <Text style={{ fontSize: '11px', color: '#71717a', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
@@ -3944,6 +4013,21 @@ function FloatingCTA() {
               </Text>
             </Group>
           </Stack>
+
+          <Box style={{
+            background: '#f5f3ff',
+            border: '1px solid #ddd6fe',
+            borderRadius: 10,
+            padding: '10px 12px',
+            marginBottom: 14,
+          }}>
+            <Text style={{ fontSize: '11px', fontWeight: 800, color: '#7c3aed', marginBottom: 3 }}>
+              선착순 혜택
+            </Text>
+            <Text style={{ fontSize: '12px', fontWeight: 700, color: '#18181b', lineHeight: 1.45 }}>
+              노션 운영 템플릿 제공
+            </Text>
+          </Box>
 
           {/* 구매 버튼 */}
           <AuthAwareButton
