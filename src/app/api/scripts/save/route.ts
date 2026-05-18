@@ -6,6 +6,30 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
+function normalizeTokenUsage(value: unknown) {
+    if (!value || typeof value !== "object") return null;
+
+    const record = value as Record<string, unknown>;
+    const totalInput = Number(record.total_input);
+    const totalOutput = Number(record.total_output);
+
+    if (!Number.isFinite(totalInput) || !Number.isFinite(totalOutput)) {
+        return null;
+    }
+
+    const normalized: Record<string, number> = {
+        total_input: Math.max(0, Math.floor(totalInput)),
+        total_output: Math.max(0, Math.floor(totalOutput)),
+    };
+
+    const calls = Number(record.calls);
+    if (Number.isFinite(calls)) {
+        normalized.calls = Math.max(0, Math.floor(calls));
+    }
+
+    return normalized;
+}
+
 export async function POST(request: Request) {
     try {
         const supabase = await createClient();
@@ -22,7 +46,7 @@ export async function POST(request: Request) {
         const userId = user.id;
 
         const body = await request.json();
-        const { input_text, scripts, selected_script, niche, tone } = body;
+        const { input_text, scripts, selected_script, niche, tone, token_usage } = body;
 
         if (!input_text) {
             return NextResponse.json(
@@ -42,6 +66,8 @@ export async function POST(request: Request) {
         };
         if (niche) insertData.niche = niche;
         if (tone) insertData.tone = tone;
+        const normalizedTokenUsage = normalizeTokenUsage(token_usage);
+        if (normalizedTokenUsage) insertData.token_usage = normalizedTokenUsage;
 
         const { data, error } = await supabase
             .from("script_generations")
