@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         const userId = user.id;
 
         const body = await request.json();
-        const { input_text, scripts, selected_script, niche, tone, token_usage } = body;
+        const { input_text, scripts, selected_script, niche, tone, token_usage, research_text } = body;
 
         if (!input_text) {
             return NextResponse.json(
@@ -68,6 +68,8 @@ export async function POST(request: Request) {
         if (tone) insertData.tone = tone;
         const normalizedTokenUsage = normalizeTokenUsage(token_usage);
         if (normalizedTokenUsage) insertData.token_usage = normalizedTokenUsage;
+        // research_text: 빈 문자열도 저장 (검증 실패 row 판별용 — undefined만 제외)
+        if (typeof research_text === "string") insertData.research_text = research_text;
 
         const { data, error } = await supabase
             .from("script_generations")
