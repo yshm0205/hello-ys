@@ -355,6 +355,7 @@ async function runBackgroundGeneration(params: {
                 niche: params.niche,
                 tone: params.tone,
                 token_usage: data.token_usage,
+                research_text: data.research_text || "",
                 scripts: data.scripts.map(s => ({
                     hook_preview: s.hook,
                     full_script: s.final,
