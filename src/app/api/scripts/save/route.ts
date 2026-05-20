@@ -1,6 +1,6 @@
 /**
  * Script Save API Route
- * 생성된 스크립트를 DB에 저장
+ * Saves generated scripts to the user's archive.
  */
 
 import { createClient } from "@/utils/supabase/server";
@@ -30,12 +30,25 @@ function normalizeTokenUsage(value: unknown) {
     return normalized;
 }
 
+function resolveResearchText(body: Record<string, unknown>) {
+    const candidates = [
+        body.research_text,
+        body.researchText,
+        body.research_result,
+        body.research && typeof body.research === "object"
+            ? (body.research as Record<string, unknown>).text
+            : undefined,
+    ];
+
+    const value = candidates.find((candidate) => typeof candidate === "string");
+    return typeof value === "string" ? value : "";
+}
+
 export async function POST(request: Request) {
     try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        // 로그인 필수 - 게스트는 저장 불가
         if (!user) {
             return NextResponse.json(
                 { error: "스크립트를 저장하려면 로그인이 필요합니다." },
@@ -43,10 +56,8 @@ export async function POST(request: Request) {
             );
         }
 
-        const userId = user.id;
-
         const body = await request.json();
-        const { input_text, scripts, selected_script, niche, tone, token_usage, research_text } = body;
+        const { input_text, scripts, selected_script, niche, tone, token_usage } = body;
 
         if (!input_text) {
             return NextResponse.json(
@@ -55,21 +66,52 @@ export async function POST(request: Request) {
             );
         }
 
-        // 스크립트 데이터 준비
         const scriptData = scripts || (selected_script ? [selected_script] : []);
+        const inputText = String(input_text).substring(0, 1000);
+        const normalizedTokenUsage = normalizeTokenUsage(token_usage);
+        const resolvedResearchText = resolveResearchText(body);
 
-        // DB에 저장
+        const { data: recentRows } = await supabase
+            .from("script_generations")
+            .select("id,scripts,research_text,token_usage")
+            .eq("user_id", user.id)
+            .eq("input_text", inputText)
+            .gte("created_at", new Date(Date.now() - 10 * 60 * 1000).toISOString())
+            .order("created_at", { ascending: false })
+            .limit(5);
+
+        const scriptSignature = JSON.stringify(scriptData);
+        const duplicate = recentRows?.find((row) => JSON.stringify(row.scripts) === scriptSignature);
+
+        if (duplicate) {
+            const updateData: Record<string, unknown> = {};
+            if (!duplicate.research_text && resolvedResearchText) updateData.research_text = resolvedResearchText;
+            if (!duplicate.token_usage && normalizedTokenUsage) updateData.token_usage = normalizedTokenUsage;
+
+            if (Object.keys(updateData).length > 0) {
+                await supabase
+                    .from("script_generations")
+                    .update(updateData)
+                    .eq("id", duplicate.id);
+            }
+
+            return NextResponse.json({
+                success: true,
+                id: duplicate.id,
+                message: "스크립트가 저장되었습니다!",
+                deduped: true,
+            });
+        }
+
         const insertData: Record<string, unknown> = {
-            user_id: userId,
-            input_text: input_text.substring(0, 1000), // 최대 1000자
+            user_id: user.id,
+            input_text: inputText,
             scripts: scriptData,
+            research_text: resolvedResearchText,
         };
         if (niche) insertData.niche = niche;
         if (tone) insertData.tone = tone;
-        const normalizedTokenUsage = normalizeTokenUsage(token_usage);
         if (normalizedTokenUsage) insertData.token_usage = normalizedTokenUsage;
-        // research_text: 빈 문자열도 저장 (검증 실패 row 판별용 — undefined만 제외)
-        if (typeof research_text === "string") insertData.research_text = research_text;
 
         const { data, error } = await supabase
             .from("script_generations")
