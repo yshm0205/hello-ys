@@ -355,6 +355,7 @@ export function BatchGeneratorContent() {
     const [selectedResult, setSelectedResult] = useState<string | null>(null);
     const [credits, setCredits] = useState<number | null>(initialCredits);
     const [creditError, setCreditError] = useState<string | null>(null);
+    const [pendingQueueAction, setPendingQueueAction] = useState<string | null>(null);
     const jobIdRef = useRef<string | null>(null);
     const creditsRef = useRef<number | null>(initialCredits);
     const processLockRef = useRef(false);
@@ -655,6 +656,7 @@ export function BatchGeneratorContent() {
     }, [applyBatchState, materialInput, niche, inputMode, structuredInput, forceMode]);
 
     const removeFromQueue = useCallback(async (id: string) => {
+        setPendingQueueAction(`remove:${id}`);
         try {
             const res = await fetch(`/api/batch-jobs/items/${id}`, { method: 'DELETE' });
             const data = await res.json();
@@ -667,10 +669,13 @@ export function BatchGeneratorContent() {
             applyBatchState((data.job ?? null) as RemoteBatchJob | null);
         } catch {
             setCreditError('큐 항목을 삭제하지 못했습니다.');
+        } finally {
+            setPendingQueueAction((current) => (current === `remove:${id}` ? null : current));
         }
     }, [applyBatchState]);
 
     const retryItem = useCallback(async (id: string) => {
+        setPendingQueueAction(`retry:${id}`);
         try {
             setCreditError(null);
             const res = await fetch(`/api/batch-jobs/items/${id}/retry`, { method: 'POST' });
@@ -689,6 +694,8 @@ export function BatchGeneratorContent() {
             }
         } catch {
             setCreditError('재시도에 실패했습니다.');
+        } finally {
+            setPendingQueueAction((current) => (current === `retry:${id}` ? null : current));
         }
     }, [applyBatchState, processNext]);
 
@@ -1136,6 +1143,8 @@ export function BatchGeneratorContent() {
                                                             variant="subtle"
                                                             color="violet"
                                                             size="sm"
+                                                            loading={pendingQueueAction === `retry:${item.id}`}
+                                                            disabled={Boolean(pendingQueueAction) && pendingQueueAction !== `retry:${item.id}`}
                                                             onClick={() => retryItem(item.id)}
                                                             title="재시도"
                                                         >
@@ -1147,6 +1156,8 @@ export function BatchGeneratorContent() {
                                                             variant="subtle"
                                                             color="red"
                                                             size="sm"
+                                                            loading={pendingQueueAction === `remove:${item.id}`}
+                                                            disabled={Boolean(pendingQueueAction) && pendingQueueAction !== `remove:${item.id}`}
                                                             onClick={() => removeFromQueue(item.id)}
                                                         >
                                                             <Trash2 size={14} />

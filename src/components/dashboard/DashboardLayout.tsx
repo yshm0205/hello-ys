@@ -5,7 +5,7 @@
  * 사이드바 네비게이션 + 헤더
  */
 
-import { createContext, ReactNode, useContext } from 'react';
+import { createContext, useContext, useState, type MouseEvent, type ReactNode } from 'react';
 import {
     AppShell,
     Burger,
@@ -29,8 +29,9 @@ import {
     BarChart3,
     Zap,
     BookOpen,
+    Loader2,
 } from 'lucide-react';
-import { Link, usePathname } from '@/i18n/routing';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import type { AdminAccessLevel } from '@/lib/admin/access';
 
 interface DashboardLayoutProps {
@@ -111,6 +112,8 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
     const [opened, { toggle }] = useDisclosure();
     const pathname = usePathname();
+    const router = useRouter();
+    const [pendingHref, setPendingHref] = useState<string | null>(null);
     const credits = initialCreditInfo?.credits ?? null;
     const canViewMarketingOverview = adminAccessLevel === 'full' || adminAccessLevel === 'marketing';
     const resolvedNavItems = canViewMarketingOverview
@@ -124,6 +127,25 @@ export function DashboardLayout({
               },
           ]
         : navItems;
+
+    const handleNavClick = (event: MouseEvent<HTMLElement>, href: string, isActive = false) => {
+        if (
+            isActive ||
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+        setPendingHref(href);
+        router.push(href);
+        window.setTimeout(() => setPendingHref((current) => (current === href ? null : current)), 8000);
+    };
 
     return (
         <DashboardShellContext.Provider
@@ -221,15 +243,19 @@ export function DashboardLayout({
                         const isActive = item.href === '/dashboard'
                             ? pathname === '/dashboard'
                             : pathname === item.href || pathname.startsWith(item.href + '/');
+                        const isPending = pendingHref === item.href;
                         return (
                             <NavLink
                                 key={item.href}
                                 component={Link}
                                 href={item.href}
                                 prefetch={false}
+                                onClick={(event) => handleNavClick(event, item.href, isActive)}
                                 label={item.label}
                                 description={item.description}
                                 leftSection={<item.icon size={20} color={isActive ? '#8b5cf6' : '#6b7280'} />}
+                                rightSection={isPending ? <Loader2 size={16} className="animate-spin" /> : null}
+                                disabled={Boolean(pendingHref) && !isPending}
                                 active={isActive}
                                 variant="light"
                                 color="violet"

@@ -2,9 +2,9 @@
 
 import type { AdminAccessLevel } from "@/lib/admin/access";
 import { usePathname } from "next/navigation";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -23,6 +23,7 @@ import {
   Menu,
   X,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -132,8 +133,10 @@ export function AdminSidebar({
 }) {
   const t = useTranslations("Admin");
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   const isActive = (href: string) => {
     // Remove locale prefix for matching
@@ -150,6 +153,27 @@ export function AdminSidebar({
           }))
           .filter((group) => group.items.length > 0)
       : navGroups;
+
+  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (
+      isActive(href) ||
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      setMobileOpen(false);
+      return;
+    }
+
+    event.preventDefault();
+    setMobileOpen(false);
+    setPendingHref(href);
+    router.push(href);
+    window.setTimeout(() => setPendingHref((current) => (current === href ? null : current)), 8000);
+  };
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -183,20 +207,29 @@ export function AdminSidebar({
             )}
             <div className="space-y-1">
               {group.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? "bg-zinc-900 text-white"
-                      : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
-                  } ${collapsed ? "justify-center" : ""}`}
-                  title={collapsed ? t(item.labelKey) : undefined}
-                >
-                  {item.icon}
-                  {!collapsed && <span>{t(item.labelKey)}</span>}
-                </Link>
+                (() => {
+                  const active = isActive(item.href);
+                  const pending = pendingHref === item.href;
+                  const disabled = Boolean(pendingHref) && !pending;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={(event) => handleNavClick(event, item.href)}
+                      aria-disabled={disabled}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        active
+                          ? "bg-zinc-900 text-white"
+                          : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
+                      } ${collapsed ? "justify-center" : ""} ${disabled ? "pointer-events-none opacity-60" : ""}`}
+                      title={collapsed ? t(item.labelKey) : undefined}
+                    >
+                      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : item.icon}
+                      {!collapsed && <span>{t(item.labelKey)}</span>}
+                    </Link>
+                  );
+                })()
               ))}
             </div>
           </div>
@@ -207,12 +240,18 @@ export function AdminSidebar({
       <div className="border-t p-3 space-y-2">
         <Link
           href="/dashboard"
+          onClick={(event) => handleNavClick(event, "/dashboard")}
+          aria-disabled={Boolean(pendingHref) && pendingHref !== "/dashboard"}
           className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors ${
             collapsed ? "justify-center" : ""
-          }`}
+          } ${Boolean(pendingHref) && pendingHref !== "/dashboard" ? "pointer-events-none opacity-60" : ""}`}
           title={collapsed ? t("backToDashboard") : undefined}
         >
-          <ArrowLeft className="h-4 w-4" />
+          {pendingHref === "/dashboard" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ArrowLeft className="h-4 w-4" />
+          )}
           {!collapsed && <span>{t("backToDashboard")}</span>}
         </Link>
         <div className={`flex ${collapsed ? "justify-center" : "px-3"}`}>
