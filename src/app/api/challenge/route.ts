@@ -73,6 +73,7 @@ function toClientEnrollment(row: EnrollmentRow | null) {
 function toClientSubmission(row: SubmissionRow) {
   return {
     id: row.id,
+    cohort: row.cohort,
     day: row.day,
     title: row.title,
     content: row.content,
@@ -83,6 +84,31 @@ function toClientSubmission(row: SubmissionRow) {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function toClientFeedSubmission(row: SubmissionRow, viewerId: string, authorLabel: string) {
+  const isMine = row.user_id === viewerId;
+
+  return {
+    ...toClientSubmission(row),
+    referenceUrl: isMine ? row.reference_url : null,
+    adminNote: isMine ? row.admin_note : null,
+    authorLabel,
+    isMine,
+  };
+}
+
+function buildAuthorLabels(rows: SubmissionRow[], viewerId: string) {
+  const otherUserIds = Array.from(
+    new Set(rows.filter((row) => row.user_id !== viewerId).map((row) => row.user_id)),
+  ).sort();
+
+  const labels = new Map<string, string>();
+  labels.set(viewerId, "나");
+  otherUserIds.forEach((userId, index) => {
+    labels.set(userId, `참여자 ${index + 1}`);
+  });
+  return labels;
 }
 
 function isEnrollmentActive(row: EnrollmentRow | null) {
@@ -125,6 +151,17 @@ async function loadEnrollment(userId: string) {
   return { admin, enrollment: (data as EnrollmentRow | null) ?? null, error: null };
 }
 
+async function loadFeedSubmissions(admin: ReturnType<typeof createAdminClient>) {
+  const { data, error } = await admin
+    .from("challenge_mission_submissions")
+    .select("*")
+    .in("status", ["submitted", "reviewed", "approved"])
+    .order("updated_at", { ascending: false })
+    .limit(80);
+
+  return { feedSubmissions: ((data || []) as SubmissionRow[]) ?? [], error };
+}
+
 export async function GET() {
   try {
     const user = await getUser();
@@ -143,6 +180,7 @@ export async function GET() {
         enrollment: null,
         canSubmit: false,
         submissions: [],
+        feedSubmissions: [],
       });
     }
 
@@ -158,11 +196,22 @@ export async function GET() {
       return NextResponse.json({ error: "미션 제출 내역을 불러오지 못했습니다." }, { status: 500 });
     }
 
+    const { feedSubmissions, error: feedError } = await loadFeedSubmissions(admin);
+    if (feedError) {
+      console.error("[Challenge API] feed submissions load error:", feedError);
+      return NextResponse.json({ error: "인증글 목록을 불러오지 못했습니다." }, { status: 500 });
+    }
+
+    const authorLabels = buildAuthorLabels(feedSubmissions, user.id);
+
     return NextResponse.json({
       success: true,
       enrollment: toClientEnrollment(enrollment),
       canSubmit: isEnrollmentActive(enrollment),
       submissions: ((submissions || []) as SubmissionRow[]).map(toClientSubmission),
+      feedSubmissions: feedSubmissions.map((row) =>
+        toClientFeedSubmission(row, user.id, authorLabels.get(row.user_id) || "참여자"),
+      ),
     });
   } catch (error) {
     console.error("[Challenge API] GET error:", error);
@@ -243,6 +292,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       submission: toClientSubmission(row),
+      feedSubmission: toClientFeedSubmission(row, user.id, "나"),
     });
   } catch (error) {
     console.error("[Challenge API] POST error:", error);
