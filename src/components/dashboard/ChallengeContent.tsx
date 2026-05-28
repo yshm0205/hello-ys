@@ -371,7 +371,7 @@ export function ChallengeContent() {
       ...prev,
       [day]: {
         title: submission?.title || prev[day]?.title || guide.title,
-        content: submission?.content || prev[day]?.content || "",
+        content: submission?.content || prev[day]?.content || guide.template,
         referenceUrl: submission?.referenceUrl || prev[day]?.referenceUrl || "",
       },
     }));
@@ -996,7 +996,7 @@ export function ChallengeContent() {
         title={
           <Group gap="xs">
             {activeGuide && <Badge color="blue" variant="light" radius={2}>{activeGuide.board}</Badge>}
-            <Text fw={800}>{activeSubmission ? "인증글 수정" : "글쓰기"}</Text>
+            <Text fw={800}>{activeSubmission ? "게시글 수정" : "글쓰기"}</Text>
           </Group>
         }
         size="lg"
@@ -1049,16 +1049,6 @@ export function ChallengeContent() {
                 <Text size="sm" mt={4}>{activeGuide.description}</Text>
               </Alert>
 
-              <Card radius={4} p="md" withBorder bg="gray.0">
-                <Group gap="xs" mb={8}>
-                  <FileText size={16} color="#228be6" />
-                  <Text fw={800} size="sm">작성 양식</Text>
-                </Group>
-                <Text size="sm" c="gray.7" style={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
-                  {activeGuide.template}
-                </Text>
-              </Card>
-
               {activeSubmission?.adminNote && (
                 <Alert color="blue" variant="light">
                   <Text fw={700} size="sm">운영자 메모</Text>
@@ -1084,7 +1074,7 @@ export function ChallengeContent() {
 
               <Textarea
                 label="본문"
-                description="위 양식을 참고해서 카페 인증글처럼 작성해주세요."
+                description="양식이 본문에 들어가 있습니다. 각 항목 아래에 바로 작성해주세요."
                 placeholder={activeGuide.placeholder}
                 value={getDraft(activeDay, activeGuide.title).content}
                 onChange={(event) => updateDraft(activeDay, { content: event.currentTarget.value })}
