@@ -78,31 +78,37 @@ const APPLICATION_URL =
 const DAY_GUIDES = [
   {
     day: 1,
-    board: "1일차 인증",
+    board: "1차 인증",
     title: "내 쇼핑 쇼츠 채널 방향 잡기",
     badge: "VOD 04",
     description:
       "레드오션도 블루오션으로 바꾸는 채널 조합법을 보고, 내가 가져갈 쇼핑 채널 방향을 한 문단으로 정리합니다.",
+    template:
+      "1. 내가 만들 쇼핑 쇼츠 채널 방향:\n2. 이 채널이 보는 사람:\n3. 흔한 쇼핑 채널과 다르게 가져갈 포인트:\n4. 지금 막히는 부분 또는 질문:",
     placeholder:
       "예: 생활꿀템을 단순 소개하는 채널이 아니라, 좁은 원룸에서 공간을 아끼는 사람들을 위한 쇼핑 쇼츠 채널로 잡겠습니다. 타깃은 자취 초보와 1인 가구이고, 첫 인상은 '이걸 왜 이제 알았지?'가 되게 만들고 싶습니다.",
   },
   {
     day: 2,
-    board: "2일차 인증",
+    board: "2차 인증",
     title: "상품/소재 후보 3개 찾기",
     badge: "VOD 08",
     description:
       "영상 주제 찾기 실전 예시를 기준으로, 내 채널에 맞는 상품 또는 소재 후보 3개를 뽑고 이유를 적습니다.",
+    template:
+      "1. 소재 후보 1 + 고른 이유:\n2. 소재 후보 2 + 고른 이유:\n3. 소재 후보 3 + 고른 이유:\n4. 이 중 가장 먼저 만들고 싶은 소재:",
     placeholder:
       "예: 1. 접이식 빨래바구니 - 원룸 공간 문제와 연결 가능\n2. 실리콘 싱크대 덮개 - 주방 공간 확장 포인트\n3. 자석형 케이블 홀더 - 책상 정리 전후 장면을 만들기 좋음",
   },
   {
     day: 3,
-    board: "3일차 인증",
+    board: "3차 인증",
     title: "FlowSpot으로 첫 쇼츠 스크립트 만들기",
     badge: "실습",
     description:
       "FlowSpot으로 만든 첫 쇼츠 스크립트 또는 스크립트 링크를 제출합니다. 완성도가 낮아도 흐름을 끝까지 만든 것이 중요합니다.",
+    template:
+      "1. 선택한 소재/상품:\n2. FlowSpot으로 만든 스크립트 요약:\n3. 마음에 드는 훅 또는 장면:\n4. 수정하고 싶은 부분:\n5. 저장 링크 또는 참고 링크:",
     placeholder:
       "FlowSpot에서 만든 스크립트를 붙여넣거나, 저장된 스크립트 링크를 함께 남겨주세요. 어떤 소재로 만들었는지도 적어주면 확인이 빠릅니다.",
   },
@@ -139,6 +145,7 @@ function clipPreview(value: string, max = 110) {
 export function ChallengeContent() {
   const [loading, setLoading] = useState(true);
   const [savingDay, setSavingDay] = useState<number | null>(null);
+  const [composerOpen, setComposerOpen] = useState(false);
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ChallengeResponse | null>(null);
@@ -202,7 +209,7 @@ export function ChallengeContent() {
     }));
   }
 
-  function openComposer(day: number) {
+  function selectGuide(day: number) {
     const guide = DAY_GUIDES.find((item) => item.day === day);
     const submission = submissionsByDay.get(day);
 
@@ -215,6 +222,22 @@ export function ChallengeContent() {
       },
     }));
     setActiveDay(day);
+  }
+
+  function openComposer(day?: number) {
+    setError(null);
+    setComposerOpen(true);
+    if (day) {
+      selectGuide(day);
+      return;
+    }
+    setActiveDay(null);
+  }
+
+  function closeComposer() {
+    setComposerOpen(false);
+    setActiveDay(null);
+    setError(null);
   }
 
   async function submit(day: number) {
@@ -258,7 +281,7 @@ export function ChallengeContent() {
           submissions: [...withoutDay, json.submission].sort((a, b) => a.day - b.day),
         };
       });
-      setActiveDay(null);
+      closeComposer();
     } catch {
       setError("게시글 저장에 실패했습니다.");
     } finally {
@@ -291,7 +314,7 @@ export function ChallengeContent() {
               </Badge>
               <Title order={2}>챌린지 게시판 권한이 아직 없습니다</Title>
               <Text c="gray.6" mt="sm">
-                신청서를 제출한 뒤 선발되면 이곳에서 1~3일차 미션 인증글을 작성할 수 있습니다.
+                신청서를 제출한 뒤 선발되면 이곳에서 1~3차 미션 인증글을 작성할 수 있습니다.
               </Text>
             </Box>
             {error && (
@@ -353,7 +376,7 @@ export function ChallengeContent() {
                 </Group>
                 <Title order={2}>원초적 인사이트 챌린지 카페</Title>
                 <Text c="gray.6" mt={6}>
-                  공지는 확인하고, 1~3일차 미션은 게시글처럼 작성해서 인증합니다.
+                  공지는 확인하고, 1~3차 미션은 게시글처럼 작성해서 인증합니다.
                 </Text>
               </Box>
               <ThemeIcon size={54} radius="xl" color="violet" variant="light">
@@ -393,7 +416,7 @@ export function ChallengeContent() {
           </SimpleGrid>
         </Box>
 
-        {error && (
+        {error && !composerOpen && (
           <Alert color="red" variant="light">
             {error}
           </Alert>
@@ -422,8 +445,17 @@ export function ChallengeContent() {
                     fontWeight: 700,
                   }}
                 >
-                  공지사항
+                  전체글 보기
                 </UnstyledButton>
+                <UnstyledButton p="xs" style={{ borderRadius: 8, color: "var(--mantine-color-gray-8)" }}>
+                  <Group justify="space-between" gap="xs" wrap="nowrap">
+                    <Text size="sm" fw={600}>공지사항</Text>
+                    <Badge size="xs" color="red" variant="light">
+                      필독
+                    </Badge>
+                  </Group>
+                </UnstyledButton>
+                <Divider my={4} />
                 {DAY_GUIDES.map((guide) => (
                   <UnstyledButton
                     key={guide.day}
@@ -451,7 +483,7 @@ export function ChallengeContent() {
                 <Text fw={800}>운영 기준</Text>
               </Group>
               <Stack gap={8}>
-                <Text size="sm" c="gray.7">3일차까지 모두 작성하면 운영자가 성실 참여 여부를 확인합니다.</Text>
+                <Text size="sm" c="gray.7">3차까지 모두 작성하면 운영자가 성실 참여 여부를 확인합니다.</Text>
                 <Text size="sm" c="gray.7">할인권은 전원 지급이 아니라 성실 수행자 중 일부에게만 지급됩니다.</Text>
               </Stack>
             </Card>
@@ -473,7 +505,7 @@ export function ChallengeContent() {
                   <Group px="lg" py="sm" justify="space-between" wrap="nowrap">
                     <Group gap="sm" wrap="nowrap">
                       <Badge color="red" variant="light" radius="sm">공지</Badge>
-                      <Text fw={700}>미션 인증글은 날짜별 게시판에 작성해주세요.</Text>
+                      <Text fw={700}>미션 인증글은 1차, 2차, 3차 말머리를 선택해서 작성해주세요.</Text>
                     </Group>
                     <Text size="xs" c="gray.5">운영자</Text>
                   </Group>
@@ -481,7 +513,7 @@ export function ChallengeContent() {
                   <Group px="lg" py="sm" justify="space-between" wrap="nowrap">
                     <Group gap="sm" wrap="nowrap">
                       <Badge color="violet" variant="light" radius="sm">안내</Badge>
-                      <Text fw={700}>3일차 제출 후 성실 참여자에게만 할인권 후보 안내가 나갑니다.</Text>
+                      <Text fw={700}>3차 제출 후 성실 참여자에게만 할인권 후보 안내가 나갑니다.</Text>
                     </Group>
                     <Text size="xs" c="gray.5">운영자</Text>
                   </Group>
@@ -493,16 +525,13 @@ export function ChallengeContent() {
                   <Group justify="space-between" align="center">
                     <Box>
                       <Text fw={800}>미션 인증 게시판</Text>
-                      <Text size="sm" c="gray.6">내가 작성해야 할 1~3일차 인증글입니다.</Text>
+                      <Text size="sm" c="gray.6">글쓰기에서 말머리를 고르면 차수별 양식이 열립니다.</Text>
                     </Box>
                     <Button
                       color="violet"
                       radius="md"
                       leftSection={<PencilLine size={16} />}
-                      onClick={() => {
-                        const nextGuide = DAY_GUIDES.find((guide) => !submissionsByDay.has(guide.day)) || DAY_GUIDES[0];
-                        openComposer(nextGuide.day);
-                      }}
+                      onClick={() => openComposer()}
                       disabled={!data.canSubmit}
                     >
                       글쓰기
@@ -514,7 +543,7 @@ export function ChallengeContent() {
                   <Table verticalSpacing="md" horizontalSpacing="lg" highlightOnHover>
                     <Table.Thead>
                       <Table.Tr>
-                        <Table.Th style={{ width: 112 }}>게시판</Table.Th>
+                        <Table.Th style={{ width: 112 }}>말머리</Table.Th>
                         <Table.Th>제목</Table.Th>
                         <Table.Th style={{ width: 132 }}>상태</Table.Th>
                         <Table.Th style={{ width: 150 }}>작성일</Table.Th>
@@ -632,7 +661,7 @@ export function ChallengeContent() {
                             <Group justify="space-between" gap="sm" wrap="nowrap">
                               <Box style={{ minWidth: 0 }}>
                                 <Group gap="xs" mb={4}>
-                                  <Badge size="xs" color="gray" variant="outline">{guide?.board || `${submission.day}일차`}</Badge>
+                                  <Badge size="xs" color="gray" variant="outline">{guide?.board || `${submission.day}차`}</Badge>
                                   <Badge size="xs" color={status.color} variant="light">{status.label}</Badge>
                                 </Group>
                                 <Text fw={700} truncate>{submission.title}</Text>
@@ -662,84 +691,140 @@ export function ChallengeContent() {
       </Stack>
 
       <Modal
-        opened={!!activeGuide}
-        onClose={() => setActiveDay(null)}
+        opened={composerOpen}
+        onClose={closeComposer}
         title={
-          activeGuide ? (
-            <Group gap="xs">
-              <Badge color="violet" variant="light">{activeGuide.board}</Badge>
-              <Text fw={800}>{activeSubmission ? "인증글 보기/수정" : "인증글 쓰기"}</Text>
-            </Group>
-          ) : null
+          <Group gap="xs">
+            {activeGuide && <Badge color="violet" variant="light">{activeGuide.board}</Badge>}
+            <Text fw={800}>{activeSubmission ? "인증글 보기/수정" : "글쓰기"}</Text>
+          </Group>
         }
         size="lg"
         radius="md"
         centered
       >
-        {activeGuide && activeDay && (
-          <Stack gap="md">
-            <Alert color="violet" variant="light">
-              <Text fw={700}>{activeGuide.title}</Text>
-              <Text size="sm" mt={4}>{activeGuide.description}</Text>
+        <Stack gap="md">
+          <Box>
+            <Text fw={800} mb="xs">말머리 선택</Text>
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+              {DAY_GUIDES.map((guide) => {
+                const selected = activeDay === guide.day;
+                const submission = submissionsByDay.get(guide.day);
+                return (
+                  <UnstyledButton
+                    key={guide.day}
+                    onClick={() => selectGuide(guide.day)}
+                    style={{
+                      border: `1px solid ${
+                        selected ? "var(--mantine-color-violet-5)" : "var(--mantine-color-gray-3)"
+                      }`,
+                      borderRadius: 8,
+                      background: selected ? "var(--mantine-color-violet-0)" : "#fff",
+                      padding: 12,
+                    }}
+                  >
+                    <Group justify="space-between" gap="xs" wrap="nowrap" mb={4}>
+                      <Text fw={800} size="sm">{guide.board}</Text>
+                      <Badge size="xs" color={submission ? "green" : "gray"} variant="light">
+                        {submission ? "작성됨" : "미작성"}
+                      </Badge>
+                    </Group>
+                    <Text size="xs" c="gray.6" lineClamp={2}>
+                      {guide.title}
+                    </Text>
+                  </UnstyledButton>
+                );
+              })}
+            </SimpleGrid>
+          </Box>
+
+          {!activeGuide && (
+            <Alert color="gray" variant="light">
+              위에서 1차, 2차, 3차 중 하나를 선택하면 해당 인증글 양식이 열립니다.
             </Alert>
+          )}
 
-            {activeSubmission?.adminNote && (
-              <Alert color="blue" variant="light">
-                <Text fw={700} size="sm">운영자 메모</Text>
-                <Text size="sm" mt={4} style={{ whiteSpace: "pre-wrap" }}>
-                  {activeSubmission.adminNote}
-                </Text>
+          {activeGuide && activeDay && (
+            <>
+              <Alert color="violet" variant="light">
+                <Text fw={700}>{activeGuide.title}</Text>
+                <Text size="sm" mt={4}>{activeGuide.description}</Text>
               </Alert>
-            )}
 
-            <TextInput
-              label="제목"
-              value={getDraft(activeDay, activeGuide.title).title}
-              onChange={(event) => updateDraft(activeDay, { title: event.currentTarget.value })}
-              disabled={!data.canSubmit}
-              maxLength={120}
-            />
+              <Card radius="md" p="md" withBorder bg="gray.0">
+                <Group gap="xs" mb={8}>
+                  <FileText size={16} color="#7c3aed" />
+                  <Text fw={800} size="sm">작성 양식</Text>
+                </Group>
+                <Text size="sm" c="gray.7" style={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+                  {activeGuide.template}
+                </Text>
+              </Card>
 
-            <Textarea
-              label="본문"
-              description="카페 인증글처럼 오늘 정리한 내용을 적어주세요."
-              placeholder={activeGuide.placeholder}
-              value={getDraft(activeDay, activeGuide.title).content}
-              onChange={(event) => updateDraft(activeDay, { content: event.currentTarget.value })}
-              autosize
-              minRows={8}
-              maxRows={16}
-              maxLength={5000}
-              disabled={!data.canSubmit}
-            />
+              {activeSubmission?.adminNote && (
+                <Alert color="blue" variant="light">
+                  <Text fw={700} size="sm">운영자 메모</Text>
+                  <Text size="sm" mt={4} style={{ whiteSpace: "pre-wrap" }}>
+                    {activeSubmission.adminNote}
+                  </Text>
+                </Alert>
+              )}
 
-            <TextInput
-              label="참고 링크"
-              description="FlowSpot 저장 링크, 채널 링크, 캡처 링크 등이 있으면 넣어주세요."
-              placeholder="https://..."
-              value={getDraft(activeDay, activeGuide.title).referenceUrl}
-              onChange={(event) => updateDraft(activeDay, { referenceUrl: event.currentTarget.value })}
-              disabled={!data.canSubmit}
-              maxLength={500}
-            />
+              {error && (
+                <Alert color="red" variant="light">
+                  {error}
+                </Alert>
+              )}
 
-            <Group justify="space-between">
-              <Anchor component={Link} href="/dashboard/batch" size="sm" c="violet">
-                FlowSpot으로 스크립트 만들기
-              </Anchor>
-              <Button
-                color="violet"
-                radius="md"
-                loading={savingDay === activeDay}
+              <TextInput
+                label="제목"
+                value={getDraft(activeDay, activeGuide.title).title}
+                onChange={(event) => updateDraft(activeDay, { title: event.currentTarget.value })}
                 disabled={!data.canSubmit}
-                onClick={() => submit(activeDay)}
-                rightSection={<Send size={16} />}
-              >
-                {activeSubmission ? "수정 저장" : "등록"}
-              </Button>
-            </Group>
-          </Stack>
-        )}
+                maxLength={120}
+              />
+
+              <Textarea
+                label="본문"
+                description="위 양식을 참고해서 카페 인증글처럼 작성해주세요."
+                placeholder={activeGuide.placeholder}
+                value={getDraft(activeDay, activeGuide.title).content}
+                onChange={(event) => updateDraft(activeDay, { content: event.currentTarget.value })}
+                autosize
+                minRows={8}
+                maxRows={16}
+                maxLength={5000}
+                disabled={!data.canSubmit}
+              />
+
+              <TextInput
+                label="참고 링크"
+                description="FlowSpot 저장 링크, 채널 링크, 캡처 링크 등이 있으면 넣어주세요."
+                placeholder="https://..."
+                value={getDraft(activeDay, activeGuide.title).referenceUrl}
+                onChange={(event) => updateDraft(activeDay, { referenceUrl: event.currentTarget.value })}
+                disabled={!data.canSubmit}
+                maxLength={500}
+              />
+
+              <Group justify="space-between">
+                <Anchor component={Link} href="/dashboard/batch" size="sm" c="violet">
+                  FlowSpot으로 스크립트 만들기
+                </Anchor>
+                <Button
+                  color="violet"
+                  radius="md"
+                  loading={savingDay === activeDay}
+                  disabled={!data.canSubmit}
+                  onClick={() => submit(activeDay)}
+                  rightSection={<Send size={16} />}
+                >
+                  {activeSubmission ? "수정 저장" : "등록"}
+                </Button>
+              </Group>
+            </>
+          )}
+        </Stack>
       </Modal>
     </Container>
   );
