@@ -10,7 +10,6 @@ import {
   Card,
   Container,
   Divider,
-  Grid,
   Group,
   Loader,
   Modal,
@@ -25,10 +24,11 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import {
+  ArrowLeft,
   ExternalLink,
   FileText,
   Lock,
-  MessageSquareText,
+  MessageCircle,
   PencilLine,
   Search,
   Send,
@@ -65,6 +65,16 @@ type MissionSubmission = {
 type FeedSubmission = MissionSubmission & {
   authorLabel: string;
   isMine: boolean;
+};
+
+type ChallengeComment = {
+  id: string;
+  submissionId: string;
+  content: string;
+  authorLabel: string;
+  isMine: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type ChallengeResponse = {
@@ -132,6 +142,16 @@ function formatDate(value: string | null) {
   });
 }
 
+function formatDateTime(value: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function getGuide(day: number) {
   return DAY_GUIDES.find((item) => item.day === day) || DAY_GUIDES[0];
 }
@@ -152,7 +172,12 @@ export function ChallengeContent() {
   const [savingDay, setSavingDay] = useState<number | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [activeDay, setActiveDay] = useState<number | null>(null);
-  const [viewingSubmission, setViewingSubmission] = useState<FeedSubmission | null>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<FeedSubmission | null>(null);
+  const [comments, setComments] = useState<ChallengeComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [savingComment, setSavingComment] = useState(false);
+  const [commentError, setCommentError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ChallengeResponse | null>(null);
   const [drafts, setDrafts] = useState<
@@ -201,6 +226,34 @@ export function ChallengeContent() {
     load();
   }, []);
 
+  async function loadComments(submissionId: string) {
+    setCommentsLoading(true);
+    setCommentError(null);
+    try {
+      const res = await fetch(`/api/challenge/comments?submissionId=${submissionId}`, {
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCommentError(json.error || "댓글을 불러오지 못했습니다.");
+        setComments([]);
+        return;
+      }
+      setComments(json.comments || []);
+    } catch {
+      setCommentError("댓글을 불러오지 못했습니다.");
+      setComments([]);
+    } finally {
+      setCommentsLoading(false);
+    }
+  }
+
+  function openSubmission(submission: FeedSubmission) {
+    setSelectedSubmission(submission);
+    setCommentDraft("");
+    void loadComments(submission.id);
+  }
+
   function getDraft(day: number, fallbackTitle: string) {
     return drafts[day] || { title: fallbackTitle, content: "", referenceUrl: "" };
   }
@@ -233,7 +286,6 @@ export function ChallengeContent() {
 
   function openComposer(day?: number) {
     setError(null);
-    setViewingSubmission(null);
     setComposerOpen(true);
     if (day) {
       selectGuide(day);
@@ -281,6 +333,7 @@ export function ChallengeContent() {
         return;
       }
 
+      let nextSelected: FeedSubmission | null = null;
       setData((prev) => {
         if (!prev) return prev;
         const withoutOwnDay = prev.submissions.filter((item) => item.day !== day);
@@ -290,6 +343,7 @@ export function ChallengeContent() {
         const nextFeed = json.feedSubmission
           ? [json.feedSubmission as FeedSubmission, ...withoutFeedDay]
           : withoutFeedDay;
+        nextSelected = (json.feedSubmission as FeedSubmission | undefined) || null;
 
         return {
           ...prev,
@@ -300,10 +354,49 @@ export function ChallengeContent() {
         };
       });
       closeComposer();
+      if (nextSelected) {
+        setSelectedSubmission(nextSelected);
+        setComments([]);
+        setCommentDraft("");
+      }
     } catch {
       setError("게시글 저장에 실패했습니다.");
     } finally {
       setSavingDay(null);
+    }
+  }
+
+  async function submitComment() {
+    if (!selectedSubmission) return;
+    const content = commentDraft.trim();
+    setCommentError(null);
+
+    if (!content) {
+      setCommentError("댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    setSavingComment(true);
+    try {
+      const res = await fetch("/api/challenge/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          submissionId: selectedSubmission.id,
+          content,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCommentError(json.error || "댓글 저장에 실패했습니다.");
+        return;
+      }
+      setComments((prev) => [...prev, json.comment]);
+      setCommentDraft("");
+    } catch {
+      setCommentError("댓글 저장에 실패했습니다.");
+    } finally {
+      setSavingComment(false);
     }
   }
 
@@ -428,148 +521,219 @@ export function ChallengeContent() {
           </Alert>
         )}
 
-        <Grid gutter="md">
-          <Grid.Col span={0} style={{ display: "none" }}>
-            <Stack gap="md">
-              <Card radius={4} p={0} withBorder>
-                <Box px="md" py="sm" style={{ borderBottom: "2px solid #111" }}>
-                  <Text fw={900} size="sm">카페정보</Text>
-                </Box>
-                <Stack gap={10} p="md">
-                  <Group gap="sm" wrap="nowrap">
-                    <ThemeIcon size={40} radius="md" color="blue" variant="light">
-                      <MessageSquareText size={20} />
-                    </ThemeIcon>
-                    <Box style={{ minWidth: 0 }}>
-                      <Text fw={800} size="sm" truncate>원초적 인사이트</Text>
-                      <Text size="xs" c="gray.6">쇼핑 쇼츠 챌린지</Text>
-                    </Box>
-                  </Group>
-                  <Divider />
-                  <Group justify="space-between">
-                    <Text size="sm" c="gray.7">내 인증글</Text>
-                    <Text size="sm" fw={800}>{completedCount}/3</Text>
-                  </Group>
-                  <Group justify="space-between">
-                    <Text size="sm" c="gray.7">전체 글</Text>
-                    <Text size="sm" fw={800}>{feedSubmissions.length}</Text>
-                  </Group>
+        <Card radius={4} p={0} withBorder>
+          <Box px={{ base: "md", sm: "lg" }} py="md">
+            <Group justify="space-between" align="flex-end" gap="sm">
+              <Box>
+                <Title order={3} fz={{ base: 18, sm: 20 }}>
+                  {selectedSubmission ? "글 상세보기" : "전체글보기"}
+                </Title>
+                <Text size="sm" c="gray.6">
+                  {selectedSubmission
+                    ? "본문을 읽고 댓글로 질문이나 피드백을 남길 수 있습니다."
+                    : `전체 기수 최신순 ${feedSubmissions.length}개`}
+                </Text>
+              </Box>
+              <Group gap={6} visibleFrom="sm">
+                {selectedSubmission ? (
                   <Button
-                    fullWidth
-                    color="blue"
+                    size="xs"
+                    variant="light"
+                    color="gray"
                     radius={4}
-                    leftSection={<PencilLine size={16} />}
-                    onClick={() => openComposer()}
-                    disabled={!data.canSubmit}
+                    leftSection={<ArrowLeft size={14} />}
+                    onClick={() => setSelectedSubmission(null)}
                   >
-                    카페 글쓰기
+                    목록으로
                   </Button>
-                </Stack>
-              </Card>
-
-              <Card radius={4} p={0} withBorder>
-                <Box px="md" py="sm" style={{ borderBottom: "1px solid #d7dde5" }}>
-                  <Group gap={6}>
-                    <Text c="green.7" fw={900}>★</Text>
-                    <Text fw={900} size="sm">즐겨찾는 게시판</Text>
-                  </Group>
-                </Box>
-                <Stack gap={0}>
-                  <Box px="md" py={9} bg="gray.0">
-                    <Text size="sm" fw={800}>전체글보기</Text>
-                  </Box>
-                  {DAY_GUIDES.map((guide) => {
-                    const submission = submissionsByDay.get(guide.day);
-                    return (
-                      <UnstyledButton
-                        key={guide.day}
-                        onClick={() => openComposer(guide.day)}
-                        style={{ width: "100%" }}
-                      >
-                        <Group justify="space-between" px="md" py={9} wrap="nowrap">
-                          <Box>
-                            <Text size="sm">{guide.board}</Text>
-                            <Text size="xs" c="gray.5">{guide.badge}</Text>
-                          </Box>
-                          <Badge size="xs" color={submission ? "green" : "gray"} variant="light">
-                            {submission ? "완료" : "작성"}
-                          </Badge>
-                        </Group>
-                      </UnstyledButton>
-                    );
-                  })}
-                </Stack>
-              </Card>
-
-              <Card radius={4} p="md" withBorder hiddenFrom="md">
-                <SimpleGrid cols={3} spacing="xs">
-                  {DAY_GUIDES.map((guide) => {
-                    const submission = submissionsByDay.get(guide.day);
-                    return (
-                      <Button
-                        key={guide.day}
-                        size="xs"
-                        variant={submission ? "light" : "outline"}
-                        color={submission ? "green" : "gray"}
-                        radius={4}
-                        onClick={() => openComposer(guide.day)}
-                      >
-                        {guide.board}
-                      </Button>
-                    );
-                  })}
-                </SimpleGrid>
-              </Card>
-            </Stack>
-          </Grid.Col>
-
-          <Grid.Col span={12}>
-            <Card radius={4} p={0} withBorder>
-              <Box px={{ base: "md", sm: "lg" }} py="md">
-                <Group justify="space-between" align="flex-end" gap="sm">
-                  <Box>
-                    <Title order={3} fz={{ base: 18, sm: 20 }}>전체글보기</Title>
-                    <Text size="sm" c="gray.6">전체 기수 최신순 {feedSubmissions.length}개</Text>
-                  </Box>
-                  <Group gap={6} visibleFrom="sm">
+                ) : (
+                  <>
                     <Search size={14} color="#6b7280" />
                     <Text size="xs" c="gray.6">기수와 작성자는 익명 표시됩니다</Text>
-                  </Group>
-                </Group>
-                <Group mt="md" gap={6} wrap="wrap">
-                  <Badge color="green" variant="light" radius={2}>
-                    내 인증 {completedCount}/3
-                  </Badge>
-                  {DAY_GUIDES.map((guide) => {
-                    const submission = submissionsByDay.get(guide.day);
-                    return (
-                      <Button
-                        key={guide.day}
-                        size="xs"
-                        variant={submission ? "light" : "outline"}
-                        color={submission ? "green" : "gray"}
-                        radius={4}
-                        onClick={() => openComposer(guide.day)}
-                      >
-                        {guide.board}
-                      </Button>
-                    );
-                  })}
+                  </>
+                )}
+              </Group>
+            </Group>
+            <Group mt="md" gap={6} wrap="wrap">
+              <Badge color="green" variant="light" radius={2}>
+                내 인증 {completedCount}/3
+              </Badge>
+              {DAY_GUIDES.map((guide) => {
+                const submission = submissionsByDay.get(guide.day);
+                return (
                   <Button
-                    visibleFrom="sm"
+                    key={guide.day}
                     size="xs"
+                    variant={submission ? "light" : "outline"}
+                    color={submission ? "green" : "gray"}
+                    radius={4}
+                    onClick={() => openComposer(guide.day)}
+                  >
+                    {guide.board}
+                  </Button>
+                );
+              })}
+              <Button
+                visibleFrom="sm"
+                size="xs"
+                color="blue"
+                radius={4}
+                leftSection={<PencilLine size={14} />}
+                onClick={() => openComposer()}
+                disabled={!data.canSubmit}
+              >
+                카페 글쓰기
+              </Button>
+            </Group>
+          </Box>
+          <Divider />
+
+          {selectedSubmission ? (
+            <Box>
+              <Box px={{ base: "md", sm: "lg" }} py="lg">
+                <Button
+                  hiddenFrom="sm"
+                  size="xs"
+                  variant="subtle"
+                  color="gray"
+                  radius={4}
+                  leftSection={<ArrowLeft size={14} />}
+                  onClick={() => setSelectedSubmission(null)}
+                  mb="sm"
+                >
+                  목록으로
+                </Button>
+
+                <Group gap={6} mb="sm">
+                  <Badge color="gray" variant="outline" radius={2}>{selectedSubmission.cohort}</Badge>
+                  <Badge color="blue" variant="light" radius={2}>{getGuide(selectedSubmission.day).board}</Badge>
+                  {selectedSubmission.isMine && <Badge color="green" variant="light" radius={2}>내 글</Badge>}
+                  <Badge color={getStatus(selectedSubmission).color} variant="light" radius={2}>
+                    {getStatus(selectedSubmission).label}
+                  </Badge>
+                </Group>
+
+                <Title order={2} fz={{ base: 20, sm: 26 }}>
+                  {selectedSubmission.title}
+                </Title>
+                <Group gap={6} mt={10}>
+                  <UserRound size={14} color="#6b7280" />
+                  <Text size="sm" c="gray.6">{selectedSubmission.authorLabel}</Text>
+                  <Text size="sm" c="gray.5">·</Text>
+                  <Text size="sm" c="gray.6">{formatDateTime(selectedSubmission.updatedAt)}</Text>
+                </Group>
+
+                <Divider my="lg" />
+                <Text style={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
+                  {selectedSubmission.content}
+                </Text>
+
+                {selectedSubmission.referenceUrl && (
+                  <Anchor
+                    href={selectedSubmission.referenceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    mt="md"
+                    display="inline-block"
+                  >
+                    참고 링크 열기
+                  </Anchor>
+                )}
+
+                {selectedSubmission.isMine && (
+                  <Group justify="flex-end" mt="lg">
+                    <Button
+                      variant="light"
+                      color="blue"
+                      radius={4}
+                      leftSection={<PencilLine size={16} />}
+                      onClick={() => openComposer(selectedSubmission.day)}
+                    >
+                      수정하기
+                    </Button>
+                  </Group>
+                )}
+              </Box>
+
+              <Divider />
+
+              <Box px={{ base: "md", sm: "lg" }} py="lg" bg="gray.0">
+                <Group gap="xs" mb="md">
+                  <MessageCircle size={17} color="#228be6" />
+                  <Text fw={900}>댓글 {comments.length}</Text>
+                </Group>
+
+                {commentError && (
+                  <Alert color="red" variant="light" mb="md">
+                    {commentError}
+                  </Alert>
+                )}
+
+                {commentsLoading ? (
+                  <Group py="md">
+                    <Loader size="sm" color="blue" />
+                    <Text size="sm" c="gray.6">댓글을 불러오는 중...</Text>
+                  </Group>
+                ) : comments.length === 0 ? (
+                  <Text size="sm" c="gray.6" mb="md">
+                    아직 댓글이 없습니다. 첫 댓글을 남겨보세요.
+                  </Text>
+                ) : (
+                  <Stack gap="xs" mb="md">
+                    {comments.map((comment) => (
+                      <Box
+                        key={comment.id}
+                        p="sm"
+                        style={{
+                          border: "1px solid #e4e7ec",
+                          borderRadius: 4,
+                          background: "#fff",
+                        }}
+                      >
+                        <Group gap={6} mb={4}>
+                          <Text size="sm" fw={800}>{comment.authorLabel}</Text>
+                          {comment.isMine && <Badge size="xs" color="green" variant="light" radius={2}>내 댓글</Badge>}
+                          <Text size="xs" c="gray.5">·</Text>
+                          <Text size="xs" c="gray.5">{formatDateTime(comment.createdAt)}</Text>
+                        </Group>
+                        <Text size="sm" style={{ whiteSpace: "pre-wrap", lineHeight: 1.65 }}>
+                          {comment.content}
+                        </Text>
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
+
+                <Textarea
+                  placeholder="댓글을 입력해주세요."
+                  value={commentDraft}
+                  onChange={(event) => setCommentDraft(event.currentTarget.value)}
+                  autosize
+                  minRows={3}
+                  maxRows={8}
+                  maxLength={1000}
+                  disabled={!data.canSubmit}
+                />
+                <Group justify="space-between" mt="sm">
+                  <Text size="xs" c="gray.6">
+                    질문, 응원, 개선 피드백을 짧게 남길 수 있습니다.
+                  </Text>
+                  <Button
+                    size="sm"
                     color="blue"
                     radius={4}
-                    leftSection={<PencilLine size={14} />}
-                    onClick={() => openComposer()}
+                    loading={savingComment}
                     disabled={!data.canSubmit}
+                    onClick={submitComment}
+                    rightSection={<Send size={15} />}
                   >
-                    카페 글쓰기
+                    댓글 등록
                   </Button>
                 </Group>
               </Box>
-              <Divider />
-
+            </Box>
+          ) : (
+            <>
               <Box visibleFrom="sm">
                 <Table verticalSpacing={9} horizontalSpacing="md" highlightOnHover>
                   <Table.Thead bg="gray.0">
@@ -603,7 +767,7 @@ export function ChallengeContent() {
                       return (
                         <Table.Tr
                           key={submission.id}
-                          onClick={() => setViewingSubmission(submission)}
+                          onClick={() => openSubmission(submission)}
                           style={{ cursor: "pointer" }}
                         >
                           <Table.Td>
@@ -660,7 +824,7 @@ export function ChallengeContent() {
                     return (
                       <UnstyledButton
                         key={submission.id}
-                        onClick={() => setViewingSubmission(submission)}
+                        onClick={() => openSubmission(submission)}
                         style={{ width: "100%", textAlign: "left" }}
                       >
                         <Box px="md" py="md" style={{ borderBottom: "1px solid #edf0f3" }}>
@@ -686,66 +850,10 @@ export function ChallengeContent() {
                   })
                 )}
               </Stack>
-            </Card>
-          </Grid.Col>
-        </Grid>
+            </>
+          )}
+        </Card>
       </Stack>
-
-      <Modal
-        opened={!!viewingSubmission}
-        onClose={() => setViewingSubmission(null)}
-        title={
-          viewingSubmission ? (
-            <Group gap="xs">
-              <Badge color="blue" variant="outline" radius={2}>{getGuide(viewingSubmission.day).board}</Badge>
-              {viewingSubmission.isMine && <Badge color="green" variant="light" radius={2}>내 글</Badge>}
-              <Text fw={800}>인증글 보기</Text>
-            </Group>
-          ) : null
-        }
-        size="lg"
-        radius="md"
-        centered
-      >
-        {viewingSubmission && (
-          <Stack gap="md">
-            <Box>
-              <Title order={3}>{viewingSubmission.title}</Title>
-              <Group gap="xs" mt={8}>
-                <UserRound size={14} color="#6b7280" />
-                <Text size="sm" c="gray.6">{viewingSubmission.authorLabel}</Text>
-                <Text size="sm" c="gray.5">·</Text>
-                <Text size="sm" c="gray.6">{formatDate(viewingSubmission.updatedAt)}</Text>
-              </Group>
-            </Box>
-            <Divider />
-            <Text style={{ whiteSpace: "pre-wrap", lineHeight: 1.75 }}>
-              {viewingSubmission.content}
-            </Text>
-            {viewingSubmission.referenceUrl && (
-              <Anchor href={viewingSubmission.referenceUrl} target="_blank" rel="noopener noreferrer">
-                참고 링크 열기
-              </Anchor>
-            )}
-            {viewingSubmission.isMine && (
-              <Group justify="flex-end">
-                <Button
-                  variant="light"
-                  color="blue"
-                  leftSection={<PencilLine size={16} />}
-                  onClick={() => {
-                    const day = viewingSubmission.day;
-                    setViewingSubmission(null);
-                    openComposer(day);
-                  }}
-                >
-                  수정하기
-                </Button>
-              </Group>
-            )}
-          </Stack>
-        )}
-      </Modal>
 
       <Modal
         opened={composerOpen}
