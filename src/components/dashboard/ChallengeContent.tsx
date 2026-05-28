@@ -179,11 +179,11 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 function formatDate(value: string | null) {
   if (!value) return "-";
-  return new Date(value).toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}.${month}.${day}`;
 }
 
 function formatDateTime(value: string | null) {
@@ -892,7 +892,7 @@ export function ChallengeContent() {
                       <Table.Th style={{ width: 92 }}>말머리</Table.Th>
                       <Table.Th>제목</Table.Th>
                       <Table.Th style={{ width: 116 }}>작성자</Table.Th>
-                      <Table.Th style={{ width: 112 }}>작성일</Table.Th>
+                      <Table.Th style={{ width: 112, whiteSpace: "nowrap" }}>작성일</Table.Th>
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
@@ -937,8 +937,10 @@ export function ChallengeContent() {
                           <Table.Td>
                             <Text size="sm" c="gray.7" truncate>{submission.authorLabel}</Text>
                           </Table.Td>
-                          <Table.Td>
-                            <Text size="sm" c="gray.6">{formatDate(submission.updatedAt)}</Text>
+                          <Table.Td style={{ whiteSpace: "nowrap" }}>
+                            <Text size="sm" c="gray.6" style={{ whiteSpace: "nowrap" }}>
+                              {formatDate(submission.updatedAt)}
+                            </Text>
                           </Table.Td>
                         </Table.Tr>
                       );
@@ -993,7 +995,9 @@ export function ChallengeContent() {
                             <UserRound size={13} color={BRAND.muted} />
                             <Text size="xs" c="gray.6">{submission.authorLabel}</Text>
                             <Text size="xs" c="gray.5">·</Text>
-                            <Text size="xs" c="gray.6">{formatDate(submission.updatedAt)}</Text>
+                            <Text size="xs" c="gray.6" style={{ whiteSpace: "nowrap" }}>
+                              {formatDate(submission.updatedAt)}
+                            </Text>
                           </Group>
                         </Box>
                       </UnstyledButton>
