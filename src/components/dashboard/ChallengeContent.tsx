@@ -385,6 +385,14 @@ export function ChallengeContent() {
       selectGuide(day);
       return;
     }
+    if (boardFilter === "review") {
+      selectGuide(4);
+      return;
+    }
+    if (boardFilter === "question") {
+      selectGuide(5);
+      return;
+    }
     setActiveDay(null);
   }
 
@@ -1030,7 +1038,7 @@ export function ChallengeContent() {
 
           {!activeGuide && (
             <Alert color="gray" variant="light">
-              위에서 1차, 2차, 3차 중 하나를 선택하면 해당 인증글 양식이 열립니다.
+              위에서 말머리를 선택하면 해당 게시글 양식이 열립니다.
             </Alert>
           )}
 
