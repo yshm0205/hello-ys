@@ -9,24 +9,35 @@ import {
   Button,
   Card,
   Container,
+  Divider,
   Group,
   Loader,
+  Modal,
   SimpleGrid,
   Stack,
+  Table,
   Text,
   Textarea,
   TextInput,
   ThemeIcon,
   Title,
+  Tooltip,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   CalendarDays,
   CheckCircle2,
   ClipboardList,
   ExternalLink,
+  Eye,
+  FileText,
   Lock,
+  Megaphone,
+  MessageSquareText,
+  PencilLine,
   Send,
   Sparkles,
+  UserRound,
 } from "lucide-react";
 
 import { Link } from "@/i18n/routing";
@@ -67,6 +78,7 @@ const APPLICATION_URL =
 const DAY_GUIDES = [
   {
     day: 1,
+    board: "1일차 인증",
     title: "내 쇼핑 쇼츠 채널 방향 잡기",
     badge: "VOD 04",
     description:
@@ -76,6 +88,7 @@ const DAY_GUIDES = [
   },
   {
     day: 2,
+    board: "2일차 인증",
     title: "상품/소재 후보 3개 찾기",
     badge: "VOD 08",
     description:
@@ -85,6 +98,7 @@ const DAY_GUIDES = [
   },
   {
     day: 3,
+    board: "3일차 인증",
     title: "FlowSpot으로 첫 쇼츠 스크립트 만들기",
     badge: "실습",
     description:
@@ -111,9 +125,21 @@ function formatDate(value: string | null) {
   });
 }
 
+function getStatus(submission?: MissionSubmission) {
+  if (!submission) return { label: "미제출", color: "gray" };
+  return STATUS_LABELS[submission.status] || { label: submission.status, color: "gray" };
+}
+
+function clipPreview(value: string, max = 110) {
+  const normalized = value.trim().replace(/\s+/g, " ");
+  if (normalized.length <= max) return normalized;
+  return `${normalized.slice(0, max - 1)}...`;
+}
+
 export function ChallengeContent() {
   const [loading, setLoading] = useState(true);
   const [savingDay, setSavingDay] = useState<number | null>(null);
+  const [activeDay, setActiveDay] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ChallengeResponse | null>(null);
   const [drafts, setDrafts] = useState<
@@ -127,6 +153,9 @@ export function ChallengeContent() {
     });
     return entries;
   }, [data?.submissions]);
+
+  const activeGuide = DAY_GUIDES.find((item) => item.day === activeDay) || null;
+  const activeSubmission = activeDay ? submissionsByDay.get(activeDay) : undefined;
 
   async function load() {
     try {
@@ -173,18 +202,33 @@ export function ChallengeContent() {
     }));
   }
 
+  function openComposer(day: number) {
+    const guide = DAY_GUIDES.find((item) => item.day === day);
+    const submission = submissionsByDay.get(day);
+
+    setDrafts((prev) => ({
+      ...prev,
+      [day]: {
+        title: submission?.title || prev[day]?.title || guide?.title || "",
+        content: submission?.content || prev[day]?.content || "",
+        referenceUrl: submission?.referenceUrl || prev[day]?.referenceUrl || "",
+      },
+    }));
+    setActiveDay(day);
+  }
+
   async function submit(day: number) {
     const guide = DAY_GUIDES.find((item) => item.day === day);
     const draft = getDraft(day, guide?.title || "");
     setError(null);
 
     if (draft.title.trim().length < 2) {
-      setError("미션 제목을 입력해주세요.");
+      setError("게시글 제목을 입력해주세요.");
       return;
     }
 
     if (draft.content.trim().length < 10) {
-      setError("미션 내용을 10자 이상 입력해주세요.");
+      setError("본문을 10자 이상 입력해주세요.");
       return;
     }
 
@@ -202,7 +246,7 @@ export function ChallengeContent() {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || "미션 제출에 실패했습니다.");
+        setError(json.error || "게시글 저장에 실패했습니다.");
         return;
       }
 
@@ -214,8 +258,9 @@ export function ChallengeContent() {
           submissions: [...withoutDay, json.submission].sort((a, b) => a.day - b.day),
         };
       });
+      setActiveDay(null);
     } catch {
-      setError("미션 제출에 실패했습니다.");
+      setError("게시글 저장에 실패했습니다.");
     } finally {
       setSavingDay(null);
     }
@@ -226,7 +271,7 @@ export function ChallengeContent() {
       <Container size="md" py="xl">
         <Group justify="center" py="xl">
           <Loader color="violet" />
-          <Text c="gray.6">챌린지 정보를 불러오는 중...</Text>
+          <Text c="gray.6">챌린지 게시판을 불러오는 중...</Text>
         </Group>
       </Container>
     );
@@ -235,7 +280,7 @@ export function ChallengeContent() {
   if (!data?.enrollment) {
     return (
       <Container size="md" py="lg">
-        <Card radius="xl" p="xl" withBorder>
+        <Card radius="lg" p="xl" withBorder>
           <Stack gap="md">
             <ThemeIcon size={54} radius="xl" color="gray" variant="light">
               <Lock size={26} />
@@ -244,9 +289,9 @@ export function ChallengeContent() {
               <Badge color="gray" variant="light" mb="sm">
                 선발 후 이용 가능
               </Badge>
-              <Title order={2}>챌린지 참여 권한이 아직 없습니다</Title>
+              <Title order={2}>챌린지 게시판 권한이 아직 없습니다</Title>
               <Text c="gray.6" mt="sm">
-                Notion 신청서를 제출한 뒤 선발되면 이 페이지에서 1~3일차 미션을 제출할 수 있습니다.
+                신청서를 제출한 뒤 선발되면 이곳에서 1~3일차 미션 인증글을 작성할 수 있습니다.
               </Text>
             </Box>
             {error && (
@@ -278,32 +323,75 @@ export function ChallengeContent() {
   ).length;
 
   return (
-    <Container size="lg" py="lg">
+    <Container size="xl" py="lg">
       <Stack gap="lg">
-        <Card
-          radius="xl"
-          p="xl"
+        <Box
           style={{
-            border: "1px solid rgba(139, 92, 246, 0.2)",
-            background:
-              "radial-gradient(circle at top left, rgba(139, 92, 246, 0.14), transparent 34%), linear-gradient(135deg, #ffffff, #f8fafc)",
+            border: "1px solid var(--mantine-color-gray-3)",
+            borderRadius: 10,
+            background: "linear-gradient(180deg, #ffffff, #f8fafc)",
+            overflow: "hidden",
           }}
         >
-          <Group justify="space-between" align="flex-start" gap="lg">
-            <Box style={{ maxWidth: 760 }}>
-              <Badge color="violet" radius="xl" mb="sm">
-                {data.enrollment.cohort} 쇼핑 쇼츠 챌린지
-              </Badge>
-              <Title order={2}>3일 안에 채널 방향부터 첫 스크립트까지 잡기</Title>
-              <Text c="gray.6" mt="sm">
-                각 날짜별 미션을 제출하면 운영자가 확인합니다. 성실 참여자는 이후 올인원 패스 할인권 후보로 검토됩니다.
-              </Text>
+          <Box
+            p="lg"
+            style={{
+              borderBottom: "1px solid var(--mantine-color-gray-2)",
+              background:
+                "linear-gradient(90deg, rgba(139, 92, 246, 0.11), rgba(14, 165, 233, 0.07), rgba(255,255,255,0))",
+            }}
+          >
+            <Group justify="space-between" align="flex-start" gap="lg">
+              <Box>
+                <Group gap="xs" mb={8}>
+                  <Badge color="violet" radius="sm">
+                    {data.enrollment.cohort}
+                  </Badge>
+                  <Badge color="blue" variant="light" radius="sm">
+                    쇼핑 쇼츠 챌린지
+                  </Badge>
+                </Group>
+                <Title order={2}>원초적 인사이트 챌린지 카페</Title>
+                <Text c="gray.6" mt={6}>
+                  공지는 확인하고, 1~3일차 미션은 게시글처럼 작성해서 인증합니다.
+                </Text>
+              </Box>
+              <ThemeIcon size={54} radius="xl" color="violet" variant="light">
+                <Sparkles size={28} />
+              </ThemeIcon>
+            </Group>
+          </Box>
+
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={0}>
+            <Box p="md" style={{ borderRight: "1px solid var(--mantine-color-gray-2)" }}>
+              <Group gap="sm">
+                <ClipboardList size={18} color="#7c3aed" />
+                <Box>
+                  <Text size="xs" c="gray.6">내 인증글</Text>
+                  <Text fw={800}>{completedCount}/3개 작성</Text>
+                </Box>
+              </Group>
             </Box>
-            <ThemeIcon size={56} radius="xl" color="violet" variant="light">
-              <Sparkles size={28} />
-            </ThemeIcon>
-          </Group>
-        </Card>
+            <Box p="md" style={{ borderRight: "1px solid var(--mantine-color-gray-2)" }}>
+              <Group gap="sm">
+                <CalendarDays size={18} color="#2563eb" />
+                <Box>
+                  <Text size="xs" c="gray.6">참여 기수</Text>
+                  <Text fw={800}>{data.enrollment.cohort}</Text>
+                </Box>
+              </Group>
+            </Box>
+            <Box p="md">
+              <Group gap="sm">
+                <CheckCircle2 size={18} color="#16a34a" />
+                <Box>
+                  <Text size="xs" c="gray.6">지급 크레딧</Text>
+                  <Text fw={800}>{data.enrollment.bonusCreditsGranted}cr</Text>
+                </Box>
+              </Group>
+            </Box>
+          </SimpleGrid>
+        </Box>
 
         {error && (
           <Alert color="red" variant="light">
@@ -311,148 +399,348 @@ export function ChallengeContent() {
           </Alert>
         )}
 
-        <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
-          <Card radius="lg" p="lg" withBorder>
-            <Group gap="sm">
-              <ThemeIcon color="violet" variant="light" radius="lg">
-                <ClipboardList size={18} />
-              </ThemeIcon>
-              <Box>
-                <Text size="sm" c="gray.6">제출 현황</Text>
-                <Text fw={700}>{completedCount}/3일차</Text>
-              </Box>
-            </Group>
-          </Card>
-          <Card radius="lg" p="lg" withBorder>
-            <Group gap="sm">
-              <ThemeIcon color="blue" variant="light" radius="lg">
-                <CalendarDays size={18} />
-              </ThemeIcon>
-              <Box>
-                <Text size="sm" c="gray.6">참여 기수</Text>
-                <Text fw={700}>{data.enrollment.cohort}</Text>
-              </Box>
-            </Group>
-          </Card>
-          <Card radius="lg" p="lg" withBorder>
-            <Group gap="sm">
-              <ThemeIcon color="green" variant="light" radius="lg">
-                <CheckCircle2 size={18} />
-              </ThemeIcon>
-              <Box>
-                <Text size="sm" c="gray.6">지급 크레딧</Text>
-                <Text fw={700}>{data.enrollment.bonusCreditsGranted}cr</Text>
-              </Box>
-            </Group>
-          </Card>
-        </SimpleGrid>
-
         {!data.canSubmit && (
           <Alert color="yellow" variant="light">
-            현재 미션 제출 가능 기간이 아닙니다. 운영자 안내를 확인해주세요.
+            현재 미션 인증글 작성 가능 기간이 아닙니다. 운영자 안내를 확인해주세요.
           </Alert>
         )}
 
-        <Stack gap="md">
-          {DAY_GUIDES.map((guide) => {
-            const submission = submissionsByDay.get(guide.day);
-            const draft = getDraft(guide.day, guide.title);
-            const status = submission
-              ? STATUS_LABELS[submission.status] || { label: submission.status, color: "gray" }
-              : null;
-            const isSaving = savingDay === guide.day;
+        <SimpleGrid cols={{ base: 1, lg: 4 }} spacing="lg">
+          <Stack gap="md">
+            <Card radius="md" p="md" withBorder>
+              <Group gap="xs" mb="sm">
+                <MessageSquareText size={16} />
+                <Text fw={800}>게시판</Text>
+              </Group>
+              <Stack gap={4}>
+                <UnstyledButton
+                  p="xs"
+                  style={{
+                    borderRadius: 8,
+                    background: "var(--mantine-color-violet-0)",
+                    color: "var(--mantine-color-violet-8)",
+                    fontWeight: 700,
+                  }}
+                >
+                  공지사항
+                </UnstyledButton>
+                {DAY_GUIDES.map((guide) => (
+                  <UnstyledButton
+                    key={guide.day}
+                    p="xs"
+                    onClick={() => openComposer(guide.day)}
+                    style={{
+                      borderRadius: 8,
+                      color: "var(--mantine-color-gray-8)",
+                    }}
+                  >
+                    <Group justify="space-between" gap="xs" wrap="nowrap">
+                      <Text size="sm" fw={600}>{guide.board}</Text>
+                      <Badge size="xs" color={submissionsByDay.has(guide.day) ? "green" : "gray"} variant="light">
+                        {submissionsByDay.has(guide.day) ? "완료" : "작성"}
+                      </Badge>
+                    </Group>
+                  </UnstyledButton>
+                ))}
+              </Stack>
+            </Card>
 
-            return (
-              <Card key={guide.day} radius="lg" p="xl" withBorder>
-                <Stack gap="md">
-                  <Group justify="space-between" align="flex-start">
-                    <Box>
-                      <Group gap="xs" mb={6}>
-                        <Badge color="violet" variant="light">
-                          {guide.day}일차
-                        </Badge>
-                        <Badge color="gray" variant="outline">
-                          {guide.badge}
-                        </Badge>
-                        {status && (
-                          <Badge color={status.color} variant="light">
-                            {status.label}
-                          </Badge>
-                        )}
-                      </Group>
-                      <Title order={3}>{guide.title}</Title>
-                      <Text c="gray.6" size="sm" mt={4}>
-                        {guide.description}
-                      </Text>
-                    </Box>
-                    {submission && (
-                      <Text size="xs" c="gray.5">
-                        마지막 제출 {formatDate(submission.updatedAt)}
-                      </Text>
-                    )}
-                  </Group>
+            <Card radius="md" p="md" withBorder>
+              <Group gap="xs" mb={8}>
+                <UserRound size={16} />
+                <Text fw={800}>운영 기준</Text>
+              </Group>
+              <Stack gap={8}>
+                <Text size="sm" c="gray.7">3일차까지 모두 작성하면 운영자가 성실 참여 여부를 확인합니다.</Text>
+                <Text size="sm" c="gray.7">할인권은 전원 지급이 아니라 성실 수행자 중 일부에게만 지급됩니다.</Text>
+              </Stack>
+            </Card>
+          </Stack>
 
-                  {submission?.adminNote && (
-                    <Alert color="violet" variant="light">
-                      <Text fw={600} size="sm">운영자 메모</Text>
-                      <Text size="sm" mt={4} style={{ whiteSpace: "pre-wrap" }}>
-                        {submission.adminNote}
-                      </Text>
-                    </Alert>
-                  )}
-
-                  <TextInput
-                    label="미션 제목"
-                    value={draft.title}
-                    onChange={(event) => updateDraft(guide.day, { title: event.currentTarget.value })}
-                    disabled={!data.canSubmit}
-                    maxLength={120}
-                  />
-                  <Textarea
-                    label="미션 제출 내용"
-                    description="운영자가 확인할 수 있게 구체적으로 적어주세요."
-                    placeholder={guide.placeholder}
-                    value={draft.content}
-                    onChange={(event) => updateDraft(guide.day, { content: event.currentTarget.value })}
-                    autosize
-                    minRows={6}
-                    maxRows={14}
-                    maxLength={5000}
-                    disabled={!data.canSubmit}
-                  />
-                  <TextInput
-                    label="참고 링크"
-                    description="FlowSpot 저장 링크, 채널 링크, 캡처 링크 등이 있으면 넣어주세요."
-                    placeholder="https://..."
-                    value={draft.referenceUrl}
-                    onChange={(event) =>
-                      updateDraft(guide.day, { referenceUrl: event.currentTarget.value })
-                    }
-                    disabled={!data.canSubmit}
-                    maxLength={500}
-                  />
-
+          <Box style={{ gridColumn: "span 3" }}>
+            <Stack gap="md">
+              <Card radius="md" p={0} withBorder>
+                <Box px="lg" py="md" style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}>
                   <Group justify="space-between" align="center">
-                    <Anchor component={Link} href="/dashboard/batch" size="sm" c="violet">
-                      FlowSpot으로 스크립트 만들기
-                    </Anchor>
-                    <Button
-                      color="violet"
-                      radius="lg"
-                      loading={isSaving}
-                      disabled={!data.canSubmit}
-                      onClick={() => submit(guide.day)}
-                      rightSection={<Send size={16} />}
-                    >
-                      {submission ? "수정 제출" : "미션 제출"}
-                    </Button>
+                    <Group gap="xs">
+                      <Megaphone size={18} color="#7c3aed" />
+                      <Text fw={800}>공지사항</Text>
+                    </Group>
+                    <Badge color="red" variant="light">필독</Badge>
+                  </Group>
+                </Box>
+                <Stack gap={0}>
+                  <Group px="lg" py="sm" justify="space-between" wrap="nowrap">
+                    <Group gap="sm" wrap="nowrap">
+                      <Badge color="red" variant="light" radius="sm">공지</Badge>
+                      <Text fw={700}>미션 인증글은 날짜별 게시판에 작성해주세요.</Text>
+                    </Group>
+                    <Text size="xs" c="gray.5">운영자</Text>
+                  </Group>
+                  <Divider />
+                  <Group px="lg" py="sm" justify="space-between" wrap="nowrap">
+                    <Group gap="sm" wrap="nowrap">
+                      <Badge color="violet" variant="light" radius="sm">안내</Badge>
+                      <Text fw={700}>3일차 제출 후 성실 참여자에게만 할인권 후보 안내가 나갑니다.</Text>
+                    </Group>
+                    <Text size="xs" c="gray.5">운영자</Text>
                   </Group>
                 </Stack>
               </Card>
-            );
-          })}
-        </Stack>
+
+              <Card radius="md" p={0} withBorder>
+                <Box px="lg" py="md" style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}>
+                  <Group justify="space-between" align="center">
+                    <Box>
+                      <Text fw={800}>미션 인증 게시판</Text>
+                      <Text size="sm" c="gray.6">내가 작성해야 할 1~3일차 인증글입니다.</Text>
+                    </Box>
+                    <Button
+                      color="violet"
+                      radius="md"
+                      leftSection={<PencilLine size={16} />}
+                      onClick={() => {
+                        const nextGuide = DAY_GUIDES.find((guide) => !submissionsByDay.has(guide.day)) || DAY_GUIDES[0];
+                        openComposer(nextGuide.day);
+                      }}
+                      disabled={!data.canSubmit}
+                    >
+                      글쓰기
+                    </Button>
+                  </Group>
+                </Box>
+
+                <Box visibleFrom="sm">
+                  <Table verticalSpacing="md" horizontalSpacing="lg" highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th style={{ width: 112 }}>게시판</Table.Th>
+                        <Table.Th>제목</Table.Th>
+                        <Table.Th style={{ width: 132 }}>상태</Table.Th>
+                        <Table.Th style={{ width: 150 }}>작성일</Table.Th>
+                        <Table.Th style={{ width: 104 }}>작업</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {DAY_GUIDES.map((guide) => {
+                        const submission = submissionsByDay.get(guide.day);
+                        const status = getStatus(submission);
+                        return (
+                          <Table.Tr key={guide.day}>
+                            <Table.Td>
+                              <Badge color="gray" variant="outline" radius="sm">{guide.board}</Badge>
+                            </Table.Td>
+                            <Table.Td>
+                              <UnstyledButton onClick={() => openComposer(guide.day)} style={{ width: "100%" }}>
+                                <Group gap="xs" wrap="nowrap">
+                                  <FileText size={16} color="#6b7280" />
+                                  <Box style={{ minWidth: 0 }}>
+                                    <Text fw={700} truncate>
+                                      {submission?.title || guide.title}
+                                    </Text>
+                                    <Text size="xs" c="gray.6" truncate>
+                                      {submission ? clipPreview(submission.content) : guide.description}
+                                    </Text>
+                                  </Box>
+                                </Group>
+                              </UnstyledButton>
+                            </Table.Td>
+                            <Table.Td>
+                              <Badge color={status.color} variant="light">{status.label}</Badge>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm" c="gray.6">{formatDate(submission?.updatedAt || null)}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <Tooltip label={submission ? "글 보기/수정" : "글쓰기"}>
+                                <Button
+                                  size="xs"
+                                  variant={submission ? "light" : "filled"}
+                                  color="violet"
+                                  leftSection={submission ? <Eye size={14} /> : <PencilLine size={14} />}
+                                  onClick={() => openComposer(guide.day)}
+                                  disabled={!data.canSubmit && !submission}
+                                >
+                                  {submission ? "보기" : "쓰기"}
+                                </Button>
+                              </Tooltip>
+                            </Table.Td>
+                          </Table.Tr>
+                        );
+                      })}
+                    </Table.Tbody>
+                  </Table>
+                </Box>
+
+                <Stack hiddenFrom="sm" gap={0}>
+                  {DAY_GUIDES.map((guide) => {
+                    const submission = submissionsByDay.get(guide.day);
+                    const status = getStatus(submission);
+                    return (
+                      <Box
+                        key={guide.day}
+                        p="md"
+                        style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+                      >
+                        <Group justify="space-between" mb={6}>
+                          <Badge color="gray" variant="outline" radius="sm">{guide.board}</Badge>
+                          <Badge color={status.color} variant="light">{status.label}</Badge>
+                        </Group>
+                        <Text fw={800}>{submission?.title || guide.title}</Text>
+                        <Text size="sm" c="gray.6" mt={4}>
+                          {submission ? clipPreview(submission.content, 80) : guide.description}
+                        </Text>
+                        <Button
+                          mt="sm"
+                          size="xs"
+                          color="violet"
+                          variant={submission ? "light" : "filled"}
+                          leftSection={submission ? <Eye size={14} /> : <PencilLine size={14} />}
+                          onClick={() => openComposer(guide.day)}
+                          disabled={!data.canSubmit && !submission}
+                        >
+                          {submission ? "글 보기/수정" : "글쓰기"}
+                        </Button>
+                      </Box>
+                    );
+                  })}
+                </Stack>
+              </Card>
+
+              {data.submissions.length > 0 && (
+                <Card radius="md" p="lg" withBorder>
+                  <Group gap="xs" mb="md">
+                    <CheckCircle2 size={18} color="#16a34a" />
+                    <Text fw={800}>최근 작성한 인증글</Text>
+                  </Group>
+                  <Stack gap="sm">
+                    {[...data.submissions]
+                      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                      .map((submission) => {
+                        const guide = DAY_GUIDES.find((item) => item.day === submission.day);
+                        const status = getStatus(submission);
+                        return (
+                          <Box
+                            key={submission.id}
+                            p="sm"
+                            style={{
+                              border: "1px solid var(--mantine-color-gray-2)",
+                              borderRadius: 8,
+                              background: "var(--mantine-color-gray-0)",
+                            }}
+                          >
+                            <Group justify="space-between" gap="sm" wrap="nowrap">
+                              <Box style={{ minWidth: 0 }}>
+                                <Group gap="xs" mb={4}>
+                                  <Badge size="xs" color="gray" variant="outline">{guide?.board || `${submission.day}일차`}</Badge>
+                                  <Badge size="xs" color={status.color} variant="light">{status.label}</Badge>
+                                </Group>
+                                <Text fw={700} truncate>{submission.title}</Text>
+                                <Text size="sm" c="gray.6" truncate>{clipPreview(submission.content)}</Text>
+                              </Box>
+                              <Button size="xs" variant="subtle" color="violet" onClick={() => openComposer(submission.day)}>
+                                열기
+                              </Button>
+                            </Group>
+                            {submission.adminNote && (
+                              <Alert color="violet" variant="light" mt="sm">
+                                <Text fw={700} size="sm">운영자 메모</Text>
+                                <Text size="sm" mt={4} style={{ whiteSpace: "pre-wrap" }}>
+                                  {submission.adminNote}
+                                </Text>
+                              </Alert>
+                            )}
+                          </Box>
+                        );
+                      })}
+                  </Stack>
+                </Card>
+              )}
+            </Stack>
+          </Box>
+        </SimpleGrid>
       </Stack>
+
+      <Modal
+        opened={!!activeGuide}
+        onClose={() => setActiveDay(null)}
+        title={
+          activeGuide ? (
+            <Group gap="xs">
+              <Badge color="violet" variant="light">{activeGuide.board}</Badge>
+              <Text fw={800}>{activeSubmission ? "인증글 보기/수정" : "인증글 쓰기"}</Text>
+            </Group>
+          ) : null
+        }
+        size="lg"
+        radius="md"
+        centered
+      >
+        {activeGuide && activeDay && (
+          <Stack gap="md">
+            <Alert color="violet" variant="light">
+              <Text fw={700}>{activeGuide.title}</Text>
+              <Text size="sm" mt={4}>{activeGuide.description}</Text>
+            </Alert>
+
+            {activeSubmission?.adminNote && (
+              <Alert color="blue" variant="light">
+                <Text fw={700} size="sm">운영자 메모</Text>
+                <Text size="sm" mt={4} style={{ whiteSpace: "pre-wrap" }}>
+                  {activeSubmission.adminNote}
+                </Text>
+              </Alert>
+            )}
+
+            <TextInput
+              label="제목"
+              value={getDraft(activeDay, activeGuide.title).title}
+              onChange={(event) => updateDraft(activeDay, { title: event.currentTarget.value })}
+              disabled={!data.canSubmit}
+              maxLength={120}
+            />
+
+            <Textarea
+              label="본문"
+              description="카페 인증글처럼 오늘 정리한 내용을 적어주세요."
+              placeholder={activeGuide.placeholder}
+              value={getDraft(activeDay, activeGuide.title).content}
+              onChange={(event) => updateDraft(activeDay, { content: event.currentTarget.value })}
+              autosize
+              minRows={8}
+              maxRows={16}
+              maxLength={5000}
+              disabled={!data.canSubmit}
+            />
+
+            <TextInput
+              label="참고 링크"
+              description="FlowSpot 저장 링크, 채널 링크, 캡처 링크 등이 있으면 넣어주세요."
+              placeholder="https://..."
+              value={getDraft(activeDay, activeGuide.title).referenceUrl}
+              onChange={(event) => updateDraft(activeDay, { referenceUrl: event.currentTarget.value })}
+              disabled={!data.canSubmit}
+              maxLength={500}
+            />
+
+            <Group justify="space-between">
+              <Anchor component={Link} href="/dashboard/batch" size="sm" c="violet">
+                FlowSpot으로 스크립트 만들기
+              </Anchor>
+              <Button
+                color="violet"
+                radius="md"
+                loading={savingDay === activeDay}
+                disabled={!data.canSubmit}
+                onClick={() => submit(activeDay)}
+                rightSection={<Send size={16} />}
+              >
+                {activeSubmission ? "수정 저장" : "등록"}
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </Container>
   );
 }
