@@ -39,7 +39,7 @@ type SubmissionRow = {
 };
 
 const submissionSchema = z.object({
-  day: z.number().int().min(1).max(3),
+  day: z.number().int().min(1).max(5),
   title: z.string().trim().min(2).max(120),
   content: z.string().trim().min(10).max(5000),
   referenceUrl: z
@@ -52,6 +52,12 @@ const submissionSchema = z.object({
       message: "링크는 https:// 또는 http://로 시작해야 합니다.",
     }),
 });
+
+function getBoardLabel(day: number) {
+  if (day === 4) return "수강후기";
+  if (day === 5) return "질문";
+  return `${day}차 인증`;
+}
 
 function toClientEnrollment(row: EnrollmentRow | null) {
   if (!row) return null;
@@ -242,7 +248,7 @@ export async function POST(request: NextRequest) {
 
     if (!isEnrollmentActive(enrollment)) {
       return NextResponse.json(
-        { error: "선발된 챌린지 참여자만 미션을 제출할 수 있습니다." },
+        { error: "선발된 챌린지 참여자만 게시글을 작성할 수 있습니다." },
         { status: 403 },
       );
     }
@@ -270,7 +276,7 @@ export async function POST(request: NextRequest) {
 
     if (upsertError || !data) {
       console.error("[Challenge API] submission upsert error:", upsertError);
-      return NextResponse.json({ error: "미션 제출 저장에 실패했습니다." }, { status: 500 });
+      return NextResponse.json({ error: "게시글 저장에 실패했습니다." }, { status: 500 });
     }
 
     const row = data as SubmissionRow;
@@ -280,6 +286,7 @@ export async function POST(request: NextRequest) {
       email: user.email || row.email,
       cohort: row.cohort,
       day: row.day,
+      missionLabel: getBoardLabel(row.day),
       title: row.title,
       content: row.content,
       referenceUrl: row.reference_url,

@@ -124,7 +124,40 @@ const DAY_GUIDES = [
     placeholder:
       "FlowSpot에서 만든 스크립트를 붙여넣거나, 저장된 스크립트 링크를 함께 남겨주세요.",
   },
+  {
+    day: 4,
+    board: "수강후기",
+    title: "강의와 FlowSpot을 써본 후기",
+    badge: "후기",
+    description:
+      "강의를 보거나 FlowSpot을 써보며 막혔던 점, 달라진 점, 앞으로 적용할 방향을 남깁니다.",
+    template:
+      "1. 시작 전 막혔던 점:\n2. 강의 또는 FlowSpot을 써보고 달라진 점:\n3. 가장 도움이 된 부분:\n4. 앞으로 만들 쇼츠 방향:\n5. 다른 참여자에게 해주고 싶은 말:",
+    placeholder:
+      "예: 소재를 찾는 데 시간이 오래 걸렸는데, 채널 방향을 먼저 잡고 나니 어떤 상품을 골라야 할지 기준이 생겼습니다.",
+  },
+  {
+    day: 5,
+    board: "질문",
+    title: "챌린지/강의/FlowSpot 질문하기",
+    badge: "Q&A",
+    description:
+      "채널 방향, 소재 선정, 스크립트 작성, 프로그램 사용 중 막히는 지점을 질문합니다.",
+    template:
+      "1. 지금 막힌 부분:\n2. 시도해본 것:\n3. 보고 있는 채널 또는 소재:\n4. 답변받고 싶은 질문:",
+    placeholder:
+      "예: 생활꿀템 쇼츠를 하고 싶은데 너무 흔한 느낌이 듭니다. 원룸/자취 쪽으로 좁히는 게 좋을지, 육아템 쪽으로 가는 게 좋을지 고민됩니다.",
+  },
 ] as const;
+
+const BOARD_FILTERS = [
+  { value: "all", label: "전체" },
+  { value: "mission", label: "미션 인증" },
+  { value: "review", label: "수강후기" },
+  { value: "question", label: "질문" },
+] as const;
+
+type BoardFilter = (typeof BOARD_FILTERS)[number]["value"];
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   submitted: { label: "제출", color: "blue" },
@@ -156,6 +189,12 @@ function getGuide(day: number) {
   return DAY_GUIDES.find((item) => item.day === day) || DAY_GUIDES[0];
 }
 
+function getSubmissionFilter(day: number): BoardFilter {
+  if (day === 4) return "review";
+  if (day === 5) return "question";
+  return "mission";
+}
+
 function getStatus(submission?: MissionSubmission) {
   if (!submission) return { label: "미제출", color: "gray" };
   return STATUS_LABELS[submission.status] || { label: submission.status, color: "gray" };
@@ -172,6 +211,7 @@ export function ChallengeContent() {
   const [savingDay, setSavingDay] = useState<number | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [activeDay, setActiveDay] = useState<number | null>(null);
+  const [boardFilter, setBoardFilter] = useState<BoardFilter>("all");
   const [selectedSubmission, setSelectedSubmission] = useState<FeedSubmission | null>(null);
   const [comments, setComments] = useState<ChallengeComment[]>([]);
   const [commentsBySubmissionId, setCommentsBySubmissionId] = useState<
@@ -198,7 +238,11 @@ export function ChallengeContent() {
 
   const activeGuide = DAY_GUIDES.find((item) => item.day === activeDay) || null;
   const activeSubmission = activeDay ? submissionsByDay.get(activeDay) : undefined;
-  const feedSubmissions = data?.feedSubmissions || [];
+  const feedSubmissions = useMemo(() => data?.feedSubmissions || [], [data?.feedSubmissions]);
+  const filteredFeedSubmissions = useMemo(() => {
+    if (boardFilter === "all") return feedSubmissions;
+    return feedSubmissions.filter((submission) => getSubmissionFilter(submission.day) === boardFilter);
+  }, [boardFilter, feedSubmissions]);
 
   async function load() {
     try {
@@ -511,7 +555,7 @@ export function ChallengeContent() {
   }
 
   const completedCount = data.submissions.filter((item) =>
-    ["submitted", "reviewed", "approved"].includes(item.status),
+    item.day <= 3 && ["submitted", "reviewed", "approved"].includes(item.status),
   ).length;
 
   return (
@@ -589,7 +633,7 @@ export function ChallengeContent() {
                 <Text size="sm" c="gray.6">
                   {selectedSubmission
                     ? "본문을 읽고 댓글로 질문이나 피드백을 남길 수 있습니다."
-                    : `전체 기수 최신순 ${feedSubmissions.length}개`}
+                    : `${BOARD_FILTERS.find((item) => item.value === boardFilter)?.label || "전체"} 최신순 ${filteredFeedSubmissions.length}개`}
                 </Text>
               </Box>
               <Group gap={6} visibleFrom="sm">
@@ -612,6 +656,31 @@ export function ChallengeContent() {
                 )}
               </Group>
             </Group>
+            {!selectedSubmission && (
+              <Group mt="md" gap={6} wrap="wrap">
+                {BOARD_FILTERS.map((filter) => {
+                  const count =
+                    filter.value === "all"
+                      ? feedSubmissions.length
+                      : feedSubmissions.filter(
+                          (submission) => getSubmissionFilter(submission.day) === filter.value,
+                        ).length;
+                  const selected = boardFilter === filter.value;
+                  return (
+                    <Button
+                      key={filter.value}
+                      size="xs"
+                      radius={4}
+                      color={selected ? "blue" : "gray"}
+                      variant={selected ? "filled" : "light"}
+                      onClick={() => setBoardFilter(filter.value)}
+                    >
+                      {filter.label} {count}
+                    </Button>
+                  );
+                })}
+              </Group>
+            )}
             <Group mt="md" gap={6} wrap="wrap">
               <Badge color="green" variant="light" radius={2}>
                 내 인증 {completedCount}/3
@@ -809,7 +878,7 @@ export function ChallengeContent() {
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm" fw={700} c="red.7">
-                          글쓰기에서 1차, 2차, 3차 말머리를 선택하면 차수별 양식이 열립니다.
+                          글쓰기에서 미션 인증, 수강후기, 질문 말머리를 선택하면 맞춤 양식이 열립니다.
                         </Text>
                       </Table.Td>
                       <Table.Td>
@@ -819,7 +888,7 @@ export function ChallengeContent() {
                         <Text size="sm" c="gray.6">고정</Text>
                       </Table.Td>
                     </Table.Tr>
-                    {feedSubmissions.map((submission) => {
+                    {filteredFeedSubmissions.map((submission) => {
                       const guide = getGuide(submission.day);
 
                       return (
@@ -859,24 +928,24 @@ export function ChallengeContent() {
                   <Group gap="xs" wrap="nowrap">
                     <Badge color="red" variant="light" radius={2}>공지</Badge>
                     <Text size="sm" fw={700} c="red.7">
-                      글쓰기에서 차수를 선택하면 양식이 열립니다.
+                      글쓰기에서 말머리를 선택하면 맞춤 양식이 열립니다.
                     </Text>
                   </Group>
                 </Box>
                 <Divider />
 
-                {feedSubmissions.length === 0 ? (
+                {filteredFeedSubmissions.length === 0 ? (
                   <Box px="md" py="xl" ta="center">
                     <ThemeIcon mx="auto" size={44} radius="xl" color="gray" variant="light">
                       <FileText size={22} />
                     </ThemeIcon>
-                    <Text fw={800} mt="sm">아직 올라온 인증글이 없습니다</Text>
+                    <Text fw={800} mt="sm">아직 올라온 게시글이 없습니다</Text>
                     <Text size="sm" c="gray.6" mt={4}>
-                      첫 인증글을 남기면 이곳에 최신순으로 표시됩니다.
+                      첫 게시글을 남기면 이곳에 최신순으로 표시됩니다.
                     </Text>
                   </Box>
                 ) : (
-                  feedSubmissions.map((submission) => {
+                  filteredFeedSubmissions.map((submission) => {
                     const guide = getGuide(submission.day);
                     const status = getStatus(submission);
                     return (

@@ -87,6 +87,12 @@ function formatDate(value: string | null) {
   });
 }
 
+function getBoardLabel(day: number) {
+  if (day === 4) return "수강후기";
+  if (day === 5) return "질문";
+  return `${day}차 인증`;
+}
+
 export function ChallengeAdminClient() {
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
   const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
@@ -340,7 +346,7 @@ export function ChallengeAdminClient() {
                 <div key={row.id} className="rounded-lg border p-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">{row.cohort}</Badge>
-                    <Badge>{row.day}일차</Badge>
+                    <Badge>{getBoardLabel(row.day)}</Badge>
                     <Badge variant="secondary">
                       {SUBMISSION_STATUS_LABELS[row.status] || row.status}
                     </Badge>

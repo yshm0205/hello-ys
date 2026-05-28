@@ -61,6 +61,7 @@ type TelegramChallengeMissionSubmittedPayload = {
   email?: string | null;
   cohort: string;
   day: number;
+  missionLabel?: string | null;
   title: string;
   content: string;
   referenceUrl?: string | null;
@@ -241,10 +242,10 @@ export async function notifyTelegramChallengeMissionSubmitted(
 
   return notifyTelegram(
     [
-      "챌린지 미션 제출",
+      "챌린지 게시글 제출",
       "",
       `기수: ${pick(payload.cohort)}`,
-      `미션: ${payload.day}일차`,
+      `말머리: ${pick(payload.missionLabel || `${payload.day}일차`)}`,
       `제목: ${payload.title}`,
       `이메일: ${pick(payload.email)}`,
       `제출ID: ${pick(payload.submissionId)}`,
