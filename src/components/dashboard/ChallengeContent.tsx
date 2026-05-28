@@ -396,6 +396,17 @@ export function ChallengeContent() {
                 <Text c="gray.7" size="sm" mt={10}>
                   이전 기수와 현재 기수의 인증글을 보고 내 미션도 게시글처럼 남깁니다.
                 </Text>
+                <Button
+                  hiddenFrom="sm"
+                  mt="md"
+                  color="blue"
+                  radius={4}
+                  leftSection={<PencilLine size={16} />}
+                  onClick={() => openComposer()}
+                  disabled={!data.canSubmit}
+                >
+                  카페 글쓰기
+                </Button>
               </Box>
               <Box visibleFrom="sm" ta="right">
                 <Text fw={900} fz={32} c="#00a84f">{completedCount}/3</Text>
@@ -418,7 +429,7 @@ export function ChallengeContent() {
         )}
 
         <Grid gutter="md">
-          <Grid.Col span={{ base: 12, md: 3 }} order={{ base: 2, md: 1 }}>
+          <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md">
             <Stack gap="md">
               <Card radius={4} p={0} withBorder>
                 <Box px="md" py="sm" style={{ borderBottom: "2px solid #111" }}>
@@ -512,7 +523,7 @@ export function ChallengeContent() {
             </Stack>
           </Grid.Col>
 
-          <Grid.Col span={{ base: 12, md: 9 }} order={{ base: 1, md: 2 }}>
+          <Grid.Col span={{ base: 12, md: 9 }}>
             <Card radius={4} p={0} withBorder>
               <Box px={{ base: "md", sm: "lg" }} py="md">
                 <Group justify="space-between" align="flex-end" gap="sm">
