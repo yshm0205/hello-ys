@@ -429,7 +429,7 @@ export function ChallengeContent() {
         )}
 
         <Grid gutter="md">
-          <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md">
+          <Grid.Col span={0} style={{ display: "none" }}>
             <Stack gap="md">
               <Card radius={4} p={0} withBorder>
                 <Box px="md" py="sm" style={{ borderBottom: "2px solid #111" }}>
@@ -523,7 +523,7 @@ export function ChallengeContent() {
             </Stack>
           </Grid.Col>
 
-          <Grid.Col span={{ base: 12, md: 9 }}>
+          <Grid.Col span={12}>
             <Card radius={4} p={0} withBorder>
               <Box px={{ base: "md", sm: "lg" }} py="md">
                 <Group justify="space-between" align="flex-end" gap="sm">
@@ -535,6 +535,37 @@ export function ChallengeContent() {
                     <Search size={14} color="#6b7280" />
                     <Text size="xs" c="gray.6">기수와 작성자는 익명 표시됩니다</Text>
                   </Group>
+                </Group>
+                <Group mt="md" gap={6} wrap="wrap">
+                  <Badge color="green" variant="light" radius={2}>
+                    내 인증 {completedCount}/3
+                  </Badge>
+                  {DAY_GUIDES.map((guide) => {
+                    const submission = submissionsByDay.get(guide.day);
+                    return (
+                      <Button
+                        key={guide.day}
+                        size="xs"
+                        variant={submission ? "light" : "outline"}
+                        color={submission ? "green" : "gray"}
+                        radius={4}
+                        onClick={() => openComposer(guide.day)}
+                      >
+                        {guide.board}
+                      </Button>
+                    );
+                  })}
+                  <Button
+                    visibleFrom="sm"
+                    size="xs"
+                    color="blue"
+                    radius={4}
+                    leftSection={<PencilLine size={14} />}
+                    onClick={() => openComposer()}
+                    disabled={!data.canSubmit}
+                  >
+                    카페 글쓰기
+                  </Button>
                 </Group>
               </Box>
               <Divider />
