@@ -510,6 +510,10 @@
       "title": "Feedback Requests",
       "description": "Review and respond to 1:1 feedback requests submitted by students."
     },
+    "challenge": {
+      "title": "Challenge",
+      "description": "Manage challenge participants and mission submissions."
+    },
     "hotList": {
       "title": "HOT List",
       "description": "Manage trending content data collection.",

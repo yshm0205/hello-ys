@@ -30,6 +30,7 @@ import {
     Zap,
     BookOpen,
     Loader2,
+    Trophy,
 } from 'lucide-react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import type { AdminAccessLevel } from '@/lib/admin/access';
@@ -95,6 +96,12 @@ const navItems = [
         href: '/dashboard/lectures',
         icon: BookOpen,
         description: '단계별 학습 + 실습',
+    },
+    {
+        label: '챌린지',
+        href: '/dashboard/challenge',
+        icon: Trophy,
+        description: '3일 미션 제출',
     },
     {
         label: 'HOT 리스트',

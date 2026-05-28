@@ -16,6 +16,7 @@ import {
   Flame,
   Star,
   Ticket,
+  Trophy,
   LifeBuoy,
   Webhook,
   ChevronLeft,
@@ -101,6 +102,11 @@ const navGroups: NavGroup[] = [
         href: "/admin/feedback-requests",
         labelKey: "feedbackRequests.title",
         icon: <Ticket className="h-4 w-4" />,
+      },
+      {
+        href: "/admin/challenge",
+        labelKey: "challenge.title",
+        icon: <Trophy className="h-4 w-4" />,
       },
       {
         href: "/admin/hot-list",

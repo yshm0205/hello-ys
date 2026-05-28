@@ -55,6 +55,18 @@ type TelegramFeedbackRequestSubmittedPayload = {
   submittedAt?: string;
 };
 
+type TelegramChallengeMissionSubmittedPayload = {
+  submissionId: string;
+  userId: string;
+  email?: string | null;
+  cohort: string;
+  day: number;
+  title: string;
+  content: string;
+  referenceUrl?: string | null;
+  submittedAt?: string;
+};
+
 function isConfigured() {
   return !!TELEGRAM_BOT_TOKEN && !!TELEGRAM_CHAT_ID;
 }
@@ -219,5 +231,31 @@ export async function notifyTelegramFeedbackRequestSubmitted(
       `관리: ${adminUrl}`,
     ],
     "feedback_request_submitted",
+  );
+}
+
+export async function notifyTelegramChallengeMissionSubmitted(
+  payload: TelegramChallengeMissionSubmittedPayload,
+): Promise<TelegramNotifyResult> {
+  const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://flowspot.kr"}/ko/admin/challenge`;
+
+  return notifyTelegram(
+    [
+      "챌린지 미션 제출",
+      "",
+      `기수: ${pick(payload.cohort)}`,
+      `미션: ${payload.day}일차`,
+      `제목: ${payload.title}`,
+      `이메일: ${pick(payload.email)}`,
+      `제출ID: ${pick(payload.submissionId)}`,
+      `사용자ID: ${pick(payload.userId)}`,
+      `시각: ${formatDateTime(payload.submittedAt)}`,
+      "",
+      clipText(payload.content, 900),
+      ...(payload.referenceUrl ? ["", `참고 링크: ${payload.referenceUrl}`] : []),
+      "",
+      `관리: ${adminUrl}`,
+    ],
+    "challenge_mission_submitted",
   );
 }
