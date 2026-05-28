@@ -87,6 +87,17 @@ type ChallengeResponse = {
 const APPLICATION_URL =
   "https://steep-radar-52f.notion.site/e45579f5dd6d43d0878a86b3869d7b54";
 
+const BRAND = {
+  primary: "#8b5cf6",
+  primaryDark: "#7c3aed",
+  accent: "#ec4899",
+  soft: "rgba(139, 92, 246, 0.08)",
+  softer: "rgba(139, 92, 246, 0.04)",
+  border: "rgba(139, 92, 246, 0.2)",
+  line: "#e5e7eb",
+  muted: "#6b7280",
+};
+
 const DAY_GUIDES = [
   {
     day: 1,
@@ -160,7 +171,7 @@ const BOARD_FILTERS = [
 type BoardFilter = (typeof BOARD_FILTERS)[number]["value"];
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  submitted: { label: "제출", color: "blue" },
+  submitted: { label: "제출", color: "violet" },
   reviewed: { label: "확인", color: "violet" },
   approved: { label: "완료", color: "green" },
   needs_revision: { label: "보완", color: "orange" },
@@ -514,7 +525,7 @@ export function ChallengeContent() {
     return (
       <Container size="md" py="xl">
         <Group justify="center" py="xl">
-          <Loader color="blue" />
+          <Loader color="violet" />
           <Text c="gray.6">챌린지 게시판을 불러오는 중...</Text>
         </Group>
       </Container>
@@ -549,7 +560,7 @@ export function ChallengeContent() {
                 href={APPLICATION_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                color="blue"
+                color="violet"
                 radius="md"
                 rightSection={<ExternalLink size={16} />}
               >
@@ -571,29 +582,29 @@ export function ChallengeContent() {
       <Stack gap="md">
         <Box
           style={{
-            border: "1px solid #d7dde5",
-            borderRadius: 4,
+            border: `1px solid ${BRAND.line}`,
+            borderRadius: 8,
             overflow: "hidden",
             background: "#fff",
           }}
         >
           <Box
             px={{ base: "md", md: "xl" }}
-            py={{ base: "lg", md: 34 }}
+            py={{ base: "md", md: "lg" }}
             style={{
-              minHeight: 132,
+              minHeight: 112,
               background:
-                "linear-gradient(90deg, #eaf6ff 0%, #f8fbff 46%, #dff4ff 100%)",
-              borderBottom: "1px solid #d7dde5",
+                "linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.06) 58%, #ffffff)",
+              borderBottom: `1px solid ${BRAND.line}`,
             }}
           >
             <Group justify="space-between" align="center" gap="lg" wrap="nowrap">
               <Box style={{ minWidth: 0 }}>
                 <Group gap={6} mb={10}>
-                  <Badge color="green" variant="filled" radius={2}>FlowSpot Cafe</Badge>
-                  <Badge color="blue" variant="light" radius={2}>{data.enrollment.cohort}</Badge>
+                  <Badge color="violet" variant="filled" radius={2}>FlowSpot Cafe</Badge>
+                  <Badge color="violet" variant="light" radius={2}>{data.enrollment.cohort}</Badge>
                 </Group>
-                <Title order={1} fz={{ base: 28, sm: 40, md: 48 }} lh={1.05} c="#0889d6">
+                <Title order={1} fz={{ base: 25, sm: 32, md: 36 }} lh={1.08} c={BRAND.primaryDark}>
                   쇼핑 쇼츠 챌린지
                 </Title>
                 <Text c="gray.7" size="sm" mt={10}>
@@ -602,17 +613,17 @@ export function ChallengeContent() {
                 <Button
                   hiddenFrom="sm"
                   mt="md"
-                  color="blue"
+                  color="violet"
                   radius={4}
                   leftSection={<PencilLine size={16} />}
                   onClick={() => openComposer()}
                   disabled={!data.canSubmit}
                 >
-                  카페 글쓰기
+                  글쓰기
                 </Button>
               </Box>
               <Box visibleFrom="sm" ta="right">
-                <Text fw={900} fz={32} c="#00a84f">{completedCount}/3</Text>
+                <Text fw={900} fz={30} c={BRAND.primary}>{completedCount}/3</Text>
                 <Text size="xs" c="gray.6">내 인증 현황</Text>
               </Box>
             </Group>
@@ -631,7 +642,7 @@ export function ChallengeContent() {
           </Alert>
         )}
 
-        <Card radius={4} p={0} withBorder>
+        <Card radius={8} p={0} withBorder>
           <Box px={{ base: "md", sm: "lg" }} py="md">
             <Group justify="space-between" align="flex-end" gap="sm">
               <Box>
@@ -658,7 +669,7 @@ export function ChallengeContent() {
                   </Button>
                 ) : (
                   <>
-                    <Search size={14} color="#6b7280" />
+                    <Search size={14} color={BRAND.muted} />
                     <Text size="xs" c="gray.6">기수와 작성자는 익명 표시됩니다</Text>
                   </>
                 )}
@@ -679,8 +690,9 @@ export function ChallengeContent() {
                       key={filter.value}
                       size="xs"
                       radius={4}
-                      color={selected ? "blue" : "gray"}
+                      color={selected ? "violet" : "gray"}
                       variant={selected ? "filled" : "light"}
+                      style={selected ? { background: BRAND.primary } : undefined}
                       onClick={() => setBoardFilter(filter.value)}
                     >
                       {filter.label} {count}
@@ -690,7 +702,7 @@ export function ChallengeContent() {
               </Group>
             )}
             <Group mt="md" gap={6} wrap="wrap">
-              <Badge color="green" variant="light" radius={2}>
+              <Badge color="violet" variant="light" radius={2}>
                 내 인증 {completedCount}/3
               </Badge>
               {DAY_GUIDES.map((guide) => {
@@ -700,9 +712,10 @@ export function ChallengeContent() {
                     key={guide.day}
                     size="xs"
                     variant={submission ? "light" : "outline"}
-                    color={submission ? "green" : "gray"}
+                    color={submission ? "violet" : "gray"}
                     radius={4}
                     onClick={() => openComposer(guide.day)}
+                    style={submission ? { color: BRAND.primaryDark } : undefined}
                   >
                     {guide.board}
                   </Button>
@@ -711,13 +724,14 @@ export function ChallengeContent() {
               <Button
                 visibleFrom="sm"
                 size="xs"
-                color="blue"
+                color="violet"
                 radius={4}
                 leftSection={<PencilLine size={14} />}
                 onClick={() => openComposer()}
                 disabled={!data.canSubmit}
+                style={{ background: BRAND.primary }}
               >
-                카페 글쓰기
+                글쓰기
               </Button>
             </Group>
           </Box>
@@ -741,8 +755,8 @@ export function ChallengeContent() {
 
                 <Group gap={6} mb="sm">
                   <Badge color="gray" variant="outline" radius={2}>{selectedSubmission.cohort}</Badge>
-                  <Badge color="blue" variant="light" radius={2}>{getGuide(selectedSubmission.day).board}</Badge>
-                  {selectedSubmission.isMine && <Badge color="green" variant="light" radius={2}>내 글</Badge>}
+                  <Badge color="violet" variant="light" radius={2}>{getGuide(selectedSubmission.day).board}</Badge>
+                  {selectedSubmission.isMine && <Badge color="violet" variant="light" radius={2}>내 글</Badge>}
                   <Badge color={getStatus(selectedSubmission).color} variant="light" radius={2}>
                     {getStatus(selectedSubmission).label}
                   </Badge>
@@ -752,7 +766,7 @@ export function ChallengeContent() {
                   {selectedSubmission.title}
                 </Title>
                 <Group gap={6} mt={10}>
-                  <UserRound size={14} color="#6b7280" />
+                  <UserRound size={14} color={BRAND.muted} />
                   <Text size="sm" c="gray.6">{selectedSubmission.authorLabel}</Text>
                   <Text size="sm" c="gray.5">·</Text>
                   <Text size="sm" c="gray.6">{formatDateTime(selectedSubmission.updatedAt)}</Text>
@@ -770,6 +784,7 @@ export function ChallengeContent() {
                     rel="noopener noreferrer"
                     mt="md"
                     display="inline-block"
+                    c="violet"
                   >
                     참고 링크 열기
                   </Anchor>
@@ -779,7 +794,7 @@ export function ChallengeContent() {
                   <Group justify="flex-end" mt="lg">
                     <Button
                       variant="light"
-                      color="blue"
+                      color="violet"
                       radius={4}
                       leftSection={<PencilLine size={16} />}
                       onClick={() => openComposer(selectedSubmission.day)}
@@ -792,9 +807,9 @@ export function ChallengeContent() {
 
               <Divider />
 
-              <Box px={{ base: "md", sm: "lg" }} py="lg" bg="gray.0">
+              <Box px={{ base: "md", sm: "lg" }} py="lg" bg={BRAND.softer}>
                 <Group gap="xs" mb="md">
-                  <MessageCircle size={17} color="#228be6" />
+                  <MessageCircle size={17} color={BRAND.primary} />
                   <Text fw={900}>댓글 {comments.length}</Text>
                 </Group>
 
@@ -806,7 +821,7 @@ export function ChallengeContent() {
 
                 {commentsLoading ? (
                   <Group py="md">
-                    <Loader size="sm" color="blue" />
+                    <Loader size="sm" color="violet" />
                     <Text size="sm" c="gray.6">댓글을 불러오는 중...</Text>
                   </Group>
                 ) : comments.length === 0 ? (
@@ -827,7 +842,7 @@ export function ChallengeContent() {
                       >
                         <Group gap={6} mb={4}>
                           <Text size="sm" fw={800}>{comment.authorLabel}</Text>
-                          {comment.isMine && <Badge size="xs" color="green" variant="light" radius={2}>내 댓글</Badge>}
+                          {comment.isMine && <Badge size="xs" color="violet" variant="light" radius={2}>내 댓글</Badge>}
                           <Text size="xs" c="gray.5">·</Text>
                           <Text size="xs" c="gray.5">{formatDateTime(comment.createdAt)}</Text>
                         </Group>
@@ -855,12 +870,13 @@ export function ChallengeContent() {
                   </Text>
                   <Button
                     size="sm"
-                    color="blue"
+                    color="violet"
                     radius={4}
                     loading={savingComment}
                     disabled={!data.canSubmit}
                     onClick={submitComment}
                     rightSection={<Send size={15} />}
+                    style={{ background: BRAND.primary }}
                   >
                     댓글 등록
                   </Button>
@@ -871,7 +887,7 @@ export function ChallengeContent() {
             <>
               <Box visibleFrom="sm">
                 <Table verticalSpacing={9} horizontalSpacing="md" highlightOnHover>
-                  <Table.Thead bg="gray.0">
+                  <Table.Thead style={{ background: BRAND.softer }}>
                     <Table.Tr>
                       <Table.Th style={{ width: 92 }}>말머리</Table.Th>
                       <Table.Th>제목</Table.Th>
@@ -882,10 +898,10 @@ export function ChallengeContent() {
                   <Table.Tbody>
                     <Table.Tr>
                       <Table.Td>
-                        <Badge color="red" variant="light" radius={2}>공지</Badge>
+                        <Badge color="violet" variant="light" radius={2}>공지</Badge>
                       </Table.Td>
                       <Table.Td>
-                        <Text size="sm" fw={700} c="red.7">
+                        <Text size="sm" fw={700} c="gray.8">
                           글쓰기에서 미션 인증, 수강후기, 질문 말머리를 선택하면 맞춤 양식이 열립니다.
                         </Text>
                       </Table.Td>
@@ -906,7 +922,7 @@ export function ChallengeContent() {
                           style={{ cursor: "pointer" }}
                         >
                           <Table.Td>
-                            <Badge color="blue" variant="outline" radius={2}>{guide.board}</Badge>
+                            <Badge color="violet" variant="outline" radius={2}>{guide.board}</Badge>
                           </Table.Td>
                           <Table.Td>
                             <Group gap={6} wrap="nowrap">
@@ -914,7 +930,7 @@ export function ChallengeContent() {
                                 {submission.title}
                               </Text>
                               {submission.isMine && (
-                                <Badge color="green" variant="light" size="xs" radius={2}>내 글</Badge>
+                                <Badge color="violet" variant="light" size="xs" radius={2}>내 글</Badge>
                               )}
                             </Group>
                           </Table.Td>
@@ -932,10 +948,10 @@ export function ChallengeContent() {
               </Box>
 
               <Stack hiddenFrom="sm" gap={0}>
-                <Box px="md" py="sm" bg="gray.0">
+                <Box px="md" py="sm" bg={BRAND.softer}>
                   <Group gap="xs" wrap="nowrap">
-                    <Badge color="red" variant="light" radius={2}>공지</Badge>
-                    <Text size="sm" fw={700} c="red.7">
+                    <Badge color="violet" variant="light" radius={2}>공지</Badge>
+                    <Text size="sm" fw={700} c="gray.8">
                       글쓰기에서 말머리를 선택하면 맞춤 양식이 열립니다.
                     </Text>
                   </Group>
@@ -944,7 +960,7 @@ export function ChallengeContent() {
 
                 {filteredFeedSubmissions.length === 0 ? (
                   <Box px="md" py="xl" ta="center">
-                    <ThemeIcon mx="auto" size={44} radius="xl" color="gray" variant="light">
+                    <ThemeIcon mx="auto" size={44} radius="xl" color="violet" variant="light">
                       <FileText size={22} />
                     </ThemeIcon>
                     <Text fw={800} mt="sm">아직 올라온 게시글이 없습니다</Text>
@@ -965,8 +981,8 @@ export function ChallengeContent() {
                         <Box px="md" py="md" style={{ borderBottom: "1px solid #edf0f3" }}>
                           <Group gap={6} mb={6}>
                             <Badge color="gray" variant="outline" radius={2}>{submission.cohort}</Badge>
-                            <Badge color="blue" variant="light" radius={2}>{guide.board}</Badge>
-                            {submission.isMine && <Badge color="green" variant="light" radius={2}>내 글</Badge>}
+                            <Badge color="violet" variant="light" radius={2}>{guide.board}</Badge>
+                            {submission.isMine && <Badge color="violet" variant="light" radius={2}>내 글</Badge>}
                             <Badge color={status.color} variant="light" radius={2}>{status.label}</Badge>
                           </Group>
                           <Text fw={800} size="sm" lineClamp={2}>{submission.title}</Text>
@@ -974,7 +990,7 @@ export function ChallengeContent() {
                             {clipPreview(submission.content)}
                           </Text>
                           <Group gap={6} mt={8}>
-                            <UserRound size={13} color="#6b7280" />
+                            <UserRound size={13} color={BRAND.muted} />
                             <Text size="xs" c="gray.6">{submission.authorLabel}</Text>
                             <Text size="xs" c="gray.5">·</Text>
                             <Text size="xs" c="gray.6">{formatDate(submission.updatedAt)}</Text>
@@ -995,7 +1011,7 @@ export function ChallengeContent() {
         onClose={closeComposer}
         title={
           <Group gap="xs">
-            {activeGuide && <Badge color="blue" variant="light" radius={2}>{activeGuide.board}</Badge>}
+            {activeGuide && <Badge color="violet" variant="light" radius={2}>{activeGuide.board}</Badge>}
             <Text fw={800}>{activeSubmission ? "게시글 수정" : "글쓰기"}</Text>
           </Group>
         }
@@ -1015,9 +1031,9 @@ export function ChallengeContent() {
                     key={guide.day}
                     onClick={() => selectGuide(guide.day)}
                     style={{
-                      border: `1px solid ${selected ? "#228be6" : "#d7dde5"}`,
+                      border: `1px solid ${selected ? BRAND.primary : BRAND.line}`,
                       borderRadius: 4,
-                      background: selected ? "#e7f5ff" : "#fff",
+                      background: selected ? BRAND.soft : "#fff",
                       padding: 12,
                     }}
                   >
@@ -1044,13 +1060,13 @@ export function ChallengeContent() {
 
           {activeGuide && activeDay && (
             <>
-              <Alert color="blue" variant="light">
+              <Alert color="violet" variant="light">
                 <Text fw={700}>{activeGuide.title}</Text>
                 <Text size="sm" mt={4}>{activeGuide.description}</Text>
               </Alert>
 
               {activeSubmission?.adminNote && (
-                <Alert color="blue" variant="light">
+                <Alert color="violet" variant="light">
                   <Text fw={700} size="sm">운영자 메모</Text>
                   <Text size="sm" mt={4} style={{ whiteSpace: "pre-wrap" }}>
                     {activeSubmission.adminNote}
@@ -1096,16 +1112,17 @@ export function ChallengeContent() {
               />
 
               <Group justify="space-between">
-                <Anchor component={Link} href="/dashboard/batch" size="sm" c="blue">
+                <Anchor component={Link} href="/dashboard/batch" size="sm" c="violet">
                   FlowSpot으로 스크립트 만들기
                 </Anchor>
                 <Button
-                  color="blue"
+                  color="violet"
                   radius={4}
                   loading={savingDay === activeDay}
                   disabled={!data.canSubmit}
                   onClick={() => submit(activeDay)}
                   rightSection={<Send size={16} />}
+                  style={{ background: BRAND.primary }}
                 >
                   {activeSubmission ? "수정 저장" : "등록"}
                 </Button>
