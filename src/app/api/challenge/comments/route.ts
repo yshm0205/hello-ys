@@ -87,6 +87,17 @@ async function loadVisibleSubmission(admin: ReturnType<typeof createAdminClient>
   return { submission: (data as SubmissionRow | null) ?? null, error };
 }
 
+async function loadComments(admin: ReturnType<typeof createAdminClient>, submissionId: string) {
+  const { data, error } = await admin
+    .from("challenge_submission_comments")
+    .select("*")
+    .eq("submission_id", submissionId)
+    .eq("status", "visible")
+    .order("created_at", { ascending: true });
+
+  return { comments: ((data || []) as CommentRow[]) ?? [], error };
+}
+
 function buildAuthorLabels(rows: CommentRow[], viewerId: string) {
   const otherUserIds = Array.from(
     new Set(rows.filter((row) => row.user_id !== viewerId).map((row) => row.user_id)),
@@ -127,11 +138,15 @@ export async function GET(request: NextRequest) {
     }
 
     const admin = createAdminClient();
-    const [{ enrollment, error: enrollmentError }, { submission, error: submissionError }] =
-      await Promise.all([
-        loadEnrollment(admin, user.id),
-        loadVisibleSubmission(admin, parsed.data.submissionId),
-      ]);
+    const [
+      { enrollment, error: enrollmentError },
+      { submission, error: submissionError },
+      { comments, error: commentsError },
+    ] = await Promise.all([
+      loadEnrollment(admin, user.id),
+      loadVisibleSubmission(admin, parsed.data.submissionId),
+      loadComments(admin, parsed.data.submissionId),
+    ]);
 
     if (enrollmentError || !enrollment) {
       return NextResponse.json({ error: "챌린지 참여자만 댓글을 볼 수 있습니다." }, { status: 403 });
@@ -141,19 +156,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "게시글을 찾을 수 없습니다." }, { status: 404 });
     }
 
-    const { data, error } = await admin
-      .from("challenge_submission_comments")
-      .select("*")
-      .eq("submission_id", parsed.data.submissionId)
-      .eq("status", "visible")
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("[Challenge Comments] GET error:", error);
+    if (commentsError) {
+      console.error("[Challenge Comments] GET error:", commentsError);
       return NextResponse.json({ error: "댓글을 불러오지 못했습니다." }, { status: 500 });
     }
 
-    const rows = (data || []) as CommentRow[];
+    const rows = comments;
     const authorLabels = buildAuthorLabels(rows, user.id);
 
     return NextResponse.json({

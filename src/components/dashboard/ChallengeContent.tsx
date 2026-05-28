@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Anchor,
@@ -174,6 +174,9 @@ export function ChallengeContent() {
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [selectedSubmission, setSelectedSubmission] = useState<FeedSubmission | null>(null);
   const [comments, setComments] = useState<ChallengeComment[]>([]);
+  const [commentsBySubmissionId, setCommentsBySubmissionId] = useState<
+    Record<string, ChallengeComment[]>
+  >({});
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentDraft, setCommentDraft] = useState("");
   const [savingComment, setSavingComment] = useState(false);
@@ -183,6 +186,7 @@ export function ChallengeContent() {
   const [drafts, setDrafts] = useState<
     Record<number, { title: string; content: string; referenceUrl: string }>
   >({});
+  const selectedSubmissionIdRef = useRef<string | null>(null);
 
   const submissionsByDay = useMemo(() => {
     const entries = new Map<number, MissionSubmission>();
@@ -205,7 +209,11 @@ export function ChallengeContent() {
         return;
       }
 
-      setData({ ...json, feedSubmissions: json.feedSubmissions || [] });
+      const nextFeedSubmissions = (json.feedSubmissions || []) as FeedSubmission[];
+      setData({ ...json, feedSubmissions: nextFeedSubmissions });
+      nextFeedSubmissions.slice(0, 3).forEach((submission) => {
+        void loadComments(submission.id, { silent: true });
+      });
       const nextDrafts: Record<number, { title: string; content: string; referenceUrl: string }> = {};
       (json.submissions || []).forEach((submission: MissionSubmission) => {
         nextDrafts[submission.day] = {
@@ -224,23 +232,48 @@ export function ChallengeContent() {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadComments(submissionId: string) {
-    setCommentsLoading(true);
-    setCommentError(null);
+  async function loadComments(
+    submissionId: string,
+    options: { silent?: boolean; force?: boolean } = {},
+  ) {
+    const cachedComments = commentsBySubmissionId[submissionId];
+    if (!options.force && cachedComments) {
+      if (!options.silent && selectedSubmissionIdRef.current === submissionId) {
+        setComments(cachedComments);
+        setCommentsLoading(false);
+        setCommentError(null);
+      }
+      return;
+    }
+
+    if (!options.silent && selectedSubmissionIdRef.current === submissionId) {
+      setCommentsLoading(true);
+      setCommentError(null);
+    }
     try {
       const res = await fetch(`/api/challenge/comments?submissionId=${submissionId}`, {
         cache: "no-store",
       });
       const json = await res.json();
       if (!res.ok) {
+        if (options.silent) return;
         setCommentError(json.error || "댓글을 불러오지 못했습니다.");
         setComments([]);
         return;
       }
-      setComments(json.comments || []);
+      const nextComments = (json.comments || []) as ChallengeComment[];
+      setCommentsBySubmissionId((prev) => ({
+        ...prev,
+        [submissionId]: nextComments,
+      }));
+      if (!options.silent) {
+        setComments(nextComments);
+      }
     } catch {
+      if (options.silent) return;
       setCommentError("댓글을 불러오지 못했습니다.");
       setComments([]);
     } finally {
@@ -249,9 +282,26 @@ export function ChallengeContent() {
   }
 
   function openSubmission(submission: FeedSubmission) {
+    selectedSubmissionIdRef.current = submission.id;
     setSelectedSubmission(submission);
     setCommentDraft("");
+    const cachedComments = commentsBySubmissionId[submission.id];
+    if (cachedComments) {
+      setComments(cachedComments);
+      setCommentsLoading(false);
+      setCommentError(null);
+      return;
+    }
+
+    setComments([]);
+    setCommentsLoading(true);
     void loadComments(submission.id);
+  }
+
+  function closeSubmission() {
+    selectedSubmissionIdRef.current = null;
+    setSelectedSubmission(null);
+    setCommentsLoading(false);
   }
 
   function getDraft(day: number, fallbackTitle: string) {
@@ -333,7 +383,7 @@ export function ChallengeContent() {
         return;
       }
 
-      let nextSelected: FeedSubmission | null = null;
+      const nextSelected = (json.feedSubmission as FeedSubmission | undefined) || null;
       setData((prev) => {
         if (!prev) return prev;
         const withoutOwnDay = prev.submissions.filter((item) => item.day !== day);
@@ -343,7 +393,6 @@ export function ChallengeContent() {
         const nextFeed = json.feedSubmission
           ? [json.feedSubmission as FeedSubmission, ...withoutFeedDay]
           : withoutFeedDay;
-        nextSelected = (json.feedSubmission as FeedSubmission | undefined) || null;
 
         return {
           ...prev,
@@ -355,7 +404,12 @@ export function ChallengeContent() {
       });
       closeComposer();
       if (nextSelected) {
+        selectedSubmissionIdRef.current = nextSelected.id;
         setSelectedSubmission(nextSelected);
+        setCommentsBySubmissionId((prev) => ({
+          ...prev,
+          [nextSelected!.id]: prev[nextSelected!.id] || [],
+        }));
         setComments([]);
         setCommentDraft("");
       }
@@ -392,6 +446,10 @@ export function ChallengeContent() {
         return;
       }
       setComments((prev) => [...prev, json.comment]);
+      setCommentsBySubmissionId((prev) => ({
+        ...prev,
+        [selectedSubmission.id]: [...(prev[selectedSubmission.id] || []), json.comment],
+      }));
       setCommentDraft("");
     } catch {
       setCommentError("댓글 저장에 실패했습니다.");
@@ -542,7 +600,7 @@ export function ChallengeContent() {
                     color="gray"
                     radius={4}
                     leftSection={<ArrowLeft size={14} />}
-                    onClick={() => setSelectedSubmission(null)}
+                    onClick={closeSubmission}
                   >
                     목록으로
                   </Button>
@@ -598,7 +656,7 @@ export function ChallengeContent() {
                   color="gray"
                   radius={4}
                   leftSection={<ArrowLeft size={14} />}
-                  onClick={() => setSelectedSubmission(null)}
+                  onClick={closeSubmission}
                   mb="sm"
                 >
                   목록으로
