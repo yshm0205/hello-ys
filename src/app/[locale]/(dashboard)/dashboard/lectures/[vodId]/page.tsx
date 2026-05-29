@@ -1,8 +1,8 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { LecturePlayerContent } from '@/components/dashboard/LecturePlayerContent';
+import { getLectureAccessForUser } from '@/lib/challenge/access';
 import { getPublishedLectureChapters } from '@/lib/lectures/server';
-import { isActiveAccessPlan } from '@/lib/plans/config';
 import { getEffectiveCreditInfo } from '@/lib/plans/server';
 
 interface LecturePageProps {
@@ -19,8 +19,9 @@ export default async function LecturePage({ params }: LecturePageProps) {
     }
 
     const plan = await getEffectiveCreditInfo(user.id);
+    const access = await getLectureAccessForUser(user.id, plan);
 
-    if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
+    if (access.mode === 'none') {
         redirect('/pricing');
     }
 
@@ -33,11 +34,17 @@ export default async function LecturePage({ params }: LecturePageProps) {
         redirect('/dashboard/lectures');
     }
 
+    if (access.mode === 'challenge' && !access.allowedVodIds.includes(vodId)) {
+        redirect(`/dashboard/lectures?lockedVod=${encodeURIComponent(vodId)}`);
+    }
+
     return (
         <LecturePlayerContent
             vodId={vodId}
             userEmail={user.email}
             chapters={chapters}
+            accessMode={access.mode}
+            allowedVodIds={access.allowedVodIds || []}
         />
     );
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { canAccessLectureVod } from "@/lib/challenge/access";
 import { getPublishedLectureVideoByVodId } from "@/lib/lectures/server";
-import { isActiveAccessPlan } from "@/lib/plans/config";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
@@ -129,14 +129,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const plan = await getEffectiveCreditInfo(user.id);
-    if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
-      return NextResponse.json(
-        { error: "Lecture progress requires an active program." },
-        { status: 403 },
-      );
-    }
-
     const body = await request.json();
     const vodId = body.vod_id;
     if (!vodId || typeof vodId !== "string") {
@@ -144,6 +136,16 @@ export async function POST(request: NextRequest) {
     }
     if (!/^vod_\d{2}$/.test(vodId)) {
       return NextResponse.json({ error: "Invalid vod_id" }, { status: 400 });
+    }
+
+    const plan = await getEffectiveCreditInfo(user.id);
+    const canAccess = await canAccessLectureVod(user.id, plan, vodId);
+
+    if (!canAccess) {
+      return NextResponse.json(
+        { error: "Lecture progress requires an active program or challenge permission." },
+        { status: 403 },
+      );
     }
 
     const lectureVideo = await getPublishedLectureVideoByVodId(vodId);

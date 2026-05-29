@@ -44,6 +44,7 @@ import {
     ImageIcon,
     FolderOpen,
     ExternalLink,
+    Lock,
 } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { VideoWatermark } from './VideoWatermark';
@@ -55,7 +56,11 @@ interface LecturePlayerContentProps {
     vodId: string;
     userEmail?: string;
     chapters?: LectureCatalogChapter[];
+    accessMode?: 'full' | 'challenge';
+    allowedVodIds?: readonly string[];
 }
+
+const EMPTY_ALLOWED_VOD_IDS: readonly string[] = [];
 
 // 모든 VOD를 순서대로 펼친 배열 생성
 function getAllVods(chapters: LectureCatalogChapter[]) {
@@ -93,8 +98,15 @@ declare global {
     }
 }
 
-export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlayerContentProps) {
+export function LecturePlayerContent({
+    vodId,
+    userEmail,
+    chapters,
+    accessMode = 'full',
+    allowedVodIds = EMPTY_ALLOWED_VOD_IDS,
+}: LecturePlayerContentProps) {
     const lectureChapters = useMemo(() => chapters?.length ? chapters : [], [chapters]);
+    const allowedVodIdSet = useMemo(() => new Set(allowedVodIds), [allowedVodIds]);
     const router = useRouter();
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [positions, setPositions] = useState<Record<string, number>>({});
@@ -122,8 +134,19 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
     const allVods = useMemo(() => getAllVods(lectureChapters), [lectureChapters]);
     const currentIndex = allVods.findIndex((v) => v.id === vodId);
     const currentVod = currentIndex >= 0 ? allVods[currentIndex] : null;
-    const prevVod = currentIndex > 0 ? allVods[currentIndex - 1] : null;
-    const nextVod = currentIndex < allVods.length - 1 ? allVods[currentIndex + 1] : null;
+    const canOpenVod = (vod: { id: string; isPlayable?: boolean }) =>
+        Boolean(vod.isPlayable && (accessMode === 'full' || allowedVodIdSet.has(vod.id)));
+    const accessibleVods = useMemo(
+        () => allVods.filter((vod) => vod.isPlayable && (accessMode === 'full' || allowedVodIdSet.has(vod.id))),
+        [accessMode, allowedVodIdSet, allVods],
+    );
+    const currentAccessibleIndex = accessibleVods.findIndex((v) => v.id === vodId);
+    const prevVod = currentAccessibleIndex > 0 ? accessibleVods[currentAccessibleIndex - 1] : null;
+    const nextVod =
+        currentAccessibleIndex >= 0 && currentAccessibleIndex < accessibleVods.length - 1
+            ? accessibleVods[currentAccessibleIndex + 1]
+            : null;
+    const canOpenCurrentVod = currentVod ? canOpenVod(currentVod) : false;
 
     const isCompleted = completedVods.includes(vodId);
 
@@ -176,7 +199,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
         setVideoSourceVodId(null);
         setVideoError(null);
 
-        if (!currentVod?.isPlayable) return;
+        if (!canOpenCurrentVod) return;
 
         setIsVideoLoading(true);
         fetch('/api/lectures/otp', {
@@ -200,7 +223,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
             .finally(() => {
                 setIsVideoLoading(false);
             });
-    }, [vodId, currentVod?.isPlayable]);
+    }, [vodId, canOpenCurrentVod]);
 
     // 수강 진도 불러오기 (completedVods + positions)
     useEffect(() => {
@@ -221,9 +244,9 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
 
     // 강의 화면에 들어온 시점부터 열람 기록을 남긴다.
     useEffect(() => {
-        if (!currentVod?.isPlayable) return;
+        if (!canOpenCurrentVod) return;
         recordLectureStart(vodId);
-    }, [vodId, currentVod?.isPlayable]);
+    }, [vodId, canOpenCurrentVod]);
 
     // 진도 저장 함수
     const savePosition = useCallback((position: number) => {
@@ -457,7 +480,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                     background: '#000',
                                 }}
                             >
-                                {currentVod.isPlayable ? (
+                                {canOpenCurrentVod ? (
                                     isVideoLoading ? (
                                         <div
                                             style={{
@@ -620,7 +643,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                         )}
 
                         {/* 실습 CTA */}
-                        {hasPracticeCta && (
+                        {accessMode === 'full' && hasPracticeCta && (
                             <Card padding="lg" radius="lg" style={{ background: '#8b5cf6' }}>
                                 <Group justify="space-between" align="center">
                                     <Box>
@@ -710,6 +733,7 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                     const chapterCompleted = chapter.vods.filter((v) =>
                                         completedVods.includes(v.id)
                                     ).length;
+                                    const chapterOpenCount = chapter.vods.filter((v) => canOpenVod(v)).length;
                                     const isOpen = openChapters[chapter.id] || false;
 
                                     return (
@@ -736,7 +760,9 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                                         </Text>
                                                     </Group>
                                                     <Text size="xs" c="gray.4">
-                                                        {chapterCompleted}/{chapter.vods.length}
+                                                        {accessMode === 'challenge'
+                                                            ? `${chapterOpenCount}개 공개`
+                                                            : `${chapterCompleted}/${chapter.vods.length}`}
                                                     </Text>
                                                 </Group>
                                             </UnstyledButton>
@@ -745,9 +771,12 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                             <Collapse in={isOpen}>
                                                 <Stack gap={0}>
                                                     {chapter.vods.map((vod) => {
-                                                        const isDone = completedVods.includes(vod.id);
+                                                        const canOpen = canOpenVod(vod);
+                                                        const isLockedByChallenge =
+                                                            Boolean(vod.isPlayable) && accessMode === 'challenge' && !canOpen;
+                                                        const isDone = canOpen && completedVods.includes(vod.id);
                                                         const isCurrent = vod.id === vodId;
-                                                        const isReady = !!vod.isPlayable;
+                                                        const isReady = canOpen;
 
                                                         const rowInner = (
                                                             <Group gap={8} wrap="nowrap">
@@ -779,7 +808,11 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                                                     {vod.title}
                                                                 </Text>
                                                                 <Text size="xs" c="gray.4" style={{ flexShrink: 0, marginLeft: 'auto' }}>
-                                                                    {isReady ? `${vod.duration}분` : '준비 중'}
+                                                                    {isReady
+                                                                        ? `${vod.duration}분`
+                                                                        : isLockedByChallenge
+                                                                            ? '잠김'
+                                                                            : '준비 중'}
                                                                 </Text>
                                                             </Group>
                                                         );
@@ -791,12 +824,21 @@ export function LecturePlayerContent({ vodId, userEmail, chapters }: LecturePlay
                                                                     py={8}
                                                                     px="md"
                                                                     style={{
-                                                                        opacity: 0.45,
+                                                                        opacity: isLockedByChallenge ? 1 : 0.45,
                                                                         cursor: 'default',
                                                                         borderLeft: '3px solid transparent',
+                                                                        background: isLockedByChallenge ? '#fafafa' : 'transparent',
                                                                     }}
                                                                 >
                                                                     {rowInner}
+                                                                    {isLockedByChallenge && (
+                                                                        <Group gap={4} mt={4} pl={22}>
+                                                                            <Lock size={11} color="#9ca3af" />
+                                                                            <Text size="10px" c="gray.5">
+                                                                                올인원 패스에서 전체 공개
+                                                                            </Text>
+                                                                        </Group>
+                                                                    )}
                                                                 </Box>
                                                             );
                                                         }

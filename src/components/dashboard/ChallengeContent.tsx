@@ -576,6 +576,35 @@ export function ChallengeContent() {
   const completedCount = data.submissions.filter((item) =>
     item.day <= 3 && ["submitted", "reviewed", "approved"].includes(item.status),
   ).length;
+  const missionTasks = [
+    {
+      day: 1,
+      label: "1일차",
+      title: "채널 방향 잡기",
+      description: "VOD 04를 보고 내 쇼핑 쇼츠 채널 방향을 정리합니다.",
+      actionLabel: "VOD 04 보기",
+      href: "/dashboard/lectures/vod_04",
+      submitLabel: "1차 인증 작성",
+    },
+    {
+      day: 2,
+      label: "2일차",
+      title: "소재 후보 찾기",
+      description: "VOD 08을 보고 내 채널에 맞는 상품/소재 후보 3개를 뽑습니다.",
+      actionLabel: "VOD 08 보기",
+      href: "/dashboard/lectures/vod_08",
+      submitLabel: "2차 인증 작성",
+    },
+    {
+      day: 3,
+      label: "3일차",
+      title: "첫 스크립트 만들기",
+      description: "FlowSpot으로 첫 쇼핑 쇼츠 스크립트를 만들고 결과를 제출합니다.",
+      actionLabel: "FlowSpot 열기",
+      href: "/dashboard/batch",
+      submitLabel: "3차 인증 작성",
+    },
+  ];
 
   return (
     <Container size="xl" py={{ base: "sm", md: "md" }} px={{ base: "xs", sm: "md" }}>
@@ -641,6 +670,83 @@ export function ChallengeContent() {
             현재 미션 인증글 작성 가능 기간이 아닙니다. 운영자 안내를 확인해주세요.
           </Alert>
         )}
+
+        <Card radius={8} p={{ base: "md", sm: "lg" }} withBorder>
+          <Group justify="space-between" align="flex-end" gap="sm" mb="md">
+            <Box>
+              <Title order={3} fz={{ base: 18, sm: 20 }}>
+                오늘 할 일
+              </Title>
+              <Text size="sm" c="gray.6" mt={4}>
+                강의 시청, FlowSpot 실습, 인증글 작성까지 여기서 바로 이어갑니다.
+              </Text>
+            </Box>
+            <Badge color="violet" variant="light" radius={2}>
+              {completedCount}/3 완료
+            </Badge>
+          </Group>
+          <SimpleGrid cols={{ base: 1, md: 3 }} spacing="sm">
+            {missionTasks.map((task) => {
+              const submission = submissionsByDay.get(task.day);
+              const status = getStatus(submission);
+              return (
+                <Box
+                  key={task.day}
+                  style={{
+                    padding: "var(--mantine-spacing-md)",
+                    borderRadius: 8,
+                    border: `1px solid ${submission ? BRAND.border : BRAND.line}`,
+                    background: submission ? BRAND.soft : "#fff",
+                  }}
+                >
+                  <Stack gap="sm">
+                    <Group justify="space-between" gap="xs" wrap="nowrap">
+                      <Badge color="violet" variant="light" radius={2}>
+                        {task.label}
+                      </Badge>
+                      <Badge color={status.color} variant="light" radius={2}>
+                        {status.label}
+                      </Badge>
+                    </Group>
+                    <Box>
+                      <Text fw={800} size="sm">
+                        {task.title}
+                      </Text>
+                      <Text size="xs" c="gray.6" mt={4} lh={1.5}>
+                        {task.description}
+                      </Text>
+                    </Box>
+                    <Group gap={6} wrap="nowrap">
+                      <Button
+                        component={Link}
+                        href={task.href}
+                        prefetch={false}
+                        size="xs"
+                        color="violet"
+                        variant="light"
+                        radius={4}
+                        style={{ flex: 1 }}
+                      >
+                        {task.actionLabel}
+                      </Button>
+                      <Button
+                        size="xs"
+                        color="violet"
+                        variant={submission ? "light" : "filled"}
+                        radius={4}
+                        onClick={() => openComposer(task.day)}
+                        disabled={!data.canSubmit}
+                        style={{ flex: 1, background: submission ? undefined : BRAND.primary }}
+                      >
+                        {submission ? "인증 수정" : task.submitLabel}
+                      </Button>
+                    </Group>
+                  </Stack>
+                </Box>
+              );
+            })}
+          </SimpleGrid>
+        </Card>
 
         <Card radius={8} p={0} withBorder>
           <Box px={{ base: "md", sm: "lg" }} py="md">

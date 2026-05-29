@@ -5,8 +5,10 @@
  * 챕터별 아코디언 + VOD 목록 + 수강 진도
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
+    Alert,
+    Button,
     Container,
     Title,
     Text,
@@ -30,6 +32,7 @@ import {
     BookOpen,
     ArrowRight,
     Paperclip,
+    Lock,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { LectureCatalogChapter } from '@/lib/lectures/types';
@@ -152,10 +155,13 @@ const TOTAL_VODS = CHAPTERS.reduce((sum, ch) => sum + ch.vods.length, 0);
 // ─── 컴포넌트 ───────────────────────────────────────────
 interface LecturesContentProps {
     chapters?: LectureCatalogChapter[];
+    accessMode?: 'full' | 'challenge';
+    allowedVodIds?: readonly string[];
 }
 
-export function LecturesContent({ chapters }: LecturesContentProps) {
+export function LecturesContent({ chapters, accessMode = 'full', allowedVodIds = [] }: LecturesContentProps) {
     const lectureChapters = chapters?.length ? chapters : CHAPTERS;
+    const allowedVodIdSet = useMemo(() => new Set(allowedVodIds), [allowedVodIds]);
     const isMobile = useMediaQuery('(max-width: 48em)');
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [startedVods, setStartedVods] = useState<string[]>([]);
@@ -186,8 +192,14 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
         setOpenChapters((prev) => ({ ...prev, [chId]: !prev[chId] }));
     };
 
-    const completedCount = completedVods.length;
-    const totalVods = lectureChapters.reduce((sum, ch) => sum + ch.vods.length, 0);
+    const completedCount =
+        accessMode === 'challenge'
+            ? allowedVodIds.filter((id) => completedVods.includes(id)).length
+            : completedVods.length;
+    const totalVods =
+        accessMode === 'challenge'
+            ? allowedVodIds.length
+            : lectureChapters.reduce((sum, ch) => sum + ch.vods.length, 0);
     const progressPercent = totalVods > 0 ? Math.round((completedCount / totalVods) * 100) : 0;
 
     if (isLoading) {
@@ -252,9 +264,42 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
 
                 <ReviewEventBanner />
 
+                {accessMode === 'challenge' && (
+                    <Alert
+                        color="violet"
+                        variant="light"
+                        radius="lg"
+                        icon={<Lock size={18} />}
+                    >
+                        <Group justify="space-between" align="center" gap="sm">
+                            <Box style={{ flex: 1, minWidth: 0 }}>
+                                <Text fw={700} size={isMobile ? 'sm' : 'md'}>
+                                    챌린지 체험 권한으로 VOD 04, VOD 08만 열려 있습니다.
+                                </Text>
+                                <Text size={isMobile ? 'xs' : 'sm'} c="gray.7" mt={4}>
+                                    전체 강의와 모든 템플릿은 올인원 패스 결제 후 이어서 볼 수 있습니다.
+                                </Text>
+                            </Box>
+                            <Button
+                                component={Link}
+                                href="/checkout/allinone?intent=pay"
+                                prefetch={false}
+                                size={isMobile ? 'xs' : 'sm'}
+                                color="violet"
+                                radius="md"
+                            >
+                                올인원 패스 보기
+                            </Button>
+                        </Group>
+                    </Alert>
+                )}
+
                 <Stack gap="md">
                     {lectureChapters.map((chapter) => {
                         const chapterCompleted = chapter.vods.filter((v) => completedVods.includes(v.id)).length;
+                        const chapterOpenCount = chapter.vods.filter(
+                            (v) => v.isPlayable && (accessMode === 'full' || allowedVodIdSet.has(v.id)),
+                        ).length;
                         const chapterMinutes = chapter.vods.reduce((s, v) => s + v.duration, 0);
                         const isOpen = openChapters[chapter.id] || false;
 
@@ -297,10 +342,16 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                         </Text>
                                                         <Badge
                                                             variant="light"
-                                                            color={chapterCompleted === chapter.vods.length ? 'green' : 'gray'}
+                                                            color={
+                                                                accessMode === 'challenge'
+                                                                    ? chapterOpenCount > 0 ? 'violet' : 'gray'
+                                                                    : chapterCompleted === chapter.vods.length ? 'green' : 'gray'
+                                                            }
                                                             size="sm"
                                                         >
-                                                            {chapterCompleted}/{chapter.vods.length}
+                                                            {accessMode === 'challenge'
+                                                                ? `${chapterOpenCount}개 공개`
+                                                                : `${chapterCompleted}/${chapter.vods.length}`}
                                                         </Badge>
                                                     </Group>
                                                     {isMobile && (
@@ -321,9 +372,14 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                     <Collapse in={isOpen}>
                                         <Stack gap={0}>
                                             {chapter.vods.map((vod) => {
-                                                const isDone = completedVods.includes(vod.id);
-                                                const isReady = !!vod.isPlayable;
-                                                const isStarted = isReady && !isDone && startedVods.includes(vod.id);
+                                                const hasVideo = !!vod.isPlayable;
+                                                const isChallengeUnlocked = allowedVodIdSet.has(vod.id);
+                                                const canOpenVod =
+                                                    hasVideo && (accessMode === 'full' || isChallengeUnlocked);
+                                                const isLockedByChallenge =
+                                                    hasVideo && accessMode === 'challenge' && !isChallengeUnlocked;
+                                                const isDone = canOpenVod && completedVods.includes(vod.id);
+                                                const isStarted = canOpenVod && !isDone && startedVods.includes(vod.id);
 
                                                 const rowMeta = (
                                                     <Group gap="xs" wrap="wrap">
@@ -335,12 +391,24 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                                 시청 중
                                                             </Badge>
                                                         )}
-                                                        {!isReady ? (
+                                                        {!hasVideo ? (
                                                             <Badge variant="light" color="gray" size="xs">
                                                                 준비 중
                                                             </Badge>
+                                                        ) : isLockedByChallenge ? (
+                                                            <>
+                                                                <Lock size={13} color="#9ca3af" />
+                                                                <Badge variant="light" color="gray" size="xs">
+                                                                    올인원 공개
+                                                                </Badge>
+                                                            </>
                                                         ) : (
                                                             <>
+                                                                {accessMode === 'challenge' && (
+                                                                    <Badge variant="light" color="violet" size="xs">
+                                                                        챌린지 공개
+                                                                    </Badge>
+                                                                )}
                                                                 <Clock size={14} color="#9ca3af" />
                                                                 <Text size="xs" c="gray.5">
                                                                     {vod.duration}분
@@ -363,14 +431,14 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                         ) : (
                                                             <Circle
                                                                 size={18}
-                                                                color={isReady ? '#d1d5db' : '#e5e7eb'}
+                                                                color={canOpenVod ? '#d1d5db' : '#e5e7eb'}
                                                                 style={{ marginTop: 2, flexShrink: 0 }}
                                                             />
                                                         )}
                                                         <Box style={{ flex: 1, minWidth: 0 }}>
                                                             <Text
                                                                 size="sm"
-                                                                c={isDone ? 'gray.6' : isReady ? 'gray.8' : 'gray.4'}
+                                                                c={isDone ? 'gray.6' : canOpenVod ? 'gray.8' : 'gray.5'}
                                                                 fw={isDone ? 400 : 500}
                                                                 style={{ lineHeight: 1.45 }}
                                                             >
@@ -390,11 +458,11 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                                     strokeWidth={0}
                                                                 />
                                                             ) : (
-                                                                <Circle size={18} color={isReady ? '#d1d5db' : '#e5e7eb'} />
+                                                                <Circle size={18} color={canOpenVod ? '#d1d5db' : '#e5e7eb'} />
                                                             )}
                                                             <Text
                                                                 size="sm"
-                                                                c={isDone ? 'gray.6' : isReady ? 'gray.8' : 'gray.4'}
+                                                                c={isDone ? 'gray.6' : canOpenVod ? 'gray.8' : 'gray.5'}
                                                                 fw={isDone ? 400 : 500}
                                                                 style={{ minWidth: 0 }}
                                                             >
@@ -405,7 +473,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                     </Group>
                                                 );
 
-                                                return isReady ? (
+                                                return canOpenVod ? (
                                                     <UnstyledButton
                                                         key={vod.id}
                                                         component={Link}
@@ -442,8 +510,9 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                                         pl={isMobile ? 'md' : 'xl'}
                                                         style={{
                                                             borderTop: '1px solid #f3f4f6',
-                                                            opacity: 0.45,
+                                                            opacity: hasVideo ? 1 : 0.45,
                                                             cursor: 'default',
+                                                            background: isLockedByChallenge ? '#fafafa' : 'transparent',
                                                         }}
                                                     >
                                                         {rowContent}
@@ -454,7 +523,7 @@ export function LecturesContent({ chapters }: LecturesContentProps) {
                                     </Collapse>
                                 </Card>
 
-                                {chapter.hasPracticeCta && (
+                                {accessMode === 'full' && chapter.hasPracticeCta && (
                                     <UnstyledButton
                                         component={Link}
                                         href="/dashboard/batch"
