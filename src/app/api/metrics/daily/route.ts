@@ -7,8 +7,6 @@ const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
 const LAUNCH_OPEN_AT_KST = "2026-04-24T17:00:00+09:00";
 
-type SalesStatus = (typeof SALES_STATUSES)[number];
-
 interface PaymentRow {
   id: string;
   amount: number;
@@ -304,9 +302,7 @@ export async function GET(request: NextRequest) {
       includeSalesAmount: true,
     });
 
-    const launchPayments = filterPayments(launchPaymentsRaw as PaymentRow[] | null).filter(
-      (payment) => payment.metadata?.provider === "tosspay-direct",
-    );
+    const launchPayments = filterPayments(launchPaymentsRaw as PaymentRow[] | null);
     const launchSessions = (launchSessionsRaw || []) as MarketingSessionRow[];
     const launchUsers = ((launchUsersRaw || []) as UserRow[]).filter(
       (user) => !internalIds.has(user.id),
@@ -351,13 +347,13 @@ export async function GET(request: NextRequest) {
           0,
         ),
         referrer_top: countReferrerTop(launchSessions, 4),
-        payment_provider: "tosspay-direct",
+        payment_provider: "all_external",
       },
       notes: {
         internal_emails_excluded: internalAdmins.length,
         sales_filter: "DONE + PARTIAL_CANCELLED",
         refunds_filter: "status CANCELED (created_at in period)",
-        launch_basis: "2026-04-24 17:00 KST open, TossPay Direct only",
+        launch_basis: "2026-04-24 17:00 KST open, all external payments",
       },
     });
   } catch (error) {

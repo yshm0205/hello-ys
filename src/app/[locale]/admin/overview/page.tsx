@@ -581,9 +581,7 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     (user) => !internalAdminIds.has(user.id),
   );
   const periodPayments = ((payments || []) as PaymentRow[]).filter(
-    (payment) =>
-      !internalAdminIds.has(payment.user_id) &&
-      payment.metadata?.provider === "tosspay-direct",
+    (payment) => !internalAdminIds.has(payment.user_id),
   );
   const periodCtaEvents = eventsResponse.error
     ? []
