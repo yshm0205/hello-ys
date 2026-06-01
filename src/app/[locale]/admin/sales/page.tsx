@@ -14,6 +14,9 @@ import {
 import { getInternalAdminUsers } from "@/lib/admin/internal-users";
 import { createAdminClient } from "@/utils/supabase/admin";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface TossPayment {
   id: string;
   created_at: string;
