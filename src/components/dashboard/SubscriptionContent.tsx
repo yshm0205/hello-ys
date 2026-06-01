@@ -208,7 +208,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                                     4개월 이용권이 종료되었습니다
                                 </Title>
                                 <Text size="sm" c="gray.6">
-                                    다음 단계로는 월 구독 상품을 붙일 예정입니다. 현재는 필요할 때 크레딧 충전으로 계속 사용할 수 있습니다.
+                                    현재는 강의와 프로그램 권한이 종료된 상태입니다. 이후 이용 방식은 별도로 안내드리겠습니다.
                                 </Text>
                             </Box>
                         </Group>
@@ -234,7 +234,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                         </Text>
                         {subscription?.plan_name && (
                             <Text size="sm" c="gray.6">
-                                현재 구독 정보: {subscription.plan_name}
+                                현재 플랜 정보: {subscription.plan_name}
                             </Text>
                         )}
                     </Stack>
@@ -247,7 +247,7 @@ export function SubscriptionContent({ subscription }: SubscriptionContentProps) 
                     radius="lg"
                     variant="light"
                 >
-                    월 구독 상품은 4개월 프로그램 종료 후 별도 결제로 연결할 예정입니다.
+                    4개월 프로그램 종료 후 이용 방식은 별도로 안내드릴 예정입니다.
                 </Alert>
             </Stack>
         </Container>

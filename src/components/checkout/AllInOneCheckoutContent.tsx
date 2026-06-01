@@ -1309,7 +1309,7 @@ export function AllInOneCheckoutContent({
                 이용 기간은 {formatDate(creditInfo?.expires_at)}까지입니다.
                 {isInitialProgram && ' 이용권이 만료되기 전에는 중복 결제가 제한됩니다.'}
                 {isMonthlySubscriber &&
-                  ' 월 구독 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
+                  ' 현재 플랜 상태에서는 추가 토큰만 대시보드에서 별도로 구매할 수 있습니다.'}
               </Alert>
             ) : (
               <>

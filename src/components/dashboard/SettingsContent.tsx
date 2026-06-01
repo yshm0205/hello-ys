@@ -464,7 +464,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                     radius="lg"
                                     variant="light"
                                 >
-                                    현재는 강의와 프로그램 접근이 닫혀 있습니다. 월 구독 상품이 열리기 전까지는
+                                    현재는 강의와 프로그램 접근이 닫혀 있습니다. 운영 정책이 확정되기 전까지는
                                     추가 크레딧 충전도 제한됩니다.
                                 </Alert>
                             )}
@@ -543,7 +543,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                 radius="lg"
                                 variant="light"
                             >
-                                월 구독 상품은 4개월 프로그램 종료 후 분리해서 제공할 예정입니다. 결제 관련 문의는
+                                4개월 프로그램 종료 후 이용 방식은 별도로 안내드릴 예정입니다. 결제 관련 문의는
                                 {' '}hmys0205hmys@gmail.com 으로 보내주세요.
                             </Alert>
                         </Stack>
