@@ -25,13 +25,12 @@ import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import { AuthAwareButton } from '@/components/landing/AuthAwareButton';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MONTHLY_SUBSCRIPTION_PREVIEW, TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
+import { TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
 import type { PublicMarketingReview, PublicMarketingReviewsSummary } from '@/lib/marketing/reviews';
 
 /* ─── Design tokens ─── */
 const ease = [0.25, 0.1, 0.25, 1] as const;
 const primaryProgram = TOSSPAY_PLAN_CONFIG.allinone;
-const monthlySubscription = MONTHLY_SUBSCRIPTION_PREVIEW;
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -3336,7 +3335,7 @@ function FAQSection() {
         },
         {
           q: '크레딧 만료가 있나요?',
-          a: '매달 정기 지급되는 400cr와 월 구독 크레딧은 다음 지급일에 리셋되며, 미사용분은 이월되지 않습니다.\n\n월별 지급분은 그 달 안에 사용해 주세요. 추가로 구매한 크레딧은 별도 정책에 따라 보존됩니다.',
+          a: '매달 정기 지급되는 400cr는 다음 지급일에 리셋되며, 미사용분은 이월되지 않습니다.\n\n월별 지급분은 그 달 안에 사용해 주세요. 추가로 구매한 크레딧은 별도 정책에 따라 보존됩니다.',
         },
         {
           q: '크레딧이 부족하면 어떻게 되나요?',
@@ -3357,7 +3356,7 @@ function FAQSection() {
       items: [
         {
           q: '올인원 4개월 끝나면 어떻게 되나요?',
-          a: `4개월 종료 후에는 올인원 구매자 한정 특전으로 월 ₩${monthlySubscription.amount.toLocaleString()} 구독 상품을 이어서 이용하실 수 있도록 열어드릴 예정입니다.\n\n그 전까지는 강의와 프로그램, 매달 400cr 지급 기준으로 이용하시면 됩니다.`,
+          a: '4개월 이용 기간이 끝나면 올인원 권한은 만료됩니다.\n\n기간 내에는 강의와 프로그램, 매달 400cr 지급 기준으로 이용하시면 됩니다.',
         },
         {
           q: '환불 되나요?',

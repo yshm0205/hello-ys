@@ -2,7 +2,7 @@
 
 /**
  * 가격 페이지
- * 1상품 판매 구조: 올인원 패스 + 추가 토큰 + 월 구독 예정
+ * 1상품 판매 구조: 올인원 패스 + 추가 토큰
  */
 
 import {
@@ -21,18 +21,16 @@ import {
   ThemeIcon,
   Divider,
 } from '@mantine/core';
-import { Check, Coins, Crown, Lock } from 'lucide-react';
+import { Check, Coins, Crown } from 'lucide-react';
 import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import { Link } from '@/i18n/routing';
 import {
   CREDIT_TOPUP_PACKS,
-  MONTHLY_SUBSCRIPTION_PREVIEW,
   TOSSPAY_PLAN_CONFIG,
 } from '@/lib/plans/config';
 
 export default function PricingPage() {
   const program = TOSSPAY_PLAN_CONFIG.allinone;
-  const monthly = MONTHLY_SUBSCRIPTION_PREVIEW;
 
   return (
     <Box style={{ background: '#fff', minHeight: '100vh' }}>
@@ -58,7 +56,7 @@ export default function PricingPage() {
           </Alert>
 
           {/* ── 메인 카드 ── */}
-          <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
             <Card
               padding="xl" radius="xl"
               style={{
@@ -169,65 +167,6 @@ export default function PricingPage() {
                 <Text size="xs" c="gray.5">
                   추가 토큰은 대시보드에서만 구매 가능합니다. 기본 제공분보다 높은 단가로 운영됩니다.
                 </Text>
-              </Stack>
-            </Card>
-
-            <Card
-              padding="xl" radius="xl"
-              style={{
-                border: '1px solid #e5e7eb',
-                background: '#fafafa',
-                position: 'relative',
-                overflow: 'visible',
-              }}
-            >
-              <Badge
-                style={{
-                  position: 'absolute', top: -12, left: '50%',
-                  transform: 'translateX(-50%)', zIndex: 10,
-                }}
-                size="lg" color="dark" variant="filled"
-                leftSection={<Lock size={12} />}
-              >
-                오픈 예정
-              </Badge>
-
-              <Stack gap="md" mt={8}>
-                <Box>
-                  <Text fw={700} size="xl" style={{ color: '#111827' }}>{monthly.name}</Text>
-                  <Text size="sm" c="gray.5">
-                    4개월 프로그램 종료 후 계속 사용할 수 있는 유지형 상품입니다.
-                  </Text>
-                </Box>
-
-                <Box>
-                  <Group gap="xs" align="baseline">
-                    <Text style={{ fontSize: '36px', fontWeight: 800, color: '#111827' }}>
-                      ₩{monthly.amount.toLocaleString()}
-                    </Text>
-                    <Text size="sm" c="gray.5">/ 월 예정</Text>
-                  </Group>
-                  <Text size="sm" c="gray.5">매달 {monthly.monthlyCredits}cr 포함</Text>
-                </Box>
-
-                <Divider color="gray.2" />
-
-                <Text size="xs" c="gray.5">예정 구성:</Text>
-                <List spacing={8} size="sm" center>
-                  {[
-                    'FlowSpot 계속 이용',
-                    '매달 400cr 자동 지급',
-                    '올인원 종료 후 이어서 사용 가능',
-                  ].map((f, i) => (
-                    <List.Item key={i} icon={
-                      <ThemeIcon size={20} radius="xl" color="gray" variant="light">
-                        <Check size={12} />
-                      </ThemeIcon>
-                    } style={{ color: '#374151' }}>
-                      {f}
-                    </List.Item>
-                  ))}
-                </List>
               </Stack>
             </Card>
           </SimpleGrid>
