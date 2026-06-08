@@ -155,6 +155,7 @@ const LANDING_SECTION_ORDER = [
 ] as const;
 const BASE_SESSION_SELECT = "cta_clicks, referrer, first_seen_at, duration_seconds";
 const BEHAVIOR_SESSION_SELECT = `${BASE_SESSION_SELECT}, duration_seconds, max_scroll_percent, last_visible_section, last_clicked_cta_section`;
+const SUPABASE_PAGE_SIZE = 1000;
 
 type PresetMarketingPeriod = keyof typeof PERIOD_CONFIG;
 type MarketingPeriod = PresetMarketingPeriod | "custom";
@@ -518,30 +519,92 @@ async function getInternalAdminIdSet() {
   return new Set(internalAdmins.map((user) => user.id));
 }
 
+async function fetchAllMarketingSessions(
+  supabase: ReturnType<typeof createAdminClient>,
+  startIso: string,
+  endIso: string,
+) {
+  const fetchWithSelect = async (select: string) => {
+    const rows: Partial<MarketingSessionRow>[] = [];
+
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const to = from + SUPABASE_PAGE_SIZE - 1;
+      const response = (await supabase
+        .from("marketing_sessions")
+        .select(select)
+        .gte("first_seen_at", startIso)
+        .lt("first_seen_at", endIso)
+        .order("first_seen_at", { ascending: true })
+        .range(from, to)) as {
+        data: Partial<MarketingSessionRow>[] | null;
+        error: unknown;
+      };
+
+      if (response.error) {
+        return { rows, error: response.error };
+      }
+
+      const page = response.data || [];
+      rows.push(...page);
+
+      if (page.length < SUPABASE_PAGE_SIZE) {
+        return { rows, error: null };
+      }
+    }
+  };
+
+  const behaviorResponse = await fetchWithSelect(BEHAVIOR_SESSION_SELECT);
+  if (!behaviorResponse.error || !isMissingBehaviorFieldError(behaviorResponse.error)) {
+    return behaviorResponse;
+  }
+
+  return fetchWithSelect(BASE_SESSION_SELECT);
+}
+
+async function fetchAllMarketingCtaEvents(
+  supabase: ReturnType<typeof createAdminClient>,
+  startIso: string,
+  endIso: string,
+) {
+  const rows: MarketingSessionEventRow[] = [];
+
+  for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+    const to = from + SUPABASE_PAGE_SIZE - 1;
+    const response = (await supabase
+      .from("marketing_session_events")
+      .select("session_key, event_type, cta_id, cta_section, created_at")
+      .eq("event_type", "cta_click")
+      .gte("created_at", startIso)
+      .lt("created_at", endIso)
+      .order("created_at", { ascending: true })
+      .range(from, to)) as {
+      data: MarketingSessionEventRow[] | null;
+      error: unknown;
+    };
+
+    if (response.error) {
+      return { rows, error: response.error };
+    }
+
+    const page = response.data || [];
+    rows.push(...page);
+
+    if (page.length < SUPABASE_PAGE_SIZE) {
+      return { rows, error: null };
+    }
+  }
+}
+
 async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDate?: string) {
   const supabase = createAdminClient();
   const internalAdminIds = await getInternalAdminIdSet();
   const range = getPeriodRange(period, startDate, endDate);
 
-  let sessionsResponse: {
-    data: Partial<MarketingSessionRow>[] | null;
-    error: unknown;
-  } = (await supabase
-    .from("marketing_sessions")
-    .select(BEHAVIOR_SESSION_SELECT)
-    .gte("first_seen_at", range.startIso)
-    .lt("first_seen_at", range.endIso)) as {
-    data: Partial<MarketingSessionRow>[] | null;
-    error: unknown;
-  };
-
-  if (sessionsResponse.error && isMissingBehaviorFieldError(sessionsResponse.error)) {
-    sessionsResponse = (await supabase
-      .from("marketing_sessions")
-      .select(BASE_SESSION_SELECT)
-      .gte("first_seen_at", range.startIso)
-      .lt("first_seen_at", range.endIso)) as typeof sessionsResponse;
-  }
+  const sessionsResponse = await fetchAllMarketingSessions(
+    supabase,
+    range.startIso,
+    range.endIso,
+  );
 
   const [{ data: users }, { data: payments }, eventsResponse] = await Promise.all([
     supabase
@@ -554,19 +617,14 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       .select("id, amount, created_at, user_id, status, metadata")
       .gte("created_at", range.startIso)
       .lt("created_at", range.endIso),
-    supabase
-      .from("marketing_session_events")
-      .select("session_key, event_type, cta_id, cta_section, created_at")
-      .eq("event_type", "cta_click")
-      .gte("created_at", range.startIso)
-      .lt("created_at", range.endIso),
+    fetchAllMarketingCtaEvents(supabase, range.startIso, range.endIso),
   ]);
 
   if (sessionsResponse.error) {
     throw sessionsResponse.error;
   }
 
-  const periodSessions = ((sessionsResponse.data || []) as Partial<MarketingSessionRow>[]).map(
+  const periodSessions = (sessionsResponse.rows || []).map(
     (session) => ({
       cta_clicks: session.cta_clicks ?? 0,
       referrer: session.referrer ?? null,
@@ -583,9 +641,7 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
   const periodPayments = ((payments || []) as PaymentRow[]).filter(
     (payment) => !internalAdminIds.has(payment.user_id),
   );
-  const periodCtaEvents = eventsResponse.error
-    ? []
-    : ((eventsResponse.data || []) as MarketingSessionEventRow[]);
+  const periodCtaEvents = eventsResponse.error ? [] : eventsResponse.rows;
 
   const completedPayments = periodPayments.filter((payment) =>
     (SALES_STATUSES as readonly string[]).includes(payment.status),

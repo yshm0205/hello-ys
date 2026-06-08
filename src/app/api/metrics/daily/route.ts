@@ -6,6 +6,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 const SALES_STATUSES = ["DONE", "PARTIAL_CANCELLED"] as const;
 const SEOUL_TIME_ZONE = "Asia/Seoul";
 const LAUNCH_OPEN_AT_KST = "2026-04-24T17:00:00+09:00";
+const SUPABASE_PAGE_SIZE = 1000;
 
 interface PaymentRow {
   id: string;
@@ -150,6 +151,44 @@ function countReferrerTop(rows: MarketingSessionRow[], topN = 3) {
     .map(([source, count]) => ({ source, count }));
 }
 
+async function fetchAllMarketingSessions(
+  admin: ReturnType<typeof createAdminClient>,
+  startIso: string,
+  endIso?: string,
+) {
+  const rows: MarketingSessionRow[] = [];
+
+  for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+    const to = from + SUPABASE_PAGE_SIZE - 1;
+    let query = admin
+      .from("marketing_sessions")
+      .select("cta_clicks, referrer, first_seen_at")
+      .gte("first_seen_at", startIso);
+
+    if (endIso) {
+      query = query.lt("first_seen_at", endIso);
+    }
+
+    const { data, error } = (await query
+      .order("first_seen_at", { ascending: true })
+      .range(from, to)) as {
+      data: MarketingSessionRow[] | null;
+      error: unknown;
+    };
+
+    if (error) {
+      throw error;
+    }
+
+    const page = data || [];
+    rows.push(...page);
+
+    if (page.length < SUPABASE_PAGE_SIZE) {
+      return rows;
+    }
+  }
+}
+
 function summarizePeriod(args: {
   payments: PaymentRow[];
   sessions: MarketingSessionRow[];
@@ -212,28 +251,23 @@ export async function GET(request: NextRequest) {
 
     const [
       { data: yPayments },
-      { data: ySessions },
       { data: yInquiries },
       { data: w7Payments },
-      { data: w7Sessions },
       { data: w7Inquiries },
       { data: m30Payments },
-      { data: m30Sessions },
       { data: m30Inquiries },
       { data: launchPaymentsRaw },
-      { data: launchSessionsRaw },
       { data: launchUsersRaw },
+      ySessions,
+      w7Sessions,
+      m30Sessions,
+      launchSessions,
     ] = await Promise.all([
       admin
         .from("toss_payments")
         .select(paymentSelect)
         .gte("created_at", yesterday.startIso)
         .lt("created_at", yesterday.endIso),
-      admin
-        .from("marketing_sessions")
-        .select("cta_clicks, referrer, first_seen_at")
-        .gte("first_seen_at", yesterday.startIso)
-        .lt("first_seen_at", yesterday.endIso),
       admin
         .from("feedback_requests")
         .select("id, created_at")
@@ -244,11 +278,6 @@ export async function GET(request: NextRequest) {
         .select(paymentSelect)
         .gte("created_at", last7.startIso)
         .lt("created_at", last7.endIso),
-      admin
-        .from("marketing_sessions")
-        .select("cta_clicks, referrer, first_seen_at")
-        .gte("first_seen_at", last7.startIso)
-        .lt("first_seen_at", last7.endIso),
       admin
         .from("feedback_requests")
         .select("id, created_at")
@@ -259,11 +288,6 @@ export async function GET(request: NextRequest) {
         .select(paymentSelect)
         .gte("created_at", last30.startIso)
         .lt("created_at", last30.endIso),
-      admin
-        .from("marketing_sessions")
-        .select("cta_clicks, referrer, first_seen_at")
-        .gte("first_seen_at", last30.startIso)
-        .lt("first_seen_at", last30.endIso),
       admin
         .from("feedback_requests")
         .select("id, created_at")
@@ -273,11 +297,11 @@ export async function GET(request: NextRequest) {
         .from("toss_payments")
         .select(paymentSelect)
         .gte("created_at", launchOpenAtIso),
-      admin
-        .from("marketing_sessions")
-        .select("cta_clicks, referrer, first_seen_at")
-        .gte("first_seen_at", launchOpenAtIso),
       admin.from("users").select("id, created_at").gte("created_at", launchOpenAtIso),
+      fetchAllMarketingSessions(admin, yesterday.startIso, yesterday.endIso),
+      fetchAllMarketingSessions(admin, last7.startIso, last7.endIso),
+      fetchAllMarketingSessions(admin, last30.startIso, last30.endIso),
+      fetchAllMarketingSessions(admin, launchOpenAtIso),
     ]);
 
     const filterPayments = (rows: PaymentRow[] | null) =>
@@ -285,25 +309,24 @@ export async function GET(request: NextRequest) {
 
     const yesterdayData = summarizePeriod({
       payments: filterPayments(yPayments as PaymentRow[] | null),
-      sessions: (ySessions || []) as MarketingSessionRow[],
+      sessions: ySessions,
       inquiries: (yInquiries || []) as FeedbackRow[],
     });
 
     const last7Data = summarizePeriod({
       payments: filterPayments(w7Payments as PaymentRow[] | null),
-      sessions: (w7Sessions || []) as MarketingSessionRow[],
+      sessions: w7Sessions,
       inquiries: (w7Inquiries || []) as FeedbackRow[],
     });
 
     const last30Data = summarizePeriod({
       payments: filterPayments(m30Payments as PaymentRow[] | null),
-      sessions: (m30Sessions || []) as MarketingSessionRow[],
+      sessions: m30Sessions,
       inquiries: (m30Inquiries || []) as FeedbackRow[],
       includeSalesAmount: true,
     });
 
     const launchPayments = filterPayments(launchPaymentsRaw as PaymentRow[] | null);
-    const launchSessions = (launchSessionsRaw || []) as MarketingSessionRow[];
     const launchUsers = ((launchUsersRaw || []) as UserRow[]).filter(
       (user) => !internalIds.has(user.id),
     );
