@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -23,7 +23,11 @@ type ChannelListRow = {
   total_video_count?: number | null;
 };
 
-const MONTH_LOOKUP_RANGE_END = 9999;
+type ChannelMonthRow = {
+  month: string | null;
+};
+
+const MONTH_LOOKUP_PAGE_SIZE = 1000;
 
 function isMissingChannelMetaColumn(error: { message?: string; code?: string } | null) {
   return Boolean(
@@ -36,6 +40,33 @@ function isMissingChannelMetaColumn(error: { message?: string; code?: string } |
   );
 }
 
+async function getAvailableMonths(supabase: SupabaseClient) {
+  const months = new Set<string>();
+
+  for (let from = 0; ; from += MONTH_LOOKUP_PAGE_SIZE) {
+    const to = from + MONTH_LOOKUP_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("channel_list")
+      .select("month")
+      .order("month", { ascending: false })
+      // Supabase REST caps each response at 1,000 rows. Read every page before
+      // de-duplicating, otherwise older months can disappear from the list.
+      .range(from, to);
+
+    const rows = (data || []) as ChannelMonthRow[];
+
+    if (error || !rows.length) break;
+
+    for (const row of rows) {
+      if (row.month) months.add(row.month);
+    }
+
+    if (rows.length < MONTH_LOOKUP_PAGE_SIZE) break;
+  }
+
+  return [...months];
+}
+
 export async function GET(request: NextRequest) {
   if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.json({ months: [], channels: [], total: 0 });
@@ -45,15 +76,7 @@ export async function GET(request: NextRequest) {
   const month = request.nextUrl.searchParams.get("month");
 
   // 사용 가능한 월 목록
-  const { data: monthRows } = await supabase
-    .from("channel_list")
-    .select("month")
-    .order("month", { ascending: false })
-    // Supabase REST returns 1,000 rows by default. Month lookup needs every row
-    // because we de-duplicate months on the application side.
-    .range(0, MONTH_LOOKUP_RANGE_END);
-
-  const months = [...new Set((monthRows || []).map((r) => r.month))];
+  const months = await getAvailableMonths(supabase);
   const selectedMonth = month && months.includes(month) ? month : months[0] || "";
 
   if (!selectedMonth) {

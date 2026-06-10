@@ -40,19 +40,32 @@ interface ChannelListItem {
   total_video_count: number | null;
 }
 
-const MONTH_LOOKUP_RANGE_END = 9999;
+const MONTH_LOOKUP_PAGE_SIZE = 1000;
 
 async function getAvailableMonths() {
   const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("channel_list")
-    .select("month")
-    .order("month", { ascending: false })
-    // Supabase REST returns 1,000 rows by default. Month lookup needs every row
-    // because we de-duplicate months on the application side.
-    .range(0, MONTH_LOOKUP_RANGE_END);
+  const months = new Set<string>();
 
-  return [...new Set((data || []).map((row) => row.month))];
+  for (let from = 0; ; from += MONTH_LOOKUP_PAGE_SIZE) {
+    const to = from + MONTH_LOOKUP_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("channel_list")
+      .select("month")
+      .order("month", { ascending: false })
+      // Supabase REST caps each response at 1,000 rows. Read every page before
+      // de-duplicating, otherwise older months can disappear from the list.
+      .range(from, to);
+
+    if (error || !data?.length) break;
+
+    for (const row of data) {
+      if (row.month) months.add(row.month);
+    }
+
+    if (data.length < MONTH_LOOKUP_PAGE_SIZE) break;
+  }
+
+  return [...months];
 }
 
 async function getChannelList(filters?: {
