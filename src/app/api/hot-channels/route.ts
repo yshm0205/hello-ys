@@ -23,6 +23,8 @@ type ChannelListRow = {
   total_video_count?: number | null;
 };
 
+const MONTH_LOOKUP_RANGE_END = 9999;
+
 function isMissingChannelMetaColumn(error: { message?: string; code?: string } | null) {
   return Boolean(
     error &&
@@ -46,7 +48,10 @@ export async function GET(request: NextRequest) {
   const { data: monthRows } = await supabase
     .from("channel_list")
     .select("month")
-    .order("month", { ascending: false });
+    .order("month", { ascending: false })
+    // Supabase REST returns 1,000 rows by default. Month lookup needs every row
+    // because we de-duplicate months on the application side.
+    .range(0, MONTH_LOOKUP_RANGE_END);
 
   const months = [...new Set((monthRows || []).map((r) => r.month))];
   const selectedMonth = month && months.includes(month) ? month : months[0] || "";
