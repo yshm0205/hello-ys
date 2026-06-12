@@ -175,11 +175,11 @@ const DAY_GUIDES = [
     title: "FlowSpot으로 첫 쇼츠 스크립트 만들기",
     badge: "실습",
     description:
-      "FlowSpot으로 만든 첫 쇼츠 스크립트 또는 저장 링크를 제출합니다.",
+      "FlowSpot으로 만든 첫 쇼츠 스크립트를 제출합니다. 영상 피드백을 받고 싶다면 참고 링크 칸에 영상 링크를 넣습니다.",
     template:
-      "1. 선택한 소재/상품:\n2. FlowSpot으로 만든 스크립트 요약:\n3. 마음에 드는 훅 또는 장면:\n4. 수정하고 싶은 부분:\n5. 저장 링크 또는 참고 링크:",
+      "1. 선택한 소재/상품:\n2. FlowSpot으로 만든 스크립트 요약:\n3. 마음에 드는 훅 또는 장면:\n4. 수정하고 싶은 부분:\n5. 영상 피드백 신청 여부:",
     placeholder:
-      "FlowSpot에서 만든 스크립트를 붙여넣거나, 저장된 스크립트 링크를 함께 남겨주세요.",
+      "FlowSpot에서 만든 스크립트를 붙여넣어주세요. 영상 피드백을 받고 싶은 경우 참고 링크 칸에 영상 링크를 넣어주세요.",
   },
   {
     day: 4,
@@ -1411,8 +1411,8 @@ export function ChallengeContent() {
               />
 
               <TextInput
-                label="참고 링크"
-                description="FlowSpot 저장 링크, 채널 링크, 캡처 링크 등이 있으면 넣어주세요."
+                label="참고 링크 (본인/운영자만 확인)"
+                description="다른 참여자에게 공개되지 않습니다. 영상 피드백을 받고 싶다면 제작한 쇼츠 영상 링크를 여기에 넣어주세요."
                 placeholder="https://..."
                 value={getDraft(activeDay, activeGuide.title).referenceUrl}
                 onChange={(event) => updateDraft(activeDay, { referenceUrl: event.currentTarget.value })}
