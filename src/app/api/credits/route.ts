@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getActiveChallengeEnrollment } from "@/lib/challenge/access";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
@@ -18,7 +19,11 @@ export async function GET() {
       );
     }
 
-    const effectiveCreditInfo = await getEffectiveCreditInfo(user.id);
+    const [effectiveCreditInfo, challengeEnrollment] = await Promise.all([
+      getEffectiveCreditInfo(user.id),
+      getActiveChallengeEnrollment(user.id),
+    ]);
+    const hasChallengeAccess = Boolean(challengeEnrollment);
 
     if (!effectiveCreditInfo) {
       const adminClient = createAdminClient();
@@ -38,7 +43,10 @@ export async function GET() {
         const retry = await getEffectiveCreditInfo(user.id);
 
         if (retry) {
-          return NextResponse.json(retry);
+          return NextResponse.json({
+            ...retry,
+            has_challenge_access: hasChallengeAccess,
+          });
         }
 
         return NextResponse.json({
@@ -51,6 +59,7 @@ export async function GET() {
           monthly_credit_total_cycles: null,
           monthly_credit_granted_cycles: 0,
           next_credit_at: null,
+          has_challenge_access: hasChallengeAccess,
         });
       }
 
@@ -64,10 +73,14 @@ export async function GET() {
         monthly_credit_total_cycles: null,
         monthly_credit_granted_cycles: 0,
         next_credit_at: null,
+        has_challenge_access: hasChallengeAccess,
       });
     }
 
-    return NextResponse.json(effectiveCreditInfo);
+    return NextResponse.json({
+      ...effectiveCreditInfo,
+      has_challenge_access: hasChallengeAccess,
+    });
   } catch (error) {
     console.error("[Credits API] Error:", error);
     return NextResponse.json(

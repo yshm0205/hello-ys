@@ -73,9 +73,11 @@ async function resolveHref(
         const creditInfo = (await response.json()) as {
           plan_type?: string | null;
           expires_at?: string | null;
+          has_challenge_access?: boolean;
         };
 
-        return isActiveAccessPlan(creditInfo.plan_type, creditInfo.expires_at)
+        return isActiveAccessPlan(creditInfo.plan_type, creditInfo.expires_at) ||
+          creditInfo.has_challenge_access
           ? authenticatedHref
           : unpaidAuthenticatedHref;
       } catch {

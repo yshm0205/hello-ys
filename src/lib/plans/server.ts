@@ -4,6 +4,7 @@ import {
   isActiveAccessPlan,
   type AppPlanType,
 } from "@/lib/plans/config";
+import { getActiveChallengeEnrollment } from "@/lib/challenge/access";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export type EffectiveCreditInfo = {
@@ -203,9 +204,16 @@ export async function resolvePostLoginRedirectPath(
   }
 
   const creditInfo = await getEffectiveCreditInfo(userId);
-  const defaultPath = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at)
-    ? "/dashboard"
-    : "/checkout/allinone";
+  const hasActiveAccessPlan = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
+
+  if (!hasActiveAccessPlan) {
+    const challengeEnrollment = await getActiveChallengeEnrollment(userId);
+    if (challengeEnrollment) {
+      return "/dashboard/challenge";
+    }
+  }
+
+  const defaultPath = hasActiveAccessPlan ? "/dashboard" : "/checkout/allinone";
 
   if (defaultPath === "/dashboard" && normalizedRequestedPath) {
     return normalizedRequestedPath;
