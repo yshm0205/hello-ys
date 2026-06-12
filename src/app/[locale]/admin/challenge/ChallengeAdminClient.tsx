@@ -101,7 +101,7 @@ export function ChallengeAdminClient() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [cohort, setCohort] = useState("1기");
-  const [bonusCredits, setBonusCredits] = useState("14");
+  const [bonusCredits, setBonusCredits] = useState("30");
   const [adminNote, setAdminNote] = useState("");
   const [submissionNotes, setSubmissionNotes] = useState<Record<string, string>>({});
 

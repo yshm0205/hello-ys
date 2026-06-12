@@ -46,7 +46,7 @@ type SubmissionRow = {
 const enrollSchema = z.object({
   email: z.string().trim().email(),
   cohort: z.string().trim().min(1).max(40).default("1기"),
-  bonusCredits: z.number().int().min(0).max(100).default(14),
+  bonusCredits: z.number().int().min(0).max(100).default(30),
   accessEndsAt: z.string().trim().optional().default(""),
   adminNote: z.string().trim().max(1000).optional().default(""),
 });
