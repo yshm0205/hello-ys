@@ -86,6 +86,52 @@ type ChallengeResponse = {
 
 const APPLICATION_URL =
   "https://steep-radar-52f.notion.site/e45579f5dd6d43d0878a86b3869d7b54";
+const CHALLENGE_GUIDE_URL =
+  "https://app.notion.com/p/3-36f847bd025f81709723e03f5d4c3da4?pvs=48";
+
+const NOTICE_SECTIONS = [
+  {
+    title: "전체 진행 흐름",
+    items: [
+      "신청서에 작성한 이메일과 같은 이메일로 FlowSpot에 가입/로그인합니다.",
+      "챌린지 게시판에서 1일차, 2일차, 3일차 미션을 순서대로 제출합니다.",
+      "막히는 부분은 기수별 오픈채팅방 또는 게시글 댓글로 질문합니다.",
+    ],
+  },
+  {
+    title: "1일차",
+    items: [
+      "VOD 04. 레드오션도 블루오션으로 바꾸는 채널 조합법을 봅니다.",
+      "내가 만들 쇼핑 쇼츠 채널 방향을 1개 정리합니다.",
+      "1차 인증 글에 채널 방향, 보는 사람, 차별점을 제출합니다.",
+    ],
+  },
+  {
+    title: "2일차",
+    items: [
+      "1차 인증 제출 후 VOD 08이 열립니다.",
+      "VOD 08. 영상 주제 찾기 실전 예시를 보고 상품/주제 후보 3개를 찾습니다.",
+      "2차 인증 글에 후보 3개와 고른 이유를 제출합니다.",
+    ],
+  },
+  {
+    title: "3일차",
+    items: [
+      "2차 인증 제출 후 FlowSpot으로 첫 쇼츠 스크립트를 만듭니다.",
+      "3차 인증 글에 선택한 소재, 스크립트 요약, 마음에 드는 훅, 수정하고 싶은 부분을 제출합니다.",
+      "3일 미션을 모두 제출하면 챌린지 완료 대상으로 확인됩니다.",
+    ],
+  },
+  {
+    title: "권한 오픈 기준",
+    items: [
+      "처음에는 챌린지 게시판과 VOD 04만 열립니다.",
+      "1차 인증 제출 후 VOD 08이 열립니다.",
+      "2차 인증 제출 후 3차 인증을 진행합니다.",
+      "질문 글은 막히는 부분을 바로 남길 수 있도록 언제든 작성할 수 있습니다.",
+    ],
+  },
+];
 
 const BRAND = {
   primary: "#8b5cf6",
@@ -239,6 +285,7 @@ export function ChallengeContent() {
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [boardFilter, setBoardFilter] = useState<BoardFilter>("all");
   const [selectedSubmission, setSelectedSubmission] = useState<FeedSubmission | null>(null);
+  const [selectedNotice, setSelectedNotice] = useState(false);
   const [comments, setComments] = useState<ChallengeComment[]>([]);
   const [commentsBySubmissionId, setCommentsBySubmissionId] = useState<
     Record<string, ChallengeComment[]>
@@ -362,6 +409,7 @@ export function ChallengeContent() {
   function openSubmission(submission: FeedSubmission) {
     selectedSubmissionIdRef.current = submission.id;
     setSelectedSubmission(submission);
+    setSelectedNotice(false);
     setCommentDraft("");
     const cachedComments = commentsBySubmissionId[submission.id];
     if (cachedComments) {
@@ -376,9 +424,20 @@ export function ChallengeContent() {
     void loadComments(submission.id);
   }
 
+  function openNotice() {
+    selectedSubmissionIdRef.current = null;
+    setSelectedSubmission(null);
+    setSelectedNotice(true);
+    setComments([]);
+    setCommentDraft("");
+    setCommentError(null);
+    setCommentsLoading(false);
+  }
+
   function closeSubmission() {
     selectedSubmissionIdRef.current = null;
     setSelectedSubmission(null);
+    setSelectedNotice(false);
     setCommentsLoading(false);
   }
 
@@ -803,7 +862,7 @@ export function ChallengeContent() {
                 </Text>
               </Box>
               <Group gap={6} visibleFrom="sm">
-                {selectedSubmission ? (
+                {selectedSubmission || selectedNotice ? (
                   <Button
                     size="xs"
                     variant="light"
@@ -822,7 +881,7 @@ export function ChallengeContent() {
                 )}
               </Group>
             </Group>
-            {!selectedSubmission && (
+            {!selectedSubmission && !selectedNotice && (
               <Group mt="md" gap={6} wrap="wrap">
                 {BOARD_FILTERS.map((filter) => {
                   const count =
@@ -886,7 +945,74 @@ export function ChallengeContent() {
           </Box>
           <Divider />
 
-          {selectedSubmission ? (
+          {selectedNotice ? (
+            <Box>
+              <Box px={{ base: "md", sm: "lg" }} py="lg">
+                <Button
+                  hiddenFrom="sm"
+                  size="xs"
+                  variant="subtle"
+                  color="gray"
+                  radius={4}
+                  leftSection={<ArrowLeft size={14} />}
+                  onClick={closeSubmission}
+                  mb="sm"
+                >
+                  목록으로
+                </Button>
+
+                <Group gap={6} mb="sm">
+                  <Badge color="violet" variant="light" radius={2}>공지</Badge>
+                  <Badge color="gray" variant="outline" radius={2}>고정</Badge>
+                </Group>
+
+                <Title order={2} fz={{ base: 20, sm: 26 }}>
+                  원초적 인사이트 3일 쇼핑 쇼츠 채널 기획 챌린지 진행 안내
+                </Title>
+                <Group gap={6} mt={10}>
+                  <UserRound size={14} color={BRAND.muted} />
+                  <Text size="sm" c="gray.6">운영자</Text>
+                  <Text size="sm" c="gray.5">·</Text>
+                  <Text size="sm" c="gray.6">고정 공지</Text>
+                </Group>
+
+                <Divider my="lg" />
+
+                <Stack gap="lg">
+                  {NOTICE_SECTIONS.map((section) => (
+                    <Box key={section.title}>
+                      <Text fw={900} size="md" mb="xs">
+                        {section.title}
+                      </Text>
+                      <Stack gap={6}>
+                        {section.items.map((item) => (
+                          <Group key={item} gap="xs" align="flex-start" wrap="nowrap">
+                            <Text c="violet" fw={900} lh={1.6}>•</Text>
+                            <Text size="sm" lh={1.7}>{item}</Text>
+                          </Group>
+                        ))}
+                      </Stack>
+                    </Box>
+                  ))}
+                </Stack>
+
+                <Group mt="xl">
+                  <Button
+                    component="a"
+                    href={CHALLENGE_GUIDE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="violet"
+                    radius={4}
+                    rightSection={<ExternalLink size={16} />}
+                    style={{ background: BRAND.primary }}
+                  >
+                    노션 진행 안내서 열기
+                  </Button>
+                </Group>
+              </Box>
+            </Box>
+          ) : selectedSubmission ? (
             <Box>
               <Box px={{ base: "md", sm: "lg" }} py="lg">
                 <Button
@@ -1045,7 +1171,23 @@ export function ChallengeContent() {
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                    <Table.Tr>
+                    <Table.Tr onClick={openNotice} style={{ cursor: "pointer", background: BRAND.softer }}>
+                      <Table.Td>
+                        <Badge color="violet" variant="light" radius={2}>공지</Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm" fw={700} c="gray.8">
+                          처음 오셨다면 클릭해서 챌린지 진행 순서와 권한 오픈 기준을 확인해주세요.
+                        </Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm" c="gray.7">운영자</Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm" c="gray.6">고정</Text>
+                      </Table.Td>
+                    </Table.Tr>
+                    <Table.Tr style={{ display: "none" }}>
                       <Table.Td>
                         <Badge color="violet" variant="light" radius={2}>공지</Badge>
                       </Table.Td>
@@ -1099,7 +1241,17 @@ export function ChallengeContent() {
               </Box>
 
               <Stack hiddenFrom="sm" gap={0}>
-                <Box px="md" py="sm" bg={BRAND.softer}>
+                <UnstyledButton onClick={openNotice} style={{ width: "100%", textAlign: "left" }}>
+                  <Box px="md" py="sm" bg={BRAND.softer}>
+                    <Group gap="xs" wrap="nowrap">
+                      <Badge color="violet" variant="light" radius={2}>공지</Badge>
+                      <Text size="sm" fw={700} c="gray.8">
+                        처음 오셨다면 클릭해서 진행 순서와 권한 오픈 기준을 확인해주세요.
+                      </Text>
+                    </Group>
+                  </Box>
+                </UnstyledButton>
+                <Box px="md" py="sm" bg={BRAND.softer} style={{ display: "none" }}>
                   <Group gap="xs" wrap="nowrap">
                     <Badge color="violet" variant="light" radius={2}>공지</Badge>
                     <Text size="sm" fw={700} c="gray.8">
