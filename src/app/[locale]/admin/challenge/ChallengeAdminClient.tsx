@@ -101,7 +101,6 @@ export function ChallengeAdminClient() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [cohort, setCohort] = useState("1기");
-  const [bonusCredits, setBonusCredits] = useState("30");
   const [adminNote, setAdminNote] = useState("");
   const [submissionNotes, setSubmissionNotes] = useState<Record<string, string>>({});
 
@@ -150,7 +149,6 @@ export function ChallengeAdminClient() {
         body: JSON.stringify({
           email,
           cohort,
-          bonusCredits: Number(bonusCredits || 0),
           adminNote,
         }),
       });
@@ -273,10 +271,10 @@ export function ChallengeAdminClient() {
         <CardHeader>
           <CardTitle>참여자 등록</CardTitle>
           <CardDescription>
-            FlowSpot에 가입된 이메일만 등록됩니다. 등록 시 크레딧을 함께 지급할 수 있습니다.
+            FlowSpot에 가입된 이메일만 등록됩니다. 크레딧은 2차 인증을 인정하면 30cr 자동 지급됩니다.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-[1.6fr_0.7fr_0.7fr_2fr_auto] md:items-end">
+        <CardContent className="grid gap-4 md:grid-cols-[1.6fr_0.7fr_0.9fr_2fr_auto] md:items-end">
           <div className="space-y-2">
             <Label htmlFor="challenge-email">이메일</Label>
             <Input
@@ -295,14 +293,14 @@ export function ChallengeAdminClient() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="challenge-credits">크레딧</Label>
+            <Label htmlFor="challenge-credits">2차 승인 지급</Label>
             <Input
               id="challenge-credits"
               type="number"
               min={0}
               max={100}
-              value={bonusCredits}
-              onChange={(event) => setBonusCredits(event.target.value)}
+              value="30"
+              disabled
             />
           </div>
           <div className="space-y-2">

@@ -43,10 +43,12 @@ type SubmissionRow = {
   updated_at: string;
 };
 
+const CHALLENGE_DAY_2_BONUS_CREDITS = 30;
+
 const enrollSchema = z.object({
   email: z.string().trim().email(),
   cohort: z.string().trim().min(1).max(40).default("1기"),
-  bonusCredits: z.number().int().min(0).max(100).default(30),
+  bonusCredits: z.number().int().min(0).max(100).default(CHALLENGE_DAY_2_BONUS_CREDITS),
   accessEndsAt: z.string().trim().optional().default(""),
   adminNote: z.string().trim().max(1000).optional().default(""),
 });
@@ -130,9 +132,9 @@ async function grantChallengeCredits(params: {
     amount: params.amount,
     balanceAfter: updateResult.plan.credits,
     description: "challenge bonus credits",
-    adminNote: `${params.cohort} challenge enrollment`,
+    adminNote: `${params.cohort} challenge day 2 approval`,
     metadata: {
-      source: "challenge_enrollment",
+      source: "challenge_day_2_approval",
       cohort: params.cohort,
       adminEmail: params.adminEmail,
     },
@@ -215,8 +217,9 @@ export async function POST(request: NextRequest) {
 
     const existingEnrollment = (existing as EnrollmentRow | null) ?? null;
     let grantedCredits = 0;
+    const shouldGrantOnEnrollment = false;
 
-    if (!existingEnrollment || existingEnrollment.bonus_credits_granted === 0) {
+    if (shouldGrantOnEnrollment && (!existingEnrollment || existingEnrollment.bonus_credits_granted === 0)) {
       const grantResult = await grantChallengeCredits({
         admin,
         userId: targetUser.id,
@@ -238,7 +241,7 @@ export async function POST(request: NextRequest) {
       cohort: parsed.data.cohort,
       status: "active",
       access_ends_at: parsed.data.accessEndsAt || null,
-      bonus_credits_granted: existingEnrollment?.bonus_credits_granted || grantedCredits,
+      bonus_credits_granted: existingEnrollment?.bonus_credits_granted || 0,
       admin_note: parsed.data.adminNote || existingEnrollment?.admin_note || null,
     };
 
@@ -323,7 +326,48 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "제출물 업데이트에 실패했습니다." }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, submission: data as SubmissionRow });
+    const submission = data as SubmissionRow;
+
+    if (submission.day === 2 && parsed.data.status === "approved") {
+      const { data: enrollmentData, error: enrollmentError } = await admin
+        .from("challenge_enrollments")
+        .select("*")
+        .eq("id", submission.enrollment_id)
+        .single();
+
+      const enrollment = (enrollmentData as EnrollmentRow | null) ?? null;
+
+      if (enrollmentError || !enrollment) {
+        console.error("[Admin Challenge] day 2 bonus enrollment lookup error:", enrollmentError);
+        return NextResponse.json({ error: "2차 승인 크레딧 지급 대상 확인에 실패했습니다." }, { status: 500 });
+      }
+
+      if ((enrollment.bonus_credits_granted || 0) === 0) {
+        const grantResult = await grantChallengeCredits({
+          admin,
+          userId: submission.user_id,
+          amount: CHALLENGE_DAY_2_BONUS_CREDITS,
+          cohort: submission.cohort,
+          adminEmail: adminUser.email!,
+        });
+
+        if (!grantResult.success) {
+          return NextResponse.json({ error: "2차 승인 크레딧 지급에 실패했습니다." }, { status: 500 });
+        }
+
+        const { error: updateEnrollmentError } = await admin
+          .from("challenge_enrollments")
+          .update({ bonus_credits_granted: grantResult.granted })
+          .eq("id", enrollment.id);
+
+        if (updateEnrollmentError) {
+          console.error("[Admin Challenge] day 2 bonus mark error:", updateEnrollmentError);
+          return NextResponse.json({ error: "2차 승인 크레딧 지급 기록에 실패했습니다." }, { status: 500 });
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, submission });
   } catch (error) {
     console.error("[Admin Challenge] PATCH error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
