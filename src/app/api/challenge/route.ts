@@ -53,6 +53,20 @@ const submissionSchema = z.object({
     }),
 });
 
+const UNLOCKING_SUBMISSION_STATUSES = new Set(["submitted", "reviewed", "approved", "needs_revision"]);
+
+function hasUnlockedSubmission(rows: SubmissionRow[], day: number) {
+  return rows.some((row) => row.day === day && UNLOCKING_SUBMISSION_STATUSES.has(row.status));
+}
+
+function canSubmitChallengeDay(day: number, rows: SubmissionRow[]) {
+  if (day === 1 || day === 5) return true;
+  if (day === 2) return hasUnlockedSubmission(rows, 1);
+  if (day === 3) return hasUnlockedSubmission(rows, 2);
+  if (day === 4) return hasUnlockedSubmission(rows, 3);
+  return false;
+}
+
 function getBoardLabel(day: number) {
   if (day === 4) return "수강후기";
   if (day === 5) return "질문";
@@ -254,6 +268,25 @@ export async function POST(request: NextRequest) {
     }
 
     const { day, title, content, referenceUrl } = parsed.data;
+
+    const { data: existingSubmissions, error: existingSubmissionsError } = await admin
+      .from("challenge_mission_submissions")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("cohort", enrollment!.cohort);
+
+    if (existingSubmissionsError) {
+      console.error("[Challenge API] submissions gate load error:", existingSubmissionsError);
+      return NextResponse.json({ error: "誘몄뀡 ?쒖텧 ?댁뿭??遺덈윭?ㅼ? 紐삵뻽?듬땲??" }, { status: 500 });
+    }
+
+    if (!canSubmitChallengeDay(day, ((existingSubmissions || []) as SubmissionRow[]))) {
+      return NextResponse.json(
+        { error: "?댁쟾 李⑥닔 誘몄뀡???쇱꽑 ?쒖텧?댁빞 ?⑸땲??" },
+        { status: 403 },
+      );
+    }
+
     const payload = {
       enrollment_id: enrollment!.id,
       user_id: user.id,

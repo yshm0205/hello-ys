@@ -177,6 +177,21 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   needs_revision: { label: "보완", color: "orange" },
 };
 
+const UNLOCKING_SUBMISSION_STATUSES = new Set(["submitted", "reviewed", "approved", "needs_revision"]);
+
+function hasUnlockedSubmission(submissionsByDay: Map<number, MissionSubmission>, day: number) {
+  const submission = submissionsByDay.get(day);
+  return Boolean(submission && UNLOCKING_SUBMISSION_STATUSES.has(submission.status));
+}
+
+function isChallengeDayUnlocked(day: number, submissionsByDay: Map<number, MissionSubmission>) {
+  if (day === 1 || day === 5) return true;
+  if (day === 2) return hasUnlockedSubmission(submissionsByDay, 1);
+  if (day === 3) return hasUnlockedSubmission(submissionsByDay, 2);
+  if (day === 4) return hasUnlockedSubmission(submissionsByDay, 3);
+  return false;
+}
+
 function formatDate(value: string | null) {
   if (!value) return "-";
   const date = new Date(value);
@@ -246,6 +261,14 @@ export function ChallengeContent() {
     });
     return entries;
   }, [data?.submissions]);
+
+  const unlockedDays = useMemo(() => {
+    return new Set<number>(
+      DAY_GUIDES.filter((guide) => isChallengeDayUnlocked(guide.day, submissionsByDay)).map(
+        (guide) => guide.day,
+      ),
+    );
+  }, [submissionsByDay]);
 
   const activeGuide = DAY_GUIDES.find((item) => item.day === activeDay) || null;
   const activeSubmission = activeDay ? submissionsByDay.get(activeDay) : undefined;
@@ -375,6 +398,10 @@ export function ChallengeContent() {
   }
 
   function selectGuide(day: number) {
+    if (!unlockedDays.has(day)) {
+      return;
+    }
+
     const guide = getGuide(day);
     const submission = submissionsByDay.get(day);
 
@@ -689,6 +716,7 @@ export function ChallengeContent() {
             {missionTasks.map((task) => {
               const submission = submissionsByDay.get(task.day);
               const status = getStatus(submission);
+              const unlocked = unlockedDays.has(task.day);
               return (
                 <Box
                   key={task.day}
@@ -717,26 +745,39 @@ export function ChallengeContent() {
                       </Text>
                     </Box>
                     <Group gap={6} wrap="nowrap">
-                      <Button
-                        component={Link}
-                        href={task.href}
-                        prefetch={false}
-                        size="xs"
-                        color="violet"
-                        variant="light"
-                        radius={4}
-                        style={{ flex: 1 }}
-                      >
-                        {task.actionLabel}
-                      </Button>
+                      {unlocked ? (
+                        <Button
+                          component={Link}
+                          href={task.href}
+                          prefetch={false}
+                          size="xs"
+                          color="violet"
+                          variant="light"
+                          radius={4}
+                          style={{ flex: 1 }}
+                        >
+                          {task.actionLabel}
+                        </Button>
+                      ) : (
+                        <Button
+                          size="xs"
+                          color="gray"
+                          variant="light"
+                          radius={4}
+                          disabled
+                          style={{ flex: 1 }}
+                        >
+                          {task.actionLabel}
+                        </Button>
+                      )}
                       <Button
                         size="xs"
                         color="violet"
                         variant={submission ? "light" : "filled"}
                         radius={4}
                         onClick={() => openComposer(task.day)}
-                        disabled={!data.canSubmit}
-                        style={{ flex: 1, background: submission ? undefined : BRAND.primary }}
+                        disabled={!data.canSubmit || !unlocked}
+                        style={{ flex: 1, background: !submission && unlocked ? BRAND.primary : undefined }}
                       >
                         {submission ? "인증 수정" : task.submitLabel}
                       </Button>
@@ -813,6 +854,7 @@ export function ChallengeContent() {
               </Badge>
               {DAY_GUIDES.map((guide) => {
                 const submission = submissionsByDay.get(guide.day);
+                const unlocked = unlockedDays.has(guide.day);
                 return (
                   <Button
                     key={guide.day}
@@ -821,6 +863,7 @@ export function ChallengeContent() {
                     color={submission ? "violet" : "gray"}
                     radius={4}
                     onClick={() => openComposer(guide.day)}
+                    disabled={!unlocked}
                     style={submission ? { color: BRAND.primaryDark } : undefined}
                   >
                     {guide.board}
@@ -1136,15 +1179,19 @@ export function ChallengeContent() {
               {DAY_GUIDES.map((guide) => {
                 const selected = activeDay === guide.day;
                 const submission = submissionsByDay.get(guide.day);
+                const unlocked = unlockedDays.has(guide.day);
                 return (
                   <UnstyledButton
                     key={guide.day}
                     onClick={() => selectGuide(guide.day)}
+                    disabled={!unlocked}
                     style={{
                       border: `1px solid ${selected ? BRAND.primary : BRAND.line}`,
                       borderRadius: 4,
                       background: selected ? BRAND.soft : "#fff",
                       padding: 12,
+                      cursor: unlocked ? "pointer" : "not-allowed",
+                      opacity: unlocked ? 1 : 0.45,
                     }}
                   >
                     <Group justify="space-between" gap="xs" wrap="nowrap" mb={4}>

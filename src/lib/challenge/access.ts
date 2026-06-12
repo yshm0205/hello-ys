@@ -5,14 +5,23 @@ import type { EffectiveCreditInfo } from "@/lib/plans/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export const CHALLENGE_LECTURE_VOD_IDS = ["vod_04", "vod_08"] as const;
+export const INITIAL_CHALLENGE_LECTURE_VOD_IDS = ["vod_04"] as const;
+export const DAY_2_CHALLENGE_LECTURE_VOD_IDS = ["vod_08"] as const;
 
 const CHALLENGE_LECTURE_VOD_ID_SET = new Set<string>(CHALLENGE_LECTURE_VOD_IDS);
+const UNLOCKING_SUBMISSION_STATUSES = ["submitted", "reviewed", "approved", "needs_revision"];
 
 type ChallengeEnrollmentRow = {
   id: string;
+  cohort: string;
   status: string;
   access_starts_at: string;
   access_ends_at: string | null;
+};
+
+type ChallengeSubmissionRow = {
+  day: number;
+  status: string;
 };
 
 export type LectureAccess =
@@ -40,7 +49,7 @@ export async function getActiveChallengeEnrollment(userId: string) {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("challenge_enrollments")
-    .select("id, status, access_starts_at, access_ends_at")
+    .select("id, cohort, status, access_starts_at, access_ends_at")
     .eq("user_id", userId)
     .eq("status", "active")
     .order("created_at", { ascending: false })
@@ -56,6 +65,34 @@ export async function getActiveChallengeEnrollment(userId: string) {
   return isChallengeEnrollmentActive(row) ? row : null;
 }
 
+async function getChallengeSubmissionDays(userId: string, cohort: string) {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("challenge_mission_submissions")
+    .select("day, status")
+    .eq("user_id", userId)
+    .eq("cohort", cohort)
+    .in("status", UNLOCKING_SUBMISSION_STATUSES);
+
+  if (error) {
+    console.error("[ChallengeAccess] Failed to load submissions:", error);
+    return new Set<number>();
+  }
+
+  return new Set(((data || []) as ChallengeSubmissionRow[]).map((row) => row.day));
+}
+
+async function getAllowedChallengeLectureVodIds(userId: string, enrollment: ChallengeEnrollmentRow) {
+  const submittedDays = await getChallengeSubmissionDays(userId, enrollment.cohort);
+  const allowedVodIds: string[] = [...INITIAL_CHALLENGE_LECTURE_VOD_IDS];
+
+  if (submittedDays.has(1)) {
+    allowedVodIds.push(...DAY_2_CHALLENGE_LECTURE_VOD_IDS);
+  }
+
+  return allowedVodIds;
+}
+
 export async function getLectureAccessForUser(
   userId: string,
   plan: EffectiveCreditInfo | null | undefined,
@@ -66,7 +103,10 @@ export async function getLectureAccessForUser(
 
   const enrollment = await getActiveChallengeEnrollment(userId);
   if (enrollment) {
-    return { mode: "challenge", allowedVodIds: CHALLENGE_LECTURE_VOD_IDS };
+    return {
+      mode: "challenge",
+      allowedVodIds: await getAllowedChallengeLectureVodIds(userId, enrollment),
+    };
   }
 
   return { mode: "none", allowedVodIds: [] };
@@ -79,6 +119,6 @@ export async function canAccessLectureVod(
 ) {
   const access = await getLectureAccessForUser(userId, plan);
   if (access.mode === "full") return true;
-  if (access.mode === "challenge") return isChallengeLectureVod(vodId);
+  if (access.mode === "challenge") return access.allowedVodIds.includes(vodId);
   return false;
 }
