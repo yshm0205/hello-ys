@@ -457,7 +457,7 @@ export function ChallengeAdminClient() {
                   onValueChange={(value) =>
                     patchEnrollment(row.id, {
                       discountStatus: value,
-                      discountAmount: value === "granted" || value === "candidate" ? 50000 : 0,
+                      discountAmount: value === "granted" || value === "candidate" ? 20000 : 0,
                     })
                   }
                   disabled={saving === row.id}
