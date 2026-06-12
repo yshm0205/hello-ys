@@ -88,6 +88,8 @@ const APPLICATION_URL =
   "https://steep-radar-52f.notion.site/e45579f5dd6d43d0878a86b3869d7b54";
 const CHALLENGE_GUIDE_URL =
   "https://app.notion.com/p/3-36f847bd025f81709723e03f5d4c3da4?pvs=48";
+const FLOWSPOT_USAGE_GUIDE_URL =
+  "https://app.notion.com/p/FlowSpot-362847bd025f8050b03ce759b7ac39b0";
 
 const NOTICE_SECTIONS = [
   {
@@ -152,6 +154,7 @@ const DAY_GUIDES = [
     badge: "VOD 04",
     description:
       "레드오션도 블루오션으로 바꾸는 채널 조합법을 보고, 내가 가져갈 쇼핑 채널 방향을 정리합니다.",
+    actions: [{ label: "VOD 04 보러가기", href: "/dashboard/lectures/vod_04" }],
     template:
       "1. 내가 만들 쇼핑 쇼츠 채널 방향:\n2. 이 채널이 보는 사람:\n3. 흔한 쇼핑 채널과 다르게 가져갈 포인트:\n4. 지금 막히는 부분 또는 질문:",
     placeholder:
@@ -164,6 +167,7 @@ const DAY_GUIDES = [
     badge: "VOD 08",
     description:
       "내 채널에 맞는 상품 또는 소재 후보 3개를 뽑고, 왜 이 소재가 맞는지 적습니다.",
+    actions: [{ label: "VOD 08 보러가기", href: "/dashboard/lectures/vod_08" }],
     template:
       "1. 소재 후보 1 + 고른 이유:\n2. 소재 후보 2 + 고른 이유:\n3. 소재 후보 3 + 고른 이유:\n4. 이 중 가장 먼저 만들고 싶은 소재:",
     placeholder:
@@ -175,7 +179,11 @@ const DAY_GUIDES = [
     title: "FlowSpot으로 첫 쇼츠 스크립트 만들기",
     badge: "실습",
     description:
-      "FlowSpot으로 만든 첫 쇼츠 스크립트를 제출합니다. 영상 피드백을 받고 싶다면 참고 링크 칸에 영상 링크를 넣습니다.",
+      "FlowSpot 사용 가이드를 보고 첫 쇼츠 스크립트를 제출합니다. 영상 피드백을 받고 싶다면 참고 링크 칸에 영상 링크를 넣습니다.",
+    actions: [
+      { label: "FlowSpot 사용 가이드", href: FLOWSPOT_USAGE_GUIDE_URL, external: true },
+      { label: "FlowSpot 열기", href: "/dashboard/batch" },
+    ],
     template:
       "1. 선택한 소재/상품:\n2. FlowSpot으로 만든 스크립트 요약:\n3. 마음에 드는 훅 또는 장면:\n4. 수정하고 싶은 부분:\n5. 영상 피드백 신청 여부:",
     placeholder:
@@ -188,6 +196,7 @@ const DAY_GUIDES = [
     badge: "후기",
     description:
       "강의를 보거나 FlowSpot을 써보며 막혔던 점, 달라진 점, 앞으로 적용할 방향을 남깁니다.",
+    actions: [],
     template:
       "1. 시작 전 막혔던 점:\n2. 강의 또는 FlowSpot을 써보고 달라진 점:\n3. 가장 도움이 된 부분:\n4. 앞으로 만들 쇼츠 방향:\n5. 다른 참여자에게 해주고 싶은 말:",
     placeholder:
@@ -200,6 +209,7 @@ const DAY_GUIDES = [
     badge: "Q&A",
     description:
       "채널 방향, 소재 선정, 스크립트 작성, 프로그램 사용 중 막히는 지점을 질문합니다.",
+    actions: [],
     template:
       "1. 지금 막힌 부분:\n2. 시도해본 것:\n3. 보고 있는 채널 또는 소재:\n4. 답변받고 싶은 질문:",
     placeholder:
@@ -1421,9 +1431,32 @@ export function ChallengeContent() {
               />
 
               <Group justify="space-between">
-                <Anchor component={Link} href="/dashboard/batch" size="sm" c="violet">
-                  FlowSpot으로 스크립트 만들기
-                </Anchor>
+                <Group gap="sm">
+                  {activeGuide.actions.map((action) =>
+                    "external" in action && action.external ? (
+                      <Anchor
+                        key={action.label}
+                        href={action.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        size="sm"
+                        c="violet"
+                      >
+                        {action.label}
+                      </Anchor>
+                    ) : (
+                      <Anchor
+                        key={action.label}
+                        component={Link}
+                        href={action.href}
+                        size="sm"
+                        c="violet"
+                      >
+                        {action.label}
+                      </Anchor>
+                    ),
+                  )}
+                </Group>
                 <Button
                   color="violet"
                   radius={4}
