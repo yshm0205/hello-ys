@@ -19,6 +19,9 @@ import {
 
 const REFUND_FORM_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform';
+const DEFAULT_LATPEED_ALLINONE_URL = 'https://www.latpeed.com/products/XMX_O/pay?theme=dark';
+const LATPEED_ALLINONE_URL =
+  process.env.NEXT_PUBLIC_LATPEED_ALLINONE_URL?.trim() || DEFAULT_LATPEED_ALLINONE_URL;
 
 const checkoutItems = [
   {
@@ -133,6 +136,7 @@ export function AllInOneCheckoutContent({
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   const finalCheckoutAmount = appliedCoupon?.finalAmount ?? plan.amount;
+  const hasLatpeedCheckout = Boolean(LATPEED_ALLINONE_URL) && !appliedCoupon;
   const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
   const totalDiscountAmount = Math.max(0, plan.listAmount - finalCheckoutAmount);
   const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
@@ -238,6 +242,44 @@ export function AllInOneCheckoutContent({
     }
   };
 
+  const handleCardCheckout = async () => {
+    if (!isAuthenticated) {
+      redirectToLogin();
+      return;
+    }
+
+    if (!canOpenPayment) return;
+
+    if (!LATPEED_ALLINONE_URL) {
+      setError('카드/간편결제 링크가 아직 설정되지 않았습니다.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/latpeed/intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.redirectUrl) {
+        setError(data.error || '카드/간편결제 준비에 실패했습니다.');
+        return;
+      }
+
+      window.location.assign(data.redirectUrl);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : '카드/간편결제 준비 중 오류가 발생했습니다.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePrimaryAction = async () => {
     if (!isAuthenticated) {
       redirectToLogin();
@@ -245,6 +287,7 @@ export function AllInOneCheckoutContent({
     }
 
     if (!canOpenPayment) return;
+
     await handleTossPayCheckout();
   };
 
@@ -953,6 +996,38 @@ export function AllInOneCheckoutContent({
           cursor: not-allowed;
         }
 
+        .fs-card-checkout {
+          display: grid;
+          gap: 8px;
+          padding: 12px 14px;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          background: #fafafa;
+        }
+
+        .fs-card-checkout span {
+          color: #52525b;
+          font-size: 12px;
+          line-height: 1.5;
+        }
+
+        .fs-card-pay-button {
+          width: 100%;
+          min-height: 44px;
+          border: 1px solid #d4d4d8;
+          border-radius: 12px;
+          background: #ffffff;
+          color: #27272a;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .fs-card-pay-button:disabled {
+          background: #f4f4f5;
+          color: #a1a1aa;
+          cursor: not-allowed;
+        }
+
         .fs-secondary-button {
           width: 100%;
           min-height: 42px;
@@ -1450,6 +1525,27 @@ export function AllInOneCheckoutContent({
                   >
                     {loading ? '결제창 여는 중...' : primaryLabel}
                   </button>
+
+                  {hasLatpeedCheckout && (
+                    <div className="fs-card-checkout">
+                      <span>
+                        카드/간편결제는 별도 결제창에서 진행됩니다. 결제창에 입력하는 이메일은
+                        FlowSpot 가입/로그인 이메일과 동일해야 권한 지급이 가능합니다.
+                      </span>
+                      <button
+                        type="button"
+                        className="fs-card-pay-button"
+                        data-marketing-cta="purchase"
+                        data-cta-id="checkout-card-pay"
+                        data-cta-label="카드/간편결제 결제창 열기"
+                        data-cta-target="/api/latpeed/intent"
+                        disabled={primaryDisabled || loading}
+                        onClick={handleCardCheckout}
+                      >
+                        {loading ? '결제창 여는 중...' : '카드/간편결제로 결제하기'}
+                      </button>
+                    </div>
+                  )}
 
                   <button
                     type="button"

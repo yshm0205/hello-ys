@@ -175,7 +175,18 @@ export default async function AdminSalesPage({
               </thead>
               <tbody className="text-foreground">
                 {payments.length > 0 ? (
-                  payments.map((payment) => (
+                  payments.map((payment) => {
+                    const provider =
+                      typeof payment.metadata?.provider === "string"
+                        ? payment.metadata.provider
+                        : null;
+                    const canCancelInApp = Boolean(
+                      payment.payment_key &&
+                      CANCELLABLE_STATUSES.has(payment.status) &&
+                      provider !== "latpeed",
+                    );
+
+                    return (
                     <tr key={payment.id} className="border-b bg-white">
                       <td className="px-4 py-3">
                         {new Date(payment.created_at).toLocaleDateString("ko-KR")}
@@ -193,17 +204,19 @@ export default async function AdminSalesPage({
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {payment.payment_key && CANCELLABLE_STATUSES.has(payment.status) ? (
+                        {canCancelInApp ? (
                           <RefundPaymentButton
-                            paymentKey={payment.payment_key}
+                            paymentKey={payment.payment_key || ""}
                             orderName={payment.order_name}
                             amount={payment.amount}
                             provider={
-                              payment.metadata?.provider === "tosspay-direct"
+                              provider === "tosspay-direct"
                                 ? "tosspay-direct"
                                 : "portone"
                             }
                           />
+                        ) : provider === "latpeed" && payment.status === "DONE" ? (
+                          <span className="text-xs text-zinc-400">래피드에서 환불</span>
                         ) : payment.status === "PENDING" ? (
                           <span className="text-xs text-zinc-400">미결제</span>
                         ) : (
@@ -211,7 +224,8 @@ export default async function AdminSalesPage({
                         )}
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">

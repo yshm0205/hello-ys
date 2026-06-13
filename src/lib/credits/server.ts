@@ -41,6 +41,12 @@ type CreditTransactionInput = {
   adminNote?: string | null;
   referenceId?: string | null;
   metadata?: Record<string, unknown> | null;
+  eventType?: string;
+  action?: string | null;
+  subscriptionCreditsDelta?: number;
+  purchasedCreditsDelta?: number;
+  subscriptionCreditsBalance?: number;
+  purchasedCreditsBalance?: number;
 };
 
 type CreditPlanRow = {
@@ -183,8 +189,26 @@ export async function recordCreditTransaction({
   adminNote = null,
   referenceId = null,
   metadata = null,
+  eventType,
+  action,
+  subscriptionCreditsDelta,
+  purchasedCreditsDelta,
+  subscriptionCreditsBalance,
+  purchasedCreditsBalance,
 }: CreditTransactionInput) {
   const adminClient = createAdminClient();
+
+  const resolvedEventType =
+    eventType ??
+    (type === "usage"
+      ? "deduct"
+      : type === "charge"
+        ? "purchase"
+        : type);
+  const resolvedAction =
+    action ??
+    (typeof metadata?.action === "string" ? metadata.action : null);
+
   const { error } = await adminClient.from("credit_transactions").insert({
     user_id: userId,
     type,
@@ -194,6 +218,13 @@ export async function recordCreditTransaction({
     admin_note: adminNote,
     reference_id: referenceId,
     metadata,
+    event_type: resolvedEventType,
+    action: resolvedAction,
+    subscription_credits_delta: subscriptionCreditsDelta ?? 0,
+    purchased_credits_delta: purchasedCreditsDelta ?? 0,
+    subscription_credits_balance: subscriptionCreditsBalance ?? 0,
+    purchased_credits_balance: purchasedCreditsBalance ?? 0,
+    total_credits_balance: balanceAfter,
   });
 
   if (error) {
