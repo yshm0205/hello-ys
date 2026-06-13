@@ -7,6 +7,7 @@ import {
   recordCreditTransaction,
   updateCreditPlanBalances,
 } from "@/lib/credits/server";
+import { validateCheckoutCoupon } from "@/lib/payments/coupons";
 import { buildGrantSnapshotMetadata } from "@/lib/payments/grant-snapshot";
 import { isActiveAccessPlan, TOSSPAY_PLAN_CONFIG } from "@/lib/plans/config";
 import { notifyTelegramPaymentCompleted } from "@/lib/telegram/payments";
@@ -59,6 +60,7 @@ const EVENT_TABLE = "latpeed_webhook_events";
 const INTENT_TABLE = "latpeed_payment_intents";
 const CHALLENGE_WEBHOOK_PURPOSE = "challenge";
 const DEFAULT_CHALLENGE_COHORT = "1기";
+const CHALLENGE_DISCOUNT_COUPON_CODE = "CHALLENGE20";
 
 type LatpeedPaymentIntentRow = {
   id: string;
@@ -483,11 +485,6 @@ async function handleSuccess(input: {
   const { admin, payment, payload, eventKey, orderId, signupEmail, amount, paidAt } = input;
   const config = TOSSPAY_PLAN_CONFIG.allinone;
 
-  if (amount !== config.amount) {
-    await updateEventStatus(admin, eventKey, "failed", `amount_mismatch:${amount}`);
-    return { ok: true, status: "amount_mismatch" };
-  }
-
   const { data: existing } = await admin
     .from("toss_payments")
     .select("id, status")
@@ -534,6 +531,24 @@ async function handleSuccess(input: {
     return { ok: true, status: "user_not_found" };
   }
 
+  const discountCoupon =
+    amount === config.amount
+      ? null
+      : await validateCheckoutCoupon({
+          couponCode: CHALLENGE_DISCOUNT_COUPON_CODE,
+          context: "allinone",
+          originalAmount: config.amount,
+          userId: user.id,
+        }).catch((error) => {
+          console.error("[Latpeed Webhook] discount validation failed:", error);
+          return null;
+        });
+
+  if (amount !== config.amount && (!discountCoupon?.ok || discountCoupon.finalAmount !== amount)) {
+    await updateEventStatus(admin, eventKey, "failed", `amount_mismatch:${amount}`, user.id);
+    return { ok: true, status: "amount_mismatch" };
+  }
+
   const currentPlan = await loadCreditPlanSnapshot(admin, user.id);
   const hasActiveAccess = isActiveAccessPlan(currentPlan?.planType, currentPlan?.expiresAt);
   const hasMatchedIntent = Boolean(matchingIntent && matchingIntent.user_id === user.id);
@@ -573,6 +588,17 @@ async function handleSuccess(input: {
     latpeedIntentCreatedAt: matchingIntent?.created_at || null,
     latpeedIntentExpiresAt: matchingIntent?.expires_at || null,
     latpeedAutoGrantWithoutIntent: !hasMatchedIntent,
+    ...(discountCoupon?.ok
+      ? {
+          couponCode: discountCoupon.coupon.code,
+          couponLabel: discountCoupon.coupon.label,
+          couponDescription: discountCoupon.coupon.description,
+          couponDiscount: discountCoupon.discountAmount,
+          couponOriginalAmount: discountCoupon.originalAmount,
+          couponFinalAmount: discountCoupon.finalAmount,
+          couponExpiresAt: discountCoupon.coupon.expiresAt || null,
+        }
+      : {}),
     flowspotUserName: user.full_name,
     manualReviewReason,
     ...grantSnapshot,

@@ -1,4 +1,6 @@
 import { AllInOneCheckoutContent } from '@/components/checkout/AllInOneCheckoutContent';
+import { validateCheckoutCoupon } from '@/lib/payments/coupons';
+import { TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
 import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
@@ -19,7 +21,7 @@ export default async function AllInOneCheckoutPage({
         ? (await (await createClient()).auth.getUser()).data.user
         : null;
     const resolvedSearchParams = searchParams ? await searchParams : undefined;
-    const initialCouponCode =
+    let initialCouponCode =
         typeof resolvedSearchParams?.coupon === 'string'
             ? resolvedSearchParams.coupon
             : '';
@@ -29,6 +31,19 @@ export default async function AllInOneCheckoutPage({
             : '';
     const wasCancelled = resolvedSearchParams?.cancelled === '1';
     const creditInfo = user ? await getEffectiveCreditInfo(user.id) : null;
+
+    if (!initialCouponCode && user) {
+        const challengeCoupon = await validateCheckoutCoupon({
+            couponCode: 'CHALLENGE20',
+            context: 'allinone',
+            originalAmount: TOSSPAY_PLAN_CONFIG.allinone.amount,
+            userId: user.id,
+        }).catch(() => null);
+
+        if (challengeCoupon?.ok) {
+            initialCouponCode = challengeCoupon.coupon.code;
+        }
+    }
 
     return (
         <AllInOneCheckoutContent

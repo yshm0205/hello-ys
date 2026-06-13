@@ -22,6 +22,9 @@ const REFUND_FORM_URL =
 const DEFAULT_LATPEED_ALLINONE_URL = 'https://www.latpeed.com/products/XMX_O/pay?theme=dark';
 const LATPEED_ALLINONE_URL =
   process.env.NEXT_PUBLIC_LATPEED_ALLINONE_URL?.trim() || DEFAULT_LATPEED_ALLINONE_URL;
+const LATPEED_CHALLENGE_DISCOUNT_URL =
+  process.env.NEXT_PUBLIC_LATPEED_CHALLENGE_DISCOUNT_URL?.trim() || '';
+const CHALLENGE_COUPON_CODES = new Set(['CHALLENGE1', 'CHALLENGE20']);
 
 const checkoutItems = [
   {
@@ -139,7 +142,12 @@ export function AllInOneCheckoutContent({
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   const finalCheckoutAmount = appliedCoupon?.finalAmount ?? plan.amount;
-  const hasLatpeedCheckout = Boolean(LATPEED_ALLINONE_URL) && !appliedCoupon;
+  const hasChallengeDiscount = Boolean(
+    appliedCoupon && CHALLENGE_COUPON_CODES.has(appliedCoupon.code),
+  );
+  const hasLatpeedCheckout = hasChallengeDiscount
+    ? Boolean(LATPEED_CHALLENGE_DISCOUNT_URL)
+    : Boolean(LATPEED_ALLINONE_URL) && !appliedCoupon;
   const activePaymentMethod: PaymentMethod = hasLatpeedCheckout ? selectedPaymentMethod : 'toss';
   const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
   const totalDiscountAmount = Math.max(0, plan.listAmount - finalCheckoutAmount);
@@ -254,7 +262,7 @@ export function AllInOneCheckoutContent({
 
     if (!canOpenPayment) return;
 
-    if (!LATPEED_ALLINONE_URL) {
+    if (!hasLatpeedCheckout) {
       setError('카드/간편결제 링크가 아직 설정되지 않았습니다.');
       return;
     }
@@ -266,6 +274,9 @@ export function AllInOneCheckoutContent({
       const res = await fetch('/api/latpeed/intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          couponCode: appliedCoupon?.code || null,
+        }),
       });
       const data = await res.json().catch(() => ({}));
 

@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { validateCheckoutCoupon } from "@/lib/payments/coupons";
 import { isActiveAccessPlan, TOSSPAY_PLAN_CONFIG } from "@/lib/plans/config";
 import { getEffectiveCreditInfo } from "@/lib/plans/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
 const DEFAULT_LATPEED_ALLINONE_URL = "https://www.latpeed.com/products/XMX_O/pay?theme=dark";
+const LATPEED_CHALLENGE_DISCOUNT_URL =
+  process.env.NEXT_PUBLIC_LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
+  process.env.LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
+  "";
 
 function normalizeEmail(value?: string | null) {
   const email = (value || "").trim().toLowerCase();
@@ -28,17 +33,19 @@ function isMissingIntentTable(error: unknown) {
 }
 
 export async function POST(request: NextRequest) {
-  const redirectUrl =
+  const defaultRedirectUrl =
     process.env.NEXT_PUBLIC_LATPEED_ALLINONE_URL?.trim() ||
     process.env.LATPEED_ALLINONE_URL?.trim() ||
     DEFAULT_LATPEED_ALLINONE_URL;
 
-  if (!redirectUrl) {
+  if (!defaultRedirectUrl) {
     return NextResponse.json(
       { error: "카드/간편결제 링크가 아직 설정되지 않았습니다." },
       { status: 500 },
     );
   }
+
+  const body = (await request.json().catch(() => ({}))) as { couponCode?: string | null };
 
   const supabase = await createClient();
   const {
@@ -82,6 +89,30 @@ export async function POST(request: NextRequest) {
   }
 
   const plan = TOSSPAY_PLAN_CONFIG.allinone;
+  const couponResult = body.couponCode
+    ? await validateCheckoutCoupon({
+        couponCode: body.couponCode,
+        context: "allinone",
+        originalAmount: plan.amount,
+        userId: user.id,
+      })
+    : null;
+
+  if (couponResult && !couponResult.ok) {
+    return NextResponse.json({ error: couponResult.message }, { status: 400 });
+  }
+
+  const appliedCoupon = couponResult && couponResult.ok ? couponResult : null;
+  const redirectUrl = appliedCoupon ? LATPEED_CHALLENGE_DISCOUNT_URL : defaultRedirectUrl;
+  const checkoutAmount = appliedCoupon?.finalAmount ?? plan.amount;
+
+  if (!redirectUrl) {
+    return NextResponse.json(
+      { error: "할인 카드/간편결제 링크가 아직 설정되지 않았습니다." },
+      { status: 500 },
+    );
+  }
+
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
@@ -89,13 +120,19 @@ export async function POST(request: NextRequest) {
     user_id: user.id,
     user_email: email,
     user_name: userName || null,
-    amount: plan.amount,
+    amount: checkoutAmount,
     status: "pending",
     expires_at: expiresAt.toISOString(),
     metadata: {
       provider: "latpeed",
       planType: "allinone",
       paymentKind: plan.paymentKind,
+      couponCode: appliedCoupon?.coupon.code || null,
+      couponLabel: appliedCoupon?.coupon.label || null,
+      couponDiscount: appliedCoupon?.discountAmount || 0,
+      couponOriginalAmount: appliedCoupon?.originalAmount || plan.amount,
+      couponFinalAmount: appliedCoupon?.finalAmount || plan.amount,
+      couponExpiresAt: appliedCoupon?.coupon.expiresAt || null,
       userAgent: request.headers.get("user-agent"),
       referer: request.headers.get("referer"),
     },
