@@ -57,6 +57,8 @@ const PLAN_TYPE = "allinone";
 const PROVIDER = "latpeed";
 const EVENT_TABLE = "latpeed_webhook_events";
 const INTENT_TABLE = "latpeed_payment_intents";
+const CHALLENGE_WEBHOOK_PURPOSE = "challenge";
+const DEFAULT_CHALLENGE_COHORT = "1기";
 
 type LatpeedPaymentIntentRow = {
   id: string;
@@ -116,6 +118,17 @@ function readAmount(value: unknown) {
   }
 
   return 0;
+}
+
+function normalizeChallengeCohort(value: string | null) {
+  const cohort = (value || "").trim();
+  return cohort || DEFAULT_CHALLENGE_COHORT;
+}
+
+function isChallengeWebhookRequest(request: NextRequest) {
+  const purpose = request.nextUrl.searchParams.get("purpose")?.trim().toLowerCase();
+  const grant = request.nextUrl.searchParams.get("grant")?.trim().toLowerCase();
+  return purpose === CHALLENGE_WEBHOOK_PURPOSE || grant === CHALLENGE_WEBHOOK_PURPOSE;
 }
 
 function readForms(payment: LatpeedPayment): LatpeedFormAnswer[] {
@@ -701,6 +714,87 @@ async function handleSuccess(input: {
   return { ok: true, status: "processed" };
 }
 
+async function handleChallengeSuccess(input: {
+  admin: ReturnType<typeof createAdminClient>;
+  eventKey: string;
+  signupEmail: string;
+  amount: number;
+  cohort: string;
+}) {
+  const { admin, eventKey, signupEmail, amount, cohort } = input;
+
+  if (amount !== 0) {
+    await updateEventStatus(admin, eventKey, "failed", `challenge_amount_mismatch:${amount}`);
+    return { ok: true, status: "challenge_amount_mismatch" };
+  }
+
+  const user = await findUserByEmail(admin, signupEmail);
+  if (!user) {
+    await updateEventStatus(admin, eventKey, "failed", "user_not_found");
+    console.warn("[Latpeed Webhook] challenge user not found:", signupEmail);
+    return { ok: true, status: "user_not_found" };
+  }
+
+  const now = new Date().toISOString();
+  const { error } = await admin.from("challenge_enrollments").upsert(
+    {
+      user_id: user.id,
+      email: signupEmail,
+      cohort,
+      status: "active",
+      access_starts_at: now,
+      access_ends_at: null,
+      admin_note: "Latpeed 0원 무료상품 웹훅으로 챌린지 권한 부여",
+    },
+    { onConflict: "user_id,cohort" },
+  );
+
+  if (error) {
+    console.error("[Latpeed Webhook] challenge enrollment upsert failed:", error);
+    await updateEventStatus(admin, eventKey, "failed", "challenge_enrollment_failed", user.id);
+    return { ok: true, status: "challenge_enrollment_failed" };
+  }
+
+  await updateEventStatus(admin, eventKey, "processed", undefined, user.id);
+  return { ok: true, status: "challenge_enrolled" };
+}
+
+async function handleChallengeCancel(input: {
+  admin: ReturnType<typeof createAdminClient>;
+  eventKey: string;
+  signupEmail: string;
+  cohort: string;
+}) {
+  const { admin, eventKey, signupEmail, cohort } = input;
+  const user = await findUserByEmail(admin, signupEmail);
+
+  if (!user) {
+    await updateEventStatus(admin, eventKey, "failed", "user_not_found");
+    console.warn("[Latpeed Webhook] challenge cancel user not found:", signupEmail);
+    return { ok: true, status: "user_not_found" };
+  }
+
+  const { error } = await admin
+    .from("challenge_enrollments")
+    .update({
+      status: "removed",
+      access_ends_at: new Date().toISOString(),
+      admin_note: "Latpeed 0원 무료상품 취소 웹훅으로 챌린지 권한 회수",
+    })
+    .eq("user_id", user.id)
+    .eq("cohort", cohort)
+    .eq("status", "active");
+
+  if (error) {
+    console.error("[Latpeed Webhook] challenge enrollment cancel failed:", error);
+    await updateEventStatus(admin, eventKey, "failed", "challenge_cancel_failed", user.id);
+    return { ok: true, status: "challenge_cancel_failed" };
+  }
+
+  await updateEventStatus(admin, eventKey, "processed", undefined, user.id);
+  return { ok: true, status: "challenge_removed" };
+}
+
 async function findOriginalLatpeedPayment(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
@@ -953,8 +1047,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, status: "duplicate" });
   }
 
-  const result =
-    paymentStatus === "SUCCESS"
+  const isChallengeWebhook = isChallengeWebhookRequest(request);
+  const cohort = normalizeChallengeCohort(request.nextUrl.searchParams.get("cohort"));
+  const result = isChallengeWebhook
+    ? paymentStatus === "SUCCESS"
+      ? await handleChallengeSuccess({
+          admin,
+          eventKey,
+          signupEmail,
+          amount,
+          cohort,
+        })
+      : await handleChallengeCancel({
+          admin,
+          eventKey,
+          signupEmail,
+          cohort,
+        })
+    : paymentStatus === "SUCCESS"
       ? await handleSuccess({
           admin,
           payload,
