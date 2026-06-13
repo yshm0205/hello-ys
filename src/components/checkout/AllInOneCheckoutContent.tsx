@@ -20,10 +20,13 @@ import {
 const REFUND_FORM_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSebxsymyHg8TKn5N_3XGr6CgTt0d-8tbmyDgqJkdNL3vbkzGg/viewform';
 const DEFAULT_LATPEED_ALLINONE_URL = 'https://www.latpeed.com/products/XMX_O/pay?theme=dark';
+const DEFAULT_LATPEED_CHALLENGE_DISCOUNT_URL =
+  'https://www.latpeed.com/products/WkgLh/pay?theme=dark';
 const LATPEED_ALLINONE_URL =
   process.env.NEXT_PUBLIC_LATPEED_ALLINONE_URL?.trim() || DEFAULT_LATPEED_ALLINONE_URL;
 const LATPEED_CHALLENGE_DISCOUNT_URL =
-  process.env.NEXT_PUBLIC_LATPEED_CHALLENGE_DISCOUNT_URL?.trim() || '';
+  process.env.NEXT_PUBLIC_LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
+  DEFAULT_LATPEED_CHALLENGE_DISCOUNT_URL;
 const CHALLENGE_COUPON_CODES = new Set(['CHALLENGE1', 'CHALLENGE20']);
 
 const checkoutItems = [

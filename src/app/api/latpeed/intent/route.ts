@@ -7,10 +7,12 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
 const DEFAULT_LATPEED_ALLINONE_URL = "https://www.latpeed.com/products/XMX_O/pay?theme=dark";
+const DEFAULT_LATPEED_CHALLENGE_DISCOUNT_URL =
+  "https://www.latpeed.com/products/WkgLh/pay?theme=dark";
 const LATPEED_CHALLENGE_DISCOUNT_URL =
   process.env.NEXT_PUBLIC_LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
   process.env.LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
-  "";
+  DEFAULT_LATPEED_CHALLENGE_DISCOUNT_URL;
 
 function normalizeEmail(value?: string | null) {
   const email = (value || "").trim().toLowerCase();
