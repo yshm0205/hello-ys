@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware(routing);
-const PUBLIC_SESSION_SKIP_PATHS = new Set(["/", "/pricing"]);
+const PUBLIC_SESSION_SKIP_PATHS = new Set(["/"]);
 const AUTH_OPTIONAL_PATHS = new Set(["/checkout/allinone"]);
 const PROTECTED_PATH_PREFIXES = ["/dashboard", "/settings", "/subscription", "/admin", "/checkout"];
 

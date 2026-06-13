@@ -8,7 +8,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // 기본 페이지들
   const staticPages = [
     { path: "", priority: 1.0, changeFreq: "weekly" as const },
-    { path: "/pricing", priority: 0.9, changeFreq: "weekly" as const },
     { path: "/blog", priority: 0.8, changeFreq: "daily" as const },
     { path: "/terms", priority: 0.3, changeFreq: "yearly" as const },
     { path: "/privacy", priority: 0.3, changeFreq: "yearly" as const },

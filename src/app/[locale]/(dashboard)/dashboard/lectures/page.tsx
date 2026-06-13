@@ -31,7 +31,7 @@ export default async function LecturesPage() {
             );
         }
 
-        redirect('/pricing');
+        redirect('/checkout/allinone?intent=pay');
     }
 
     const chapters = await getPublishedLectureChapters();

@@ -131,7 +131,6 @@ function getCurrentSectionName(sections: HTMLElement[]) {
 
 function isPurchaseCtaHref(href: string) {
   return (
-    href.includes("/pricing") ||
     href.includes("/login") ||
     href.includes("/checkout/allinone")
   );

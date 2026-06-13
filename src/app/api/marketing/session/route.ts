@@ -277,7 +277,7 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
     const durationSeconds = clampDuration(body.durationSeconds);
     const maxScrollPercent = clampScrollPercent(body.maxScrollPercent);
-    const pricingBump = pagePath.includes("/pricing") ? 1 : 0;
+    const pricingBump = pagePath.includes("/checkout/allinone") ? 1 : 0;
     const lastVisibleSection = normalizeNullable(body.lastVisibleSection, 120);
     const lastClickedCtaId = normalizeNullable(body.ctaId, 120);
     const lastClickedCtaLabel = normalizeNullable(body.ctaLabel, 160);

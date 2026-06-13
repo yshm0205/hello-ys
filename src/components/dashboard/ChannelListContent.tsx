@@ -792,8 +792,7 @@ function BlurOverlay({ total }: { total: number }) {
                     </Text>
                     <Button
                         component="a"
-                        href="https://flowspot-kr.vercel.app/#pricing"
-                        target="_blank"
+                        href="/checkout/allinone?intent=pay"
                         color="violet"
                         radius="md"
                         mt="xs"

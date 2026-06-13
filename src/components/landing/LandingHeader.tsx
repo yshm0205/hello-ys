@@ -22,7 +22,7 @@ import { AuthAwareButton } from './AuthAwareButton';
 
 const navLinks = [
   { label: '사용 방법', href: '#how-it-works' },
-  { label: '가격', href: '/pricing' },
+  { label: '가격', href: '/#pricing' },
   { label: 'FAQ', href: '#faq' },
 ];
 

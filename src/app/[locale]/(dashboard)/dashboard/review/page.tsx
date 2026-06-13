@@ -16,7 +16,7 @@ export default async function ReviewEventPage() {
 
   const plan = await getEffectiveCreditInfo(user.id);
   if (!isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
-    redirect("/pricing");
+    redirect("/checkout/allinone?intent=pay");
   }
 
   return <ReviewEventContent />;
