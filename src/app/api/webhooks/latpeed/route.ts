@@ -174,6 +174,16 @@ function buildHash(input: Record<string, unknown>) {
   return createHash("sha256").update(JSON.stringify(input)).digest("hex");
 }
 
+function buildRawEventKey(reason: string, payload: unknown) {
+  const hash = buildHash({
+    reason,
+    payload,
+    receivedAtBucket: new Date().toISOString().slice(0, 16),
+  });
+
+  return `latpeed_raw_${hash.slice(0, 48)}`;
+}
+
 function buildEventIdentity(
   type: LatpeedWebhookType,
   paymentStatus: LatpeedPaymentStatus,
@@ -237,6 +247,39 @@ async function tryInsertEvent(
 
   console.error("[Latpeed Webhook] event insert failed:", error);
   return { ok: false as const, error };
+}
+
+async function tryInsertRawEvent(
+  admin: ReturnType<typeof createAdminClient>,
+  input: {
+    reason: string;
+    payload: unknown;
+    eventType?: string;
+    paymentStatus?: string;
+    signupEmail?: string;
+    amount?: number;
+  },
+) {
+  const safePayload =
+    input.payload && typeof input.payload === "object"
+      ? (input.payload as Record<string, unknown>)
+      : { raw: input.payload ?? null };
+
+  const { error } = await admin.from(EVENT_TABLE).insert({
+    event_key: buildRawEventKey(input.reason, safePayload),
+    event_type: input.eventType || "UNKNOWN",
+    payment_status: input.paymentStatus || "UNKNOWN",
+    signup_email: input.signupEmail || null,
+    amount: Number.isFinite(input.amount) ? input.amount : null,
+    payload: safePayload,
+    status: "failed",
+    error_message: input.reason,
+    processed_at: new Date().toISOString(),
+  });
+
+  if (error && (error as { code?: string }).code !== "23505" && !isMissingEventTable(error)) {
+    console.error("[Latpeed Webhook] raw event insert failed:", error);
+  }
 }
 
 async function updateEventStatus(
@@ -802,29 +845,56 @@ export async function POST(request: NextRequest) {
 
   const payload = (await request.json().catch(() => null)) as LatpeedWebhookPayload | null;
   if (!payload || typeof payload !== "object" || !payload.payment) {
+    await tryInsertRawEvent(createAdminClient(), {
+      reason: "invalid_payload",
+      payload,
+    });
     return NextResponse.json({ ok: false, error: "invalid_payload" }, { status: 400 });
   }
 
   const type = readString(payload.type) as LatpeedWebhookType;
   const payment = payload.payment;
   const paymentStatus = readString(payment.status) as LatpeedPaymentStatus;
+  const admin = createAdminClient();
 
   if (type !== "NORMAL_PAYMENT") {
+    await tryInsertRawEvent(admin, {
+      reason: `unsupported_type:${type || "UNKNOWN"}`,
+      payload,
+      eventType: type || "UNKNOWN",
+      paymentStatus: paymentStatus || "UNKNOWN",
+      signupEmail: normalizeEmail(payment.email),
+      amount: readAmount(payment.amount),
+    });
     return NextResponse.json({ ok: true, skipped: "unsupported_type" });
   }
 
   if (paymentStatus !== "SUCCESS" && paymentStatus !== "CANCEL") {
+    await tryInsertRawEvent(admin, {
+      reason: `unsupported_status:${paymentStatus || "UNKNOWN"}`,
+      payload,
+      eventType: type,
+      paymentStatus: paymentStatus || "UNKNOWN",
+      signupEmail: normalizeEmail(payment.email),
+      amount: readAmount(payment.amount),
+    });
     return NextResponse.json({ ok: true, skipped: "unsupported_status" });
   }
 
   const amount = readAmount(payment.amount);
   const { email: signupEmail, source: signupEmailSource } = extractSignupEmail(payment);
   if (!signupEmail) {
+    await tryInsertRawEvent(admin, {
+      reason: "missing_signup_email",
+      payload,
+      eventType: type,
+      paymentStatus,
+      amount,
+    });
     return NextResponse.json({ ok: true, status: "missing_signup_email" });
   }
 
   const { eventKey, orderId } = buildEventIdentity(type, paymentStatus, payment, signupEmail);
-  const admin = createAdminClient();
   const event = await tryInsertEvent(admin, {
     eventKey,
     type,
