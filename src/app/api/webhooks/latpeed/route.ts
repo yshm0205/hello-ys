@@ -131,6 +131,12 @@ function isChallengeWebhookRequest(request: NextRequest) {
   return purpose === CHALLENGE_WEBHOOK_PURPOSE || grant === CHALLENGE_WEBHOOK_PURPOSE;
 }
 
+function shouldHandleAsChallenge(request: NextRequest, amount: number) {
+  // The only 0 KRW Latpeed product we operate is the free challenge entry.
+  // This keeps access grants working even if the Latpeed webhook URL misses the purpose query.
+  return isChallengeWebhookRequest(request) || amount === 0;
+}
+
 function readForms(payment: LatpeedPayment): LatpeedFormAnswer[] {
   return Array.isArray(payment.forms) ? (payment.forms as LatpeedFormAnswer[]) : [];
 }
@@ -1047,7 +1053,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, status: "duplicate" });
   }
 
-  const isChallengeWebhook = isChallengeWebhookRequest(request);
+  const isChallengeWebhook = shouldHandleAsChallenge(request, amount);
   const cohort = normalizeChallengeCohort(request.nextUrl.searchParams.get("cohort"));
   const result = isChallengeWebhook
     ? paymentStatus === "SUCCESS"
