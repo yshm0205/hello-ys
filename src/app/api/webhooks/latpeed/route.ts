@@ -31,6 +31,7 @@ type LatpeedPayment = {
   method?: unknown;
   canceledReason?: unknown;
   option?: unknown;
+  orderId?: unknown;
   forms?: unknown;
   agreements?: unknown;
 };
@@ -190,6 +191,16 @@ function buildEventIdentity(
   payment: LatpeedPayment,
   signupEmail: string,
 ) {
+  const latpeedOrderId = readString(payment.orderId);
+  if (latpeedOrderId) {
+    const statusKey = paymentStatus.toLowerCase();
+    const orderHash = buildHash({ orderId: latpeedOrderId }).slice(0, 48);
+    return {
+      eventKey: `latpeed_${statusKey}_${orderHash}`,
+      orderId: latpeedOrderId,
+    };
+  }
+
   const hash = buildHash({
     type,
     status: paymentStatus,
@@ -469,6 +480,24 @@ async function handleSuccess(input: {
     return { ok: true, status: "duplicate" };
   }
 
+  const latpeedOrderId = readString(payment.orderId);
+  if (latpeedOrderId) {
+    const { data: existingByOrderId } = await admin
+      .from("toss_payments")
+      .select("id, status, metadata")
+      .eq("order_id", latpeedOrderId)
+      .limit(10);
+
+    const duplicatedOrder = (existingByOrderId || []).find(
+      (row: { metadata?: Record<string, unknown> | null }) => row.metadata?.provider === PROVIDER,
+    );
+
+    if (duplicatedOrder) {
+      await updateEventStatus(admin, eventKey, "duplicate");
+      return { ok: true, status: "duplicate" };
+    }
+  }
+
   const matchingIntent = await findMatchingIntent(admin, {
     signupEmail,
     amount,
@@ -521,6 +550,7 @@ async function handleSuccess(input: {
     latpeedPaymentDate: readString(payment.date),
     latpeedMethod: readString(payment.method),
     latpeedOption: readString(payment.option),
+    latpeedOrderId,
     latpeedEventKey: eventKey,
     latpeedPayload: payload,
     latpeedIntentMatched: hasMatchedIntent,
@@ -675,12 +705,12 @@ async function findOriginalLatpeedPayment(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
   amount: number,
+  orderId?: string,
 ) {
   const { data, error } = await admin
     .from("toss_payments")
     .select("id, user_id, order_id, order_name, amount, credits, status, payment_key, metadata")
     .eq("user_id", userId)
-    .eq("amount", amount)
     .order("created_at", { ascending: false })
     .limit(20);
 
@@ -689,12 +719,22 @@ async function findOriginalLatpeedPayment(
     return null;
   }
 
-  return ((data || []) as PaymentRow[]).find(
+  const rows = ((data || []) as PaymentRow[]).filter(
     (row) =>
       row.status === "DONE" &&
       row.metadata?.provider === PROVIDER &&
-      row.metadata?.paymentKind === "initial_program",
+      row.metadata?.paymentKind === "initial_program" &&
+      row.amount === amount,
   );
+
+  if (orderId) {
+    const byOrderId = rows.find(
+      (row) => row.order_id === orderId || row.metadata?.latpeedOrderId === orderId,
+    );
+    if (byOrderId) return byOrderId;
+  }
+
+  return rows[0] || null;
 }
 
 async function handleCancel(input: {
@@ -702,10 +742,11 @@ async function handleCancel(input: {
   payload: LatpeedWebhookPayload;
   payment: LatpeedPayment;
   eventKey: string;
+  orderId: string;
   signupEmail: string;
   amount: number;
 }) {
-  const { admin, payment, payload, eventKey, signupEmail, amount } = input;
+  const { admin, payment, payload, eventKey, orderId, signupEmail, amount } = input;
   const user = await findUserByEmail(admin, signupEmail);
 
   if (!user) {
@@ -714,7 +755,7 @@ async function handleCancel(input: {
     return { ok: true, status: "user_not_found" };
   }
 
-  const originalPayment = await findOriginalLatpeedPayment(admin, user.id, amount);
+  const originalPayment = await findOriginalLatpeedPayment(admin, user.id, amount, orderId);
   if (!originalPayment?.payment_key) {
     await updateEventStatus(admin, eventKey, "failed", "original_payment_not_found", user.id);
     return { ok: true, status: "original_payment_not_found" };
@@ -930,6 +971,7 @@ export async function POST(request: NextRequest) {
           payload,
           payment,
           eventKey,
+          orderId,
           signupEmail,
           amount,
         });
