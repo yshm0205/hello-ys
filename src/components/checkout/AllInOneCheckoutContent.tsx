@@ -142,9 +142,7 @@ export function AllInOneCheckoutContent({
   const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
-  const primaryLabel = isAuthenticated
-    ? `${formatWon(finalCheckoutAmount)} 결제하기`
-    : '로그인하고 결제 계속하기';
+  const primaryLabel = isAuthenticated ? '토스페이로 결제하기' : '로그인하고 결제 계속하기';
 
   const buildCheckoutRedirectTarget = () => {
     const params = new URLSearchParams();
@@ -978,54 +976,68 @@ export function AllInOneCheckoutContent({
           line-height: 1.45;
         }
 
-        .fs-pay-button {
-          width: 100%;
-          min-height: 54px;
-          border: 0;
-          border-radius: 12px;
-          background: #7c3aed;
-          color: #fff;
-          font-size: 16px;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .fs-pay-button:disabled {
-          background: #d4d4d8;
-          color: #71717a;
-          cursor: not-allowed;
-        }
-
-        .fs-card-checkout {
+        .fs-payment-methods {
           display: grid;
           gap: 8px;
-          padding: 12px 14px;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          background: #fafafa;
+          margin-top: 2px;
         }
 
-        .fs-card-checkout span {
-          color: #52525b;
-          font-size: 12px;
-          line-height: 1.5;
+        .fs-payment-title {
+          color: #18181b;
+          font-size: 13px;
+          font-weight: 850;
+          line-height: 1.4;
+        }
+
+        .fs-payment-options {
+          display: grid;
+          gap: 8px;
+        }
+
+        .fs-pay-button,
+        .fs-card-pay-button {
+          width: 100%;
+          min-height: 52px;
+          border-radius: 12px;
+          font-size: 15px;
+          font-weight: 900;
+          cursor: pointer;
+          transition:
+            border-color 0.15s ease,
+            background-color 0.15s ease,
+            color 0.15s ease,
+            transform 0.15s ease;
+        }
+
+        .fs-pay-button {
+          border: 0;
+          background: #7c3aed;
+          color: #fff;
         }
 
         .fs-card-pay-button {
-          width: 100%;
-          min-height: 44px;
-          border: 1px solid #d4d4d8;
-          border-radius: 12px;
+          border: 1px solid #7c3aed;
           background: #ffffff;
-          color: #27272a;
-          font-weight: 900;
-          cursor: pointer;
+          color: #5b21b6;
         }
 
+        .fs-pay-button:not(:disabled):hover,
+        .fs-card-pay-button:not(:disabled):hover {
+          transform: translateY(-1px);
+        }
+
+        .fs-pay-button:disabled,
         .fs-card-pay-button:disabled {
+          border-color: #d4d4d8;
           background: #f4f4f5;
           color: #a1a1aa;
           cursor: not-allowed;
+        }
+
+        .fs-payment-method-note {
+          color: #52525b;
+          font-size: 12px;
+          line-height: 1.5;
         }
 
         .fs-secondary-button {
@@ -1513,39 +1525,44 @@ export function AllInOneCheckoutContent({
                     </div>
                   )}
 
-                  <button
-                    type="button"
-                    className="fs-pay-button"
-                    data-marketing-cta="purchase"
-                    data-cta-id="checkout-confirm-pay"
-                    data-cta-label="토스 결제창 열기"
-                    data-cta-target="/api/tosspay/direct"
-                    disabled={primaryDisabled || loading}
-                    onClick={handlePrimaryAction}
-                  >
-                    {loading ? '결제창 여는 중...' : primaryLabel}
-                  </button>
-
-                  {hasLatpeedCheckout && (
-                    <div className="fs-card-checkout">
-                      <span>
-                        카드/간편결제는 별도 결제창에서 진행됩니다. 결제창에 입력하는 이메일은
-                        FlowSpot 가입/로그인 이메일과 동일해야 권한 지급이 가능합니다.
-                      </span>
+                  <div className="fs-payment-methods">
+                    <div className="fs-payment-title">결제수단 선택</div>
+                    <div className="fs-payment-options">
                       <button
                         type="button"
-                        className="fs-card-pay-button"
+                        className="fs-pay-button"
                         data-marketing-cta="purchase"
-                        data-cta-id="checkout-card-pay"
-                        data-cta-label="카드/간편결제 결제창 열기"
-                        data-cta-target="/api/latpeed/intent"
+                        data-cta-id="checkout-confirm-pay"
+                        data-cta-label="토스 결제창 열기"
+                        data-cta-target="/api/tosspay/direct"
                         disabled={primaryDisabled || loading}
-                        onClick={handleCardCheckout}
+                        onClick={handlePrimaryAction}
                       >
-                        {loading ? '결제창 여는 중...' : '카드/간편결제로 결제하기'}
+                        {loading ? '결제창 여는 중...' : primaryLabel}
                       </button>
+
+                      {hasLatpeedCheckout && (
+                        <button
+                          type="button"
+                          className="fs-card-pay-button"
+                          data-marketing-cta="purchase"
+                          data-cta-id="checkout-card-pay"
+                          data-cta-label="카드/간편결제 결제창 열기"
+                          data-cta-target="/api/latpeed/intent"
+                          disabled={primaryDisabled || loading}
+                          onClick={handleCardCheckout}
+                        >
+                          {loading ? '결제창 여는 중...' : '카드/간편결제로 결제하기'}
+                        </button>
+                      )}
                     </div>
-                  )}
+                    {hasLatpeedCheckout && (
+                      <div className="fs-payment-method-note">
+                        카드/간편결제 시 결제창에 입력하는 이메일은 FlowSpot 가입/로그인 이메일과 동일해야
+                        권한 지급이 가능합니다.
+                      </div>
+                    )}
+                  </div>
 
                   <button
                     type="button"
