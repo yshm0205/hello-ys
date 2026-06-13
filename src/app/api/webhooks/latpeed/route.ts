@@ -537,11 +537,7 @@ async function handleSuccess(input: {
   const currentPlan = await loadCreditPlanSnapshot(admin, user.id);
   const hasActiveAccess = isActiveAccessPlan(currentPlan?.planType, currentPlan?.expiresAt);
   const hasMatchedIntent = Boolean(matchingIntent && matchingIntent.user_id === user.id);
-  const manualReviewReason = hasActiveAccess
-    ? "active_access_plan_exists"
-    : hasMatchedIntent
-      ? null
-      : "latpeed_intent_not_found";
+  const manualReviewReason = hasActiveAccess ? "active_access_plan_exists" : null;
   const grantSnapshot = buildGrantSnapshotMetadata({
     paymentKind: "initial_program",
     chargedAmount: amount,
@@ -576,6 +572,7 @@ async function handleSuccess(input: {
     latpeedIntentId: matchingIntent?.id || null,
     latpeedIntentCreatedAt: matchingIntent?.created_at || null,
     latpeedIntentExpiresAt: matchingIntent?.expires_at || null,
+    latpeedAutoGrantWithoutIntent: !hasMatchedIntent,
     flowspotUserName: user.full_name,
     manualReviewReason,
     ...grantSnapshot,
@@ -604,11 +601,6 @@ async function handleSuccess(input: {
     console.error("[Latpeed Webhook] payment row insert failed:", insertError);
     await updateEventStatus(admin, eventKey, "failed", "payment_insert_failed", user.id);
     return { ok: true, status: "payment_insert_failed" };
-  }
-
-  if (!hasMatchedIntent) {
-    await updateEventStatus(admin, eventKey, "failed", "latpeed_intent_not_found", user.id);
-    return { ok: true, status: "manual_review_missing_intent" };
   }
 
   if (hasActiveAccess) {
