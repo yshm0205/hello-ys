@@ -72,6 +72,8 @@ interface AppliedCoupon {
   expiresAt: string | null;
 }
 
+type PaymentMethod = 'toss' | 'card';
+
 interface AllInOneCheckoutContentProps {
   userEmail?: string;
   creditInfo: CheckoutCreditInfo | null;
@@ -131,18 +133,22 @@ export function AllInOneCheckoutContent({
   const isMonthlySubscriber = isMonthlySubscriberPlan(creditInfo?.plan_type);
 
   const [confirmedCheckout, setConfirmedCheckout] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('toss');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   const finalCheckoutAmount = appliedCoupon?.finalAmount ?? plan.amount;
   const hasLatpeedCheckout = Boolean(LATPEED_ALLINONE_URL) && !appliedCoupon;
+  const activePaymentMethod: PaymentMethod = hasLatpeedCheckout ? selectedPaymentMethod : 'toss';
   const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
   const totalDiscountAmount = Math.max(0, plan.listAmount - finalCheckoutAmount);
   const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
   const primaryLabel = isAuthenticated ? '토스페이로 결제하기' : '로그인하고 결제 계속하기';
+  const selectedPaymentLabel =
+    activePaymentMethod === 'card' ? '카드/간편결제로 결제하기' : primaryLabel;
 
   const buildCheckoutRedirectTarget = () => {
     const params = new URLSearchParams();
@@ -285,6 +291,11 @@ export function AllInOneCheckoutContent({
     }
 
     if (!canOpenPayment) return;
+
+    if (activePaymentMethod === 'card') {
+      await handleCardCheckout();
+      return;
+    }
 
     await handleTossPayCheckout();
   };
@@ -978,8 +989,8 @@ export function AllInOneCheckoutContent({
 
         .fs-payment-methods {
           display: grid;
-          gap: 8px;
-          margin-top: 2px;
+          gap: 10px;
+          margin-top: 4px;
         }
 
         .fs-payment-title {
@@ -991,46 +1002,101 @@ export function AllInOneCheckoutContent({
 
         .fs-payment-options {
           display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 8px;
         }
 
-        .fs-pay-button,
-        .fs-card-pay-button {
+        .fs-payment-choice {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
           width: 100%;
-          min-height: 52px;
-          border-radius: 12px;
-          font-size: 15px;
-          font-weight: 900;
+          min-height: 82px;
+          padding: 13px 14px;
+          border: 1px solid #e5e7eb;
+          border-radius: 14px;
+          background: #ffffff;
+          color: #27272a;
+          text-align: left;
           cursor: pointer;
           transition:
             border-color 0.15s ease,
             background-color 0.15s ease,
             color 0.15s ease,
-            transform 0.15s ease;
+            box-shadow 0.15s ease;
+        }
+
+        .fs-payment-choice.is-selected {
+          border-color: #7c3aed;
+          background: #f5f3ff;
+          box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+        }
+
+        .fs-payment-choice:disabled {
+          background: #f4f4f5;
+          color: #a1a1aa;
+          cursor: not-allowed;
+        }
+
+        .fs-payment-dot {
+          width: 18px;
+          height: 18px;
+          margin-top: 1px;
+          border: 2px solid #d4d4d8;
+          border-radius: 999px;
+          background: #fff;
+          box-shadow: inset 0 0 0 4px #fff;
+        }
+
+        .fs-payment-choice.is-selected .fs-payment-dot {
+          border-color: #7c3aed;
+          background: #7c3aed;
+        }
+
+        .fs-payment-copy {
+          display: grid;
+          gap: 4px;
+          min-width: 0;
+        }
+
+        .fs-payment-copy strong {
+          color: #18181b;
+          font-size: 14px;
+          font-weight: 950;
+          line-height: 1.25;
+        }
+
+        .fs-payment-copy em {
+          color: #71717a;
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 650;
+          line-height: 1.4;
         }
 
         .fs-pay-button {
+          width: 100%;
+          min-height: 52px;
           border: 0;
+          border-radius: 12px;
           background: #7c3aed;
           color: #fff;
+          font-size: 15px;
+          font-weight: 900;
+          cursor: pointer;
+          transition:
+            background-color 0.15s ease,
+            color 0.15s ease,
+            transform 0.15s ease;
         }
 
-        .fs-card-pay-button {
-          border: 1px solid #7c3aed;
-          background: #ffffff;
-          color: #5b21b6;
-        }
-
-        .fs-pay-button:not(:disabled):hover,
-        .fs-card-pay-button:not(:disabled):hover {
+        .fs-pay-button:not(:disabled):hover {
           transform: translateY(-1px);
         }
 
-        .fs-pay-button:disabled,
-        .fs-card-pay-button:disabled {
-          border-color: #d4d4d8;
-          background: #f4f4f5;
-          color: #a1a1aa;
+        .fs-pay-button:disabled {
+          background: #d4d4d8;
+          color: #71717a;
           cursor: not-allowed;
         }
 
@@ -1264,6 +1330,10 @@ export function AllInOneCheckoutContent({
 
           .fs-agree {
             padding: 0 16px 18px;
+          }
+
+          .fs-payment-options {
+            grid-template-columns: 1fr;
           }
 
         }
@@ -1526,33 +1596,35 @@ export function AllInOneCheckoutContent({
                   )}
 
                   <div className="fs-payment-methods">
-                    <div className="fs-payment-title">결제수단 선택</div>
+                    <div className="fs-payment-title">결제수단을 선택해 주세요</div>
                     <div className="fs-payment-options">
                       <button
                         type="button"
-                        className="fs-pay-button"
-                        data-marketing-cta="purchase"
-                        data-cta-id="checkout-confirm-pay"
-                        data-cta-label="토스 결제창 열기"
-                        data-cta-target="/api/tosspay/direct"
-                        disabled={primaryDisabled || loading}
-                        onClick={handlePrimaryAction}
+                        className={`fs-payment-choice${activePaymentMethod === 'toss' ? ' is-selected' : ''}`}
+                        aria-pressed={activePaymentMethod === 'toss'}
+                        disabled={loading}
+                        onClick={() => setSelectedPaymentMethod('toss')}
                       >
-                        {loading ? '결제창 여는 중...' : primaryLabel}
+                        <span className="fs-payment-dot" aria-hidden="true" />
+                        <span className="fs-payment-copy">
+                          <strong>토스페이</strong>
+                          <em>토스페이 · 계좌이체</em>
+                        </span>
                       </button>
 
                       {hasLatpeedCheckout && (
                         <button
                           type="button"
-                          className="fs-card-pay-button"
-                          data-marketing-cta="purchase"
-                          data-cta-id="checkout-card-pay"
-                          data-cta-label="카드/간편결제 결제창 열기"
-                          data-cta-target="/api/latpeed/intent"
-                          disabled={primaryDisabled || loading}
-                          onClick={handleCardCheckout}
+                          className={`fs-payment-choice${activePaymentMethod === 'card' ? ' is-selected' : ''}`}
+                          aria-pressed={activePaymentMethod === 'card'}
+                          disabled={loading}
+                          onClick={() => setSelectedPaymentMethod('card')}
                         >
-                          {loading ? '결제창 여는 중...' : '카드/간편결제로 결제하기'}
+                          <span className="fs-payment-dot" aria-hidden="true" />
+                          <span className="fs-payment-copy">
+                            <strong>카드/간편결제</strong>
+                            <em>카드 · 네이버페이 · 카카오페이</em>
+                          </span>
                         </button>
                       )}
                     </div>
@@ -1562,6 +1634,18 @@ export function AllInOneCheckoutContent({
                         권한 지급이 가능합니다.
                       </div>
                     )}
+                    <button
+                      type="button"
+                      className="fs-pay-button"
+                      data-marketing-cta="purchase"
+                      data-cta-id={activePaymentMethod === 'card' ? 'checkout-card-pay' : 'checkout-confirm-pay'}
+                      data-cta-label={activePaymentMethod === 'card' ? '카드/간편결제 결제창 열기' : '토스 결제창 열기'}
+                      data-cta-target={activePaymentMethod === 'card' ? '/api/latpeed/intent' : '/api/tosspay/direct'}
+                      disabled={primaryDisabled || loading}
+                      onClick={handlePrimaryAction}
+                    >
+                      {loading ? '결제창 여는 중...' : selectedPaymentLabel}
+                    </button>
                   </div>
 
                   <button
