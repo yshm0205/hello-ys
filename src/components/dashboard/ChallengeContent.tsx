@@ -120,7 +120,7 @@ const NOTICE_SECTIONS = [
     title: "3일차",
     items: [
       "2차 인증 제출 후 FlowSpot으로 첫 쇼츠 스크립트를 만듭니다.",
-      "3차 인증 글에 선택한 소재, 스크립트 요약, 마음에 드는 훅, 수정하고 싶은 부분을 제출합니다.",
+      "3차 인증 글에 완성한 주제와 챌린지 후기를 제출합니다.",
       "3일 미션을 모두 제출하면 챌린지 완료 대상으로 확인됩니다.",
     ],
   },
@@ -176,31 +176,18 @@ const DAY_GUIDES = [
   {
     day: 3,
     board: "3차 인증",
-    title: "FlowSpot으로 첫 쇼츠 스크립트 만들기",
+    title: "첫 쇼츠 스크립트 완성 후기",
     badge: "실습",
     description:
-      "FlowSpot 사용 가이드를 보고 첫 쇼츠 스크립트를 제출합니다. 영상 피드백을 받고 싶다면 참고 링크 칸에 영상 링크를 넣습니다.",
+      "FlowSpot으로 첫 쇼츠 스크립트를 만든 뒤, 챌린지 전후로 달라진 점과 앞으로의 방향을 정리합니다. 영상 피드백을 받고 싶다면 참고 링크 칸에 영상 링크를 넣습니다.",
     actions: [
       { label: "FlowSpot 사용 가이드", href: FLOWSPOT_USAGE_GUIDE_URL, external: true },
       { label: "FlowSpot 열기", href: "/dashboard/batch" },
     ],
     template:
-      "1. 선택한 소재/상품:\n2. FlowSpot으로 만든 스크립트 요약:\n3. 마음에 드는 훅 또는 장면:\n4. 수정하고 싶은 부분:\n5. 영상 피드백 신청 여부:",
+      "1. 완성한 쇼츠 주제/상품은 무엇인가요?\n2. 챌린지 시작 전 가장 막혔던 점은 무엇인가요?\n3. 강의 또는 FlowSpot을 써보고 달라진 점은 무엇인가요?\n4. 이번 챌린지에서 가장 도움이 된 부분은 무엇인가요?\n5. 앞으로 만들 쇼츠 방향은 무엇인가요?\n\n선택. 영상까지 제작했다면 참고 링크 칸에 링크를 남겨주세요.",
     placeholder:
-      "FlowSpot에서 만든 스크립트를 붙여넣어주세요. 영상 피드백을 받고 싶은 경우 참고 링크 칸에 영상 링크를 넣어주세요.",
-  },
-  {
-    day: 4,
-    board: "수강후기",
-    title: "강의와 FlowSpot을 써본 후기",
-    badge: "후기",
-    description:
-      "강의를 보거나 FlowSpot을 써보며 막혔던 점, 달라진 점, 앞으로 적용할 방향을 남깁니다.",
-    actions: [],
-    template:
-      "1. 시작 전 막혔던 점:\n2. 강의 또는 FlowSpot을 써보고 달라진 점:\n3. 가장 도움이 된 부분:\n4. 앞으로 만들 쇼츠 방향:\n5. 다른 참여자에게 해주고 싶은 말:",
-    placeholder:
-      "예: 소재를 찾는 데 시간이 오래 걸렸는데, 채널 방향을 먼저 잡고 나니 어떤 상품을 골라야 할지 기준이 생겼습니다.",
+      "예: 처음에는 어떤 상품을 골라야 할지 막혔는데, 채널 방향을 먼저 잡고 나니 소재를 고르는 기준이 생겼습니다.",
   },
   {
     day: 5,
@@ -220,7 +207,6 @@ const DAY_GUIDES = [
 const BOARD_FILTERS = [
   { value: "all", label: "전체" },
   { value: "mission", label: "미션 인증" },
-  { value: "review", label: "수강후기" },
   { value: "question", label: "질문" },
 ] as const;
 
@@ -272,7 +258,6 @@ function getGuide(day: number) {
 }
 
 function getSubmissionFilter(day: number): BoardFilter {
-  if (day === 4) return "review";
   if (day === 5) return "question";
   return "mission";
 }
@@ -490,10 +475,6 @@ export function ChallengeContent() {
     setComposerOpen(true);
     if (day) {
       selectGuide(day);
-      return;
-    }
-    if (boardFilter === "review") {
-      selectGuide(4);
       return;
     }
     if (boardFilter === "question") {
@@ -1203,7 +1184,7 @@ export function ChallengeContent() {
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm" fw={700} c="gray.8">
-                          글쓰기에서 미션 인증, 수강후기, 질문 말머리를 선택하면 맞춤 양식이 열립니다.
+                          글쓰기에서 미션 인증 또는 질문 말머리를 선택하면 맞춤 양식이 열립니다.
                         </Text>
                       </Table.Td>
                       <Table.Td>
