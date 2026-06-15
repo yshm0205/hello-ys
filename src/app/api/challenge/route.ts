@@ -78,6 +78,7 @@ function toClientEnrollment(row: EnrollmentRow | null) {
 
   return {
     id: row.id,
+    email: row.email,
     cohort: row.cohort,
     status: row.status,
     accessStartsAt: row.access_starts_at,
@@ -130,6 +131,19 @@ function toDisplayId(email: string | null | undefined, fallback = "참여자") {
   const localPart = (email || "").split("@")[0]?.trim();
   if (OFFICIAL_AUTHOR_IDS.has(localPart.toLowerCase())) return "원초적 인사이트";
   return localPart ? maskDisplayId(localPart) : fallback;
+}
+
+const AUTO_TITLE_SUFFIX_BY_DAY: Record<number, string> = {
+  1: "채널 방향 인증",
+  2: "소재 후보 인증",
+  3: "최종 스크립트 인증",
+};
+
+function buildAutoSubmissionTitle(params: { day: number; cohort: string; email: string | null | undefined }) {
+  const suffix = AUTO_TITLE_SUFFIX_BY_DAY[params.day];
+  if (!suffix) return null;
+
+  return `[${params.cohort} ${params.day}일차] ${toDisplayId(params.email)} ${suffix}`;
 }
 
 function buildAuthorLabels(rows: SubmissionRow[]) {
@@ -279,6 +293,12 @@ export async function POST(request: NextRequest) {
     }
 
     const { day, title, content, referenceUrl } = parsed.data;
+    const submissionTitle =
+      buildAutoSubmissionTitle({
+        day,
+        cohort: enrollment!.cohort,
+        email: user.email || enrollment!.email,
+      }) || title;
 
     const { data: existingSubmissions, error: existingSubmissionsError } = await admin
       .from("challenge_mission_submissions")
@@ -304,7 +324,7 @@ export async function POST(request: NextRequest) {
       email: user.email || enrollment!.email,
       cohort: enrollment!.cohort,
       day,
-      title,
+      title: submissionTitle,
       content,
       reference_url: referenceUrl || null,
       status: "submitted",

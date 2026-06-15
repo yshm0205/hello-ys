@@ -40,6 +40,7 @@ import { Link } from "@/i18n/routing";
 
 type ChallengeEnrollment = {
   id: string;
+  email: string;
   cohort: string;
   status: string;
   accessStartsAt: string;
@@ -221,6 +222,33 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const COMMENT_MAX_LENGTH = 1000;
+
+const OFFICIAL_AUTHOR_IDS = new Set(["hmys0205", "hmys0205hmys"]);
+
+const AUTO_TITLE_SUFFIX_BY_DAY: Record<number, string> = {
+  1: "채널 방향 인증",
+  2: "소재 후보 인증",
+  3: "최종 스크립트 인증",
+};
+
+function maskDisplayId(value: string) {
+  if (value.length <= 2) return `${value[0] || ""}***`;
+  if (value.length <= 4) return `${value.slice(0, 2)}***`;
+  return `${value.slice(0, 4)}***`;
+}
+
+function getAuthorDisplayId(email: string | null | undefined, fallback = "참여자") {
+  const localPart = (email || "").split("@")[0]?.trim();
+  if (!localPart) return fallback;
+  if (OFFICIAL_AUTHOR_IDS.has(localPart.toLowerCase())) return "원초적 인사이트";
+  return maskDisplayId(localPart);
+}
+
+function getAutoSubmissionTitle(day: number, enrollment: ChallengeEnrollment | null) {
+  const suffix = AUTO_TITLE_SUFFIX_BY_DAY[day];
+  if (!suffix || !enrollment) return "";
+  return `[${enrollment.cohort} ${day}일차] ${getAuthorDisplayId(enrollment.email)} ${suffix}`;
+}
 
 const UNLOCKING_SUBMISSION_STATUSES = new Set(["submitted", "reviewed", "approved", "needs_revision"]);
 
@@ -506,9 +534,11 @@ export function ChallengeContent() {
   async function submit(day: number) {
     const guide = getGuide(day);
     const draft = getDraft(day, guide.title);
+    const autoTitle = getAutoSubmissionTitle(day, data?.enrollment || null);
+    const submissionTitle = autoTitle || draft.title.trim();
     setError(null);
 
-    if (draft.title.trim().length < 2) {
+    if (submissionTitle.length < 2) {
       setError("게시글 제목을 입력해주세요.");
       return;
     }
@@ -525,7 +555,7 @@ export function ChallengeContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           day,
-          title: draft.title,
+          title: submissionTitle,
           content: draft.content,
           referenceUrl: draft.referenceUrl,
         }),
@@ -790,6 +820,7 @@ export function ChallengeContent() {
       submitLabel: "3차 인증 작성",
     },
   ];
+  const activeAutoTitle = activeDay ? getAutoSubmissionTitle(activeDay, data.enrollment) : "";
 
   return (
     <Container size="xl" py={{ base: "sm", md: "md" }} px={{ base: "xs", sm: "md" }}>
@@ -1564,13 +1595,36 @@ export function ChallengeContent() {
                 </Alert>
               )}
 
-              <TextInput
-                label="제목"
-                value={getDraft(activeDay, activeGuide.title).title}
-                onChange={(event) => updateDraft(activeDay, { title: event.currentTarget.value })}
-                disabled={!data.canSubmit}
-                maxLength={120}
-              />
+              {activeAutoTitle ? (
+                <Box>
+                  <Text size="sm" fw={500} mb={4}>
+                    제목
+                  </Text>
+                  <Box
+                    p="sm"
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 4,
+                      background: "#f9fafb",
+                    }}
+                  >
+                    <Text size="sm" fw={800}>
+                      {activeAutoTitle}
+                    </Text>
+                    <Text size="xs" c="gray.6" mt={4}>
+                      인증글 제목은 기수, 일차, 작성자 표시명으로 자동 생성됩니다.
+                    </Text>
+                  </Box>
+                </Box>
+              ) : (
+                <TextInput
+                  label="제목"
+                  value={getDraft(activeDay, activeGuide.title).title}
+                  onChange={(event) => updateDraft(activeDay, { title: event.currentTarget.value })}
+                  disabled={!data.canSubmit}
+                  maxLength={120}
+                />
+              )}
 
               <Textarea
                 label="본문"
