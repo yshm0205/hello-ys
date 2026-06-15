@@ -4,10 +4,16 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { getActiveChallengeEnrollment } from "@/lib/challenge/access";
+import { isActiveAccessPlan } from "@/lib/plans/config";
+import { getEffectiveCreditInfo } from "@/lib/plans/server";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
+
+const CHALLENGE_HOT_LIST_MONTH = "2026-01";
+const LOCKED_MONTH_PREVIEW_COUNT = 5;
 
 type ChannelListRow = {
   title: string;
@@ -68,42 +74,83 @@ async function getAvailableMonths(supabase: SupabaseClient) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json({ months: [], channels: [], total: 0 });
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json(
+      { error: "로그인이 필요합니다.", months: [], channels: [], total: 0 },
+      { status: 401 },
+    );
   }
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const plan = await getEffectiveCreditInfo(user.id);
+  const hasFullAccess = isActiveAccessPlan(plan?.plan_type, plan?.expires_at);
+  const challengeEnrollment = hasFullAccess ? null : await getActiveChallengeEnrollment(user.id);
+  const hasChallengeAccess = Boolean(challengeEnrollment);
+
+  if (!hasFullAccess && !hasChallengeAccess) {
+    return NextResponse.json(
+      { error: "채널 리스트 권한이 없습니다.", months: [], channels: [], total: 0 },
+      { status: 403 },
+    );
+  }
+
+  const supabase = createAdminClient();
   const month = request.nextUrl.searchParams.get("month");
 
   // 사용 가능한 월 목록
   const months = await getAvailableMonths(supabase);
-  const selectedMonth = month && months.includes(month) ? month : months[0] || "";
+  const defaultMonth = hasFullAccess ? months[0] || "" : CHALLENGE_HOT_LIST_MONTH;
+  const selectedMonth = month && months.includes(month) ? month : defaultMonth;
+  const isLockedMonth = hasChallengeAccess && !hasFullAccess && selectedMonth !== CHALLENGE_HOT_LIST_MONTH;
 
   if (!selectedMonth) {
     return NextResponse.json({ months: [], channels: [], total: 0 });
   }
 
-  const result = await supabase
+  let query = supabase
     .from("channel_list")
-    .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url, first_upload_date, profile_image_url, total_video_count")
+    .select(
+      "title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url, first_upload_date, profile_image_url, total_video_count",
+      { count: "exact" },
+    )
     .eq("month", selectedMonth)
     .order("avg_view_count", { ascending: false });
+
+  if (isLockedMonth) {
+    query = query.limit(LOCKED_MONTH_PREVIEW_COUNT);
+  }
+
+  const result = await query;
   let data = result.data as ChannelListRow[] | null;
   let error = result.error;
+  let total = result.count ?? data?.length ?? 0;
 
   if (isMissingChannelMetaColumn(error)) {
-    const fallback = await supabase
+    let fallbackQuery = supabase
       .from("channel_list")
-      .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url")
+      .select("title, subscriber_count, avg_view_count, median_views, category, subcategory, format, channel_url", {
+        count: "exact",
+      })
       .eq("month", selectedMonth)
       .order("avg_view_count", { ascending: false });
 
+    if (isLockedMonth) {
+      fallbackQuery = fallbackQuery.limit(LOCKED_MONTH_PREVIEW_COUNT);
+    }
+
+    const fallback = await fallbackQuery;
+
     data = fallback.data as ChannelListRow[] | null;
     error = fallback.error;
+    total = fallback.count ?? data?.length ?? 0;
   }
 
   if (error) {
-    return NextResponse.json({ months, month: selectedMonth, channels: [], total: 0 });
+    return NextResponse.json({ months, month: selectedMonth, channels: [], total: 0, locked: isLockedMonth });
   }
 
   const channels = (data || []).map((ch) => ({
@@ -124,6 +171,10 @@ export async function GET(request: NextRequest) {
     months,
     month: selectedMonth,
     channels,
-    total: channels.length,
+    total,
+    locked: isLockedMonth,
+    lockMessage: isLockedMonth
+      ? "최신월과 전체 Hot 리스트는 올인원 패스 구매자 전용입니다. 챌린지에서는 1월 리스트만 열람할 수 있습니다."
+      : null,
   });
 }

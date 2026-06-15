@@ -38,8 +38,11 @@ interface ChannelData {
     updated_at: string;
     total: number;
     channels: Channel[];
+    locked?: boolean;
+    lockMessage?: string | null;
 }
 
+type ChannelListAccessMode = 'full' | 'challenge' | 'none';
 type SortColumn = 'opportunity' | 'subscribers' | 'avg_views' | 'median_views';
 type SortDir = 'asc' | 'desc';
 
@@ -219,7 +222,11 @@ function GradeBadge({ grade, size = 'sm' }: { grade: PerformanceGrade; size?: 'x
 }
 
 // ── 컴포넌트 ──
-export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) {
+export function ChannelListContent({
+    accessMode,
+}: {
+    accessMode: ChannelListAccessMode;
+}) {
     const [months, setMonths] = useState<string[]>([]);
     const [month, setMonth] = useState('');
     const [data, setData] = useState<ChannelData | null>(null);
@@ -228,13 +235,22 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
     const [categoryFilter, setCategoryFilter] = useState<string>('전체');
     const [formFilter, setFormFilter] = useState<FormFilter>('all');
     const [performanceFilter, setPerformanceFilter] = useState<PerformanceFilter>('all');
+    const isSubscribed = accessMode === 'full' || (accessMode === 'challenge' && !data?.locked);
+    const isLockedMonth = Boolean(data?.locked);
 
     // Supabase 데이터 fetch (월별)
     useEffect(() => {
         const url = month ? `/api/hot-channels?month=${month}` : '/api/hot-channels';
         fetch(url)
             .then((r) => r.json())
-            .then((d: { months: string[]; month: string; channels: Channel[]; total: number }) => {
+            .then((d: {
+                months: string[];
+                month: string;
+                channels: Channel[];
+                total: number;
+                locked?: boolean;
+                lockMessage?: string | null;
+            }) => {
                 setMonths(d.months || []);
                 if (!month && d.month) setMonth(d.month);
                 setData({
@@ -242,6 +258,8 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                     updated_at: '',
                     total: d.total,
                     channels: d.channels,
+                    locked: d.locked,
+                    lockMessage: d.lockMessage,
                 });
                 setLoading(false);
             })
@@ -318,6 +336,8 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
         setFormFilter('all');
         setPerformanceFilter('all');
     };
+    const visibleChannels = isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT);
+    const shouldShowLockedOverlay = isLockedMonth || (!isSubscribed && filtered.length > FREE_PREVIEW_COUNT);
 
     return (
         <Stack gap="md">
@@ -338,7 +358,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                             </Text>
                             {data && (
                                 <Badge variant="light" color="violet" size="lg" radius="md">
-                                    {filtered.length}개 채널
+                                    {(isLockedMonth ? data.total : filtered.length).toLocaleString()}개 채널
                                 </Badge>
                             )}
                         </Group>
@@ -494,7 +514,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                             {/* PC 테이블 (sm 이상) */}
                             <Box visibleFrom="sm">
                                 <ChannelTable
-                                    channels={isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)}
+                                    channels={visibleChannels}
                                     sort={sort}
                                     onSort={isSubscribed ? toggleSort : undefined}
                                     performanceThresholds={performanceThresholds}
@@ -504,7 +524,7 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                             {/* 모바일 카드 (sm 미만) */}
                             <Box hiddenFrom="sm">
                                 <Stack gap="sm">
-                                    {(isSubscribed ? filtered : filtered.slice(0, FREE_PREVIEW_COUNT)).map(
+                                    {visibleChannels.map(
                                         (ch, idx) => (
                                             <ChannelCard
                                                 key={`${idx}-${ch.channel_url}`}
@@ -517,8 +537,12 @@ export function ChannelListContent({ isSubscribed }: { isSubscribed: boolean }) 
                             </Box>
 
                             {/* 비수강생 블러 + CTA */}
-                            {!isSubscribed && filtered.length > FREE_PREVIEW_COUNT && (
-                                <BlurOverlay total={filtered.length} />
+                            {shouldShowLockedOverlay && (
+                                <BlurOverlay
+                                    total={data.total || filtered.length}
+                                    message={data.lockMessage}
+                                    isChallengeLocked={isLockedMonth}
+                                />
                             )}
                         </>
                     )}
@@ -749,7 +773,15 @@ function ChannelCard({
 }
 
 // ── 블러 오버레이 (비수강생) ──
-function BlurOverlay({ total }: { total: number }) {
+function BlurOverlay({
+    total,
+    message,
+    isChallengeLocked,
+}: {
+    total: number;
+    message?: string | null;
+    isChallengeLocked?: boolean;
+}) {
     return (
         <Box
             mt={-80}
@@ -790,6 +822,16 @@ function BlurOverlay({ total }: { total: number }) {
                     <Text size="sm" c="dimmed">
                         매달 업데이트되는 {total}개+ 추천 채널 리스트를 확인하세요
                     </Text>
+                    {message && (
+                        <Text size="sm" c="#4b5563" fw={600}>
+                            {message}
+                        </Text>
+                    )}
+                    {isChallengeLocked && (
+                        <Text size="xs" c="dimmed">
+                            이 달에는 {total.toLocaleString()}개 채널 중 일부만 미리보기로 표시됩니다.
+                        </Text>
+                    )}
                     <Button
                         component="a"
                         href="/checkout/allinone?intent=pay"

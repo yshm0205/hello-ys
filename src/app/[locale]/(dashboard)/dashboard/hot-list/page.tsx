@@ -1,4 +1,5 @@
 import { ChannelListContent } from '@/components/dashboard/ChannelListContent';
+import { getActiveChallengeEnrollment } from '@/lib/challenge/access';
 import { isActiveAccessPlan } from '@/lib/plans/config';
 import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { createClient } from '@/utils/supabase/server';
@@ -16,6 +17,8 @@ export default async function ChannelListPage() {
     // 활성 구독자 확인 — toss_payments(올인원/월구독) 흐름 호환
     const plan = await getEffectiveCreditInfo(user.id);
     const isSubscribed = isActiveAccessPlan(plan?.plan_type, plan?.expires_at);
+    const challengeEnrollment = isSubscribed ? null : await getActiveChallengeEnrollment(user.id);
+    const accessMode = isSubscribed ? 'full' : challengeEnrollment ? 'challenge' : 'none';
 
-    return <ChannelListContent isSubscribed={isSubscribed} />;
+    return <ChannelListContent accessMode={accessMode} />;
 }
