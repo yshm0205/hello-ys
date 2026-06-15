@@ -279,12 +279,12 @@ export async function POST(request: NextRequest) {
 
     if (existingSubmissionsError) {
       console.error("[Challenge API] submissions gate load error:", existingSubmissionsError);
-      return NextResponse.json({ error: "誘몄뀡 ?쒖텧 ?댁뿭??遺덈윭?ㅼ? 紐삵뻽?듬땲??" }, { status: 500 });
+      return NextResponse.json({ error: "미션 제출 내역을 불러오지 못했습니다." }, { status: 500 });
     }
 
     if (!canSubmitChallengeDay(day, ((existingSubmissions || []) as SubmissionRow[]))) {
       return NextResponse.json(
-        { error: "?댁쟾 李⑥닔 誘몄뀡???쇱꽑 ?쒖텧?댁빞 ?⑸땲??" },
+        { error: "이전 차수 미션을 먼저 제출해야 합니다." },
         { status: 403 },
       );
     }
