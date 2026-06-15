@@ -120,10 +120,16 @@ function toClientFeedSubmission(row: SubmissionRow, viewerId: string, authorLabe
 
 const OFFICIAL_AUTHOR_IDS = new Set(["hmys0205", "hmys0205hmys"]);
 
+function maskDisplayId(value: string) {
+  if (value.length <= 2) return `${value[0] || ""}***`;
+  if (value.length <= 4) return `${value.slice(0, 2)}***`;
+  return `${value.slice(0, 4)}***`;
+}
+
 function toDisplayId(email: string | null | undefined, fallback = "참여자") {
   const localPart = (email || "").split("@")[0]?.trim();
   if (OFFICIAL_AUTHOR_IDS.has(localPart.toLowerCase())) return "원초적 인사이트";
-  return localPart || fallback;
+  return localPart ? maskDisplayId(localPart) : fallback;
 }
 
 function buildAuthorLabels(rows: SubmissionRow[]) {
