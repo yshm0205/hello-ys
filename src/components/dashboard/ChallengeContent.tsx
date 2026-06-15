@@ -220,6 +220,8 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   needs_revision: { label: "보완", color: "orange" },
 };
 
+const COMMENT_MAX_LENGTH = 1000;
+
 const UNLOCKING_SUBMISSION_STATUSES = new Set(["submitted", "reviewed", "approved", "needs_revision"]);
 
 function hasUnlockedSubmission(submissionsByDay: Map<number, MissionSubmission>, day: number) {
@@ -1254,23 +1256,32 @@ export function ChallengeContent() {
                               autosize
                               minRows={2}
                               maxRows={8}
-                              maxLength={1000}
+                              maxLength={COMMENT_MAX_LENGTH}
                               disabled={updatingCommentId === comment.id}
                             />
-                            <Group justify="flex-end" gap={6}>
-                              <Button size="xs" variant="light" color="gray" radius={4} onClick={cancelEditComment}>
-                                취소
-                              </Button>
-                              <Button
+                            <Group justify="space-between" gap={6} align="center">
+                              <Text
                                 size="xs"
-                                color="violet"
-                                radius={4}
-                                loading={updatingCommentId === comment.id}
-                                onClick={() => saveCommentEdit(comment)}
-                                style={{ background: BRAND.primary }}
+                                c={editingCommentDraft.length >= COMMENT_MAX_LENGTH ? "red.6" : "gray.5"}
                               >
-                                수정 완료
-                              </Button>
+                                {editingCommentDraft.length.toLocaleString("ko-KR")} /{" "}
+                                {COMMENT_MAX_LENGTH.toLocaleString("ko-KR")}자
+                              </Text>
+                              <Group gap={6}>
+                                <Button size="xs" variant="light" color="gray" radius={4} onClick={cancelEditComment}>
+                                  취소
+                                </Button>
+                                <Button
+                                  size="xs"
+                                  color="violet"
+                                  radius={4}
+                                  loading={updatingCommentId === comment.id}
+                                  onClick={() => saveCommentEdit(comment)}
+                                  style={{ background: BRAND.primary }}
+                                >
+                                  수정 완료
+                                </Button>
+                              </Group>
                             </Group>
                           </Stack>
                         ) : (
@@ -1290,13 +1301,23 @@ export function ChallengeContent() {
                   autosize
                   minRows={3}
                   maxRows={8}
-                  maxLength={1000}
+                  maxLength={COMMENT_MAX_LENGTH}
                   disabled={!data.canSubmit}
                 />
-                <Group justify="space-between" mt="sm">
-                  <Text size="xs" c="gray.6">
-                    질문, 응원, 개선 피드백을 짧게 남길 수 있습니다.
-                  </Text>
+                <Group justify="space-between" mt="sm" align="flex-start" gap="sm">
+                  <Box>
+                    <Text size="xs" c="gray.6">
+                      질문, 응원, 개선 피드백을 짧게 남길 수 있습니다.
+                    </Text>
+                    <Text
+                      size="xs"
+                      c={commentDraft.length >= COMMENT_MAX_LENGTH ? "red.6" : "gray.5"}
+                      mt={2}
+                    >
+                      {commentDraft.length.toLocaleString("ko-KR")} /{" "}
+                      {COMMENT_MAX_LENGTH.toLocaleString("ko-KR")}자
+                    </Text>
+                  </Box>
                   <Button
                     size="sm"
                     color="violet"
