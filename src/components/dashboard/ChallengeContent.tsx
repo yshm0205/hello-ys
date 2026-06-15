@@ -331,6 +331,11 @@ export function ChallengeContent() {
   >({});
   const selectedSubmissionIdRef = useRef<string | null>(null);
 
+  const visibleComments = useMemo(() => {
+    if (!selectedSubmission) return [];
+    return comments.filter((comment) => comment.submissionId === selectedSubmission.id);
+  }, [comments, selectedSubmission]);
+
   const submissionsByDay = useMemo(() => {
     const entries = new Map<number, MissionSubmission>();
     (data?.submissions || []).forEach((submission) => {
@@ -415,8 +420,10 @@ export function ChallengeContent() {
       const json = await res.json();
       if (!res.ok) {
         if (options.silent) return;
-        setCommentError(json.error || "댓글을 불러오지 못했습니다.");
-        setComments([]);
+        if (selectedSubmissionIdRef.current === submissionId) {
+          setCommentError(json.error || "댓글을 불러오지 못했습니다.");
+          setComments([]);
+        }
         return;
       }
       const nextComments = (json.comments || []) as ChallengeComment[];
@@ -424,15 +431,19 @@ export function ChallengeContent() {
         ...prev,
         [submissionId]: nextComments,
       }));
-      if (!options.silent) {
+      if (!options.silent && selectedSubmissionIdRef.current === submissionId) {
         setComments(nextComments);
       }
     } catch {
       if (options.silent) return;
-      setCommentError("댓글을 불러오지 못했습니다.");
-      setComments([]);
+      if (selectedSubmissionIdRef.current === submissionId) {
+        setCommentError("댓글을 불러오지 못했습니다.");
+        setComments([]);
+      }
     } finally {
-      setCommentsLoading(false);
+      if (!options.silent && selectedSubmissionIdRef.current === submissionId) {
+        setCommentsLoading(false);
+      }
     }
   }
 
@@ -605,6 +616,7 @@ export function ChallengeContent() {
 
   async function submitComment() {
     if (!selectedSubmission) return;
+    const targetSubmissionId = selectedSubmission.id;
     const content = commentDraft.trim();
     setCommentError(null);
 
@@ -619,7 +631,7 @@ export function ChallengeContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          submissionId: selectedSubmission.id,
+          submissionId: targetSubmissionId,
           content,
         }),
       });
@@ -628,12 +640,16 @@ export function ChallengeContent() {
         setCommentError(json.error || "댓글 저장에 실패했습니다.");
         return;
       }
-      setComments((prev) => [...prev, json.comment]);
+      if (selectedSubmissionIdRef.current === targetSubmissionId) {
+        setComments((prev) => [...prev, json.comment]);
+      }
       setCommentsBySubmissionId((prev) => ({
         ...prev,
-        [selectedSubmission.id]: [...(prev[selectedSubmission.id] || []), json.comment],
+        [targetSubmissionId]: [...(prev[targetSubmissionId] || []), json.comment],
       }));
-      setCommentDraft("");
+      if (selectedSubmissionIdRef.current === targetSubmissionId) {
+        setCommentDraft("");
+      }
     } catch {
       setCommentError("댓글 저장에 실패했습니다.");
     } finally {
@@ -642,9 +658,11 @@ export function ChallengeContent() {
   }
 
   function replaceCommentInState(nextComment: ChallengeComment) {
-    setComments((prev) =>
-      prev.map((comment) => (comment.id === nextComment.id ? nextComment : comment)),
-    );
+    if (selectedSubmissionIdRef.current === nextComment.submissionId) {
+      setComments((prev) =>
+        prev.map((comment) => (comment.id === nextComment.id ? nextComment : comment)),
+      );
+    }
     setCommentsBySubmissionId((prev) => {
       const current = prev[nextComment.submissionId] || [];
       return {
@@ -657,7 +675,9 @@ export function ChallengeContent() {
   }
 
   function removeCommentFromState(submissionId: string, commentId: string) {
-    setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+    if (selectedSubmissionIdRef.current === submissionId) {
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+    }
     setCommentsBySubmissionId((prev) => ({
       ...prev,
       [submissionId]: (prev[submissionId] || []).filter((comment) => comment.id !== commentId),
@@ -711,6 +731,7 @@ export function ChallengeContent() {
 
   async function deleteComment(comment: ChallengeComment) {
     if (!selectedSubmission) return;
+    const targetSubmissionId = selectedSubmission.id;
     if (!window.confirm("댓글을 삭제할까요?")) return;
 
     setCommentError(null);
@@ -725,7 +746,7 @@ export function ChallengeContent() {
         return;
       }
 
-      removeCommentFromState(selectedSubmission.id, comment.id);
+      removeCommentFromState(targetSubmissionId, comment.id);
       if (editingCommentId === comment.id) {
         cancelEditComment();
       }
@@ -1215,7 +1236,7 @@ export function ChallengeContent() {
               <Box px={{ base: "md", sm: "lg" }} py="lg" bg={BRAND.softer}>
                 <Group gap="xs" mb="md">
                   <MessageCircle size={17} color={BRAND.primary} />
-                  <Text fw={900}>댓글 {comments.length}</Text>
+                  <Text fw={900}>댓글 {visibleComments.length}</Text>
                 </Group>
 
                 {commentError && (
@@ -1229,13 +1250,13 @@ export function ChallengeContent() {
                     <Loader size="sm" color="violet" />
                     <Text size="sm" c="gray.6">댓글을 불러오는 중...</Text>
                   </Group>
-                ) : comments.length === 0 ? (
+                ) : visibleComments.length === 0 ? (
                   <Text size="sm" c="gray.6" mb="md">
                     아직 댓글이 없습니다. 첫 댓글을 남겨보세요.
                   </Text>
                 ) : (
                   <Stack gap="xs" mb="md">
-                    {comments.map((comment) => (
+                    {visibleComments.map((comment) => (
                       <Box
                         key={comment.id}
                         p="sm"
