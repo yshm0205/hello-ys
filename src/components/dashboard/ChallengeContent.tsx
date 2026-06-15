@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Container,
   Divider,
   Group,
@@ -148,6 +149,19 @@ const BRAND = {
   muted: "#6b7280",
 };
 
+const DAY_3_MARKETING_CONSENT_TEXT =
+  "[마케팅 활용 동의]\n제출한 별점과 후기는 익명 처리 후 FlowSpot 후기/홍보 자료로 활용될 수 있음에 동의합니다.";
+
+function hasDay3MarketingConsent(content?: string | null) {
+  return Boolean(content?.includes(DAY_3_MARKETING_CONSENT_TEXT));
+}
+
+function appendDay3MarketingConsent(content: string) {
+  const trimmed = content.trim();
+  if (hasDay3MarketingConsent(trimmed)) return trimmed;
+  return `${trimmed}\n\n${DAY_3_MARKETING_CONSENT_TEXT}`;
+}
+
 const DAY_GUIDES = [
   {
     day: 1,
@@ -187,9 +201,9 @@ const DAY_GUIDES = [
       { label: "FlowSpot 열기", href: "/dashboard/batch" },
     ],
     template:
-      "1. 완성한 쇼츠 주제/상품은 무엇인가요?\n2. 챌린지 시작 전 가장 막혔던 점은 무엇인가요?\n3. 강의 또는 FlowSpot을 써보고 달라진 점은 무엇인가요?\n4. 이번 챌린지에서 가장 도움이 된 부분은 무엇인가요?\n5. 앞으로 만들 쇼츠 방향은 무엇인가요?\n\n선택. 영상까지 제작했다면 참고 링크 칸에 링크를 남겨주세요.",
+      "별점: ★★★★★\n다음 기수 분들이 참고할 수 있도록, 직접 해보신 체험 후기를 남겨주세요.\n\n1. 완성한 쇼츠 주제/상품은 무엇인가요?\n\n2. 챌린지 시작 전 가장 막혔던 점은 무엇인가요?\n\n3. 강의 또는 FlowSpot을 써보고 달라진 점은 무엇인가요?\n\n4. 가장 도움이 된 부분은 무엇인가요?\n\n5. 한 줄 후기를 남겨주세요.\n\n선택. 영상까지 제작했다면 참고 링크 칸에 영상 링크를 남겨주세요.",
     placeholder:
-      "예: 처음에는 어떤 상품을 골라야 할지 막혔는데, 채널 방향을 먼저 잡고 나니 소재를 고르는 기준이 생겼습니다.",
+      "예: 별점 ★★★★★\n처음에는 어떤 상품을 골라야 할지 막혔는데, 채널 방향을 먼저 잡고 나니 소재를 고르는 기준이 생겼습니다.",
   },
   {
     day: 5,
@@ -324,6 +338,7 @@ export function ChallengeContent() {
   const [updatingCommentId, setUpdatingCommentId] = useState<string | null>(null);
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [commentError, setCommentError] = useState<string | null>(null);
+  const [day3MarketingConsent, setDay3MarketingConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ChallengeResponse | null>(null);
   const [drafts, setDrafts] = useState<
@@ -510,6 +525,7 @@ export function ChallengeContent() {
 
     const guide = getGuide(day);
     const submission = submissionsByDay.get(day);
+    setDay3MarketingConsent(day === 3 && hasDay3MarketingConsent(submission?.content));
 
     setDrafts((prev) => ({
       ...prev,
@@ -540,6 +556,7 @@ export function ChallengeContent() {
     setComposerOpen(false);
     setActiveDay(null);
     setError(null);
+    setDay3MarketingConsent(false);
   }
 
   async function submit(day: number) {
@@ -547,6 +564,10 @@ export function ChallengeContent() {
     const draft = getDraft(day, guide.title);
     const autoTitle = getAutoSubmissionTitle(day, data?.enrollment || null);
     const submissionTitle = autoTitle || draft.title.trim();
+    const rawSubmissionContent = draft.content.trim();
+    const submissionContent = day === 3
+      ? appendDay3MarketingConsent(draft.content)
+      : draft.content;
     setError(null);
 
     if (submissionTitle.length < 2) {
@@ -554,7 +575,12 @@ export function ChallengeContent() {
       return;
     }
 
-    if (draft.content.trim().length < 10) {
+    if (day === 3 && !day3MarketingConsent) {
+      setError("3일차 인증은 후기/홍보 자료 활용 동의가 필요합니다.");
+      return;
+    }
+
+    if (rawSubmissionContent.length < 10) {
       setError("본문을 10자 이상 입력해주세요.");
       return;
     }
@@ -567,7 +593,7 @@ export function ChallengeContent() {
         body: JSON.stringify({
           day,
           title: submissionTitle,
-          content: draft.content,
+          content: submissionContent,
           referenceUrl: draft.referenceUrl,
         }),
       });
@@ -1659,6 +1685,15 @@ export function ChallengeContent() {
                 maxLength={5000}
                 disabled={!data.canSubmit}
               />
+
+              {activeDay === 3 && (
+                <Checkbox
+                  checked={day3MarketingConsent}
+                  onChange={(event) => setDay3MarketingConsent(event.currentTarget.checked)}
+                  disabled={!data.canSubmit}
+                  label="[필수] 제출한 별점과 후기는 익명 처리 후 FlowSpot 후기/홍보 자료로 활용될 수 있습니다."
+                />
+              )}
 
               <TextInput
                 label="참고 링크 (본인/운영자만 확인)"
