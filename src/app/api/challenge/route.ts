@@ -118,8 +118,11 @@ function toClientFeedSubmission(row: SubmissionRow, viewerId: string, authorLabe
   };
 }
 
+const OFFICIAL_AUTHOR_IDS = new Set(["hmys0205", "hmys0205hmys"]);
+
 function toDisplayId(email: string | null | undefined, fallback = "참여자") {
   const localPart = (email || "").split("@")[0]?.trim();
+  if (OFFICIAL_AUTHOR_IDS.has(localPart.toLowerCase())) return "원초적 인사이트";
   return localPart || fallback;
 }
 
