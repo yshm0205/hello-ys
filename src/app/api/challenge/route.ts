@@ -118,15 +118,17 @@ function toClientFeedSubmission(row: SubmissionRow, viewerId: string, authorLabe
   };
 }
 
-function buildAuthorLabels(rows: SubmissionRow[], viewerId: string) {
-  const otherUserIds = Array.from(
-    new Set(rows.filter((row) => row.user_id !== viewerId).map((row) => row.user_id)),
-  ).sort();
+function toDisplayId(email: string | null | undefined, fallback = "참여자") {
+  const localPart = (email || "").split("@")[0]?.trim();
+  return localPart || fallback;
+}
 
+function buildAuthorLabels(rows: SubmissionRow[]) {
   const labels = new Map<string, string>();
-  labels.set(viewerId, "나");
-  otherUserIds.forEach((userId, index) => {
-    labels.set(userId, `참여자 ${index + 1}`);
+  rows.forEach((row) => {
+    if (!labels.has(row.user_id)) {
+      labels.set(row.user_id, toDisplayId(row.email));
+    }
   });
   return labels;
 }
@@ -222,7 +224,7 @@ export async function GET() {
       return NextResponse.json({ error: "인증글 목록을 불러오지 못했습니다." }, { status: 500 });
     }
 
-    const authorLabels = buildAuthorLabels(feedSubmissions, user.id);
+    const authorLabels = buildAuthorLabels(feedSubmissions);
 
     return NextResponse.json({
       success: true,
@@ -332,7 +334,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       submission: toClientSubmission(row),
-      feedSubmission: toClientFeedSubmission(row, user.id, "나"),
+      feedSubmission: toClientFeedSubmission(row, user.id, toDisplayId(row.email)),
     });
   } catch (error) {
     console.error("[Challenge API] POST error:", error);

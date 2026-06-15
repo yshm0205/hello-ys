@@ -32,6 +32,7 @@ import {
   PencilLine,
   Search,
   Send,
+  Trash2,
   UserRound,
 } from "lucide-react";
 
@@ -288,6 +289,10 @@ export function ChallengeContent() {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentDraft, setCommentDraft] = useState("");
   const [savingComment, setSavingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentDraft, setEditingCommentDraft] = useState("");
+  const [updatingCommentId, setUpdatingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [commentError, setCommentError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ChallengeResponse | null>(null);
@@ -406,6 +411,8 @@ export function ChallengeContent() {
     setSelectedSubmission(submission);
     setSelectedNotice(false);
     setCommentDraft("");
+    setEditingCommentId(null);
+    setEditingCommentDraft("");
     const cachedComments = commentsBySubmissionId[submission.id];
     if (cachedComments) {
       setComments(cachedComments);
@@ -425,6 +432,8 @@ export function ChallengeContent() {
     setSelectedNotice(true);
     setComments([]);
     setCommentDraft("");
+    setEditingCommentId(null);
+    setEditingCommentDraft("");
     setCommentError(null);
     setCommentsLoading(false);
   }
@@ -434,6 +443,8 @@ export function ChallengeContent() {
     setSelectedSubmission(null);
     setSelectedNotice(false);
     setCommentsLoading(false);
+    setEditingCommentId(null);
+    setEditingCommentDraft("");
   }
 
   function getDraft(day: number, fallbackTitle: string) {
@@ -595,6 +606,101 @@ export function ChallengeContent() {
       setCommentError("댓글 저장에 실패했습니다.");
     } finally {
       setSavingComment(false);
+    }
+  }
+
+  function replaceCommentInState(nextComment: ChallengeComment) {
+    setComments((prev) =>
+      prev.map((comment) => (comment.id === nextComment.id ? nextComment : comment)),
+    );
+    setCommentsBySubmissionId((prev) => {
+      const current = prev[nextComment.submissionId] || [];
+      return {
+        ...prev,
+        [nextComment.submissionId]: current.map((comment) =>
+          comment.id === nextComment.id ? nextComment : comment,
+        ),
+      };
+    });
+  }
+
+  function removeCommentFromState(submissionId: string, commentId: string) {
+    setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+    setCommentsBySubmissionId((prev) => ({
+      ...prev,
+      [submissionId]: (prev[submissionId] || []).filter((comment) => comment.id !== commentId),
+    }));
+  }
+
+  function startEditComment(comment: ChallengeComment) {
+    setCommentError(null);
+    setEditingCommentId(comment.id);
+    setEditingCommentDraft(comment.content);
+  }
+
+  function cancelEditComment() {
+    setEditingCommentId(null);
+    setEditingCommentDraft("");
+  }
+
+  async function saveCommentEdit(comment: ChallengeComment) {
+    const content = editingCommentDraft.trim();
+    setCommentError(null);
+
+    if (!content) {
+      setCommentError("댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    setUpdatingCommentId(comment.id);
+    try {
+      const res = await fetch("/api/challenge/comments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          commentId: comment.id,
+          content,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCommentError(json.error || "댓글 수정에 실패했습니다.");
+        return;
+      }
+
+      replaceCommentInState(json.comment as ChallengeComment);
+      cancelEditComment();
+    } catch {
+      setCommentError("댓글 수정에 실패했습니다.");
+    } finally {
+      setUpdatingCommentId(null);
+    }
+  }
+
+  async function deleteComment(comment: ChallengeComment) {
+    if (!selectedSubmission) return;
+    if (!window.confirm("댓글을 삭제할까요?")) return;
+
+    setCommentError(null);
+    setDeletingCommentId(comment.id);
+    try {
+      const res = await fetch(`/api/challenge/comments?commentId=${comment.id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCommentError(json.error || "댓글 삭제에 실패했습니다.");
+        return;
+      }
+
+      removeCommentFromState(selectedSubmission.id, comment.id);
+      if (editingCommentId === comment.id) {
+        cancelEditComment();
+      }
+    } catch {
+      setCommentError("댓글 삭제에 실패했습니다.");
+    } finally {
+      setDeletingCommentId(null);
     }
   }
 
@@ -1106,15 +1212,72 @@ export function ChallengeContent() {
                           background: "#fff",
                         }}
                       >
-                        <Group gap={6} mb={4}>
-                          <Text size="sm" fw={800}>{comment.authorLabel}</Text>
-                          {comment.isMine && <Badge size="xs" color="violet" variant="light" radius={2}>내 댓글</Badge>}
-                          <Text size="xs" c="gray.5">·</Text>
-                          <Text size="xs" c="gray.5">{formatDateTime(comment.createdAt)}</Text>
+                        <Group justify="space-between" align="flex-start" gap="xs" mb={4}>
+                          <Group gap={6}>
+                            <Text size="sm" fw={800}>{comment.authorLabel}</Text>
+                            {comment.isMine && <Badge size="xs" color="violet" variant="light" radius={2}>내 댓글</Badge>}
+                            <Text size="xs" c="gray.5">·</Text>
+                            <Text size="xs" c="gray.5">{formatDateTime(comment.createdAt)}</Text>
+                            {comment.updatedAt !== comment.createdAt && (
+                              <Text size="xs" c="gray.5">수정됨</Text>
+                            )}
+                          </Group>
+                          {comment.isMine && editingCommentId !== comment.id && (
+                            <Group gap={4}>
+                              <Button
+                                size="compact-xs"
+                                variant="subtle"
+                                color="gray"
+                                leftSection={<PencilLine size={12} />}
+                                onClick={() => startEditComment(comment)}
+                              >
+                                수정
+                              </Button>
+                              <Button
+                                size="compact-xs"
+                                variant="subtle"
+                                color="red"
+                                leftSection={<Trash2 size={12} />}
+                                loading={deletingCommentId === comment.id}
+                                onClick={() => deleteComment(comment)}
+                              >
+                                삭제
+                              </Button>
+                            </Group>
+                          )}
                         </Group>
-                        <Text size="sm" style={{ whiteSpace: "pre-wrap", lineHeight: 1.65 }}>
-                          {comment.content}
-                        </Text>
+                        {editingCommentId === comment.id ? (
+                          <Stack gap="xs">
+                            <Textarea
+                              value={editingCommentDraft}
+                              onChange={(event) => setEditingCommentDraft(event.currentTarget.value)}
+                              autosize
+                              minRows={2}
+                              maxRows={8}
+                              maxLength={1000}
+                              disabled={updatingCommentId === comment.id}
+                            />
+                            <Group justify="flex-end" gap={6}>
+                              <Button size="xs" variant="light" color="gray" radius={4} onClick={cancelEditComment}>
+                                취소
+                              </Button>
+                              <Button
+                                size="xs"
+                                color="violet"
+                                radius={4}
+                                loading={updatingCommentId === comment.id}
+                                onClick={() => saveCommentEdit(comment)}
+                                style={{ background: BRAND.primary }}
+                              >
+                                수정 완료
+                              </Button>
+                            </Group>
+                          </Stack>
+                        ) : (
+                          <Text size="sm" style={{ whiteSpace: "pre-wrap", lineHeight: 1.65 }}>
+                            {comment.content}
+                          </Text>
+                        )}
                       </Box>
                     ))}
                   </Stack>

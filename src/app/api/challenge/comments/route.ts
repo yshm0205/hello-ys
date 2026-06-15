@@ -42,6 +42,15 @@ const commentSchema = z.object({
   content: z.string().trim().min(1).max(1000),
 });
 
+const patchCommentSchema = z.object({
+  commentId: z.string().uuid(),
+  content: z.string().trim().min(1).max(1000),
+});
+
+const deleteCommentSchema = z.object({
+  commentId: z.string().uuid(),
+});
+
 async function getUser() {
   const supabase = await createClient();
   const {
@@ -98,17 +107,20 @@ async function loadComments(admin: ReturnType<typeof createAdminClient>, submiss
   return { comments: ((data || []) as CommentRow[]) ?? [], error };
 }
 
-function buildAuthorLabels(rows: CommentRow[], viewerId: string) {
-  const otherUserIds = Array.from(
-    new Set(rows.filter((row) => row.user_id !== viewerId).map((row) => row.user_id)),
-  ).sort();
+async function loadVisibleComment(admin: ReturnType<typeof createAdminClient>, commentId: string) {
+  const { data, error } = await admin
+    .from("challenge_submission_comments")
+    .select("*")
+    .eq("id", commentId)
+    .eq("status", "visible")
+    .maybeSingle();
 
-  const labels = new Map<string, string>();
-  labels.set(viewerId, "나");
-  otherUserIds.forEach((userId, index) => {
-    labels.set(userId, `참여자 ${index + 1}`);
-  });
-  return labels;
+  return { comment: (data as CommentRow | null) ?? null, error };
+}
+
+function toDisplayId(email: string | null | undefined, fallback = "참여자") {
+  const localPart = (email || "").split("@")[0]?.trim();
+  return localPart || fallback;
 }
 
 function toClientComment(row: CommentRow, viewerId: string, authorLabel: string) {
@@ -161,14 +173,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "댓글을 불러오지 못했습니다." }, { status: 500 });
     }
 
-    const rows = comments;
-    const authorLabels = buildAuthorLabels(rows, user.id);
-
     return NextResponse.json({
       success: true,
-      comments: rows.map((row) =>
-        toClientComment(row, user.id, authorLabels.get(row.user_id) || "참여자"),
-      ),
+      comments: comments.map((row) => toClientComment(row, user.id, toDisplayId(row.email))),
     });
   } catch (error) {
     console.error("[Challenge Comments] GET fatal:", error);
@@ -224,10 +231,116 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      comment: toClientComment(data as CommentRow, user.id, "나"),
+      comment: toClientComment(data as CommentRow, user.id, toDisplayId((data as CommentRow).email)),
     });
   } catch (error) {
     console.error("[Challenge Comments] POST fatal:", error);
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    const parsed = patchCommentSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "댓글 내용을 입력해주세요." }, { status: 400 });
+    }
+
+    const admin = createAdminClient();
+    const [{ enrollment, error: enrollmentError }, { comment, error: commentError }] =
+      await Promise.all([loadEnrollment(admin, user.id), loadVisibleComment(admin, parsed.data.commentId)]);
+
+    if (enrollmentError || !isEnrollmentActive(enrollment)) {
+      return NextResponse.json({ error: "활성 챌린지 참여자만 댓글을 수정할 수 있습니다." }, { status: 403 });
+    }
+
+    if (commentError || !comment) {
+      return NextResponse.json({ error: "댓글을 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    if (comment.user_id !== user.id) {
+      return NextResponse.json({ error: "내 댓글만 수정할 수 있습니다." }, { status: 403 });
+    }
+
+    const { submission, error: submissionError } = await loadVisibleSubmission(admin, comment.submission_id);
+    if (submissionError || !submission) {
+      return NextResponse.json({ error: "게시글을 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    const { data, error } = await admin
+      .from("challenge_submission_comments")
+      .update({ content: parsed.data.content })
+      .eq("id", comment.id)
+      .eq("user_id", user.id)
+      .eq("status", "visible")
+      .select("*")
+      .single();
+
+    if (error || !data) {
+      console.error("[Challenge Comments] PATCH error:", error);
+      return NextResponse.json({ error: "댓글 수정에 실패했습니다." }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      comment: toClientComment(data as CommentRow, user.id, toDisplayId((data as CommentRow).email)),
+    });
+  } catch (error) {
+    console.error("[Challenge Comments] PATCH fatal:", error);
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    const parsed = deleteCommentSchema.safeParse({
+      commentId: request.nextUrl.searchParams.get("commentId"),
+    });
+    if (!parsed.success) {
+      return NextResponse.json({ error: "댓글을 확인할 수 없습니다." }, { status: 400 });
+    }
+
+    const admin = createAdminClient();
+    const [{ enrollment, error: enrollmentError }, { comment, error: commentError }] =
+      await Promise.all([loadEnrollment(admin, user.id), loadVisibleComment(admin, parsed.data.commentId)]);
+
+    if (enrollmentError || !isEnrollmentActive(enrollment)) {
+      return NextResponse.json({ error: "활성 챌린지 참여자만 댓글을 삭제할 수 있습니다." }, { status: 403 });
+    }
+
+    if (commentError || !comment) {
+      return NextResponse.json({ error: "댓글을 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    if (comment.user_id !== user.id) {
+      return NextResponse.json({ error: "내 댓글만 삭제할 수 있습니다." }, { status: 403 });
+    }
+
+    const { error } = await admin
+      .from("challenge_submission_comments")
+      .update({ status: "removed" })
+      .eq("id", comment.id)
+      .eq("user_id", user.id)
+      .eq("status", "visible");
+
+    if (error) {
+      console.error("[Challenge Comments] DELETE error:", error);
+      return NextResponse.json({ error: "댓글 삭제에 실패했습니다." }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, commentId: comment.id });
+  } catch (error) {
+    console.error("[Challenge Comments] DELETE fatal:", error);
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
   }
 }
