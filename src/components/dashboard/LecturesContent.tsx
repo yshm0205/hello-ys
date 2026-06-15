@@ -201,6 +201,7 @@ export function LecturesContent({ chapters, accessMode = 'full', allowedVodIds =
             ? allowedVodIds.length
             : lectureChapters.reduce((sum, ch) => sum + ch.vods.length, 0);
     const progressPercent = totalVods > 0 ? Math.round((completedCount / totalVods) * 100) : 0;
+    const hasUnlockedVod08 = allowedVodIdSet.has('vod_08');
 
     if (isLoading) {
         return (
@@ -274,10 +275,14 @@ export function LecturesContent({ chapters, accessMode = 'full', allowedVodIds =
                         <Group justify="space-between" align="center" gap="sm">
                             <Box style={{ flex: 1, minWidth: 0 }}>
                                 <Text fw={700} size={isMobile ? 'sm' : 'md'}>
-                                    챌린지 체험 권한으로 VOD 04, VOD 08만 열려 있습니다.
+                                    {hasUnlockedVod08
+                                        ? '1일차 인증 완료로 VOD 04, VOD 08이 열려 있습니다.'
+                                        : '지금은 VOD 04만 열려 있습니다.'}
                                 </Text>
                                 <Text size={isMobile ? 'xs' : 'sm'} c="gray.7" mt={4}>
-                                    전체 강의와 모든 템플릿은 올인원 패스 결제 후 이어서 볼 수 있습니다.
+                                    {hasUnlockedVod08
+                                        ? '전체 강의와 모든 템플릿은 올인원 패스 결제 후 이어서 볼 수 있습니다.'
+                                        : 'VOD 08은 1일차 인증 제출 후 열립니다. 전체 강의는 올인원 패스에서 볼 수 있습니다.'}
                                 </Text>
                             </Box>
                             <Button
@@ -399,7 +404,7 @@ export function LecturesContent({ chapters, accessMode = 'full', allowedVodIds =
                                                             <>
                                                                 <Lock size={13} color="#9ca3af" />
                                                                 <Badge variant="light" color="gray" size="xs">
-                                                                    올인원 공개
+                                                                    {vod.id === 'vod_08' ? '1일차 인증 후 공개' : '올인원 공개'}
                                                                 </Badge>
                                                             </>
                                                         ) : (

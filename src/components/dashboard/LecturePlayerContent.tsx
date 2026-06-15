@@ -835,7 +835,9 @@ export function LecturePlayerContent({
                                                                         <Group gap={4} mt={4} pl={22}>
                                                                             <Lock size={11} color="#9ca3af" />
                                                                             <Text size="10px" c="gray.5">
-                                                                                올인원 패스에서 전체 공개
+                                                                                {vod.id === 'vod_08'
+                                                                                    ? '1일차 인증 후 공개'
+                                                                                    : '올인원 패스에서 전체 공개'}
                                                                             </Text>
                                                                         </Group>
                                                                     )}
