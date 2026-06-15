@@ -33,17 +33,17 @@ const LAUNCH_CHANGES = [
   {
     happenedAt: "4/25 새벽",
     title: "로그인·회원가입 후 체크아웃 복귀 수정",
-    watch: "신청 클릭 → 토스창 열림",
+    watch: "신청 클릭 → 결제창 열림",
   },
   {
     happenedAt: "4/26 오전",
     title: "전자책 쿠폰 EBOOK50 적용",
-    watch: "토스창 열림 / 결제 완료",
+    watch: "결제창 열림 / 결제 완료",
   },
   {
     happenedAt: "4/26 저녁",
     title: "로그인 화면 압축 및 안내 문구 보강",
-    watch: "신청 클릭 → 토스창 열림",
+    watch: "신청 클릭 → 결제창 열림",
   },
   {
     happenedAt: "4/27 오후",
@@ -58,7 +58,7 @@ const LAUNCH_CHANGES = [
   {
     happenedAt: "5/7",
     title: "구매하기 이후 흐름 추적 추가",
-    watch: "구매 화면 클릭 / 결제하기 클릭 / 토스창 열림",
+    watch: "구매 화면 클릭 / 결제하기 클릭 / 결제창 열림",
   },
 ] as const;
 const SECTION_INFOS: Record<
@@ -190,6 +190,16 @@ interface PaymentRow {
   created_at: string;
   user_id: string;
   status: string;
+  metadata: Record<string, unknown> | null;
+}
+
+interface LatpeedPaymentIntentRow {
+  id: string;
+  amount: number;
+  created_at: string;
+  user_id: string;
+  status: string;
+  latpeed_event_key: string | null;
   metadata: Record<string, unknown> | null;
 }
 
@@ -388,6 +398,26 @@ function getNetRevenue(payment: PaymentRow) {
   }
 
   return 0;
+}
+
+function isOpenLatpeedIntent(intent: LatpeedPaymentIntentRow) {
+  return intent.status !== "matched" && !intent.latpeed_event_key;
+}
+
+function toLatpeedPendingPayment(intent: LatpeedPaymentIntentRow): PaymentRow {
+  return {
+    id: intent.id,
+    amount: intent.amount,
+    created_at: intent.created_at,
+    user_id: intent.user_id,
+    status: "PENDING",
+    metadata: {
+      ...(intent.metadata || {}),
+      provider: "latpeed",
+      source: "latpeed_payment_intent",
+      latpeedIntentStatus: intent.status,
+    },
+  };
 }
 
 function formatCurrency(value: number) {
@@ -606,7 +636,8 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     range.endIso,
   );
 
-  const [{ data: users }, { data: payments }, eventsResponse] = await Promise.all([
+  const [{ data: users }, { data: payments }, { data: latpeedIntents }, eventsResponse] =
+    await Promise.all([
     supabase
       .from("users")
       .select("id, created_at")
@@ -615,6 +646,11 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     supabase
       .from("toss_payments")
       .select("id, amount, created_at, user_id, status, metadata")
+      .gte("created_at", range.startIso)
+      .lt("created_at", range.endIso),
+    supabase
+      .from("latpeed_payment_intents")
+      .select("id, amount, created_at, user_id, status, latpeed_event_key, metadata")
       .gte("created_at", range.startIso)
       .lt("created_at", range.endIso),
     fetchAllMarketingCtaEvents(supabase, range.startIso, range.endIso),
@@ -641,12 +677,19 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
   const periodPayments = ((payments || []) as PaymentRow[]).filter(
     (payment) => !internalAdminIds.has(payment.user_id),
   );
+  const periodLatpeedOpenIntents = ((latpeedIntents || []) as LatpeedPaymentIntentRow[])
+    .filter((intent) => !internalAdminIds.has(intent.user_id))
+    .filter(isOpenLatpeedIntent);
+  const periodPaymentAttempts = [
+    ...periodPayments,
+    ...periodLatpeedOpenIntents.map(toLatpeedPendingPayment),
+  ];
   const periodCtaEvents = eventsResponse.error ? [] : eventsResponse.rows;
 
   const completedPayments = periodPayments.filter((payment) =>
     (SALES_STATUSES as readonly string[]).includes(payment.status),
   );
-  const pendingPayments = periodPayments.filter(
+  const pendingPayments = periodPaymentAttempts.filter(
     (payment) => payment.status === "PENDING",
   );
   const ctaUnique = periodSessions.filter((session) => (session.cta_clicks || 0) > 0).length;
@@ -706,7 +749,7 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
   // 세션 단위 4분할 — 한 사람의 여정 중 어디서 떠났는가
   // 주의: paymentAttempts는 결제건 단위, ctaUnique/landingSessions는 세션 단위라 정확 매칭은 2단계(session_key 보강)에서 가능
   const droppedAtLanding = Math.max(0, periodSessions.length - ctaUnique);
-  const droppedAfterCta = Math.max(0, ctaUnique - periodPayments.length);
+  const droppedAfterCta = Math.max(0, ctaUnique - periodPaymentAttempts.length);
   const droppedAtCheckout = pendingPayments.length;
   const completed = completedPayments.length;
 
@@ -730,7 +773,7 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     checkoutConfirmSessions,
     hasCheckoutStepSignals,
     signups: periodUsers.length,
-    paymentAttempts: periodPayments.length,
+    paymentAttempts: periodPaymentAttempts.length,
     paymentPending: pendingPayments.length,
     paymentCompleted: completedPayments.length,
     droppedAtLanding,
@@ -863,9 +906,9 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
   if (stats.ctaUnique >= 3 && ctaToPaymentRate < 60) {
     return {
       title: "가장 큰 병목",
-      value: "신청 후 토스창 미진입",
+      value: "신청 후 결제창 미진입",
       tone: "warning" as const,
-      body: `랜딩 신청 클릭 후 토스창 열림까지의 전환이 ${ctaToPaymentRate}%입니다.`,
+      body: `랜딩 신청 클릭 후 결제창 열림까지의 전환이 ${ctaToPaymentRate}%입니다.`,
       action: "로그인/회원가입 화면 문구와 결제창 이동 흐름을 우선 확인하세요.",
       href: "/admin/sessions?stage=cta-no-payment",
     };
@@ -876,7 +919,7 @@ function getPrimaryBottleneckInsight(stats: PeriodStats) {
       title: "가장 큰 병목",
       value: "결제창 미완료",
       tone: "warning" as const,
-      body: `토스창 열림 대비 결제 완료가 ${paymentDoneRate}%입니다.`,
+      body: `결제창 열림 대비 결제 완료가 ${paymentDoneRate}%입니다.`,
       action: "카드/계좌이체 안내, 가격 확신, 쿠폰 적용 여부를 확인하세요.",
       href: "/admin/sessions?stage=checkout-pending",
     };
@@ -923,7 +966,7 @@ function getPrioritySectionInsight(stats: PeriodStats) {
     value: "위치 데이터 대기",
     tone: "neutral" as const,
     body: `${stats.behaviorReliableFromLabel} 이후 세션부터 정확히 표시됩니다.`,
-    action: "오늘은 랜딩 방문, 신청 클릭, 토스창 열림만 먼저 보세요.",
+    action: "오늘은 랜딩 방문, 신청 클릭, 결제창 열림만 먼저 보세요.",
   };
 }
 
@@ -944,9 +987,9 @@ function getTodayActionInsight(stats: PeriodStats) {
   if (stats.droppedAfterCta > stats.droppedAtLanding && stats.ctaUnique >= 3) {
     return {
       title: "오늘 할 일",
-      value: "토스창 진입 확인",
+      value: "결제창 진입 확인",
       tone: "warning" as const,
-      body: `신청 클릭 후 토스창까지 가지 않은 사람이 ${stats.droppedAfterCta}명입니다.`,
+      body: `신청 클릭 후 결제창까지 가지 않은 사람이 ${stats.droppedAfterCta}명입니다.`,
       action: "회원가입/로그인 뒤 결제창으로 제대로 복귀하는지 모바일 기준으로 다시 보세요.",
       href: "/admin/sessions?stage=cta-no-payment",
     };
@@ -1017,7 +1060,7 @@ const OVERVIEW_READ_GUIDE = [
   },
   {
     title: "2. 다음 퍼널",
-    body: "방문 → 랜딩 신청 클릭 → 구매 화면 클릭 → 결제하기 클릭 → 토스창 열림 → 결제 완료 중 어디서 빠지는지 봅니다.",
+    body: "방문 → 랜딩 신청 클릭 → 구매 화면 클릭 → 결제하기 클릭 → 결제창 열림 → 결제 완료 중 어디서 빠지는지 봅니다.",
   },
   {
     title: "3. 마지막 구간표",
@@ -1087,7 +1130,7 @@ export default async function AdminOverviewPage({
       requiresCheckoutSignals: true,
     },
     {
-      title: "토스창 열림",
+      title: "결제창 열림",
       count: periodStats.paymentAttempts,
       unit: "건",
       previousCount: paymentAttemptPreviousCount,
@@ -1099,7 +1142,7 @@ export default async function AdminOverviewPage({
       count: periodStats.paymentCompleted,
       unit: "건",
       previousCount: periodStats.paymentAttempts,
-      previousLabel: "토스창 대비",
+      previousLabel: "결제창 대비",
       description: "DONE / 부분취소 포함",
     },
   ];
@@ -1294,7 +1337,7 @@ export default async function AdminOverviewPage({
                 {formatCurrency(periodStats.revenue)}
               </div>
               <p className="text-xs text-muted-foreground">
-                토스창 열림 {periodStats.paymentAttempts} · 완료 {periodStats.paymentCompleted}건
+                결제창 열림 {periodStats.paymentAttempts} · 완료 {periodStats.paymentCompleted}건
               </p>
             </CardContent>
           </Card>
@@ -1364,7 +1407,7 @@ export default async function AdminOverviewPage({
           <h2 className="text-base font-semibold text-foreground">어디서 빠지는지</h2>
           <p className="max-w-3xl text-xs leading-5 text-muted-foreground">
             큰 숫자는 해당 단계에 도달한 수입니다. 아래에는 직전 단계 대비,
-            전체 방문 대비, 이탈률을 함께 표시합니다. 토스창 열림은 결제 주문 생성 기준입니다.
+            전체 방문 대비, 이탈률을 함께 표시합니다. 결제창 열림은 토스 주문 생성 또는 래피드 결제창 이동 기준입니다.
           </p>
         </div>
 
@@ -1372,6 +1415,8 @@ export default async function AdminOverviewPage({
           {funnelSteps.map((step, index) => {
             const hasStepData =
               !step.requiresCheckoutSignals || periodStats.hasCheckoutStepSignals;
+            const isPaymentAttemptStep = index === funnelSteps.length - 2;
+            const stepTitle = isPaymentAttemptStep ? "결제창 열림" : step.title;
             const previousRate = index === 0 ? 100 : getRate(step.count, step.previousCount);
             const totalRate =
               index === 0 ? 100 : getRate(step.count, periodStats.landingSessions);
@@ -1381,9 +1426,9 @@ export default async function AdminOverviewPage({
             const dropRateLabel = hasStepData ? formatPercent(dropRate) : "-";
 
             return (
-              <Card key={step.title}>
+              <Card key={stepTitle}>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">{step.title}</CardTitle>
+                  <CardTitle className="text-sm font-medium">{stepTitle}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
@@ -1473,7 +1518,7 @@ export default async function AdminOverviewPage({
                   </div>
                 </div>
                 <div className="rounded-lg bg-white px-4 py-3">
-                  <p className="text-xs font-medium text-violet-700">토스창 열림</p>
+                  <p className="text-xs font-medium text-violet-700">결제창 열림</p>
                   <p className="mt-1 text-2xl font-bold text-violet-950">
                     {periodStats.paymentAttempts}건
                   </p>
@@ -1528,7 +1573,7 @@ export default async function AdminOverviewPage({
           <Card className="border-amber-200 bg-amber-50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-amber-800">
-                ② 신청 후 토스창 미진입
+                ② 신청 후 결제창 미진입
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1536,7 +1581,7 @@ export default async function AdminOverviewPage({
                 {periodStats.droppedAfterCta}명
               </div>
               <p className="text-xs text-amber-700/80">
-                신청은 눌렀지만 토스창까지 안 옴 · 로그인/회원가입 단계 의심
+                신청은 눌렀지만 결제창까지 안 옴 · 로그인/회원가입 단계 의심
               </p>
               <Link
                 href="/admin/sessions?stage=cta-no-payment"
@@ -1550,7 +1595,7 @@ export default async function AdminOverviewPage({
           <Card className="border-rose-200 bg-rose-50">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-rose-800">
-                ③ 토스창 이후 미완료
+                ③ 결제창 이후 미완료
               </CardTitle>
             </CardHeader>
             <CardContent>

@@ -102,6 +102,56 @@ function formatWon(amount: number) {
   return `${amount.toLocaleString()}원`;
 }
 
+async function readMarketingBrowserSession() {
+  const { getMarketingSessionKeyFromBrowser, getMarketingTokenFromBrowser } = await import(
+    '@/lib/marketing/tracking'
+  );
+
+  return {
+    sessionKey: getMarketingSessionKeyFromBrowser(),
+    marketingToken: getMarketingTokenFromBrowser(),
+  };
+}
+
+async function trackCheckoutRedirect({
+  sessionKey,
+  marketingToken,
+  locale,
+  redirectUrl,
+  ctaId,
+  ctaLabel,
+}: {
+  sessionKey: string | null;
+  marketingToken: string | null;
+  locale: string;
+  redirectUrl: string;
+  ctaId: string;
+  ctaLabel: string;
+}) {
+  if (!sessionKey || !marketingToken || typeof window === 'undefined') return;
+
+  try {
+    await fetch('/api/marketing/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        eventType: 'checkout_open',
+        sessionKey,
+        marketingToken,
+        pagePath: window.location.pathname,
+        locale,
+        ctaTarget: redirectUrl,
+        ctaId,
+        ctaLabel,
+        ctaSection: 'checkout-confirm',
+      }),
+    });
+  } catch {
+    // 결제창 이동을 추적 실패 때문에 막지 않는다.
+  }
+}
+
 function PolicyCard({
   title,
   teaser,
@@ -226,9 +276,7 @@ export function AllInOneCheckoutContent({
     setError(null);
 
     try {
-      const { getMarketingSessionKeyFromBrowser, getMarketingTokenFromBrowser } = await import(
-        '@/lib/marketing/tracking'
-      );
+      const marketingSession = await readMarketingBrowserSession();
       const res = await fetch('/api/tosspay/direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -237,8 +285,8 @@ export function AllInOneCheckoutContent({
           buyerEmail: userEmail,
           locale,
           couponCode: appliedCoupon?.code || null,
-          sessionKey: getMarketingSessionKeyFromBrowser(),
-          marketingToken: getMarketingTokenFromBrowser(),
+          sessionKey: marketingSession.sessionKey,
+          marketingToken: marketingSession.marketingToken,
         }),
       });
       const data = await res.json();
@@ -274,11 +322,14 @@ export function AllInOneCheckoutContent({
     setError(null);
 
     try {
+      const marketingSession = await readMarketingBrowserSession();
       const res = await fetch('/api/latpeed/intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           couponCode: appliedCoupon?.code || null,
+          sessionKey: marketingSession.sessionKey,
+          marketingToken: marketingSession.marketingToken,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -287,6 +338,15 @@ export function AllInOneCheckoutContent({
         setError(data.error || '카드/간편결제 준비에 실패했습니다.');
         return;
       }
+
+      await trackCheckoutRedirect({
+        sessionKey: marketingSession.sessionKey,
+        marketingToken: marketingSession.marketingToken,
+        locale,
+        redirectUrl: data.redirectUrl,
+        ctaId: 'latpeed-checkout-open',
+        ctaLabel: '래피드 결제창 열림',
+      });
 
       window.location.assign(data.redirectUrl);
     } catch (err) {

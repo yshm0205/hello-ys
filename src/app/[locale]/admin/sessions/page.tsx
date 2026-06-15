@@ -31,6 +31,38 @@ type PaymentRow = {
   created_at: string;
 };
 
+type LatpeedIntentRow = {
+  id: string;
+  user_id: string;
+  amount: number;
+  status: string;
+  latpeed_event_key: string | null;
+  metadata: { sessionKey?: string; provider?: string } | null;
+  created_at: string;
+};
+
+function getLatpeedIntentSessionKey(intent: LatpeedIntentRow) {
+  const sessionKey = intent.metadata?.sessionKey;
+  return typeof sessionKey === "string" && sessionKey ? sessionKey : null;
+}
+
+function isOpenLatpeedIntent(intent: LatpeedIntentRow) {
+  return intent.status !== "matched" && !intent.latpeed_event_key;
+}
+
+function toLatpeedPaymentRow(intent: LatpeedIntentRow): PaymentRow {
+  return {
+    session_key: getLatpeedIntentSessionKey(intent),
+    status: "PENDING",
+    amount: intent.amount,
+    created_at: intent.created_at,
+    metadata: {
+      ...(intent.metadata || {}),
+      provider: "latpeed",
+    },
+  };
+}
+
 function formatKstTime(isoString: string) {
   const date = new Date(isoString);
   return new Intl.DateTimeFormat("ko-KR", {
@@ -116,19 +148,39 @@ async function getRecentSessions(limit = 100) {
 
   const sessionRows = (sessions || []) as SessionRow[];
   const sessionKeys = sessionRows.map((s) => s.session_key);
+  const sessionKeySet = new Set(sessionKeys);
+  const oldestSessionSeenAt = sessionRows[sessionRows.length - 1]?.first_seen_at;
 
   let paymentMap = new Map<string, PaymentRow>();
 
   if (sessionKeys.length) {
-    const { data: payments } = await supabase
-      .from("toss_payments")
-      .select("session_key, status, amount, metadata, created_at, user_id")
-      .in("session_key", sessionKeys);
+    const [{ data: payments }, { data: latpeedIntents }] = await Promise.all([
+      supabase
+        .from("toss_payments")
+        .select("session_key, status, amount, metadata, created_at, user_id")
+        .in("session_key", sessionKeys),
+      supabase
+        .from("latpeed_payment_intents")
+        .select("id, user_id, amount, status, latpeed_event_key, metadata, created_at")
+        .gte("created_at", oldestSessionSeenAt || new Date(0).toISOString())
+        .order("created_at", { ascending: false }),
+    ]);
 
     const filtered = ((payments || []) as (PaymentRow & { user_id: string })[]).filter(
       (p) => !internalIds.has(p.user_id),
     );
     paymentMap = new Map(filtered.map((p) => [p.session_key as string, p]));
+
+    ((latpeedIntents || []) as LatpeedIntentRow[])
+      .filter((intent) => !internalIds.has(intent.user_id))
+      .filter(isOpenLatpeedIntent)
+      .forEach((intent) => {
+        const sessionKey = getLatpeedIntentSessionKey(intent);
+        if (!sessionKey || !sessionKeySet.has(sessionKey) || paymentMap.has(sessionKey)) {
+          return;
+        }
+        paymentMap.set(sessionKey, toLatpeedPaymentRow(intent));
+      });
   }
 
   return { sessions: sessionRows, paymentMap };

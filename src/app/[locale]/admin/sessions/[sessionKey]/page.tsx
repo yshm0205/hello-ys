@@ -49,6 +49,33 @@ type PaymentRow = {
   metadata: Record<string, unknown> | null;
 };
 
+type LatpeedIntentRow = {
+  id: string;
+  amount: number;
+  status: string;
+  latpeed_event_key: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+};
+
+function isOpenLatpeedIntent(intent: LatpeedIntentRow) {
+  return intent.status !== "matched" && !intent.latpeed_event_key;
+}
+
+function toLatpeedPaymentRow(intent: LatpeedIntentRow): PaymentRow {
+  return {
+    order_id: `latpeed-intent-${intent.id.slice(0, 8)}`,
+    status: "PENDING",
+    amount: intent.amount,
+    created_at: intent.created_at,
+    metadata: {
+      ...(intent.metadata || {}),
+      provider: "latpeed",
+      latpeedIntentStatus: intent.status,
+    },
+  };
+}
+
 function formatKst(isoString: string) {
   return new Intl.DateTimeFormat("ko-KR", {
     timeZone: SEOUL_TIME_ZONE,
@@ -67,6 +94,8 @@ function eventTypeLabel(eventType: string) {
       return { label: "페이지 진입", color: "bg-blue-500/15 text-blue-300" };
     case "cta_click":
       return { label: "CTA 클릭", color: "bg-violet-500/20 text-violet-300" };
+    case "checkout_open":
+      return { label: "결제창 열림", color: "bg-emerald-500/20 text-emerald-300" };
     case "heartbeat":
       return { label: "체류", color: "bg-zinc-500/15 text-zinc-400" };
     default:
@@ -77,8 +106,12 @@ function eventTypeLabel(eventType: string) {
 async function getSessionDetail(sessionKey: string) {
   const supabase = createAdminClient();
 
-  const [{ data: session }, { data: events, error: eventsError }, { data: payments }] =
-    await Promise.all([
+  const [
+    { data: session },
+    { data: events, error: eventsError },
+    { data: payments },
+    { data: latpeedIntents },
+  ] = await Promise.all([
       supabase
         .from("marketing_sessions")
         .select(
@@ -98,13 +131,25 @@ async function getSessionDetail(sessionKey: string) {
         .select("order_id, status, amount, created_at, metadata")
         .eq("session_key", sessionKey)
         .order("created_at", { ascending: true }),
+      supabase
+        .from("latpeed_payment_intents")
+        .select("id, amount, status, latpeed_event_key, metadata, created_at")
+        .contains("metadata", { sessionKey })
+        .order("created_at", { ascending: true }),
     ]);
+
+  const paymentRows = [
+    ...((payments as PaymentRow[] | null) || []),
+    ...(((latpeedIntents as LatpeedIntentRow[] | null) || [])
+      .filter(isOpenLatpeedIntent)
+      .map(toLatpeedPaymentRow)),
+  ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
   return {
     session: (session as SessionRow | null) || null,
     events: (events as EventRow[] | null) || [],
     eventsError,
-    payments: (payments as PaymentRow[] | null) || [],
+    payments: paymentRows,
   };
 }
 
@@ -293,7 +338,8 @@ export default async function AdminSessionDetailPage({
                         <div className="text-muted-foreground space-y-0.5">
                           {event.page_path && <p>경로: {event.page_path}</p>}
                           {event.section && <p>본 섹션: {event.section}</p>}
-                          {event.event_type === "cta_click" && (
+                          {(event.event_type === "cta_click" ||
+                            event.event_type === "checkout_open") && (
                             <>
                               {event.cta_target && (
                                 <p>CTA → {event.cta_target}</p>

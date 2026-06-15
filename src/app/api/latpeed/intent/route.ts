@@ -13,10 +13,28 @@ const LATPEED_CHALLENGE_DISCOUNT_URL =
   process.env.NEXT_PUBLIC_LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
   process.env.LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
   DEFAULT_LATPEED_CHALLENGE_DISCOUNT_URL;
+const SESSION_KEY_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+type LatpeedIntentPayload = {
+  couponCode?: string | null;
+  sessionKey?: string | null;
+  marketingToken?: string | null;
+};
 
 function normalizeEmail(value?: string | null) {
   const email = (value || "").trim().toLowerCase();
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : "";
+}
+
+function normalizeSessionKey(value?: string | null) {
+  const sessionKey = (value || "").trim();
+  return SESSION_KEY_PATTERN.test(sessionKey) ? sessionKey : null;
+}
+
+function normalizeTrackingToken(value?: string | null) {
+  const token = (value || "").trim();
+  return token ? token.slice(0, 160) : null;
 }
 
 function readUserName(userMetadata: Record<string, unknown> | null | undefined) {
@@ -47,7 +65,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = (await request.json().catch(() => ({}))) as { couponCode?: string | null };
+  const body = (await request.json().catch(() => ({}))) as LatpeedIntentPayload;
 
   const supabase = await createClient();
   const {
@@ -117,6 +135,8 @@ export async function POST(request: NextRequest) {
 
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  const sessionKey = normalizeSessionKey(body.sessionKey);
+  const marketingToken = normalizeTrackingToken(body.marketingToken);
 
   const { error } = await admin.from("latpeed_payment_intents").insert({
     user_id: user.id,
@@ -135,6 +155,8 @@ export async function POST(request: NextRequest) {
       couponOriginalAmount: appliedCoupon?.originalAmount || plan.amount,
       couponFinalAmount: appliedCoupon?.finalAmount || plan.amount,
       couponExpiresAt: appliedCoupon?.coupon.expiresAt || null,
+      sessionKey,
+      marketingToken,
       userAgent: request.headers.get("user-agent"),
       referer: request.headers.get("referer"),
     },
