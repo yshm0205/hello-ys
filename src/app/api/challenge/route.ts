@@ -201,7 +201,7 @@ async function loadFeedSubmissions(admin: ReturnType<typeof createAdminClient>) 
     .from("challenge_mission_submissions")
     .select("*")
     .in("status", ["submitted", "reviewed", "approved"])
-    .order("updated_at", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(80);
 
   return { feedSubmissions: ((data || []) as SubmissionRow[]) ?? [], error };

@@ -618,7 +618,7 @@ export function ChallengeContent() {
           ...prev,
           submissions: [...withoutOwnDay, json.submission].sort((a, b) => a.day - b.day),
           feedSubmissions: nextFeed.sort(
-            (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           ),
         };
       });
@@ -1221,7 +1221,7 @@ export function ChallengeContent() {
                   <UserRound size={14} color={BRAND.muted} />
                   <Text size="sm" c="gray.6">{selectedSubmission.authorLabel}</Text>
                   <Text size="sm" c="gray.5">·</Text>
-                  <Text size="sm" c="gray.6">{formatDateTime(selectedSubmission.updatedAt)}</Text>
+                  <Text size="sm" c="gray.6">{formatDateTime(selectedSubmission.createdAt)}</Text>
                 </Group>
 
                 <Divider my="lg" />
@@ -1483,7 +1483,7 @@ export function ChallengeContent() {
                           </Table.Td>
                           <Table.Td style={{ whiteSpace: "nowrap" }}>
                             <Text size="sm" c="gray.6" style={{ whiteSpace: "nowrap" }}>
-                              {formatDate(submission.updatedAt)}
+                              {formatDate(submission.createdAt)}
                             </Text>
                           </Table.Td>
                         </Table.Tr>
@@ -1550,7 +1550,7 @@ export function ChallengeContent() {
                             <Text size="xs" c="gray.6">{submission.authorLabel}</Text>
                             <Text size="xs" c="gray.5">·</Text>
                             <Text size="xs" c="gray.6" style={{ whiteSpace: "nowrap" }}>
-                              {formatDate(submission.updatedAt)}
+                              {formatDate(submission.createdAt)}
                             </Text>
                           </Group>
                         </Box>
