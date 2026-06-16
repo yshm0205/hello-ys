@@ -164,13 +164,28 @@ export async function signUpWithEmailPassword(
     ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
     : `${origin}/auth/callback`;
 
+  async function signInExistingUser() {
+    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+
+    if (loginError || !loginData.user) {
+      return {
+        error:
+          locale === "en"
+            ? "This email is already registered. Please log in with the original password, Google, or Kakao."
+            : "이미 가입된 이메일입니다. 기존 비밀번호, Google 또는 Kakao로 로그인해주세요.",
+      };
+    }
+
+    const redirectPath = await resolvePostLoginRedirectPath(loginData.user.id, next);
+    const nextLocale = locale === "en" ? "en" : "ko";
+    redirect(`/${nextLocale}${redirectPath}`);
+  }
+
   if (await isExistingUserEmail(normalizedEmail)) {
-    return {
-      error:
-        locale === "en"
-          ? "This email is already registered. Please log in instead."
-          : "이미 가입된 이메일입니다. 로그인으로 진행해주세요.",
-    };
+    return signInExistingUser();
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -187,12 +202,7 @@ export async function signUpWithEmailPassword(
   }
 
   if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-    return {
-      error:
-        locale === "en"
-          ? "This email is already registered. Please log in instead."
-          : "이미 가입된 이메일입니다. 로그인으로 진행해주세요.",
-    };
+    return signInExistingUser();
   }
 
   // 이메일 확인이 필요한 프로젝트 설정인 경우 세션이 바로 발급되지 않는다.
