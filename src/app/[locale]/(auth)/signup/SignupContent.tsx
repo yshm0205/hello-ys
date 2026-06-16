@@ -20,7 +20,6 @@ import { Link } from '@/i18n/routing';
 import {
   loginWithGoogle,
   loginWithKakao,
-  loginWithMagicLink,
   signUpWithEmailPassword,
 } from '@/services/auth/actions';
 
@@ -28,7 +27,6 @@ export function SignupContent() {
   const locale = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isMagicLoading, setIsMagicLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isKakaoLoading, setIsKakaoLoading] = useState(false);
@@ -46,9 +44,7 @@ export function SignupContent() {
 
   const titleText = locale === 'en' ? 'Create account' : '회원가입';
   const googleButtonLabel = locale === 'en' ? 'Continue with Google' : 'Google로 계속하기';
-  const passwordButtonLabel = locale === 'en' ? 'Sign up with email' : '이메일로 회원가입';
-  const magicLinkButtonLabel = locale === 'en' ? 'Get a sign-up link by email' : '이메일 링크로 가입';
-
+  const passwordButtonLabel = locale === 'en' ? 'Create account' : '회원가입하기';
   const kakaoButtonLabel = locale === 'en' ? 'Continue with Kakao' : 'Kakao로 계속하기';
 
   const handleKakaoSignup = async () => {
@@ -101,30 +97,6 @@ export function SignupContent() {
       });
       setIsGoogleLoading(false);
     }
-  };
-
-  const handleMagicLinkSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes('@')) {
-      setMessage({ type: 'error', text: '유효한 이메일을 입력해주세요.' });
-      return;
-    }
-
-    setIsMagicLoading(true);
-    setMessage(null);
-
-    const res = await loginWithMagicLink(email, redirectTarget);
-
-    if (res?.error) {
-      setMessage({ type: 'error', text: res.error });
-    } else {
-      setMessage({
-        type: 'success',
-        text: '이메일을 확인해주세요. 가입 확인 링크를 보냈습니다.',
-      });
-      setEmail('');
-    }
-    setIsMagicLoading(false);
   };
 
   const handlePasswordSignup = async (e: React.FormEvent) => {
@@ -373,17 +345,9 @@ export function SignupContent() {
                 {passwordButtonLabel}
               </Button>
 
-              <Button
-                size="md"
-                radius="md"
-                fullWidth
-                loading={isMagicLoading}
-                onClick={handleMagicLinkSignup}
-                variant="subtle"
-                style={{ color: '#a78bfa', height: 40 }}
-              >
-                {magicLinkButtonLabel}
-              </Button>
+              <Text size="xs" c="gray.5" ta="center">
+                가입 확인 메일이 오지 않으면 이미 가입된 이메일일 수 있습니다.
+              </Text>
             </Stack>
 
             <Text size="xs" ta="center" c="gray.5">
@@ -492,8 +456,8 @@ export function SignupContent() {
                     </Text>
                     <Text size="xs" c="#86efac">
                       {locale === 'en'
-                        ? 'If you do not see it, check your spam or promotions folder.'
-                        : '메일이 보이지 않으면 스팸함이나 프로모션함도 확인해주세요.'}
+                        ? 'If you do not see it, check spam first. If this email is already registered, log in instead.'
+                        : '메일이 보이지 않으면 스팸함을 먼저 확인해주세요. 이미 가입한 이메일이면 로그인으로 진행해주세요.'}
                     </Text>
                   </Stack>
                 ) : (
