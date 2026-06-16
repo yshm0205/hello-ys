@@ -435,16 +435,70 @@ export function SignupContent() {
               <Alert
                 icon={
                   message.type === 'success' ? (
-                    <Check size={18} />
+                    <Check size={20} />
                   ) : (
-                    <AlertCircle size={18} />
+                    <AlertCircle size={20} />
                   )
+                }
+                title={
+                  message.type === 'success'
+                    ? locale === 'en'
+                      ? 'Check your email'
+                      : '이메일을 확인해주세요'
+                    : undefined
                 }
                 color={message.type === 'success' ? 'green' : 'red'}
                 radius="md"
                 variant="light"
+                styles={{
+                  root: {
+                    border:
+                      message.type === 'success'
+                        ? '1px solid rgba(74, 222, 128, 0.55)'
+                        : undefined,
+                    background:
+                      message.type === 'success'
+                        ? 'rgba(20, 83, 45, 0.52)'
+                        : undefined,
+                    boxShadow:
+                      message.type === 'success'
+                        ? '0 14px 36px rgba(22, 163, 74, 0.18)'
+                        : undefined,
+                  },
+                  icon: {
+                    color: message.type === 'success' ? '#86efac' : undefined,
+                  },
+                  title: {
+                    color: message.type === 'success' ? '#f0fdf4' : undefined,
+                    fontSize: '15px',
+                    fontWeight: 800,
+                  },
+                  message: {
+                    color: message.type === 'success' ? '#dcfce7' : undefined,
+                  },
+                }}
               >
-                {message.text}
+                {message.type === 'success' ? (
+                  <Stack gap={4}>
+                    <Text size="sm" fw={700} c="#f0fdf4">
+                      {locale === 'en'
+                        ? 'We sent a confirmation email.'
+                        : '가입 확인 이메일을 보냈습니다.'}
+                    </Text>
+                    <Text size="sm" c="#bbf7d0">
+                      {locale === 'en'
+                        ? 'Open the email and tap the confirmation link to finish signing up.'
+                        : '메일함에서 인증 링크를 누르면 회원가입이 완료됩니다.'}
+                    </Text>
+                    <Text size="xs" c="#86efac">
+                      {locale === 'en'
+                        ? 'If you do not see it, check your spam or promotions folder.'
+                        : '메일이 보이지 않으면 스팸함이나 프로모션함도 확인해주세요.'}
+                    </Text>
+                  </Stack>
+                ) : (
+                  message.text
+                )}
               </Alert>
             )}
 
