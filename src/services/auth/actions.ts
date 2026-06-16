@@ -1,6 +1,7 @@
 "use server";
 
 import { resolvePostLoginRedirectPath } from "@/lib/plans/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -12,6 +13,27 @@ function sanitizeNextPath(nextPath?: string | null) {
   }
 
   return nextPath;
+}
+
+async function isExistingUserEmail(email: string) {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("users")
+      .select("id")
+      .eq("email", email.trim().toLowerCase())
+      .maybeSingle();
+
+    if (error) {
+      console.error("Existing user lookup error:", error);
+      return false;
+    }
+
+    return Boolean(data?.id);
+  } catch (error) {
+    console.error("Existing user lookup failed:", error);
+    return false;
+  }
 }
 
 /**
@@ -136,13 +158,23 @@ export async function signUpWithEmailPassword(
 ) {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
+  const normalizedEmail = email.trim().toLowerCase();
   const next = sanitizeNextPath(nextPath);
   const callbackUrl = next
     ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
     : `${origin}/auth/callback`;
 
+  if (await isExistingUserEmail(normalizedEmail)) {
+    return {
+      error:
+        locale === "en"
+          ? "This email is already registered. Please log in instead."
+          : "이미 가입된 이메일입니다. 로그인으로 진행해주세요.",
+    };
+  }
+
   const { data, error } = await supabase.auth.signUp({
-    email,
+    email: normalizedEmail,
     password,
     options: {
       emailRedirectTo: callbackUrl,
@@ -152,6 +184,15 @@ export async function signUpWithEmailPassword(
   if (error) {
     console.error("Email/Password Sign-up Error:", error);
     return { error: error.message };
+  }
+
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return {
+      error:
+        locale === "en"
+          ? "This email is already registered. Please log in instead."
+          : "이미 가입된 이메일입니다. 로그인으로 진행해주세요.",
+    };
   }
 
   // 이메일 확인이 필요한 프로젝트 설정인 경우 세션이 바로 발급되지 않는다.
