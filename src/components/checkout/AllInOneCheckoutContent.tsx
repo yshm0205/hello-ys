@@ -1624,7 +1624,7 @@ export function AllInOneCheckoutContent({
                   >
                     <ul>
                       <li>결제일로부터 7일 이내, 수강/자료 이용/크레딧 사용 이력이 기준 이하인 경우 환불 검토가 가능합니다.</li>
-                      <li>5강 이상 수강, 자료 다운로드, 크레딧 사용, 결제일로부터 28일 경과 시 환불이 제한될 수 있습니다.</li>
+                      <li>5강 이상 수강, 자료 다운로드, 크레딧 사용 이력이 있는 경우 환불이 제한될 수 있습니다.</li>
                       <li>
                         환불을 원하시면{' '}
                         <a href={REFUND_FORM_URL} target="_blank" rel="noopener noreferrer">
