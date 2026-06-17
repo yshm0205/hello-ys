@@ -69,7 +69,7 @@ type LandingReview = PublicMarketingReview & {
   dateLabel?: string;
 };
 
-const YOUTUBE_COMMENT_REVIEWS: LandingReview[] = [
+const STATIC_LANDING_REVIEWS: LandingReview[] = [
   {
     id: 'youtube-comment-life-temperature-20260511',
     rating: 5,
@@ -79,10 +79,20 @@ const YOUTUBE_COMMENT_REVIEWS: LandingReview[] = [
     createdAt: '2026-05-11T09:00:00+09:00',
     sourceLabel: '유튜브',
   },
+  {
+    id: 'challenge-review-chjm-20260617',
+    rating: 5,
+    headline: null,
+    content:
+      '제품 선정부터 콘텐츠 방향, 대본 작성까지 막막했는데 FlowSpot으로 입력만 하니 훨씬 수월했습니다. 3가지 소스가 나와서 고를 수 있었고, 제품 선정과 대본까지 거침없이 진행할 수 있어 좋았습니다.',
+    displayName: 'chjm***',
+    createdAt: '2026-06-17T15:43:03+09:00',
+    dateLabel: '1일 전',
+  },
 ];
 
 function getLandingReviewItems(summary: PublicMarketingReviewsSummary): LandingReview[] {
-  return [...YOUTUBE_COMMENT_REVIEWS, ...summary.reviews].sort((a, b) => {
+  return [...STATIC_LANDING_REVIEWS, ...summary.reviews].sort((a, b) => {
     const aTime = new Date(a.createdAt).getTime();
     const bTime = new Date(b.createdAt).getTime();
     return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
@@ -91,7 +101,7 @@ function getLandingReviewItems(summary: PublicMarketingReviewsSummary): LandingR
 
 function getLandingReviewCount(summary: PublicMarketingReviewsSummary) {
   const baseCount = summary.totalCount || summary.reviews.length;
-  return baseCount + YOUTUBE_COMMENT_REVIEWS.length;
+  return baseCount + STATIC_LANDING_REVIEWS.length;
 }
 
 function getLandingAverageRating(summary: PublicMarketingReviewsSummary) {
@@ -102,8 +112,8 @@ function getLandingAverageRating(summary: PublicMarketingReviewsSummary) {
       : summary.reviews.length > 0
         ? summary.reviews.reduce((sum, review) => sum + review.rating, 0) / summary.reviews.length
         : 0;
-  const staticTotal = YOUTUBE_COMMENT_REVIEWS.reduce((sum, review) => sum + review.rating, 0);
-  const totalCount = baseCount + YOUTUBE_COMMENT_REVIEWS.length;
+  const staticTotal = STATIC_LANDING_REVIEWS.reduce((sum, review) => sum + review.rating, 0);
+  const totalCount = baseCount + STATIC_LANDING_REVIEWS.length;
 
   if (totalCount === 0) return 5;
   return (baseAverage * baseCount + staticTotal) / totalCount;
@@ -3132,7 +3142,7 @@ function BuyerReviewSection({
                 marginBottom: 'clamp(26px, 5vw, 40px)',
               }}
             >
-              실제 구매자의 리뷰입니다.
+              실제 사용자 후기입니다.
             </Title>
 
             <Group justify="space-between" align="center" mb={24}>
