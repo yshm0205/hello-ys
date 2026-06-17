@@ -89,6 +89,26 @@ const STATIC_LANDING_REVIEWS: LandingReview[] = [
     createdAt: '2026-06-17T15:43:03+09:00',
     dateLabel: '1일 전',
   },
+  {
+    id: 'challenge-review-laug-20260617',
+    rating: 5,
+    headline: null,
+    content:
+      '일반 AI로 스크립트를 짤 때보다 훨씬 자연스럽고 빠른 결과물을 얻었습니다. 약간의 수정만 하면 바로 쓸 수 있을 정도였고, 대본 작성 초기에 방향을 잡는 어려움이 크게 줄었습니다.',
+    displayName: 'laug***',
+    createdAt: '2026-06-17T18:09:11+09:00',
+    dateLabel: '1일 전',
+  },
+  {
+    id: 'challenge-review-kgar-20260617',
+    rating: 5,
+    headline: null,
+    content:
+      '컨셉에 맞는 대본 기획의 큰 틀을 잡아줘서 제 생각을 더해 수정하니 훨씬 쉽게 완성할 수 있었습니다. 다른 도구 없이 빠르게 대본 기획을 할 수 있다는 점이 좋았습니다.',
+    displayName: 'kgar***',
+    createdAt: '2026-06-17T03:11:30+09:00',
+    dateLabel: '1일 전',
+  },
 ];
 
 function getLandingReviewItems(summary: PublicMarketingReviewsSummary): LandingReview[] {
