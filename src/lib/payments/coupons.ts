@@ -183,8 +183,8 @@ async function validateChallengeCoupon(options: {
   ).toISOString();
   const coupon: CouponDefinition = {
     code: options.normalizedCode,
-    label: '챌린지 완료 2만원 할인',
-    description: '3일 챌린지 성실 참여자 전용 할인',
+    label: '챌린지 완주 추가 2만원 할인',
+    description: '기존 10만원 할인에 더해 적용되는 3일 챌린지 완주자 전용 추가 할인',
     context: 'allinone',
     amountOff: discountAmount,
     expiresAt,

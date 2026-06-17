@@ -203,7 +203,8 @@ export function AllInOneCheckoutContent({
     : Boolean(LATPEED_ALLINONE_URL) && !appliedCoupon;
   const activePaymentMethod: PaymentMethod = hasLatpeedCheckout ? selectedPaymentMethod : 'toss';
   const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
-  const totalDiscountAmount = Math.max(0, plan.listAmount - finalCheckoutAmount);
+  const baseDiscountAmount = Math.max(0, plan.listAmount - plan.amount);
+  const extraDiscountAmount = appliedCoupon?.discountAmount ?? 0;
   const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
@@ -1586,9 +1587,19 @@ export function AllInOneCheckoutContent({
                     <span>{formatWon(plan.listAmount)}</span>
                   </div>
                   <div className="fs-price-row discount">
-                    <span>{appliedCoupon ? appliedCoupon.label : '할인 혜택'}</span>
-                    <span>-{formatWon(totalDiscountAmount)}</span>
+                    <span>기존 10만원 할인</span>
+                    <span>-{formatWon(baseDiscountAmount)}</span>
                   </div>
+                  {extraDiscountAmount > 0 ? (
+                    <div className="fs-price-row discount">
+                      <span>
+                        {hasChallengeDiscount
+                          ? '챌린지 완주 추가 2만원 할인'
+                          : appliedCoupon?.label}
+                      </span>
+                      <span>-{formatWon(extraDiscountAmount)}</span>
+                    </div>
+                  ) : null}
                   <div className="fs-total">
                     <div>
                       <div className="fs-total-label">최종 결제</div>
