@@ -168,6 +168,12 @@ function isEnrollmentActive(row: EnrollmentRow | null) {
   return true;
 }
 
+function hasCommunityAccess(row: EnrollmentRow | null) {
+  if (!row) return false;
+  if (row.status === "completed") return true;
+  return isEnrollmentActive(row);
+}
+
 async function getUser() {
   const supabase = await createClient();
   const {
@@ -224,6 +230,7 @@ export async function GET() {
         success: true,
         enrollment: null,
         canSubmit: false,
+        canComment: false,
         submissions: [],
         feedSubmissions: [],
       });
@@ -253,6 +260,7 @@ export async function GET() {
       success: true,
       enrollment: toClientEnrollment(enrollment),
       canSubmit: isEnrollmentActive(enrollment),
+      canComment: hasCommunityAccess(enrollment),
       submissions: ((submissions || []) as SubmissionRow[]).map(toClientSubmission),
       feedSubmissions: feedSubmissions.map((row) =>
         toClientFeedSubmission(row, user.id, authorLabels.get(row.user_id) || "참여자"),

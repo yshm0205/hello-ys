@@ -83,6 +83,7 @@ type ChallengeComment = {
 type ChallengeResponse = {
   enrollment: ChallengeEnrollment | null;
   canSubmit: boolean;
+  canComment: boolean;
   submissions: MissionSubmission[];
   feedSubmissions: FeedSubmission[];
 };
@@ -1380,7 +1381,7 @@ export function ChallengeContent() {
                   minRows={3}
                   maxRows={8}
                   maxLength={COMMENT_MAX_LENGTH}
-                  disabled={!data.canSubmit}
+                  disabled={!data.canComment}
                 />
                 <Group justify="space-between" mt="sm" align="flex-start" gap="sm">
                   <Box>
@@ -1401,7 +1402,7 @@ export function ChallengeContent() {
                     color="violet"
                     radius={4}
                     loading={savingComment}
-                    disabled={!data.canSubmit}
+                    disabled={!data.canComment}
                     onClick={submitComment}
                     rightSection={<Send size={15} />}
                     style={{ background: BRAND.primary }}

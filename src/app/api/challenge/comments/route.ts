@@ -72,6 +72,12 @@ function isEnrollmentActive(row: EnrollmentRow | null) {
   return true;
 }
 
+function hasCommunityAccess(row: EnrollmentRow | null) {
+  if (!row) return false;
+  if (row.status === "completed") return true;
+  return isEnrollmentActive(row);
+}
+
 async function loadEnrollment(admin: ReturnType<typeof createAdminClient>, userId: string) {
   const { data, error } = await admin
     .from("challenge_enrollments")
@@ -211,8 +217,8 @@ export async function POST(request: NextRequest) {
         loadVisibleSubmission(admin, parsed.data.submissionId),
       ]);
 
-    if (enrollmentError || !isEnrollmentActive(enrollment)) {
-      return NextResponse.json({ error: "활성 챌린지 참여자만 댓글을 쓸 수 있습니다." }, { status: 403 });
+    if (enrollmentError || !hasCommunityAccess(enrollment)) {
+      return NextResponse.json({ error: "챌린지 커뮤니티 권한이 필요합니다." }, { status: 403 });
     }
 
     if (submissionError || !submission) {
@@ -264,8 +270,8 @@ export async function PATCH(request: NextRequest) {
     const [{ enrollment, error: enrollmentError }, { comment, error: commentError }] =
       await Promise.all([loadEnrollment(admin, user.id), loadVisibleComment(admin, parsed.data.commentId)]);
 
-    if (enrollmentError || !isEnrollmentActive(enrollment)) {
-      return NextResponse.json({ error: "활성 챌린지 참여자만 댓글을 수정할 수 있습니다." }, { status: 403 });
+    if (enrollmentError || !hasCommunityAccess(enrollment)) {
+      return NextResponse.json({ error: "챌린지 커뮤니티 권한이 필요합니다." }, { status: 403 });
     }
 
     if (commentError || !comment) {
@@ -323,8 +329,8 @@ export async function DELETE(request: NextRequest) {
     const [{ enrollment, error: enrollmentError }, { comment, error: commentError }] =
       await Promise.all([loadEnrollment(admin, user.id), loadVisibleComment(admin, parsed.data.commentId)]);
 
-    if (enrollmentError || !isEnrollmentActive(enrollment)) {
-      return NextResponse.json({ error: "활성 챌린지 참여자만 댓글을 삭제할 수 있습니다." }, { status: 403 });
+    if (enrollmentError || !hasCommunityAccess(enrollment)) {
+      return NextResponse.json({ error: "챌린지 커뮤니티 권한이 필요합니다." }, { status: 403 });
     }
 
     if (commentError || !comment) {
