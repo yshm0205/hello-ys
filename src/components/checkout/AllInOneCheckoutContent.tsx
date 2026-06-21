@@ -212,9 +212,7 @@ export function AllInOneCheckoutContent({
   const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
-  const primaryLabel = isAuthenticated
-    ? `${formatWon(finalCheckoutAmount)} 결제하기`
-    : '로그인하고 결제 계속하기';
+  const primaryLabel = isAuthenticated ? '결제하러 가기' : '로그인하고 결제 계속하기';
   const selectedPaymentLabel =
     activePaymentMethod === 'card' ? '카드/간편결제로 결제하기' : primaryLabel;
 
@@ -1716,43 +1714,43 @@ export function AllInOneCheckoutContent({
                   )}
 
                   <div className="fs-payment-methods">
-                    <div className="fs-payment-title">결제수단을 선택해 주세요</div>
-                    <div className="fs-payment-options">
-                      <button
-                        type="button"
-                        className={`fs-payment-choice${activePaymentMethod === 'toss' ? ' is-selected' : ''}`}
-                        aria-pressed={activePaymentMethod === 'toss'}
-                        disabled={loading}
-                        onClick={() => setSelectedPaymentMethod('toss')}
-                      >
-                        <span className="fs-payment-dot" aria-hidden="true" />
-                        <span className="fs-payment-copy">
-                          <strong>결제창</strong>
-                          <em>카드 · 간편결제</em>
-                        </span>
-                      </button>
-
-                      {hasLatpeedCheckout && (
-                        <button
-                          type="button"
-                          className={`fs-payment-choice${activePaymentMethod === 'card' ? ' is-selected' : ''}`}
-                          aria-pressed={activePaymentMethod === 'card'}
-                          disabled={loading}
-                          onClick={() => setSelectedPaymentMethod('card')}
-                        >
-                          <span className="fs-payment-dot" aria-hidden="true" />
-                          <span className="fs-payment-copy">
-                            <strong>카드/간편결제</strong>
-                            <em>카드 · 네이버페이 · 카카오페이</em>
-                          </span>
-                        </button>
-                      )}
-                    </div>
                     {hasLatpeedCheckout && (
-                      <div className="fs-payment-method-note">
-                        카드/간편결제 시 결제창에 입력하는 이메일은 FlowSpot 가입/로그인 이메일과 동일해야
-                        권한 지급이 가능합니다.
-                      </div>
+                      <>
+                        <div className="fs-payment-title">결제수단을 선택해 주세요</div>
+                        <div className="fs-payment-options">
+                          <button
+                            type="button"
+                            className={`fs-payment-choice${activePaymentMethod === 'toss' ? ' is-selected' : ''}`}
+                            aria-pressed={activePaymentMethod === 'toss'}
+                            disabled={loading}
+                            onClick={() => setSelectedPaymentMethod('toss')}
+                          >
+                            <span className="fs-payment-dot" aria-hidden="true" />
+                            <span className="fs-payment-copy">
+                              <strong>결제창</strong>
+                              <em>카드 · 간편결제</em>
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`fs-payment-choice${activePaymentMethod === 'card' ? ' is-selected' : ''}`}
+                            aria-pressed={activePaymentMethod === 'card'}
+                            disabled={loading}
+                            onClick={() => setSelectedPaymentMethod('card')}
+                          >
+                            <span className="fs-payment-dot" aria-hidden="true" />
+                            <span className="fs-payment-copy">
+                              <strong>카드/간편결제</strong>
+                              <em>카드 · 네이버페이 · 카카오페이</em>
+                            </span>
+                          </button>
+                        </div>
+                        <div className="fs-payment-method-note">
+                          카드/간편결제 시 결제창에 입력하는 이메일은 FlowSpot 가입/로그인 이메일과 동일해야
+                          권한 지급이 가능합니다.
+                        </div>
+                      </>
                     )}
                     <button
                       type="button"
