@@ -212,6 +212,8 @@ export default async function AdminSalesPage({
                             provider={
                               provider === "tosspay-direct"
                                 ? "tosspay-direct"
+                                : provider === "tosspayments"
+                                  ? "tosspayments"
                                 : "portone"
                             }
                           />

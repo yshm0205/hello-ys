@@ -83,7 +83,7 @@ export default function PaymentSuccessPage() {
             }
         }
 
-        async function confirmLegacyTossPayments(paymentKey: string, orderId: string, amount: number) {
+        async function confirmLegacyTossPayments(paymentKey: string, orderId: string, amount: number, attempt = 0) {
             try {
                 const res = await fetch('/api/payments/confirm', {
                     method: 'POST',
@@ -96,8 +96,21 @@ export default function PaymentSuccessPage() {
 
                 if (data.success) {
                     setStatus('success');
-                    setAddedCredits(data.added);
-                    setMessage(`${data.added}cr 충전이 완료되었습니다. (보유: ${data.credits}cr)`);
+                    setAddedCredits(data.added ?? 0);
+                    setMessage(
+                        data.message ||
+                            (typeof data.added === 'number' && typeof data.credits === 'number'
+                                ? `${data.added}cr 충전이 완료되었습니다. (보유: ${data.credits}cr)`
+                                : '결제가 완료되었습니다.'),
+                    );
+                    return;
+                }
+
+                if ((res.status === 202 || data.pending) && attempt < 15) {
+                    setMessage('결제 완료를 반영하는 중입니다...');
+                    timer = setTimeout(() => {
+                        void confirmLegacyTossPayments(paymentKey, orderId, amount, attempt + 1);
+                    }, 2000);
                     return;
                 }
 

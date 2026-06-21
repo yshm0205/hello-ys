@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { Alert, Box, Button, Card, Checkbox, Container, Group, Text } from '@mantine/core';
+import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import { AlertCircle, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react';
@@ -28,6 +29,7 @@ const LATPEED_CHALLENGE_DISCOUNT_URL =
   process.env.NEXT_PUBLIC_LATPEED_CHALLENGE_DISCOUNT_URL?.trim() ||
   DEFAULT_LATPEED_CHALLENGE_DISCOUNT_URL;
 const CHALLENGE_COUPON_CODES = new Set(['CHALLENGE1', 'CHALLENGE20']);
+const ENABLE_LATPEED_FALLBACK = process.env.NEXT_PUBLIC_ENABLE_LATPEED_CHECKOUT === '1';
 
 const checkoutItems = [
   {
@@ -198,9 +200,11 @@ export function AllInOneCheckoutContent({
   const hasChallengeDiscount = Boolean(
     appliedCoupon && CHALLENGE_COUPON_CODES.has(appliedCoupon.code),
   );
-  const hasLatpeedCheckout = hasChallengeDiscount
-    ? Boolean(LATPEED_CHALLENGE_DISCOUNT_URL)
-    : Boolean(LATPEED_ALLINONE_URL) && !appliedCoupon;
+  const hasLatpeedCheckout =
+    ENABLE_LATPEED_FALLBACK &&
+    (hasChallengeDiscount
+      ? Boolean(LATPEED_CHALLENGE_DISCOUNT_URL)
+      : Boolean(LATPEED_ALLINONE_URL) && !appliedCoupon);
   const activePaymentMethod: PaymentMethod = hasLatpeedCheckout ? selectedPaymentMethod : 'toss';
   const monthly12Final = Math.ceil(finalCheckoutAmount / 12);
   const baseDiscountAmount = Math.max(0, plan.listAmount - plan.amount);
@@ -208,7 +212,9 @@ export function AllInOneCheckoutContent({
   const discountRate = Math.round((1 - finalCheckoutAmount / plan.listAmount) * 100);
   const canOpenPayment = confirmedCheckout;
   const primaryDisabled = isAuthenticated && !canOpenPayment;
-  const primaryLabel = isAuthenticated ? '토스페이로 결제하기' : '로그인하고 결제 계속하기';
+  const primaryLabel = isAuthenticated
+    ? `${formatWon(finalCheckoutAmount)} 결제하기`
+    : '로그인하고 결제 계속하기';
   const selectedPaymentLabel =
     activePaymentMethod === 'card' ? '카드/간편결제로 결제하기' : primaryLabel;
 
@@ -278,7 +284,7 @@ export function AllInOneCheckoutContent({
 
     try {
       const marketingSession = await readMarketingBrowserSession();
-      const res = await fetch('/api/tosspay/direct', {
+      const res = await fetch('/api/tosspayments/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -292,12 +298,41 @@ export function AllInOneCheckoutContent({
       });
       const data = await res.json();
 
-      if (!res.ok || !data.checkoutPage) {
+      if (!res.ok || !data.clientKey || !data.orderId || !data.amount) {
         setError(data.error || '결제 주문 생성에 실패했습니다.');
         return;
       }
 
-      window.location.assign(data.checkoutPage);
+      await trackCheckoutRedirect({
+        sessionKey: marketingSession.sessionKey,
+        marketingToken: marketingSession.marketingToken,
+        locale,
+        redirectUrl: data.successUrl,
+        ctaId: 'tosspayments-checkout-open',
+        ctaLabel: '토스페이먼츠 결제창 열림',
+      });
+
+      const tossPayments = await loadTossPayments(data.clientKey);
+      const payment = tossPayments.payment({ customerKey: data.customerKey });
+
+      await payment.requestPayment({
+        method: 'CARD',
+        amount: {
+          currency: 'KRW',
+          value: data.amount,
+        },
+        orderId: data.orderId,
+        orderName: data.orderName,
+        successUrl: data.successUrl,
+        failUrl: data.failUrl,
+        customerEmail: data.customerEmail,
+        card: {
+          useEscrow: false,
+          flowMode: 'DEFAULT',
+          useCardPoint: false,
+          useAppCardOnly: false,
+        },
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : '결제 요청에 실패했습니다.';
       setError(message);
@@ -1692,8 +1727,8 @@ export function AllInOneCheckoutContent({
                       >
                         <span className="fs-payment-dot" aria-hidden="true" />
                         <span className="fs-payment-copy">
-                          <strong>토스페이</strong>
-                          <em>토스페이 · 계좌이체</em>
+                          <strong>결제창</strong>
+                          <em>카드 · 간편결제</em>
                         </span>
                       </button>
 
@@ -1724,8 +1759,8 @@ export function AllInOneCheckoutContent({
                       className="fs-pay-button"
                       data-marketing-cta="purchase"
                       data-cta-id={activePaymentMethod === 'card' ? 'checkout-card-pay' : 'checkout-confirm-pay'}
-                      data-cta-label={activePaymentMethod === 'card' ? '카드/간편결제 결제창 열기' : '토스 결제창 열기'}
-                      data-cta-target={activePaymentMethod === 'card' ? '/api/latpeed/intent' : '/api/tosspay/direct'}
+                      data-cta-label={activePaymentMethod === 'card' ? '카드/간편결제 결제창 열기' : '토스페이먼츠 결제창 열기'}
+                      data-cta-target={activePaymentMethod === 'card' ? '/api/latpeed/intent' : '/api/tosspayments/create'}
                       disabled={primaryDisabled || loading}
                       onClick={handlePrimaryAction}
                     >

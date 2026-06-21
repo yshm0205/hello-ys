@@ -40,7 +40,7 @@ type RefundPreview = {
   penaltyAmount: number;
 };
 
-export type RefundProvider = "portone" | "tosspay-direct";
+export type RefundProvider = "portone" | "tosspay-direct" | "tosspayments";
 
 interface RefundPaymentButtonProps {
   paymentKey: string;
