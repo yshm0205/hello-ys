@@ -41,7 +41,7 @@ import {
     ExternalLink,
     Clapperboard,
 } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
 import {
     LifetipsStructuredInput,
@@ -353,6 +353,7 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
 
 export function BatchGeneratorContent() {
     const { initialCredits, showReactionLab } = useDashboardShell();
+    const router = useRouter();
     const [niche, setNiche] = useState('knowledge');
     const [forceMode, setForceMode] = useState<string>(''); // lifetips 전용: '' | 'saga' | 'review'
     const [materialInput, setMaterialInput] = useState('');
@@ -819,6 +820,10 @@ export function BatchGeneratorContent() {
                                     className="batch-pressable"
                                     onClick={() => {
                                         if (!opt.enabled) return;
+                                        if (opt.value === REACTION_NICHE) {
+                                            router.push('/dashboard/reaction-lab');
+                                            return;
+                                        }
                                         setNiche(opt.value);
                                         if (opt.value !== 'lifetips') setForceMode('');
                                     }}
