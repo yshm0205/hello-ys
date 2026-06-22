@@ -10,6 +10,9 @@ import {
     toBatchJobItemPayload,
     toBatchJobPayload,
 } from "@/lib/batch-jobs/server";
+import { isEntertainmentReactionAllowed } from "@/lib/script-generator/server";
+
+const REACTION_NICHE = "entertainment_reaction";
 
 export async function GET() {
     try {
@@ -44,6 +47,15 @@ export async function POST(request: NextRequest) {
 
         if (!material) {
             return NextResponse.json({ error: "소재를 입력해 주세요." }, { status: 400 });
+        }
+
+        if (rawNiche === REACTION_NICHE) {
+            if (!isEntertainmentReactionAllowed({ id: user.id, email: user.email ?? undefined })) {
+                return NextResponse.json({ error: "아직 베타 허용 계정에서만 사용할 수 있습니다." }, { status: 403 });
+            }
+            if (material.length < 20) {
+                return NextResponse.json({ error: "원본 대사/상황을 20자 이상 입력해 주세요." }, { status: 400 });
+            }
         }
 
         // lifetips + force_mode → niche에 인코딩 ("lifetips:saga" 형식)

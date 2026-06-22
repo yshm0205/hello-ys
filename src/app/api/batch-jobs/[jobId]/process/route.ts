@@ -10,6 +10,7 @@ import {
   updateBatchJobCounts,
 } from "@/lib/batch-jobs/server";
 import { type CreditAction, deductUserCredits, refundUserCredits } from "@/lib/credits/server";
+import { isEntertainmentReactionAllowed, postToScriptGenerator } from "@/lib/script-generator/server";
 import { createClient } from "@/utils/supabase/server";
 
 const RENDER_API_URL =
@@ -17,14 +18,67 @@ const RENDER_API_URL =
 const INTERNAL_PROCESS_KEY = process.env.API_SECRET_KEY || "";
 const PROCESSABLE_JOB_STATUSES = ["draft", "running", "paused"];
 const MAX_CREDIT_DEDUCT_RETRIES = 3;
+const REACTION_NICHE = "entertainment_reaction";
 
 type LoadedState = {
   job: BatchJobRow;
   items: BatchJobItemRow[];
 };
 
+type ReactionScriptJson = {
+  selected_material?: {
+    incident?: string;
+    why_selected?: string;
+  };
+  top_lines?: string[];
+  script_lines?: string[];
+};
+
+type ReactionGenerationResult = {
+  success?: boolean;
+  category?: string;
+  selected_templates?: Array<{ template_id?: string; rank?: number; title?: string }>;
+  script_json?: ReactionScriptJson;
+  script_text?: string;
+  edit_sheet?: string;
+};
+
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function buildReactionFallbackScript(script?: ReactionScriptJson) {
+  if (!script) return "";
+  return [
+    "제목:",
+    ...(script.top_lines || []),
+    "",
+    "스크립트:",
+    ...(script.script_lines || []),
+  ].join("\n");
+}
+
+function toReactionBatchScripts(data: ReactionGenerationResult) {
+  const script = data.script_json;
+  const hook =
+    (script?.top_lines || []).filter(Boolean).join(" / ") ||
+    script?.selected_material?.incident ||
+    "해외 반응 쇼츠";
+  const templateText = (data.selected_templates || [])
+    .map((template) => template.template_id || template.title || "")
+    .filter(Boolean)
+    .join(", ");
+  const scriptText = data.script_text || buildReactionFallbackScript(script);
+  const fullScript = data.edit_sheet
+    ? `${scriptText}\n\n--- 편집 타임코드 ---\n${data.edit_sheet}`
+    : scriptText;
+
+  return [
+    {
+      hook,
+      full_script: templateText ? `${fullScript}\n\n[매칭 벤치마크]\n${templateText}` : fullScript,
+    },
+  ];
 }
 
 async function resolveBatchActor(
@@ -32,7 +86,7 @@ async function resolveBatchActor(
   jobId: string,
   admin: ReturnType<typeof createBatchAdminClient>,
 ): Promise<
-  | { userId: string; loaded: LoadedState; internal: boolean }
+  | { userId: string; accountId: string; loaded: LoadedState; internal: boolean }
   | { response: NextResponse }
 > {
   const apiKey = request.headers.get("x-api-key");
@@ -51,6 +105,7 @@ async function resolveBatchActor(
 
     return {
       userId: loaded.job.user_id,
+      accountId: loaded.job.user_id,
       loaded,
       internal: true,
     };
@@ -79,6 +134,7 @@ async function resolveBatchActor(
 
   return {
     userId: user.id,
+    accountId: user.email || user.id,
     loaded,
     internal: false,
   };
@@ -293,6 +349,37 @@ export async function POST(
         });
       }
 
+      const candidateNiche = nextItem.niche || state.job.niche || "";
+      if (candidateNiche === REACTION_NICHE) {
+        const failedAt = new Date().toISOString();
+        const error =
+          !isEntertainmentReactionAllowed({ id: actor.userId, email: actor.accountId })
+            ? "아직 베타 허용 계정에서만 사용할 수 있습니다."
+            : nextItem.material.trim().length < 20
+              ? "원본 대사/상황을 20자 이상 입력해 주세요."
+              : "";
+
+        if (error) {
+          await admin
+            .from("batch_job_items")
+            .update({
+              status: "error",
+              phase: null,
+              updated_at: failedAt,
+              finished_at: failedAt,
+              error,
+              error_code: "reaction_not_allowed",
+            })
+            .eq("id", nextItem.id);
+
+          state = await updateBatchJobCounts(admin, state.job.id, {
+            current_item_id: null,
+            last_error: error,
+          });
+          continue;
+        }
+      }
+
       const startedAt = new Date().toISOString();
       const lockAcquired = await acquireJobLock(admin, state, nextItem.id, startedAt);
       if (!lockAcquired) {
@@ -381,10 +468,6 @@ export async function POST(
         last_error: null,
       });
 
-      const handoffController = new AbortController();
-      const handoffTimeout = setTimeout(() => handoffController.abort(), 60000);
-      let handoffOk = false;
-
       // lifetips + force_mode 인코딩 분리 ("lifetips:saga" → niche=lifetips, force_mode=saga)
       const rawNiche = nextItem.niche || state.job.niche || "";
       let actualNiche = rawNiche;
@@ -394,6 +477,96 @@ export async function POST(
         actualNiche = "lifetips";
         actualForceMode = parts[1] || "";
       }
+
+      if (actualNiche === REACTION_NICHE) {
+        try {
+          await admin
+            .from("batch_job_items")
+            .update({
+              phase: "generating",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", nextItem.id);
+
+          const data = await postToScriptGenerator<ReactionGenerationResult>(
+            "/api/entertainment-reaction/generate",
+            {
+              source_text: nextItem.material,
+              account_id: actor.accountId,
+              user_id: actor.userId,
+              target_lines: "24-32",
+              direction: "",
+              category: "",
+              top_hook: "",
+            },
+          );
+
+          const finishedAt = new Date().toISOString();
+          const elapsed = Math.max(
+            1,
+            Math.round((new Date(finishedAt).getTime() - new Date(startedAt).getTime()) / 1000),
+          );
+
+          await admin
+            .from("batch_job_items")
+            .update({
+              status: "done",
+              phase: null,
+              scripts: toReactionBatchScripts(data),
+              elapsed,
+              updated_at: finishedAt,
+              finished_at: finishedAt,
+              error: null,
+              error_code: null,
+            })
+            .eq("id", nextItem.id);
+
+          state = await updateBatchJobCounts(admin, state.job.id, {
+            current_item_id: null,
+            last_error: null,
+          });
+
+          return NextResponse.json({
+            success: true,
+            credits: creditResult.credits,
+            job: toBatchJobPayload(state.job, state.items),
+          });
+        } catch (error) {
+          const failedAt = new Date().toISOString();
+          const errMsg =
+            error instanceof Error ? error.message : "반응 쇼츠 생성 실패";
+          const refundResult = await refundUserCredits(
+            actor.userId,
+            creditResult.deducted,
+            referenceId,
+            "reaction_generation_failed",
+          );
+
+          await admin
+            .from("batch_job_items")
+            .update({
+              status: "error",
+              phase: null,
+              updated_at: failedAt,
+              finished_at: failedAt,
+              error: errMsg,
+              error_code: "reaction_generation_failed",
+              credits_refunded: refundResult.success ? creditResult.deducted : 0,
+              refund_processed_at: refundResult.success ? failedAt : null,
+            })
+            .eq("id", nextItem.id);
+
+          state = await updateBatchJobCounts(admin, state.job.id, {
+            current_item_id: null,
+            last_error: errMsg,
+          });
+          continue;
+        }
+      }
+
+      const handoffController = new AbortController();
+      const handoffTimeout = setTimeout(() => handoffController.abort(), 60000);
+      let handoffOk = false;
 
       try {
         const renderRes = await fetch(`${RENDER_API_URL}/api/v2/batch-process`, {

@@ -31,7 +31,6 @@ import {
     BookOpen,
     Loader2,
     Trophy,
-    Clapperboard,
 } from 'lucide-react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import type { AdminAccessLevel } from '@/lib/admin/access';
@@ -63,11 +62,13 @@ interface DashboardShellContextValue {
         next_credit_at?: string | null;
     } | null;
     initialCredits: number | null;
+    showReactionLab: boolean;
 }
 
 const DashboardShellContext = createContext<DashboardShellContextValue>({
     creditInfo: null,
     initialCredits: null,
+    showReactionLab: false,
 });
 
 export function useDashboardShell() {
@@ -126,20 +127,9 @@ export function DashboardLayout({
     const [pendingHref, setPendingHref] = useState<string | null>(null);
     const credits = initialCreditInfo?.credits ?? null;
     const canViewMarketingOverview = adminAccessLevel === 'full' || adminAccessLevel === 'marketing';
-    const betaNavItems = showReactionLab
-        ? [
-              {
-                  label: '반응 쇼츠 베타',
-                  href: '/dashboard/reaction-lab',
-                  icon: Clapperboard,
-                  description: '해외 반응 원본 → 편집시트',
-              },
-          ]
-        : [];
     const resolvedNavItems = canViewMarketingOverview
         ? [
               ...navItems,
-              ...betaNavItems,
               {
                   label: '운영 지표',
                   href: '/admin/overview',
@@ -147,7 +137,7 @@ export function DashboardLayout({
                   description: '런칭 퍼널과 핵심 지표',
               },
           ]
-        : [...navItems, ...betaNavItems];
+        : navItems;
 
     const handleNavClick = (event: MouseEvent<HTMLElement>, href: string, isActive = false) => {
         if (
@@ -173,6 +163,7 @@ export function DashboardLayout({
             value={{
                 creditInfo: initialCreditInfo,
                 initialCredits: credits,
+                showReactionLab,
             }}
         >
             <AppShell

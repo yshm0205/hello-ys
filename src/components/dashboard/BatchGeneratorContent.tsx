@@ -39,6 +39,7 @@ import {
     FolderOpen,
     RotateCcw,
     ExternalLink,
+    Clapperboard,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useDashboardShell } from '@/components/dashboard/DashboardLayout';
@@ -98,6 +99,8 @@ interface RemoteBatchCurrentResponse {
 
 // ============ 니치 (V2 에셋 재사용) ============
 
+const REACTION_NICHE = 'entertainment_reaction';
+
 const NICHE_OPTIONS = [
     { value: 'knowledge', label: '잡학지식', desc: '놀라운 사실, 과학 원리', image: '/images/niches/knowledge.png', enabled: true },
     { value: 'seollem', label: '설렘/썰', desc: '연애·썸·고백 등 감성 스토리', image: '/images/niches/seollem.png', enabled: true },
@@ -105,11 +108,20 @@ const NICHE_OPTIONS = [
     { value: 'animal', label: '동물/자연', desc: '신기한 동물, 자연 현상', image: null, enabled: false },
 ];
 
+const REACTION_NICHE_OPTION = {
+    value: REACTION_NICHE,
+    label: '해외 반응',
+    desc: '원본 상황·대사 → 쇼츠',
+    image: null,
+    enabled: true,
+};
+
 const NICHE_LABELS: Record<string, string> = {
     knowledge: '지식',
     seollem: '설렘/썰',
     lifetips: '쇼핑',
     animal: '동물',
+    [REACTION_NICHE]: '해외 반응',
 };
 
 const NICHE_COLORS: Record<string, string> = {
@@ -117,6 +129,7 @@ const NICHE_COLORS: Record<string, string> = {
     seollem: 'pink',
     lifetips: 'orange',
     animal: 'green',
+    [REACTION_NICHE]: 'teal',
 };
 
 function getQueueNicheLabel(niche?: string) {
@@ -339,7 +352,7 @@ function ScriptResultViewer({ item }: { item: QueueItem }) {
 // ============ 메인 컴포넌트 ============
 
 export function BatchGeneratorContent() {
-    const { initialCredits } = useDashboardShell();
+    const { initialCredits, showReactionLab } = useDashboardShell();
     const [niche, setNiche] = useState('knowledge');
     const [forceMode, setForceMode] = useState<string>(''); // lifetips 전용: '' | 'saga' | 'review'
     const [materialInput, setMaterialInput] = useState('');
@@ -361,6 +374,10 @@ export function BatchGeneratorContent() {
     const processLockRef = useRef(false);
     const pollingRef = useRef<number | null>(null);
     const MAX_QUEUE = 10;
+    const nicheOptions = showReactionLab
+        ? [...NICHE_OPTIONS.slice(0, 3), REACTION_NICHE_OPTION, ...NICHE_OPTIONS.slice(3)]
+        : NICHE_OPTIONS;
+    const isReactionNiche = niche === REACTION_NICHE;
 
     const isRecentCompleted = useCallback((item: QueueItem) => {
         if (item.status !== 'done' || !item.finishedAt) return false;
@@ -452,6 +469,12 @@ export function BatchGeneratorContent() {
             setInputMode('simple');
         }
     }, [niche, inputMode]);
+
+    useEffect(() => {
+        if (!showReactionLab && niche === REACTION_NICHE) {
+            setNiche('knowledge');
+        }
+    }, [niche, showReactionLab]);
 
     const fetchCurrentJob = useCallback(async () => {
         try {
@@ -616,6 +639,7 @@ export function BatchGeneratorContent() {
         } else {
             material = materialInput.trim();
             if (!material) return;
+            if (niche === REACTION_NICHE && material.length < 20) return;
         }
 
         // 낙관적 UI: 즉시 큐에 추가 (입력 폼은 응답 후 reset)
@@ -723,6 +747,9 @@ export function BatchGeneratorContent() {
     const generatingItem = queue.find(q => q.status === 'generating');
     const selectedItem = recentCompleted.find(q => q.id === selectedResult);
     const isRunning = jobStatus === 'running' || queue.some((item) => item.status === 'generating');
+    const materialText = materialInput.trim();
+    const materialMinLength = isReactionNiche ? 20 : 10;
+    const canAddSimpleMaterial = materialText.length >= materialMinLength;
 
     useEffect(() => {
         if (selectedResult && !recentCompleted.some((item) => item.id === selectedResult)) {
@@ -784,13 +811,17 @@ export function BatchGeneratorContent() {
                         scrollbarWidth: 'thin',
                         WebkitOverflowScrolling: 'touch',
                     }}>
-                        {NICHE_OPTIONS.map((opt) => {
+                        {nicheOptions.map((opt) => {
                             const isSelected = niche === opt.value;
                             return (
                                 <Box
                                     key={opt.value}
                                     className="batch-pressable"
-                                    onClick={() => opt.enabled && setNiche(opt.value)}
+                                    onClick={() => {
+                                        if (!opt.enabled) return;
+                                        setNiche(opt.value);
+                                        if (opt.value !== 'lifetips') setForceMode('');
+                                    }}
                                     style={{
                                         flex: '0 0 160px',
                                         width: '160px',
@@ -827,7 +858,39 @@ export function BatchGeneratorContent() {
                                         </Box>
                                     )}
                                     <Box style={{ aspectRatio: '9/13', width: '100%', overflow: 'hidden', background: 'var(--mantine-color-gray-1)' }}>
-                                        {opt.image ? (
+                                        {opt.value === REACTION_NICHE ? (
+                                            <Box
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    background:
+                                                        'linear-gradient(160deg, rgba(20, 184, 166, 0.18), rgba(139, 92, 246, 0.16))',
+                                                }}
+                                            >
+                                                <Stack align="center" gap={8}>
+                                                    <Box
+                                                        style={{
+                                                            width: 54,
+                                                            height: 54,
+                                                            borderRadius: '50%',
+                                                            background: '#0f766e',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            boxShadow: '0 10px 24px rgba(15, 118, 110, 0.25)',
+                                                        }}
+                                                    >
+                                                        <Clapperboard size={28} color="#fff" />
+                                                    </Box>
+                                                    <Badge color="teal" variant="filled" size="xs" radius="xl">
+                                                        BETA
+                                                    </Badge>
+                                                </Stack>
+                                            </Box>
+                                        ) : opt.image ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img src={opt.image} alt={opt.label}
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -970,9 +1033,13 @@ export function BatchGeneratorContent() {
                             />
                         ) : (
                             <Textarea
-                                placeholder="YouTube Shorts 소재를 입력하세요..."
-                                minRows={2}
-                                maxRows={5}
+                                placeholder={
+                                    isReactionNiche
+                                        ? "해외 영상 원본 대사/OCR/상황을 그대로 붙여넣으세요..."
+                                        : "YouTube Shorts 소재를 입력하세요..."
+                                }
+                                minRows={isReactionNiche ? 5 : 2}
+                                maxRows={isReactionNiche ? 10 : 5}
                                 autosize
                                 value={materialInput}
                                 onChange={(e) => setMaterialInput(e.currentTarget.value)}
@@ -989,7 +1056,7 @@ export function BatchGeneratorContent() {
                             <Text size="xs" c={
                                 niche === 'lifetips' && inputMode === 'detailed'
                                     ? (!isLifetipsStructuredValid(structuredInput) && (structuredInput.product.trim() || structuredInput.reviews.trim()) ? "red.5" : "gray.5")
-                                    : (materialInput.trim().length > 0 && materialInput.trim().length < 10 ? "red.5" : "gray.5")
+                                    : (materialText.length > 0 && !canAddSimpleMaterial ? "red.5" : "gray.5")
                             }>
                                 {niche === 'lifetips' && inputMode === 'detailed'
                                     ? (
@@ -998,8 +1065,8 @@ export function BatchGeneratorContent() {
                                             : <>1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}</>
                                     )
                                     : (
-                                        materialInput.trim().length > 0 && materialInput.trim().length < 10
-                                            ? `소재를 10자 이상 입력해 주세요 (현재 ${materialInput.trim().length}자)`
+                                        materialText.length > 0 && !canAddSimpleMaterial
+                                            ? `${isReactionNiche ? '원본 대사/상황을' : '소재를'} ${materialMinLength}자 이상 입력해 주세요 (현재 ${materialText.length}자)`
                                             : <>1개당 10cr{credits !== null && ` · 보유: ${credits}cr`}</>
                                     )
                                 }
@@ -1015,7 +1082,7 @@ export function BatchGeneratorContent() {
                                     disabled={
                                         niche === 'lifetips' && inputMode === 'detailed'
                                             ? (!isLifetipsStructuredValid(structuredInput) || activeSlotCount >= MAX_QUEUE)
-                                            : (!materialInput.trim() || materialInput.trim().length < 10 || activeSlotCount >= MAX_QUEUE)
+                                            : (!canAddSimpleMaterial || activeSlotCount >= MAX_QUEUE)
                                     }
                                 >
                                     추가 ({activeSlotCount}/{MAX_QUEUE})
