@@ -54,6 +54,8 @@ const submissionSchema = z.object({
 });
 
 const UNLOCKING_SUBMISSION_STATUSES = new Set(["submitted", "reviewed", "approved", "needs_revision"]);
+const CHALLENGE_COMPLETION_DISCOUNT_AMOUNT = 20000;
+const CHALLENGE_DISCOUNT_OPEN_STATUSES = new Set(["candidate", "granted"]);
 
 function hasUnlockedSubmission(rows: SubmissionRow[], day: number) {
   return rows.some((row) => row.day === day && UNLOCKING_SUBMISSION_STATUSES.has(row.status));
@@ -352,6 +354,34 @@ export async function POST(request: NextRequest) {
     }
 
     const row = data as SubmissionRow;
+    let nextEnrollment = enrollment!;
+
+    if (
+      row.day === 3 &&
+      !(
+        CHALLENGE_DISCOUNT_OPEN_STATUSES.has(enrollment!.discount_status) &&
+        Number(enrollment!.discount_amount || 0) > 0
+      )
+    ) {
+      const { data: updatedEnrollment, error: discountError } = await admin
+        .from("challenge_enrollments")
+        .update({
+          discount_status: "granted",
+          discount_amount: CHALLENGE_COMPLETION_DISCOUNT_AMOUNT,
+          admin_note: "3일차 인증 제출 완료로 챌린지 완료자 할인 자동 오픈",
+        })
+        .eq("id", enrollment!.id)
+        .select("*")
+        .single();
+
+      if (discountError || !updatedEnrollment) {
+        console.error("[Challenge API] completion discount grant error:", discountError);
+        return NextResponse.json({ error: "완료자 할인 적용에 실패했습니다." }, { status: 500 });
+      }
+
+      nextEnrollment = updatedEnrollment as EnrollmentRow;
+    }
+
     const telegramResult = await notifyTelegramChallengeMissionSubmitted({
       submissionId: row.id,
       userId: user.id,
@@ -370,6 +400,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      enrollment: toClientEnrollment(nextEnrollment),
       submission: toClientSubmission(row),
       feedSubmission: toClientFeedSubmission(row, user.id, toDisplayId(row.email)),
     });

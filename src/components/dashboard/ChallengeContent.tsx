@@ -49,6 +49,7 @@ type ChallengeEnrollment = {
   bonusCreditsGranted: number;
   discountStatus: string;
   discountAmount: number;
+  updatedAt: string;
 };
 
 type MissionSubmission = {
@@ -237,6 +238,8 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const COMMENT_MAX_LENGTH = 1000;
+const CHALLENGE_DISCOUNT_WINDOW_MS = 48 * 60 * 60 * 1000;
+const CHALLENGE_DISCOUNT_CHECKOUT_URL = "/checkout/allinone?coupon=CHALLENGE20";
 
 const OFFICIAL_AUTHOR_IDS = new Set(["hmys0205", "hmys0205hmys"]);
 
@@ -370,6 +373,23 @@ export function ChallengeContent() {
 
   const activeGuide = DAY_GUIDES.find((item) => item.day === activeDay) || null;
   const activeSubmission = activeDay ? submissionsByDay.get(activeDay) : undefined;
+  const challengeDiscountExpiresAt = useMemo(() => {
+    const enrollment = data?.enrollment;
+    if (
+      !enrollment ||
+      !["candidate", "granted"].includes(enrollment.discountStatus) ||
+      enrollment.discountAmount <= 0
+    ) {
+      return null;
+    }
+
+    const updatedAt = new Date(enrollment.updatedAt).getTime();
+    if (!Number.isFinite(updatedAt)) return null;
+    return new Date(updatedAt + CHALLENGE_DISCOUNT_WINDOW_MS);
+  }, [data?.enrollment]);
+  const hasActiveChallengeDiscount = Boolean(
+    challengeDiscountExpiresAt && challengeDiscountExpiresAt.getTime() > Date.now(),
+  );
   const feedSubmissions = useMemo(() => data?.feedSubmissions || [], [data?.feedSubmissions]);
   const filteredFeedSubmissions = useMemo(() => {
     if (boardFilter === "all") return feedSubmissions;
@@ -617,6 +637,7 @@ export function ChallengeContent() {
 
         return {
           ...prev,
+          enrollment: json.enrollment || prev.enrollment,
           submissions: [...withoutOwnDay, json.submission].sort((a, b) => a.day - b.day),
           feedSubmissions: nextFeed.sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -933,6 +954,45 @@ export function ChallengeContent() {
           <Alert color="yellow" variant="light">
             현재 미션 인증글 작성 가능 기간이 아닙니다. 운영자 안내를 확인해주세요.
           </Alert>
+        )}
+
+        {completedCount >= 3 && (
+          <Card radius={8} p={{ base: "md", sm: "lg" }} withBorder bg={BRAND.softer}>
+            <Group justify="space-between" align="center" gap="md">
+              <Box>
+                <Badge color="violet" variant="filled" radius={2} mb="xs">
+                  챌린지 수료 완료
+                </Badge>
+                <Title order={3} fz={{ base: 19, sm: 22 }}>
+                  3일 미션을 끝까지 완료했습니다.
+                </Title>
+                <Text size="sm" c="gray.7" mt={6}>
+                  {hasActiveChallengeDiscount && challengeDiscountExpiresAt
+                    ? `완료자 전용 추가 ${data.enrollment.discountAmount.toLocaleString(
+                        "ko-KR",
+                      )}원 할인이 ${challengeDiscountExpiresAt.toLocaleString("ko-KR", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}까지 열려 있습니다.`
+                    : "완료자 할인 기간이 종료되었습니다."}
+                </Text>
+              </Box>
+              {hasActiveChallengeDiscount && (
+                <Button
+                  component={Link}
+                  href={CHALLENGE_DISCOUNT_CHECKOUT_URL}
+                  color="violet"
+                  radius={4}
+                  rightSection={<ExternalLink size={16} />}
+                  style={{ background: BRAND.primary, flexShrink: 0 }}
+                >
+                  수료 완료 후 할인받기
+                </Button>
+              )}
+            </Group>
+          </Card>
         )}
 
         <Card radius={8} p={{ base: "md", sm: "lg" }} withBorder>
