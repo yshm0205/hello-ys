@@ -70,13 +70,6 @@ type ReactionGenerationResult = {
   account_id?: string;
   model?: string;
   category?: string;
-  source_collection?: {
-    auto_collected?: boolean;
-    source_url?: string;
-    method?: string;
-    language?: string;
-    video_id?: string;
-  };
   selected_templates?: ReactionTemplate[];
   validation?: {
     ok?: boolean;
@@ -148,7 +141,6 @@ export function EntertainmentReactionLabContent({
 }: {
   userEmail?: string;
 }) {
-  const [sourceUrl, setSourceUrl] = useState("");
   const [sourceText, setSourceText] = useState("");
   const [targetLines, setTargetLines] = useState("24-32");
   const [category, setCategory] = useState<string | null>("auto");
@@ -164,9 +156,8 @@ export function EntertainmentReactionLabContent({
 
   const handleGenerate = async () => {
     const trimmed = sourceText.trim();
-    const trimmedUrl = sourceUrl.trim();
-    if (trimmed.length < 20 && !trimmedUrl) {
-      setError("유튜브 URL을 넣거나, 전체 자막/상황 원문을 그대로 붙여넣어 주세요.");
+    if (trimmed.length < 20) {
+      setError("선택한 원본 구간/상황 원문을 20자 이상 붙여넣어 주세요.");
       return;
     }
 
@@ -180,7 +171,6 @@ export function EntertainmentReactionLabContent({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           source_text: trimmed,
-          source_url: trimmedUrl,
           target_lines: targetLines,
           category: category === "auto" ? "" : category || "",
           top_hook: topHook,
@@ -222,7 +212,7 @@ export function EntertainmentReactionLabContent({
             )}
           </Group>
           <Text c="gray.6" size="sm">
-            해외 원본 영상 URL을 넣으면 자막을 자동 수집하고, 벤치마크 형식에 맞춰 상단 훅, 나레이션 훅, 본문 자막, 편집 타임코드 표를 생성합니다.
+            해외 원본 영상에서 사용할 구간 원문만 넣으면 벤치마크 형식에 맞춰 상단 훅, 나레이션 훅, 본문 자막, 편집 타임코드 표를 생성합니다.
           </Text>
         </Box>
 
@@ -233,19 +223,10 @@ export function EntertainmentReactionLabContent({
               <Title order={4}>원본 입력</Title>
             </Group>
 
-            <TextInput
-              label="유튜브 URL"
-              description="영상 링크만 넣어도 서버가 자막을 자동 수집해 분석합니다. 자동 수집이 막히면 아래에 전체 자막/상황을 붙여넣으세요."
-              placeholder="https://www.youtube.com/watch?v=..."
-              value={sourceUrl}
-              onChange={(event) => setSourceUrl(event.currentTarget.value)}
-              disabled={isGenerating}
-            />
-
             <Textarea
-              label="전체 자막 / 상황 원문"
-              description="선택 입력입니다. URL 자동 수집이 실패했거나 특정 장면을 보강하고 싶을 때, 발췌하지 말고 전체 원문을 그대로 붙여넣으세요."
-              placeholder={"유튜브 URL만으로 안 될 때 전체 transcript/OCR/상황 원문을 그대로 붙여넣으세요.\n발췌하거나 시간표를 직접 만들 필요 없습니다."}
+              label="선택 구간 원문"
+              description="영상 전체가 아니라 쓸 장면 구간만 붙여넣으세요. 원문 대사, 자동자막, OCR, 상황 설명을 같이 넣으면 편집표 정확도가 올라갑니다."
+              placeholder={"예:\n00:00.00 Excuse me, can you help me?\n00:03.20 I lost my brother and I cannot find him.\n00:08.10 한국인이 길을 알려주고 직접 데려다주는 장면"}
               minRows={8}
               autosize
               value={sourceText}
@@ -319,11 +300,6 @@ export function EntertainmentReactionLabContent({
               <Badge color="teal" variant="light">
                 {result.category || "category"}
               </Badge>
-              {result.source_collection?.auto_collected && (
-                <Badge color="blue" variant="light">
-                  URL 자막 수집 {result.source_collection.language || ""}
-                </Badge>
-              )}
               <Badge color="gray" variant="outline">
                 리스크 {script.qa?.invented_content_risk || "-"}
               </Badge>

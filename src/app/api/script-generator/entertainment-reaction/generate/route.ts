@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}));
   const sourceText = typeof body.source_text === "string" ? body.source_text.trim() : "";
-  const sourceUrl = typeof body.source_url === "string" ? body.source_url.trim() : "";
   const targetLines =
     typeof body.target_lines === "string" && body.target_lines.trim()
       ? body.target_lines.trim()
@@ -34,9 +33,9 @@ export async function POST(request: NextRequest) {
   const category = typeof body.category === "string" ? body.category : "";
   const topHook = typeof body.top_hook === "string" ? body.top_hook : "";
 
-  if (sourceText.length < 20 && !sourceUrl) {
+  if (sourceText.length < 20) {
     return NextResponse.json(
-      { success: false, error: "유튜브 URL을 넣거나, 전체 자막/상황 원문을 그대로 붙여넣어 주세요." },
+      { success: false, error: "선택한 원본 구간/상황 원문을 20자 이상 붙여넣어 주세요." },
       { status: 400 },
     );
   }
@@ -46,7 +45,6 @@ export async function POST(request: NextRequest) {
       "/api/entertainment-reaction/generate",
       {
         source_text: sourceText,
-        source_url: sourceUrl,
         account_id: user.email || user.id,
         user_id: user.id,
         target_lines: targetLines,
