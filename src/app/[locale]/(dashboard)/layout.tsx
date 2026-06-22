@@ -1,6 +1,7 @@
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { getAdminAccessLevel, type AdminAccessLevel } from '@/lib/admin/access';
 import { getEffectiveCreditInfo } from '@/lib/plans/server';
+import { isEntertainmentReactionAllowed } from '@/lib/script-generator/server';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -32,13 +33,17 @@ export default async function DashboardGroupLayout({
   let adminAccessLevel: AdminAccessLevel = 'none';
 
   initialCreditInfo = await getEffectiveCreditInfo(user.id);
-  adminAccessLevel = getAdminAccessLevel(user.email, user.user_metadata);
+    adminAccessLevel = getAdminAccessLevel(user.email, user.user_metadata);
 
-  return (
+    return (
     <DashboardLayout
-      user={{ email: user.email ?? undefined }}
+      user={{ id: user.id, email: user.email ?? undefined }}
       initialCreditInfo={initialCreditInfo}
       adminAccessLevel={adminAccessLevel}
+      showReactionLab={isEntertainmentReactionAllowed({
+        id: user.id,
+        email: user.email ?? undefined,
+      })}
     >
       {children}
     </DashboardLayout>

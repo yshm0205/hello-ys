@@ -8,6 +8,46 @@ export type AuthenticatedUser = {
   email?: string;
 };
 
+const DEFAULT_ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS = "hmys0205hmys";
+
+function normalizeAccountKey(value?: string | null) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function splitAccountList(value: string) {
+  return value
+    .split(/[,;\s]+/)
+    .map((item) => normalizeAccountKey(item))
+    .filter(Boolean);
+}
+
+function accountMatchKeys(user?: AuthenticatedUser | null) {
+  const keys = new Set<string>();
+  const id = normalizeAccountKey(user?.id);
+  const email = normalizeAccountKey(user?.email);
+  if (id) keys.add(id);
+  if (email) {
+    keys.add(email);
+    keys.add(email.split("@")[0]);
+  }
+  return keys;
+}
+
+export function getEntertainmentReactionAllowedAccounts() {
+  return splitAccountList(
+    process.env.ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS ||
+      DEFAULT_ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS,
+  );
+}
+
+export function isEntertainmentReactionAllowed(user?: AuthenticatedUser | null) {
+  const allowed = new Set(getEntertainmentReactionAllowedAccounts());
+  for (const key of accountMatchKeys(user)) {
+    if (allowed.has(key)) return true;
+  }
+  return false;
+}
+
 export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> {
   const supabase = await createClient();
   const {

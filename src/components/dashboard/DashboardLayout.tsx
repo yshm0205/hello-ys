@@ -31,13 +31,14 @@ import {
     BookOpen,
     Loader2,
     Trophy,
+    Clapperboard,
 } from 'lucide-react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import type { AdminAccessLevel } from '@/lib/admin/access';
 
 interface DashboardLayoutProps {
     children: ReactNode;
-    user?: { email?: string };
+    user?: { id?: string; email?: string };
     adminAccessLevel?: AdminAccessLevel;
     initialCreditInfo?: {
         credits: number;
@@ -48,6 +49,7 @@ interface DashboardLayoutProps {
         monthly_credit_granted_cycles?: number | null;
         next_credit_at?: string | null;
     } | null;
+    showReactionLab?: boolean;
 }
 
 interface DashboardShellContextValue {
@@ -116,6 +118,7 @@ export function DashboardLayout({
     user,
     adminAccessLevel = 'none',
     initialCreditInfo = null,
+    showReactionLab = false,
 }: DashboardLayoutProps) {
     const [opened, { toggle }] = useDisclosure();
     const pathname = usePathname();
@@ -123,9 +126,20 @@ export function DashboardLayout({
     const [pendingHref, setPendingHref] = useState<string | null>(null);
     const credits = initialCreditInfo?.credits ?? null;
     const canViewMarketingOverview = adminAccessLevel === 'full' || adminAccessLevel === 'marketing';
+    const betaNavItems = showReactionLab
+        ? [
+              {
+                  label: '반응 쇼츠 베타',
+                  href: '/dashboard/reaction-lab',
+                  icon: Clapperboard,
+                  description: '해외 반응 원본 → 편집시트',
+              },
+          ]
+        : [];
     const resolvedNavItems = canViewMarketingOverview
         ? [
               ...navItems,
+              ...betaNavItems,
               {
                   label: '운영 지표',
                   href: '/admin/overview',
@@ -133,7 +147,7 @@ export function DashboardLayout({
                   description: '런칭 퍼널과 핵심 지표',
               },
           ]
-        : navItems;
+        : [...navItems, ...betaNavItems];
 
     const handleNavClick = (event: MouseEvent<HTMLElement>, href: string, isActive = false) => {
         if (
