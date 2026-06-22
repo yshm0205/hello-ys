@@ -25,13 +25,6 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}));
   const sourceText = typeof body.source_text === "string" ? body.source_text.trim() : "";
-  const targetLines =
-    typeof body.target_lines === "string" && body.target_lines.trim()
-      ? body.target_lines.trim()
-      : "24-32";
-  const direction = typeof body.direction === "string" ? body.direction : "";
-  const category = typeof body.category === "string" ? body.category : "";
-  const topHook = typeof body.top_hook === "string" ? body.top_hook : "";
 
   if (sourceText.length < 20) {
     return NextResponse.json(
@@ -47,10 +40,6 @@ export async function POST(request: NextRequest) {
         source_text: sourceText,
         account_id: user.email || user.id,
         user_id: user.id,
-        target_lines: targetLines,
-        direction,
-        category,
-        top_hook: topHook,
       },
     );
 

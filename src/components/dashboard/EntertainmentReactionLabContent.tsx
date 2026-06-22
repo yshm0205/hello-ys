@@ -9,12 +9,10 @@ import {
   Card,
   CopyButton,
   Group,
-  Select,
   Stack,
   Table,
   Text,
   Textarea,
-  TextInput,
   Title,
 } from "@mantine/core";
 import {
@@ -82,15 +80,6 @@ type ReactionGenerationResult = {
   error?: string;
 };
 
-const CATEGORY_OPTIONS = [
-  { value: "auto", label: "자동 라우팅" },
-  { value: "kindness_help", label: "친절/도움" },
-  { value: "food_reaction", label: "음식 반응" },
-  { value: "system_safety_infra", label: "시스템/치안/인프라" },
-  { value: "travel_culture_shock", label: "여행/문화충격" },
-  { value: "korea_identity_praise", label: "한국 이미지" },
-];
-
 function formatSourceTime(source?: LineSource) {
   const start = source?.source_time_start;
   if (start === null || start === undefined || !Number.isFinite(Number(start))) return "";
@@ -142,10 +131,6 @@ export function EntertainmentReactionLabContent({
   userEmail?: string;
 }) {
   const [sourceText, setSourceText] = useState("");
-  const [targetLines, setTargetLines] = useState("24-32");
-  const [category, setCategory] = useState<string | null>("auto");
-  const [topHook, setTopHook] = useState("");
-  const [direction, setDirection] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ReactionGenerationResult | null>(null);
@@ -171,10 +156,6 @@ export function EntertainmentReactionLabContent({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           source_text: trimmed,
-          target_lines: targetLines,
-          category: category === "auto" ? "" : category || "",
-          top_hook: topHook,
-          direction,
         }),
       });
       const data = (await response.json()) as ReactionGenerationResult;
@@ -212,7 +193,7 @@ export function EntertainmentReactionLabContent({
             )}
           </Group>
           <Text c="gray.6" size="sm">
-            해외 원본 영상에서 사용할 구간 원문만 넣으면 벤치마크 형식에 맞춰 상단 훅, 나레이션 훅, 본문 자막, 편집 타임코드 표를 생성합니다.
+            해외 원본 영상에서 사용할 구간 원문만 넣으면 스크립트와 편집 타임코드 표를 생성합니다.
           </Text>
         </Box>
 
@@ -231,41 +212,6 @@ export function EntertainmentReactionLabContent({
               autosize
               value={sourceText}
               onChange={(event) => setSourceText(event.currentTarget.value)}
-              disabled={isGenerating}
-            />
-
-            <Group grow align="flex-end">
-              <TextInput
-                label="목표 라인 수"
-                value={targetLines}
-                onChange={(event) => setTargetLines(event.currentTarget.value)}
-                disabled={isGenerating}
-              />
-              <Select
-                label="카테고리"
-                data={CATEGORY_OPTIONS}
-                value={category}
-                onChange={setCategory}
-                disabled={isGenerating}
-              />
-            </Group>
-
-            <TextInput
-              label="상단 훅 고정"
-              description="비워두면 API가 벤치마크 기반으로 정합니다. 고정 시 줄바꿈 또는 / 로 2줄을 넣으세요."
-              placeholder="외국인 : 여기 호텔이야? / 한국 : 휴게소야"
-              value={topHook}
-              onChange={(event) => setTopHook(event.currentTarget.value)}
-              disabled={isGenerating}
-            />
-
-            <Textarea
-              label="추가 방향"
-              placeholder="선택: 특정 장면을 우선하거나, 특정 벤치 흐름을 강하게 맞추고 싶을 때만 입력"
-              minRows={2}
-              autosize
-              value={direction}
-              onChange={(event) => setDirection(event.currentTarget.value)}
               disabled={isGenerating}
             />
 
@@ -296,9 +242,6 @@ export function EntertainmentReactionLabContent({
               </Badge>
               <Badge color="gray" variant="light">
                 {result.model || "model"}
-              </Badge>
-              <Badge color="teal" variant="light">
-                {result.category || "category"}
               </Badge>
               <Badge color="gray" variant="outline">
                 리스크 {script.qa?.invented_content_risk || "-"}
