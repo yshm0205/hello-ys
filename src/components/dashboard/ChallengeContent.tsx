@@ -37,7 +37,7 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 
 type ChallengeEnrollment = {
   id: string;
@@ -324,6 +324,7 @@ function clipPreview(value: string, max = 96) {
 }
 
 export function ChallengeContent() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [savingDay, setSavingDay] = useState<number | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -586,6 +587,7 @@ export function ChallengeContent() {
     const guide = getGuide(day);
     const draft = getDraft(day, guide.title);
     const autoTitle = getAutoSubmissionTitle(day, data?.enrollment || null);
+    const shouldRedirectToCheckout = day === 3 && !activeSubmission;
     const submissionTitle = autoTitle || draft.title.trim();
     const rawSubmissionContent = draft.content.trim();
     const submissionContent = day === 3
@@ -647,6 +649,10 @@ export function ChallengeContent() {
         };
       });
       closeComposer();
+      if (shouldRedirectToCheckout) {
+        router.push(CHALLENGE_DISCOUNT_CHECKOUT_URL);
+        return;
+      }
       if (nextSelected) {
         selectedSubmissionIdRef.current = nextSelected.id;
         setSelectedSubmission(nextSelected);
