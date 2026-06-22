@@ -494,10 +494,6 @@ export async function POST(
               source_text: nextItem.material,
               account_id: actor.accountId,
               user_id: actor.userId,
-              target_lines: "24-32",
-              direction: "",
-              category: "",
-              top_hook: "",
             },
           );
 
