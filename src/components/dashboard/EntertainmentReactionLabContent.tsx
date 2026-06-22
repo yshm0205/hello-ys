@@ -70,6 +70,13 @@ type ReactionGenerationResult = {
   account_id?: string;
   model?: string;
   category?: string;
+  source_collection?: {
+    auto_collected?: boolean;
+    source_url?: string;
+    method?: string;
+    language?: string;
+    video_id?: string;
+  };
   selected_templates?: ReactionTemplate[];
   validation?: {
     ok?: boolean;
@@ -95,16 +102,16 @@ function formatSourceTime(source?: LineSource) {
   const start = source?.source_time_start;
   if (start === null || start === undefined || !Number.isFinite(Number(start))) return "";
   const end = source?.source_time_end;
-  const startText = secondsToStamp(Number(start));
-  if (end === null || end === undefined || !Number.isFinite(Number(end))) return startText;
-  return `${startText}-${secondsToStamp(Number(end))}`;
+  const startValue = Number(start);
+  const endValue =
+    end === null || end === undefined || !Number.isFinite(Number(end)) || Number(end) <= startValue
+      ? startValue + 2
+      : Number(end);
+  return `${secondsToRangePart(startValue)}-${secondsToRangePart(endValue)}초`;
 }
 
-function secondsToStamp(value: number) {
-  const safe = Math.max(0, value);
-  const minutes = Math.floor(safe / 60);
-  const seconds = safe - minutes * 60;
-  return `${String(minutes).padStart(2, "0")}:${seconds.toFixed(2).padStart(5, "0")}`;
+function secondsToRangePart(value: number) {
+  return Math.max(0, value).toFixed(2);
 }
 
 function buildFallbackScriptText(script?: ReactionScriptJson) {
@@ -122,7 +129,7 @@ function buildTableCopyText(script?: ReactionScriptJson) {
   const lines = script?.script_lines || [];
   const sources = script?.line_sources || [];
   return [
-    ["#", "한국어 자막", "원본 시간", "원문/근거", "타입"].join("\t"),
+    ["#", "한국어 자막", "원본 구간(초)", "원문/근거", "타입"].join("\t"),
     ...lines.map((line, index) => {
       const source = sources[index] || {};
       return [
@@ -141,6 +148,7 @@ export function EntertainmentReactionLabContent({
 }: {
   userEmail?: string;
 }) {
+  const [sourceUrl, setSourceUrl] = useState("");
   const [sourceText, setSourceText] = useState("");
   const [targetLines, setTargetLines] = useState("24-32");
   const [category, setCategory] = useState<string | null>("auto");
@@ -156,8 +164,9 @@ export function EntertainmentReactionLabContent({
 
   const handleGenerate = async () => {
     const trimmed = sourceText.trim();
-    if (trimmed.length < 20) {
-      setError("원본 자막/상황을 20자 이상 입력해주세요.");
+    const trimmedUrl = sourceUrl.trim();
+    if (trimmed.length < 20 && !trimmedUrl) {
+      setError("유튜브 URL을 넣거나, 전체 자막/상황 원문을 그대로 붙여넣어 주세요.");
       return;
     }
 
@@ -171,6 +180,7 @@ export function EntertainmentReactionLabContent({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           source_text: trimmed,
+          source_url: trimmedUrl,
           target_lines: targetLines,
           category: category === "auto" ? "" : category || "",
           top_hook: topHook,
@@ -212,7 +222,7 @@ export function EntertainmentReactionLabContent({
             )}
           </Group>
           <Text c="gray.6" size="sm">
-            해외 원본 자막/상황을 넣으면 벤치마크 형식에 맞춰 상단 훅, 나레이션 훅, 본문 자막, 편집 타임코드 표를 생성합니다.
+            해외 원본 영상 URL을 넣으면 자막을 자동 수집하고, 벤치마크 형식에 맞춰 상단 훅, 나레이션 훅, 본문 자막, 편집 타임코드 표를 생성합니다.
           </Text>
         </Box>
 
@@ -223,10 +233,19 @@ export function EntertainmentReactionLabContent({
               <Title order={4}>원본 입력</Title>
             </Group>
 
+            <TextInput
+              label="유튜브 URL"
+              description="영상 링크만 넣어도 서버가 자막을 자동 수집해 분석합니다. 자동 수집이 막히면 아래에 전체 자막/상황을 붙여넣으세요."
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={sourceUrl}
+              onChange={(event) => setSourceUrl(event.currentTarget.value)}
+              disabled={isGenerating}
+            />
+
             <Textarea
-              label="원본 자막 / 상황"
-              description="영상 자막, OCR, 상황 원문을 그대로 붙여넣으세요. 시간이 있으면 편집표 정확도가 올라갑니다."
-              placeholder={"00:20.94 asking people to help push me up the big hill in my wheelchair\n00:35.58 excuse me could you help me up the ramp"}
+              label="전체 자막 / 상황 원문"
+              description="선택 입력입니다. URL 자동 수집이 실패했거나 특정 장면을 보강하고 싶을 때, 발췌하지 말고 전체 원문을 그대로 붙여넣으세요."
+              placeholder={"유튜브 URL만으로 안 될 때 전체 transcript/OCR/상황 원문을 그대로 붙여넣으세요.\n발췌하거나 시간표를 직접 만들 필요 없습니다."}
               minRows={8}
               autosize
               value={sourceText}
@@ -300,6 +319,11 @@ export function EntertainmentReactionLabContent({
               <Badge color="teal" variant="light">
                 {result.category || "category"}
               </Badge>
+              {result.source_collection?.auto_collected && (
+                <Badge color="blue" variant="light">
+                  URL 자막 수집 {result.source_collection.language || ""}
+                </Badge>
+              )}
               <Badge color="gray" variant="outline">
                 리스크 {script.qa?.invented_content_risk || "-"}
               </Badge>
@@ -402,7 +426,7 @@ export function EntertainmentReactionLabContent({
                       <Table.Tr>
                         <Table.Th>#</Table.Th>
                         <Table.Th>한국어 자막</Table.Th>
-                        <Table.Th>원본 시간</Table.Th>
+                        <Table.Th>원본 구간(초)</Table.Th>
                         <Table.Th>원문/근거</Table.Th>
                         <Table.Th>타입</Table.Th>
                       </Table.Tr>
