@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getAdminAccessLevel } from "@/lib/admin/access";
 import { notifyTelegramChallengeMissionSubmitted } from "@/lib/telegram/payments";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
@@ -51,6 +52,10 @@ const submissionSchema = z.object({
     .refine((value) => !value || /^https?:\/\/.+/i.test(value), {
       message: "링크는 https:// 또는 http://로 시작해야 합니다.",
     }),
+});
+
+const deleteSubmissionSchema = z.object({
+  submissionId: z.string().uuid(),
 });
 
 const UNLOCKING_SUBMISSION_STATUSES = new Set(["submitted", "reviewed", "approved", "needs_revision"]);
@@ -122,6 +127,15 @@ function toClientFeedSubmission(row: SubmissionRow, viewerId: string, authorLabe
 }
 
 const OFFICIAL_AUTHOR_IDS = new Set(["hmys0205", "hmys0205hmys"]);
+
+function isChallengeModerator(user: {
+  email?: string | null;
+  user_metadata?: Record<string, unknown> | null;
+}) {
+  const localPart = (user.email || "").split("@")[0]?.trim().toLowerCase();
+  if (localPart && OFFICIAL_AUTHOR_IDS.has(localPart)) return true;
+  return getAdminAccessLevel(user.email, user.user_metadata) === "full";
+}
 
 function maskDisplayId(value: string) {
   if (value.length <= 2) return `${value[0] || ""}***`;
@@ -223,6 +237,7 @@ export async function GET() {
     }
 
     const { admin, enrollment, error } = await loadEnrollment(user.id);
+    const canManage = isChallengeModerator(user);
     if (error) {
       return NextResponse.json({ error: "챌린지 정보를 불러오지 못했습니다." }, { status: 500 });
     }
@@ -233,6 +248,7 @@ export async function GET() {
         enrollment: null,
         canSubmit: false,
         canComment: false,
+        canManage,
         submissions: [],
         feedSubmissions: [],
       });
@@ -263,6 +279,7 @@ export async function GET() {
       enrollment: toClientEnrollment(enrollment),
       canSubmit: isEnrollmentActive(enrollment),
       canComment: hasCommunityAccess(enrollment),
+      canManage,
       submissions: ((submissions || []) as SubmissionRow[]).map(toClientSubmission),
       feedSubmissions: feedSubmissions.map((row) =>
         toClientFeedSubmission(row, user.id, authorLabels.get(row.user_id) || "참여자"),
@@ -406,6 +423,57 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("[Challenge API] POST error:", error);
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    if (!isChallengeModerator(user)) {
+      return NextResponse.json({ error: "인증글 삭제 권한이 없습니다." }, { status: 403 });
+    }
+
+    const parsed = deleteSubmissionSchema.safeParse({
+      submissionId: request.nextUrl.searchParams.get("submissionId"),
+    });
+    if (!parsed.success) {
+      return NextResponse.json({ error: "삭제할 인증글을 확인할 수 없습니다." }, { status: 400 });
+    }
+
+    const admin = createAdminClient();
+    const { data: submission, error: loadError } = await admin
+      .from("challenge_mission_submissions")
+      .select("id")
+      .eq("id", parsed.data.submissionId)
+      .maybeSingle();
+
+    if (loadError) {
+      console.error("[Challenge API] submission delete lookup error:", loadError);
+      return NextResponse.json({ error: "인증글 확인에 실패했습니다." }, { status: 500 });
+    }
+
+    if (!submission) {
+      return NextResponse.json({ error: "이미 삭제되었거나 존재하지 않는 인증글입니다." }, { status: 404 });
+    }
+
+    const { error: deleteError } = await admin
+      .from("challenge_mission_submissions")
+      .delete()
+      .eq("id", parsed.data.submissionId);
+
+    if (deleteError) {
+      console.error("[Challenge API] submission delete error:", deleteError);
+      return NextResponse.json({ error: "인증글 삭제에 실패했습니다." }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, submissionId: parsed.data.submissionId });
+  } catch (error) {
+    console.error("[Challenge API] DELETE error:", error);
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
   }
 }

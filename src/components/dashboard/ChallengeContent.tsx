@@ -85,6 +85,7 @@ type ChallengeResponse = {
   enrollment: ChallengeEnrollment | null;
   canSubmit: boolean;
   canComment: boolean;
+  canManage: boolean;
   submissions: MissionSubmission[];
   feedSubmissions: FeedSubmission[];
 };
@@ -341,6 +342,7 @@ export function ChallengeContent() {
   const [editingCommentDraft, setEditingCommentDraft] = useState("");
   const [updatingCommentId, setUpdatingCommentId] = useState<string | null>(null);
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
   const [commentError, setCommentError] = useState<string | null>(null);
   const [day3MarketingConsent, setDay3MarketingConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -802,6 +804,43 @@ export function ChallengeContent() {
       setCommentError("댓글 삭제에 실패했습니다.");
     } finally {
       setDeletingCommentId(null);
+    }
+  }
+
+  async function deleteSubmission(submission: FeedSubmission) {
+    if (!data?.canManage) return;
+    if (!window.confirm("이 인증글을 삭제할까요?")) return;
+
+    setError(null);
+    setDeletingSubmissionId(submission.id);
+    try {
+      const res = await fetch(`/api/challenge?submissionId=${submission.id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(json.error || "인증글 삭제에 실패했습니다.");
+        return;
+      }
+
+      setData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          submissions: prev.submissions.filter((item) => item.id !== submission.id),
+          feedSubmissions: prev.feedSubmissions.filter((item) => item.id !== submission.id),
+        };
+      });
+      setCommentsBySubmissionId((prev) => {
+        const next = { ...prev };
+        delete next[submission.id];
+        return next;
+      });
+      closeSubmission();
+    } catch {
+      setError("인증글 삭제에 실패했습니다.");
+    } finally {
+      setDeletingSubmissionId(null);
     }
   }
 
@@ -1303,17 +1342,31 @@ export function ChallengeContent() {
                   </Anchor>
                 )}
 
-                {selectedSubmission.isMine && (
+                {(selectedSubmission.isMine || data.canManage) && (
                   <Group justify="flex-end" mt="lg">
-                    <Button
-                      variant="light"
-                      color="violet"
-                      radius={4}
-                      leftSection={<PencilLine size={16} />}
-                      onClick={() => openComposer(selectedSubmission.day)}
-                    >
-                      수정하기
-                    </Button>
+                    {data.canManage && (
+                      <Button
+                        variant="light"
+                        color="red"
+                        radius={4}
+                        leftSection={<Trash2 size={16} />}
+                        loading={deletingSubmissionId === selectedSubmission.id}
+                        onClick={() => deleteSubmission(selectedSubmission)}
+                      >
+                        삭제
+                      </Button>
+                    )}
+                    {selectedSubmission.isMine && (
+                      <Button
+                        variant="light"
+                        color="violet"
+                        radius={4}
+                        leftSection={<PencilLine size={16} />}
+                        onClick={() => openComposer(selectedSubmission.day)}
+                      >
+                        수정하기
+                      </Button>
+                    )}
                   </Group>
                 )}
               </Box>
@@ -1802,7 +1855,13 @@ export function ChallengeContent() {
                   rightSection={<Send size={16} />}
                   style={{ background: BRAND.primary }}
                 >
-                  {activeSubmission ? "수정 저장" : "등록"}
+                  {activeSubmission
+                    ? activeDay === 3
+                      ? "수료 내용 수정"
+                      : "수정 저장"
+                    : activeDay === 3
+                      ? "수료 완료 후 할인받기"
+                      : "등록"}
                 </Button>
               </Group>
             </>
