@@ -37,7 +37,7 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { Link, useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 
 type ChallengeEnrollment = {
   id: string;
@@ -242,6 +242,14 @@ const COMMENT_MAX_LENGTH = 1000;
 const CHALLENGE_DISCOUNT_WINDOW_MS = 48 * 60 * 60 * 1000;
 const CHALLENGE_DISCOUNT_CHECKOUT_URL = "/checkout/allinone?coupon=CHALLENGE20";
 
+function getLocalizedChallengeDiscountCheckoutUrl() {
+  if (typeof window === "undefined") return CHALLENGE_DISCOUNT_CHECKOUT_URL;
+
+  const locale = window.location.pathname.split("/").filter(Boolean)[0];
+  const localePrefix = locale === "ko" || locale === "en" ? `/${locale}` : "";
+  return `${localePrefix}${CHALLENGE_DISCOUNT_CHECKOUT_URL}`;
+}
+
 const OFFICIAL_AUTHOR_IDS = new Set(["hmys0205", "hmys0205hmys"]);
 
 const AUTO_TITLE_SUFFIX_BY_DAY: Record<number, string> = {
@@ -324,7 +332,6 @@ function clipPreview(value: string, max = 96) {
 }
 
 export function ChallengeContent() {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [savingDay, setSavingDay] = useState<number | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -587,7 +594,7 @@ export function ChallengeContent() {
     const guide = getGuide(day);
     const draft = getDraft(day, guide.title);
     const autoTitle = getAutoSubmissionTitle(day, data?.enrollment || null);
-    const shouldRedirectToCheckout = day === 3 && !activeSubmission;
+    const shouldRedirectToCheckout = day === 3;
     const submissionTitle = autoTitle || draft.title.trim();
     const rawSubmissionContent = draft.content.trim();
     const submissionContent = day === 3
@@ -650,7 +657,7 @@ export function ChallengeContent() {
       });
       closeComposer();
       if (shouldRedirectToCheckout) {
-        router.push(CHALLENGE_DISCOUNT_CHECKOUT_URL);
+        window.location.assign(getLocalizedChallengeDiscountCheckoutUrl());
         return;
       }
       if (nextSelected) {
@@ -1861,13 +1868,7 @@ export function ChallengeContent() {
                   rightSection={<Send size={16} />}
                   style={{ background: BRAND.primary }}
                 >
-                  {activeSubmission
-                    ? activeDay === 3
-                      ? "수료 내용 수정"
-                      : "수정 저장"
-                    : activeDay === 3
-                      ? "수료 완료 후 할인받기"
-                      : "등록"}
+                  {activeDay === 3 ? "수료 완료 후 할인받기" : activeSubmission ? "수정 저장" : "등록"}
                 </Button>
               </Group>
             </>
