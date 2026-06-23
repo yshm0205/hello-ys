@@ -3942,18 +3942,18 @@ function FloatingCTA() {
           )}
         </AnimatePresence>
 
-        <Box style={{ padding: '4px 16px 12px' }}>
-          <Group justify="space-between" align="center" wrap="nowrap" gap="sm">
-            <Box style={{ flex: 1, minWidth: 0 }}>
-              <Text style={{ fontSize: '11px', color: '#71717a', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
-                  <span>올인원 패스 할인 판매가</span>
-                <span style={{ color: '#a1a1aa', textDecoration: 'line-through' }}> 월 {monthly12Orig.toLocaleString()}원</span>
+        <Box style={{ padding: '4px 14px 12px' }}>
+          <Group justify="space-between" align="center" wrap="nowrap" gap={10}>
+            <Box style={{ flex: '1 1 auto', minWidth: 0, maxWidth: 'calc(100% - 174px)' }}>
+              <Text style={{ fontSize: '11px', color: '#71717a', lineHeight: 1.25, whiteSpace: 'normal', wordBreak: 'keep-all' }}>
+                <span>올인원 패스 할인 판매가</span>
+                <span style={{ color: '#a1a1aa', textDecoration: 'line-through', whiteSpace: 'nowrap' }}> 월 {monthly12Orig.toLocaleString()}원</span>
               </Text>
               <Group gap={6} align="baseline" wrap="nowrap" style={{ marginTop: 1 }}>
                 <Text style={{ fontSize: '13px', fontWeight: 800, color: '#ef4444', lineHeight: 1.1 }}>
                   {discountPct}%
                 </Text>
-                <Text style={{ fontSize: '18px', fontWeight: 800, color: '#18181b', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+                <Text style={{ fontSize: '18px', fontWeight: 800, color: '#18181b', lineHeight: 1.1, letterSpacing: 0, whiteSpace: 'nowrap' }}>
                   월 {monthly12Now.toLocaleString()}원
                 </Text>
               </Group>
@@ -3965,7 +3965,8 @@ function FloatingCTA() {
               activeAccessChildren="강의 보러가기"
               size="md" radius="xl"
               style={{
-                background: '#8b5cf6', fontWeight: 700, fontSize: '14px', flexShrink: 0,
+                width: 164, minWidth: 164, height: 56,
+                background: '#8b5cf6', fontWeight: 800, fontSize: '14px', flexShrink: 0,
                 boxShadow: '0 2px 8px rgba(139,92,246,0.2)',
               }}
             >

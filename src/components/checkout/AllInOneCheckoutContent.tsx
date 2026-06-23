@@ -1207,14 +1207,16 @@ export function AllInOneCheckoutContent({
           margin: 0 20px 20px;
         }
 
-        @media (max-width: 820px) {
+        @media (max-width: 1024px) {
           .fs-checkout-page {
-            padding: 16px 0 36px;
+            padding: 12px 0 32px;
           }
 
           .fs-checkout-shell {
-            padding-right: 14px;
-            padding-left: 14px;
+            width: 100%;
+            max-width: none;
+            padding-right: 10px;
+            padding-left: 10px;
           }
 
           .fs-checkout-topbar {
@@ -1227,7 +1229,13 @@ export function AllInOneCheckoutContent({
           }
 
           .fs-select-wrap {
-            padding: 24px 0 0;
+            padding: 18px 0 0;
+          }
+
+          .fs-select-content,
+          .fs-checkout-grid {
+            width: 100%;
+            max-width: none;
           }
 
           .fs-select-title {
