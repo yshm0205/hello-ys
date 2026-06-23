@@ -2,14 +2,13 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { Alert, Box, Button, Card, Checkbox, Container, Group, Text } from '@mantine/core';
+import { Alert, Box, Card, Checkbox, Container, Group, Text } from '@mantine/core';
 import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import Image from 'next/image';
 import { useLocale } from 'next-intl';
-import { AlertCircle, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 import { MarketingTracker } from '@/components/analytics/MarketingTracker';
-import { Link } from '@/i18n/routing';
 import {
   isActiveAccessPlan,
   isInitialProgramPlan,
@@ -432,6 +431,7 @@ export function AllInOneCheckoutContent({
         }
 
         .fs-checkout-topbar {
+          justify-content: flex-end;
           margin-bottom: 16px;
           color: #71717a;
           font-size: 14px;
@@ -1191,18 +1191,6 @@ export function AllInOneCheckoutContent({
           line-height: 1.5;
         }
 
-        .fs-secondary-button {
-          width: 100%;
-          min-height: 42px;
-          border: 1px solid #e5e7eb;
-          border-radius: 11px;
-          background: #fff;
-          color: #27272a;
-          font-size: 14px;
-          font-weight: 750;
-          cursor: pointer;
-        }
-
         .fs-checkout-error {
           margin: 0 20px 20px;
         }
@@ -1220,7 +1208,7 @@ export function AllInOneCheckoutContent({
           }
 
           .fs-checkout-topbar {
-            margin-bottom: 12px;
+            display: none;
           }
 
           .fs-checkout-topbar .fs-checkout-secure,
@@ -1429,9 +1417,6 @@ export function AllInOneCheckoutContent({
 
       <Container fluid className="fs-checkout-shell">
         <Group className="fs-checkout-topbar">
-          <Button component={Link} href="/" variant="subtle" color="gray" leftSection={<ChevronLeft size={16} />}>
-            홈으로
-          </Button>
           <span className="fs-checkout-secure">토스 보안 결제</span>
         </Group>
 
@@ -1726,14 +1711,6 @@ export function AllInOneCheckoutContent({
                       {loading ? '결제창 여는 중...' : selectedPaymentLabel}
                     </button>
                   </div>
-
-                  <button
-                    type="button"
-                    className="fs-secondary-button"
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  >
-                    구성품 다시 보기
-                  </button>
                 </div>
 
                 {error && (
