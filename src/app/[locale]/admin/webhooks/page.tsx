@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/table";
 import { createAdminClient } from "@/utils/supabase/admin";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type PaymentLog = {
   id: string;
   payment_key: string;

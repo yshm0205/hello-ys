@@ -981,29 +981,6 @@ export function AllInOneCheckoutContent({
           letter-spacing: 0;
         }
 
-        .fs-payment-note {
-          margin: 0 20px 18px;
-          padding: 14px;
-          border: 1px solid #ddd6fe;
-          border-radius: 12px;
-          background: #f5f3ff;
-        }
-
-        .fs-payment-note strong {
-          display: block;
-          color: #4c1d95;
-          font-size: 14px;
-          line-height: 1.35;
-        }
-
-        .fs-payment-note span {
-          display: block;
-          margin-top: 5px;
-          color: #6b7280;
-          font-size: 13px;
-          line-height: 1.5;
-        }
-
         .fs-policy-list {
           display: grid;
           gap: 10px;
@@ -1418,11 +1395,6 @@ export function AllInOneCheckoutContent({
             white-space: nowrap;
           }
 
-          .fs-payment-note {
-            margin: 0 16px 12px;
-            padding: 12px;
-          }
-
           .fs-policy-list {
             gap: 8px;
             padding: 0 16px 14px;
@@ -1640,25 +1612,6 @@ export function AllInOneCheckoutContent({
                     </div>
                     <div className="fs-total-amount">{formatWon(finalCheckoutAmount)}</div>
                   </div>
-                </div>
-
-                <div className="fs-payment-note">
-                  <strong>토스 보안 결제창에서 결제합니다</strong>
-                  <span>카드, 토스머니, 계좌이체 등 실제 결제수단은 토스 화면에서 선택합니다.</span>
-                  <a
-                    href="/help/payment"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-block',
-                      marginTop: '8px',
-                      fontSize: '13px',
-                      color: '#8b5cf6',
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    토스페이 처음 사용하시나요? 안내 보기 →
-                  </a>
                 </div>
 
                 <div className="fs-policy-list">
