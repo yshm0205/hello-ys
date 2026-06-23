@@ -152,6 +152,7 @@ async function getRecentSessions(limit = 100) {
   const oldestSessionSeenAt = sessionRows[sessionRows.length - 1]?.first_seen_at;
 
   let paymentMap = new Map<string, PaymentRow>();
+  let internalSessionKeys = new Set<string>();
 
   if (sessionKeys.length) {
     const [{ data: payments }, { data: latpeedIntents }] = await Promise.all([
@@ -166,12 +167,29 @@ async function getRecentSessions(limit = 100) {
         .order("created_at", { ascending: false }),
     ]);
 
-    const filtered = ((payments || []) as (PaymentRow & { user_id: string })[]).filter(
+    const paymentRows = (payments || []) as (PaymentRow & { user_id: string })[];
+    const latpeedIntentRows = (latpeedIntents || []) as LatpeedIntentRow[];
+
+    internalSessionKeys = new Set(
+      paymentRows
+        .filter((payment) => internalIds.has(payment.user_id) && payment.session_key)
+        .map((payment) => payment.session_key as string),
+    );
+    latpeedIntentRows
+      .filter((intent) => internalIds.has(intent.user_id))
+      .forEach((intent) => {
+        const sessionKey = getLatpeedIntentSessionKey(intent);
+        if (sessionKey) {
+          internalSessionKeys.add(sessionKey);
+        }
+      });
+
+    const filtered = paymentRows.filter(
       (p) => !internalIds.has(p.user_id),
     );
     paymentMap = new Map(filtered.map((p) => [p.session_key as string, p]));
 
-    ((latpeedIntents || []) as LatpeedIntentRow[])
+    latpeedIntentRows
       .filter((intent) => !internalIds.has(intent.user_id))
       .filter(isOpenLatpeedIntent)
       .forEach((intent) => {
@@ -183,7 +201,10 @@ async function getRecentSessions(limit = 100) {
       });
   }
 
-  return { sessions: sessionRows, paymentMap };
+  return {
+    sessions: sessionRows.filter((session) => !internalSessionKeys.has(session.session_key)),
+    paymentMap,
+  };
 }
 
 function isValidStage(value: string | undefined): value is StageId {

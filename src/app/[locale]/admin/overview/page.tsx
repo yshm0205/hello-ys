@@ -153,7 +153,7 @@ const LANDING_SECTION_ORDER = [
   "checkout-select",
   "checkout-confirm",
 ] as const;
-const BASE_SESSION_SELECT = "cta_clicks, referrer, first_seen_at, duration_seconds";
+const BASE_SESSION_SELECT = "session_key, cta_clicks, referrer, first_seen_at, duration_seconds";
 const BEHAVIOR_SESSION_SELECT = `${BASE_SESSION_SELECT}, duration_seconds, max_scroll_percent, last_visible_section, last_clicked_cta_section`;
 const SUPABASE_PAGE_SIZE = 1000;
 
@@ -161,6 +161,7 @@ type PresetMarketingPeriod = keyof typeof PERIOD_CONFIG;
 type MarketingPeriod = PresetMarketingPeriod | "custom";
 
 interface MarketingSessionRow {
+  session_key: string;
   cta_clicks: number | null;
   referrer: string | null;
   first_seen_at: string;
@@ -189,6 +190,7 @@ interface PaymentRow {
   amount: number;
   created_at: string;
   user_id: string;
+  session_key: string | null;
   status: string;
   metadata: Record<string, unknown> | null;
 }
@@ -404,12 +406,18 @@ function isOpenLatpeedIntent(intent: LatpeedPaymentIntentRow) {
   return intent.status !== "matched" && !intent.latpeed_event_key;
 }
 
+function getLatpeedIntentSessionKey(intent: Pick<LatpeedPaymentIntentRow, "metadata">) {
+  const sessionKey = intent.metadata?.sessionKey;
+  return typeof sessionKey === "string" && sessionKey ? sessionKey : null;
+}
+
 function toLatpeedPendingPayment(intent: LatpeedPaymentIntentRow): PaymentRow {
   return {
     id: intent.id,
     amount: intent.amount,
     created_at: intent.created_at,
     user_id: intent.user_id,
+    session_key: getLatpeedIntentSessionKey(intent),
     status: "PENDING",
     metadata: {
       ...(intent.metadata || {}),
@@ -645,7 +653,7 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       .lt("created_at", range.endIso),
     supabase
       .from("toss_payments")
-      .select("id, amount, created_at, user_id, status, metadata")
+      .select("id, amount, created_at, user_id, session_key, status, metadata")
       .gte("created_at", range.startIso)
       .lt("created_at", range.endIso),
     supabase
@@ -660,8 +668,25 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
     throw sessionsResponse.error;
   }
 
-  const periodSessions = (sessionsResponse.rows || []).map(
-    (session) => ({
+  const allPayments = (payments || []) as PaymentRow[];
+  const allLatpeedIntents = (latpeedIntents || []) as LatpeedPaymentIntentRow[];
+  const internalMetricSessionKeys = new Set<string>();
+
+  allPayments.forEach((payment) => {
+    if (internalAdminIds.has(payment.user_id) && payment.session_key) {
+      internalMetricSessionKeys.add(payment.session_key);
+    }
+  });
+  allLatpeedIntents.forEach((intent) => {
+    const sessionKey = getLatpeedIntentSessionKey(intent);
+    if (internalAdminIds.has(intent.user_id) && sessionKey) {
+      internalMetricSessionKeys.add(sessionKey);
+    }
+  });
+
+  const periodSessions = (sessionsResponse.rows || [])
+    .map((session) => ({
+      session_key: session.session_key ?? "",
       cta_clicks: session.cta_clicks ?? 0,
       referrer: session.referrer ?? null,
       first_seen_at: session.first_seen_at ?? "",
@@ -669,22 +694,24 @@ async function getPeriodStats(period: MarketingPeriod, startDate?: string, endDa
       max_scroll_percent: session.max_scroll_percent ?? 0,
       last_visible_section: session.last_visible_section ?? null,
       last_clicked_cta_section: session.last_clicked_cta_section ?? null,
-    }),
-  );
+    }))
+    .filter((session) => !internalMetricSessionKeys.has(session.session_key));
   const periodUsers = ((users || []) as UserRow[]).filter(
     (user) => !internalAdminIds.has(user.id),
   );
-  const periodPayments = ((payments || []) as PaymentRow[]).filter(
+  const periodPayments = allPayments.filter(
     (payment) => !internalAdminIds.has(payment.user_id),
   );
-  const periodLatpeedOpenIntents = ((latpeedIntents || []) as LatpeedPaymentIntentRow[])
+  const periodLatpeedOpenIntents = allLatpeedIntents
     .filter((intent) => !internalAdminIds.has(intent.user_id))
     .filter(isOpenLatpeedIntent);
   const periodPaymentAttempts = [
     ...periodPayments,
     ...periodLatpeedOpenIntents.map(toLatpeedPendingPayment),
   ];
-  const periodCtaEvents = eventsResponse.error ? [] : eventsResponse.rows;
+  const periodCtaEvents = (eventsResponse.error ? [] : eventsResponse.rows).filter(
+    (event) => !internalMetricSessionKeys.has(event.session_key),
+  );
 
   const completedPayments = periodPayments.filter((payment) =>
     (SALES_STATUSES as readonly string[]).includes(payment.status),
