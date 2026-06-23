@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
       amount: chargeAmount,
       couponApplied: Boolean(appliedCoupon),
       successUrl: `${origin}/${locale}/dashboard/credits/success`,
-      failUrl: `${origin}/${locale}/dashboard/credits/fail`,
+      failUrl: `${origin}/${locale}?payment=failed`,
     });
   } catch (error) {
     console.error("[TossPayments Create] Error:", error);
