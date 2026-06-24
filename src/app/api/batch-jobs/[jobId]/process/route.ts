@@ -64,19 +64,12 @@ function toReactionBatchScripts(data: ReactionGenerationResult) {
     (script?.top_lines || []).filter(Boolean).join(" / ") ||
     script?.selected_material?.incident ||
     "해외 반응 쇼츠";
-  const templateText = (data.selected_templates || [])
-    .map((template) => template.template_id || template.title || "")
-    .filter(Boolean)
-    .join(", ");
   const scriptText = data.script_text || buildReactionFallbackScript(script);
-  const fullScript = data.edit_sheet
-    ? `${scriptText}\n\n--- 편집 타임코드 ---\n${data.edit_sheet}`
-    : scriptText;
 
   return [
     {
       hook,
-      full_script: templateText ? `${fullScript}\n\n[매칭 벤치마크]\n${templateText}` : fullScript,
+      full_script: scriptText,
     },
   ];
 }

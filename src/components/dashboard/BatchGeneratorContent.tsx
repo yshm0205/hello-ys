@@ -1035,7 +1035,7 @@ export function BatchGeneratorContent() {
                             <Textarea
                                 placeholder={
                                     isReactionNiche
-                                        ? "해외 영상 원본 대사/OCR/상황을 그대로 붙여넣으세요..."
+                                        ? "해외 영상 전체 원문/OCR을 그대로 붙여넣으세요. 서버가 쓸 구간을 고릅니다..."
                                         : "YouTube Shorts 소재를 입력하세요..."
                                 }
                                 minRows={isReactionNiche ? 5 : 2}
