@@ -10,7 +10,7 @@ import {
   updateBatchJobCounts,
 } from "@/lib/batch-jobs/server";
 import { type CreditAction, deductUserCredits, refundUserCredits } from "@/lib/credits/server";
-import { isEntertainmentReactionAllowed, postToScriptGenerator } from "@/lib/script-generator/server";
+import { isEntertainmentReactionAllowed } from "@/lib/script-generator/server";
 import { createClient } from "@/utils/supabase/server";
 
 const RENDER_API_URL =
@@ -25,53 +25,8 @@ type LoadedState = {
   items: BatchJobItemRow[];
 };
 
-type ReactionScriptJson = {
-  selected_material?: {
-    incident?: string;
-    why_selected?: string;
-  };
-  top_lines?: string[];
-  script_lines?: string[];
-};
-
-type ReactionGenerationResult = {
-  success?: boolean;
-  category?: string;
-  selected_templates?: Array<{ template_id?: string; rank?: number; title?: string }>;
-  script_json?: ReactionScriptJson;
-  script_text?: string;
-  edit_sheet?: string;
-};
-
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function buildReactionFallbackScript(script?: ReactionScriptJson) {
-  if (!script) return "";
-  return [
-    "제목:",
-    ...(script.top_lines || []),
-    "",
-    "스크립트:",
-    ...(script.script_lines || []),
-  ].join("\n");
-}
-
-function toReactionBatchScripts(data: ReactionGenerationResult) {
-  const script = data.script_json;
-  const hook =
-    (script?.top_lines || []).filter(Boolean).join(" / ") ||
-    script?.selected_material?.incident ||
-    "해외 반응 쇼츠";
-  const scriptText = data.script_text || buildReactionFallbackScript(script);
-
-  return [
-    {
-      hook,
-      full_script: scriptText,
-    },
-  ];
 }
 
 async function resolveBatchActor(
@@ -96,9 +51,17 @@ async function resolveBatchActor(
       };
     }
 
+    let accountId = loaded.job.user_id;
+    try {
+      const { data } = await admin.auth.admin.getUserById(loaded.job.user_id);
+      accountId = data.user?.email || loaded.job.user_id;
+    } catch (error) {
+      console.warn("[Batch Job Process API] Failed to resolve internal user email:", error);
+    }
+
     return {
       userId: loaded.job.user_id,
-      accountId: loaded.job.user_id,
+      accountId,
       loaded,
       internal: true,
     };
@@ -471,88 +434,6 @@ export async function POST(
         actualForceMode = parts[1] || "";
       }
 
-      if (actualNiche === REACTION_NICHE) {
-        try {
-          await admin
-            .from("batch_job_items")
-            .update({
-              phase: "generating",
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", nextItem.id);
-
-          const data = await postToScriptGenerator<ReactionGenerationResult>(
-            "/api/entertainment-reaction/generate",
-            {
-              source_text: nextItem.material,
-              account_id: actor.accountId,
-              user_id: actor.userId,
-            },
-          );
-
-          const finishedAt = new Date().toISOString();
-          const elapsed = Math.max(
-            1,
-            Math.round((new Date(finishedAt).getTime() - new Date(startedAt).getTime()) / 1000),
-          );
-
-          await admin
-            .from("batch_job_items")
-            .update({
-              status: "done",
-              phase: null,
-              scripts: toReactionBatchScripts(data),
-              elapsed,
-              updated_at: finishedAt,
-              finished_at: finishedAt,
-              error: null,
-              error_code: null,
-            })
-            .eq("id", nextItem.id);
-
-          state = await updateBatchJobCounts(admin, state.job.id, {
-            current_item_id: null,
-            last_error: null,
-          });
-
-          return NextResponse.json({
-            success: true,
-            credits: creditResult.credits,
-            job: toBatchJobPayload(state.job, state.items),
-          });
-        } catch (error) {
-          const failedAt = new Date().toISOString();
-          const errMsg =
-            error instanceof Error ? error.message : "반응 쇼츠 생성 실패";
-          const refundResult = await refundUserCredits(
-            actor.userId,
-            creditResult.deducted,
-            referenceId,
-            "reaction_generation_failed",
-          );
-
-          await admin
-            .from("batch_job_items")
-            .update({
-              status: "error",
-              phase: null,
-              updated_at: failedAt,
-              finished_at: failedAt,
-              error: errMsg,
-              error_code: "reaction_generation_failed",
-              credits_refunded: refundResult.success ? creditResult.deducted : 0,
-              refund_processed_at: refundResult.success ? failedAt : null,
-            })
-            .eq("id", nextItem.id);
-
-          state = await updateBatchJobCounts(admin, state.job.id, {
-            current_item_id: null,
-            last_error: errMsg,
-          });
-          continue;
-        }
-      }
-
       const handoffController = new AbortController();
       const handoffTimeout = setTimeout(() => handoffController.abort(), 60000);
       let handoffOk = false;
@@ -574,6 +455,7 @@ export async function POST(
             job_id: state.job.id,
             item_id: nextItem.id,
             user_id: `${actor.userId}_batch_${nextItem.id}`,
+            account_id: actor.accountId,
           }),
           signal: handoffController.signal,
         });
