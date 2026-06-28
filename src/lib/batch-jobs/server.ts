@@ -1,9 +1,10 @@
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export const MAX_BATCH_ITEMS = 10;
-export const BATCH_PROCESSING_STALE_MS = 10 * 60 * 1000;
+export const BATCH_PROCESSING_STALE_MS = 30 * 60 * 1000;
 export const RECENT_COMPLETED_WINDOW_MS = 2 * 60 * 60 * 1000;
 export const RECENT_COMPLETED_LIMIT = 3;
+const STALE_PROCESSING_MESSAGE = "생성 시간이 길어져 일시 중단됐습니다. 다시 시도해 주세요.";
 
 export type BatchJobStatus = "draft" | "running" | "paused" | "completed" | "failed";
 export type BatchJobItemStatus = "queued" | "processing" | "done" | "error" | "cancelled";
@@ -341,11 +342,12 @@ export async function recoverStaleProcessing(
     await admin
         .from("batch_job_items")
         .update({
-            status: "queued",
+            status: "error",
             phase: null,
-            started_at: null,
+            finished_at: timestamp,
             updated_at: timestamp,
-            error: "중단된 작업을 자동 복구했습니다. 다시 시작해 주세요.",
+            error: STALE_PROCESSING_MESSAGE,
+            error_code: "processing_timeout",
         })
         .in("id", staleIds);
 
@@ -354,7 +356,7 @@ export async function recoverStaleProcessing(
         .update({
             status: "paused",
             current_item_id: null,
-            last_error: "브라우저나 연결 문제로 중단된 작업을 복구했습니다.",
+            last_error: STALE_PROCESSING_MESSAGE,
             updated_at: timestamp,
         })
         .eq("id", job.id);
