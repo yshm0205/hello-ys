@@ -1,7 +1,9 @@
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { getAdminAccessLevel, type AdminAccessLevel } from '@/lib/admin/access';
+import { isActiveAccessPlan } from '@/lib/plans/config';
 import { getEffectiveCreditInfo } from '@/lib/plans/server';
 import { isEntertainmentReactionAllowed } from '@/lib/script-generator/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -31,15 +33,28 @@ export default async function DashboardGroupLayout({
     next_credit_at?: string | null;
   } | null = null;
   let adminAccessLevel: AdminAccessLevel = 'none';
+  let showFeedbackNav = false;
 
   initialCreditInfo = await getEffectiveCreditInfo(user.id);
-    adminAccessLevel = getAdminAccessLevel(user.email, user.user_metadata);
+  adminAccessLevel = getAdminAccessLevel(user.email, user.user_metadata);
 
-    return (
+  if (isActiveAccessPlan(initialCreditInfo?.plan_type, initialCreditInfo?.expires_at)) {
+    const admin = createAdminClient();
+    const { data: review } = await admin
+      .from('student_reviews')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    showFeedbackNav = !!review;
+  }
+
+  return (
     <DashboardLayout
       user={{ id: user.id, email: user.email ?? undefined }}
       initialCreditInfo={initialCreditInfo}
       adminAccessLevel={adminAccessLevel}
+      showFeedbackNav={showFeedbackNav}
       showReactionLab={isEntertainmentReactionAllowed({
         id: user.id,
         email: user.email ?? undefined,

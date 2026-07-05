@@ -30,6 +30,7 @@ import {
     Zap,
     BookOpen,
     Loader2,
+    Ticket,
     Trophy,
 } from 'lucide-react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
@@ -49,6 +50,7 @@ interface DashboardLayoutProps {
         next_credit_at?: string | null;
     } | null;
     showReactionLab?: boolean;
+    showFeedbackNav?: boolean;
 }
 
 interface DashboardShellContextValue {
@@ -120,6 +122,7 @@ export function DashboardLayout({
     adminAccessLevel = 'none',
     initialCreditInfo = null,
     showReactionLab = false,
+    showFeedbackNav = false,
 }: DashboardLayoutProps) {
     const [opened, { toggle }] = useDisclosure();
     const pathname = usePathname();
@@ -127,9 +130,20 @@ export function DashboardLayout({
     const [pendingHref, setPendingHref] = useState<string | null>(null);
     const credits = initialCreditInfo?.credits ?? null;
     const canViewMarketingOverview = adminAccessLevel === 'full' || adminAccessLevel === 'marketing';
-    const resolvedNavItems = canViewMarketingOverview
+    const visibleNavItems = showFeedbackNav
         ? [
               ...navItems,
+              {
+                  label: '1:1 피드백',
+                  href: '/dashboard/feedback',
+                  icon: Ticket,
+                  description: '남은 피드백권 사용',
+              },
+          ]
+        : navItems;
+    const resolvedNavItems = canViewMarketingOverview
+        ? [
+              ...visibleNavItems,
               {
                   label: '운영 지표',
                   href: '/admin/overview',
@@ -137,7 +151,7 @@ export function DashboardLayout({
                   description: '런칭 퍼널과 핵심 지표',
               },
           ]
-        : navItems;
+        : visibleNavItems;
 
     const handleNavClick = (event: MouseEvent<HTMLElement>, href: string, isActive = false) => {
         if (
