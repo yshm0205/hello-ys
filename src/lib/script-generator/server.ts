@@ -8,7 +8,8 @@ export type AuthenticatedUser = {
   email?: string;
 };
 
-const DEFAULT_ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS = "hmys0205hmys";
+// 해외반응 베타 허용 계정 (이메일 로컬파트 매칭). 이하민(owner) + 박정호(ckh181@naver.com)
+const DEFAULT_ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS = "hmys0205hmys,ckh181";
 
 function normalizeAccountKey(value?: string | null) {
   return String(value || "").trim().toLowerCase();
@@ -34,9 +35,13 @@ function accountMatchKeys(user?: AuthenticatedUser | null) {
 }
 
 export function getEntertainmentReactionAllowedAccounts() {
-  return splitAccountList(
-    process.env.ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS ||
-      DEFAULT_ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS,
+  // 기본 허용목록은 '바닥값'으로 유지하고 env를 합집합으로 추가
+  // (Vercel에 ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS가 설정돼 있어도 기본 계정이 사라지지 않게)
+  return Array.from(
+    new Set([
+      ...splitAccountList(DEFAULT_ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS),
+      ...splitAccountList(process.env.ENTERTAINMENT_REACTION_ALLOWED_ACCOUNTS || ""),
+    ]),
   );
 }
 
