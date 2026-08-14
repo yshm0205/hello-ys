@@ -2738,7 +2738,7 @@ function WhySpecialSection() {
               background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.2)',
               borderRadius: 14, padding: '20px 24px', marginLeft: -24, marginRight: -24,
             }}>
-              <PricingBar name="원초적 인사이트" price="50만원" nameColor="#a78bfa" priceColor="#8b5cf6" barWidth="28%" mobileBarWidth="55%" isMobile={isMobile}
+              <PricingBar name="원초적 인사이트" price="49만원" nameColor="#a78bfa" priceColor="#8b5cf6" barWidth="28%" mobileBarWidth="55%" isMobile={isMobile}
                 segments={[
                   { label: '강의 제작', flex: 2, bg: '#7c3aed', color: '#e9d5ff' },
                   { label: 'AI 개발', flex: 1.5, bg: '#7c3aed', color: '#e9d5ff' },
@@ -2789,7 +2789,7 @@ function WhySpecialSection() {
               background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.2)',
               borderRadius: 14, padding: '20px 24px', marginLeft: -24, marginRight: -24,
             }}>
-              <PricingBar name="원초적 인사이트" price="50만원" nameColor="#a78bfa" priceColor="#8b5cf6" barWidth="100%" isMobile={isMobile}
+              <PricingBar name="원초적 인사이트" price="49만원" nameColor="#a78bfa" priceColor="#8b5cf6" barWidth="100%" isMobile={isMobile}
                 segments={[
                   { label: '강의 40강', flex: 1.8, bg: '#8b5cf6', color: '#fff' },
                   { label: '전자책', flex: 1.3, bg: '#8b5cf6', color: '#fff' },
