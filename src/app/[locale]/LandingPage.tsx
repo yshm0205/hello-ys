@@ -2637,13 +2637,17 @@ function WhySpecialSection() {
     }}>
       <Box style={{ position: 'absolute', inset: 0, ...gridBg, pointerEvents: 'none' }} />
 
-      <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
+      <Container size="lg" style={{
+        position: 'relative', zIndex: 1,
+        display: 'flex', flexDirection: 'column',
+      }}>
         {/* ═══ 브리지: 시간 → 가격 전환 ═══ */}
-        <motion.div {...fadeUp}>
+        <motion.div {...fadeUp} style={{ order: 3 }}>
           <Box style={{
             textAlign: 'center',
             maxWidth: '520px',
             margin: '0 auto',
+            marginTop: 'clamp(64px, 12vw, 100px)',
             marginBottom: 'clamp(40px, 8vw, 64px)',
           }}>
             <Text style={{
@@ -2666,7 +2670,7 @@ function WhySpecialSection() {
         </motion.div>
 
         {/* ═══ 비용 구조 비교 ═══ */}
-        <motion.div {...fadeUp}>
+        <motion.div {...fadeUp} style={{ order: 4 }}>
           <Box style={{
             background: '#0a0a0a',
             borderRadius: '20px',
@@ -2810,8 +2814,8 @@ function WhySpecialSection() {
         </motion.div>
 
         {/* 커리큘럼 헤딩 */}
-        <motion.div {...fadeUp}>
-          <Stack align="center" gap={8} mb={56} style={{ marginTop: 'clamp(64px, 12vw, 100px)' }}>
+        <motion.div {...fadeUp} style={{ order: 1 }}>
+          <Stack align="center" gap={8} mb={56}>
             <Title order={2} ta="center" style={{
               fontSize: 'clamp(28px, 7.5vw, 40px)', fontWeight: 700,
               color: '#18181b', letterSpacing: '-0.02em', lineHeight: 1.3,
@@ -2822,7 +2826,7 @@ function WhySpecialSection() {
         </motion.div>
 
         {/* 커리큘럼 리스트 */}
-        <Stack gap={24} style={{ maxWidth: '540px', margin: '0 auto' }}>
+        <Stack gap={24} style={{ maxWidth: '540px', width: '100%', margin: '0 auto', order: 2 }}>
           {curriculum.map((c, i) => (
             <motion.div
               key={i}
