@@ -110,7 +110,7 @@ export function LecturePlayerContent({
     const router = useRouter();
     const [completedVods, setCompletedVods] = useState<string[]>([]);
     const [positions, setPositions] = useState<Record<string, number>>({});
-    const [showList, setShowList] = useState(true);
+    const [showList, setShowList] = useState(false);
     const [videoOtp, setVideoOtp] = useState<string | null>(null);
     const [playbackInfo, setPlaybackInfo] = useState<string | null>(null);
     const [videoSourceVodId, setVideoSourceVodId] = useState<string | null>(null);
