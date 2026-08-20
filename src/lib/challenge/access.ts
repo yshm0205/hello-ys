@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getAdminAccessLevel } from "@/lib/admin/access";
 import { isActiveAccessPlan } from "@/lib/plans/config";
 import type { EffectiveCreditInfo } from "@/lib/plans/server";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -98,6 +99,15 @@ export async function getLectureAccessForUser(
   plan: EffectiveCreditInfo | null | undefined,
 ): Promise<LectureAccess> {
   if (isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
+    return { mode: "full", allowedVodIds: null };
+  }
+
+  const admin = createAdminClient();
+  const {
+    data: { user },
+  } = await admin.auth.admin.getUserById(userId);
+
+  if (getAdminAccessLevel(user?.email, user?.user_metadata) === "full") {
     return { mode: "full", allowedVodIds: null };
   }
 
