@@ -4,6 +4,7 @@ import {
   isActiveAccessPlan,
   type AppPlanType,
 } from "@/lib/plans/config";
+import { getAdminAccessLevel } from "@/lib/admin/access";
 import { getActiveChallengeEnrollment } from "@/lib/challenge/access";
 import { createAdminClient } from "@/utils/supabase/admin";
 
@@ -205,15 +206,27 @@ export async function resolvePostLoginRedirectPath(
 
   const creditInfo = await getEffectiveCreditInfo(userId);
   const hasActiveAccessPlan = isActiveAccessPlan(creditInfo?.plan_type, creditInfo?.expires_at);
+  let hasFullAdminAccess = false;
 
   if (!hasActiveAccessPlan) {
-    const challengeEnrollment = await getActiveChallengeEnrollment(userId);
-    if (challengeEnrollment) {
-      return "/dashboard/challenge";
+    const admin = createAdminClient();
+    const {
+      data: { user },
+    } = await admin.auth.admin.getUserById(userId);
+
+    hasFullAdminAccess = getAdminAccessLevel(user?.email, user?.user_metadata) === "full";
+
+    if (!hasFullAdminAccess) {
+      const challengeEnrollment = await getActiveChallengeEnrollment(userId);
+      if (challengeEnrollment) {
+        return "/dashboard/challenge";
+      }
     }
   }
 
-  const defaultPath = hasActiveAccessPlan ? "/dashboard" : "/checkout/allinone";
+  const defaultPath = hasActiveAccessPlan || hasFullAdminAccess
+    ? "/dashboard"
+    : "/checkout/allinone";
 
   if (defaultPath === "/dashboard" && normalizedRequestedPath) {
     return normalizedRequestedPath;
