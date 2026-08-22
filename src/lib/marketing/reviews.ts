@@ -7,6 +7,7 @@ export type PublicMarketingReview = {
   content: string;
   displayName: string;
   createdAt: string;
+  featured?: boolean;
 };
 
 export type PublicMarketingReviewsSummary = {
@@ -30,6 +31,7 @@ type StudentReviewRow = {
   content: string;
   channel_name: string | null;
   created_at: string;
+  featured_rank: number | null;
 };
 
 type UserNameRow = {
@@ -61,7 +63,7 @@ export async function getMarketingReviews(limit = 20): Promise<PublicMarketingRe
   const supabase = createAdminClient();
   const { data, error, count } = await supabase
     .from("student_reviews")
-    .select("id, user_id, email, rating, headline, content, channel_name, created_at", { count: "exact" })
+    .select("id, user_id, email, rating, headline, content, channel_name, created_at, featured_rank", { count: "exact" })
     .eq("marketing_consent", true)
     .in("status", ["submitted", "approved"])
     .order("featured_rank", { ascending: true, nullsFirst: false })
@@ -113,6 +115,7 @@ export async function getMarketingReviews(limit = 20): Promise<PublicMarketingRe
       content: row.content,
       displayName: maskReviewerName(displayNameSource),
       createdAt: row.created_at,
+      featured: row.featured_rank != null,
     };
   });
 

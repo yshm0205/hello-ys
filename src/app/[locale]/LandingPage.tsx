@@ -109,11 +109,17 @@ const STATIC_LANDING_REVIEWS: LandingReview[] = [
 ];
 
 function getLandingReviewItems(summary: PublicMarketingReviewsSummary): LandingReview[] {
-  return [...STATIC_LANDING_REVIEWS, ...summary.reviews].sort((a, b) => {
-    const aTime = new Date(a.createdAt).getTime();
-    const bTime = new Date(b.createdAt).getTime();
-    return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
-  });
+  // featured 후기는 서버가 내려준 고정 순서(featured_rank) 그대로 맨 위에 두고,
+  // 나머지(정적 후기 포함)만 최신순으로 정렬한다.
+  const featured = summary.reviews.filter((review) => review.featured);
+  const rest = [...STATIC_LANDING_REVIEWS, ...summary.reviews.filter((review) => !review.featured)].sort(
+    (a, b) => {
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
+    },
+  );
+  return [...featured, ...rest];
 }
 
 function getLandingReviewCount(summary: PublicMarketingReviewsSummary) {
