@@ -64,6 +64,7 @@ export async function getMarketingReviews(limit = 20): Promise<PublicMarketingRe
     .select("id, user_id, email, rating, headline, content, channel_name, created_at", { count: "exact" })
     .eq("marketing_consent", true)
     .in("status", ["submitted", "approved"])
+    .order("featured_rank", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(limit);
 
