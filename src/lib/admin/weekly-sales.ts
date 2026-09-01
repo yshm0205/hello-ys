@@ -46,10 +46,11 @@ function getNetRevenue(payment: WeeklySalesPayment) {
 
 export function getKstWeekStart(date: Date) {
   const shifted = new Date(date.getTime() + KST_OFFSET_MS);
+  const daysSinceSaturday = (shifted.getUTCDay() + 1) % 7;
   const startAsUtc = Date.UTC(
     shifted.getUTCFullYear(),
     shifted.getUTCMonth(),
-    shifted.getUTCDate() - shifted.getUTCDay(),
+    shifted.getUTCDate() - daysSinceSaturday,
   );
 
   return new Date(startAsUtc - KST_OFFSET_MS);

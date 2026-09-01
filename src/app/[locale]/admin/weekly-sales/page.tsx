@@ -156,7 +156,7 @@ export default async function AdminWeeklySalesPage() {
             </div>
           </CardHeader>
           <CardContent className="px-5">
-            <p className="text-sm text-zinc-500">일요일 00:00부터 토요일 23:59까지</p>
+            <p className="text-sm text-zinc-500">토요일 00:00부터 금요일 23:59까지</p>
           </CardContent>
         </Card>
       </div>
