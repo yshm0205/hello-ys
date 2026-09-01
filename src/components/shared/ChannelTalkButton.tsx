@@ -39,6 +39,7 @@ export function ChannelTalkButton() {
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
   const isLecturePlayer = /\/lectures\/vod_/.test(pathname);
+  const isAdminPage = /\/admin(?:\/|$)/.test(pathname);
   const isLandingRoot = /^\/[a-z]{2}\/?$/.test(pathname) || pathname === "/";
   const locale = pathname.startsWith("/ko") ? "ko" : "en";
 
@@ -151,7 +152,7 @@ export function ChannelTalkButton() {
     }
   };
 
-  if (!CHANNEL_TALK_PLUGIN_KEY || isLecturePlayer) {
+  if (!CHANNEL_TALK_PLUGIN_KEY || isLecturePlayer || isAdminPage) {
     return null;
   }
 
