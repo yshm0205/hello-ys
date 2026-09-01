@@ -31,7 +31,7 @@ export default async function AdminLayout({
     <div className="admin-light flex min-h-screen bg-zinc-50">
       <AdminSidebar accessLevel={accessLevel} />
       <main className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 md:p-8 max-w-7xl space-y-6">
+        <div className="container mx-auto p-6 pt-16 md:p-8 max-w-7xl space-y-6">
           {children}
         </div>
       </main>
