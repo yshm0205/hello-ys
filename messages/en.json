@@ -416,6 +416,9 @@
       "colAmount": "Amount",
       "colStatus": "Status"
     },
+    "weeklySales": {
+      "title": "Weekly sales"
+    },
     "tickets": {
       "title": "Tickets",
       "description": "Manage customer inquiries and support requests.",

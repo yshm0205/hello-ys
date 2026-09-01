@@ -416,6 +416,9 @@
       "colAmount": "금액",
       "colStatus": "상태"
     },
+    "weeklySales": {
+      "title": "주간 판매"
+    },
     "tickets": {
       "title": "티켓",
       "description": "고객 문의 및 지원 요청을 관리합니다.",

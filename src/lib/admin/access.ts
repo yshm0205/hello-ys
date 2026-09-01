@@ -52,7 +52,7 @@ export function canAccessAdminPath(accessLevel: AdminAccessLevel, pathname: stri
   }
 
   if (accessLevel === "marketing") {
-    return pathname === "/admin/overview";
+    return pathname === "/admin/overview" || pathname === "/admin/weekly-sales";
   }
 
   return false;

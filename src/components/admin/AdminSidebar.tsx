@@ -10,6 +10,7 @@ import {
   Users,
   CreditCard,
   DollarSign,
+  CalendarRange,
   Activity,
   Footprints,
   GraduationCap,
@@ -67,6 +68,11 @@ const navGroups: NavGroup[] = [
         href: "/admin/sales",
         labelKey: "sales.title",
         icon: <DollarSign className="h-4 w-4" />,
+      },
+      {
+        href: "/admin/weekly-sales",
+        labelKey: "weeklySales.title",
+        icon: <CalendarRange className="h-4 w-4" />,
       },
       {
         href: "/admin/credits",
@@ -155,7 +161,9 @@ export function AdminSidebar({
       ? navGroups
           .map((group) => ({
             ...group,
-            items: group.items.filter((item) => item.href === "/admin/overview"),
+            items: group.items.filter(
+              (item) => item.href === "/admin/overview" || item.href === "/admin/weekly-sales",
+            ),
           }))
           .filter((group) => group.items.length > 0)
       : navGroups;
