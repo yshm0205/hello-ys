@@ -49,7 +49,7 @@ export function ChannelTalkButton() {
   }, [pathname, searchParams]);
 
   useEffect(() => {
-    if (!CHANNEL_TALK_PLUGIN_KEY) return;
+    if (!CHANNEL_TALK_PLUGIN_KEY || isAdminPage) return;
 
     const supabase = createClient();
     let active = true;
@@ -76,10 +76,10 @@ export function ChannelTalkButton() {
       active = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [isAdminPage]);
 
   useEffect(() => {
-    if (!CHANNEL_TALK_PLUGIN_KEY) return;
+    if (!CHANNEL_TALK_PLUGIN_KEY || isAdminPage) return;
 
     loadScript();
 
@@ -105,15 +105,15 @@ export function ChannelTalkButton() {
     return () => {
       shutdown();
     };
-  }, [locale, user?.email, user?.id, user?.phone]);
+  }, [isAdminPage, locale, user]);
 
   useEffect(() => {
-    if (!CHANNEL_TALK_PLUGIN_KEY) return;
+    if (!CHANNEL_TALK_PLUGIN_KEY || isAdminPage) return;
     setPage(pagePath);
-  }, [pagePath]);
+  }, [isAdminPage, pagePath]);
 
   useEffect(() => {
-    if (!CHANNEL_TALK_PLUGIN_KEY) return;
+    if (!CHANNEL_TALK_PLUGIN_KEY || isAdminPage) return;
     if (typeof window === "undefined") return;
 
     const dismissedAt = Number(window.localStorage.getItem(TOOLTIP_DISMISS_KEY) ?? 0);
@@ -142,7 +142,7 @@ export function ChannelTalkButton() {
     );
     observer.observe(faqEl);
     return () => observer.disconnect();
-  }, [pathname]);
+  }, [isAdminPage, pathname]);
 
   const handleDismissTooltip = (e: React.MouseEvent) => {
     e.stopPropagation();
