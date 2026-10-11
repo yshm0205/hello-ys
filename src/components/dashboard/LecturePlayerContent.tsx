@@ -44,6 +44,7 @@ import {
     ImageIcon,
     FolderOpen,
     ExternalLink,
+    Download,
     Lock,
 } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
@@ -592,6 +593,8 @@ export function LecturePlayerContent({
                                 </Group>
                                 <Stack gap={6}>
                                     {materials.map((m) => {
+                                        // 사이트 안 다운로드 링크(/api/programs/...)는 새 탭 없이 바로 받기
+                                        const isDirectDownload = m.url.startsWith('/api/');
                                         const icon =
                                             m.type === 'docs' ? <FileText size={16} color="#6b7280" /> :
                                             m.type === 'audio' ? <Music size={16} color="#6b7280" /> :
@@ -602,8 +605,8 @@ export function LecturePlayerContent({
                                                 key={m.id}
                                                 component="a"
                                                 href={m.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                                target={isDirectDownload ? undefined : '_blank'}
+                                                rel={isDirectDownload ? undefined : 'noopener noreferrer'}
                                                 style={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -634,7 +637,11 @@ export function LecturePlayerContent({
                                                         {m.file_size}
                                                     </Text>
                                                 )}
-                                                <ExternalLink size={14} color="#9ca3af" />
+                                                {isDirectDownload ? (
+                                                    <Download size={14} color="#9ca3af" />
+                                                ) : (
+                                                    <ExternalLink size={14} color="#9ca3af" />
+                                                )}
                                             </Box>
                                         );
                                     })}
