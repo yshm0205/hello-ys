@@ -29,6 +29,7 @@ import {
     BarChart3,
     Zap,
     BookOpen,
+    Download,
     Loader2,
     Ticket,
     Trophy,
@@ -101,6 +102,12 @@ const navItems = [
         href: '/dashboard/lectures',
         icon: BookOpen,
         description: '단계별 학습 + 실습',
+    },
+    {
+        label: '프로그램',
+        href: '/dashboard/programs',
+        icon: Download,
+        description: '주제 선정 프로그램 다운로드',
     },
     {
         label: '챌린지',
