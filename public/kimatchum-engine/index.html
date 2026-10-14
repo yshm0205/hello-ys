@@ -1,0 +1,1861 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important} .set-table-scroll{overflow-x:auto;max-width:100%}.settab{min-width:620px;table-layout:fixed}.settab th:nth-child(1){width:20%}.settab th:nth-child(2){width:15%}.settab th:nth-child(3){width:20%}.settab th:nth-child(4){width:45%}.settab td{word-break:keep-all;overflow-wrap:break-word}</style></head><body><title>찬양팀 키맞춤</title>
+
+
+
+<style>
+/* Layout: one short column — tap two notes, read the answer, drop in a sheet and hear it in the new key. The only loud color is the highlighter. */
+:root{
+  --paper:#f6f8fb; --panel:#ffffff; --ink:#141c2a; --ink-2:#4c576a; --line:#d7dde7; --soft:#edf1f6;
+  --hl:#ffe14d; --hl-ink:#332900; --sel:#2f5fd0; --red:#c4213d; --ok:#1d7f46; --warn:#a96400; --bad:#c4213d;
+  --ok-bg:#dff3e6; --warn-bg:#fdf0d2; --bad-bg:#fbe0e5;
+  --p1:#0d8a8c; --p2:#7b4bd0; --p3:#c05f00; --p4:#2f7d32; --p5:#b0306f;
+  --display:"Black Han Sans","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --music:"Noto Music","Segoe UI Symbol","Apple Symbols",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0e121a; --panel:#151b26; --ink:#e6eaf1; --ink-2:#9aa5b7; --line:#273042; --soft:#1b2230;
+    --hl:#efd13c; --hl-ink:#221b00; --sel:#86a8ff; --red:#ff6f86; --ok:#56cf8b; --warn:#f0a845; --bad:#ff6f86;
+    --ok-bg:#16301f; --warn-bg:#33270f; --bad-bg:#371820;
+    --p1:#4fd1cf; --p2:#b49bff; --p3:#f5a55c; --p4:#79d483; --p5:#f283b8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0e121a; --panel:#151b26; --ink:#e6eaf1; --ink-2:#9aa5b7; --line:#273042; --soft:#1b2230;
+  --hl:#efd13c; --hl-ink:#221b00; --sel:#86a8ff; --red:#ff6f86; --ok:#56cf8b; --warn:#f0a845; --bad:#ff6f86;
+  --ok-bg:#16301f; --warn-bg:#33270f; --bad-bg:#371820;
+  --p1:#4fd1cf; --p2:#b49bff; --p3:#f5a55c; --p4:#79d483; --p5:#f283b8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 15px/1.6 var(--body)}
+.wrap{max-width:820px;margin:0 auto;padding-inline:16px;padding-block:22px 72px;display:grid;gap:16px}
+.brand{font:400 clamp(34px,7vw,48px)/1.05 var(--display);margin:0}
+.swipe{background:linear-gradient(transparent 52%,var(--hl) 52%,var(--hl) 90%,transparent 90%);padding-inline:4px}
+.tag{margin:6px 0 0;color:var(--ink-2)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px;min-width:0}
+h2{font:700 18px/1.35 var(--body);margin:0}
+h3{font:700 15px var(--body);margin:0}
+.help{color:var(--ink-2);margin:0;font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:grid;gap:4px;min-width:0;flex:1 1 140px}
+.field label{font:500 12px var(--body);color:var(--ink-2)}
+input,select,textarea{font:400 15px var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%}
+input[type=range]{padding:0;accent-color:var(--sel);width:auto;flex:1 1 120px}
+textarea{resize:vertical}
+button{font:500 14px var(--body);cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:8px 12px}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
+.btn.hl{background:var(--hl);color:var(--hl-ink);border-color:transparent;font-weight:700}
+.btn[aria-pressed="true"]{background:var(--hl);color:var(--hl-ink);border-color:transparent;font-weight:700}
+.btn:disabled{opacity:.5;cursor:default}
+.link{border:0;background:none;color:var(--sel);text-decoration:underline;padding:0}
+:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ask{font:700 17px/1.4 var(--body);margin:0}
+.ask .now{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding-inline:2px}
+.picked{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0}
+.pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:4px 12px;background:var(--soft);font:500 14px var(--body)}
+.pill b{font:600 14px var(--mono)}
+.pill.lo b{color:var(--sel)}.pill.hi b{color:var(--red)}
+.sg-line,.sg-ledger{stroke:var(--ink-2);stroke-width:1.2}
+.sg-hit{fill:transparent;cursor:pointer}
+.sg-note{fill:var(--ink)}
+.sg-g:hover .sg-note,.sg-g:focus .sg-note{fill:var(--sel)}
+.sg-g.lo .sg-note{fill:var(--sel)}.sg-g.hi .sg-note{fill:var(--red)}
+.sg-lab{fill:var(--ink-2);font:500 11px var(--mono)}
+.sg-g.lo .sg-lab{fill:var(--sel);font-weight:600}.sg-g.hi .sg-lab{fill:var(--red);font-weight:600}
+.sg-clef{fill:var(--ink);font:400 58px var(--music)}
+.sg-g{outline:none}
+.ce-crop{height:44px;border:1px solid var(--line);border-radius:6px;background:#fff;vertical-align:middle}
+.sg-who{font:500 12px var(--body)}
+.sg-band{fill:var(--ok);opacity:.12}
+.sg-song{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 3}
+.answer{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.answer .big{font:400 72px/1 var(--display);background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding-inline:6px}
+.answer .say{font:700 22px/1.3 var(--body)}
+.answer .sub{color:var(--ink-2);font-size:14px;flex-basis:100%}
+.why{margin:0;padding-left:18px;display:grid;gap:4px}
+.keys{display:flex;flex-wrap:wrap;gap:6px}
+.kp{border:1px solid transparent;border-radius:8px;min-width:46px;padding:6px 8px;font:400 18px var(--display);color:var(--ink)}
+.kp.ok{background:var(--ok-bg)}.kp.warn{background:var(--warn-bg)}.kp.bad{background:var(--bad-bg)}
+.kp[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2);align-items:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.setlist{display:grid;gap:8px}
+.sg{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.sg.cur{outline:2px solid var(--sel);outline-offset:1px}
+.sg .no{font:600 14px var(--mono);color:var(--ink-2)}.sg .nm{font-weight:700;flex:1 1 160px;min-width:0}.sg .rg{font:500 13px var(--mono);color:var(--ink-2)}
+.settab{width:100%;border-collapse:collapse;font-size:14px}.settab td,.settab th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.settab .ok{color:var(--ok);font-weight:700}.settab .warn{color:var(--warn);font-weight:700}.settab .bad{color:var(--bad);font-weight:700}
+.cmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.cmap div{background:var(--soft);border-radius:8px;padding:6px 8px;font:600 15px var(--mono);text-align:center}
+.cmap div.dim{opacity:.6}
+details.card{gap:0}
+details.card[open]{gap:12px}
+summary{cursor:pointer;font:700 16px var(--body);list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"펼치기";font:500 13px var(--body);color:var(--sel);flex:0 0 auto}
+details[open] summary::after{content:"접기"}
+summary .sm{display:block;font:400 13px var(--body);color:var(--ink-2)}
+.member{display:grid;grid-template-columns:minmax(70px,1fr) minmax(120px,1.4fr) minmax(120px,1.4fr) auto;gap:8px;align-items:center}
+.nsel{display:flex;gap:6px;align-items:center;min-width:0}
+.play{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:50%;width:34px;height:34px;flex:0 0 34px;font-size:12px}
+.del{border:0;background:none;color:var(--ink-2);text-decoration:underline;padding:6px}
+@media (max-width:560px){.member{grid-template-columns:1fr auto;grid-template-areas:"name del" "lo lo" "hi hi"}.member .m-name{grid-area:name}.member .del{grid-area:del}.member .lo{grid-area:lo}.member .hi{grid-area:hi}}
+.member + .member{border-top:1px dashed var(--line);padding-top:10px}
+
+/* sheet */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--panel);color:var(--ink);padding:8px 14px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);font-weight:700}
+.tools{display:grid;gap:10px;padding:12px;border-radius:10px;background:var(--soft)}
+.lbls{display:flex;flex-wrap:wrap;gap:6px}
+.lbl{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel);color:var(--ink);display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.lbl i{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,.15)}
+.lbl[aria-pressed="true"]{outline:2px solid var(--sel);outline-offset:1px}
+.pvwrap{position:relative}
+#pv{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:8px;cursor:crosshair;touch-action:manipulation}
+#playbox{position:absolute;border:3px solid #ff7a00;border-radius:6px;background:rgba(255,160,0,.18);pointer-events:none;transition:left .12s,top .12s,width .12s,height .12s}
+.status{font:500 13px var(--body);color:var(--ink-2);margin:0}
+.status b{color:var(--ink)}
+.msg{font:500 14px var(--body);margin:0}.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.check input{width:auto}
+.edit{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.edit input{flex:1 1 140px;font:600 18px var(--mono)}
+.now{font:600 15px var(--body)}
+.now b{font:400 26px var(--display);margin-left:4px}
+.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--sel);transition:width .2s}
+#a4img{border:1px solid var(--line);border-radius:6px;background:#fff;max-width:100%}
+.step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--hl);color:var(--hl-ink);font:600 14px var(--mono);margin-right:8px;vertical-align:1px}
+ .review-list{display:grid;gap:8px;max-height:300px;overflow:auto}.review-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:8px}.review-row button{text-align:left}.review-row .target{font:700 18px var(--mono)}.notice{padding:12px;border-left:4px solid #bd7800;background:#fff6df;color:#513500}.settab{width:100%;table-layout:fixed}.settab td{overflow-wrap:anywhere}.member .comfort{grid-column:1/-1}.key-candidates{display:flex;flex-wrap:wrap;gap:8px}.wrap{overflow-wrap:anywhere}button:disabled{opacity:.5}@media(max-width:540px){.settab{font-size:12px}.settab th,.settab td{padding:6px 3px}.settab select{max-width:65px}.member{display:flex;flex-wrap:wrap}.member .comfort{width:100%}.answer .big{font-size:38px}.sg{flex-wrap:wrap}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 class="brand"><span class="swipe">키맞춤</span></h1>
+    <p class="tag">악보 사진의 코드를 확인하고, 같은 높이로 부르는 우리 팀의 키 후보를 비교해요. 선택한 키로 코드 악보와 피아노 반주를 만들어요.</p>
+  </header>
+
+
+
+  <section class="card" aria-labelledby="h-up">
+    <h2 id="h-up"><span class="step">1</span>악보 넣기</h2>
+    <div class="row">
+      <div class="field" style="flex:2 1 180px"><label for="s-title">곡 제목</label><input id="s-title" autocomplete="off"></div>
+      <div class="field" style="flex:1 1 120px"><label for="s-key">원본 코드의 키</label><select id="s-key"></select></div><div class="field"><label for="note-key">원본 음표·조표의 키</label><select id="note-key"></select></div>
+    </div>
+    <div class="row"><span class="file btn hl">악보 이미지 올리기<input id="file" type="file" accept="image/*" aria-label="악보 이미지 올리기"></span></div>
+    <label class="help" for="ocr-provider">코드 읽기</label><select id="ocr-provider"><option value="browser">브라우저 OCR — 업로드 시 무료로 읽기</option><option value="gemini">서버 AI — 버튼을 누를 때 이미지 전송·API 비용 발생</option></select><p class="help">자동 인식은 임시표(#·♭), 분수코드, 반복 번호를 틀릴 수 있어요. 인식 후 원본과 대조하세요.</p>
+    <p id="key-evidence" class="notice"></p><label class="check"><input id="key-confirmed" type="checkbox">원본 코드 키와 음표 키를 확인했어요 (장·단조와 중심음도 확인)</label><p id="load-msg" class="msg" aria-live="polite"></p>
+    <div class="prog" id="prog" hidden><i></i></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-song">
+    <h2 id="h-song"><span class="step">2</span>제일 낮은 음, 제일 높은 음 누르기</h2>
+    <p class="ask" id="ask" aria-live="polite"></p>
+    <div class="scroll"><div id="staff"></div></div>
+    <p class="picked" id="picked"></p><label class="check"><input id="range-verified" type="checkbox">원본 음표의 전체 최저·최고음과 원래 키를 확인했어요</label><p class="help">자동 선율 판독은 참고값이에요. 코드만 바꾼 이미지를 다시 올리면 음표·조표는 이전 키일 수 있어요. 낮은 음을 자동 제외하거나 옥타브를 바꾸지 않아요.</p>
+  </section>
+
+  <section class="card" id="result" aria-live="polite"></section>
+
+  <section class="card" aria-labelledby="h-sheet">
+    <h2 id="h-sheet"><span class="step">4</span>코드 검토 · 바뀐 코드 악보</h2><p id="sheet-notice" class="notice"></p><label class="check"><input id="overlay" type="checkbox">검토한 코드만 원본 자리에 교체하기</label><p class="help">기본은 원본 보존 + 바뀐 코드표예요. 원본 위 교체는 모든 코드와 지울 영역을 확인한 뒤 켤 수 있어요. 오선 음표·조표는 바뀌지 않아요.</p><div id="review-list" class="review-list"></div><p id="review-summary" class="help" aria-live="polite"></p>
+
+    <div class="row">
+      <div class="seg" role="group" aria-label="보기">
+        <button id="v-old" type="button" aria-pressed="false">원래 키</button>
+        <button id="v-new" type="button" aria-pressed="true">바꾼 키</button>
+      </div>
+      <div class="seg" role="group" aria-label="할 일">
+        <button id="m-chord" type="button" aria-pressed="true">코드</button>
+        <button id="m-hl" type="button" aria-pressed="false">형광펜</button>
+      </div>
+    </div>
+
+    <div class="tools" id="tool-chord">
+      <div class="row">
+        <button id="play" class="btn primary" type="button">▶ 피아노로 치기</button>
+        <button id="pause" class="btn" type="button" disabled>일시정지</button><button id="stop" class="btn" type="button" disabled>정지</button><button id="restart" class="btn" type="button">처음부터</button>
+        <button id="ai-read" class="btn hl" type="button" hidden>AI로 코드 다시 읽기</button>
+        <label class="row" style="gap:6px;flex:1 1 220px"><span class="help">빠르기</span><input id="bpm" type="range" min="30" max="220" step="1"><span class="mono" id="bpm-v"></span></label>
+        <select id="beats" aria-label="박자" style="width:auto"><option value="4">4/4박자</option><option value="3">3/4박자</option></select>
+      </div>
+      <div class="row">
+        <label class="check"><input id="t-mel" type="checkbox"> 실험적 멜로디 재생</label>
+        <label class="check"><input id="t-acc" type="checkbox"> 반주(코드)</label>
+        <span class="status" id="mel-info"></span>
+      </div>
+      <p class="now" id="now" aria-live="polite"></p>
+      <div class="legend"><span><i style="background:#1d9a52"></i>잘 읽음</span><span><i style="background:#e08a00"></i>확인해 주세요</span><span><i style="background:#d8283f"></i>못 읽음</span><button id="add-chord" class="btn" type="button" aria-pressed="false">+ 코드 추가</button></div>
+      <div class="edit" id="edit" hidden>
+        <canvas id="ce-crop" class="ce-crop" hidden aria-label="악보에 인쇄된 코드"></canvas>
+        <label for="ce" class="help">악보 그림 ↔ 읽은 글자 (같은지만 보면 돼요)</label>
+        <input id="ce" autocomplete="off" spellcheck="false">
+        <button id="ce-ok" class="btn hl" type="button">확인</button>
+        <button id="ce-del" class="btn" type="button">지우기</button>
+        <label class="check"><input id="ce-box-safe" type="checkbox">상자에 코드만 있고 반복 번호·음표는 없어요</label>
+        <span id="ce-msg" class="status"></span>
+      </div>
+      <p class="help">단순 피아노 코드 반주예요. 코드 위치에서 박자를 추정하므로 원곡 반주·반복 순서와 다를 수 있어요. 템포와 박자를 직접 맞추고 들어보세요. 실험적 멜로디는 음표 판독 검수가 필요해요.</p>
+    </div>
+
+    <div class="tools" id="tool-hl" hidden>
+      <div id="lbls" class="lbls" role="group" aria-label="파트"></div>
+      <div class="row">
+        <button id="split" class="btn" type="button" aria-pressed="false">줄 중간에서 나누기</button>
+        <button id="unsplit" class="btn" type="button">나눈 곳 지우기</button>
+        <label class="check"><input id="lyr2" type="checkbox"> 가사가 두 줄이에요</label>
+      </div>
+      <p id="sel-info" class="status"></p>
+    </div>
+
+    <div class="pvwrap"><canvas id="pv" width="10" height="10" aria-label="악보 미리보기"></canvas><div id="playbox" hidden></div></div>
+
+    <details class="card" style="padding:0;border:0">
+      <summary><span>A4로 뽑기<span class="sm">날짜와 콘티를 넣어 PNG로 저장해요</span></span></summary>
+      <div class="row">
+        <div class="field"><label for="h-date">날짜</label><input id="h-date" autocomplete="off"></div>
+        <div class="field"><label for="h-service">예배 이름</label><input id="h-service" autocomplete="off"></div>
+      </div>
+      <div class="field"><label for="h-setlist">콘티 곡 (한 줄에 한 곡)</label><textarea id="h-setlist" rows="3"></textarea></div>
+      <div class="field"><label for="h-prog">진행 순서</label><input id="h-prog" autocomplete="off" placeholder="예: A → A → B → 후렴"></div>
+      <div class="field"><label for="h-note">빨간 글씨 (주의할 점)</label><input id="h-note" autocomplete="off" placeholder="예: 끝나면 바로 다음 곡"></div>
+      <div class="row"><button id="build" class="btn primary" type="button">A4 악보 만들기</button></div>
+      <div id="a4out" style="display:grid;gap:10px" hidden>
+        <div class="row"><button id="save" class="btn hl" type="button" hidden>PNG로 저장</button><a id="save-local" class="btn" hidden>PNG로 저장</a></div>
+        <p id="save-alt" class="help" hidden>이미지를 길게 누르거나 오른쪽 클릭해서 저장하세요.</p>
+        <p id="save-msg" class="msg" aria-live="polite"></p>
+        <img id="a4img" alt="완성된 A4 악보">
+      </div>
+    </details>
+  </section>
+
+  <section class="card" id="setcard" aria-labelledby="h-set">
+    <h2 id="h-set"><span class="step">5</span>이어 부르기 (여러 곡)</h2>
+    <p class="help">곡마다 전체 음역을 비교해 연습할 키 후보를 골라요. 음역 적합성을 먼저 보고 곡 사이 키 이동도 비교해요. 곡 이름을 누르면 4번에 그 곡이 떠요.</p>
+    <div class="row"><span class="file btn hl">곡 여러 장 올리기<input id="files" type="file" accept="image/*" multiple aria-label="악보 여러 장 올리기"></span><span class="status" id="set-msg" aria-live="polite"></span></div>
+    <div id="setlist" class="setlist"></div>
+    <div id="setres" style="display:grid;gap:12px" hidden></div>
+  </section>
+
+  <details class="card" id="team-fold">
+    <summary><span>우리 팀 음역<span class="sm" id="team-sm"></span></span></summary>
+    <p class="help">세 사람이 같은 실제 높이로 부르는 기준이에요. 기존 값은 과거 이미지에서 읽은 미검증 최대 범위입니다. 각자의 편한 최저·최고음을 다시 맞추고 확인해 주세요. 특히 미소의 B♭4 / B♭5를 확인하세요. 성별로 옥타브를 자동 변경하지 않아요.</p>
+    <div id="members"></div>
+    <div class="row"><button id="add" class="btn" type="button">+ 사람 추가</button></div>
+  </details>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
+<script src="/kimatchum-engine/practice-core.js"></script>
+<script>
+/* chordcore: find staves, cut chord tokens above each staff, normalize them for OCR,
+   and snap OCR text to real chord names. Pure array code: runs in the browser and in node. */
+(function(root){
+const CC={};
+
+/* binary (1 = ink) from RGBA */
+CC.binarize=function(rgba,W,H,thr){thr=thr||150;const b=new Uint8Array(W*H);for(let i=0,p=0;i<W*H;i++,p+=4){const l=rgba[p]*0.299+rgba[p+1]*0.587+rgba[p+2]*0.114;b[i]=(rgba[p+3]>16&&l<thr)?1:0;}return b;};
+
+/* the black/white cut. A clean print works at 150; a small or blurred picture draws its staff lines in light grey,
+   so try stronger cuts and keep the lightest one that finds the most complete staves */
+CC.autoThreshold=function(rgba,W,H){let best=150,bn=-1;
+  [150,165,180,195,210,225,240].forEach(t=>{const n=CC.findSystems(CC.binarize(rgba,W,H,t),W,H).length;if(n>bn){bn=n;best=t;}});
+  return best;};
+
+/* staves: 5 evenly spaced long horizontal lines */
+CC.findSystems=function(bin,W,H){
+  const x0=Math.round(W*.1),x1=Math.round(W*.9),thr=0.45*(x1-x0),g=[];let cur=null;
+  for(let y=0;y<H;y++){let c=0;const o=y*W;for(let x=x0;x<x1;x++)c+=bin[o+x];if(c>=thr){if(cur&&y-cur.e<=1)cur.e=y;else{cur={s:y,e:y};g.push(cur);}}}
+  const ys=g.map(q=>(q.s+q.e)/2),out=[];let i=0;
+  while(i+4<ys.length){const d=[ys[i+1]-ys[i],ys[i+2]-ys[i+1],ys[i+3]-ys[i+2],ys[i+4]-ys[i+3]],mn=Math.min(...d),mx=Math.max(...d),av=(d[0]+d[1]+d[2]+d[3])/4;
+    if(mn>=3&&mx-mn<=Math.max(1.6,av*0.22)&&av<W*0.05){out.push({top:ys[i],bot:ys[i+4],sp:av,lines:ys.slice(i,i+5)});i+=5;}else i++;}
+  return out;
+};
+
+/* row ink counts (3%..97% width) for lyric-bottom search */
+CC.rowInk=function(bin,W,H){const r=new Int32Array(H),a=Math.round(W*.03),b=Math.round(W*.97);for(let y=0;y<H;y++){let c=0;const o=y*W;for(let x=a;x<b;x++)c+=bin[o+x];r[y]=c;}return r;};
+CC.lyricBottoms=function(rows,H,sys,gapF){gapF=gapF||1;return sys.map((s,i)=>{const lim=i+1<sys.length?sys[i+1].top-2.6*sys[i+1].sp:H-1;let last=s.bot,gap=0,found=false;
+  for(let y=Math.round(s.bot+1);y<=lim;y++){if(rows[y]>1){last=y;gap=0;}else{gap++;if(gap>=gapF*s.sp&&last>s.bot+2*s.sp){found=true;break;}}}
+  const v=Math.max(s.bot+s.sp,Math.min(lim,last+0.45*s.sp));return found?v:{y:v,none:true,bot:s.bot,sp:s.sp};});};
+CC.lyrY=v=>typeof v==='number'?v:v.y;
+
+/* connected components inside a horizontal band */
+function components(bin,W,ya,yb){
+  const h=yb-ya,lab=new Int32Array(W*h),comps=[];let n=0;const st=[];
+  for(let y=0;y<h;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!bin[(ya+y)*W+x]||lab[i])continue;n++;lab[i]=n;st.length=0;st.push(i);
+    let x0=x,x1=x,y0=y,y1=y;const px=[];
+    while(st.length){const j=st.pop();const jy=(j/W)|0,jx=j-jy*W;px.push(j);if(jx<x0)x0=jx;if(jx>x1)x1=jx;if(jy<y0)y0=jy;if(jy>y1)y1=jy;
+      for(let dy=-1;dy<=1;dy++){const ny=jy+dy;if(ny<0||ny>=h)continue;for(let dx=-1;dx<=1;dx++){const nx=jx+dx;if(nx<0||nx>=W)continue;const k=ny*W+nx;if(!lab[k]&&bin[(ya+ny)*W+nx]){lab[k]=n;st.push(k);}}}}
+    comps.push({x0,y0:y0+ya,x1:x1+1,y1:y1+1+ya,w:x1-x0+1,h:y1-y0+1,px,ya,W});}
+  return comps;
+}
+
+/* chord tokens for every staff */
+CC.chordTokens=function(bin,W,H,sys,lyrBottoms){
+  const toks=[];
+  sys.forEach((s,i)=>{const sp=s.sp,yb=Math.round(s.top-0.2*sp);let ya=Math.round(s.top-6*sp);
+    if(i>0){const L=lyrBottoms?lyrBottoms[i-1]:sys[i-1].bot+3*sys[i-1].sp;const lb=typeof L==='number'?L:L.bot+1.2*L.sp;ya=Math.max(ya,Math.round(Math.min(lb,typeof L==='number'?s.top-4.5*sp:lb)+0.2*sp));}
+    ya=Math.max(0,ya);if(yb-ya<sp)return;
+    /* a 1st/2nd-ending bracket line can touch the chord names and glue them into one block: wipe thin long lines first */
+    const band=bin.slice(ya*W,yb*W),bh=yb-ya,thin=Math.max(2,Math.round(0.3*sp));
+    for(let y=0;y<bh;y++){let x=0;while(x<W){if(!band[y*W+x]){x++;continue;}let e=x;while(e+1<W&&band[y*W+e+1])e++;
+        if(e-x+1>=3*sp){for(let xx=x;xx<=e;xx++){let a=y,b=y;while(a>0&&band[(a-1)*W+xx])a--;while(b<bh-1&&band[(b+1)*W+xx])b++;if(b-a+1<=thin)for(let yy=a;yy<=b;yy++)band[yy*W+xx]=0;}}
+        x=e+1;}}
+    let cs=components(band,W,0,bh).map(c=>{c.y0+=ya;c.y1+=ya;c.ya=ya;return c;}).filter(c=>{
+      if(c.y1>=yb-1)return false;       // stems, heads, beams touching the staff side
+      if(c.h<0.25*sp&&c.w<0.25*sp)return false;            // specks
+      if(c.w>4*sp&&c.h<0.6*sp)return false;                 // volta / bracket lines
+      if(c.w<0.22*sp&&c.h>1.8*sp)return false;              // bracket hooks
+      if(c.h>4.8*sp)return false;
+      return true;});
+    cs.sort((a,b)=>a.x0-b.x0);
+    const groups=[];
+    cs.forEach(c=>{const g=groups[groups.length-1];
+      if(g){const gap=c.x0-g.x1,hm=Math.max(c.h,g.hmax),vov=Math.min(c.y1,g.y1)-Math.max(c.y0,g.y0);
+        if(gap<0.42*hm&&vov>-0.6*hm){g.comps.push(c);g.x0=Math.min(g.x0,c.x0);g.x1=Math.max(g.x1,c.x1);g.y0=Math.min(g.y0,c.y0);g.y1=Math.max(g.y1,c.y1);g.hmax=Math.max(g.hmax,c.h);return;}}
+      groups.push({comps:[c],x0:c.x0,x1:c.x1,y0:c.y0,y1:c.y1,hmax:c.h});});
+    groups.forEach(g=>{if(g.hmax<0.75*sp||g.x1-g.x0<0.35*sp)return;g.sys=i;g.sp=sp;toks.push(g);});
+  });
+  /* bar numbers sit at the far left of a line and are smaller than the chord names */
+  const hs=toks.map(t=>t.hmax).sort((a,b)=>a-b),mh=hs.length?hs[hs.length>>1]:0;
+  return toks.filter(t=>!(t.x1<0.07*W&&t.hmax<0.8*mh));
+};
+
+
+function maskOf(c){const m=new Uint8Array(c.w*c.h);c.px.forEach(j=>{const jy=(j/c.W)|0,jx=j-jy*c.W;m[(jy+c.ya-c.y0)*c.w+(jx-c.x0)]=1;});return m;}
+function runsRow(m,w,y){let r=0,p=0;for(let x=0;x<w;x++){const v=m[y*w+x];if(v&&!p)r++;p=v;}return r;}
+function runsCol(m,w,h,x){let r=0,p=0;for(let y=0;y<h;y++){const v=m[y*w+x];if(v&&!p)r++;p=v;}return r;}
+function colCover(m,w,h,x){let n=0;for(let y=0;y<h;y++)if(m[y*w+x])n++;return n/h;}
+function holesOf(m,w,h){/* enclosed white areas: count and vertical centre (0 top .. 1 bottom) */
+  const lab=new Int32Array(w*h),out=[];let n=0;for(let i=0;i<w*h;i++){if(m[i]||lab[i])continue;n++;let border=false,sy=0,cnt=0;const st=[i];lab[i]=n;
+    while(st.length){const j=st.pop(),y=(j/w)|0,x=j-y*w;cnt++;sy+=y;if(x===0||y===0||x===w-1||y===h-1)border=true;[[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const X=x+a,Y=y+b;if(X<0||Y<0||X>=w||Y>=h)return;const k=Y*w+X;if(!m[k]&&!lab[k]){lab[k]=n;st.push(k);}});}
+    if(!border&&cnt>=2)out.push({cy:sy/cnt/h,cnt});}
+  return out;}
+CC.shape=function(c,hm){
+  const m=maskOf(c),w=c.w,h=c.h,dens=c.px.length/(w*h);c.mask=m;
+  if(h>=0.55*hm&&w/h>=0.22&&w/h<=0.85&&dens<0.42){
+    const band=Math.max(1,Math.round(h*0.2));let tx=0,tn=0,bx=0,bn=0;
+    for(let y=0;y<band;y++)for(let x=0;x<w;x++)if(m[y*w+x]){tx+=x;tn++;}
+    for(let y=h-band;y<h;y++)for(let x=0;x<w;x++)if(m[y*w+x]){bx+=x;bn++;}
+    if(tn&&bn&&tx/tn>w*0.6&&bx/bn<w*0.4)return 'slash';}
+  if(h>=0.55*hm&&w/h<=0.8){
+    let stem=0;const lw=Math.max(1,Math.round(w*0.32));for(let y=0;y<h;y++){let f=0;for(let x=0;x<lw;x++)if(m[y*w+x]){f=1;break;}stem+=f;}
+    const r25=runsRow(m,w,Math.round(h*0.22)),r75=runsRow(m,w,Math.round(h*0.75));
+    let topW=0;for(let y=0;y<Math.round(h*0.3);y++){let mx=-1;for(let x=w-1;x>=0;x--)if(m[y*w+x]){mx=x;break;}topW=Math.max(topW,mx+1);}
+    if(stem/h>=0.88&&r25===1&&r75>=2&&topW<=w*0.5)return 'flat';}
+  if(h>=0.6*hm&&w/h>=0.25&&w/h<=0.95&&dens<0.62){
+    const cm=Math.round(w/2),band=(a,b)=>{let best=0;for(let xx=Math.floor(w*a);xx<=Math.ceil(w*b)&&xx<w;xx++){let run=0,mx=0;for(let y=0;y<h;y++){if(m[y*w+xx]){run++;mx=Math.max(mx,run);}else run=0;}best=Math.max(best,mx/h);}return best;}; /* one unbroken vertical stroke in each outer band */
+    const ends=(fa,fb)=>{for(let y=Math.max(0,Math.round(h*fa));y<=Math.min(h-1,Math.round(h*fb));y++){let ink=0;for(let xx=0;xx<w;xx++)ink+=m[y*w+xx];if(runsRow(m,w,y)>=2&&ink<=0.6*w)return true;}return false;}; /* the two strokes stick out alone at top and bottom */
+    const bars=[];for(let y=Math.round(h*0.2);y<=Math.round(h*0.8);y++){let ink=0;for(let xx=0;xx<w;xx++)ink+=m[y*w+xx];if(runsRow(m,w,y)===1&&ink>=0.75*w)bars.push(y);} /* two full-width bars in the middle, unlike D or B */
+    if(bars.length>=2&&bars[bars.length-1]-bars[0]>=0.15*h&&ends(0.04,0.16)&&ends(0.84,0.96)&&runsRow(m,w,Math.round(h*0.5))>=2&&runsCol(m,w,h,cm)>=2&&band(0.1,0.42)>=0.65&&band(0.58,0.9)>=0.65&&(runsRow(m,w,Math.round(h*0.18))>=2||runsRow(m,w,Math.round(h*0.82))>=2)&&(hs=>(hs.length===0&&dens<0.55)||(hs.length===1&&hs[0].cy>=0.38&&hs[0].cy<=0.57))(holesOf(m,w,h)))return 'sharp';} /* its one box sits in the middle; b and a have their hole low */ /* a bold B has two holes */
+  return '';
+};
+
+/* redraw a token: raised small glyphs (superscripts, raised numerators, °) are moved down to the
+   baseline and enlarged, so OCR sees one line of evenly sized characters */
+CC.tokenImage=function(tok,target){
+  target=target||46;const all=tok.comps.slice().sort((a,b)=>a.x0-b.x0);all.forEach(c=>{c.kind=CC.shape(c,tok.hmax);});
+  const letters=all.filter(c=>!c.kind),hm=letters.length?Math.max(...letters.map(c=>c.h)):tok.hmax,big=all.filter(c=>!c.kind&&c.h>=0.72*hm),base=big.length?Math.max(...big.map(c=>c.y1)):Math.max(...all.map(c=>c.y1));
+  const s=target/hm,pad=16,place=[];let cursor=pad;
+  /* accidentals that follow a tall letter are taken out and re-inserted as text after OCR */
+  const acc={root:'',bass:'',list:[]};let seenSlash=false,lettersSeen=0;const cs=[];
+  const tallAfter=k=>all.slice(k+1).some(c=>!c.kind&&c.h>=0.72*hm);
+  all.forEach((c,k)=>{const prev=cs[cs.length-1];
+    if(c.kind==='slash'){seenSlash=true;cs.push(c);return;}
+    if((c.kind==='sharp'||c.kind==='flat')&&prev&&prev.h>=0.72*hm&&prev.kind!=='slash'&&prev.w>=0.45*prev.h){const v=c.kind==='sharp'?'#':'b'; /* not after a bracket: (b9) keeps its flat */
+      /* lift it out after the root, after the bass (past a slash), or after the last letter when the slash was not seen */
+      if(seenSlash||lettersSeen===1||!tallAfter(k)){acc.list.push({idx:lettersSeen,v,at:(prev.x1-tok.x0)/Math.max(1,tok.x1-tok.x0)});if(seenSlash||(lettersSeen>1&&!tallAfter(k)))acc.bass=v;else acc.root=v;return;}
+      cs.push(c);return;}
+    if(c.h>=0.72*hm)lettersSeen++;cs.push(c);});
+  acc.tall=lettersSeen;acc.glued=all.length===1&&all[0].w>1.3*all[0].h; /* one blob holding the whole chord (thin fonts) */
+  tok.acc=acc;tok.hmL=hm;tok.base=base;
+  /* the first mark after the root letter, read by shape: three legs = m (minor), two legs and a V = M (major 7th);
+     OCR often drops a small m or reads a small capital M as m */
+  {const ri=cs.findIndex(c=>!c.kind&&c.h>=0.72*hm);
+    /* a letter b written right after the root is the flat, not the quality */
+    const isB=c=>{if(c.kind||c.h<0.85*hm||c.w/c.h>0.7)return false;const hs=holesOf(c.mask||maskOf(c),c.w,c.h);return hs.length===1&&hs[0].cy>0.5;};
+    let qi=ri+1;if(ri>=0&&cs[qi]&&isB(cs[qi])){acc.rootB=true;qi++;}
+    const q=ri>=0&&cs[qi]&&cs[qi].kind!=='slash'?cs[qi]:null;
+    if(ri>=0){const R=cs[ri],m=R.mask||maskOf(R),w=R.w,h=R.h,rr=f=>runsRow(m,w,Math.min(h-1,Math.round(h*f)));acc.root2={r50:rr(0.5),r58:rr(0.58),r66:rr(0.66),ratio:w/h};}
+    const q2=q&&cs[qi+1]&&cs[qi+1].kind!=='slash'?cs[qi+1]:null;
+    if(q2){const m=q2.mask||maskOf(q2);acc.q2={ratio:q2.w/q2.h,rel:q2.h/hm,kind:q2.kind,holes:holesOf(m,q2.w,q2.h)};}
+    if(q){const m=q.mask||maskOf(q),w=q.w,h=q.h,r=f=>runsRow(m,w,Math.min(h-1,Math.round(h*f)));
+      acc.q={w,h,ratio:w/h,legs:r(0.85),mid:r(0.5),top:r(0.12),rel:h/hm,raised:q.y1<base-0.22*hm,holes:holesOf(m,w,h)};}}
+  cs.forEach((c,k)=>{let sc=s,bottom=c.y1;
+    const raised=c.y1<base-0.22*hm;
+    if(raised){bottom=base;if(c.h<0.7*hm)sc=s*Math.min(1.7,0.78*hm/c.h);}
+    const dw=Math.max(1,Math.round(c.w*sc)),dh=Math.max(1,Math.round(c.h*sc));
+    const dx=k===0?pad:Math.max(cursor+2,Math.round(pad+(c.x0-tok.x0)*s));
+    const dy=Math.round(pad+(bottom-tok.y0)*s)-dh;
+    place.push({c,dx,dy,dw,dh});cursor=Math.max(cursor,dx+dw);});
+  const minY=Math.min(...place.map(p=>p.dy)),shift=pad-minY;place.forEach(p=>p.dy+=shift);
+  const OW=cursor+pad,OH=Math.max(...place.map(p=>p.dy+p.dh))+pad,out=new Uint8ClampedArray(OW*OH*4).fill(255);
+  place.forEach(p=>{const c=p.c,mask=c.mask||maskOf(c);
+    for(let y=0;y<p.dh;y++){const sy=Math.min(c.h-1,Math.floor(y*c.h/p.dh));for(let x=0;x<p.dw;x++){const sx=Math.min(c.w-1,Math.floor(x*c.w/p.dw));if(mask[sy*c.w+sx]){const o=((p.dy+y)*OW+(p.dx+x))*4;out[o]=out[o+1]=out[o+2]=0;}}}});
+  return {data:out,width:OW,height:OH};
+};
+
+/* ---- chord grammar ---- */
+const QUALS=['','m','7','m7','maj7','M7','6','m6','9','m9','add9','add2','(add2)','(add9)','2','sus4','sus2','sus','7sus4','dim','dim7','°','°7','aug','+','m7(b5)','m7b5','7(b9)','13(b9)','11','m11','13','maj9','M9','5','mM7','aug7','7(b5)','7(#9)','6/9','sus4(add9)','m(add9)','madd9','7sus'];
+const CHEAP={'s6':.4,'6s':.4,'S6':.4,'b6':.5,'nm':.5,'mn':.5,'o°':.3,'°o':.3,'0°':.3,'s5':.5,'5s':.5,'i/':.5,'l/':.5,'1/':.5,'j/':.5,'I/':.5,'S5':.5,'z2':.5,'Z2':.5};
+function lev(a,b){const m=a.length,n=b.length,d=[];for(let i=0;i<=m;i++){d[i]=[i];}for(let j=1;j<=n;j++)d[0][j]=j*0.8;
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){const sub=a[i-1]===b[j-1]?0:(CHEAP[a[i-1]+b[j-1]]||1);d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+0.8,d[i-1][j-1]+sub);}return d[m][n];}
+CC.parseChord=function(raw){
+  let t=String(raw||'').replace(/\s+/g,'').replace(/♯/g,'#').replace(/♭/g,'b').replace(/[oO0](?=7?$)/,'°');
+  /* other ways people write the same chord: Cmin7/C-7 → Cm7, Cø → Cm7b5, CΔ7/C^7 → Cmaj7, Cm(maj7) → CmM7, am7 → Am7 */
+  t=t.replace(/^([a-g])(?=[#b]?(m|M|maj|min|mi|sus|add|dim|aug|[0-9]|\/|$|-|°|ø|Δ|△|\^|\())/,c=>c.toUpperCase());
+  t=t.replace(/^([A-G][#b]?)(min|mi)(?![a-z])/,'$1m').replace(/^([A-G][#b]?)-/,'$1m').replace(/ø7?/,'m7b5').replace(/[Δ△^]/,'maj').replace(/m\(?maj7\)?/,'mM7');
+  t=t.replace(/^[^A-G]+/,'');if(!t)return null;
+  t=t.replace(/^([A-G])[gHi](?![a-z])/,'$1#').replace(/^([A-G])[gHi](?=m|\/|M|[0-9]|s|a|d)/,'$1#').replace(/^([A-G])[gH](?=n)/,'$1#'); /* 'Fin' stays Fine */
+  t=t.replace(/([A-Za-z0-9#)°])[lI1|ij]([A-G][#bgH]?)$/,'$1/$2');
+  t=t.replace(/\/([A-G])[gHij4]$/,'/$1#');
+  t=t.replace(/[^A-Za-z0-9#/()+°]/g,'');
+  t=t.replace(/(\/[A-G][#b]?)\d+$/,'$1');
+  const opens=(t.match(/\(/g)||[]).length,closes=(t.match(/\)/g)||[]).length;
+  if(opens!==closes)t=t.replace(/[()]/g,'');
+  const m=t.match(/^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/);if(!m)return null;
+  let q=m[2],exact=QUALS.includes(q),dist=0;
+  if(!exact){let best='',bd=99;QUALS.forEach(c=>{const d=lev(q,c);if(d<bd){bd=d;best=c;}});const lim=q.length<=2?1:Math.ceil(q.length*0.4);if(bd<=lim){dist=bd;}else return {text:t,root:m[1],qual:m[2],bass:m[3]||'',ok:false,raw};}
+  return {text:m[1]+q+(m[3]?'/'+m[3]:''),root:m[1],qual:q,bass:m[3]||'',ok:exact,dist,raw};
+};
+
+/* apply re-inserted accidentals, then parse; if the text holds two or three chords, split it */
+CC.readToken=function(text,acc){
+  let raw=String(text||'').trim(),fine=false;
+  /* a C read as a bracket: "(/Bb" is C/Bb */
+  raw=raw.replace(/^[(\[{](?=\/|m|7|maj|sus|add)/,'C');
+  /* the word Fine written right after a chord: keep the chord, report the word */
+  {const f=raw.match(/^(.*[A-G].*?)\s*F[il1|!I]?n[eE3]?$/);if(f&&CC.parseChord(f[1])&&CC.parseChord(f[1]).ok){raw=f[1];fine=true;}}
+  /* the first tall mark must look like a letter; a slur or tie read as a chord is much wider than tall */
+  if(acc&&acc.root2&&acc.root2.ratio>1.8)return [];
+  /* "/F": only the bass changes, the chord before it stays */
+  {const b=raw.match(/^[\/|]\s*([A-G])(#|b)?$/);if(b){const bass=b[1]+(b[2]||(acc&&acc.list.length?acc.list[acc.list.length-1].v:''));return [{root:null,bassOnly:true,bass,text:'/'+bass,frac:0,fracEnd:1,ok:true}];}}
+  if(acc&&acc.glued&&raw.indexOf('/')<0)raw=raw.replace(/^([A-G][#b]?)([A-G])/,'$1/$2');
+  /* put each sharp/flat back after the letter it followed */
+  if(acc&&acc.list&&acc.list.length){const L=[];for(let i=0;i<raw.length;i++)if(/[A-G]/.test(raw[i]))L.push(i);
+    const pick=a=>{if(L.length===acc.tall)return L[a.idx-1];let best=null,bd=9;L.forEach(i=>{const d=Math.abs((i+1)/raw.length-a.at);if(d<bd){bd=d;best=i;}});return best;};
+    const ins=acc.list.map(a=>({i:pick(a),v:a.v})).filter(z=>z.i!==null&&z.i!==undefined).sort((a,b)=>b.i-a.i);const done=new Set();
+    ins.forEach(z=>{if(done.has(z.i))return;done.add(z.i);if(/[#b]/.test(raw[z.i+1]||''))return;raw=raw.slice(0,z.i+1)+z.v+raw.slice(z.i+1);});}
+  /* a gap left where a sharp/flat was lifted out can come back as a space: "F m7", "G7 /B" belong together */
+  const chunks=[];raw.split(/\s+/).filter(Boolean).forEach(c=>{if(chunks.length&&!/^[A-G]/.test(c)&&/^[\/(#bmM0-9a-z°+]/.test(c))chunks[chunks.length-1]+=c;else{const v=c.replace(/^[^A-G]+/,'');if(v)chunks.push(v);}});
+  if(!chunks.length)return [];
+  const out=[];let pos=0;const total=chunks.join('').length;
+  chunks.forEach(t=>{const parts=splitChords(t);parts.forEach(p=>{p.frac=(pos+p.at)/Math.max(1,total);p.fracEnd=(pos+p.at+p.len)/Math.max(1,total);out.push(p);});pos+=t.length;});
+  if(out.length===1&&out[0].root&&acc)shapeFix(out[0],acc);
+  if(fine)out.fine=true;
+  return out;
+};
+/* OCR slips that the glyph shapes can settle (only for a token holding one chord) */
+function shapeFix(p,acc){let root=p.root,qual=p.qual,changed=false;const q=acc.q,q2=acc.q2,r2=acc.root2;
+  const setQ=v=>{if(QUALS.includes(v)){qual=v;changed=true;}};
+  /* C and G: G has a bar just below the middle */
+  if(r2&&root[0]==='G'&&r2.r58===1){root='C'+root.slice(1);changed=true;}
+  else if(r2&&root[0]==='C'&&r2.r58>=2&&r2.r66>=2){root='G'+root.slice(1);changed=true;}
+  if(q){const isM=q.top===2&&((q.legs===2&&q.ratio<1)||(q.mid>=4&&q.rel>=0.85&&q.legs<=3)),ism=q.legs===3&&q.mid===3&&q.ratio>=1&&q.rel<0.85;
+    if(isM&&/^m(?!aj)/.test(qual)&&/^m(7|9|11|13)/.test(qual))setQ('maj'+qual.slice(1));
+    else if(ism&&!/^m/.test(qual)&&!/^(M|aug|\+|dim|°|sus)/.test(qual))setQ('m'+qual);
+    /* a raised 9 (hole at the top, narrow) is not the diminished circle */
+    if(qual==='°'&&q.holes.length===1&&q.holes[0].cy<0.45&&q.ratio<0.8)setQ('9');
+    /* a 6 that OCR dropped or read as o: one hole in the lower half */
+    const six=g=>g&&g.kind!=='slash'&&g.rel<=0.9&&g.holes.length===1&&g.holes[0].cy>0.58&&g.ratio>=0.45&&g.ratio<0.9; /* a flat sign is taller and thinner */
+    if(qual==='m'&&six(q2))setQ('m6');else if(qual===''&&six(q))setQ('6');}
+  if(changed){p.root=root;p.qual=qual;p.text=root+qual+(p.bass?'/'+p.bass:'');p.ok=true;p.fixed=true;}}
+function splitChords(t){
+  const one=CC.parseChord(t);if(one&&one.ok){one.at=0;one.len=t.length;return [one];}
+  const cuts=[0];for(let i=1;i<t.length;i++)if(/[A-G]/.test(t[i])&&t[i-1]!=='/')cuts.push(i);cuts.push(t.length);
+  const n=cuts.length,best=new Array(n).fill(null);best[0]={k:0,list:[]};
+  for(let a=0;a<n-1;a++){if(!best[a])continue;for(let b=a+1;b<n;b++){const seg=t.slice(cuts[a],cuts[b]),p=CC.parseChord(seg);if(!p||!(p.ok||(p.dist!==undefined&&p.dist<=0.6)))continue;p.at=cuts[a];p.len=seg.length;const cand={k:best[a].k+1+(p.ok?0:p.dist),list:best[a].list.concat([p])};if(!best[b]||cand.k<best[b].k)best[b]=cand;}} /* a near match (one look-alike letter) may join a split */
+  if(best[n-1])return best[n-1].list;
+  if(one){one.at=0;one.len=t.length;return [one];}return [];
+}
+
+/* ---- transposition ---- */
+const LET={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const SP={flat:['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'],sharp:['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],c:['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B']};
+CC.spellFor=k=>[5,10,3,8,1].includes(k)?SP.flat:(k===0?SP.c:SP.sharp);
+CC.pc=n=>((LET[n[0]]+(n[1]==='#'?1:n[1]==='b'?-1:0))%12+12)%12;
+/* move a chord to another key keeping its letters in step with the key: in F→G, D/F# becomes E/G#, and
+   in the same key nothing changes. Spellings like E#, B#, Cb, Fb or double sharps/flats fall back to the plain name. */
+const KEYLET=['C','D','D','E','E','F','F','G','A','A','B','B'],LETS='CDEFGAB',NATPC={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+CC.transpose=function(ch,shift,toKey,fromKey){shift=((shift%12)+12)%12;if(shift===0)return ch.root+ch.qual+(ch.bass?'/'+ch.bass:'');if(fromKey===undefined)fromKey=((toKey-shift)%12+12)%12;
+  const sp=CC.spellFor(toKey),steps=((LETS.indexOf(KEYLET[toKey])-LETS.indexOf(KEYLET[fromKey]))%7+7)%7;
+  const r=x=>CC.transposeNote(x,shift,toKey,fromKey,sp,steps);
+  return r(ch.root)+ch.qual+(ch.bass?'/'+r(ch.bass):'');};
+CC.transposeNote=function(x,shift,toKey,fromKey,sp,steps){shift=((shift%12)+12)%12;if(fromKey===undefined)fromKey=((toKey-shift)%12+12)%12;
+  sp=sp||CC.spellFor(toKey);if(steps===undefined)steps=((LETS.indexOf(KEYLET[toKey])-LETS.indexOf(KEYLET[fromKey]))%7+7)%7;
+  const t=((CC.pc(x)+shift)%12+12)%12,kn=CC.keyNames(toKey);if(kn[t])return kn[t];
+  const L=LETS[(LETS.indexOf(x[0])+steps)%7],acc=((t-NATPC[L])%12+18)%12-6;
+  const name=acc===0?L:acc===1?L+'#':acc===-1?L+'b':null;if(!name||/^(E#|B#|Cb|Fb)$/.test(name))return sp[t];return name;};
+/* the seven note names of a major key, by pitch class */
+CC.keyNames=function(k){k=((k%12)+12)%12;const SHN=[0,0,2,0,4,0,6,1,0,3,0,5],FLN=[0,5,0,3,0,1,0,0,4,0,2,0],SO=[5,0,7,2,9,4,11],FO=[11,4,9,2,7,0,5];
+  const up=new Set(SO.slice(0,SHN[k])),dn=new Set(FO.slice(0,FLN[k])),out={};'CDEFGAB'.split('').forEach(L=>{const pc=NATPC[L],a=up.has(pc)?1:dn.has(pc)?-1:0;const nm=L+(a>0?'#':a<0?'b':'');out[((pc+a)%12+12)%12]={'E#':'F','B#':'C','Cb':'B','Fb':'E'}[nm]||nm;});return out;};
+
+/* ---- chord tones for playback ---- */
+CC.tones=function(ch){
+  const q=ch.qual;let iv;
+  if(q==='5')iv=[0,7];
+  else if(/sus2/.test(q))iv=[0,2,7];else if(/sus/.test(q))iv=[0,5,7];
+  else if(/dim|°/.test(q))iv=[0,3,6];else if(/aug|\+/.test(q))iv=[0,4,8];
+  else if(/^m(?!aj)/.test(q))iv=[0,3,7];else iv=[0,4,7];
+  if(/b5/.test(q))iv=iv.map(x=>x===7?6:x);                       /* 7(b5) keeps its major third, m7b5 its minor one */
+  if(/maj7|M7|maj9|M9/.test(q))iv.push(11);
+  else if(/dim7|°7/.test(q))iv.push(9);
+  else if(/(^|[^0-9/])(7|9|11|13)/.test(q)&&!/add|6\/9/.test(q))iv.push(10);
+  if(/6/.test(q)&&!/b5|13/.test(q))iv.push(9);
+  if(/b9/.test(q))iv.push(13);else if(/#9/.test(q))iv.push(15);
+  else if(/9|add2|^2$|11|13/.test(q))iv.push(14);
+  if(/11/.test(q)){iv.push(17);if(!/^m/.test(q))iv=iv.filter(x=>x!==4);}   /* an 11 chord drops the major third */
+  if(/13/.test(q))iv.push(21);
+  return {root:CC.pc(ch.root),bass:ch.bass?CC.pc(ch.bass):CC.pc(ch.root),iv};
+};
+
+
+/* barlines: thin columns covering the whole staff and empty just outside it */
+CC.barlines=function(bin,W,s){
+  const t=Math.round(s.top),b=Math.round(s.bot),h=b-t+1,sp=s.sp,Hh=bin.length/W,lines=(s.lines||[]).map(Math.round),xs=[];
+  const isLineRow=y=>lines.some(l=>Math.abs(l-y)<=2);
+  for(let x=0;x<W;x++){let n=0;for(let y=t;y<=b;y++)n+=bin[y*W+x];if(n<h-2)continue;
+    let up=0;for(let y=t-1;y>=0&&bin[y*W+x];y--)up++;let dn=0;for(let y=b+1;y<Hh&&bin[y*W+x];y++)dn++;
+    if(up>0.6*sp||dn>0.6*sp)continue;xs.push(x);}
+  const g=[];xs.forEach(x=>{const l=g[g.length-1];if(l&&x-l.e<=2)l.e=x;else g.push({s:x,e:x});});
+  /* a stem has a notehead at one end: lots of ink next to it near the top or bottom line */
+  const headNear=(x)=>{const r=Math.round(0.95*sp);let best=0;[[t+Math.round(0.15*sp),t+Math.round(0.85*sp)],[b-Math.round(0.85*sp),b-Math.round(0.15*sp)]].forEach(([ya,yb])=>{[-1,1].forEach(side=>{let n=0;
+      for(let y=ya;y<=yb;y++){if(y<0||y>=Hh||isLineRow(y))continue;for(let k=2;k<=r;k++){const xx=Math.round(x)+side*k;if(xx>=0&&xx<W&&bin[y*W+xx])n++;}}best=Math.max(best,n);});});return best>0.3*sp*sp;};
+  let bars=g.filter(q=>q.e-q.s<=0.6*sp).map(q=>(q.s+q.e)/2).filter(x=>!headNear(x));
+  const merged=[];bars.forEach(x=>{const l=merged[merged.length-1];if(l!==undefined&&x-l<1.5*sp)merged[merged.length-1]=x;else merged.push(x);});
+  const y=Math.round(s.top);let x0=0,x1=W-1;while(x0<W&&!bin[y*W+x0])x0++;while(x1>0&&!bin[y*W+x1])x1--;
+  return {x0,x1,bars:merged};
+};
+
+
+/* a segno / coda sign inside a chord-row token: a roughly square glyph with three or more holes */
+CC.signIn=function(tok){
+  for(const c of tok.comps){if(c.h<1.0*tok.sp||c.w<0.8*tok.sp)continue;const r=c.w/c.h;if(r<0.6||r>1.6)continue;
+    const m=c.mask||maskOf(c),w=c.w,h=c.h,seen=new Uint8Array(w*h),st=[];
+    for(let x=0;x<w;x++){st.push(x,(h-1)*w+x);}for(let y=0;y<h;y++){st.push(y*w,y*w+w-1);}
+    while(st.length){const j=st.pop();if(seen[j]||m[j])continue;seen[j]=1;const y=(j/w)|0,x=j-y*w;if(x>0)st.push(j-1);if(x<w-1)st.push(j+1);if(y>0)st.push(j-w);if(y<h-1)st.push(j+w);}
+    let holes=0;for(let j=0;j<w*h;j++){if(seen[j]||m[j])continue;let a=0;const q=[j];while(q.length){const k=q.pop();if(seen[k]||m[k])continue;seen[k]=1;a++;const y=(k/w)|0,x=k-y*w;if(x>0)q.push(k-1);if(x<w-1)q.push(k+1);if(y>0)q.push(k-w);if(y<h-1)q.push(k+w);}if(a>=0.02*tok.sp*tok.sp)holes++;}
+    if(holes>=3)return c.x0;}
+  return null;};
+
+/* small text right before a barline under the staff (where "Fine" or "D.S. al Fine" often sits) */
+CC.belowTokens=function(bin,W,H,sys,barsPer){
+  const out=[];
+  sys.forEach((s,i)=>{const sp=s.sp,ya=Math.round(s.bot+0.5*sp),yb=Math.min(H,Math.round(s.bot+5*sp));if(i+1<sys.length&&yb>sys[i+1].top-3*sp)return;if(yb-ya<sp)return;
+    const bl=barsPer[i]||{bars:[],x1:W};const ends=bl.bars.concat([bl.x1]);
+    const cs=components(bin,W,ya,yb).filter(c=>c.h>=0.3*sp&&c.h<=1.6*sp&&c.w<=3*sp&&ends.some(e=>c.x1<=e+0.5*sp&&c.x1>=e-12*sp));
+    cs.sort((a,b)=>a.x0-b.x0);const groups=[];
+    cs.forEach(c=>{const g=groups[groups.length-1];if(g&&c.x0-g.x1<0.9*sp&&Math.abs((c.y0+c.y1)/2-(g.y0+g.y1)/2)<0.8*sp){g.x1=Math.max(g.x1,c.x1);g.y0=Math.min(g.y0,c.y0);g.y1=Math.max(g.y1,c.y1);g.x0=Math.min(g.x0,c.x0);return;}groups.push({x0:c.x0,x1:c.x1,y0:c.y0,y1:c.y1});});
+    const ph=CC.phrases(groups.filter(g=>g.y1-g.y0<=1.6*sp).map(g=>({sys:i,x0:g.x0,x1:g.x1,y0:g.y0,y1:g.y1,sp})));
+    ph.forEach(p=>{if(ends.some(e=>p.x1<=e+0.5*sp&&p.x1>=e-4*sp))out.push(Object.assign(p,{where:'below'}));});});
+  return out;
+};
+/* join word tokens on one line into a phrase box */
+CC.phrases=function(toks){const s=toks.slice().sort((a,b)=>a.sys-b.sys||a.x0-b.x0),out=[];
+  s.forEach(t=>{const p=out[out.length-1];if(p&&p.sys===t.sys&&t.x0-p.x1<2.2*t.sp&&Math.abs((t.y0+t.y1)/2-(p.y0+p.y1)/2)<0.9*t.sp){p.x1=Math.max(p.x1,t.x1);p.y0=Math.min(p.y0,t.y0);p.y1=Math.max(p.y1,t.y1);p.n++;return;}
+    out.push({sys:t.sys,x0:t.x0,x1:t.x1,y0:t.y0,y1:t.y1,sp:t.sp,n:1});});return out;};
+/* what a phrase says */
+CC.markType=function(text,phrase){const t=String(text||'').replace(/\s+/g,' ').trim();
+  /* capital D.S. / D.C. on their own (not the end of a word like "Chords"), Fine as a whole word */
+  if(/(^|[^A-Za-z])D\.?\s?S\.?(?![A-Za-z])/.test(t)||/dal\s*segno/i.test(t))return 'ds';
+  if(/(^|[^A-Za-z])D\.?\s?C\.?(?![A-Za-z])/.test(t)||/da\s*capo/i.test(t))return 'dc';
+  if(/(^|[^A-Za-z])fin[ec](?![A-Za-z])/i.test(t)&&!/(^|[^A-Za-z])al(?![A-Za-z])/i.test(t))return 'fine';
+  if(phrase&&phrase.n===1&&/^[S$%§8OQ0@]$/.test(t)&&(phrase.y1-phrase.y0)>=1.1*phrase.sp&&phrase.where!=='below')return 'segno';
+  return null;};
+
+/* guess the major key from the chords */
+CC.guessKey=function(chs){
+  if(!chs.length)return null;const sc=[0,2,4,5,7,9,11],minorDeg=[2,4,9];let best=0,bs=-1e9;
+  for(let k=0;k<12;k++){let v=0;chs.forEach((c,i)=>{const r=((CC.pc(c.root)-k)%12+12)%12;if(sc.includes(r)){v+=1;if(r===0)v+=1;if(r===5||r===7)v+=0.5;const m=/^m(?!aj)/.test(c.qual);if(m===minorDeg.includes(r))v+=0.3;}else v-=0.6;});
+    const last=chs[chs.length-1];if(((CC.pc(last.root)-k)%12+12)%12===0)v+=2;if(((CC.pc(chs[0].root)-k)%12+12)%12===0)v+=1;
+    if(v>bs){bs=v;best=k;}}
+  return best;
+};
+
+
+/* ---- rewriting chords in a new key from the sheet's own print ----
+   Only the letters (and their sharps/flats) change with the key; m7, sus4, 6, maj7 and the slash stay as printed.
+   So a chord in the new key is put together from: a letter glyph taken from elsewhere on the same sheet,
+   an accidental glyph from the sheet, and the quality marks copied pixel for pixel from the chord itself. */
+CC.maskOf=maskOf;
+
+/* the glyphs of one token grouped per chord */
+
+/* a slash printed touching the letter next to it comes out as one blob ("/D", "m/B"): find the diagonal and cut it out */
+CC.splitSlash=function(c){const m=c.mask||maskOf(c),w=c.w,h=c.h;if(h<6||w<1.15*h)return null;
+  const t=Math.max(1,Math.round(0.07*h));let best=null;
+  for(let xb=0;xb<w;xb++)for(let k=Math.round(0.3*h);k<=Math.round(1.0*h);k++){const xt=xb+k;if(xt>=w+t)break;let hit=0,side=0;
+    for(let y=0;y<h;y++){const xx=Math.round(xb+k*(1-y/(h-1)));let on=false;for(let dx=-1;dx<=1;dx++){const X=xx+dx;if(X>=0&&X<w&&m[y*w+X])on=true;}if(on)hit++;
+      const a=xx-t-2,b=xx+t+2;if((a>=0&&m[y*w+a])||(b<w&&m[y*w+b]))side++;}
+    const cov=hit/h,sc=cov-0.6*side/h;if(cov>=0.9&&(!best||sc>best.sc))best={xb,k,sc,cov,side:side/h};}
+  if(!best||best.side>0.45)return null;
+  const lineX=y=>best.xb+best.k*(1-y/(h-1));const parts=[[],[],[]];
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(!m[y*w+x])continue;const d=x-lineX(y);parts[d<-t-0.5?0:d>t+0.5?2:1].push([x,y]);}
+  const mk=(pts,kind)=>{if(pts.length<3)return null;let x0=w,x1=-1,y0=h,y1=-1;pts.forEach(([x,y])=>{if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;});const W2=x1-x0+1,H2=y1-y0+1,mm=new Uint8Array(W2*H2);pts.forEach(([x,y])=>{mm[(y-y0)*W2+(x-x0)]=1;});
+    return {x0:c.x0+x0,x1:c.x0+x1+1,y0:c.y0+y0,y1:c.y0+y1+1,w:W2,h:H2,mask:mm,px:[],dens:pts.length/(W2*H2),kind,synthetic:true};};
+  const L=mk(parts[0],''),S=mk(parts[1],'slash'),R=mk(parts[2],'');if(!S||(!L&&!R))return null;
+  /* a real slash is thin: its own box is not much wider than the stroke */
+  if(S.dens<0.12)return null;
+  return [L,S,R].filter(Boolean);};
+function densOf(c){return c.dens!==undefined?c.dens:c.px.length/(c.w*c.h);}
+CC.glyphParts=function(tok,letters,nSplit){
+  const hm=tok.hmL||tok.hmax;let all=[],left=nSplit||0;tok.comps.slice().sort((a,b)=>a.x0-b.x0).forEach(c=>{const sp=(left>0&&!c.kind&&c.h>=0.72*hm)?CC.splitSlash(c):null;if(sp){left--;all.push.apply(all,sp);}else all.push(c);});
+  const tall=c=>!c.kind&&c.h>=0.72*hm&&c.w<=1.15*c.h;
+  const isB=c=>{if(c.kind||c.h<0.85*hm||c.w/c.h>0.7)return false;const hs=holesOf(c.mask||maskOf(c),c.w,c.h);return hs.length===1&&hs[0].cy>0.5;};
+  /* letters: the roles the OCR text expects, in order ('root' or 'bass'); used when the count of tall glyphs matches */
+  let roles=null;if(letters&&letters.length){const talls=[];all.forEach((c,i)=>{if(!tall(c))return;const prev=all[i-1];if(prev&&tall(prev)&&c.x0-prev.x1<0.35*hm&&isB(c))return;talls.push(c);});if(talls.length===letters.length)roles=letters.slice();}
+  const parts=[];let cur=null,last=null;
+  all.forEach((c,i)=>{const prev=all[i-1];
+    if(c.kind==='slash'){if(cur&&!cur.slash&&!cur.bass){cur.slash=c;last=null;}else if(cur)cur.after.push(c);return;}
+    if((c.kind==='sharp'||c.kind==='flat')&&last&&!last.part[last.which+'Acc']&&c.x0-last.comp.x1<0.6*hm){last.part[last.which+'Acc']=c;last.part[last.which+'AccV']=c.kind==='sharp'?'#':'b';return;}
+    if(tall(c)){
+      if(last&&!last.part[last.which+'Acc']&&c.x0-last.comp.x1<0.35*hm&&isB(c)){last.part[last.which+'Acc']=c;last.part[last.which+'AccV']='b';return;}
+      let role;if(roles)role=roles.shift()||'qual';else role=(cur&&cur.slash&&!cur.bass)?'bass':((!prev||prev.kind==='slash'||c.x0-prev.x1>=0.3*hm)?'root':'qual');
+      if(role==='bass'&&cur&&!cur.bass){cur.bass=c;last={comp:c,part:cur,which:'bass'};return;}
+      if(role==='root'||(role==='bass'&&!cur)){cur={root:c,qual:[],slash:null,bass:null,after:[]};parts.push(cur);last={comp:c,part:cur,which:'root'};return;}}
+    if(!cur)return;
+    last=null;if(cur.bass)cur.after.push(c);else cur.qual.push(c);});
+  parts.forEach(p=>{const cs=[p.root,p.rootAcc].concat(p.qual,[p.slash,p.bass,p.bassAcc],p.after).filter(Boolean);
+    p.x0=Math.min.apply(null,cs.map(c=>c.x0));p.x1=Math.max.apply(null,cs.map(c=>c.x1));p.y0=Math.min.apply(null,cs.map(c=>c.y0));p.y1=Math.max.apply(null,cs.map(c=>c.y1));p.hm=hm;});
+  return parts;};
+/* pair the glyph groups with the chords read from the text; null when they do not line up */
+CC.glyphsFor=function(tok,parts){const rootParts=parts.filter(p=>p.root);if(!rootParts.length)return null;
+  const letters=[];rootParts.forEach(p=>{letters.push('root');if(p.bass)letters.push('bass');});
+  const wantSlash=rootParts.filter(p=>p.bass).length,haveSlash=tok.comps.filter(c=>c.kind==='slash').length;
+  let gps=CC.glyphParts(tok,letters,Math.max(0,wantSlash-haveSlash));
+  if(parts.fine&&gps.length===rootParts.length+1)gps=gps.slice(0,-1);   /* the word Fine after the chord */
+  if(gps.length!==rootParts.length)return null;
+  const out=[];for(let i=0;i<gps.length;i++){const g=gps[i],p=rootParts[i];
+    /* the text and the glyphs must agree about accidentals, else leave this chord to the plain renderer */
+    const fix=(which,L)=>{if(!L)return true;const hasT=/[#b]/.test(L[1]||''),hasG=!!g[which+'Acc'];
+      if(hasG&&!hasT){if(which==='root')p.root=L[0]+g.rootAccV+L.slice(1);else p.bass=L[0]+g.bassAccV+L.slice(1);p.text=p.root+p.qual+(p.bass?'/'+p.bass:'');p.fixedAcc=true;return true;}
+      if(hasT&&!hasG)return false;
+      return true;};
+    if(!fix('root',p.root)||!fix('bass',p.bass)){out.push(null);continue;}
+    if(!!g.bass!==!!p.bass||g.root.w>1.15*g.root.h||(g.bass&&g.bass.w>1.15*g.bass.h)){out.push(null);continue;}
+    out.push(g);}
+  return out;};
+
+/* a glyph scaled onto a small grid, for comparing shapes */
+CC.resample=function(mask,w,h,G){G=G||20;const out=new Float32Array(G*G);
+  for(let gy=0;gy<G;gy++){const y0=Math.floor(gy*h/G),y1=Math.max(y0+1,Math.floor((gy+1)*h/G));for(let gx=0;gx<G;gx++){const x0=Math.floor(gx*w/G),x1=Math.max(x0+1,Math.floor((gx+1)*w/G));let s=0,n=0;for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){s+=mask[y*w+x];n++;}out[gy*G+gx]=n?s/n:0;}}
+  return out;};
+CC.glyphSim=function(a,b){const G=20;const ra=a.w/a.h,rb=b.w/b.h,asp=Math.min(ra,rb)/Math.max(ra,rb);
+  const A=a.grid||(a.grid=CC.resample(a.mask,a.w,a.h,G)),B=b.grid||(b.grid=CC.resample(b.mask,b.w,b.h,G));let d=0;for(let i=0;i<G*G;i++)d+=Math.abs(A[i]-B[i]);
+  return (1-d/(G*G))*Math.pow(asp,0.5);};
+
+/* the sheet's own letters and accidentals, one exemplar each, taken from chords read with confidence.
+   entries: {mask,w,h} for letters; accidentals also carry their place next to the letter they followed */
+CC.buildBank=function(chords,parsedOf){const cand={L:{},A:{}},bank={L:{},A:{}};
+  chords.forEach(ch=>{const g=ch.g;if(!g||ch.status!=='ok')return;const p=parsedOf(ch);if(!p||!p.root)return;
+    const add=(k,key,comp,ref)=>{if(!comp)return;(cand[k][key]=cand[k][key]||[]).push({comp,ref});};
+    add('L',p.root[0],g.root,g.root);if(p.root[1])add('A',p.root[1],g.rootAcc,g.root);
+    if(g.bass&&p.bass){add('L',p.bass[0],g.bass,g.bass);if(p.bass[1])add('A',p.bass[1],g.bassAcc,g.bass);}});
+  const med=a=>{const b=a.slice().sort((p,q)=>p-q);return b[b.length>>1];};
+  ['L','A'].forEach(k=>Object.keys(cand[k]).forEach(key=>{const arr=cand[k][key],r=med(arr.map(z=>z.comp.w/z.comp.h)),d=med(arr.map(z=>densOf(z.comp)));
+    let best=null,bd=1e9;arr.forEach(z=>{const dd=Math.abs(z.comp.w/z.comp.h-r)*3+Math.abs(densOf(z.comp)-d);if(dd<bd){bd=dd;best=z;}});
+    const c=best.comp,ref=best.ref;bank[k][key]={mask:c.mask||maskOf(c),w:c.w,h:c.h,n:arr.length,top:(c.y0-ref.y0)/ref.h,bot:(c.y1-ref.y1)/ref.h,wr:c.w/ref.h,gapr:(c.x0-ref.x1)/ref.h};}));
+  return bank;};
+
+/* does each letter look like the sheet's exemplar of what it was read as? returns {letter,score,bestLetter,bestScore} */
+CC.checkLetter=function(comp,letter,bank){const me=bank.L[letter];let best=null,bs=-1;
+  Object.keys(bank.L).forEach(L=>{const s=CC.glyphSim({mask:comp.mask||maskOf(comp),w:comp.w,h:comp.h,grid:comp.grid},bank.L[L]);comp.grid=comp.grid||CC.resample(comp.mask||maskOf(comp),comp.w,comp.h,20);if(s>bs){bs=s;best=L;}});
+  const mine=me?CC.glyphSim({mask:comp.mask||maskOf(comp),w:comp.w,h:comp.h,grid:comp.grid},me):null;
+  return {letter,score:mine,bestLetter:best,bestScore:bs};};
+
+/* where each glyph goes once the letters are changed. pieces: {src,x,y,w,h} to draw from a mask, or {text,x,baseline,size} */
+CC.layoutChord=function(g,newRoot,newBass,bank,measure){
+  const pieces=[];let cx=g.x0;const ref=g.root;
+  const letter=(L,r)=>{const b=bank.L[L];if(b){const w=b.w*(r.h/b.h);pieces.push({src:b,x:cx,y:r.y0,w,h:r.h});cx+=w;}
+    else{const w=measure?measure(L,r.h):0.7*r.h;pieces.push({text:L,x:cx,baseline:r.y1,size:r.h});cx+=w;}};
+  const accid=(v,r)=>{const b=bank.A[v];if(b){const x=cx+Math.max(0.02,b.gapr)*r.h,y0=r.y0+b.top*r.h,y1=r.y1+b.bot*r.h,w=b.wr*r.h;pieces.push({src:b,x,y:y0,w,h:y1-y0});cx=x+w;}
+    else{const size=0.72*r.h,w=measure?measure(v==='#'?'#':'b',size):0.5*size;const x=cx+0.05*r.h;pieces.push({text:v==='#'?'#':'b',x,baseline:v==='#'?r.y1-0.12*r.h:r.y1,size});cx=x+w;}};
+  letter(newRoot[0],ref);if(newRoot[1])accid(newRoot[1],ref);
+  let origEnd=g.rootAcc?g.rootAcc.x1:g.root.x1;
+  const copy=(cs)=>{cs.forEach(q=>{pieces.push({src:q,x:cx+(q.x0-origEnd),y:q.y0,w:q.w,h:q.h});});if(cs.length){const l=cs[cs.length-1];cx=cx+(l.x1-origEnd);origEnd=l.x1;}};
+  copy(g.qual);
+  if(g.slash){pieces.push({src:g.slash,x:cx+(g.slash.x0-origEnd),y:g.slash.y0,w:g.slash.w,h:g.slash.h});cx=cx+(g.slash.x1-origEnd);origEnd=g.slash.x1;}
+  if(g.bass&&newBass){cx+=Math.max(0,g.bass.x0-origEnd);letter(newBass[0],g.bass);if(newBass[1])accid(newBass[1],g.bass);origEnd=g.bassAcc?g.bassAcc.x1:g.bass.x1;copy(g.after);}
+  let y0=1e9,y1=-1e9;pieces.forEach(p=>{if(p.src){y0=Math.min(y0,p.y);y1=Math.max(y1,p.y+p.h);}else{y0=Math.min(y0,p.baseline-p.size);y1=Math.max(y1,p.baseline+0.1*p.size);}});
+  return {pieces,x0:g.x0,x1:cx,y0,y1};};
+
+
+/* for letters the sheet never prints: draw with whichever font looks most like the sheet's own letters.
+   render(text,size,font) returns ImageData of the text drawn black on white */
+CC.pickFont=function(bank,render,fonts){const Ls=Object.keys(bank.L).sort((a,b)=>bank.L[b].n-bank.L[a].n).slice(0,3);if(!Ls.length)return fonts[0];
+  const glyph=id=>{const W=id.width,H=id.height,d=id.data;let x0=W,x1=-1,y0=H,y1=-1;for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(d[(y*W+x)*4]<128){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}}
+    if(x1<0)return null;const w=x1-x0+1,h=y1-y0+1,m=new Uint8Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++)m[y*w+x]=d[((y0+y)*W+x0+x)*4]<128?1:0;return {mask:m,w,h};};
+  let best=fonts[0],bs=-1;fonts.forEach(f=>{let s=0,n=0;Ls.forEach(L=>{const g=glyph(render(L,40,f));if(!g)return;s+=CC.glyphSim(g,bank.L[L]);n++;});const v=n?s/n:0;if(v>bs){bs=v;best=f;}});
+  return best;};
+
+if(typeof module!=='undefined')module.exports=CC;else root.ChordCore=CC;
+})(typeof window!=='undefined'?window:this);
+
+</script>
+<script>
+/* melody: read a single-line melody (treble clef) from a lead sheet.
+   pitch = notehead position on the staff (+ key signature + accidentals in the bar)
+   rhythm = hollow/filled head, stem, beams/flags, dots; bars are filled to the time signature. */
+(function(root){
+const ML={};
+const mod=(a,n)=>((a%n)+n)%n;
+
+/* integral image for fast box sums */
+function integral(bin,W,y0,y1){const h=y1-y0,I=new Int32Array((W+1)*(h+1));for(let y=0;y<h;y++){let row=0;const o=(y0+y)*W;for(let x=0;x<W;x++){row+=bin[o+x];I[(y+1)*(W+1)+x+1]=I[y*(W+1)+x+1]+row;}}return I;}
+function boxSum(I,W,x0,y0,x1,y1){const w=W+1;return I[y1*w+x1]-I[y0*w+x1]-I[y1*w+x0]+I[y0*w+x0];}
+
+/* erase staff lines and ledger lines where they are only line-thick */
+function cleanStaff(bin,W,H,s,ref){ /* ref: line thickness measured on a copy where the lines show clearly */
+  const sp=s.sp,y0=Math.max(0,Math.round(s.top-5*sp)),y1=Math.min(H,Math.round(s.bot+5*sp)),h=y1-y0,c=new Uint8Array(W*h);
+  for(let y=0;y<h;y++)c.set(bin.subarray((y0+y)*W,(y0+y+1)*W),y*W);
+  /* line thickness = median run length through the five lines */
+  const runs=[];const xa=Math.round(W*0.12),xb=Math.round(W*0.88);
+  s.lines.forEach(L=>{const ly=Math.round(L)-y0;for(let x=xa;x<xb;x+=3){if(!c[ly*W+x])continue;let a=ly,b=ly;while(a>0&&c[(a-1)*W+x])a--;while(b<h-1&&c[(b+1)*W+x])b++;const r=b-a+1;if(r<=0.5*sp)runs.push(r);}});
+  runs.sort((a,b)=>a-b);const th=ref?Math.min(ref.th,runs.length?runs[runs.length>>1]:ref.th):(runs.length?runs[runs.length>>1]:2);
+  /* ledger lines are often drawn thicker than the staff lines: measure them on their own */
+  const led=[];for(let k=1;k<=4;k++)[s.top-k*sp,s.bot+k*sp].forEach(Y=>{const ly=Math.round(Y)-y0;if(ly<2||ly>=h-2)return;
+    for(let x=0;x<W;x+=2){let yy=-1;for(let d=0;d<=2;d++){if(c[(ly+d)*W+x]){yy=ly+d;break;}if(c[(ly-d)*W+x]){yy=ly-d;break;}}if(yy<0)continue;
+      let a=yy,b=yy;while(a>0&&c[(a-1)*W+x])a--;while(b<h-1&&c[(b+1)*W+x])b++;if(b-a+1<=0.4*sp)led.push(b-a+1);}});
+  led.sort((a,b)=>a-b);const thL=ref?Math.max(th,ref.thL):led.length>=10?Math.max(th,Math.min(led[led.length>>1],Math.max(th+1,Math.round(0.22*sp)))):th; /* beams crossing those rows must not count as ledger lines */
+  const ys=s.lines.map(Y=>({Y,t:th}));for(let k=1;k<=4;k++){ys.push({Y:s.top-k*sp,t:thL});ys.push({Y:s.bot+k*sp,t:thL});}
+  ys.forEach(({Y,t:th})=>{const ly=Math.round(Y)-y0;if(ly<1||ly>=h-1)return;
+    for(let x=0;x<W;x++){let yy=-1;for(let d=0;d<=Math.ceil(th/2)+1;d++){if(c[(ly+d)*W+x]){yy=ly+d;break;}if(ly-d>=0&&c[(ly-d)*W+x]){yy=ly-d;break;}}if(yy<0)continue;
+      let a=yy,b=yy;while(a>0&&c[(a-1)*W+x])a--;while(b<h-1&&c[(b+1)*W+x])b++;if(b-a+1<=th+1)for(let y=a;y<=b;y++)c[y*W+x]=0;}});
+  return {c,y0,h,th,thL};
+}
+
+function components(c,W,h,want){const lab=new Int32Array(W*h),out=[];let n=0;const st=[];
+  for(let i=0;i<W*h;i++){if(c[i]!==want||lab[i])continue;n++;lab[i]=n;st.length=0;st.push(i);let x0=W,x1=0,y0=h,y1=0,a=0,border=false;
+    while(st.length){const j=st.pop(),y=(j/W)|0,x=j-y*W;a++;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;if(x===0||y===0||x===W-1||y===h-1)border=true;
+      const nb=want?[[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]]:[[0,-1],[-1,0],[1,0],[0,1]];
+      for(const [dx,dy] of nb){const X=x+dx,Y=y+dy;if(X<0||Y<0||X>=W||Y>=h)continue;const k=Y*W+X;if(c[k]===want&&!lab[k]){lab[k]=n;st.push(k);}}}
+    out.push({id:n,x0,x1:x1+1,y0,y1:y1+1,w:x1-x0+1,h:y1-y0+1,a,border});}
+  return {lab,list:out};}
+
+/* stem from a head: returns {len, x, end, up} */
+function findStem(c,W,h,hx,hy,hw,sp){
+  let best={len:0};
+  /* the joint between head and stem may have been wiped with a ledger line: allow a short gap before the stem starts */
+  const lead=Math.max(2,Math.round(0.45*sp));
+  const tryCol=(xa,xb,dir)=>{for(let x=Math.round(xa);x<=Math.round(xb);x++){if(x<0||x>=W)continue;let y=Math.round(hy),miss=0,len=0,end=y,on=false;
+      while(y>=0&&y<h&&(miss<=2||(!on&&miss<=lead))){if(c[y*W+x]){len+=on?1+miss:1;on=true;miss=0;end=y;}else miss++;y+=dir;}
+      if(len>best.len){let thick=0;const my=Math.round((hy+end)/2);if(my>=0&&my<h){let l=x,r=x;while(l>0&&c[my*W+l-1])l--;while(r<W-1&&c[my*W+r+1])r++;thick=r-l+1;}
+        if(thick<=0.4*sp)best={len,x,end,up:dir<0};}}};
+  tryCol(hx+hw-0.35*sp,hx+hw+0.15*sp,-1);tryCol(hx-hw-0.15*sp,hx-hw+0.35*sp,1);
+  return best.len>=2.4*sp?best:null;
+}
+/* beams or flags at the far end of a stem */
+function countBeams(c,W,h,st,sp){
+  let best=0,longest=0;[-0.55,0.55].forEach(off=>{const x=Math.round(st.x+off*sp);if(x<0||x>=W)return;let runs=0,run=0;
+    const a=st.up?st.end:st.end-1.8*sp,b=st.up?st.end+1.8*sp:st.end;
+    for(let y=Math.round(a);y<=Math.round(b);y++){const v=y>=0&&y<h&&c[y*W+x];if(v)run++;else{if(run>=0.25*sp)runs++;longest=Math.max(longest,run);run=0;}}if(run>=0.25*sp)runs++;longest=Math.max(longest,run);
+    best=Math.max(best,runs);});
+  countBeams.longest=longest;
+  /* flags of a 16th lie close together further out; right next to the stem their roots are still apart */
+  [0.2,0.3,0.4].forEach(off=>{const x=Math.round(st.x+off*sp);if(x<0||x>=W)return;let runs=0,run=0;const mn=Math.max(2,0.15*sp);
+    const a=st.up?st.end:st.end-1.8*sp,b=st.up?st.end+1.8*sp:st.end;
+    for(let y=Math.round(a);y<=Math.round(b);y++){const v=y>=0&&y<h&&c[y*W+x];if(v)run++;else{if(run>=mn)runs++;run=0;}}if(run>=mn)runs++;
+    best=Math.max(best,runs);});
+  return Math.min(best,3);
+}
+
+
+/* accidental shape from a bounding box in the cleaned image: 1 sharp, -1 flat, 0 natural, null unknown */
+function accKind(c,W,k){const w=k.w,h=k.h,m=(x,y)=>c[(k.y0+y)*W+(k.x0+x)];
+  const runsRow=y=>{let r=0,p=0;for(let x=0;x<w;x++){const v=m(x,y);if(v&&!p)r++;p=v;}return r;};
+  let stem=0;const lw=Math.max(1,Math.round(w*0.35));for(let y=0;y<h;y++){let f=0;for(let x=0;x<lw;x++)if(m(x,y)){f=1;break;}stem+=f;}
+  let topW=0;for(let y=0;y<Math.round(h*0.35);y++){let mx=-1;for(let x=w-1;x>=0;x--)if(m(x,y)){mx=x;break;}topW=Math.max(topW,mx+1);}
+  if(stem/h>=0.85&&topW<=w*0.55&&runsRow(Math.round(h*0.75))>=2)return -1;
+  const y12=Math.round(h*0.12),y88=Math.min(h-1,Math.round(h*0.88)),r12=runsRow(y12),r88=runsRow(y88),r50=runsRow(Math.round(h*0.5));
+  if(r12>=2&&r88>=2)return 1;
+  if(r12===1&&r88===1&&r50>=2){let lx=0,ln=0,rx=0,rn=0;for(let x=0;x<w;x++){if(m(x,y12)){lx+=x;ln++;}if(m(x,y88)){rx+=x;rn++;}}if(ln&&rn&&lx/ln<rx/rn-0.2*w)return 0;}
+  return null;}
+
+/* what kind of rest a mark is, from its shape and where it sits on the staff */
+function restKind(c,W,k,s,y0,sp){const Yt=k.y0+y0,Yb=k.y1+y0,fill=k.a/(k.w*k.h);
+  if(k.h<=0.8*sp){if(k.w<0.8*sp||fill<0.75)return null;
+    if(Math.abs(Yt-(s.top+sp))<=0.3*sp)return {dur:'bar',kind:'whole'};
+    if(Math.abs(Yb-(s.top+2*sp))<=0.3*sp)return {dur:2,kind:'half'};return null;}
+  if(k.w>1.5*sp||k.h<1.2*sp)return null;
+  if(k.h<2.3*sp)return {dur:0.5,kind:'8th'};
+  return {dur:1,kind:'4th'};}
+/* removing the staff lines can cut a flat into its stem and its bowl: join them again */
+function joinFlats(list,sp){const used=new Set(),out=[];
+  list.forEach(k=>{if(used.has(k))return;if(k.w<=0.32*sp&&k.h>=1.4*sp){
+      const b=list.find(o=>o!==k&&!used.has(o)&&o.x0-k.x1>=-1&&o.x0-k.x1<=0.3*sp&&o.h<=1.6*sp&&o.w<=1.0*sp&&o.y0>=k.y0+0.5*sp&&o.y1<=k.y1+0.3*sp);
+      if(b){used.add(b);out.push({x0:k.x0,x1:Math.max(k.x1,b.x1),y0:k.y0,y1:Math.max(k.y1,b.y1),w:Math.max(k.x1,b.x1)-k.x0,h:Math.max(k.y1,b.y1)-k.y0,a:k.a+b.a,joined:true});return;}}
+    out.push(k);});
+  return out.filter(k=>!used.has(k));}
+/* which letters the key signature raises or lowers: sharps go F C G D A E B, flats B E A D G C F.
+   Key 6 is read as F# (six sharps) unless ML.flat6 says the sheet was written in Gb. */
+ML.keyAcc=function(k){k=mod(k,12);const SHN=[0,0,2,0,4,0,6,1,0,3,0,5],FLN=[0,5,0,3,0,1,6,0,4,0,2,0];
+  const SO=[5,0,7,2,9,4,11],FO=[11,4,9,2,7,0,5];let sh=SHN[k],fl=FLN[k];if(k===6){if(ML.flat6)sh=0;else fl=0;}
+  const up=new Set(SO.slice(0,sh)),down=new Set(FO.slice(0,fl));return pc=>up.has(pc)?1:down.has(pc)?-1:0;};
+ML._clean=(...a)=>cleanStaff(...a);ML._countBeams=(...a)=>countBeams(...a);ML._findStem=(...a)=>findStem(...a);
+/* key signature read from the staff: the sharps or flats right after the clef, checked against
+   the fixed places they are written (sharps F C G D A E B, flats B E A D G C F) */
+ML.keySig=function(bin,W,H,sys,bars){
+  const SH=[8,5,9,6,3,7,4],FL=[4,7,3,6,2,5,1],SPC=[0,7,2,9,4,11,6,1],FPC=[0,5,10,3,8,1,6,11];
+  const per=sys.map((s,si)=>{const sp=s.sp,cl=cleanStaff(bin,W,H,s),c=cl.c,h=cl.h,y0=cl.y0,bl=bars[si]||{x0:0};
+    const comps=joinFlats(components(c,W,h,1).list,sp);
+    let clefR=null;comps.forEach(k=>{if(k.h>=5*sp&&k.w>=1.2*sp&&k.x0<bl.x0+3*sp&&k.x1>bl.x0)clefR=Math.max(clefR||0,k.x1);});
+    if(clefR===null)return null;
+    const cand=comps.filter(k=>k.h>=1.4*sp&&k.h<=3.4*sp&&k.w>=0.4*sp&&k.w<=1.5*sp&&k.x0>=clefR-0.3*sp&&k.x0<=clefR+9*sp).sort((p,q)=>p.x0-q.x0);
+    let kind=0,n=0,prev=null;
+    for(const k of cand){if(prev===null?k.x0>clefR+1.6*sp:k.x0-prev.x1>1.0*sp)break;
+      const a=accKind(c,W,k);if(a!==1&&a!==-1)break;if(kind&&a!==kind)break;
+      const step=(a===1?SH:FL)[n];if(step===undefined)break;const want=s.bot-step*sp/2,at=a===1?(k.y0+k.y1)/2+y0:k.y1+y0-0.5*sp;
+      if(Math.abs(at-want)>0.6*sp)break;kind=a;n++;prev=k;}
+    if(!n)return null;return {n,kind,pc:kind===1?SPC[n]:FPC[n]};});
+  const votes={};per.forEach(p=>{if(p)votes[p.pc]=(votes[p.pc]||0)+1;});
+  let best=null,bv=0;Object.keys(votes).forEach(k=>{if(votes[k]>bv){bv=votes[k];best=+k;}});
+  /* a key change counts only when the next line keeps it too (or it is the last line) */
+  const pk=i=>per[i]?per[i].pc:null;
+  const sysKeys=per.map((p,i)=>{const k=pk(i);if(k===null||k===best)return best;const nx=i+1<per.length?pk(i+1):(i>0?pk(i-1):null);return nx===k?k:best;});
+  return {pc:best,per,seen:per.filter(Boolean).length,sysKeys};
+};
+ML.read=function(bin,W,H,sys,bars,chordBoxes,keyPc,beats,lowBin){
+  /* bin: thin lines (staff, stems, ledgers) must show. lowBin (optional, small pictures): a lighter cut where
+     the gaps between beams and the holes of hollow heads stay open; heads, holes, beams and dots are read from it */
+  /* keyPc: one key for the whole sheet, or one per line (a key change part way through) */
+  const DIA=[0,2,4,5,7,9,11],keyOf=si=>Array.isArray(keyPc)?(keyPc[si]!==undefined&&keyPc[si]!==null?keyPc[si]:keyPc[0]):keyPc;
+  const accFor=k=>ML.keyAcc(k);
+  const notes=[];let measureBase=0;const measures=[];const restsAll=[];const voltasAll=[];
+  sys.forEach((s,si)=>{
+    const sp=s.sp,cl=cleanStaff(bin,W,H,s),c=cl.c,h=cl.h,y0=cl.y0,bl=bars[si]||{x0:0,x1:W,bars:[]};
+    const clL=lowBin?cleanStaff(lowBin,W,H,s,cl):cl,cL=clL.c,srcL=lowBin||bin;
+    const kp=keyOf(si),keyAcc=accFor(kp),nAcc=[0,5,2,3,4,1,6,1,4,3,2,5][mod(kp,12)],xStart=bl.x0+(3.3+nAcc*0.95+(si===0?1.8:0))*sp,inChord=(x,y)=>chordBoxes.some(b=>b.sys===si&&x>=b.x0-0.3*sp&&x<=b.x1+0.3*sp&&y+y0>=b.y0-0.3*sp&&y+y0<=b.y1+0.3*sp);
+    const lineAt=(Y)=>{let k=Math.round((s.bot-Y)/(sp/2));return k;};
+    const ledgerOK=(x,Y)=>{ /* below/above the staff a head needs ledger lines from the original image */
+      if(Y>s.top-0.6*sp&&Y<s.bot+0.6*sp)return true;const ly=Y>s.bot?s.bot+sp:s.top-sp;const yy=Math.round(ly);let n=0;for(let xx=Math.round(x-0.9*sp);xx<=Math.round(x+0.9*sp);xx++)if(xx>=0&&xx<W&&(bin[yy*W+xx]||bin[(yy+1)*W+xx]||bin[(yy-1)*W+xx]))n++;return n>=1.4*sp;};
+    const I=integral(cL,W,0,h),cand=[];
+    /* filled heads: every 0.7sp x 0.42sp box fully dark */
+    const bw=Math.max(3,Math.round(0.62*sp)),bh=Math.max(2,Math.round(0.38*sp)),core=new Uint8Array(W*h);
+    for(let y=0;y+bh<h;y++)for(let x=Math.round(xStart);x+bw<Math.min(W,bl.x1+sp);x++)if(boxSum(I,W,x,y,x+bw,y+bh)>=bw*bh*0.96)core[(y+(bh>>1))*W+x+(bw>>1)]=1;
+    components(core,W,h,1).list.forEach(k=>{if(k.w>1.2*sp||k.h>1.0*sp)return;const hx=(k.x0+k.x1)/2,hy=(k.y0+k.y1)/2;
+      let l=Math.round(hx),r=l;const yy=Math.round(hy);while(l>0&&cL[yy*W+l-1])l--;while(r<W-1&&cL[yy*W+r+1])r++;const hwid=r-l+1;
+      if(hwid<0.8*sp||hwid>1.65*sp)return;
+      const wAt=yy2=>{if(yy2<0||yy2>=h)return 0;let a=Math.round(hx),b=a;if(!cL[yy2*W+a])return 0;while(a>0&&cL[yy2*W+a-1])a--;while(b<W-1&&cL[yy2*W+b+1])b++;return b-a+1;};
+      let ta=Math.round(hy),tb=ta;const hcx=Math.round(hx);while(ta>0&&cL[(ta-1)*W+hcx]&&yy-ta<sp)ta--;while(tb<h-1&&cL[(tb+1)*W+hcx]&&tb-yy<sp)tb++;const headH=tb-ta+1;
+      /* a head is about one space tall; a beam is only half of that */
+      if(headH<0.75*sp)return;
+      const wU=wAt(Math.round(hy-0.36*headH)),wD=wAt(Math.round(hy+0.36*headH));if(wU>0.88*hwid&&wD>0.88*hwid)return;
+      const thickAt=(xx)=>{xx=Math.round(xx);if(xx<0||xx>=W)return 0;let n=0;for(let yy3=Math.round(hy-0.5*sp);yy3<=Math.round(hy+0.5*sp);yy3++)if(yy3>=0&&yy3<h&&cL[yy3*W+xx])n++;return n;};
+      if((thickAt(hx-0.95*sp)>=0.35*sp&&thickAt(hx-1.45*sp)>=0.3*sp)||(thickAt(hx+0.95*sp)>=0.35*sp&&thickAt(hx+1.45*sp)>=0.3*sp))return;
+      cand.push({x:hx,y:hy,hw:Math.min(hwid,1.5*sp)/2,filled:true});});
+    /* hollow heads: small enclosed holes inside a head-sized ring (searched with and without staff lines) */
+    const orig=new Uint8Array(W*h);for(let y=0;y<h;y++)orig.set(srcL.subarray((y0+y)*W,(y0+y+1)*W),y*W);
+    const holesOf=src=>{const L=components(src,W,h,0).list.filter(k=>!k.border&&k.w>=0.3*sp&&k.w<=1.2*sp&&k.h<=0.45*sp);const extra=[];
+      /* a staff line or a ledger line through a hollow head splits its hole in two: join the halves */
+      const ruled=s.lines.concat([1,2,3,4].flatMap(k=>[s.top-k*sp,s.bot+k*sp]));
+      L.forEach(a=>{L.forEach(b=>{if(b===a||b.y0<=a.y0)return;const gap=b.y0-a.y1;if(gap<1||gap>Math.max(3,clL.thL+2))return;if(Math.abs((a.x0+a.x1)-(b.x0+b.x1))>1.2*sp)return; /* a tilted hole: its halves sit a little apart */
+        const lineMid=(a.y1+b.y0)/2+y0;if(!ruled.some(Lr=>Math.abs(Lr-lineMid)<=Math.max(2.5,clL.thL)))return;
+        extra.push({x0:Math.min(a.x0,b.x0),x1:Math.max(a.x1,b.x1),y0:a.y0,y1:b.y1,w:Math.max(a.x1,b.x1)-Math.min(a.x0,b.x0),h:b.y1-a.y0,a:a.a+b.a+gap*Math.min(a.w,b.w),border:false,merged:true});});});
+      return components(src,W,h,0).list.concat(extra);};
+    [cL,orig].forEach(src=>{holesOf(src).forEach(k=>{if(k.border)return;if(k.w<0.22*sp||k.w>1.2*sp||k.h<0.12*sp||k.h>0.95*sp||k.a<0.04*sp*sp||k.a>0.65*sp*sp)return;
+      const hx=(k.x0+k.x1)/2,hy=(k.y0+k.y1)/2;if(hx<xStart)return;const yy=Math.round(hy);
+      const ringW=(()=>{const rows=k.merged?[Math.round(k.y0+0.25*k.h),Math.round(k.y1-1-0.25*k.h)]:[yy];let best=0;rows.forEach(ry=>{let a=k.x0-1;while(a>0&&src[ry*W+a])a--;let b=k.x1;while(b<W-1&&src[ry*W+b])b++;best=Math.max(best,b-a);});return best;})(); /* a merged hole sits on a line: measure the ring away from it */
+      if(ringW<1.12*sp||ringW>1.9*sp)return;
+      if(k.a/(k.w*k.h)<0.36||k.a/(k.w*k.h)>0.9)return;
+      if(bl.bars.concat([bl.x1]).some(v=>Math.abs(hx-v)<1.0*sp))return;
+      if(k.h<0.35*k.w)return;
+      if(!k.merged){const onLine=Y=>s.lines.some(L=>Math.abs(L-(Y+y0))<=2.5);if((onLine(k.y0-1)||onLine(k.y1))&&k.h<0.5*sp)return;}
+      {const ry=k.merged?Math.round(k.y0+0.25*k.h):yy;let a=k.x0-1;while(a>0&&src[ry*W+a])a--;let b=k.x1;while(b<W-1&&src[ry*W+b])b++;if(Math.abs((a+b)/2-hx)>0.22*sp)return;}
+      const cx=Math.round(hx);let up=k.y0-1,thU=0;while(up>=0&&src[up*W+cx]){up--;thU++;}let dn=k.y1,thD=0;while(dn<h&&src[dn*W+cx]){dn++;thD++;}
+      if(thU>0.45*sp||thD>0.45*sp||thU<1||thD<1)return;
+      if(k.y1-k.y0+thU+thD>1.3*sp)return;
+      /* a hole closed by a stem that runs on past both its ends is the inside of a flag, not a head */
+      const through=xx=>{if(xx<0||xx>=W)return false;let miss=0;for(let y=Math.round(k.y0-0.8*sp);y<=Math.round(k.y1+0.8*sp);y++){if(y<0||y>=h||!src[y*W+xx]){if(++miss>2)return false;}else miss=0;}return true;};
+      for(let xx=Math.round(k.x0-0.3*sp);xx<=Math.round(k.x1+0.3*sp);xx++)if((xx<k.x0||xx>=k.x1)&&through(xx))return;
+      if(cand.some(o=>!o.filled&&Math.abs(o.x-hx)<0.6*sp&&Math.abs(o.y-hy)<0.6*sp))return;
+      cand.push({x:hx,y:hy,hw:ringW/2,filled:false});});});
+    /* keep heads in a plausible place */
+    let heads=cand.filter(n=>{const Y=n.y+y0;if(Y<s.top-3.8*sp||Y>s.bot+3.8*sp)return false;if(inChord(n.x,n.y))return false;if(!ledgerOK(n.x,Y))return false;return true;});
+    heads.sort((a,b)=>a.x-b.x);
+    heads=heads.filter((n,i)=>!heads.some((m,j)=>j<i&&Math.abs(m.x-n.x)<0.5*sp&&Math.abs(m.y-n.y)<0.4*sp));
+    /* rhythm */
+    const out=[];heads.forEach(n=>{n.st=findStem(c,W,h,n.x,n.y,n.hw,sp);});
+    heads.forEach(n=>{const st=n.st;
+      if(n.filled&&!st)return;let dur;
+      if(!n.filled){const Y=n.y+y0;if(!st&&(Y>s.bot+0.8*sp||Y<s.top-0.8*sp))return;
+        if(st&&heads.some(m=>m!==n&&m.filled&&m.st&&Math.abs(m.x-st.x)<1.1*sp&&Math.abs(m.y-st.end)<1.0*sp))return;}
+      let nb=-1,beamL=0;if(!n.filled)dur=st?2:(n.hw*2>=1.3*sp?4:2);else{nb=countBeams(cL,W,h,st,sp);beamL=countBeams.longest/sp;dur=[1,0.5,0.25,0.125][nb];}
+      /* dot */
+      let dot=false;for(let dy=-0.75;dy<=0.25&&!dot;dy+=0.25){const yy=Math.round(n.y+dy*sp);if(yy<0||yy>=h)continue;for(let xx=Math.round(n.x+n.hw+0.25*sp);xx<Math.round(n.x+n.hw+1.3*sp);xx++){if(xx>=W)break;if(cL[yy*W+xx]){
+        let a=0,x0=xx,x1=xx,ya=yy,yb=yy;const seen=new Set(),q=[yy*W+xx];while(q.length&&a<200){const j=q.pop();if(seen.has(j))continue;seen.add(j);const Y=(j/W)|0,X=j-Y*W;if(!cL[j])continue;a++;x0=Math.min(x0,X);x1=Math.max(x1,X);ya=Math.min(ya,Y);yb=Math.max(yb,Y);[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,v])=>{const XX=X+u,YY=Y+v;if(XX>=0&&YY>=0&&XX<W&&YY<h)q.push(YY*W+XX);});}
+        const dw=x1-x0+1,dh=yb-ya+1;if(a<200&&dw<=0.55*sp&&dh<=0.55*sp&&dw>=0.15*sp&&dh>=0.15*sp){dot=true;
+          /* a second dot right after the first: double dotted */
+          const ry=Math.round((ya+yb)/2);for(let x2=x1+1;x2<=Math.round(x1+0.8*sp)&&x2<W;x2++){if(!cL[ry*W+x2])continue;let n2=0,u0=x2,u1=x2,v0=ry,v1=ry;const seen2=new Set(),q2=[ry*W+x2];
+            while(q2.length&&n2<200){const j=q2.pop();if(seen2.has(j))continue;seen2.add(j);const Y2=(j/W)|0,X2=j-Y2*W;if(!cL[j])continue;n2++;u0=Math.min(u0,X2);u1=Math.max(u1,X2);v0=Math.min(v0,Y2);v1=Math.max(v1,Y2);[[1,0],[-1,0],[0,1],[0,-1]].forEach(([p,q])=>{const XX=X2+p,YY=Y2+q;if(XX>=0&&YY>=0&&XX<W&&YY<h)q2.push(YY*W+XX);});}
+            if(n2<200&&u1-u0+1<=0.55*sp&&v1-v0+1<=0.55*sp&&u1-u0+1>=0.15*sp&&v1-v0+1>=0.15*sp)dot=2;break;}}
+        break;}}}
+      if(dot)dur*=dot===2?1.75:1.5;
+      const Y=n.y+y0,k=lineAt(Y),d=2+k,li=mod(d,7),o=4+Math.floor(d/7),nat=12*(o+1)+DIA[li];
+      out.push({id:'n'+si+'_'+Math.round(n.x)+'_'+Math.round(Y),sys:si,x:n.x,y:Y,hw:n.hw,dur,base:dur,letterPc:DIA[li],nat,filled:n.filled,stem:!!st,sx:st?st.x:null,se:st?st.end+y0:null,up:st?st.up:null,nb,beamL,dotF:dot?(dot===2?1.75:1.5):1});});
+    /* which neighbouring notes share a beam: the straight line between their stem ends is inked */
+    for(let i=0;i+1<out.length;i++){const a=out[i],b2=out[i+1];if(!a.filled||!b2.filled||a.sx===null||b2.sx===null||a.up!==b2.up||b2.sx-a.sx>8*sp)continue;
+      let hit=0,tot=0;for(let t=0.15;t<=0.851;t+=0.07){const xx=Math.round(a.sx+(b2.sx-a.sx)*t),yy=a.se+(b2.se-a.se)*t-y0;tot++;
+        const ya=Math.round(a.up?yy-0.15*sp:yy-0.6*sp),yb=Math.round(a.up?yy+0.6*sp:yy+0.15*sp);let any=false;for(let y=ya;y<=yb&&!any;y++)if(y>=0&&y<h&&c[y*W+xx])any=true;if(any)hit++;}
+      if(hit>=tot*0.6)a.beamNext=true;}
+    /* in a small picture two beams can blur into one thick band: for beamed notes, count beams by thickness too */
+    out.forEach((n,i)=>{if(!n.filled||n.nb<0||!(n.beamNext||(i>0&&out[i-1].beamNext)))return;const byTh=Math.min(3,Math.round((n.beamL+0.25)/0.73));
+      if(byTh>n.nb){n.nb=byTh;n.dur=n.base=[1,0.5,0.25,0.125][byTh]*n.dotF;}});
+    /* a head without a stem can only be a whole note, and a whole note fills its bar alone */
+    {const edges=[bl.x0].concat(bl.bars,[bl.x1]).sort((p,q)=>p-q),barOf=x=>edges.filter(v=>v<=x).length;
+      for(let i=out.length-1;i>=0;i--){const n=out[i];if(n.stem||n.filled)continue;
+        if(out.some(m=>m!==n&&barOf(m.x)===barOf(n.x)&&Math.abs(m.x-n.x)>0.6*sp))out.splice(i,1);}}
+    const compsAll=components(c,W,h,1).list;
+    /* rest symbols: compact marks inside the staff that are not heads, stems, flags or accidentals */
+    const rests=[];compsAll.forEach(k=>{const X=(k.x0+k.x1)/2,Yt=k.y0+y0,Yb=k.y1+y0;
+      if(X<xStart||k.w<0.35*sp||k.w>1.7*sp||k.h<0.25*sp||k.h>3.6*sp)return;if(Yt<s.top-0.6*sp||Yb>s.bot+0.6*sp)return;
+      if(out.some(n=>Math.abs(n.x-X)<n.hw+0.5*sp&&n.y>=Yt-0.6*sp&&n.y<=Yb+0.6*sp))return;
+      if(out.some(n=>n.x-X>0&&n.x-X<1.6*sp&&n.y>=Yt-0.3*sp&&n.y<=Yb+0.3*sp))return;
+      if(out.some(n=>n.sx!==null&&n.sx>=k.x0-1&&n.sx<=k.x1+1))return;
+      if(out.some(n=>n.sx!==null&&k.x0>=n.sx-1&&k.x0<=n.sx+0.5*sp&&Yt>=Math.min(n.y,n.se)-0.3*sp&&Yb<=Math.max(n.y,n.se)+0.3*sp))return;
+      if(inChord(X,k.y0+(k.y1-k.y0)/2))return;
+      let r=k.h>=1.2*sp&&accKind(c,W,k)!==null?null:restKind(c,W,k,s,y0,sp);
+      /* a dot just after a rest makes it half as long again */
+      if(r&&typeof r.dur==='number'){const dot=compsAll.find(d=>d!==k&&d.w>=0.15*sp&&d.w<=0.6*sp&&d.h>=0.15*sp&&d.h<=0.6*sp&&d.a>=0.6*d.w*d.h&&d.x0>=k.x1-1&&d.x0<=k.x1+0.9*sp&&(d.y0+d.y1)/2>=k.y0-0.2*sp&&(d.y0+d.y1)/2<=k.y1-0.5*sp);if(dot){const dot2=compsAll.find(d=>d!==dot&&d.w<=0.6*sp&&d.h<=0.6*sp&&d.w>=0.15*sp&&d.h>=0.15*sp&&d.x0>=dot.x1-1&&d.x0<=dot.x1+0.8*sp&&Math.abs((d.y0+d.y1)-(dot.y0+dot.y1))<=0.5*sp);r=dot2?{dur:r.dur*1.75,kind:r.kind+'..'}:{dur:r.dur*1.5,kind:r.kind+'.'};}}
+      if(ML.dbgRests)ML.dbgRests.push({sys:si,k,X,Yt,Yb,sp,r});if(!r)return;
+      rests.push({x:X,dur:r.dur,kind:r.kind,sys:si});});
+    restsAll.push(...rests);
+    /* accidentals right in front of a head */
+    const accComps=joinFlats(compsAll,sp);
+    out.forEach(n=>{const ly=n.y-y0;let best=null;
+      accComps.forEach(k=>{if(k.h<1.3*sp||k.h>3.6*sp||k.w<0.3*sp||k.w>1.4*sp)return;if(k.x1<n.x-n.hw-1.7*sp||k.x1>n.x-n.hw+0.25*sp)return;
+        const cy=(k.y0+k.y1)/2;if(Math.abs(cy-ly)>1.1*sp)return;if(ly<k.y0-0.2*sp||ly>k.y1+0.2*sp)return;if(!best||k.x1>best.x1)best=k;});
+      if(best){const a=accKind(c,W,best);if(a!==null)n.acc=a;}});
+    /* ties: a thin arc joining two neighbouring heads of the same written pitch */
+    for(let i=0;i+1<out.length;i++){const a=out[i],b2=out[i+1];if(a.nat!==b2.nat||b2.x-a.x>9*sp)continue;const ay=a.y-y0;
+      const arc=compsAll.find(k=>k.h<=1.1*sp&&k.h>=0.2*sp&&k.a<=k.w*0.38*sp&&k.w>=0.8*sp&&k.x0>=a.x-0.4*sp&&k.x0<=a.x+a.hw+1.3*sp&&k.x1>=b2.x-b2.hw-1.3*sp&&k.x1<=b2.x+0.4*sp&&(k.y0+k.y1)/2>ay-1.7*sp&&(k.y0+k.y1)/2<ay+1.7*sp);
+      if(arc)b2.tie=true;}
+    /* bars */
+    let b=[bl.x0].concat(bl.bars.filter(v=>v>bl.x0+sp*1.5&&v<bl.x1-sp*0.5&&!out.some(n=>n.sx!==null&&Math.abs(n.sx-v)<0.45*sp)));b.push(bl.x1);if(b.length<2)b=[bl.x0,bl.x1];
+    b=b.filter((v,i)=>i===0||v-b[i-1]>=1.2*sp||i===b.length-1);
+    /* repeat signs: two dots in the 2nd and 3rd spaces right next to a barline */
+    const dotPair=(xa,xb)=>{const r=Math.max(1,Math.round(0.14*sp)),ys=[s.top+1.5*sp,s.top+2.5*sp];
+      for(let x=Math.round(xa);x<=Math.round(xb);x++){if(x-r<0||x+r>=W)continue;
+        const full=ys.every(Y=>{let n=0,tot=0;for(let yy=Math.round(Y-r);yy<=Math.round(Y+r);yy++)for(let xx=x-r;xx<=x+r;xx++){tot++;if(bin[yy*W+xx])n++;}return n>=tot*0.6;});
+        if(!full)continue;const far=Math.round(0.55*sp);
+        const small=ys.every(Y=>{const yy=Math.round(Y);return !bin[yy*W+x-far]&&!bin[yy*W+x+far];});
+        const gap=!bin[Math.round(s.top+2*sp-0.2*sp)*W+x]||!bin[Math.round(s.top+2*sp+0.2*sp)*W+x];
+        if(small&&gap)return true;}return false;};
+    const repEndAt=new Set(),repStartAt=new Set();
+    b.forEach((v,bi)=>{if(bi>0&&dotPair(v-1.9*sp,v-0.15*sp))repEndAt.add(bi);if(bi<b.length-1&&dotPair(v+0.15*sp,v+1.9*sp))repStartAt.add(bi);});
+    /* volta brackets: a long thin line above the staff with a hook going down at its left end */
+    const voltas=[];{const ya=Math.max(0,Math.round(s.top-4.6*sp)),yb=Math.round(s.top-0.5*sp);
+      for(let y=ya;y<=yb;y++){let x=Math.round(bl.x0);while(x<bl.x1){if(!bin[y*W+x]){x++;continue;}let e=x;while(e<bl.x1&&bin[y*W+e+1])e++;
+          if(e-x+1>=2.5*sp){const thin=(()=>{let ok=0,tot=0;for(let xx=x+Math.round(0.3*sp);xx<=e;xx+=2){tot++;let w=true;for(const d of [-4,-3,-2,3,4,5])if(bin[(y+d)*W+xx])w=false;if(w)ok++;}return tot>0&&ok>=tot*0.75;})();
+            let hook=0;for(let yy=y;yy<y+2*sp&&yy<H;yy++){let any=false;for(let dx=-2;dx<=2;dx++)if(bin[yy*W+x+dx])any=true;if(any)hook++;else break;}
+            if(thin&&hook>=0.8*sp&&!voltas.some(v=>Math.abs(v.y-y)<=3&&Math.abs(v.x0-x)<sp))voltas.push({y,x0:x,x1:e});}
+          x=e+1;}}}
+    if(ML.debugV)console.log('sys',si,'voltas',JSON.stringify(voltas.slice(0,6).map(v=>({y:Math.round((v.y-s.top)/sp*10)/10,x0:v.x0,x1:v.x1}))));voltas.sort((p,q)=>p.x0-q.x0);voltasAll.push(...voltas.map(v=>({sys:si,x0:v.x0,x1:v.x1})));
+    for(let m=0;m+1<b.length;m++){const inM=out.filter(n=>n.x>=b[m]-0.3*sp&&n.x<b[m+1]-0.3*sp);
+      const acc={};inM.forEach(n=>{const a=(n.acc!==undefined)?n.acc:(acc[n.nat]!==undefined?acc[n.nat]:keyAcc(n.letterPc));if(n.acc!==undefined)acc[n.nat]=n.acc;n.midi=n.nat+a;});
+      measures.push({sys:si,x0:b[m],x1:b[m+1],notes:inM,index:measureBase+m,repStart:repStartAt.has(m),repEnd:repEndAt.has(m+1)});}
+    measureBase+=b.length-1;
+    notes.push(...out);
+  });
+  /* time: merge bars split by a false barline, then fill each bar to the time signature */
+  for(let i=0;i+1<measures.length;i++){const A=measures[i],B=measures[i+1];if(A.sys!==B.sys)continue;if(i===0||measures[i-1].sys!==A.sys)continue;if(restsAll.some(r=>r.sys===A.sys&&r.x>A.x0&&r.x<B.x1))continue;
+    const ra=A.notes.reduce((a,n)=>a+n.dur,0),rb=B.notes.reduce((a,n)=>a+n.dur,0);
+    if(ra>0&&rb>0&&ra<beats-0.01&&rb<beats-0.01&&Math.abs(ra+rb-beats)<=0.26&&i>0){A.notes=A.notes.concat(B.notes);A.x1=B.x1;A.repEnd=A.repEnd||B.repEnd;measures.splice(i+1,1);i--;}}
+  /* number the brackets: a bracket right after a repeat sign is the 2nd ending */
+  voltasAll.forEach(v=>{const ms=measures.filter(M=>M.sys===v.sys&&(M.x0+M.x1)/2>v.x0&&(M.x0+M.x1)/2<v.x1+0.5*sys[v.sys].sp);v.ms=ms;
+    const first=ms[0],idx=first?measures.indexOf(first):-1,prev=idx>0?measures[idx-1]:null;v.num=prev&&prev.repEnd?2:1;});
+  voltasAll.forEach(v=>v.ms.forEach(M=>{M.volta=v.num;}));
+  const R={measures,rests:restsAll,voltas:voltasAll,sys:sys.map(q=>({sp:q.sp,top:q.top,bot:q.bot})),keyPc:keyOf(0),marks:[]};
+  return ML.retime(R,beats);
+
+};
+
+
+/* choose, for one bar, the reading closest to what was seen whose lengths add up to the time signature.
+   Each mark may be read a little differently (one beam more or less, a dot or not, an eighth or a quarter rest,
+   or a stray mark that is not a rest at all). Beamed notes are taken as one group: a group normally fills whole or
+   half beats, and three equal beamed eighths are most likely a triplet. Rare readings (32nd notes) cost more. */
+ML.solveBar=function(ns,rests,beats){
+  const U=96,unit=v=>Math.round(v*U),target=unit(beats),B=[1,0.5,0.25,0.125];
+  const noteAlts=n=>{const alts=[];
+    if(n.filled&&n.nb>=0){[-1,0,1].forEach(db=>{const b=n.nb+db;if(b<0||b>3)return;[n.dotF,n.dotF===1?1.5:1].forEach((df,k)=>{let c=Math.abs(db)+(k?1.5:0);if(b===3&&n.nb!==3)c+=2;alts.push({v:B[b]*df,c});});});}
+    else{alts.push({v:n.base,c:0});if(!n.filled&&n.stem)alts.push({v:n.dotF===1?n.base*1.5:n.base/n.dotF,c:1.5});}
+    return alts;};
+  const seq=[];ns.forEach((n,i)=>seq.push({x:n.x,kind:'n',i}));rests.forEach((r,i)=>seq.push({x:r.x,kind:'r',i}));seq.sort((a,b)=>a.x-b.x);
+  const units=[];let cur=null;
+  seq.forEach(e=>{if(e.kind==='n'){if(cur&&cur.open)cur.items.push(e.i);else{cur={kind:'g',items:[e.i]};units.push(cur);}cur.open=!!ns[e.i].beamNext;}else{cur=null;units.push({kind:'r',i:e.i});}});
+  units.forEach(un=>{
+    if(un.kind==='r'){const r=rests[un.i],d=r.dur==='bar'?beats:r.dur,alts=[{vals:[d],c:0}];
+      if(r.kind&&/^(8th|4th)/.test(r.kind)){const f=/\.\./.test(r.kind)?1.75:/\./.test(r.kind)?1.5:1,base=/^8th/.test(r.kind)?0.5:1,other=base===0.5?1:0.5;
+        alts.push({vals:[other*f],c:0.8});alts.push({vals:[f===1?base*1.5:base],c:1.5});}
+      alts.push({vals:[0],c:1.3});un.alts=alts.map(a=>({vals:a.vals,c:a.c,u:unit(a.vals[0])}));return;}
+    let combos=[{vals:[],c:0,s:0}];
+    un.items.forEach(i=>{const na=noteAlts(ns[i]),nx=[];combos.forEach(cb=>na.forEach(a=>nx.push({vals:cb.vals.concat([a.v]),c:cb.c+a.c,s:cb.s+a.v})));
+      const best=new Map();nx.forEach(z=>{const k=unit(z.s);const o=best.get(k);if(!o||z.c<o.c)best.set(k,z);});combos=[...best.values()];});
+    if(un.items.length>1)combos.forEach(z=>{if(unit(z.s)%(U/2)!==0)z.c+=0.6;});
+    if(un.items.length===3){const bs=un.items.map(i=>ns[i].base);if(bs.every(v=>Math.abs(v-bs[0])<1e-9)&&(bs[0]===0.5||bs[0]===0.25)){const v=bs[0]*2/3;combos.push({vals:[v,v,v],c:bs[0]===0.5?0.5:0.8,s:3*v,triplet:true});}}
+    un.alts=combos.map(z=>({vals:z.vals,c:z.c,u:unit(z.s),triplet:!!z.triplet}));});
+  let st=new Map([[0,{c:0,path:[]}]]);
+  units.forEach(un=>{const nx=new Map();st.forEach((v,t)=>{un.alts.forEach((a,ai)=>{const t2=t+a.u;if(t2>target)return;const c=v.c+a.c,o=nx.get(t2);if(!o||c<o.c)nx.set(t2,{c,path:v.path.concat([ai])});});});st=nx;});
+  const best=st.get(target);if(!best||best.c>2.5)return null;
+  const notes=ns.map(n=>n.dur),rs=rests.map(r=>r.dur==='bar'?beats:r.dur);let trip=false;
+  units.forEach((un,k)=>{const a=un.alts[best.path[k]];if(un.kind==='r')rs[un.i]=a.vals[0];else{un.items.forEach((i,j)=>{notes[i]=a.vals[j];});if(a.triplet)trip=true;}});
+  return {notes,rests:rs,cost:best.c,triplet:trip};};
+
+/* timing: a bar lasts what is written in it (notes + rests). A bar cut in two at the end of a line,
+   or a pickup bar, stays short; any other short bar is filled to the time signature. */
+ML.retime=function(R,beats){
+  const measures=R.measures,restsAll=R.rests,sys=R.sys,rd=r=>r.dur==='bar'?beats:r.dur;
+  measures.forEach(M=>{M.notes.sort((a,b)=>a.x-b.x);M.notes.forEach(n=>{n.dur=n.base;delete n.restAfter;delete n.start;});delete M.restBefore;delete M.fixed;delete M.partial;
+    M.rs=restsAll.filter(r=>r.sys===M.sys&&r.x>M.x0&&r.x<M.x1).sort((a,b)=>a.x-b.x);
+    M.raw=M.notes.reduce((a,n)=>a+n.dur,0);M.written=M.raw+M.rs.reduce((a,r)=>a+rd(r),0);});
+  const short=M=>M.written>0.01&&M.written<beats-0.01;
+  measures.forEach((M,i)=>{const N=measures[i+1];if(N&&N.sys===M.sys+1&&short(M)&&short(N)&&Math.abs(M.written+N.written-beats)<0.01)M.partial=N.partial=true;});
+  /* a short first bar is a pickup only when it is clearly short; a nearly full first bar is a full bar read a little wrong */
+  if(measures.length&&short(measures[0])&&measures[0].written<=0.6*beats){measures[0].partial=true;
+    /* a song that starts with a pickup usually ends on the bar that completes it */
+    const L=measures[measures.length-1];if(measures.length>1&&short(L)&&Math.abs(L.written+measures[0].written-beats)<0.01)L.partial=true;}
+  let t=0;measures.forEach((M,mi)=>{const ns=M.notes,sp=sys[M.sys].sp;let rs=M.rs.map(r=>({x:r.x,d:rd(r)}));
+    /* an empty stretch at the start of a line (clef and key up to a start-repeat bar) is not a bar of silence */
+    const lineStart=mi===0||measures[mi-1].sys!==M.sys;
+    if(!ns.length){M.start=t;t+=M.partial?M.written:(rs.length?beats:(!lineStart&&M.x1-M.x0>3*sp?beats:0));return;}
+    let sum=M.raw;
+    /* the bar does not add up: try the fewest re-readings of uncertain marks that make it add up */
+    if(!M.partial&&Math.abs(sum+rs.reduce((a,r)=>a+r.d,0)-beats)>0.01){const fix=ML.solveBar(ns,M.rs,beats);if(fix){ns.forEach((n,i)=>{n.dur=fix.notes[i];});rs=M.rs.map((r,i)=>({x:r.x,d:fix.rests[i]}));sum=ns.reduce((a,n)=>a+n.dur,0);M.solved=fix.cost;}}
+    if(sum>beats+0.01&&sum<=beats*1.3){const f=beats/sum;ns.forEach(n=>n.dur*=f);sum=beats;M.fixed=true;rs=[];}
+    let rsum=rs.reduce((a,r)=>a+r.d,0);
+    if(sum+rsum>beats+0.01){const room=Math.max(0,beats-sum);rs.forEach(r=>{r.d=rsum>0?r.d*room/rsum:0;});rsum=room;}
+    rs.forEach(r=>{if(r.d<=0)return;let idx=-1;ns.forEach((n,i)=>{if(n.x<r.x)idx=i;});if(idx<0)M.restBefore=(M.restBefore||0)+r.d;else ns[idx].restAfter=(ns[idx].restAfter||0)+r.d;});
+    const missing=M.partial?0:beats-sum-rsum;
+    if(missing>0.01){const firstGap=(ns[0].x-M.x0)/(M.x1-M.x0);
+      if(firstGap>0.35&&!M.restBefore)M.restBefore=missing;
+      else{const gaps=ns.map((n,i)=>((i+1<ns.length?ns[i+1].x:M.x1)-n.x)/Math.max(0.25,n.dur));let gi=0;gaps.forEach((g,i)=>{if(g>gaps[gi])gi=i;});ns[gi].restAfter=(ns[gi].restAfter||0)+missing;}}
+    M.start=t;let tt=t+(M.restBefore||0);ns.forEach(n=>{n.start=tt;tt+=n.dur+(n.restAfter||0);});
+    t=M.partial?tt:Math.max(t+beats,tt);});
+  measures.forEach((M,i)=>{const nx=i+1<measures.length?measures[i+1].start:null;M.len=nx!==null&&nx!==undefined?Math.max(0,nx-M.start):(M.partial?M.written:beats);M.notes.forEach(n=>{n.mi=i;});});
+  R.notes=[];measures.forEach(M=>M.notes.forEach(n=>{if(n.start!==undefined)R.notes.push(n);}));R.beats=beats;
+  return R;
+};
+
+/* text marks found by OCR: [{type:'fine'|'ds'|'dc'|'segno', sys, x}] */
+ML.setMarks=function(R,marks){R.marks=marks||[];R.measures.forEach(M=>{delete M.fine;delete M.ds;delete M.dc;delete M.segno;});
+  marks.forEach(k=>{const ms=R.measures.filter(M=>M.sys===k.sys);if(!ms.length)return;const sp=R.sys[k.sys].sp;
+    if(k.type==='segno'){const M=ms.find(M=>k.x<M.x1-0.5*sp&&k.x>=M.x0-1.5*sp)||ms[0];M.segno=true;}
+    else{let M=ms.find(M=>k.x>=M.x0-0.3*sp&&k.x<M.x1+0.3*sp);if(!M){M=ms[ms.length-1];}
+      if(k.type==='fine'&&k.x-M.x0<0.35*(M.x1-M.x0)){const i=R.measures.indexOf(M);if(i>0&&R.measures[i-1].sys===M.sys)M=R.measures[i-1];}
+      M[k.type]=true;}});};
+/* the order in which bars are played: repeats, 1st/2nd endings, D.S./D.C. al Fine */
+ML.playOrder=function(R){
+  const ms=R.measures,n=ms.length,seq=[];let i=0,start=0,jumped=false,guard=0;const done=new Set();let second=false,repEndIdx=-1;
+  const segno=ms.findIndex(M=>M.segno);
+  while(i<n&&guard++<5000){const M=ms[i];
+    if(M.repStart&&!second)start=i;
+    if(second&&i>repEndIdx){second=false;}
+    if(M.volta===1&&(second||jumped)){i++;continue;}
+    seq.push(i);
+    if(jumped&&M.fine)break;
+    if(M.repEnd&&!done.has(i)&&!jumped){done.add(i);repEndIdx=i;second=true;i=start;continue;}
+    if(M.repEnd&&!M.volta)start=i+1;
+    if((M.ds||M.dc)&&!jumped){jumped=true;second=false;i=M.dc||segno<0?0:segno;continue;}
+    i++;}
+  return seq;};
+/* pitch of a position on a staff (for notes added by hand) */
+ML.pitchAt=function(s,Y,keyPc){const DIA=[0,2,4,5,7,9,11],k=Math.round((s.bot-Y)/(s.sp/2)),d=2+k,li=mod(d,7),o=4+Math.floor(d/7),nat=12*(o+1)+DIA[li];
+  const pc=DIA[li],a=ML.keyAcc(keyPc)(pc);return {nat,letterPc:pc,midi:nat+a,y:s.bot-k*s.sp/2};};
+
+if(typeof module!=='undefined')module.exports=ML;else root.Melody=ML;
+})(typeof window!=='undefined'?window:this);
+
+</script>
+<script>
+(function(){
+const CC=window.ChordCore,ML=window.Melody,PC=window.PracticeCore;
+const SET={songs:[],cur:-1,keys:null,allowMod:true,busy:false};
+let LOADING=false;
+const HOSTED=!(window.claude&&window.claude.use)&&/^https?:$/.test(location.protocol);
+const $=s=>document.querySelector(s);
+const PCN=['C','C#','D','E♭','E','F','F#','G','G#','A','B♭','B'];
+const KEYN=['C','D♭','D','E♭','E','F','F#','G','A♭','A','B♭','B'];
+const KEYQ=['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const CF='"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+const SERIF='"Noto Serif","Times New Roman",Georgia,serif';
+const mod=(a,n)=>((a%n)+n)%n;
+const nn=m=>PCN[mod(m,12)]+(Math.floor(m/12)-1);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function josa(w,a,b){const ch=w.charCodeAt(w.length-1);if(!(ch>=0xAC00&&ch<=0xD7A3))return w+b;return w+(((ch-0xAC00)%28)?a:b);}
+function nextSunday(){const d=new Date();const add=(7-d.getDay())%7;d.setDate(d.getDate()+add);return String(d.getFullYear()).slice(2)+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');}
+
+/* ---------- state ---------- */
+const STORE='kimatchum.v3';
+function load(){return null;}
+function save(){}
+const sv=load()||{};
+const S={
+  team:(sv.team&&sv.team.length)?sv.team:[{name:'미소',lo:60,hi:82},{name:'하영',lo:60,hi:84},{name:'하민',lo:57,hi:76}],
+  song:Object.assign({title:'요게벳의 노래',key:0,noteKey:0,lo:52,hi:72,keyConfirmed:false},sv.song||{}),
+  view:null,next:'lo',showNew:true,mode:'chord',
+  play:Object.assign({bpm:72,beats:4,mel:false,acc:true},sv.play||{}),
+  overlay:false,
+  head:Object.assign({date:nextSunday(),service:'주일찬양',setlist:'',prog:'',note:''},sv.head||{})
+};
+/* a saved date that has passed rolls on to the coming Sunday; the sample's order is only a hint */
+S.play.mel=false;S.play.acc=true;S.song.keyConfirmed=false;S.team.forEach(p=>{p.comfortVerified=p.comfortVerified===true;});
+if(!S.head.date||S.head.date<nextSunday())S.head.date=nextSunday();
+if(S.head.prog==='A → A → B → 후렴')S.head.prog='';
+
+/* ---------- sound ---------- */
+let AC=null,UNLOCK=null;
+/* iPhone mutes web audio while the silent switch is on; asking for a "playback" session and
+   keeping a silent <audio> element playing lets the piano through anyway */
+function silentWav(){const n=4000,b=new Uint8Array(44+n*2),v=new DataView(b.buffer),w=(o,s)=>{for(let i=0;i<s.length;i++)b[o+i]=s.charCodeAt(i);};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,16000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  let s='';for(let i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return 'data:audio/wav;base64,'+btoa(s);}
+function unlock(){try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+  try{if(!UNLOCK){UNLOCK=new Audio(silentWav());UNLOCK.loop=true;UNLOCK.setAttribute('playsinline','');}const p=UNLOCK.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+function ac(){if(!AC){unlock();AC=new (window.AudioContext||window.webkitAudioContext)();}else unlock();if(AC.state!=='running'){try{AC.resume();}catch(e){}}return AC;}
+function tone(dest,at,m,peak,len){
+  const a=ac(),f=440*Math.pow(2,(m-69)/12),g=a.createGain();
+  g.gain.setValueAtTime(0.0001,at);g.gain.linearRampToValueAtTime(peak,at+0.008);g.gain.setTargetAtTime(peak*0.35,at+0.02,0.35);g.gain.setTargetAtTime(0.0001,at+len,0.09);g.connect(dest);
+  [[1,'triangle',1],[2,'sine',.35],[4,'sine',.08]].forEach(([h,ty,v])=>{const o=a.createOscillator(),og=a.createGain();o.type=ty;o.frequency.value=f*h;og.gain.value=v;o.connect(og);og.connect(g);o.start(at);o.stop(at+len+0.6);});
+}
+function play1(m){const a=ac();tone(a.destination,a.currentTime+0.01,m,0.3,1.3);}
+
+/* ---------- team ---------- */
+function stats(){const lo=S.team.map(p=>p.lo),hi=S.team.map(p=>p.hi);return{cL:Math.max(...lo),cH:Math.min(...hi),uL:Math.min(...lo),uH:Math.max(...hi)};}
+function noteOptions(sel,val){sel.innerHTML='';for(let m=43;m<=89;m++){const o=document.createElement('option');o.value=m;o.textContent=nn(m)+(m===60?' (가온 도)':'');if(m===val)o.selected=true;sel.appendChild(o);}}
+function renderTeam(){
+  const box=$('#members');box.innerHTML='';
+  S.team.forEach((p,i)=>{
+    const row=document.createElement('div');row.className='member';
+    const name=document.createElement('input');name.className='m-name';name.id='m-name-'+i;name.value=p.name;name.setAttribute('aria-label','이름');name.autocomplete='off';name.style.borderLeft='5px solid var(--p'+(i%5+1)+')';
+    const mk=(cls,lab,key)=>{const w=document.createElement('div');w.className='nsel '+cls;const sl=document.createElement('select');sl.id='m-'+key+'-'+i;sl.setAttribute('aria-label',(p.name||'')+' '+lab);noteOptions(sl,p[key]);
+      const pb=document.createElement('button');pb.type='button';pb.className='play';pb.textContent='▶';pb.setAttribute('aria-label',lab+' 들어보기');
+      sl.addEventListener('change',()=>{stopPlay();p[key]=+sl.value;p.comfortVerified=false;if(p.lo>p.hi){const x=p.lo;p.lo=p.hi;p.hi=x;renderTeam();}save();refresh();});
+      pb.addEventListener('click',()=>play1(p[key]));w.append(sl,pb);return w;};
+    const del=document.createElement('button');del.type='button';del.className='del';del.textContent='빼기';
+    name.addEventListener('input',()=>{p.name=name.value;save();renderTeamSummary();renderResult();});
+    del.addEventListener('click',()=>{if(S.team.length<=1)return;stopPlay();S.team.splice(i,1);save();renderTeam();refresh();});
+    const comfort=document.createElement('label');comfort.className='check comfort';const check=document.createElement('input');check.type='checkbox';check.checked=!!p.comfortVerified;check.addEventListener('change',()=>{stopPlay();p.comfortVerified=check.checked;save();refresh();renderSet();});comfort.append(check,document.createTextNode('이 범위를 같은 높이에서 편하게 부르는지 확인했어요'));
+    row.append(name,mk('lo','최저','lo'),mk('hi','최고','hi'),del,comfort);box.appendChild(row);
+  });
+}
+function renderTeamSummary(){$('#team-sm').textContent=S.team.map(p=>(p.name||'이름 없음')+' '+nn(p.lo)+'~'+nn(p.hi)).join(' · ');}
+$('#add').addEventListener('click',()=>{stopPlay();S.team.push({name:'새 사람',lo:60,hi:76});save();renderTeam();refresh();});
+
+/* ---------- song input ---------- */
+function renderSongInputs(){$('#s-title').value=S.song.title;const sel=$('#s-key');sel.innerHTML='<option value="-1" disabled>원키 확인 필요</option>';KEYN.forEach((k,i)=>{const o=document.createElement('option');o.value=i;o.textContent=k+'키';if(i===S.song.key)o.selected=true;sel.appendChild(o);});const ns=$('#note-key');ns.innerHTML=sel.innerHTML;ns.value=S.song.noteKey??S.song.key;const ev=S.song.keyEvidence||{};if(!S.song.keyManual&&ev.signature==null&&ev.chords==null&&!S.song.keyConfirmed)sel.value='-1';if(!S.song.noteKeyManual&&ev.signature==null&&!S.song.keyConfirmed)ns.value='-1';renderKeyEvidence();}
+$('#s-title').addEventListener('input',e=>{S.song.title=e.target.value;save();renderResult();});
+$('#s-key').addEventListener('change',e=>{stopPlay();if(+e.target.value<0)return;S.song.key=+e.target.value;S.song.keyConfirmed=false;S.song.keyManual=true;S.song.rangeVerified=false;S.view=null;save();if(typeof readMelody==='function'&&SH.work)readMelody();refresh();});
+function renderStaff(){
+  const key=S.song.noteKey??S.song.key,DIA=[0,2,4,5,7,9,11],sc=DIA.map(i=>mod(key+i,12));
+  const ka=ML&&ML.keyAcc?ML.keyAcc(key):null,acc=pc=>ka?ka(pc):(sc.includes(pc)?0:sc.includes(mod(pc-1,12))?-1:sc.includes(mod(pc+1,12))?1:0);
+  const dmin=-5,dmax=14,step=42,left=88,half=7,yTop=40,W=left+(dmax-dmin+1)*step+16,H=yTop+20*half+40,yOf=d=>yTop+(10-d)*half;
+  /* under the staff: one coloured bar per singer (their range) and the song's range, on the same pitch axis */
+  const cols=[];for(let d=dmin;d<=dmax;d++){const li=mod(d,7),o=4+Math.floor(d/7);cols.push({m:12*(o+1)+DIA[li]+acc(DIA[li]),x:left+(d-dmin)*step+step/2});}
+  const xOf=mm=>{const a=cols[0],z=cols[cols.length-1];if(mm<=a.m)return Math.max(left,a.x-(a.m-mm)*step/2);if(mm>=z.m)return Math.min(W-8,z.x+(mm-z.m)*step/2);
+    for(let i=0;i+1<cols.length;i++){const p=cols[i],q=cols[i+1];if(mm>=p.m&&mm<=q.m)return p.x+(q.m===p.m?0:(mm-p.m)/(q.m-p.m))*(q.x-p.x);}return a.x;};
+  const st=stats(),rowH=20,team=S.team.map((p,i)=>({name:p.name||'이름 없음',lo:p.lo,hi:p.hi,c:'var(--p'+(i%5+1)+')'}));
+  const rows=team.concat([{name:'곡',lo:S.song.lo,hi:S.song.hi,song:true}]),H2=H+8+rows.length*rowH;
+  let s='<svg viewBox="0 0 '+W+' '+H2+'" width="'+W+'" style="max-width:none;display:block" role="group" aria-label="오선에서 음 누르기">';
+  if(st.cL<=st.cH)s+='<rect class="sg-band" x="'+(xOf(st.cL)-8)+'" y="'+(H+2)+'" width="'+(xOf(st.cH)-xOf(st.cL)+16)+'" height="'+(rows.length*rowH+4)+'" rx="4"><title>다 같이 낼 수 있는 음 '+nn(st.cL)+'~'+nn(st.cH)+'</title></rect>';
+  rows.forEach((r,i)=>{const y=H+8+i*rowH+rowH/2,x0=xOf(r.lo),x1=xOf(r.hi);
+    s+='<text class="sg-who" x="8" y="'+(y+4)+'" style="fill:'+(r.song?'var(--ink)':r.c)+'">'+esc(r.name)+'</text>';
+    s+=r.song?'<rect class="sg-song" x="'+(x0-6)+'" y="'+(y-5)+'" width="'+Math.max(12,x1-x0+12)+'" height="10" rx="5"><title>곡 '+nn(r.lo)+'~'+nn(r.hi)+'</title></rect>'
+      :'<rect x="'+(x0-6)+'" y="'+(y-4)+'" width="'+Math.max(12,x1-x0+12)+'" height="8" rx="4" style="fill:'+r.c+'"><title>'+esc(r.name)+' '+nn(r.lo)+'~'+nn(r.hi)+'</title></rect>';});
+  [2,4,6,8,10].forEach(d=>{s+='<line class="sg-line" x1="8" x2="'+(W-8)+'" y1="'+yOf(d)+'" y2="'+yOf(d)+'"/>';});
+  s+='<text class="sg-clef" x="12" y="'+(yOf(2)+12)+'">𝄞</text>';
+  for(let d=dmin;d<=dmax;d++){
+    const li=mod(d,7),o=4+Math.floor(d/7),ak=acc(DIA[li]),m=12*(o+1)+DIA[li]+ak,nm='CDEFGAB'[li]+(ak>0?'#':ak<0?'b':'')+o,x=left+(d-dmin)*step+step/2,y=yOf(d); /* named by the key: Ab in Eb, G# in E */
+    let cls='sg-g';if(m===S.song.lo)cls+=' lo';if(m===S.song.hi)cls+=' hi';
+    s+='<g class="'+cls+'" data-m="'+m+'" tabindex="0" role="button" aria-label="'+nm+'"><rect class="sg-hit" x="'+(x-step/2)+'" y="0" width="'+step+'" height="'+H+'"/>';
+    if(d<=0)for(let q=0;q>=d;q-=2)s+='<line class="sg-ledger" x1="'+(x-13)+'" x2="'+(x+13)+'" y1="'+yOf(q)+'" y2="'+yOf(q)+'"/>';
+    if(d>=12)for(let q=12;q<=d;q+=2)s+='<line class="sg-ledger" x1="'+(x-13)+'" x2="'+(x+13)+'" y1="'+yOf(q)+'" y2="'+yOf(q)+'"/>';
+    s+='<ellipse class="sg-note" cx="'+x+'" cy="'+y+'" rx="7.6" ry="5.6" transform="rotate(-20 '+x+' '+y+')"/><text class="sg-lab" x="'+x+'" y="'+(H-10)+'" text-anchor="middle">'+nm+'</text></g>';
+  }
+  $('#staff').innerHTML=s+'</svg>';
+  document.querySelectorAll('#staff .sg-g').forEach(g=>{
+    const pick=()=>{const m=+g.dataset.m;stopPlay();SH.rangeAuto=false;SH.rangeFromSheet=false;S.song.rangeVerified=false;S.song.hist=null;S.song.outLo=null;S.song.outHi=null;if(S.next==='lo'){S.song.lo=m;S.next='hi';}else{S.song.hi=m;S.next='lo';}
+      if(S.song.lo>S.song.hi){const x=S.song.lo;S.song.lo=S.song.hi;S.song.hi=x;}S.view=null;save();play1(m);refresh();};
+    g.addEventListener('click',pick);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});
+  });
+  $('#ask').innerHTML=SH.rangeFromSheet?'악보 멜로디에서 <span class="now">제일 낮은 음·높은 음</span>을 찾았어요. 다르면 오선을 눌러 고쳐요':S.next==='lo'?'악보에서 <span class="now">제일 낮은 음</span>과 같은 자리를 눌러요':'이제 <span class="now">제일 높은 음</span> 자리를 눌러요';
+  $('#picked').innerHTML='<span class="pill lo">제일 낮은 음 <b>'+nn(S.song.lo)+'</b></span><span class="pill hi">제일 높은 음 <b>'+nn(S.song.hi)+'</b></span><button class="link" id="repick" type="button">다시 누르기</button>';
+  $('#repick').addEventListener('click',()=>{S.next='lo';renderStaff();});
+}
+
+/* ---------- key evaluation ---------- */
+function evaluate(){return evaluateFor(S.song);}
+function evaluateFor(song){return PC.candidates(song,S.team);}
+const targetKey=()=>{const E=evaluate();return (S.view===0||S.view)?S.view:E.best.k;};
+const stat=r=>r.score===0?'ok':r.unc===0?'warn':'bad';
+function why(r,st,song){song=song||S.song;const L=[];
+  if(!S.team.every(p=>p.comfortVerified))L.push('팀 음역은 미확인 값이 포함돼 있어요. 편한 음역을 입력한 뒤 연습으로 확인하세요.');
+  if(!song.rangeVerified)L.push('곡의 전체 음역과 원래 키가 미확인 상태예요. 추천은 참고 후보입니다.');
+  if(r.below===0&&r.above===0)L.push('전체 음역이 입력한 공통 범위 안에 있어요. 편안함은 실제로 불러 확인하세요.');
+  else L.push('같은 높이로 부르면 공통 범위를 벗어나요: '+(r.below?'최저 '+nn(r.L)+' (아래 '+r.below+'반음) ':'')+(r.above?'최고 '+nn(r.H)+' (위 '+r.above+'반음)':'')+'. 옥타브나 담당 파트를 자동으로 바꾸지 않아요.');
+  if(song.hi-song.lo>st.cH-st.cL)L.push('곡의 음폭이 공통 범위보다 넓어 키 변경만으로 모두 맞출 수 없어요.');
+  return L;
+}
+function renderResult(){
+  renderKeyEvidence();if(!S.song.keyConfirmed){$('#result').innerHTML='<h2><span class="step">3</span>원키 확인이 먼저예요</h2><p>1번의 자동 추정과 원본을 비교하고 코드·음표 키를 확인하면 키 후보가 나와요. C키를 기본 정답으로 사용하지 않아요.</p>';return;}
+  const E=evaluate(),k=targetKey(),r=E.res[k],isBest=k===E.best.k;
+  const shift=mod(k-S.song.key,12),f=S.song.key,sf=CC.spellFor(f),stt=CC.spellFor(k);
+  const sub=(r.s===0?'지금 악보 키 그대로':'원본 음표 '+KEYN[S.song.noteKey??f]+'키에서 반음 '+Math.abs(r.s)+'개 '+(r.s>0?'올려요':'내려요'))+' · 곡 음역 '+nn(r.L)+' ~ '+nn(r.H);
+  const order=[0,2,4,5,7,9,11].map(i=>mod(f+i,12)),rest=[];for(let i=0;i<12;i++){const pc=mod(f+i,12);if(!order.includes(pc))rest.push(pc);}
+  const tn=pc=>CC.transposeNote?CC.transposeNote(sf[pc],shift,k,f):stt[mod(pc+shift,12)];
+  const cells=order.map(pc=>'<div>'+sf[pc]+' → <b>'+tn(pc)+'</b></div>').join('')+rest.map(pc=>'<div class="dim">'+sf[pc]+' → <b>'+tn(pc)+'</b></div>').join('');
+  const q=(S.song.title||'').trim();
+  let h='<h2><span class="step">3</span>연습할 키 후보</h2><div class="answer"><span class="big">'+KEYN[k]+'</span><span class="say">'+(isBest?'키부터 비교해 보세요':'키로 비교하면')+'</span><span class="sub">'+sub+'</span></div>';
+  h+='<ul class="why">'+why(r,E.st).map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul>';
+  if(shift!==0)h+='<h3>코드는 이렇게 바꿔요</h3><p class="help">코드 이름의 앞 글자와 / 뒤 글자만 바꾸면 돼요. 예: '+sf[order[1]]+'m7 → '+tn(order[1])+'m7, '+sf[order[4]]+'/'+sf[order[6]]+' → '+tn(order[4])+'/'+tn(order[6])+'</p><div class="cmap">'+cells+'</div>';
+  if(q)h+='<p class="help"><a href="https://search.naver.com/search.naver?query='+encodeURIComponent(q+' '+KEYQ[k]+'코드 악보')+'" target="_blank" rel="noopener">'+esc(q)+' '+KEYQ[k]+'코드 악보 찾기</a></p>';
+  h+='<h3>12개 키 비교</h3><div class="keys" role="group" aria-label="다른 키">'+E.res.map(x=>'<button type="button" class="kp '+stat(x)+'" data-k="'+x.k+'" aria-pressed="'+(x.k===k)+'" aria-label="'+KEYN[x.k]+'키">'+KEYN[x.k]+'</button>').join('')+'</div>';
+  h+='<div class="legend"><span><i style="background:var(--ok-bg)"></i>입력 범위 안</span><span><i style="background:var(--warn-bg)"></i>공통 범위 벗어남</span><span><i style="background:var(--bad-bg)"></i>공통 범위 벗어남</span>'+(isBest?'':'<button class="link" id="back" type="button">추천 키로 돌아가기</button>')+'</div>';
+  $('#result').innerHTML=h;
+  document.querySelectorAll('#result .kp').forEach(b=>b.addEventListener('click',()=>{chooseCurrentKey(+b.dataset.k);renderResult();sheetKeyChanged();renderSet();}));
+  const bk=$('#back');if(bk)bk.addEventListener('click',()=>{chooseCurrentKey(null);renderResult();sheetKeyChanged();renderSet();});
+  $('#v-new').textContent='바꾼 키 ('+KEYN[k]+')';$('#v-old').textContent='원래 키 ('+KEYN[S.song.key]+')';
+}
+
+/* ---------- sheet ---------- */
+const LB={'A':{fill:[255,243,140],ink:[170,128,0]},'B':{fill:[198,239,186],ink:[34,128,58]},'C':{fill:[255,208,228],ink:[196,36,110]},'D':{fill:[255,219,186],ink:[212,96,18]},
+  '후렴':{fill:[255,198,208],ink:[190,30,60]},'브릿지':{fill:[228,212,252],ink:[122,60,205]},'전주':{fill:[226,230,236],ink:[90,98,112]},'간주':{fill:[214,232,242],ink:[52,106,140]},'엔딩':{fill:[232,226,218],ink:[110,96,82]},'지우기':{fill:null,ink:[120,120,120]}};
+const LBK=Object.keys(LB),rgb=a=>'rgb('+a[0]+','+a[1]+','+a[2]+')';
+const SH={work:null,bin:null,sys:[],bars:[],rows:null,lyr:null,chords:[],contentBottom:0,gap:1,sel:null,split:false,isSample:true,padl:0,csel:-1,adding:false};
+function mk(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function rr(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.lineTo(X+w-r,Y);x.quadraticCurveTo(X+w,Y,X+w,Y+r);x.lineTo(X+w,Y+h-r);x.quadraticCurveTo(X+w,Y+h,X+w-r,Y+h);x.lineTo(X+r,Y+h);x.quadraticCurveTo(X,Y+h,X,Y+h-r);x.lineTo(X,Y+r);x.quadraticCurveTo(X,Y,X+r,Y);x.closePath();}
+async function fontsReady(){try{await Promise.all(['500','700','900'].map(w=>document.fonts.load(w+' 40px "Noto Sans KR"','가나')).concat([document.fonts.load('700 40px "Noto Serif"','CDEFGAB#7')]));}catch(e){}}
+function setMsg(t,cls){const m=$('#load-msg');m.className='msg'+(cls?' '+cls:'');m.textContent=t;}
+function setProg(v){const p=$('#prog');if(v===null){p.hidden=true;return;}p.hidden=false;p.firstElementChild.style.width=Math.round(v*100)+'%';}
+
+function makeSample(){
+  const W=1600,H=1430,c=mk(W,H),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#111';x.textAlign='center';
+  x.font='700 46px '+CF;x.fillText('샘플 악보',W/2,92);x.font='400 22px '+CF;x.fillStyle='#666';x.fillText('예시예요. 내 악보 이미지를 올리면 이 자리에 나와요.',W/2,132);
+  x.textAlign='left';x.fillStyle='#111';const sp=16,xs=90,xe=1530,bw=(xe-xs)/4,seed=[3,2,1,2,4,5,4,2,6,3],chords=[];
+  const ch=[['C','G/B','Am','F'],['C/E','Dm7','G7','C'],['F','G','Em7','Am'],['Dm7','G7sus4','G7','C']];
+  const ly=['주 님 의   사 랑 이     우 리 를   감 싸 네','어 두 운   밤 에 도     빛 으 로   오 시 네','오 늘 도   우 리 는     주 님 을   노 래 해','영 원 히   함 께 할     주 님 을   찬 양 해'];
+  for(let i=0;i<4;i++){const top=240+i*290;x.strokeStyle='#111';x.lineWidth=2;for(let l=0;l<5;l++){x.beginPath();x.moveTo(xs,top+l*sp);x.lineTo(xe,top+l*sp);x.stroke();}
+    x.lineWidth=3;for(let b=0;b<=4;b++){const bx=xs+b*bw;x.beginPath();x.moveTo(bx,top);x.lineTo(bx,top+4*sp);x.stroke();}
+    x.font='700 30px '+SERIF;ch[i].forEach((t,b)=>{const X=xs+28+b*bw,base=top-24;x.fillText(t,X,base);chords.push({sys:i,x0:X,x1:X+x.measureText(t).width,y0:base-22,y1:base+2,base,h:21,text:t,status:'ok'});});
+    for(let b=0;b<4;b++)for(let n=0;n<4;n++){const nx=xs+100+b*bw+n*72,ny=top+4*sp-seed[(n+b*2+i)%10]*sp/2;x.beginPath();x.ellipse(nx,ny,sp*0.64,sp*0.47,-0.35,0,Math.PI*2);x.fill();x.fillRect(nx+sp*0.52,ny-3.3*sp,2.4,3.3*sp);}
+    x.font='500 30px '+CF;x.fillText(ly[i],xs+40,top+4*sp+66);}
+  return {canvas:c,chords};
+}
+/* the working copy of the sheet; mul > 1 enlarges a small picture (up to 2400px wide / 9M pixels) */
+function toWork(img,mul){const w0=img.naturalWidth,h0=img.naturalHeight;let s=Math.min(1,2400/w0);const a=w0*h0*s*s;if(a>9e6)s*=Math.sqrt(9e6/a);
+  if(mul&&mul>1)s*=Math.min(mul,2400/(w0*s),Math.sqrt(9e6/(w0*h0*s*s)));
+  const c=mk(Math.max(1,Math.round(w0*s)),Math.max(1,Math.round(h0*s))),x=c.getContext('2d');if(c.width!==w0){x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';}x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);return c;}
+function analyze(srcSp,thr){
+  const W=SH.work.width,H=SH.work.height,d=SH.work.getContext('2d',{willReadFrequently:true}).getImageData(0,0,W,H).data;
+  /* light grey staff lines (small or blurred pictures) move the ink/paper cut up for lines and stems;
+     heads, beams and dots are still read at the normal cut so the gaps between them stay open */
+  SH.thr=thr||(CC.autoThreshold?CC.autoThreshold(d,W,H):150);SH.bin=CC.binarize(d,W,H,SH.thr);SH.low=SH.thr>150?CC.binarize(d,W,H,150):null;const sys=CC.findSystems(SH.bin,W,H);SH.rows=CC.rowInk(SH.bin,W,H);
+  SH.sys=sys.map(s=>Object.assign(s,{segs:[{x:0,label:'지우기'}]}));SH.lyr1=CC.lyricBottoms(SH.rows,H,SH.sys,1);bands();
+  SH.bars=SH.sys.map(s=>CC.barlines(SH.bin,W,s));
+  /* the key comes from the sharps/flats printed after the clef; a very small picture is too blurry for that */
+  const sps=SH.sys.map(s=>s.sp).sort((a,b)=>a-b),msp=sps.length?sps[sps.length>>1]:0;SH.small=(srcSp||msp)>0&&(srcSp||msp)<9;SH.ksig=null;
+  try{if(ML&&ML.keySig&&!SH.small){const k=ML.keySig(SH.bin,W,H,SH.sys,SH.bars);if(k&&k.pc!==null)SH.ksig=k;}}catch(e){}
+  if(ML)ML.flat6=!!(SH.ksig&&SH.ksig.pc===6&&SH.ksig.per.some(p=>p&&p.kind===-1));
+  let cb=H-1;for(let y=H-1;y>=0;y--){if(SH.rows[y]>1){cb=y;break;}}SH.contentBottom=cb;
+}
+function bands(){const L=CC.lyricBottoms(SH.rows,SH.work.height,SH.sys,SH.gap);SH.sys.forEach((s,i)=>{s.y0=s.top-0.55*s.sp;s.y1=CC.lyrY(L[i]);});}
+function msp(){const a=SH.sys.map(s=>s.sp).sort((p,q)=>p-q);return a.length?a[a.length>>1]:18;}
+
+/* chords helpers */
+/* the sheet's own letters and accidentals, used to rewrite chords in the new key in the same print;
+   a letter that does not look like the sheet's exemplar sends that chord back to the plain font */
+function buildBank(){SH.bank=null;SH.font=null;if(!CC.buildBank)return;const bank=CC.buildBank(SH.chords,parsed);if(!Object.keys(bank.L).length)return;SH.bank=bank;
+  SH.chords.forEach(ch=>{const g=ch.g;if(!g)return;const p=parsed(ch);if(!p||!p.root){ch.g=null;return;}
+    const bad=[[g.root,p.root[0]],[g.bass,p.bass?p.bass[0]:null]].some(([comp,L])=>{if(!comp||!L)return false;const r=CC.checkLetter(comp,L,bank);
+      if(r.bestLetter!==L&&r.bestScore>=0.8&&(r.score===null||r.bestScore-r.score>=0.15)&&ch.status==='ok')ch.status='check';
+      return r.score!==null&&r.score<0.6;});
+    if(bad)ch.g=null;});
+  try{SH.font=CC.pickFont(bank,(tx,sz,font)=>{const cv=mk(Math.ceil(sz*1.4),Math.ceil(sz*1.6)),cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.fillStyle='#000';cx.textBaseline='alphabetic';cx.font='700 '+(sz/0.72)+'px '+font;cx.fillText(tx,2,Math.round(sz*1.25));return cx.getImageData(0,0,cv.width,cv.height);},[SERIF,CF]);}catch(e){SH.font=null;}}
+function maskCanvas(src){if(src.cv)return src.cv;const m=src.mask||CC.maskOf(src),w=src.w,h=src.h,c=mk(w,h),cx=c.getContext('2d'),id=cx.createImageData(w,h);for(let i=0;i<w*h;i++)if(m[i]){const o=i*4;id.data[o]=17;id.data[o+1]=17;id.data[o+2]=17;id.data[o+3]=255;}cx.putImageData(id,0,0);src.cv=c;return c;}
+function showCrop(ch){const cv=$('#ce-crop');if(!SH.work||!ch||ch.manual){cv.hidden=true;return;}const g=ch.g;
+  const x0=Math.max(0,Math.round((g?g.x0:ch.x0)-8)),x1=Math.min(SH.work.width,Math.round((g?g.x1:ch.x1)+8)),y0=Math.max(0,Math.round(Math.min(ch.y0,g?g.y0:ch.y0)-8)),y1=Math.min(SH.work.height,Math.round(Math.max(ch.y1,g?g.y1:ch.y1)+8));
+  if(x1<=x0||y1<=y0){cv.hidden=true;return;}const h=88,w=Math.max(1,Math.round((x1-x0)*h/(y1-y0)));cv.width=w;cv.height=h;cv.style.width=(w/2)+'px';
+  const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,w,h);cx.drawImage(SH.work,x0,y0,x1-x0,y1-y0,0,0,w,h);cv.hidden=false;}
+function parsed(c){return PC.playableChord(CC,c.text);}
+function shiftNow(){const k=targetKey();return {k,shift:mod(k-S.song.key,12)};}
+function shownText(c){const p=parsed(c);if(!p)return c.text+' (수정 필요)';if(!S.showNew)return p.text;const t=shiftNow();return CC.transpose(p,t.shift,t.k,S.song.key);}
+function sortChords(){SH.chords.sort((a,b)=>a.sys-b.sys||a.x0-b.x0);}
+
+function compose(withUI){
+  const W=SH.work.width,H=SH.work.height,P=Math.round(Math.max(msp()*4.6,W*0.05));SH.padl=P;
+  /* the preview reuses one canvas (phones run out of canvas memory if every redraw makes a new one) */
+  const c=withUI?(SH.cv&&SH.cv.width===W+P&&SH.cv.height===H?SH.cv:(SH.cv=mk(W+P,H))):mk(W+P,H),x=c.getContext('2d');x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='source-over';x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(SH.work,P,0);
+  /* new-key chords: letters swapped for the sheet's own glyphs, the rest of each chord copied as printed */
+  if(S.showNew&&S.overlay&&canOverlay()&&SH.chords.length){const t=shiftNow();x.textBaseline='alphabetic';x.textAlign='left';const jobs=[];
+    SH.chords.forEach((ch,i)=>{const p=parsed(ch);if(!p)return;const txt=CC.transpose(p,t.shift,t.k,S.song.key);if(t.shift===0&&txt===ch.text)return;
+      const useG=false;
+      jobs.push({ch,p,txt,i,useG,bx0:ch.sourceBox.x0,bx1:ch.sourceBox.x1,by0:ch.sourceBox.y0,by1:ch.sourceBox.y1});});
+    jobs.forEach(j=>{x.fillStyle='#fff';x.fillRect(P+j.bx0,j.by0,j.bx1-j.bx0+1,j.by1-j.by0+1);});
+    /* one letter height for the whole sheet (a glued "C#m/E" blob is taller than its letters) */
+    const hs=SH.chords.filter(c=>c.h&&!c.manual).map(c=>c.h).sort((a,b)=>a-b),hMed=hs.length?hs[hs.length>>1]:0;const lastEnd={};
+    jobs.forEach(j=>{const {ch,p,txt,i}=j,fs=Math.max(10,(hMed||ch.h)/0.7);const next=SH.chords.find((o,k)=>k>i&&o.sys===ch.sys&&o.x0>ch.x0);
+      /* never draw over the chord before it: start after its end, and fit before the next one */
+      const prevEnd=lastEnd[ch.sys];let x0=j.bx0;if(prevEnd!==undefined&&x0<prevEnd+fs*0.2)x0=prevEnd+fs*0.2;const maxW=Math.max(fs*0.6,(next?next.x0:W)-x0-fs*0.25);
+      if(j.useG){const F=SH.font||SERIF,nr=CC.transposeNote(p.root,t.shift,t.k,S.song.key),nb=p.bass?CC.transposeNote(p.bass,t.shift,t.k,S.song.key):'';
+        const lay=CC.layoutChord(ch.g,nr,nb,SH.bank,(tx,sz)=>{x.font='700 '+(sz/0.72)+'px '+F;return x.measureText(tx).width;});
+        const w=lay.x1-lay.x0;let sc=1;if(w>maxW&&maxW>8)sc=Math.max(0.5,maxW/w);x.save();x.translate(P+x0,0);x.scale(sc,1);
+        lay.pieces.forEach(pc=>{if(pc.src)x.drawImage(maskCanvas(pc.src),pc.x-lay.x0,pc.y,pc.w,pc.h);else{x.fillStyle='#111';x.font='700 '+(pc.size/0.72)+'px '+F;x.fillText(pc.text,pc.x-lay.x0,pc.baseline);}});
+        x.restore();ch.dw=w*sc;ch.dx=x0-ch.x0;lastEnd[ch.sys]=x0+w*sc;return;}
+      x.save();x.beginPath();x.rect(P+j.bx0,j.by0,j.bx1-j.bx0+1,j.by1-j.by0+1);x.clip();x.font='700 '+fs+'px '+(SH.font||SERIF);let w=x.measureText(txt).width;x.fillStyle='#111';const base=hMed?ch.y1-(ch.h-hMed)*0:ch.base;
+      if(w>maxW){const sc2=Math.max(0.5,maxW/w);x.save();x.translate(P+x0,ch.base);x.scale(sc2,1);x.fillText(txt,0,0);x.restore();ch.dw=w*sc2;}else{x.fillText(txt,P+x0,ch.base);ch.dw=w;}
+      x.restore();ch.dx=x0-ch.x0;lastEnd[ch.sys]=x0+ch.dw;});}
+  const span=(s,j)=>[j===0?6:P+s.segs[j].x, j+1<s.segs.length?P+s.segs[j+1].x:c.width-8];
+  x.globalCompositeOperation='multiply';SH.sys.forEach(s=>s.segs.forEach((g,j)=>{const L=LB[g.label];if(!L.fill)return;const [a,b]=span(s,j);x.fillStyle=rgb(L.fill);x.fillRect(a,s.y0,b-a,s.y1-s.y0);}));
+  x.globalCompositeOperation='source-over';x.textAlign='left';x.textBaseline='middle';
+  SH.sys.forEach(s=>s.segs.forEach((g,j)=>{const L=LB[g.label];if(!L.fill)return;
+    if(j===0){const tt=g.label,fs=tt.length>1?Math.min(s.sp*1.5,(P-14)/(tt.length*1.08)):Math.min(s.sp*2,P-16);x.font='900 '+fs+'px '+CF;x.fillStyle=rgb(L.ink);x.fillText(tt,10,(s.y0+s.y1)/2);}
+    else{const gx=P+g.x;x.strokeStyle='rgba(25,25,25,.85)';x.lineWidth=Math.max(2,s.sp*0.22);x.setLineDash([s.sp*0.6,s.sp*0.45]);x.beginPath();x.moveTo(gx,s.y0);x.lineTo(gx,s.y1+s.sp*0.3);x.stroke();x.setLineDash([]);
+      const fs=Math.max(12,s.sp*1.05),tt=g.label+' 시작';x.font='700 '+fs+'px '+CF;const tw=x.measureText(tt).width,cy=s.y1+s.sp*0.35,chh=fs*1.35;x.fillStyle=rgb(L.ink);rr(x,gx,cy,tw+fs*0.9,chh,fs*0.3);x.fill();x.fillStyle='#fff';x.fillText(tt,gx+fs*0.45,cy+chh/2);}}));
+  if(withUI&&S.mode==='chord'&&SH.mel){x.fillStyle='rgba(47,95,208,.8)';SH.mel.notes.forEach(n=>{const r=Math.max(3,SH.sys[n.sys].sp*0.28);x.beginPath();x.arc(P+n.x,n.y,r,0,Math.PI*2);x.fill();});}
+  if(withUI&&S.mode==='chord'){SH.chords.forEach((ch,i)=>{const p=CC.parseChord(ch.text);const st=!p||!p.root?'bad':(p.ok?(!ch.reviewed?'check':'ok'):(p.dist!==undefined?'check':'bad'));
+      x.strokeStyle=st==='ok'?'#1d9a52':st==='check'?'#e08a00':'#d8283f';x.lineWidth=ch===SH.cedit?Math.max(4,msp()*0.32):Math.max(2,msp()*0.16);
+      const dx=(S.showNew&&ch.dx)||0,w=Math.max(ch.x1-ch.x0,ch.dw&&S.showNew?ch.dw:0);x.strokeRect(P+ch.x0+dx-4,ch.y0-4,w+8,ch.y1-ch.y0+8);
+      if(ch===SH.cedit){x.strokeStyle='#2f5fd0';x.lineWidth=2;x.strokeRect(P+ch.x0+dx-8,ch.y0-8,w+16,ch.y1-ch.y0+16);}});}
+  if(withUI&&S.mode==='hl'){SH.sys.forEach(s=>{if(s.segs.every(g=>!LB[g.label].fill)){x.strokeStyle='rgba(47,95,208,.45)';x.lineWidth=Math.max(2,s.sp*0.15);x.setLineDash([s.sp*0.5,s.sp*0.5]);x.strokeRect(6,s.y0,c.width-14,s.y1-s.y0);x.setLineDash([]);}});
+    if(SH.sel&&SH.sys[SH.sel.i]){const s=SH.sys[SH.sel.i],[a,b]=span(s,Math.min(SH.sel.j,s.segs.length-1));x.strokeStyle='#2f5fd0';x.lineWidth=Math.max(3,s.sp*0.32);x.strokeRect(a+2,s.y0+2,b-a-4,s.y1-s.y0-4);}}
+  return c;
+}
+let pvTimer=null;
+function preview(){if(!SH.work)return;if(SH.chords.some(c=>!parsed(c))){$('#a4out').hidden=true;$('#save-local').removeAttribute('href');}renderReview();clearTimeout(pvTimer);pvTimer=setTimeout(()=>{const c=compose(true),pv=$('#pv');pv.width=c.width;pv.height=c.height;pv.getContext('2d').drawImage(c,0,0);selInfo();},16);}
+function selInfo(){const el=$('#sel-info');
+  if(!SH.sys.length){el.textContent='악보에서 줄(오선)을 못 찾았어요.';return;}
+  if(!SH.sel){el.textContent='악보에서 줄을 눌러 고르세요.';return;}
+  const s=SH.sys[SH.sel.i],g=s.segs[SH.sel.j];
+  el.innerHTML=(SH.isSample?'샘플 악보예요. ':'')+'<b>'+(SH.sel.i+1)+'번째 줄</b>'+(s.segs.length>1?' '+(SH.sel.j+1)+'번째 칸':'')+' 고름'+(SH.split?' · 나눌 자리를 누르세요':'');
+  document.querySelectorAll('#lbls .lbl').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===g.label?'true':'false'));}
+const segAt=(s,X)=>{let j=0;s.segs.forEach((g,q)=>{if(q>0&&X>=g.x)j=q;});return j;};
+function setSplit(on){SH.split=on;$('#split').setAttribute('aria-pressed',on);selInfo();}
+function setMode(m){S.mode=m;$('#m-chord').setAttribute('aria-pressed',m==='chord');$('#m-hl').setAttribute('aria-pressed',m==='hl');$('#tool-chord').hidden=m!=='chord';$('#tool-hl').hidden=m!=='hl';if(m!=='chord')closeEdit();preview();}
+$('#m-chord').addEventListener('click',()=>setMode('chord'));$('#m-hl').addEventListener('click',()=>setMode('hl'));
+function setView(n){S.showNew=n;$('#v-new').setAttribute('aria-pressed',n);$('#v-old').setAttribute('aria-pressed',!n);stopPlay();preview();}
+$('#v-new').addEventListener('click',()=>setView(true));$('#v-old').addEventListener('click',()=>setView(false));
+function sheetKeyChanged(){stopPlay();preview();}
+
+/* clicks on the sheet */
+$('#pv').addEventListener('click',e=>{
+  if(!SH.work)return;const pv=$('#pv'),r=pv.getBoundingClientRect(),sc=pv.width/r.width,X=(e.clientX-r.left)*sc-SH.padl,Y=(e.clientY-r.top)*sc;
+  if(S.mode==='chord'){
+    if(SH.adding){let s=null,bd=1e9;SH.sys.forEach((q,i)=>{const d=q.top-Y;if(d>-q.sp&&d<bd){bd=d;s=i;}});if(s===null)s=SH.sys.length-1;if(s<0)return;const q=SH.sys[s],sp=q.sp;
+      const ch={sys:s,x0:X,x1:X+2.4*sp,y1:Math.min(Y+0.8*sp,q.top-0.6*sp),h:1.3*sp,text:'',status:'bad',manual:true};ch.y0=ch.y1-1.7*sp;ch.base=ch.y1;SH.chords.push(ch);sortChords();SH.csel=SH.chords.indexOf(ch);setAdding(false);openEdit();preview();return;}
+    let hit=-1,bd=1e9;SH.chords.forEach((ch,i)=>{const m=msp()*0.6,dx=(S.showNew&&ch.dx)||0,w=Math.max(ch.x1-ch.x0,ch.dw||0);if(X>=ch.x0+dx-m&&X<=ch.x0+dx+w+m&&Y>=ch.y0-m&&Y<=ch.y1+m){const d=Math.abs(X-(ch.x0+dx+w/2))+Math.abs(Y-(ch.y0+ch.y1)/2);if(d<bd){bd=d;hit=i;}}});
+    SH.csel=hit;if(hit>=0)openEdit();else closeEdit();preview();return;}
+  if(!SH.sys.length)return;let bi=0,bd=1e9;SH.sys.forEach((s,i)=>{const dd=Y<s.y0?s.y0-Y:Y>s.y1?Y-s.y1:0;if(dd<bd){bd=dd;bi=i;}});const s=SH.sys[bi];
+  if(SH.split){if(X>s.sp*2&&X<SH.work.width-s.sp*2&&!s.segs.some(g=>Math.abs(g.x-X)<s.sp*2)){const cur=segAt(s,X);s.segs.push({x:X,label:s.segs[cur].label});s.segs.sort((p,q)=>p.x-q.x);SH.sel={i:bi,j:s.segs.findIndex(g=>g.x===X)};}setSplit(false);}
+  else SH.sel={i:bi,j:segAt(s,X)};preview();});
+
+/* chord editor */
+function openEdit(){const ch=SH.chords[SH.csel];if(!ch)return closeEdit();SH.cedit=ch;showCrop(ch);$('#edit').hidden=false;$('#ce').value=ch.text;$('#ce-box-safe').checked=!!ch.overlaySafe;editMsg();setTimeout(()=>{try{$('#ce').focus();}catch(e){}},0);}
+function closeEdit(){$('#edit').hidden=true;SH.csel=-1;SH.cedit=null;}
+function editMsg(){const ch=SH.cedit;if(!ch)return;const p=parsed(ch);const t=shiftNow();
+  $('#ce-msg').textContent=!p?'지원하지 않거나 불확실한 코드입니다. 원본과 비교해 수정해 주세요.':(t.shift?'→ '+KEYN[t.k]+'키에서 '+CC.transpose(p,t.shift,t.k,S.song.key):'좋아요');}
+$('#ce').addEventListener('input',e=>{const ch=SH.cedit;if(!ch)return;stopPlay();ch.text=e.target.value.trim().replace(/♯/g,'#').replace(/♭/g,'b');ch.reviewed=false;ch.status='check';editMsg();preview();});
+function confirmChord(){const ch=SH.cedit;if(!ch)return;const r=PC.recognition(ch.text),p=CC.parseChord(ch.text);if(!r.valid||r.repeat||!p||!p.ok){$('#ce-msg').textContent='반복 번호를 빼고 정확한 코드 이름을 입력하세요.';return;}ch.reviewed=true;ch.overlaySafe=$('#ce-box-safe').checked;ch.status='ok';closeEdit();preview();syncCurrent();}
+$('#ce').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();confirmChord();}});
+$('#ce-ok').addEventListener('click',confirmChord);
+$('#ce-del').addEventListener('click',()=>{stopPlay();const i=SH.chords.indexOf(SH.cedit);if(i>=0)SH.chords.splice(i,1);closeEdit();preview();syncCurrent();});
+function setAdding(on){SH.adding=on;$('#add-chord').setAttribute('aria-pressed',on);$('#add-chord').textContent=on?'악보에서 코드 자리를 눌러요':'+ 코드 추가';}
+$('#add-chord').addEventListener('click',()=>{setAdding(!SH.adding);closeEdit();});
+
+/* highlight tools */
+LBK.forEach(l=>{const b=document.createElement('button');b.type='button';b.className='lbl';b.dataset.l=l;b.setAttribute('aria-pressed','false');const sw=document.createElement('i');sw.style.background=LB[l].fill?rgb(LB[l].fill):'transparent';b.append(sw,document.createTextNode(l));
+  b.addEventListener('click',()=>{if(!SH.sel)return;const s=SH.sys[SH.sel.i];s.segs[SH.sel.j].label=l;if(SH.sel.j+1<s.segs.length)SH.sel={i:SH.sel.i,j:SH.sel.j+1};else if(SH.sel.i+1<SH.sys.length)SH.sel={i:SH.sel.i+1,j:0};preview();});$('#lbls').appendChild(b);});
+$('#split').addEventListener('click',()=>{if(SH.sel)setSplit(!SH.split);});
+$('#unsplit').addEventListener('click',()=>{if(!SH.sel||SH.sel.j===0)return;const s=SH.sys[SH.sel.i];s.segs.splice(SH.sel.j,1);SH.sel={i:SH.sel.i,j:SH.sel.j-1};preview();});
+$('#lyr2').addEventListener('change',e=>{SH.gap=e.target.checked?2.2:1;if(SH.work){bands();preview();}});
+
+/* ---------- reading chords (OCR) ---------- */
+let OCR=null;
+function withTimeout(p,ms){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);}
+async function getOCR(){
+  if(OCR)return OCR;if(!window.Tesseract)throw new Error('engine');
+  const base=new URL('tess/',document.baseURI).href;
+  OCR=await withTimeout(HOSTED?Tesseract.createWorker('eng',1,{}):Tesseract.createWorker('eng',1,{workerPath:base+'worker.min.js',corePath:base+'core',langPath:base+'lang',gzip:true,workerBlobURL:false,cacheMethod:'none'}),120000);
+  await OCR.setParameters({tessedit_pageseg_mode:'7',tessedit_char_whitelist:'ABCDEFGabdgijmnosu#/0123456789()+-M°',user_defined_dpi:'300'});
+  return OCR;
+}
+let readToken=0;
+const CHORD_WL='ABCDEFGabdgijmnosu#/0123456789()+-M°';
+/* words such as Fine, D.S. al Fine, D.C. and the segno sign decide the playing order */
+async function readMarks(w,nonChord,signs,my){
+  const W=SH.work.width,H=SH.work.height,marks=signs.slice();
+  let below=[];try{below=CC.belowTokens(SH.bin,W,H,SH.sys,SH.bars);}catch(e){}
+  const phr=CC.phrases(nonChord).concat(below);if(!phr.length)return marks;
+  setMsg('반복 기호(D.S., Fine 등)를 찾는 중…');
+  try{await w.setParameters({tessedit_char_whitelist:'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.$%§ '});}catch(e){}
+  for(const p of phr){const pad=Math.round(0.3*p.sp),bw=Math.max(1,p.x1-p.x0+2*pad),bh=Math.max(1,p.y1-p.y0+2*pad),k=48/bh,cv=mk(Math.max(1,Math.round(bw*k)),Math.max(1,Math.round(bh*k))),cx=cv.getContext('2d');
+    cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(SH.work,p.x0-pad,p.y0-pad,bw,bh,0,0,cv.width,cv.height);
+    if(my!==readToken)break;
+    try{await w.setParameters({tessedit_pageseg_mode:p.n>1?'7':'8'});const r=(await w.recognize(cv)).data.text.trim(),typ=CC.markType(r,p);if(typ)marks.push({type:typ,sys:p.sys,x:typ==='segno'?p.x0:p.x1-0.5*p.sp,box:p});}catch(e){}}
+  try{await w.setParameters({tessedit_pageseg_mode:'7',tessedit_char_whitelist:CHORD_WL});}catch(e){}
+  if(my!==readToken)return null;
+  marks.forEach(k=>{if(!k.box||k.type==='segno')return;const b=k.box;SH.chords=SH.chords.filter(c=>!(c.sys===b.sys&&c.x0>=b.x0-3&&c.x1<=b.x1+3&&c.y0>=b.y0-b.sp&&c.y1<=b.y1+b.sp));});
+  return marks;
+}
+async function readChords(){
+  const my=++readToken,W=SH.work.width,H=SH.work.height;
+  const toks=CC.chordTokens(SH.bin,W,H,SH.sys,SH.lyr1);SH.chords=[];SH.toks=[];SH.bank=null;SH.font=null;
+  if(!toks.length){setMsg('코드 줄을 못 찾았어요. 코드 추가를 눌러 직접 넣을 수 있어요.'+(SH.ksig?'':' 원래 키가 맞는지 1번 위에서 확인해 주세요.'),'err');return;}
+  if($('#ocr-provider').value==='paddle'){SH.toks=toks.map((t,i)=>({id:'box-'+t.sys+'-'+i,sys:t.sys,x0:t.x0,x1:t.x1,y0:t.y0,y1:t.y1,sp:t.sp,base:t.base,h:t.hmL}));await readPaddle(my);return;}setMsg('코드 읽는 엔진을 준비하는 중이에요. 처음엔 조금 걸려요…');setProg(0.02);
+  let w;try{w=await getOCR();}catch(e){setProg(null);setMsg('이 기기에서는 코드를 자동으로 못 읽어요. 코드 추가를 눌러 직접 넣어주세요.'+(SH.ksig?'':' 원래 키가 맞는지 1번 위에서 확인해 주세요.'),'err');OCR=null;return;}
+  if(my!==readToken)return;try{await w.setParameters({tessedit_pageseg_mode:'7',tessedit_char_whitelist:CHORD_WL});}catch(e){}
+  const nonChord=[],signs=[];let tempoSet=false;
+  for(let i=0;i<toks.length;i++){if(my!==readToken)return;const t=toks[i];const im=CC.tokenImage(t);const c=mk(im.width,im.height);c.getContext('2d').putImageData(new ImageData(im.data,im.width,im.height),0,0);
+    let text='';try{const r=await w.recognize(c);text=r.data.text||'';}catch(e){}
+    if(my!==readToken)return;
+    /* a lone letter (its sharp/flat taken off) is sometimes read as nothing on a line; read it again as one word */
+    if(!/[A-G]/.test(text)&&t.acc&&t.acc.tall===1&&t.comps.length<=2&&t.acc.root2&&t.acc.root2.ratio>=0.45&&t.acc.root2.ratio<=1.3){
+      try{await w.setParameters({tessedit_pageseg_mode:'8'});const r2=await w.recognize(c);if(/[A-G]/.test(r2.data.text||''))text=r2.data.text;}catch(e){}
+      try{await w.setParameters({tessedit_pageseg_mode:'7'});}catch(e){}}
+    if(my!==readToken)return;
+    /* a tempo mark (♩=65) at the start of the first line sets the playing speed */
+    if(t.sys===0&&t.x0<0.2*W&&!tempoSet){const tm=text.trim().match(/^[^A-G0-9]*=?\s*(\d{2,3})$/);if(tm&&+tm[1]>=40&&+tm[1]<=200){tempoSet=true;S.play.bpm=+tm[1];$('#bpm').value=S.play.bpm;$('#bpm-v').textContent=S.play.bpm;save();continue;}}
+    const parts=CC.readToken(text.trim(),t.acc);const gl=CC.glyphsFor?CC.glyphsFor(t,parts):null;let gi=0;
+    const sg=CC.signIn(t);if(sg!==null)signs.push({type:'segno',sys:t.sys,x:sg});
+    const box={id:'box-'+t.sys+'-'+i,sys:t.sys,x0:t.x0,x1:t.x1,y0:t.y0,y1:t.y1,sp:t.sp};
+    if(/^[^A-G]*[S$%§]/.test(text.trim()))nonChord.push(Object.assign({},box,{x1:t.x0+1.2*t.sp}));
+    if(parts.fine)signs.push({type:'fine',sys:t.sys,x:t.x1-0.5*t.sp});
+    if(parts.some(p=>p.root||p.bassOnly)||(sg===null&&!parts.fine&&!/^[\d.,\s]+$/.test(text.trim())))SH.toks.push(Object.assign({},box,{base:t.base,h:t.hmL,raw:text.trim()}));
+    if(!parts.some(p=>(p.root||p.bassOnly)&&p.ok))nonChord.push(box);
+    parts.forEach(p=>{let g=null;if(p.root&&!p.bassOnly){g=gl?gl[gi]:null;gi++;}
+      /* "/F" keeps the chord before it and changes only the bass */
+      if(p.bassOnly){const prev=SH.chords.slice().reverse().map(c=>CC.parseChord(c.text)).find(q=>q&&q.root);if(!prev)return;p=Object.assign({},p,{root:prev.root,text:prev.root+prev.qual+'/'+p.bass,ok:true});}
+      if(!p.root)return;const x0=g?g.x0:t.x0+p.frac*(t.x1-t.x0),x1=g?g.x1:t.x0+p.fracEnd*(t.x1-t.x0);SH.chords.push({boxId:box.id,sys:t.sys,x0,x1:Math.max(x0+t.sp,x1),y0:t.y0,y1:t.y1,base:t.base,h:t.hmL,text:p.text,ocrText:p.text,g:g||null,status:p.ok?'ok':(p.dist!==undefined?'check':'bad')});});
+    if(i%6===5||i===toks.length-1){setProg((i+1)/toks.length);setMsg('코드 읽는 중… '+(i+1)+' / '+toks.length);sortChords();preview();}}
+  const mk2=await readMarks(w,nonChord,signs,my);if(my!==readToken||!mk2)return;SH.marks=mk2;
+  setProg(null);sortChords();buildBank();
+  /* a chord whose root or bass is outside the key is unusual: ask for a look (a small picture often loses a sharp this way) */
+  flagOffKey(SH.ksig?SH.ksig.pc:CC.guessKey(SH.chords.filter(c=>c.status!=='bad').map(c=>CC.parseChord(c.text)).filter(p=>p&&p.root)));
+  PC.attachBoxes(SH.chords,SH.toks);
+  SH.chords.forEach(c=>{c.reviewed=false;c.status='check';c.overlaySafe=false;});
+  let keyNote=keyFromChords();
+  if(SH.small)keyNote+=' 사진이 작아서 잘못 읽은 곳이 있을 수 있어요. 카톡으로 받은 악보면 원본으로 저장해서 올려주세요.';
+  readMelody();
+  const nCheck=SH.chords.filter(c=>c.status!=='ok').length;
+  setMsg('코드 '+SH.chords.length+'개를 읽었어요.'+keyNote+(SH.rangeFromSheet?' 2번 음역('+nn(S.song.lo)+'~'+nn(S.song.hi)+')은 멜로디에서 읽어 넣었어요. 다르면 오선을 눌러 고쳐요.':' 이제 2번에서 제일 낮은 음과 높은 음을 눌러요.')+(nCheck?' 4번 악보의 주황·빨강 코드 '+nCheck+'개는 눌러서 확인해 주세요.':''),'ok');preview();
+}
+/* ---------- reading the chord rows with Claude (the sample capability) ---------- */
+let SAMPLE=null,SAMPLE_IMG=false,AI_MAX=1,API_AI=false;
+(async()=>{if(HOSTED){API_AI=true;AI_MAX=8;$('#ai-read').hidden=false;return;}
+  try{if(window.claude&&window.claude.use){SAMPLE=await window.claude.use('sample');if(SAMPLE){const lim=await SAMPLE.limits().catch(()=>null);SAMPLE_IMG=!!(lim&&lim.images);AI_MAX=lim&&lim.images?Math.max(1,lim.images.maxCount||1):1;}}}catch(e){SAMPLE=null;}
+  $('#ai-read').hidden=!(SAMPLE&&SAMPLE_IMG);})();
+const aiReady=()=>API_AI||(SAMPLE&&SAMPLE_IMG);
+const toB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=rej;r.readAsDataURL(b);});
+/* ask the vision model: an array of {line, chords:[{x,chord}]} */
+async function askVision(prompt,blobs,key,where){
+  if(API_AI){const images=[];for(const b of blobs)images.push(await toB64(b));
+    const r=await fetch('/api/kimatchum/trial/recognize',{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({images,key,where})});
+    if(r.status===429)throw {code:'rate_limited'};if(!r.ok)throw {code:'upstream_error',message:'http '+r.status};const j=await r.json();return j.lines||[];}
+  const res=await SAMPLE.json(prompt,{images:blobs,modelTier:'default',cache:{gcTime:3600000}});return Array.isArray(res)?res:(res&&Array.isArray(res.lines)?res.lines:[]);}
+const AI_PROMPT=(key,where)=>'These images show the chord rows of a lead sheet (the chord symbols printed above each staff), one strip per line of the sheet. The large red number at the left edge of a strip is the line number; each printed symbol in the chord row has a small blue number just above it. '+where+'. '+(key?'The song is in '+key+' major. ':'The key of the song is not known; read the sharps and flats exactly as printed. ')+
+  'Read every chord symbol in each strip from left to right. Reply with only a JSON array, one object per strip: {"line": 1, "chords": [{"n": 3, "chord": "C#m/E"}]} where n is the blue number above that chord symbol. '+
+  'Two different chord symbols get the same n only when they are printed touching each other under one blue number. If a chord symbol has no blue number, give it as {"x": 0.42, "chord": "D"} where x is its horizontal centre as a fraction 0..1 of the strip width. Blue numbers above things that are not chord symbols (bar numbers, tempo marks, words, lyrics) are simply not used. '+
+  'Write sharps as # and flats as b (C#m/E, Bb, Ebm6), minor as m, and use 7, maj7, m7, sus4, sus2, add2, add9, 6, m6, 9, dim, aug, m7b5 as printed; slash chords as A/C#. Thin fonts often print a small raised sharp or flat right after a letter, and a small raised 7 at the end (E7, Bm7, F#7): include them. '+
+  'Ignore the red line numbers, tempo marks like =65, bar numbers, lyrics, and words such as Fine, D.S., D.C. A strip with no chord symbols gets an empty list. No other text.';
+function flagOffKey(kp){const sc=kp===null||kp===undefined?null:[0,2,4,5,7,9,11].map(i=>mod(kp+i,12));
+  SH.chords.forEach(c=>{if(c.status!=='ok')return;const p=CC.parseChord(c.text);if(!p||!p.root)return;
+    if(sc&&(!sc.includes(CC.pc(p.root))||(p.bass&&!sc.includes(CC.pc(p.bass)))))c.status='check';
+    if(p.bass&&[1,6,8,11].includes(mod(CC.pc(p.bass)-CC.pc(p.root),12)))c.status='check';});}
+/* the song's key: the key signature when it could be read, else the chords (a small picture has no readable key signature) */
+function keyFromChords(){
+  const good=SH.chords.filter(c=>c.status!=='bad').map(c=>CC.parseChord(c.text)).filter(p=>p&&p.root);
+  const guess=good.length>=3?CC.guessKey(good):null,signature=SH.ksig?SH.ksig.pc:null;
+  S.song.keyEvidence={signature,chords:guess};
+  if(!S.song.keyManual){S.song.keyConfirmed=false;if(guess!==null)S.song.key=guess;else if(signature!==null)S.song.key=signature;}
+  if(!S.song.noteKeyManual&&signature!==null)S.song.noteKey=signature;
+  renderSongInputs();refresh();return ' 원키는 추정값입니다. 1번에서 코드·음표 키를 확인하세요.';
+}
+
+async function aiReadChords(auto){if(!aiReady()||!SH.work||!SH.sys.length||SH.aiBusy)return false;SH.aiBusy=true;const my=readToken;const btn=$('#ai-read');btn.disabled=true;
+  setMsg(auto?'코드가 애매해서 AI가 다시 읽어요…'+(API_AI?' (10초쯤 걸려요)':' (처음엔 허용을 눌러주세요)'):'AI가 코드를 읽는 중이에요…'+(API_AI?' (10초쯤 걸려요)':' (처음엔 허용을 눌러주세요)'));
+  /* the key hint: the key signature or the key already set; on the first automatic read only a guess from the chords the OCR got (none when too few) */
+  const ocrP=SH.chords.filter(c=>c.status!=='bad'&&!c.ai).map(c=>CC.parseChord(c.text)).filter(p=>p&&p.root);const g0=(SH.ksig||!auto)?S.song.key:(ocrP.length>=4?CC.guessKey(ocrP):null);const hint=g0===null||g0===undefined?'':KEYN[g0];
+  try{const W=SH.work.width;const strips=SH.sys.map((q,i)=>({i,y0:Math.max(0,Math.round(q.top-6*q.sp)),y1:Math.round(q.top+0.6*q.sp)}));
+    const groups=[];for(let i=0;i<strips.length;i+=4)groups.push(strips.slice(i,i+4));const blobs=[];
+    for(const g of groups){const h=g.reduce((a,t)=>a+(t.y1-t.y0)+10,0);const c=mk(W,h),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,h);let Y=0;
+      g.forEach(t=>{const sp=SH.sys[t.i].sp;x.drawImage(SH.work,0,t.y0,W,t.y1-t.y0,0,Y,W,t.y1-t.y0);x.fillStyle='#d00';x.font='700 '+Math.round(1.7*sp)+'px sans-serif';x.textAlign='left';x.fillText(String(t.i+1),4,Y+Math.round(1.9*sp));
+        /* every printed token gets a small blue number above it, so the answer can name the token instead of guessing a position */
+        const tk=(SH.toks||[]).filter(k=>k.sys===t.i).sort((a,b)=>a.x0-b.x0);x.fillStyle='#06c';x.font='700 '+Math.round(1.0*sp)+'px sans-serif';x.textAlign='center';
+        tk.forEach((k,ki)=>{k.n=ki+1;const yy=Y+(k.y0-t.y0)-Math.round(0.3*sp);x.fillText(String(ki+1),(k.x0+k.x1)/2,yy>Y+sp?yy:Y+(k.y1-t.y0)+Math.round(1.1*sp));});x.textAlign='left';
+        x.fillStyle='#bbb';x.fillRect(0,Y+(t.y1-t.y0)+4,W,2);Y+=(t.y1-t.y0)+10;});
+      blobs.push(await new Promise(r=>c.toBlob(r,'image/png')));}
+    let out=[];for(let b=0;b<blobs.length;b+=AI_MAX){const part=blobs.slice(b,b+AI_MAX),gs=groups.slice(b,b+part.length);
+      const where=gs.map((g,gi)=>'Image '+(gi+1)+' holds line'+(g.length>1?'s '+(g[0].i+1)+' to '+(g[g.length-1].i+1):' '+(g[0].i+1))).join('; ');
+      const arr=await askVision(AI_PROMPT(hint,where),part,hint,where);if(my!==readToken)return false;out=out.concat(arr);}
+    try{console.log('[kimatchum] AI answer',JSON.stringify(out));SH.sys.forEach((q,li)=>console.log('[kimatchum] line',li+1,'toks',(SH.toks||[]).filter(k=>k.sys===li).map(k=>k.n+'@'+Math.round(k.x0)+'-'+Math.round(k.x1)).join(' '),'| ocr',SH.chords.filter(c=>c.sys===li).map(c=>c.text+'('+c.status+')@'+Math.round(c.x0)+'-'+Math.round(c.x1)).join(' ')));}catch(e){}
+    const n=applyAI(out);sortChords();buildBank();const keyNote=keyFromChords();flagOffKey(S.song.key);readMelody();
+    const nCheck=SH.chords.filter(c=>c.status!=='ok').length;setMsg((SH.aiUnmatched?'고정 위치에 연결하지 못한 항목 '+SH.aiUnmatched+'개는 원본에서 직접 추가·확인하세요. ':'')+'AI가 코드 '+n+'개를 읽었어요.'+keyNote+(nCheck?' 주황·빨강 '+nCheck+'개는 눌러서 확인해 주세요.':''),'ok');preview();return true;}
+  catch(e){const c=e&&e.code;if(c==='not_granted'||c==='sampling_disabled'||c==='not_declared'||c==='capability_disabled'||c==='images_unavailable'){SH.aiDeclined=true;btn.hidden=true;if(!auto)setMsg('여기서는 AI 읽기를 쓸 수 없어요.','err');}
+    else if(c==='rate_limited')setMsg('AI 사용량이 잠시 막혔어요. 조금 뒤에 다시 눌러주세요.','err');else if(c==='cancelled'){}else setMsg('AI가 코드를 읽지 못했어요. 다시 눌러보세요.','err');return false;}
+  finally{SH.aiBusy=false;btn.disabled=false;}}
+/* put Claude's chords onto the sheet: paired with the chords already found on that line, else placed by position */
+/* order-keeping match of the AI's chords (by x) to the chords read on that line: most pairs, then closest */
+function alignAI(ai,have,tol){const n=ai.length,m=have.length,cx=c=>c.x0+(c.dw||c.x1-c.x0)/2;
+  const dp=Array.from({length:n+1},()=>Array(m+1).fill(null));dp[0][0]={k:0,d:0,f:0};
+  for(let i=0;i<=n;i++)for(let j=0;j<=m;j++){const s=dp[i][j];if(!s)continue;const put=(ii,jj,k,d,f)=>{const o=dp[ii][jj];if(!o||k>o.k||(k===o.k&&d<o.d))dp[ii][jj]={k,d,f};};
+    if(i<n)put(i+1,j,s.k,s.d,1);if(j<m)put(i,j+1,s.k,s.d,2);if(i<n&&j<m){const d=Math.abs(ai[i].x-cx(have[j]));if(d<=tol)put(i+1,j+1,s.k+1,s.d+d,3);}}
+  const map=Array(n).fill(-1);let i=n,j=m;while(i>0||j>0){const f=dp[i][j].f;if(f===3){map[i-1]=j-1;i--;j--;}else if(f===1)i--;else j--;}return map;}
+function applyAI(lines){const result=PC.mergeRecognition(SH.chords,SH.toks||[],lines,CC.parseChord);SH.aiUnmatched=result.unmatched;return result.applied;}
+$('#ai-read').addEventListener('click',()=>{if(!SH.work||SH.isSample){setMsg('먼저 악보를 올려주세요.','err');return;}if($('#ocr-provider').value==='paddle'){stopPlay();document.querySelector('.wrap').inert=true;readPaddle(readToken).finally(()=>{document.querySelector('.wrap').inert=false;syncCurrent();});return;}if($('#ocr-provider').value!=='gemini'){setMsg('서버 AI를 선택하면 이미지를 서버로 보내며 API 비용이 발생해요.','err');return;}stopPlay();document.querySelector('.wrap').inert=true;aiReadChords(false).finally(()=>{document.querySelector('.wrap').inert=false;syncCurrent();});});
+
+/* open one sheet image into the current song; resolves true once its chords have been read */
+async function loadFile(f){LOADING=true;document.querySelector('.wrap').inert=true;try{return await readFile(f);}finally{LOADING=false;document.querySelector('.wrap').inert=false;}}
+async function readFile(f){++readToken;stopPlay();closeEdit();setAdding(false);setMsg('악보를 여는 중이에요…');
+  let img=null,url='';try{url=URL.createObjectURL(f);img=new Image();await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url;});SH.work=toWork(img);SH.original=SH.work;}
+  catch(err){if(url)URL.revokeObjectURL(url);setMsg('이미지를 열 수 없어요. PNG나 JPG를 올려주세요.','err');return false;}
+  SH.isSample=false;SH.mel=null;SH.marks=[];SH.aiBusy=false;SH.aiUnmatched=0;SH.toks=[];S.view=null;S.overlay=false;$('#overlay').checked=false;S.song={title:'',key:0,noteKey:0,lo:60,hi:72,hist:null,rangeVerified:false,keyManual:false,keyConfirmed:false,noteKeyManual:false};S.play={bpm:72,beats:4,mel:false,acc:true};S.head.prog='';S.head.note='';syncPlayControls();SH.rangeFromSheet=false;SH.rangeAuto=false;melInfo();
+  /* the song is named after the file; the title box can be edited afterwards */
+  S.song.title=String(f.name||'').replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s*\([A-G][#b]?\)\s*-?\d*$/,'').trim();S.song.lo=60;S.song.hi=72;save();renderSongInputs();
+  analyze();
+  /* staff lines packed close together: read again from an enlarged copy */
+  if(SH.sys.length){const sp0=msp();if(sp0<14){const w2=toWork(img,18/sp0);if(w2.width>SH.work.width*1.25){const t0=SH.thr;SH.work=w2;analyze(sp0,t0);}}}
+  URL.revokeObjectURL(url);SH.sel=SH.sys.length?{i:0,j:0}:null;setSplit(false);$('#a4out').hidden=true;SH.chords=[];preview();
+  if(!SH.sys.length){setMsg('줄(오선)을 못 찾았어요. 기울어지지 않은 사진이나 캡처 이미지를 올려주세요.','err');return false;}
+  if(SH.ksig){S.song.key=SH.ksig.pc;S.song.noteKey=SH.ksig.pc;S.song.keyEvidence={signature:SH.ksig.pc,chords:null};S.view=null;save();renderSongInputs();refresh();}
+  SH.beatsManual=false;SH.marks=[];SH.rangeAuto=true;readMelody();await readChords();return true;}
+$('#file').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;e.target.value='';if(LOADING||SET.busy)return;syncCurrent();SET.cur=-1;renderSet();
+  const ok=await loadFile(f);if(ok&&!S.head.setlist.trim()&&S.song.title){S.head.setlist=S.song.title;$('#h-setlist').value=S.head.setlist;save();}});
+
+/* ---------- melody ---------- */
+SH.mel=null;SH.beatsManual=false;SH.marks=[];
+function melInfo(){const m=SH.mel,n=m?m.notes.length:0;if(!n){$('#mel-info').textContent='멜로디를 못 읽어서 반주만 쳐요.';return;}
+  const rep=m.measures.filter(M=>M.repEnd).length,ds=m.measures.some(M=>M.ds),dc=m.measures.some(M=>M.dc),fine=m.measures.some(M=>M.fine);
+  const parts=[];if(rep)parts.push('도돌이표 '+rep+'곳');if(ds)parts.push('D.S.');if(dc)parts.push('D.C.');if(fine)parts.push('Fine');
+  $('#mel-info').textContent='실험적 음표 판독 '+n+'개 — 음높이·박자 검수 필요.'+(parts.length?' 반복: '+parts.join(', ')+' 인식 후보.':'');}
+/* the song's range without stray notes: a few notes far below or above the rest (a pickup written an octave down)
+   are left out of the range and reported instead, so one note cannot push every key out of reach */
+function coreRange(ms){return PC.fullRange(ms); }
+function readMelody(){
+  if(!SH.work||!SH.sys.length||!ML){SH.mel=null;melInfo();return;}
+  const boxes=SH.chords.map(c=>({sys:c.sys,x0:c.x0,x1:c.x1,y0:c.y0,y1:c.y1}));
+  const noteKey=S.song.noteKey??S.song.key;const keys=SH.ksig&&SH.ksig.pc===noteKey&&SH.ksig.sysKeys?SH.ksig.sysKeys:noteKey;
+  const run=b=>{try{return ML.read(SH.bin,SH.work.width,SH.work.height,SH.sys,SH.bars,boxes,keys,b,SH.low);}catch(e){return null;}};
+  let m=run(S.play.beats);
+  if(m&&!SH.beatsManual){const raws=m.measures.filter((M,i)=>i>0&&M.notes.length>=2&&!M.partial).map(M=>M.written!==undefined?M.written:M.raw).sort((a,b)=>a-b);
+    if(raws.length>=3){const med=raws[raws.length>>1],over=raws.filter(v=>v>3.1).length;
+      /* a bar longer than 3 beats cannot be 3/4; a busy 4/4 sheet read a little short still has plenty of those */
+      const want=(med<3.5&&over<0.2*raws.length)?3:4;if(want!==S.play.beats){S.play.beats=want;$('#beats').value=want;save();m=run(want);}}}
+  if(m&&ML.setMarks)ML.setMarks(m,SH.marks||[]);
+  SH.mel=m&&m.notes.length?m:null;melInfo();
+  /* the song's lowest and highest notes come straight from the melody until someone picks them by hand */
+  if(SH.rangeAuto&&!SH.mel)SH.rangeFromSheet=false;
+  if(SH.rangeAuto&&SH.mel){const ms=SH.mel.notes.map(n=>n.midi),cr=coreRange(ms),lo=cr.lo,hi=cr.hi;SH.rangeFromSheet=true;S.song.rangeVerified=false;S.song.hist=cr.hist;S.song.outLo=cr.outLo;S.song.outHi=cr.outHi;
+    if(lo!==S.song.lo||hi!==S.song.hi){S.song.lo=lo;S.song.hi=hi;S.next='lo';S.view=null;save();refresh();return;}}
+  preview();
+}
+
+/* ---------- playback ---------- */
+function timeline(){
+  const beats=S.play.beats,mel=SH.mel;
+  if(mel){const ms=mel.measures,per=ms.map(()=>[]);
+    mel.notes.forEach(n=>{if(n.mi===undefined)return;per[n.mi].push({kind:'note',n,rel:n.start-ms[n.mi].start,dur:n.dur});});
+    SH.chords.forEach(c=>{if(!parsed(c))return;const s=SH.sys[c.sys];let mi=-1;ms.forEach((M,i)=>{if(M.sys===c.sys&&c.x0>=M.x0-0.5*s.sp&&c.x0<M.x1-0.3*s.sp)mi=i;});
+      if(mi<0){ms.forEach((M,i)=>{if(M.sys===c.sys)mi=i;});}if(mi<0)return;const M=ms[mi];
+      /* a chord sounds with the note under it; over a rest it sounds where the rest begins */
+      const first=M.notes.find(n=>n.x>=c.x0-0.7*s.sp&&n.start!==undefined);let rel;
+      if(first&&first.x<=Math.max(c.x1,c.x0+2*s.sp)+s.sp)rel=first.start-M.start;
+      else{const prev=M.notes.filter(n=>n.x<c.x0-0.7*s.sp&&n.start!==undefined).pop();
+        if(prev)rel=prev.start+prev.dur-M.start;else if(first)rel=0;else{const r=(c.x0-M.x0)/Math.max(1,M.x1-M.x0);rel=Math.min(beats-1,Math.max(0,Math.floor(r*beats+0.25)));}}
+      per[mi].push({kind:'chord',c,rel});});
+    /* play the bars in score order: repeats, 1st/2nd endings, D.S./D.C. al Fine */
+    const order=ML.playOrder?ML.playOrder(mel):ms.map((M,i)=>i),ev=[];let t=0;
+    order.forEach(mi=>{const M=ms[mi];per[mi].forEach(e=>ev.push(Object.assign({},e,{beat:t+e.rel})));t+=M.len!==undefined?M.len:beats;});
+    ev.sort((a,b)=>a.beat-b.beat||(a.kind!==b.kind?(a.kind==='chord'?-1:1):(a.kind==='chord'?(a.c.sys-b.c.sys||a.c.x0-b.c.x0):0)));
+    /* tied notes sound once, for the whole length */
+    let head=null;ev.forEach(e=>{if(e.kind!=='note')return;if(e.n.tie&&head&&head.n.midi===e.n.midi&&Math.abs(head.beat+head.dur-e.beat)<0.35){head.dur+=e.dur;e.skip=true;}else head=e;});
+    const chs=ev.filter(e=>e.kind==='chord');
+    for(let i=1;i<chs.length;i++)if(chs[i].beat<=chs[i-1].beat)chs[i].beat=chs[i-1].beat+0.5;
+    chs.forEach((e,i)=>{const nb=i+1<chs.length?chs[i+1].beat:e.beat+beats;e.dur=Math.max(0.5,Math.min(nb-e.beat,beats*2));});
+    return ev.filter(e=>!e.skip).sort((a,b)=>a.beat-b.beat);}
+  const ev=[];let base=0;
+  SH.sys.forEach((s,i)=>{const bl=SH.bars[i]||{x0:0,x1:SH.work.width,bars:[]};let b=[bl.x0].concat(bl.bars.filter(v=>v>bl.x0+s.sp*1.5&&v<bl.x1-s.sp*0.5));b.push(bl.x1);
+    if(b.length<3||b.length>12){b=[bl.x0];for(let k=1;k<=4;k++)b.push(bl.x0+(bl.x1-bl.x0)*k/4);}
+    const nM=b.length-1,chs=SH.chords.filter(c=>c.sys===i&&parsed(c));
+    chs.forEach(c=>{let m=0;for(let k=0;k<nM;k++)if(c.x0>=b[k]-s.sp*0.5)m=k;const rel=(c.x0-b[m])/Math.max(1,b[m+1]-b[m]);const bt=Math.min(beats-1,Math.max(0,Math.floor(rel*beats+0.25)));ev.push({kind:'chord',c,beat:(base+m)*beats+bt});});
+    base+=nM;});
+  ev.sort((a,b)=>a.beat-b.beat||a.c.x0-b.c.x0);
+  for(let i=1;i<ev.length;i++)if(ev[i].beat<=ev[i-1].beat)ev[i].beat=ev[i-1].beat+1;
+  ev.forEach((e,i)=>{const nb=i+1<ev.length?ev[i+1].beat:(Math.floor(e.beat/beats)+1)*beats;e.dur=Math.max(1,nb-e.beat);});
+  return ev;
+}
+let PL=null;
+function syncPlayControls(){for(const id of ['bpm','beats'])$('#'+id).value=S.play[id==='bpm'?'bpm':'beats'];$('#bpm-v').textContent=S.play.bpm;$('#t-mel').checked=S.play.mel;$('#t-acc').checked=S.play.acc;}
+function setPlayBtn(on){$('#play').textContent=on?'■ 멈추기':'▶ 선택 키로 코드 반주';}
+function stopPlay(){if(PL){const old=PL;PL=null;old.transport.stop();}try{UNLOCK?.pause();}catch(e){}$('#playbox').hidden=true;$('#now').textContent='';setPlayBtn(false);$('#pause').disabled=true;$('#stop').disabled=true;$('#pause').textContent='일시정지';const sb=$('#set-play');if(sb)sb.textContent=setBtnLabel();}
+function placeBox(x0,y0,w,h){const pv=$('#pv'),box=$('#playbox'),r=pv.getBoundingClientRect(),sc=r.width/pv.width;box.hidden=false;box.style.left=((x0+SH.padl)*sc)+'px';box.style.top=(y0*sc)+'px';box.style.width=w*sc+'px';box.style.height=h*sc+'px';}
+function showPlaying(c){placeBox(c.x0-4,c.y0-4,c.x1-c.x0+8,c.y1-c.y0+8);}
+function showNote(n){const sp=SH.sys[n.sys].sp;placeBox(n.x-n.hw-5,n.y-.75*sp,2*n.hw+10,1.5*sp);}
+function showChordLabel(label,orig){$('#now').textContent='선택 키 '+KEYN[targetKey()]+' · 코드 '+label+(orig!==label?' (원래 '+orig+')':'');}
+function playbackEvents(key,songIndex){
+  if(SH.chords.some(c=>!parsed(c)))return [];
+  const spb=60/S.play.bpm,shift=mod(key-S.song.key,12),useMel=S.play.mel&&!!SH.mel;
+  const tl=timeline().filter(e=>e.kind==='chord'?(S.play.acc||!useMel):useMel),b0=tl.length?Math.min(...tl.map(e=>e.beat)):0;
+  return tl.map(e=>{const at=(e.beat-b0)*spb,duration=Math.max(.08,e.dur*spb),common={at,duration,song:songIndex,key,c:e.c,n:e.n};
+    if(e.kind==='note')return {...common,kind:'note',notes:[e.n.midi+evaluateFor(S.song).res[key].s],label:'멜로디 (실험적)'};
+    const v=PC.chordVoicing(CC,e.c.text,shift,key,S.song.key);return v?{...common,kind:'chord',notes:v.notes,bass:v.bass,label:v.label,original:e.c.text}:null;
+  }).filter(Boolean);
+}
+function playVoice(e,at,duration){
+  const a=ac(),master=a.createGain(),nodes=[];master.gain.value=.8;master.connect(a.destination);
+  const add=(m,volume)=>{const f=440*Math.pow(2,(m-69)/12),gain=a.createGain();gain.gain.setValueAtTime(.0001,at);gain.gain.linearRampToValueAtTime(volume,at+.008);gain.gain.exponentialRampToValueAtTime(.0001,at+Math.max(.05,duration));gain.connect(master);
+    [[1,'triangle',1],[2,'sine',.25]].forEach(([harmonic,type,level])=>{const osc=a.createOscillator(),g=a.createGain();osc.type=type;osc.frequency.value=f*harmonic;g.gain.value=level;osc.connect(g);g.connect(gain);osc.start(at);osc.stop(at+duration+.04);nodes.push(osc);});};
+  e.notes.forEach(m=>add(m,e.kind==='note'?.17:.08));if(e.bass!==undefined)add(e.bass,.14);
+  return {master,nodes};
+}
+function launchPlayback(events,isSet){
+  stopPlay();if(!events.length){$('#now').textContent='재생할 코드를 확인하거나 직접 추가해 주세요.';return;}
+  const a=ac();let lastSong=-1;
+  const transport=new PC.Transport({now:()=>a.currentTime,every:(fn,ms)=>window.setInterval(fn,ms),clear:id=>window.clearInterval(id),
+    cancel:voice=>{voice.nodes.forEach(n=>{try{n.stop();}catch(e){}});voice.master.disconnect();},play:playVoice,
+    show:e=>{if(isSet&&e.song!==lastSong){lastSong=e.song;selectSong(e.song,true);}if(e.kind==='chord'){showChordLabel(e.label,e.original);showPlaying(e.c);}else showNote(e.n);},
+    state:state=>{const active=state!=='stopped';setPlayBtn(active);$('#pause').disabled=!active;$('#stop').disabled=!active;$('#pause').textContent=state==='paused'?'계속 재생':'일시정지';const sb=$('#set-play');if(sb)sb.textContent=active&&isSet?'■ 멈추기':setBtnLabel();if(!active)$('#playbox').hidden=true;}
+  });
+  PL={transport,set:isSet};transport.start(events);
+}
+function startPlay(){syncCurrent();if(!readyForPlayback(false))return;launchPlayback(playbackEvents(targetKey(),SET.cur),false);}
+$('#play').addEventListener('click',()=>{if(PL&&PL.transport.state!=='stopped'){stopPlay();return;}try{startPlay();}catch(e){console.error('[kimatchum] playback failed',e);stopPlay();$('#now').textContent='코드를 확인하고 다시 재생해 주세요.';}});
+$('#pause').addEventListener('click',()=>{if(!PL)return;if(PL.transport.state==='paused')PL.transport.resume();else PL.transport.pause();});
+$('#stop').addEventListener('click',stopPlay);
+$('#restart').addEventListener('click',()=>{const isSet=PL?.set;stopPlay();if(isSet)startSetPlay();else startPlay();});
+syncPlayControls();
+$('#bpm').addEventListener('input',e=>{stopPlay();S.play.bpm=+e.target.value;$('#bpm-v').textContent=S.play.bpm;save();syncCurrent();});
+$('#beats').addEventListener('change',e=>{stopPlay();S.play.beats=+e.target.value;SH.beatsManual=true;readMelody();save();syncCurrent();});
+$('#t-mel').addEventListener('change',e=>{stopPlay();S.play.mel=e.target.checked;save();syncCurrent();});
+$('#t-acc').addEventListener('change',e=>{stopPlay();S.play.acc=e.target.checked;save();syncCurrent();});
+
+
+/* ---------- A4 ---------- */
+['date','service','setlist','prog','note'].forEach(f=>{const el=$('#h-'+f);el.value=S.head[f];el.addEventListener('input',()=>{S.head[f]=el.value;save();});});
+if(!S.head.setlist&&S.song.title&&S.song.title!=='요게벳의 노래'){S.head.setlist=S.song.title;$('#h-setlist').value=S.head.setlist;}
+function wrapL(x,t,w){const ws=t.split(' '),o=[];let l='';ws.forEach(v=>{const n=l?l+' '+v:v;if(x.measureText(n).width>w&&l){o.push(l);l=v;}else l=n;});if(l)o.push(l);return o;}
+async function buildA4(){
+  if(!readyForPlayback(false))return null;
+  await fontsReady();const W=2480,H=3508,m=80,c=mk(W,H),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  const K='#111',R='#c8203c',G='#5c5c5c',hd=S.head.date.trim(),head=((hd?'['+hd+'] ':'')+S.head.service.trim()).trim();
+  const songs=S.head.setlist.split('\n').map(v=>v.trim()).filter(Boolean),tt=(S.song.title||'').replace(/\s/g,'');
+  x.textBaseline='alphabetic';x.textAlign='left';let fx=m,line=m+52;
+  if(head){x.font='700 56px '+CF;x.fillStyle=K;x.fillText(head,fx,line);fx+=x.measureText(head).width+50;}
+  songs.forEach((s,i)=>{const n=s.replace(/\s/g,''),on=!!tt&&(n.includes(tt)||tt.includes(n)),t=(i+1)+'. '+s;x.font=(on?'700':'500')+' 44px '+CF;const w=x.measureText(t).width;if(fx+w>W-m){fx=m;line+=64;}x.fillStyle=on?R:G;x.fillText(t,fx,line);fx+=w+40;});
+  let y=(head||songs.length)?line+36:m;
+  const k=targetKey(),prog=S.head.prog.trim(),note=S.head.note.trim(),raw=[];
+  if(prog){raw.push({t:'진행 순서   ('+KEYN[k]+'키)',c:K});raw.push({t:prog,c:K});}if(note)raw.push({t:note,c:R});
+  if(raw.length){let fs=60;const mw=W-2*m-80,wid=()=>{x.font='700 '+fs+'px '+CF;return Math.max(...raw.map(l=>x.measureText(l.t).width));};while(wid()>mw&&fs>44)fs-=2;x.font='700 '+fs+'px '+CF;
+    const ls=[];raw.forEach(l=>wrapL(x,l.t,mw).forEach(t=>ls.push({t,c:l.c})));const lh=fs*1.38,bh=fs*0.5+lh*ls.length+fs*0.25;
+    x.fillStyle='#f4f4f4';x.strokeStyle='#3c3c3c';x.lineWidth=4;rr(x,m,y,W-2*m,bh,24);x.fill();x.stroke();let ty=y+fs*0.4;x.textBaseline='top';ls.forEach(l=>{x.fillStyle=l.c;x.fillText(l.t,m+40,ty);ty+=lh;});y+=bh+30;}
+  const oldView=S.showNew;S.showNew=true;let sh;try{sh=compose(false);}finally{S.showNew=oldView;}const bot=Math.min(sh.height,Math.round(SH.contentBottom+msp()*1.2)),s=Math.min((W-2*m)/sh.width,(H-y-m-600)/bot);
+  x.imageSmoothingQuality='high';x.drawImage(sh,0,0,sh.width,bot,(W-sh.width*s)/2,y,sh.width*s,bot*s);
+  let cy=y+bot*s+40;x.font='700 30px '+CF;x.fillStyle=R;x.fillText('코드만 '+KEYN[k]+'키 · 오선 음표·조표는 원본 '+KEYN[S.song.noteKey??S.song.key]+'키 그대로',m,cy);cy+=40;
+  x.font='500 27px '+CF;x.fillStyle=G;x.fillText('단순 코드 반주용 · 미검토 '+SH.chords.filter(c=>!c.reviewed).length+'개 · 원곡 멜로디 전조 악보 아님',m,cy);cy+=42;
+  SH.sys.forEach((_,i)=>{const line=SH.chords.filter(c=>c.sys===i&&parsed(c)).map(c=>CC.transpose(parsed(c),mod(k-S.song.key,12),k,S.song.key)+(c.reviewed?'':'?')).join('  |  ');wrapL(x,(i+1)+'줄  '+line,W-2*m).forEach(t=>{x.fillText(t,m,cy);cy+=36;});});return c;
+}
+let DL=null,blob=null,fname='';
+$('#build').addEventListener('click',async()=>{if(!SH.work||!readyForPlayback(false))return;const b=$('#build');b.disabled=true;b.textContent='만드는 중…';
+  try{const c=await buildA4();if(!c)return;blob=await new Promise(r=>c.toBlob(r,'image/png'));const k=targetKey();
+    fname=(((S.head.date?'['+S.head.date+'] ':'')+(S.head.service||'')+' '+(S.song.title||'악보')+' '+KEYQ[k]+' 코드반주용').trim().replace(/[\\/:*?"<>|]/g,''))+'.png';
+    const url=URL.createObjectURL(blob);$('#a4img').src=url;$('#a4out').hidden=false;$('#save-msg').textContent='';
+    const inViewer=!!(window.claude&&window.claude.use);$('#save').hidden=!DL;$('#save-alt').hidden=!!DL;const a=$('#save-local');if(!inViewer){a.href=url;a.download=fname;a.hidden=false;}else a.hidden=true;
+  }catch(e){$('#a4out').hidden=false;$('#save-msg').className='msg err';$('#save-msg').textContent='A4 악보를 만들지 못했어요. 이미지를 다시 올려보세요.';}
+  b.disabled=false;b.textContent='A4 악보 만들기';});
+$('#save-local').addEventListener('click',e=>{if(!readyForPlayback(false))e.preventDefault();});
+$('#save').addEventListener('click',async()=>{if(!DL||!blob||!readyForPlayback(false))return;const m=$('#save-msg');m.className='msg';
+  try{await DL.save({filename:fname,data:blob});m.textContent='저장했어요.';}
+  catch(e){const c=e&&e.code;if(c==='declined')m.textContent='';else if(c==='rate_limited')m.textContent='저장 창이 이미 떠 있어요. 잠시 뒤 다시 눌러주세요.';else{m.className='msg err';m.textContent='여기서는 저장이 안 돼요. 이미지를 길게 눌러 저장하세요.';$('#save').hidden=true;$('#save-alt').hidden=false;}}});
+
+/* ---------- boot ---------- */
+function refresh(){renderTeamSummary();renderStaff();renderResult();$('#range-verified').checked=!!S.song.rangeVerified;preview();}
+renderTeam();renderSongInputs();refresh();setView(true);setMode('chord');
+fontsReady().then(()=>{if(!SH.isSample)return;const smp=makeSample();SH.work=smp.canvas;analyze();SH.chords=smp.chords;const sy=SH.sys;
+  if(sy.length>=4){sy[0].segs[0].label='A';sy[1].segs[0].label='A';sy[2].segs=[{x:0,label:'B'},{x:Math.round(SH.work.width*0.5),label:'후렴'}];sy[3].segs[0].label='후렴';}
+  SH.sel=sy.length?{i:0,j:0}:null;$('#h-prog').placeholder='예: A → A → B → 후렴';
+  readMelody();setMsg('지금은 아래 4번에 샘플 악보가 들어가 있어요. 내 악보 이미지를 올려보세요.');preview();});
+(async()=>{try{if(window.claude&&window.claude.use)DL=await window.claude.use('downloads');}catch(e){DL=null;}})();
+window.addEventListener('resize',()=>{if(PL)$('#playbox').hidden=true;});
+
+/* ---------- several songs sung in a row ---------- */
+/* each song keeps its own sheet state (a copy of SH) and its own title/key/range; one of them is shown in step 4 */
+const SHKEYS=['original','work','bin','sys','bars','rows','lyr1','chords','contentBottom','gap','sel','split','isSample','padl','csel','adding','mel','marks','beatsManual','rangeAuto','rangeFromSheet','ksig','small','thr','low','bank','font','cedit','toks','aiDeclined','aiUnmatched'];
+function snapSong(){const sh={};SHKEYS.forEach(k=>{sh[k]=SH[k];});return {sh,song:structuredClone(S.song),play:{...S.play},view:S.view,overlay:S.overlay,head:{prog:S.head.prog,note:S.head.note}};}
+function syncCurrent(){if(SET.cur>=0&&SET.cur<SET.songs.length&&!SET.busy&&!LOADING)SET.songs[SET.cur]=snapSong();}
+function chooseCurrentKey(k){stopPlay();S.view=k;if(SET.cur>=0){const keys=planKeys();keys[SET.cur]=k===null?evaluate().best.k:k;SET.keys=keys;syncCurrent();}}
+function applySong(sg){Object.assign(SH,sg.sh);S.song=structuredClone(sg.song);S.play={...sg.play};S.view=sg.view;S.overlay=!!sg.overlay;S.head.prog=sg.head?.prog||'';S.head.note=sg.head?.note||'';SH.cedit=null;SH.csel=-1;SH.aiBusy=false;$('#overlay').checked=S.overlay;$('#h-prog').value=S.head.prog;$('#h-note').value=S.head.note;$('#a4out').hidden=true;syncPlayControls();}
+
+/* every song scored in every key, with the team's ranges */
+function setEval(){const st=stats(),per=SET.songs.map(sg=>evaluateFor(sg.song).res),tot=[];
+  for(let k=0;k<12;k++){let score=0,move=0,H=0;per.forEach(res=>{score+=res[k].score;move+=Math.abs(res[k].s);H+=Math.abs(res[k].H-st.cH);});tot.push({k,score,move,H});}
+  const ranked=tot.slice().sort((a,b)=>a.score-b.score||a.move-b.move||a.H-b.H);return {per,tot,best:ranked[0].k,st};}
+/* how a key change between two songs feels: none is best, a lift of a half or whole step is common,
+   up a fourth or fifth is fine, going down sounds like a letdown */
+const TRANS=d=>{d=mod(d,12);return d===0?0:(d===1||d===2)?0.6:(d===5||d===7)?1.2:(d===10||d===11)?2.5:3;};
+const transName=d=>{d=mod(d,12);return d===0?'그대로':d===1?'반음 올려':d===2?'온음 올려':d===5?'4도 올려':d===7?'5도 올려':d===11?'반음 내려':d===10?'온음 내려':'전조해서';};
+/* the best keys for the whole set: each song's fit for the team plus the feel of each key change */
+function setPlan(){const E=setEval(),per=E.per,n=per.length;if(!n)return {keys:[],cost:0,E};
+  let prev=per[0].map(r=>r.score);const back=[];
+  for(let i=1;i<n;i++){const cur=new Array(12).fill(1e9),bk=new Array(12).fill(0);for(let k=0;k<12;k++)for(let j=0;j<12;j++){const c=prev[j]+TRANS(k-j)+per[i][k].score;if(c<cur[k]){cur[k]=c;bk[k]=j;}}back.push(bk);prev=cur;}
+  let best=0;for(let k=1;k<12;k++)if(prev[k]<prev[best])best=k;const keys=[best];for(let i=n-1;i>=1;i--)keys.unshift(back[i-1][keys[0]]);
+  return {keys,cost:prev[best],E};}
+function planKeys(){if(!SET.songs.length)return [];if(SET.keys&&SET.keys.length===SET.songs.length)return SET.keys.slice();if(SET.allowMod)return setPlan().keys;const b=setEval().best;return SET.songs.map(()=>b);}
+function songKey(i){const ks=planKeys();return ks[i]!==undefined?ks[i]:0;}
+function setKey(){const ks=planKeys();return ks.length?ks[0]:0;}
+function setBtnLabel(){const ks=planKeys();if(!ks.length)return '▶ 이어 치기';return ks.every(k=>k===ks[0])?'▶ '+KEYN[ks[0]]+'키로 이어 치기':'▶ 이어 치기 ('+ks.map(k=>KEYN[k]).join(' → ')+')';}
+function selectSong(i,quiet){if(LOADING||SET.busy)return;if(i<0||i>=SET.songs.length)return;if(!quiet)stopPlay();closeEdit();setAdding(false);
+  if(SET.cur>=0&&SET.cur<SET.songs.length)SET.songs[SET.cur]=snapSong();
+  applySong(SET.songs[i]);SET.cur=i;S.view=songKey(i);renderSongInputs();refresh();melInfo();renderSet();
+  if(!quiet&&!S.song.keyConfirmed)setMsg('이 곡의 원본 코드·음표 키를 먼저 확인해 주세요.','err');else if(!quiet)setMsg('이어 부르기 '+(i+1)+'번 곡 "'+S.song.title+'"을 보고 있어요. 4번에서 '+KEYN[S.view]+'키로 바뀐 코드가 보여요.','ok');}
+function renderSet(){syncCurrent();const box=$('#setlist'),res=$('#setres');box.innerHTML='';
+  SET.songs.forEach((sg,i)=>{const row=document.createElement('div');row.className='sg'+(i===SET.cur?' cur':'');
+    const n=document.createElement('span');n.className='no';n.textContent=(i+1)+'.';
+    const nm=document.createElement('button');nm.type='button';nm.className='link nm';nm.style.textAlign='left';nm.textContent=sg.song.title||('곡 '+(i+1));nm.addEventListener('click',()=>selectSong(i));
+    const rg=document.createElement('span');rg.className='rg';rg.textContent='원래 '+KEYN[sg.song.key]+'키 · '+nn(sg.song.lo)+'~'+nn(sg.song.hi);
+    /* the order matters for the key plan, so songs can be moved up and down */
+    const mv=(d,lab)=>{const b=document.createElement('button');b.type='button';b.className='btn';b.style.padding='4px 9px';b.textContent=lab;b.setAttribute('aria-label',(d<0?'앞으로':'뒤로'));b.disabled=(i+d<0||i+d>=SET.songs.length);
+      b.addEventListener('click',()=>{stopPlay();const j=i+d;if(SET.cur>=0&&SET.cur<SET.songs.length)SET.songs[SET.cur]=snapSong();[SET.songs[i],SET.songs[j]]=[SET.songs[j],SET.songs[i]];if(SET.keys)[SET.keys[i],SET.keys[j]]=[SET.keys[j],SET.keys[i]];
+        if(SET.cur===i)SET.cur=j;else if(SET.cur===j)SET.cur=i;if(SET.cur>=0){S.view=songKey(SET.cur);renderResult();preview();}
+        S.head.setlist=SET.songs.map(sg=>sg.song.title).filter(Boolean).join('\n');$('#h-setlist').value=S.head.setlist;save();renderSet();});return b;};
+    const del=document.createElement('button');del.type='button';del.className='del';del.textContent='빼기';del.addEventListener('click',()=>{stopPlay();SET.songs.splice(i,1);SET.keys=null;if(SET.cur===i)SET.cur=-1;else if(SET.cur>i)SET.cur--;renderSet();});
+    row.append(n,nm,rg,mv(-1,'▲'),mv(1,'▼'),del);box.appendChild(row);});
+  if(!SET.songs.length){res.hidden=true;return;}
+  if(SET.songs.some(s=>!s.song.keyConfirmed)){res.hidden=false;res.innerHTML='<p class="notice">각 곡을 눌러 원본 코드·음표 키를 먼저 확인해 주세요. 모든 곡 확인 후 이어 재생 후보가 나와요.</p>';return;}const E=setEval(),st=E.st,keys=planKeys(),plan=setPlan(),same=keys.every(k=>k===keys[0]),isPlan=!SET.keys;
+  const stat=r=>r.below===0&&r.above===0?'ok':'warn';const keyStat=k=>{const rs=E.per.map(res=>res[k]);return rs.some(r=>r.unc>0)?'bad':rs.some(r=>r.score>0)?'warn':'ok';};
+  let h='<div class="answer">';
+  if(same)h+='<span class="big">'+KEYN[keys[0]]+'</span><span class="say">'+(isPlan?'키를 연습 후보로 비교해요':'키로 비교하면')+'</span><span class="sub">모든 곡을 같은 키로 쳐서 전조 없이 그대로 이어져요.</span>';
+  else h+='<span class="big">'+keys.map(k=>KEYN[k]).join('→')+'</span><span class="say">'+(isPlan?'이 순서로 비교해요':'이렇게 비교하면')+'</span><span class="sub">'+keys.slice(1).map((k,i)=>(i+2)+'번 곡은 '+transName(k-keys[i])+' '+KEYN[k]+'키').join(', ')+'</span>';
+  h+='</div>';
+  h+='<div class="set-table-scroll" role="region" aria-label="곡별 키와 음역 비교" tabindex="0"><table class="settab"><tr><th>곡</th><th>키</th><th>그 키 음역</th><th>어때요</th></tr>';
+  SET.songs.forEach((sg,i)=>{const k=keys[i],r=E.per[i][k],w=why(r,st,sg.song);
+    h+='<tr><td>'+(i+1)+'. '+esc(sg.song.title||'')+'</td><td><select class="sk" data-i="'+i+'" aria-label="'+(i+1)+'번 곡 키" style="width:auto">'+KEYN.map((nm2,kk)=>'<option value="'+kk+'"'+(kk===k?' selected':'')+'>'+nm2+'</option>').join('')+'</select></td><td class="mono">'+nn(r.L)+'~'+nn(r.H)+'</td><td class="'+stat(r)+'">'+(w.length?esc(w.join(' ')):'')+'</td></tr>';});
+  h+='</table></div>';
+  h+='<div class="row"><button id="set-play" class="btn primary" type="button">'+(PL&&PL.set?'■ 멈추기':setBtnLabel())+'</button><label class="check"><input id="set-mod" type="checkbox"'+(SET.allowMod?' checked':'')+'> 곡 사이 전조 허용</label></div>';
+  h+='<p class="help">같은 높이의 공통 범위와 키 이동을 비교한 연습 후보예요. 자연스러운 연결·편안함을 보장하지 않아요. 곡별 템포·박자를 쓰고 한 마디 쉬어요. 표에서 키를 바꾸면 그 곡만 바뀌어요.</p>';
+  h+='<h3>모든 곡을 한 키로</h3><div class="keys" role="group" aria-label="이어 부를 키">'+E.tot.map(x=>'<button type="button" class="kp '+keyStat(x.k)+'" data-k="'+x.k+'" aria-pressed="'+(same&&x.k===keys[0])+'" aria-label="'+KEYN[x.k]+'키">'+KEYN[x.k]+'</button>').join('')+'</div>';
+  h+='<div class="legend"><span><i style="background:var(--ok-bg)"></i>모든 곡을 입력 범위 안</span><span><i style="background:var(--warn-bg)"></i>어떤 곡은 공통 범위 벗어남</span><span><i style="background:var(--bad-bg)"></i>공통 범위 벗어남</span>'+(isPlan?'':'<button class="link" id="set-back" type="button">추천으로 돌아가기</button>')+'</div>';
+  res.innerHTML=h;res.hidden=false;
+  const reflect=()=>{if(SET.cur>=0){S.view=songKey(SET.cur);renderResult();preview();}renderSet();};
+  res.querySelectorAll('.kp').forEach(b=>b.addEventListener('click',()=>{stopPlay();SET.keys=SET.songs.map(()=>+b.dataset.k);reflect();}));
+  res.querySelectorAll('.sk').forEach(sl=>sl.addEventListener('change',()=>{stopPlay();const ks=planKeys();ks[+sl.dataset.i]=+sl.value;SET.keys=ks;reflect();}));
+  $('#set-mod').addEventListener('change',e=>{stopPlay();SET.allowMod=e.target.checked;SET.keys=null;reflect();});
+  const bk=$('#set-back');if(bk)bk.addEventListener('click',()=>{stopPlay();SET.keys=null;reflect();});
+  $('#set-play').addEventListener('click',()=>{if(PL){stopPlay();return;}try{startSetPlay();}catch(e){stopPlay();$('#now').textContent='이어서 치지 못했어요. 곡을 다시 올려보세요.';}});}
+$('#files').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);e.target.value='';if(!fs.length||SET.busy||LOADING)return;stopPlay();syncCurrent();SET.busy=true;
+  if(SET.cur>=0&&SET.cur<SET.songs.length)SET.songs[SET.cur]=snapSong();SET.keys=null;
+  try{for(let i=0;i<fs.length;i++){$('#set-msg').textContent=(i+1)+' / '+fs.length+' 읽는 중…';const ok=await loadFile(fs[i]);if(!ok)continue;SET.songs.push(snapSong());SET.cur=SET.songs.length-1;renderSet();}}
+  catch(err){setMsg('악보를 읽다가 멈췄어요. 그 악보를 다시 올려보세요.','err');}
+  SET.busy=false;$('#set-msg').textContent=SET.songs.length+'곡';
+  if(SET.songs.length){S.head.setlist=SET.songs.map(sg=>sg.song.title).filter(Boolean).join('\n');$('#h-setlist').value=S.head.setlist;save();selectSong(SET.songs.length-1,true);
+    setMsg(SET.songs.length+'곡을 읽었어요. 각 곡의 원본 코드·음표 키를 먼저 확인하세요. 확인 뒤 5번에서 후보를 비교해요.');/*setMsg(SET.songs.length+'곡을 읽었어요. 5번에서 이어 부를 키를 보고 "'+setBtnLabel().replace('▶ ','')+'"를 눌러요.','ok');*/}});
+/* every song in order, each in its own planned key, with a bar of rest between songs */
+function startSetPlay(){syncCurrent();if(!SET.songs.length||!readyForPlayback(true))return;const keys=planKeys(),keep=snapSong(),all=[];let off=0;
+  try{SET.songs.forEach((sg,i)=>{applySong(sg);const part=playbackEvents(keys[i],i);if(!part.length)return;part.forEach(e=>all.push({...e,at:e.at+off}));off+=Math.max(...part.map(e=>e.at+e.duration))+S.play.beats*60/S.play.bpm;});}finally{applySong(keep);}
+  launchPlayback(all,true);
+}
+function renderKeyEvidence(){
+  const e=S.song.keyEvidence||{},sig=e.signature,guess=e.chords;
+  const name=k=>k===null||k===undefined?'읽지 못함':KEYN[k]+' 장조 / '+KEYN[mod(k+9,12)]+' 단조 후보';
+  let msg='조표: '+name(sig)+' · 코드 중심음 추정: '+name(guess)+'. 조표만으로 장·단조를 확정할 수 없어요.';
+  if(sig!==undefined&&sig!==null&&guess!==undefined&&guess!==null&&sig!==guess)msg+=' 조표와 코드 추정이 다릅니다. 코드만 조옮김한 이미지이거나 인식 오류일 수 있어요.';
+  if((S.song.keyConfirmed||(S.song.noteKeyManual&&S.song.keyManual))&&(S.song.noteKey??S.song.key)!==S.song.key)msg+=' 코드·음표 키가 다르게 지정됐어요. 반주는 코드 키에서, 음역 비교는 음표 키에서 목표 키로 옮깁니다.';
+  msg+=S.song.keyConfirmed?' 사용자가 원키를 확인했습니다.':' 원키 미확인: 추천·반주·출력 전에 확인해 주세요.';
+  $('#key-evidence').textContent=msg;$('#key-confirmed').checked=!!S.song.keyConfirmed;
+}
+function readyForPlayback(isSet){const songs=isSet?SET.songs.map(s=>s.song):[S.song];if(songs.some(s=>!s.keyConfirmed)){setMsg('각 곡의 원본 코드·음표 키를 1번에서 먼저 확인해 주세요.','err');return false;}const chords=isSet?SET.songs.flatMap(s=>s.sh.chords):SH.chords;if(chords.some(c=>!parsed(c))){setMsg('지원하지 않거나 불확실한 코드가 있어 반주와 이미지 저장을 보류합니다. 원본과 비교해 코드를 수정해 주세요.','err');return false;}return true;}
+$('#note-key').addEventListener('change',e=>{stopPlay();S.song.noteKey=+e.target.value;S.song.noteKeyManual=true;S.song.keyConfirmed=false;S.song.rangeVerified=false;readMelody();syncCurrent();save();refresh();renderSet();});
+$('#key-confirmed').addEventListener('change',e=>{stopPlay();if(e.target.checked&&(+$('#s-key').value<0||+$('#note-key').value<0)){e.target.checked=false;setMsg('원본 코드와 음표의 키를 각각 선택해 주세요.','err');return;}S.song.keyConfirmed=e.target.checked;S.song.keyManual=true;S.song.noteKeyManual=true;syncCurrent();save();refresh();renderSet();});
+
+async function readPaddle(my){
+  setMsg('Paddle로 고정 코드 상자를 읽는 중이에요…');
+  try{
+    const boxes=[];
+    const original=SH.original||SH.work,scale=original.width/SH.work.width;
+    for(const t of SH.toks||[]){const pad=4,x0=Math.floor(t.x0*scale),y0=Math.floor(t.y0*scale),w=Math.ceil(t.x1*scale)-x0+1,h=Math.ceil(t.y1*scale)-y0+1,c=mk(w+pad*2,h+pad*2),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(original,x0,y0,w,h,pad,pad,w,h);boxes.push({box_id:t.id,image:c.toDataURL('image/png')});}
+    if(!boxes.length)throw Error('코드 상자를 못 찾았어요. 직접 추가해 주세요.');
+    const output=[];for(let i=0;i<boxes.length;i+=64){const response=await fetch('/api/kimatchum/chord-crops',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({boxes:boxes.slice(i,i+64)})});if(!response.ok)throw Error(response.status===503?'Paddle 런타임이 준비되지 않았어요. 브라우저 OCR을 선택하거나 직접 검토해 주세요.':'Paddle 읽기에 실패했어요. 잠시 뒤 다시 시도해 주세요.');output.push(...(await response.json()).results);}
+    if(my!==readToken)return;
+    const merged=PC.mergeFixedRecognition(SH.chords,SH.toks||[],output,CC.parseChord),count=merged.applied,unmatched=merged.unmatched;
+    PC.attachBoxes(SH.chords,SH.toks);sortChords();buildBank();keyFromChords();readMelody();preview();setMsg('Paddle가 '+count+'개를 읽었어요. 신뢰도가 높아도 임시표·분수코드를 확인하세요.'+(unmatched?' 코드로 연결되지 않은 상자 '+unmatched+'개는 원본에서 빠진 코드가 없는지 확인하세요.':''),'ok');
+  }catch(e){setMsg(e.message||'Paddle 읽기에 실패했어요.','err');}finally{setProg(null);}
+}
+
+
+function canOverlay(){return !!S.song.keyConfirmed&&SH.chords.length>0&&SH.chords.every(c=>c.reviewed&&c.overlaySafe&&parsed(c));}
+function renderReview(){
+  PC.attachBoxes(SH.chords,SH.toks||[]);const k=targetKey(),shift=mod(k-S.song.key,12),missing=SH.chords.filter(c=>!c.reviewed).length;
+  $('#sheet-notice').textContent=!S.song.keyConfirmed?'원키 미확인 — 코드 변환과 반주를 보류합니다. 원본은 보존됩니다.':'원본 코드 '+KEYN[S.song.key]+' → 목표 코드 '+KEYN[k]+' · 오선 음표·조표는 원본 그대로예요. '+(S.overlay&&canOverlay()?'확인한 코드 영역만 교체합니다.':'원본을 보존하고 아래 코드표로 바꾼 코드를 보여줍니다.');
+  $('#review-summary').textContent='코드 '+SH.chords.length+'개 · 미검토 '+missing+'개. #·♭·슬래시 뒤 음과 1·2번 반복 번호를 꼭 확인하세요.';
+  const box=$('#review-list');box.innerHTML='';SH.chords.forEach((c,i)=>{const r=document.createElement('div');r.className='review-row';const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=(c.sys+1)+'줄 · '+c.text+' · '+(c.reviewed?'검토 완료':'검토 필요');b.addEventListener('click',()=>{stopPlay();SH.csel=i;openEdit();preview();$('#edit').scrollIntoView({block:'center',behavior:'smooth'});});const out=document.createElement('span');out.className='target';const p=parsed(c);out.textContent=!S.song.keyConfirmed?'원키 확인 후 변환':'→ '+(p?CC.transpose(p,shift,k,S.song.key):'코드 확인');r.append(b,out);box.appendChild(r);});
+}
+$('#overlay').addEventListener('change',e=>{stopPlay();S.overlay=e.target.checked;if(S.overlay&&!canOverlay()){S.overlay=false;e.target.checked=false;setMsg('각 코드 이름과 지울 상자에 코드만 있는지 먼저 확인해 주세요. 원본은 그대로 보존됩니다.','err');}preview();syncCurrent();});
+$('#range-verified').addEventListener('change',e=>{stopPlay();S.song.rangeVerified=e.target.checked;if(e.target.checked)SH.rangeAuto=false;save();syncCurrent();refresh();renderSet();});
+$('#ocr-provider').addEventListener('change',()=>{$('#ai-read').textContent=$('#ocr-provider').value==='gemini'?'서버 AI로 읽기 (API 비용 발생)':$('#ocr-provider').value==='paddle'?'Paddle로 다시 읽기':'서버 AI로 읽기';});
+
+
+window.kimatchumIntake={
+  async prepare(file){
+    if(LOADING||SET.busy)throw Error('악보를 읽는 작업이 끝난 뒤 다시 접수해 주세요.');
+    stopPlay();syncCurrent();SET.cur=-1;renderSet();
+    const previous=$('#ocr-provider').value;$('#ocr-provider').value='browser';
+    let ok;try{ok=await loadFile(file);}finally{$('#ocr-provider').value=previous;}
+    if(!ok||!SH.chords.length)throw Error('코드를 읽지 못했어요. 선명한 악보를 다시 선택해 주세요.');
+    PC.attachBoxes(SH.chords,SH.toks||[]);
+    return {title:S.song.title,draft:SH.chords.map(c=>({id:c.id,text:c.text,sys:c.sys,x0:Math.max(0,c.sourceBox.x0/SH.work.width),y0:Math.max(0,c.sourceBox.y0/SH.work.height),x1:Math.min(1,(c.sourceBox.x1+1)/SH.work.width),y1:Math.min(1,(c.sourceBox.y1+1)/SH.work.height)}))};
+  },
+  async openResult(blob,result){
+    if(LOADING||SET.busy)throw Error('진행 중인 악보 읽기를 기다려 주세요.');
+    const policy=await window.ChordSupport.load();
+    if(!result.chords.every(r=>window.ChordSupport.isSupported(r.text,policy.qualities)&&CC.parseChord(r.text)?.ok))throw Error('반주가 지원하지 않는 코드가 있어 결과를 열지 않았습니다. 검수를 다시 확인해 주세요.');
+    stopPlay();syncCurrent();SET.cur=-1;renderSet();
+    const previous=$('#ocr-provider').value;$('#ocr-provider').value='browser';
+    let ok;try{ok=await loadFile(new File([blob],'검수 결과.png',{type:blob.type}));}finally{$('#ocr-provider').value=previous;}
+    if(!ok)throw Error('검수 결과의 원본을 열지 못했습니다.');
+    SH.chords=result.chords.map(r=>{if(!SH.sys[r.sys])throw Error('검수 결과 영역을 확인해 주세요.');const x0=r.x0*SH.work.width,y0=r.y0*SH.work.height,x1=r.x1*SH.work.width-1,y1=r.y1*SH.work.height-1;return {id:r.id,sys:r.sys,text:r.text,ocrText:r.text,x0,y0,x1,y1,h:Math.max(8,y1-y0),base:y1,status:'ok',reviewed:true,overlaySafe:false,manual:true,g:null};});
+    PC.attachBoxes(SH.chords,SH.toks||[]);sortChords();buildBank();
+    Object.assign(S.song,{key:result.source_key,noteKey:result.note_key,keyConfirmed:true,keyManual:true,noteKeyManual:true,rangeVerified:false});
+    Object.assign(S.play,{bpm:result.bpm,beats:result.beats,mel:false,acc:true});SH.beatsManual=true;S.overlay=false;
+    readMelody();S.view=result.target_key;renderSongInputs();syncPlayControls();save();refresh();preview();
+    setMsg('저장된 검수 코드를 불러왔어요. 선택한 목표 키로 반주할 수 있어요. 음표·조표는 원본이며 음역은 별도 확인이 필요해요.','ok');
+    $('#result').scrollIntoView({block:'start'});
+  }
+};
+
+
+// Trial adapter only. Recognition, token matching and chord algorithms above are unchanged.
+function trialSnapshot(){
+  PC.attachBoxes(SH.chords,SH.toks||[]);
+  return {draft:SH.chords.map(c=>({id:c.id,text:c.text,sys:c.sys,x0:Math.max(0,c.sourceBox.x0/SH.work.width),y0:Math.max(0,c.sourceBox.y0/SH.work.height),x1:Math.min(1,(c.sourceBox.x1+1)/SH.work.width),y1:Math.min(1,(c.sourceBox.y1+1)/SH.work.height)})),unmatched:SH.aiUnmatched||0};
+}
+let trialBusy=false;
+window.addEventListener('message',async event=>{
+  if(event.source!==parent||event.origin!==location.origin)return;
+  if(event.data?.type==='km-engine-ping'){parent.postMessage({type:'km-engine-ready'},location.origin);return;}
+  if(event.data?.type!=='km-recognize')return;
+  const {id,image,mode}=event.data;
+  if(typeof id!=='string'||typeof image!=='string'||image.length>8388708||!/^data:image\/(png|jpeg);base64,/.test(image)||!['browser','gemini'].includes(mode))return;
+  if(trialBusy){parent.postMessage({type:'km-recognized',id,error:'Recognition is busy'},location.origin);return;}
+  trialBusy=true;
+  try{
+    const response=await fetch(image),file=new File([await response.blob()],'score.png',{type:image.startsWith('data:image/png')?'image/png':'image/jpeg'});
+    await window.kimatchumIntake.prepare(file);
+    if(mode==='gemini'&&!await aiReadChords(false))throw Error('Gemini recognition unavailable; existing draft preserved');
+    parent.postMessage({type:'km-recognized',id,result:trialSnapshot()},location.origin);
+  }catch(error){parent.postMessage({type:'km-recognized',id,error:error instanceof Error?error.message:'Recognition failed'},location.origin);}
+  finally{trialBusy=false;}
+});
+parent.postMessage({type:'km-engine-ready'},location.origin);
+
+})();
+</script>
+<script src="/kimatchum-engine/chord-support.js" defer></script>
+
+</body></html>

@@ -11,7 +11,7 @@ import { validateCheckoutCoupon } from "@/lib/payments/coupons";
 import { buildGrantSnapshotMetadata } from "@/lib/payments/grant-snapshot";
 import { isActiveAccessPlan, TOSSPAY_PLAN_CONFIG } from "@/lib/plans/config";
 import { notifyTelegramPaymentCompleted } from "@/lib/telegram/payments";
-import { sendPaymentCompleteEmail } from "@/services/email/actions";
+import { sendPaymentCompleteEmail } from "@/services/email/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 type LatpeedPaymentStatus = "SUCCESS" | "CANCEL";

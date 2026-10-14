@@ -14,7 +14,7 @@ import { finalizePortOnePayment } from "@/lib/payments/portone";
 import { CREDIT_TOPUP_PACKS } from "@/lib/plans/config";
 import { notifyTelegramPaymentCompleted } from "@/lib/telegram/payments";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
-import { sendPaymentCompleteEmail } from "@/services/email/actions";
+import { sendPaymentCompleteEmail } from "@/services/email/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 

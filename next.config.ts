@@ -62,6 +62,13 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/kimatchum-engine/:path*",
+        headers: [{
+          key: "Content-Security-Policy",
+          value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' data: blob: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'none'",
+        }],
+      },
     ];
   },
 

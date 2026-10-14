@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { resolvePostLoginRedirectPath } from "@/lib/plans/server";
 import { createClient } from "@/utils/supabase/server";
 import { routing } from "@/i18n/routing";
-import { sendWelcomeEmail } from "@/services/email/actions";
+import { sendWelcomeEmail } from "@/services/email/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

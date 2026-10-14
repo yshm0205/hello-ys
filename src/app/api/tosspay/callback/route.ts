@@ -7,7 +7,7 @@ import {
 } from "@/lib/payments/grant-snapshot";
 import { notifyTelegramPaymentCompleted } from "@/lib/telegram/payments";
 import { TOSSPAY_PLAN_CONFIG } from "@/lib/tosspay/config";
-import { sendPaymentCompleteEmail } from "@/services/email/actions";
+import { sendPaymentCompleteEmail } from "@/services/email/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 type ExistingUserPlanRow = {
