@@ -25,6 +25,12 @@
 .login a { text-decoration: underline; text-underline-offset: 4px; }
 .login [role=alert] { color: var(--destructive); }
 .social { display: grid; gap: 12px; margin-top: 24px; }
+.workNav { max-width:1120px; margin:auto; display:flex; gap:8px; padding:16px 24px 0; flex-wrap:wrap; }
+.workNav button { padding:8px 16px; border-radius:6px; font-weight:600; color:var(--muted-foreground); }
+.workNav button[aria-pressed=true] { background:var(--primary); color:var(--primary-foreground); }
+.workArea { max-width:1120px; margin:auto; }
+.workNote { margin:16px 24px 0; font-size:14px; color:var(--muted-foreground); line-height:1.7; }
+.workFrame { display:block; width:100%; border:0; }
 @media(max-width: 640px) {
   .header { padding: 16px; gap: 12px; flex-wrap: wrap; }
   .tag { order: 3; width: 100%; }

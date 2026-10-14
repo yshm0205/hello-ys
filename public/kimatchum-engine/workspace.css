@@ -1,0 +1,21 @@
+:root[data-workspace] {
+  --paper:#f5f4ef;--panel:#fff;--ink:#233c38;--ink-2:#546760;--line:#d6dfd8;--soft:#e9eee8;
+  --hl:#e9eee8;--hl-ink:#233c38;--sel:#245e50;
+  --display:"Noto Sans KR","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+[data-workspace] .wrap { max-width:1120px; padding:24px; gap:24px; }
+[data-workspace] .wrap>header { display:none; }
+[data-workspace] .card { padding:24px; }
+[data-workspace] .notice { border:0; background:var(--soft); color:var(--ink); border-radius:6px; }
+[data-workspace] :is(button,input,select) { min-height:44px; }
+[data-workspace] input[type=checkbox] { min-height:auto; }
+[data-workspace] :is(button,input,select,summary):focus-visible { outline:2px solid var(--sel); outline-offset:3px; }
+[data-workspace] .m-name { border-left:1px solid var(--line)!important; }
+[data-workspace] .scroll { overflow-x:auto; }
+[data-workspace] .workspace-limit { margin:0; padding:16px; background:var(--soft); border-radius:6px; }
+[data-workspace] .workspace-limit strong { display:block; margin-bottom:4px; }
+@media(max-width:640px) {
+  [data-workspace] .wrap { padding:16px; gap:16px; }
+  [data-workspace] .card { padding:16px; }
+}

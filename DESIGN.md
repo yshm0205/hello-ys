@@ -1,5 +1,9 @@
 # FlowSpot Design System
 
+## Kimatchum workbench restoration
+
+Preserve the original five-step workflow: upload, song/singer range, common-range key comparison, score/chord playback/export, multiple songs; keep team ranges in the existing disclosure. Reuse the existing browser engine with its original algorithms and review gates. The workbench is the default tab; authenticated intake/email review is a separate, preserved tab. Request links open that tab. Switching tabs preserves work and stops audio. Embedded content reports its height to a same-origin/source-checked parent so the outer document owns scrolling. Paper/green tokens remain the visual contract. Show original image immediately and never label synthetic chord playback or experimental melody OCR as a verified singer-fit result. No authentication, server flags, storage permissions or email behavior changes. Existing offline browser test infrastructure is reused; no new packages. Lighthouse results are not claimed.
+
 ## 1. Atmosphere & Identity
 
 FlowSpot's product and admin surfaces are quiet, practical workspaces. The admin signature is a compact white workspace on a soft gray canvas, with restrained status color used only to direct attention.

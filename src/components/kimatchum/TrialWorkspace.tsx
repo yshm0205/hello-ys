@@ -27,7 +27,7 @@ async function api(path:string,data?:unknown){
 }
 function validChord(text:string){const p=CC.parseChord(text);return p?.root&&p.ok&&policy.qualities.includes(p.qual)?p:null;}
 
-export function TrialWorkspace(){
+export function TrialWorkspace({active=true}:{active?:boolean}){
   const engine=useRecognitionEngine();
   const [suggestions,setSuggestions]=useState<Record<string,string>>({});
   const locale=useLocale();const params=useSearchParams();
@@ -46,6 +46,7 @@ export function TrialWorkspace(){
   const stop=useCallback(()=>{if(timer.current)clearTimeout(timer.current);timer.current=null;
     if(audio.current){void audio.current.close();audio.current=null;}setPlaying(false);},[]);
   useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current);void audio.current?.close();if(blob.current)URL.revokeObjectURL(blob.current);},[]);
+  useEffect(()=>{if(!active)stop();},[active,stop]);
 
   const open=useCallback(async(id:string)=>{
     const value=await api('requests/'+id);setJob(value);setEdits(value.result?.chords||value.draft);setConfirmed(false);setScopeAccepted(false);

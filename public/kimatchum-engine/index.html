@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important} .set-table-scroll{overflow-x:auto;max-width:100%}.settab{min-width:620px;table-layout:fixed}.settab th:nth-child(1){width:20%}.settab th:nth-child(2){width:15%}.settab th:nth-child(3){width:20%}.settab th:nth-child(4){width:45%}.settab td{word-break:keep-all;overflow-wrap:break-word}</style></head><body><title>찬양팀 키맞춤</title>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important} .set-table-scroll{overflow-x:auto;max-width:100%}.settab{min-width:620px;table-layout:fixed}.settab th:nth-child(1){width:20%}.settab th:nth-child(2){width:15%}.settab th:nth-child(3){width:20%}.settab th:nth-child(4){width:45%}.settab td{word-break:keep-all;overflow-wrap:break-word}</style><link rel="stylesheet" href="/kimatchum-engine/workspace.css"></head><body><title>찬양팀 키맞춤</title>
 
 
 
@@ -1838,6 +1838,7 @@ function trialSnapshot(){
 let trialBusy=false;
 window.addEventListener('message',async event=>{
   if(event.source!==parent||event.origin!==location.origin)return;
+  if(event.data?.type==='km-workspace-stop'){stopPlay();return;}
   if(event.data?.type==='km-engine-ping'){parent.postMessage({type:'km-engine-ready'},location.origin);return;}
   if(event.data?.type!=='km-recognize')return;
   const {id,image,mode}=event.data;
@@ -1858,4 +1859,5 @@ parent.postMessage({type:'km-engine-ready'},location.origin);
 </script>
 <script src="/kimatchum-engine/chord-support.js" defer></script>
 
+<script src="/kimatchum-engine/workspace.js" defer></script>
 </body></html>
