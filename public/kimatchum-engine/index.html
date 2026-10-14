@@ -155,7 +155,7 @@ summary .sm{display:block;font:400 13px var(--body);color:var(--ink-2)}
     </div>
     <div class="row"><span class="file btn hl">악보 이미지 올리기<input id="file" type="file" accept="image/*" aria-label="악보 이미지 올리기"></span></div>
     <label class="help" for="ocr-provider">코드 읽기</label><select id="ocr-provider"><option value="browser">브라우저 OCR — 업로드 시 무료로 읽기</option><option value="gemini">서버 AI — 버튼을 누를 때 이미지 전송·API 비용 발생</option></select><p class="help">자동 인식은 임시표(#·♭), 분수코드, 반복 번호를 틀릴 수 있어요. 인식 후 원본과 대조하세요.</p>
-    <p id="key-evidence" class="notice"></p><label class="check"><input id="key-confirmed" type="checkbox">원본 코드 키와 음표 키를 확인했어요 (장·단조와 중심음도 확인)</label><p id="load-msg" class="msg" aria-live="polite"></p>
+    <p id="key-evidence" class="notice"></p><p id="load-msg" class="msg" aria-live="polite"></p>
     <div class="prog" id="prog" hidden><i></i></div>
   </section>
 
@@ -163,13 +163,13 @@ summary .sm{display:block;font:400 13px var(--body);color:var(--ink-2)}
     <h2 id="h-song"><span class="step">2</span>제일 낮은 음, 제일 높은 음 누르기</h2>
     <p class="ask" id="ask" aria-live="polite"></p>
     <div class="scroll"><div id="staff"></div></div>
-    <p class="picked" id="picked"></p><label class="check"><input id="range-verified" type="checkbox">원본 음표의 전체 최저·최고음과 원래 키를 확인했어요</label><p class="help">자동 선율 판독은 참고값이에요. 코드만 바꾼 이미지를 다시 올리면 음표·조표는 이전 키일 수 있어요. 낮은 음을 자동 제외하거나 옥타브를 바꾸지 않아요.</p>
+    <p class="picked" id="picked"></p><label class="check"><input id="range-verified" type="checkbox">음역 후보 검토 (선택): 원본 음표의 전체 최저·최고음과 원래 키를 확인했어요</label><p class="help">자동 선율 판독은 참고값이에요. 코드만 바꾼 이미지를 다시 올리면 음표·조표는 이전 키일 수 있어요. 낮은 음을 자동 제외하거나 옥타브를 바꾸지 않아요.</p>
   </section>
 
   <section class="card" id="result" aria-live="polite"></section>
 
   <section class="card" aria-labelledby="h-sheet">
-    <h2 id="h-sheet"><span class="step">4</span>코드 검토 · 바뀐 코드 악보</h2><p id="sheet-notice" class="notice"></p><label class="check"><input id="overlay" type="checkbox">검토한 코드만 원본 자리에 교체하기</label><p class="help">기본은 원본 보존 + 바뀐 코드표예요. 원본 위 교체는 모든 코드와 지울 영역을 확인한 뒤 켤 수 있어요. 오선 음표·조표는 바뀌지 않아요.</p><div id="review-list" class="review-list"></div><p id="review-summary" class="help" aria-live="polite"></p>
+    <h2 id="h-sheet"><span class="step">4</span>코드 검토 · 바뀐 코드 악보</h2><p id="sheet-notice" class="notice"></p><label class="check"><input id="key-confirmed" type="checkbox">원본 위에 코드를 교체할 때: 원본 코드 키와 음표 키를 확인했어요</label><label class="check"><input id="overlay" type="checkbox">검토한 코드만 원본 자리에 교체하기</label><p class="help">기본은 원본 보존 + 바뀐 코드표예요. 원본 위 교체는 모든 코드와 지울 영역을 확인한 뒤 켤 수 있어요. 오선 음표·조표는 바뀌지 않아요.</p><div id="review-list" class="review-list"></div><p id="review-summary" class="help" aria-live="polite"></p>
 
     <div class="row">
       <div class="seg" role="group" aria-label="보기">
@@ -195,7 +195,7 @@ summary .sm{display:block;font:400 13px var(--body);color:var(--ink-2)}
         <label class="check"><input id="t-acc" type="checkbox"> 반주(코드)</label>
         <span class="status" id="mel-info"></span>
       </div>
-      <p class="now" id="now" aria-live="polite"></p>
+      <p id="preview-note" class="help" aria-live="polite"></p><p class="now" id="now" aria-live="polite"></p>
       <div class="legend"><span><i style="background:#1d9a52"></i>잘 읽음</span><span><i style="background:#e08a00"></i>확인해 주세요</span><span><i style="background:#d8283f"></i>못 읽음</span><button id="add-chord" class="btn" type="button" aria-pressed="false">+ 코드 추가</button></div>
       <div class="edit" id="edit" hidden>
         <canvas id="ce-crop" class="ce-crop" hidden aria-label="악보에 인쇄된 코드"></canvas>
@@ -1154,7 +1154,7 @@ function renderTeamSummary(){$('#team-sm').textContent=S.team.map(p=>(p.name||'�
 $('#add').addEventListener('click',()=>{stopPlay();S.team.push({name:'새 사람',lo:60,hi:76});save();renderTeam();refresh();});
 
 /* ---------- song input ---------- */
-function renderSongInputs(){$('#s-title').value=S.song.title;const sel=$('#s-key');sel.innerHTML='<option value="-1" disabled>원키 확인 필요</option>';KEYN.forEach((k,i)=>{const o=document.createElement('option');o.value=i;o.textContent=k+'키';if(i===S.song.key)o.selected=true;sel.appendChild(o);});const ns=$('#note-key');ns.innerHTML=sel.innerHTML;ns.value=S.song.noteKey??S.song.key;const ev=S.song.keyEvidence||{};if(!S.song.keyManual&&ev.signature==null&&ev.chords==null&&!S.song.keyConfirmed)sel.value='-1';if(!S.song.noteKeyManual&&ev.signature==null&&!S.song.keyConfirmed)ns.value='-1';renderKeyEvidence();}
+function renderSongInputs(){$('#s-title').value=S.song.title;for(const [id,key]of [['s-key',S.song.key],['note-key',S.song.noteKey??S.song.key]]){const sel=$('#'+id);sel.innerHTML='';KEYN.forEach((k,i)=>{const o=document.createElement('option');o.value=i;o.textContent=k+'키';o.selected=i===key;sel.appendChild(o);});}renderKeyEvidence();}
 $('#s-title').addEventListener('input',e=>{S.song.title=e.target.value;save();renderResult();});
 $('#s-key').addEventListener('change',e=>{stopPlay();if(+e.target.value<0)return;S.song.key=+e.target.value;S.song.keyConfirmed=false;S.song.keyManual=true;S.song.rangeVerified=false;S.view=null;save();if(typeof readMelody==='function'&&SH.work)readMelody();refresh();});
 function renderStaff(){
@@ -1208,7 +1208,7 @@ function why(r,st,song){song=song||S.song;const L=[];
   return L;
 }
 function renderResult(){
-  renderKeyEvidence();if(!S.song.keyConfirmed){$('#result').innerHTML='<h2><span class="step">3</span>원키 확인이 먼저예요</h2><p>1번의 자동 추정과 원본을 비교하고 코드·음표 키를 확인하면 키 후보가 나와요. C키를 기본 정답으로 사용하지 않아요.</p>';return;}
+  renderKeyEvidence();
   const E=evaluate(),k=targetKey(),r=E.res[k],isBest=k===E.best.k;
   const shift=mod(k-S.song.key,12),f=S.song.key,sf=CC.spellFor(f),stt=CC.spellFor(k);
   const sub=(r.s===0?'지금 악보 키 그대로':'원본 음표 '+KEYN[S.song.noteKey??f]+'키에서 반음 '+Math.abs(r.s)+'개 '+(r.s>0?'올려요':'내려요'))+' · 곡 음역 '+nn(r.L)+' ~ '+nn(r.H);
@@ -1488,9 +1488,9 @@ function keyFromChords(){
   const good=SH.chords.filter(c=>c.status!=='bad').map(c=>CC.parseChord(c.text)).filter(p=>p&&p.root);
   const guess=good.length>=3?CC.guessKey(good):null,signature=SH.ksig?SH.ksig.pc:null;
   S.song.keyEvidence={signature,chords:guess};
-  if(!S.song.keyManual){S.song.keyConfirmed=false;if(guess!==null)S.song.key=guess;else if(signature!==null)S.song.key=signature;}
-  if(!S.song.noteKeyManual&&signature!==null)S.song.noteKey=signature;
-  renderSongInputs();refresh();return ' 원키는 추정값입니다. 1번에서 코드·음표 키를 확인하세요.';
+  if(!S.song.keyManual){S.song.keyConfirmed=false;if(signature!==null)S.song.key=signature;else if(guess!==null)S.song.key=guess;}
+  if(!S.song.noteKeyManual)S.song.noteKey=signature??guess??S.song.key;
+  renderSongInputs();refresh();return ' '+KEYN[S.song.key]+'키를 추정값으로 선택했어요. 바로 미리듣거나 위에서 바꿀 수 있어요.';
 }
 
 async function aiReadChords(auto){if(!aiReady()||!SH.work||!SH.sys.length||SH.aiBusy)return false;SH.aiBusy=true;const my=readToken;const btn=$('#ai-read');btn.disabled=true;
@@ -1612,13 +1612,12 @@ function stopPlay(){if(PL){const old=PL;PL=null;old.transport.stop();}try{UNLOCK
 function placeBox(x0,y0,w,h){const pv=$('#pv'),box=$('#playbox'),r=pv.getBoundingClientRect(),sc=r.width/pv.width;box.hidden=false;box.style.left=((x0+SH.padl)*sc)+'px';box.style.top=(y0*sc)+'px';box.style.width=w*sc+'px';box.style.height=h*sc+'px';}
 function showPlaying(c){placeBox(c.x0-4,c.y0-4,c.x1-c.x0+8,c.y1-c.y0+8);}
 function showNote(n){const sp=SH.sys[n.sys].sp;placeBox(n.x-n.hw-5,n.y-.75*sp,2*n.hw+10,1.5*sp);}
-function showChordLabel(label,orig){$('#now').textContent='선택 키 '+KEYN[targetKey()]+' · 코드 '+label+(orig!==label?' (원래 '+orig+')':'');}
-function playbackEvents(key,songIndex){
-  if(SH.chords.some(c=>!parsed(c)))return [];
+function showChordLabel(label,orig,key){$('#now').textContent='재생 키 '+KEYN[key]+' · 코드 '+label+(orig!==label?' (원래 '+orig+')':'');}
+function playbackEvents(key,songIndex,original=false){
   const spb=60/S.play.bpm,shift=mod(key-S.song.key,12),useMel=S.play.mel&&!!SH.mel;
   const tl=timeline().filter(e=>e.kind==='chord'?(S.play.acc||!useMel):useMel),b0=tl.length?Math.min(...tl.map(e=>e.beat)):0;
   return tl.map(e=>{const at=(e.beat-b0)*spb,duration=Math.max(.08,e.dur*spb),common={at,duration,song:songIndex,key,c:e.c,n:e.n};
-    if(e.kind==='note')return {...common,kind:'note',notes:[e.n.midi+evaluateFor(S.song).res[key].s],label:'멜로디 (실험적)'};
+    if(e.kind==='note')return {...common,kind:'note',notes:[e.n.midi+(original?0:evaluateFor(S.song).res[key].s)],label:'멜로디 (실험적)'};
     const v=PC.chordVoicing(CC,e.c.text,shift,key,S.song.key);return v?{...common,kind:'chord',notes:v.notes,bass:v.bass,label:v.label,original:e.c.text}:null;
   }).filter(Boolean);
 }
@@ -1632,14 +1631,15 @@ function playVoice(e,at,duration){
 function launchPlayback(events,isSet){
   stopPlay();if(!events.length){$('#now').textContent='재생할 코드를 확인하거나 직접 추가해 주세요.';return;}
   const a=ac();let lastSong=-1;
+  setTimeout(()=>{if(PL&&a.state!=='running')$('#now').textContent='오디오가 일시 중지되어 있어요. 화면의 재생 버튼을 다시 눌러 주세요.';},800);
   const transport=new PC.Transport({now:()=>a.currentTime,every:(fn,ms)=>window.setInterval(fn,ms),clear:id=>window.clearInterval(id),
     cancel:voice=>{voice.nodes.forEach(n=>{try{n.stop();}catch(e){}});voice.master.disconnect();},play:playVoice,
-    show:e=>{if(isSet&&e.song!==lastSong){lastSong=e.song;selectSong(e.song,true);}if(e.kind==='chord'){showChordLabel(e.label,e.original);showPlaying(e.c);}else showNote(e.n);},
+    show:e=>{if(isSet&&e.song!==lastSong){lastSong=e.song;selectSong(e.song,true);}if(e.kind==='chord'){showChordLabel(e.label,e.original,e.key);showPlaying(e.c);}else showNote(e.n);},
     state:state=>{const active=state!=='stopped';setPlayBtn(active);$('#pause').disabled=!active;$('#stop').disabled=!active;$('#pause').textContent=state==='paused'?'계속 재생':'일시정지';const sb=$('#set-play');if(sb)sb.textContent=active&&isSet?'■ 멈추기':setBtnLabel();if(!active)$('#playbox').hidden=true;}
   });
   PL={transport,set:isSet};transport.start(events);
 }
-function startPlay(){syncCurrent();if(!readyForPlayback(false))return;launchPlayback(playbackEvents(targetKey(),SET.cur),false);}
+function startPlay(){syncCurrent();if(!readyForPlayback(false))return;launchPlayback(playbackEvents(S.showNew?targetKey():S.song.key,SET.cur,!S.showNew),false);}
 $('#play').addEventListener('click',()=>{if(PL&&PL.transport.state!=='stopped'){stopPlay();return;}try{startPlay();}catch(e){console.error('[kimatchum] playback failed',e);stopPlay();$('#now').textContent='코드를 확인하고 다시 재생해 주세요.';}});
 $('#pause').addEventListener('click',()=>{if(!PL)return;if(PL.transport.state==='paused')PL.transport.resume();else PL.transport.pause();});
 $('#stop').addEventListener('click',stopPlay);
@@ -1656,7 +1656,7 @@ $('#t-acc').addEventListener('change',e=>{stopPlay();S.play.acc=e.target.checked
 if(!S.head.setlist&&S.song.title&&S.song.title!=='요게벳의 노래'){S.head.setlist=S.song.title;$('#h-setlist').value=S.head.setlist;}
 function wrapL(x,t,w){const ws=t.split(' '),o=[];let l='';ws.forEach(v=>{const n=l?l+' '+v:v;if(x.measureText(n).width>w&&l){o.push(l);l=v;}else l=n;});if(l)o.push(l);return o;}
 async function buildA4(){
-  if(!readyForPlayback(false))return null;
+  if(!readyForExport())return null;
   await fontsReady();const W=2480,H=3508,m=80,c=mk(W,H),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
   const K='#111',R='#c8203c',G='#5c5c5c',hd=S.head.date.trim(),head=((hd?'['+hd+'] ':'')+S.head.service.trim()).trim();
   const songs=S.head.setlist.split('\n').map(v=>v.trim()).filter(Boolean),tt=(S.song.title||'').replace(/\s/g,'');
@@ -1676,15 +1676,15 @@ async function buildA4(){
   SH.sys.forEach((_,i)=>{const line=SH.chords.filter(c=>c.sys===i&&parsed(c)).map(c=>CC.transpose(parsed(c),mod(k-S.song.key,12),k,S.song.key)+(c.reviewed?'':'?')).join('  |  ');wrapL(x,(i+1)+'줄  '+line,W-2*m).forEach(t=>{x.fillText(t,m,cy);cy+=36;});});return c;
 }
 let DL=null,blob=null,fname='';
-$('#build').addEventListener('click',async()=>{if(!SH.work||!readyForPlayback(false))return;const b=$('#build');b.disabled=true;b.textContent='만드는 중…';
+$('#build').addEventListener('click',async()=>{if(!SH.work||!readyForExport())return;const b=$('#build');b.disabled=true;b.textContent='만드는 중…';
   try{const c=await buildA4();if(!c)return;blob=await new Promise(r=>c.toBlob(r,'image/png'));const k=targetKey();
     fname=(((S.head.date?'['+S.head.date+'] ':'')+(S.head.service||'')+' '+(S.song.title||'악보')+' '+KEYQ[k]+' 코드반주용').trim().replace(/[\\/:*?"<>|]/g,''))+'.png';
     const url=URL.createObjectURL(blob);$('#a4img').src=url;$('#a4out').hidden=false;$('#save-msg').textContent='';
     const inViewer=!!(window.claude&&window.claude.use);$('#save').hidden=!DL;$('#save-alt').hidden=!!DL;const a=$('#save-local');if(!inViewer){a.href=url;a.download=fname;a.hidden=false;}else a.hidden=true;
   }catch(e){$('#a4out').hidden=false;$('#save-msg').className='msg err';$('#save-msg').textContent='A4 악보를 만들지 못했어요. 이미지를 다시 올려보세요.';}
   b.disabled=false;b.textContent='A4 악보 만들기';});
-$('#save-local').addEventListener('click',e=>{if(!readyForPlayback(false))e.preventDefault();});
-$('#save').addEventListener('click',async()=>{if(!DL||!blob||!readyForPlayback(false))return;const m=$('#save-msg');m.className='msg';
+$('#save-local').addEventListener('click',e=>{if(!readyForExport())e.preventDefault();});
+$('#save').addEventListener('click',async()=>{if(!DL||!blob||!readyForExport())return;const m=$('#save-msg');m.className='msg';
   try{await DL.save({filename:fname,data:blob});m.textContent='저장했어요.';}
   catch(e){const c=e&&e.code;if(c==='declined')m.textContent='';else if(c==='rate_limited')m.textContent='저장 창이 이미 떠 있어요. 잠시 뒤 다시 눌러주세요.';else{m.className='msg err';m.textContent='여기서는 저장이 안 돼요. 이미지를 길게 눌러 저장하세요.';$('#save').hidden=true;$('#save-alt').hidden=false;}}});
 
@@ -1727,7 +1727,7 @@ function setBtnLabel(){const ks=planKeys();if(!ks.length)return '▶ 이어 치�
 function selectSong(i,quiet){if(LOADING||SET.busy)return;if(i<0||i>=SET.songs.length)return;if(!quiet)stopPlay();closeEdit();setAdding(false);
   if(SET.cur>=0&&SET.cur<SET.songs.length)SET.songs[SET.cur]=snapSong();
   applySong(SET.songs[i]);SET.cur=i;S.view=songKey(i);renderSongInputs();refresh();melInfo();renderSet();
-  if(!quiet&&!S.song.keyConfirmed)setMsg('이 곡의 원본 코드·음표 키를 먼저 확인해 주세요.','err');else if(!quiet)setMsg('이어 부르기 '+(i+1)+'번 곡 "'+S.song.title+'"을 보고 있어요. 4번에서 '+KEYN[S.view]+'키로 바뀐 코드가 보여요.','ok');}
+  if(!quiet)setMsg('이어 부르기 '+(i+1)+'번 곡 "'+S.song.title+'"을 보고 있어요. 4번에서 '+KEYN[S.view]+'키로 바뀐 코드가 보여요.','ok');}
 function renderSet(){syncCurrent();const box=$('#setlist'),res=$('#setres');box.innerHTML='';
   SET.songs.forEach((sg,i)=>{const row=document.createElement('div');row.className='sg'+(i===SET.cur?' cur':'');
     const n=document.createElement('span');n.className='no';n.textContent=(i+1)+'.';
@@ -1741,7 +1741,7 @@ function renderSet(){syncCurrent();const box=$('#setlist'),res=$('#setres');box.
     const del=document.createElement('button');del.type='button';del.className='del';del.textContent='빼기';del.addEventListener('click',()=>{stopPlay();SET.songs.splice(i,1);SET.keys=null;if(SET.cur===i)SET.cur=-1;else if(SET.cur>i)SET.cur--;renderSet();});
     row.append(n,nm,rg,mv(-1,'▲'),mv(1,'▼'),del);box.appendChild(row);});
   if(!SET.songs.length){res.hidden=true;return;}
-  if(SET.songs.some(s=>!s.song.keyConfirmed)){res.hidden=false;res.innerHTML='<p class="notice">각 곡을 눌러 원본 코드·음표 키를 먼저 확인해 주세요. 모든 곡 확인 후 이어 재생 후보가 나와요.</p>';return;}const E=setEval(),st=E.st,keys=planKeys(),plan=setPlan(),same=keys.every(k=>k===keys[0]),isPlan=!SET.keys;
+  const E=setEval(),st=E.st,keys=planKeys(),plan=setPlan(),same=keys.every(k=>k===keys[0]),isPlan=!SET.keys;
   const stat=r=>r.below===0&&r.above===0?'ok':'warn';const keyStat=k=>{const rs=E.per.map(res=>res[k]);return rs.some(r=>r.unc>0)?'bad':rs.some(r=>r.score>0)?'warn':'ok';};
   let h='<div class="answer">';
   if(same)h+='<span class="big">'+KEYN[keys[0]]+'</span><span class="say">'+(isPlan?'키를 연습 후보로 비교해요':'키로 비교하면')+'</span><span class="sub">모든 곡을 같은 키로 쳐서 전조 없이 그대로 이어져요.</span>';
@@ -1780,10 +1780,15 @@ function renderKeyEvidence(){
   let msg='조표: '+name(sig)+' · 코드 중심음 추정: '+name(guess)+'. 조표만으로 장·단조를 확정할 수 없어요.';
   if(sig!==undefined&&sig!==null&&guess!==undefined&&guess!==null&&sig!==guess)msg+=' 조표와 코드 추정이 다릅니다. 코드만 조옮김한 이미지이거나 인식 오류일 수 있어요.';
   if((S.song.keyConfirmed||(S.song.noteKeyManual&&S.song.keyManual))&&(S.song.noteKey??S.song.key)!==S.song.key)msg+=' 코드·음표 키가 다르게 지정됐어요. 반주는 코드 키에서, 음역 비교는 음표 키에서 목표 키로 옮깁니다.';
-  msg+=S.song.keyConfirmed?' 사용자가 원키를 확인했습니다.':' 원키 미확인: 추천·반주·출력 전에 확인해 주세요.';
+  msg+=S.song.keyConfirmed?' 사용자가 원키를 확인했습니다.':sig==null&&guess==null?' 자동 추정 근거가 부족해 선택된 키를 임시로 사용합니다. 위에서 바꿀 수 있어요.':' 자동 추정값으로 바로 비교·미리듣기할 수 있어요. 다르면 위에서 바꿔 주세요.';
   $('#key-evidence').textContent=msg;$('#key-confirmed').checked=!!S.song.keyConfirmed;
 }
-function readyForPlayback(isSet){const songs=isSet?SET.songs.map(s=>s.song):[S.song];if(songs.some(s=>!s.keyConfirmed)){setMsg('각 곡의 원본 코드·음표 키를 1번에서 먼저 확인해 주세요.','err');return false;}const chords=isSet?SET.songs.flatMap(s=>s.sh.chords):SH.chords;if(chords.some(c=>!parsed(c))){setMsg('지원하지 않거나 불확실한 코드가 있어 반주와 이미지 저장을 보류합니다. 원본과 비교해 코드를 수정해 주세요.','err');return false;}return true;}
+function readyForPlayback(isSet){
+  const chords=isSet?SET.songs.flatMap(s=>s.sh.chords):SH.chords,skipped=chords.filter(c=>!parsed(c)).length;
+  $('#preview-note').textContent='미리듣기: 자동 인식·추정 키를 사용하며 원곡 정확도는 미검증입니다.'+(skipped?' 읽지 못한 코드 '+skipped+'개는 건너뜁니다. 직접 고칠 수 있어요.':'');
+  if(!chords.some(c=>parsed(c))&&!(S.play.mel&&SH.mel)){$('#now').textContent='재생할 코드가 없어요. 악보를 올리거나 코드를 직접 추가해 주세요.';return false;}return true;
+}
+function readyForExport(){if(S.overlay&&!canOverlay()){setMsg('원본 위 교체는 원키·코드 이름·영역 확인 후 사용할 수 있어요. 원본 보존 모드로 저장할 수 있습니다.','err');return false;}return true;}
 $('#note-key').addEventListener('change',e=>{stopPlay();S.song.noteKey=+e.target.value;S.song.noteKeyManual=true;S.song.keyConfirmed=false;S.song.rangeVerified=false;readMelody();syncCurrent();save();refresh();renderSet();});
 $('#key-confirmed').addEventListener('change',e=>{stopPlay();if(e.target.checked&&(+$('#s-key').value<0||+$('#note-key').value<0)){e.target.checked=false;setMsg('원본 코드와 음표의 키를 각각 선택해 주세요.','err');return;}S.song.keyConfirmed=e.target.checked;S.song.keyManual=true;S.song.noteKeyManual=true;syncCurrent();save();refresh();renderSet();});
 
@@ -1805,9 +1810,9 @@ async function readPaddle(my){
 function canOverlay(){return !!S.song.keyConfirmed&&SH.chords.length>0&&SH.chords.every(c=>c.reviewed&&c.overlaySafe&&parsed(c));}
 function renderReview(){
   PC.attachBoxes(SH.chords,SH.toks||[]);const k=targetKey(),shift=mod(k-S.song.key,12),missing=SH.chords.filter(c=>!c.reviewed).length;
-  $('#sheet-notice').textContent=!S.song.keyConfirmed?'원키 미확인 — 코드 변환과 반주를 보류합니다. 원본은 보존됩니다.':'원본 코드 '+KEYN[S.song.key]+' → 목표 코드 '+KEYN[k]+' · 오선 음표·조표는 원본 그대로예요. '+(S.overlay&&canOverlay()?'확인한 코드 영역만 교체합니다.':'원본을 보존하고 아래 코드표로 바꾼 코드를 보여줍니다.');
+  $('#sheet-notice').textContent='원본 코드 '+KEYN[S.song.key]+' → 목표 코드 '+KEYN[k]+' · 오선 음표·조표는 원본 그대로예요. '+(S.overlay&&canOverlay()?'확인한 코드 영역만 교체합니다.':'원본을 보존하고 아래 코드표로 바꾼 코드를 보여줍니다.');
   $('#review-summary').textContent='코드 '+SH.chords.length+'개 · 미검토 '+missing+'개. #·♭·슬래시 뒤 음과 1·2번 반복 번호를 꼭 확인하세요.';
-  const box=$('#review-list');box.innerHTML='';SH.chords.forEach((c,i)=>{const r=document.createElement('div');r.className='review-row';const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=(c.sys+1)+'줄 · '+c.text+' · '+(c.reviewed?'검토 완료':'검토 필요');b.addEventListener('click',()=>{stopPlay();SH.csel=i;openEdit();preview();$('#edit').scrollIntoView({block:'center',behavior:'smooth'});});const out=document.createElement('span');out.className='target';const p=parsed(c);out.textContent=!S.song.keyConfirmed?'원키 확인 후 변환':'→ '+(p?CC.transpose(p,shift,k,S.song.key):'코드 확인');r.append(b,out);box.appendChild(r);});
+  const box=$('#review-list');box.innerHTML='';SH.chords.forEach((c,i)=>{const r=document.createElement('div');r.className='review-row';const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=(c.sys+1)+'줄 · '+c.text+' · '+(c.reviewed?'검토 완료':'미검토');b.addEventListener('click',()=>{stopPlay();SH.csel=i;openEdit();preview();$('#edit').scrollIntoView({block:'center',behavior:'smooth'});});const out=document.createElement('span');out.className='target';const p=parsed(c);out.textContent='→ '+(p?CC.transpose(p,shift,k,S.song.key):'코드 확인');r.append(b,out);box.appendChild(r);});
 }
 $('#overlay').addEventListener('change',e=>{stopPlay();S.overlay=e.target.checked;if(S.overlay&&!canOverlay()){S.overlay=false;e.target.checked=false;setMsg('각 코드 이름과 지울 상자에 코드만 있는지 먼저 확인해 주세요. 원본은 그대로 보존됩니다.','err');}preview();syncCurrent();});
 $('#range-verified').addEventListener('change',e=>{stopPlay();S.song.rangeVerified=e.target.checked;if(e.target.checked)SH.rangeAuto=false;save();syncCurrent();refresh();renderSet();});
