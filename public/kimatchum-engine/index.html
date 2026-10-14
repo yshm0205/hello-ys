@@ -203,6 +203,7 @@ summary .sm{display:block;font:400 13px var(--body);color:var(--ink-2)}
         <input id="ce" autocomplete="off" spellcheck="false">
         <button id="ce-ok" class="btn hl" type="button">확인</button>
         <button id="ce-del" class="btn" type="button">지우기</button>
+        <button id="ce-merge" class="btn" type="button">다음 영역과 합치기</button>
         <label class="check"><input id="ce-box-safe" type="checkbox">상자에 코드만 있고 반복 번호·음표는 없어요</label>
         <span id="ce-msg" class="status"></span>
       </div>
@@ -1367,6 +1368,18 @@ $('#ce').addEventListener('input',e=>{const ch=SH.cedit;if(!ch)return;stopPlay()
 function confirmChord(){const ch=SH.cedit;if(!ch)return;const r=PC.recognition(ch.text),p=CC.parseChord(ch.text);if(!r.valid||r.repeat||!p||!p.ok){$('#ce-msg').textContent='반복 번호를 빼고 정확한 코드 이름을 입력하세요.';return;}ch.reviewed=true;ch.overlaySafe=$('#ce-box-safe').checked;ch.status='ok';closeEdit();preview();syncCurrent();}
 $('#ce').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();confirmChord();}});
 $('#ce-ok').addEventListener('click',confirmChord);
+$('#ce-merge').addEventListener('click',()=>{
+  stopPlay();const current=SH.cedit,index=SH.chords.indexOf(current),next=SH.chords[index+1];
+  if(!current||!next||current.sys!==next.sys){$('#ce-msg').textContent='같은 줄의 다음 코드 영역만 합칠 수 있어요.';return;}
+  PC.attachBoxes(SH.chords,SH.toks||[]);const a=current.sourceBox,b=next.sourceBox;
+  const merged={...current,id:current.id+'-merged',text:current.text+' '+next.text,
+    x0:Math.min(a.x0,b.x0),x1:Math.max(a.x1,b.x1),y0:Math.min(a.y0,b.y0),y1:Math.max(a.y1,b.y1),
+    reviewed:false,overlaySafe:false,manual:true,g:null,status:'check',boxId:null};
+  merged.h=merged.y1-merged.y0;merged.base=merged.y1;
+  merged.sourceBox=Object.freeze({x0:merged.x0,x1:merged.x1,y0:merged.y0,y1:merged.y1});
+  SH.chords.splice(index,2,merged);SH.csel=index;openEdit();preview();syncCurrent();
+  $('#ce-msg').textContent='두 영역을 합쳤어요. 원본과 비교해 코드 이름을 직접 고치고, 지울 영역도 확인하세요.';
+});
 $('#ce-del').addEventListener('click',()=>{stopPlay();const i=SH.chords.indexOf(SH.cedit);if(i>=0)SH.chords.splice(i,1);closeEdit();preview();syncCurrent();});
 function setAdding(on){SH.adding=on;$('#add-chord').setAttribute('aria-pressed',on);$('#add-chord').textContent=on?'악보에서 코드 자리를 눌러요':'+ 코드 추가';}
 $('#add-chord').addEventListener('click',()=>{setAdding(!SH.adding);closeEdit();});
