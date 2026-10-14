@@ -92,7 +92,7 @@ export function TrialWorkspace(){
     setDraft(old=>[...old,{id:'box-'+crypto.randomUUID(),text:'',x0:Math.min(start.x,end.x),x1:Math.max(start.x,end.x),y0:Math.min(start.y,end.y),y1:Math.max(start.y,end.y),sys:0}]);}
   useEffect(()=>{if(!job?.result||!image||!canvas.current)return;const result=job.result;
     const img=new Image();img.onload=()=>{const c=canvas.current;if(!c)return;c.width=img.width;c.height=img.height;const ctx=c.getContext('2d');if(!ctx)return;
-      ctx.drawImage(img,0,0);for(const box of result.chords){const parsed=validChord(box.text);if(!parsed)continue;
+      ctx.fillStyle='white';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0);for(const box of result.chords){const parsed=validChord(box.text);if(!parsed)continue;
         const label=CC.transpose(parsed,result.target_key-result.source_key,result.target_key,result.source_key);
         const x=box.x0*c.width,y=box.y0*c.height,w=(box.x1-box.x0)*c.width,h=(box.y1-box.y0)*c.height;
         ctx.fillStyle='white';ctx.fillRect(x,y,w,h);ctx.fillStyle='black';ctx.font=`600 ${Math.max(10,h*.8)}px sans-serif`;ctx.textBaseline='top';ctx.fillText(label,x,y,w);}
@@ -128,7 +128,7 @@ export function TrialWorkspace(){
         {image&&<div className="grid min-w-0 gap-6 lg:grid-cols-2"><div className="relative min-w-0 self-start">
           {/* Private owner image is deliberately not passed through a public image optimizer. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img ref={imageElement} src={image} alt="검수할 원본 악보. 표시한 코드 영역과 함께 확인하세요." width={800} height={1100} className="h-auto w-full rounded-md" draggable={false}
+          <img ref={imageElement} src={image} alt="검수할 원본 악보. 표시한 코드 영역과 함께 확인하세요." width={800} height={1100} className="h-auto w-full rounded-md bg-white" draggable={false}
             onPointerDown={e=>{if(!job){pointer.current=point(e);e.currentTarget.setPointerCapture(e.pointerId);}}} onPointerUp={mark} style={{touchAction:job?'auto':'none'}}/>
           {boxes.map((box,i)=><span key={box.id} className="pointer-events-none absolute bg-primary/10 text-xs font-semibold" style={{left:`${box.x0*100}%`,top:`${box.y0*100}%`,width:`${(box.x1-box.x0)*100}%`,height:`${(box.y1-box.y0)*100}%`}}>{i+1}</span>)}
         </div><div className="min-w-0 space-y-4">
