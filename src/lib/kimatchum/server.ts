@@ -22,7 +22,8 @@ const submitSchema=z.object({email:z.literal(EMAIL),consent:z.literal(true),titl
 const key=z.number().int().min(0).max(11);
 const completeSchema=z.object({version:z.number().int(),review_confirmed:z.literal(true),source_key:key,note_key:key,target_key:key,
   bpm:z.number().int().min(30).max(220),beats:z.union([z.literal(3),z.literal(4)]),notes:z.string().max(2000).default(''),
-  chords:z.array(z.object({id:z.string(),text:z.string().max(32)}).strict()).min(1).max(256)}).strict();
+  removed_ids:z.array(z.string()).max(256).default([]),
+  chords:z.array(z.object({id:z.string(),text:z.string().max(32),source_ids:z.array(z.string()).min(1).max(256).optional()}).strict()).min(1).max(256)}).strict();
 export class TrialError extends Error { constructor(public status:number, message:string){super(message);} }
 
 export function configuration() {
@@ -162,11 +163,24 @@ export async function handle(request:Request,segments:string[]):Promise<Response
     if(area==='review' && action==='complete'){
       const input=completeSchema.parse(await readJson(request));const row=await ctx.rpc('read',job);
       const draft=draftSchema.parse(row.draft);const seen=new Set<string>();
-      if(input.chords.length!==draft.length)throw new TrialError(400,'접수한 모든 코드 영역을 확인해야 승인할 수 있습니다.');
-      const chords=input.chords.map(chord=>{const original=draft.find(b=>b.id===chord.id);const match=/^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/.exec(chord.text);
-        if(!original||seen.has(chord.id)||!match||!policy.qualities.includes(match[2]))throw new TrialError(400,'원본 ID와 지원되는 코드만 승인할 수 있습니다.');
-        seen.add(chord.id);return {...original,text:chord.text};});
-      const {version,review_confirmed,...result}=input;void review_confirmed;
+      const removed=new Set(input.removed_ids);
+      if(removed.size!==input.removed_ids.length||input.removed_ids.some(id=>!draft.some(b=>b.id===id)))throw new TrialError(400,'삭제할 원본 영역을 확인해 주세요.');
+      const remaining=draft.filter(b=>!removed.has(b.id));let cursor=0;
+      const chords=input.chords.map(chord=>{
+        const ids=chord.source_ids||[chord.id];
+        const originals=remaining.slice(cursor,cursor+ids.length);
+        const match=/^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/.exec(chord.text);
+        if(chord.id!==ids[0]||originals.length!==ids.length||ids.some((id,i)=>seen.has(id)||originals[i].id!==id)
+          ||originals.some(b=>b.sys!==originals[0].sys)||!match||!policy.qualities.includes(match[2]))
+          throw new TrialError(400,'같은 줄의 원본 영역을 순서대로 확인하고 지원되는 코드를 입력해 주세요.');
+        ids.forEach(id=>seen.add(id));cursor+=ids.length;
+        const original=originals[0];return {...original,text:chord.text,
+          x0:Math.min(...originals.map(b=>b.x0)),x1:Math.max(...originals.map(b=>b.x1)),
+          y0:Math.min(...originals.map(b=>b.y0)),y1:Math.max(...originals.map(b=>b.y1)),
+          ...(ids.length>1?{source_ids:ids}:{})};
+      });
+      if(cursor!==remaining.length)throw new TrialError(400,'누락된 원본 영역은 명시적으로 삭제해야 합니다.');
+      const {version,review_confirmed,removed_ids,...result}=input;void review_confirmed;void removed_ids;
       const response=await ctx.rpc('complete',job,{version,result:{...result,chords},
         mail:envelope(job,'검수 완료',`검수한 코드 이미지와 반주를 확인하세요. 로그인이 필요합니다.\n${url(job)}`)});
       return Response.json({...response,mail:await sendQueued(ctx)},{headers});

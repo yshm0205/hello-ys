@@ -9,7 +9,7 @@ import CC from '@/lib/kimatchum/chord-core.mjs';
 import policy from '@/lib/kimatchum/chord-support.json';
 import {useRecognitionEngine} from './RecognitionEngine';
 
-type Box={id:string;text:string;x0:number;x1:number;y0:number;y1:number;sys:number};
+type Box={id:string;text:string;x0:number;x1:number;y0:number;y1:number;sys:number;source_ids?:string[]};
 type Result={source_key:number;note_key:number;target_key:number;bpm:number;beats:3|4;notes:string;chords:Box[]};
 type Job={id:string;title:string;state:string;version:number;draft:Box[];result:Result|null;approved_at?:string;delivery?:string};
 type Row=Pick<Job,'id'|'title'|'state'|'version'>;
@@ -107,6 +107,19 @@ export function TrialWorkspace(){
       for(const midi of [36+tones.bass,...tones.iv.map(n=>48+tones.root+n)]){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='triangle';osc.frequency.value=440*2**((midi-69)/12);
         gain.gain.setValueAtTime(.04,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration*.9);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration);}
       timer.current=setTimeout(next,duration*1000);};next();}
+  function changeBoxes(index:number,merge:boolean){
+    const current=job?edits:draft;
+    const first=current[index],next=current[index+1];
+    if(!first||(job&&job.state!=='reviewing'))return;
+    if(merge&&(!next||first.sys!==next.sys))return;
+    const updated=merge?current.map((box,i)=>i===index?{...first,
+      x0:Math.min(first.x0,next.x0),x1:Math.max(first.x1,next.x1),
+      y0:Math.min(first.y0,next.y0),y1:Math.max(first.y1,next.y1),
+      ...(job?{source_ids:[...(first.source_ids||[first.id]),...(next.source_ids||[next.id])]}:{})}:box).filter((_,i)=>i!==index+1)
+      :current.filter((_,i)=>i!==index);
+    (job?setEdits:setDraft)(updated);setConfirmed(false);setSuggestions({});
+    setNotice(merge?'영역을 합쳤습니다. 원본과 비교해 코드명을 직접 수정해 주세요.':'영역을 삭제했습니다. 남은 코드와 순서를 확인해 주세요.');
+  }
   const boxes=job?edits:draft;
   const reviewable=job?.state==='reviewing';
   const allValid=edits.length>0&&edits.every(b=>!!validChord(b.text));
@@ -133,14 +146,14 @@ export function TrialWorkspace(){
           {boxes.map((box,i)=><span key={box.id} className="pointer-events-none absolute bg-primary/10 text-xs font-semibold" style={{left:`${box.x0*100}%`,top:`${box.y0*100}%`,width:`${(box.x1-box.x0)*100}%`,height:`${(box.y1-box.y0)*100}%`}}>{i+1}</span>)}
         </div><div className="min-w-0 space-y-4">
           <h2 className="text-xl font-semibold">코드 확인</h2>
-          {boxes.map((box,i)=><label className="block space-y-2" key={box.id}><span className="text-sm">영역 {i+1}</span>{job&&<span className="block text-sm text-muted-foreground">접수 코드: {job.draft.find(b=>b.id===box.id)?.text}</span>}{suggestions[box.id]&&<span className="block text-sm text-muted-foreground">AI 제안: {suggestions[box.id]} · 원본과 비교 후 아래에 입력</span>}<Input aria-label={`영역 ${i+1}`} value={box.text} disabled={!!job&&!reviewable} maxLength={32} aria-invalid={!!box.text&&!validChord(box.text)} onChange={e=>{const text=e.target.value;(job?setEdits:setDraft)(old=>old.map(b=>b.id===box.id?{...b,text}:b));setConfirmed(false);}}/>{box.text&&!validChord(box.text)&&<span className="text-sm text-destructive">지원되는 코드로 수정해 주세요.</span>}</label>)}
+          {boxes.map((box,i)=><label className="block space-y-2" key={box.id}><span className="text-sm">영역 {i+1}</span>{job&&<span className="block text-sm text-muted-foreground">접수 코드: {job.draft.find(b=>b.id===box.id)?.text}</span>}{suggestions[box.id]&&<span className="block text-sm text-muted-foreground">인식 결과: {suggestions[box.id]} · 원본과 비교 후 아래에 입력</span>}<Input aria-label={`영역 ${i+1}`} value={box.text} disabled={!!job&&!reviewable} maxLength={32} aria-invalid={!!box.text&&!validChord(box.text)} onChange={e=>{const text=e.target.value;(job?setEdits:setDraft)(old=>old.map(b=>b.id===box.id?{...b,text}:b));setConfirmed(false);}}/>{(!job||reviewable)&&<span className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={!!busy||boxes.length===1} aria-label={`영역 ${i+1} 삭제`} onClick={()=>changeBoxes(i,false)}>영역 삭제</Button><Button type="button" variant="outline" disabled={!!busy||!boxes[i+1]||box.sys!==boxes[i+1].sys} aria-label={`영역 ${i+1} 다음 영역과 병합`} onClick={()=>changeBoxes(i,true)}>다음 영역과 병합</Button></span>}{box.text&&!validChord(box.text)&&<span className="text-sm text-destructive">지원되는 코드로 수정해 주세요.</span>}</label>)}
           {!boxes.length&&<p>코드 글자가 있는 영역을 표시해 주세요.</p>}
           {reviewable&&<><div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{(['source_key','note_key','target_key'] as const).map((key,i)=><label key={key} className="space-y-2 text-sm"><span>{['원래 코드 키','원래 음표 키','목표 키'][i]}</span><select className={field} value={settings[key]} onChange={e=>{setSettings(s=>({...s,[key]:Number(e.target.value)}));setConfirmed(false);}}>{KEYS.map((label,value)=><option key={value} value={value}>{label}</option>)}</select></label>)}</div>
             <div className="grid grid-cols-2 gap-3"><label>빠르기<Input type="number" min={30} max={220} value={settings.bpm} onChange={e=>{setSettings(s=>({...s,bpm:Number(e.target.value)}));setConfirmed(false);}}/></label><label>박자<select className={field} value={settings.beats} onChange={e=>{setSettings(s=>({...s,beats:Number(e.target.value) as 3|4}));setConfirmed(false);}}><option value={3}>3/4</option><option value={4}>4/4</option></select></label></div>
             <label className="block space-y-2"><span>검수 메모</span><textarea className={field} maxLength={2000} value={settings.notes} onChange={e=>setSettings(s=>({...s,notes:e.target.value}))}/></label>
             <label className="flex items-start gap-3"><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/><span>원본과 모든 코드·영역·키·박자를 확인했습니다. 승인하면 이 결과가 저장됩니다.</span></label>
             <p className="text-sm text-muted-foreground">검수 버전 {job.version} · 승인 후 결과 메일은 별도 발송 대기 상태로 저장됩니다.</p>
-            <Button disabled={!!busy||!confirmed||!allValid} onClick={()=>void action('검수 승인',async()=>{await api(`review/${job.id}/complete`,{...settings,version:job.version,review_confirmed:true,chords:edits.map(({id,text})=>({id,text}))});await open(job.id);await refresh();})}>검수 결과 승인</Button></>}
+            <Button disabled={!!busy||!confirmed||!allValid} onClick={()=>void action('검수 승인',async()=>{await api(`review/${job.id}/complete`,{...settings,version:job.version,review_confirmed:true,chords:edits.map(({id,text,source_ids})=>({id,text,...(source_ids?{source_ids}:{})})),removed_ids:job.draft.filter(b=>!edits.some(e=>(e.source_ids||[e.id]).includes(b.id))).map(b=>b.id)});await open(job.id);await refresh();})}>검수 결과 승인</Button></>}
         </div></div>}
         {!job&&<><label className="flex items-start gap-3"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><span>본인 이메일과 악보 이미지를 검수 목적으로 저장하는 데 동의합니다.</span></label>
           <Button disabled={!!busy||!consent||!image||!draft.length||draft.some(b=>!validChord(b.text))} onClick={()=>void action('악보 접수',async()=>{const response=await api('requests',{email:EMAIL,title,image,draft,consent,idempotency_key:idem.current});await open(response.id);await refresh();setNotice('접수되었습니다. 메일 처리 결과와 접수 상태를 확인해 주세요.');})}>본인 이메일로 접수</Button></>}
