@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CC from '@/lib/kimatchum/chord-core.mjs';
 import policy from '@/lib/kimatchum/chord-support.json';
+import {keepVerification,clearVerification} from '@/lib/kimatchum/verification-return';
 import {useRecognitionEngine} from './RecognitionEngine';
 
 type Box={id:string;text:string;x0:number;x1:number;y0:number;y1:number;sys:number;source_ids?:string[]};
@@ -15,7 +16,7 @@ type Job={id:string;title:string;state:string;version:number;draft:Box[];result:
 type Row=Pick<Job,'id'|'title'|'state'|'version'>;
 const EMAIL='hmys0205hmys@gmail.com';
 const KEYS=['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
-const states:Record<string,string>={awaiting_email:'이메일 확인 대기',queued:'검수 대기',reviewing:'검수 중',completed:'검수 완료'};
+const states:Record<string,string>={awaiting_email:'이메일 확인 대기',queued:'검수 대기',reviewing:'코드 검수 중',completed:'코드 변환 검수 완료'};
 const delivery:Record<string,string>={pending:'이메일 발송 대기',sending:'발송 결과 확인 중',accepted:'메일 공급자가 접수함',unknown:'발송 결과 불명확 · 자동 재시도 안 함',rejected:'메일 공급자가 거절함',blocked:'메일 발송 차단'};
 const field='w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50';
 
@@ -36,6 +37,7 @@ export function TrialWorkspace(){
   const [title,setTitle]=useState(''),[image,setImage]=useState(''),[draft,setDraft]=useState<Box[]>([]),[consent,setConsent]=useState(false);
   const [edits,setEdits]=useState<Box[]>([]),[confirmed,setConfirmed]=useState(false);
   const [settings,setSettings]=useState<Result>({source_key:0,note_key:0,target_key:0,bpm:90,beats:4,notes:'',chords:[]});
+  const [scopeAccepted,setScopeAccepted]=useState(false);
   const [verification,setVerification]=useState(''),[playing,setPlaying]=useState(false);
   const canvas=useRef<HTMLCanvasElement>(null);const pointer=useRef<{x:number;y:number}|null>(null);
   const imageElement=useRef<HTMLImageElement>(null);const audio=useRef<AudioContext|null>(null);const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -46,7 +48,7 @@ export function TrialWorkspace(){
   useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current);void audio.current?.close();if(blob.current)URL.revokeObjectURL(blob.current);},[]);
 
   const open=useCallback(async(id:string)=>{
-    const value=await api('requests/'+id);setJob(value);setEdits(value.result?.chords||value.draft);setConfirmed(false);
+    const value=await api('requests/'+id);setJob(value);setEdits(value.result?.chords||value.draft);setConfirmed(false);setScopeAccepted(false);
     setSettings(value.result||{source_key:0,note_key:0,target_key:0,bpm:90,beats:4,notes:'',chords:[]});setSuggestions({});
     const response=await fetch('/api/kimatchum/trial/requests/'+id+'/image',{cache:'no-store'});
     if(!response.ok)throw new Error('원본 이미지를 불러오지 못했습니다.');
@@ -54,18 +56,24 @@ export function TrialWorkspace(){
   },[]);
   const refresh=useCallback(async()=>{const result=await api('requests');setRows(result.jobs);},[]);
   useEffect(()=>{let active=true;
+    const requestId=params.get('request')||'';
+    const hash=new URLSearchParams(location.hash.slice(1));const incoming=hash.get('km-verify');
+    if(incoming){hash.delete('km-verify');history.replaceState(null,'',location.pathname+location.search+(hash.size?'#'+hash.toString():''));}
+    try{setVerification(keepVerification(sessionStorage,requestId,incoming));}
+    catch{if(incoming&&/^[A-Za-z0-9_-]{20,100}$/.test(incoming))setVerification(incoming);}
+
     void (async()=>{try{const capabilities=await api('capabilities');if(!active)return;
       setReady(capabilities.enabled);if(!capabilities.enabled){setNotice('시험 접수 준비 중입니다. 운영 저장소와 검수 계정 확인 후 이용할 수 있습니다.');return;}
       await api('session');if(!active)return;setSignedIn(true);setNotice('본인 계정 전용 시험입니다. 검수는 사람이 직접 시작하고 승인합니다.');
       await refresh();const id=params.get('request');if(id&&/^[a-f0-9]{32}$/.test(id))await open(id);
-      const hash=new URLSearchParams(location.hash.slice(1));const token=hash.get('km-verify');if(token){setVerification(token);history.replaceState(null,'',location.pathname+location.search);}
+
     }catch(e){if(active)setError(e instanceof Error?e.message:'연결을 확인하지 못했습니다.');}})();
     return()=>{active=false;};
   },[open,params,refresh]);
   async function action(name:string,work:()=>Promise<void>){if(busy)return;setBusy(name);setError('');try{await work();}catch(e){setError(e instanceof Error?e.message:'처리하지 못했습니다.');}finally{setBusy('');}}
   async function dispatch(){const result=await api('dispatch',{});setNotice(result.state==='idle'?'발송 대기 항목이 없습니다.':delivery[result.state]||'메일 처리 상태를 확인해 주세요.');}
   async function readImage(value:string,mode:'browser'|'gemini'){
-    const result=await engine.recognize(value,mode);setConfirmed(false);
+    const result=await engine.recognize(value,mode);setConfirmed(false);setScopeAccepted(false);
     if(!job){setDraft(result.draft);setSuggestions(Object.fromEntries(result.draft.map(b=>[b.id,b.text])));}
     else {
       const matched:Record<string,string>={};let unmatched=result.unmatched;
@@ -76,7 +84,7 @@ export function TrialWorkspace(){
     setNotice('자동 인식 '+result.draft.length+'개. 원본과 비교하여 수정한 뒤 접수하세요. 위치 미대응 '+result.unmatched+'개.');
   }
   async function selectFile(file:File|undefined){if(!file)return;if(file.size>6*1024*1024){setError('이미지는 6MiB 이하로 올려 주세요.');return;}
-    stop();setJob(null);setDraft([]);setEdits([]);setSuggestions({});setConfirmed(false);idem.current=crypto.randomUUID().replaceAll('-','');
+    stop();setJob(null);setDraft([]);setEdits([]);setSuggestions({});setConfirmed(false);setScopeAccepted(false);idem.current=crypto.randomUUID().replaceAll('-','');
     const value=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('이미지를 읽지 못했습니다.'));reader.readAsDataURL(file);});
     setImage(value);const result=await engine.recognize(value,'browser');setDraft(result.draft);setSuggestions(Object.fromEntries(result.draft.map(b=>[b.id,b.text])));
     setNotice('자동 OCR 완료. 원본과 인식 코드를 비교하고 수정해 주세요.');
@@ -91,11 +99,15 @@ export function TrialWorkspace(){
     if(Math.abs(end.x-start.x)<.005||Math.abs(end.y-start.y)<.005)return;
     setDraft(old=>[...old,{id:'box-'+crypto.randomUUID(),text:'',x0:Math.min(start.x,end.x),x1:Math.max(start.x,end.x),y0:Math.min(start.y,end.y),y1:Math.max(start.y,end.y),sys:0}]);}
   useEffect(()=>{if(!job?.result||!image||!canvas.current)return;const result=job.result;
-    const img=new Image();img.onload=()=>{const c=canvas.current;if(!c)return;c.width=img.width;c.height=img.height;const ctx=c.getContext('2d');if(!ctx)return;
+    const img=new Image();img.onload=()=>{const c=canvas.current;if(!c)return;c.width=img.width;c.height=img.height+Math.max(100,Math.ceil(img.width*.13));const ctx=c.getContext('2d');if(!ctx)return;
       ctx.fillStyle='white';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0);for(const box of result.chords){const parsed=validChord(box.text);if(!parsed)continue;
         const label=CC.transpose(parsed,result.target_key-result.source_key,result.target_key,result.source_key);
-        const x=box.x0*c.width,y=box.y0*c.height,w=(box.x1-box.x0)*c.width,h=(box.y1-box.y0)*c.height;
+        const x=box.x0*c.width,y=box.y0*img.height,w=(box.x1-box.x0)*c.width,h=(box.y1-box.y0)*img.height;
         ctx.fillStyle='white';ctx.fillRect(x,y,w,h);ctx.fillStyle='black';ctx.font=`600 ${Math.max(10,h*.8)}px sans-serif`;ctx.textBaseline='top';ctx.fillText(label,x,y,w);}
+      ctx.fillStyle='#233c38';ctx.font=`${Math.max(12,img.width/60)}px sans-serif`;ctx.textBaseline='top';
+      ['키맞춤 · 코드 변환 검수 결과 (오선 음표는 원키)',
+        '멜로디·오선 전조·원곡 리듬·싱어 적합성 미검증',
+        '보컬 음역 확인용 악보가 아닙니다.'].forEach((line,i)=>ctx.fillText(line,12,img.height+16+i*Math.max(24,img.width/45),Math.max(1,img.width-24)));
     };img.src=image;
   },[job,image]);
   async function play(){if(!job?.result)return;stop();const result=job.result;
@@ -117,17 +129,17 @@ export function TrialWorkspace(){
       y0:Math.min(first.y0,next.y0),y1:Math.max(first.y1,next.y1),
       ...(job?{source_ids:[...(first.source_ids||[first.id]),...(next.source_ids||[next.id])]}:{})}:box).filter((_,i)=>i!==index+1)
       :current.filter((_,i)=>i!==index);
-    (job?setEdits:setDraft)(updated);setConfirmed(false);setSuggestions({});
+    (job?setEdits:setDraft)(updated);setConfirmed(false);setScopeAccepted(false);setSuggestions({});
     setNotice(merge?'영역을 합쳤습니다. 원본과 비교해 코드명을 직접 수정해 주세요.':'영역을 삭제했습니다. 남은 코드와 순서를 확인해 주세요.');
   }
   const boxes=job?edits:draft;
   const reviewable=job?.state==='reviewing';
   const allValid=edits.length>0&&edits.every(b=>!!validChord(b.text));
   return <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 text-foreground">
-    {engine.element}<header className="space-y-2"><p className="text-sm text-muted-foreground">FlowSpot · 본인 계정 시험</p><h1 className="text-3xl font-semibold">키맞춤 접수와 검수</h1>
-      <p className="text-base text-muted-foreground">악보 이미지를 접수하고 코드를 확인한 뒤 결과를 이메일로 안내합니다. 결과는 코드 이미지와 반주이며, 오선 음표 전체를 전조하지 않습니다.</p></header>
+    {engine.element}<header className="space-y-2"><p className="text-sm text-muted-foreground">악보 작업실</p><h1 className="text-3xl font-semibold">내 악보의 코드를 확인하세요</h1>
+      <p className="text-base text-muted-foreground">악보 이미지를 접수하고 코드를 확인한 뒤 결과를 이메일로 안내합니다. 코드만 목표 키로 바뀌며 오선 음표는 원키 그대로입니다. 재생은 코드 확인용으로, 멜로디나 보컬 음역을 확인하는 기능은 아닙니다.</p></header>
     <Card><CardContent className="space-y-3 pt-6"><p role="status">{busy?`${busy} 중…`:notice}</p>{error&&<p role="alert" className="text-destructive">{error}</p>}
-      {!signedIn&&<Button asChild variant="outline"><a href={`/${locale}/login?redirect=${encodeURIComponent('/kimatchum'+(params.get('request')?'?request='+params.get('request'):''))}`}>기존 FlowSpot 계정으로 로그인</a></Button>}
+      {!signedIn&&<Button asChild variant="outline"><a href={`/${locale}/login?redirect=${encodeURIComponent('/kimatchum'+(params.get('request')?'?request='+params.get('request'):''))}`}>키맞춤 로그인</a></Button>}
       {!ready&&<p className="text-sm text-muted-foreground">준비 중에는 접수·승인·이메일 발송이 차단됩니다.</p>}
     </CardContent></Card>
     {signedIn&&<><section className="flex flex-wrap items-center gap-3"><Button variant="outline" disabled={!!busy} onClick={()=>void action('목록 확인',refresh)}>접수 목록 새로고침</Button>
@@ -146,21 +158,22 @@ export function TrialWorkspace(){
           {boxes.map((box,i)=><span key={box.id} className="pointer-events-none absolute bg-primary/10 text-xs font-semibold" style={{left:`${box.x0*100}%`,top:`${box.y0*100}%`,width:`${(box.x1-box.x0)*100}%`,height:`${(box.y1-box.y0)*100}%`}}>{i+1}</span>)}
         </div><div className="min-w-0 space-y-4">
           <h2 className="text-xl font-semibold">코드 확인</h2>
-          {boxes.map((box,i)=><label className="block space-y-2" key={box.id}><span className="text-sm">영역 {i+1}</span>{job&&<span className="block text-sm text-muted-foreground">접수 코드: {job.draft.find(b=>b.id===box.id)?.text}</span>}{suggestions[box.id]&&<span className="block text-sm text-muted-foreground">인식 결과: {suggestions[box.id]} · 원본과 비교 후 아래에 입력</span>}<Input aria-label={`영역 ${i+1}`} value={box.text} disabled={!!job&&!reviewable} maxLength={32} aria-invalid={!!box.text&&!validChord(box.text)} onChange={e=>{const text=e.target.value;(job?setEdits:setDraft)(old=>old.map(b=>b.id===box.id?{...b,text}:b));setConfirmed(false);}}/>{(!job||reviewable)&&<span className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={!!busy||boxes.length===1} aria-label={`영역 ${i+1} 삭제`} onClick={()=>changeBoxes(i,false)}>영역 삭제</Button><Button type="button" variant="outline" disabled={!!busy||!boxes[i+1]||box.sys!==boxes[i+1].sys} aria-label={`영역 ${i+1} 다음 영역과 병합`} onClick={()=>changeBoxes(i,true)}>다음 영역과 병합</Button></span>}{box.text&&!validChord(box.text)&&<span className="text-sm text-destructive">지원되는 코드로 수정해 주세요.</span>}</label>)}
+          {boxes.map((box,i)=><label className="block space-y-2" key={box.id}><span className="text-sm">영역 {i+1}</span>{job&&<span className="block text-sm text-muted-foreground">접수 코드: {job.draft.find(b=>b.id===box.id)?.text}</span>}{suggestions[box.id]&&<span className="block text-sm text-muted-foreground">인식 결과: {suggestions[box.id]} · 원본과 비교 후 아래에 입력</span>}<Input aria-label={`영역 ${i+1}`} value={box.text} disabled={!!job&&!reviewable} maxLength={32} aria-invalid={!!box.text&&!validChord(box.text)} onChange={e=>{const text=e.target.value;(job?setEdits:setDraft)(old=>old.map(b=>b.id===box.id?{...b,text}:b));setConfirmed(false);setScopeAccepted(false);}}/>{(!job||reviewable)&&<span className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={!!busy||boxes.length===1} aria-label={`영역 ${i+1} 삭제`} onClick={()=>changeBoxes(i,false)}>영역 삭제</Button><Button type="button" variant="outline" disabled={!!busy||!boxes[i+1]||box.sys!==boxes[i+1].sys} aria-label={`영역 ${i+1} 다음 영역과 병합`} onClick={()=>changeBoxes(i,true)}>다음 영역과 병합</Button></span>}{box.text&&!validChord(box.text)&&<span className="text-sm text-destructive">지원되는 코드로 수정해 주세요.</span>}</label>)}
           {!boxes.length&&<p>코드 글자가 있는 영역을 표시해 주세요.</p>}
-          {reviewable&&<><div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{(['source_key','note_key','target_key'] as const).map((key,i)=><label key={key} className="space-y-2 text-sm"><span>{['원래 코드 키','원래 음표 키','목표 키'][i]}</span><select className={field} value={settings[key]} onChange={e=>{setSettings(s=>({...s,[key]:Number(e.target.value)}));setConfirmed(false);}}>{KEYS.map((label,value)=><option key={value} value={value}>{label}</option>)}</select></label>)}</div>
-            <div className="grid grid-cols-2 gap-3"><label>빠르기<Input type="number" min={30} max={220} value={settings.bpm} onChange={e=>{setSettings(s=>({...s,bpm:Number(e.target.value)}));setConfirmed(false);}}/></label><label>박자<select className={field} value={settings.beats} onChange={e=>{setSettings(s=>({...s,beats:Number(e.target.value) as 3|4}));setConfirmed(false);}}><option value={3}>3/4</option><option value={4}>4/4</option></select></label></div>
+          {reviewable&&<><div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{(['source_key','note_key','target_key'] as const).map((key,i)=><label key={key} className="space-y-2 text-sm"><span>{['원래 코드 키','원래 음표 키','목표 키'][i]}</span><select className={field} value={settings[key]} onChange={e=>{setSettings(s=>({...s,[key]:Number(e.target.value)}));setConfirmed(false);setScopeAccepted(false);}}>{KEYS.map((label,value)=><option key={value} value={value}>{label}</option>)}</select></label>)}</div>
+            <div className="grid grid-cols-2 gap-3"><label>코드 확인 재생 속도 (BPM)<Input type="number" min={30} max={220} value={settings.bpm} onChange={e=>{setSettings(s=>({...s,bpm:Number(e.target.value)}));setConfirmed(false);setScopeAccepted(false);}}/></label><label>코드당 재생 길이<select className={field} value={settings.beats} onChange={e=>{setSettings(s=>({...s,beats:Number(e.target.value) as 3|4}));setConfirmed(false);setScopeAccepted(false);}}><option value={3}>3박</option><option value={4}>4박</option></select></label></div>
             <label className="block space-y-2"><span>검수 메모</span><textarea className={field} maxLength={2000} value={settings.notes} onChange={e=>setSettings(s=>({...s,notes:e.target.value}))}/></label>
-            <label className="flex items-start gap-3"><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/><span>원본과 모든 코드·영역·키·박자를 확인했습니다. 승인하면 이 결과가 저장됩니다.</span></label>
-            <p className="text-sm text-muted-foreground">검수 버전 {job.version} · 승인 후 결과 메일은 별도 발송 대기 상태로 저장됩니다.</p>
-            <Button disabled={!!busy||!confirmed||!allValid} onClick={()=>void action('검수 승인',async()=>{await api(`review/${job.id}/complete`,{...settings,version:job.version,review_confirmed:true,chords:edits.map(({id,text,source_ids})=>({id,text,...(source_ids?{source_ids}:{})})),removed_ids:job.draft.filter(b=>!edits.some(e=>(e.source_ids||[e.id]).includes(b.id))).map(b=>b.id)});await open(job.id);await refresh();})}>검수 결과 승인</Button></>}
+            <label className="flex items-start gap-3"><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/><span>원본의 코드명·코드 영역과 원래 코드 키·목표 키를 확인했습니다. 코드 변환 결과만 저장합니다.</span></label>
+            <section aria-label="코드 변환 검수 범위" className="space-y-2 rounded-md bg-muted p-4"><h3 className="font-semibold">이번에 확인하는 범위</h3><p>코드명·영역·원래 코드 키·목표 키에 따른 코드 변환입니다.</p><p>멜로디, 오선 음표 전조, 원곡의 리듬·변박·반복, 각 싱어에게 맞는 음역은 검증하지 않았습니다. 오선 음표는 원키로 남습니다.</p><label className="flex items-start gap-3"><input type="checkbox" checked={scopeAccepted} onChange={e=>setScopeAccepted(e.target.checked)}/><span>미검증 항목을 확인했습니다. 이 결과를 전체 악보 검수 완료나 싱어 음역 확인 완료로 사용하지 않습니다.</span></label></section>
+            <p className="text-sm text-muted-foreground">코드 검수 버전 {job.version} · 승인 후 결과 메일은 별도 발송 대기 상태로 저장됩니다.</p>
+            <Button disabled={!!busy||!confirmed||!scopeAccepted||!allValid} onClick={()=>void action('검수 승인',async()=>{await api(`review/${job.id}/complete`,{...settings,version:job.version,review_confirmed:true,limitations_acknowledged:true,chords:edits.map(({id,text,source_ids})=>({id,text,...(source_ids?{source_ids}:{})})),removed_ids:job.draft.filter(b=>!edits.some(e=>(e.source_ids||[e.id]).includes(b.id))).map(b=>b.id)});await open(job.id);await refresh();})}>코드 변환 결과 저장</Button></>}
         </div></div>}
         {!job&&<><label className="flex items-start gap-3"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><span>본인 이메일과 악보 이미지를 검수 목적으로 저장하는 데 동의합니다.</span></label>
           <Button disabled={!!busy||!consent||!image||!draft.length||draft.some(b=>!validChord(b.text))} onClick={()=>void action('악보 접수',async()=>{const response=await api('requests',{email:EMAIL,title,image,draft,consent,idempotency_key:idem.current});await open(response.id);await refresh();setNotice('접수되었습니다. 메일 처리 결과와 접수 상태를 확인해 주세요.');})}>본인 이메일로 접수</Button></>}
-        {job?.state==='awaiting_email'&&<><p>확인 이메일의 링크를 연 뒤 아래 버튼을 눌러 주세요. 로그인도 필요합니다.</p><Button disabled={!!busy||!verification} onClick={()=>void action('이메일 확인',async()=>{await api(`requests/${job.id}/verify`,{token:verification});setVerification('');await open(job.id);await refresh();})}>이메일 확인 완료</Button></>}
+        {job?.state==='awaiting_email'&&<><p>확인 이메일의 링크를 연 뒤 아래 버튼을 눌러 주세요. 로그인도 필요합니다.</p><Button disabled={!!busy||!verification} onClick={()=>void action('이메일 확인',async()=>{await api(`requests/${job.id}/verify`,{token:verification});try{clearVerification(sessionStorage,job.id);}catch{}setVerification('');await open(job.id);await refresh();})}>이메일 확인 완료</Button></>}
         {job?.state==='queued'&&<><p>검수 대기 중입니다. 사람이 직접 검수를 시작해야 진행됩니다.</p><Button disabled={!!busy} onClick={()=>void action('검수 시작',async()=>{await api(`review/${job.id}/claim`,{});await open(job.id);await refresh();})}>검수 시작</Button></>}
       </CardContent></Card>
-      {job?.result&&<Card><CardHeader><CardTitle>승인된 결과</CardTitle></CardHeader><CardContent className="space-y-4"><p>{delivery[job.delivery||'pending']||'메일 상태 확인 필요'} · 승인 {job.approved_at}</p><canvas ref={canvas} className="h-auto w-full" aria-label="검수 후 전조한 코드 이미지"/><div className="flex flex-wrap gap-3"><Button variant="outline" onClick={()=>{const c=canvas.current;if(!c)return;const link=document.createElement('a');link.download='kimatchum-reviewed.png';link.href=c.toDataURL('image/png');link.click();}}>코드 이미지 저장</Button><Button onClick={()=>void play()} disabled={playing}>코드 반주 듣기</Button><Button variant="outline" onClick={stop} disabled={!playing}>멈추기</Button></div><p className="text-sm text-muted-foreground">코드당 한 마디로 재생하는 확인용 반주입니다. 멜로디와 반복기호 해석은 포함하지 않습니다.</p></CardContent></Card>}
+      {job?.result&&<Card><CardHeader><CardTitle>코드 변환 검수 결과</CardTitle></CardHeader><CardContent className="space-y-4"><p className="rounded-md bg-muted p-4">코드 변환만 검수했습니다. 오선 음표는 원키입니다. 멜로디·오선 전조·원곡 리듬·싱어 적합성은 미검증이며, 보컬 음역 확인용 악보가 아닙니다.</p><p>{delivery[job.delivery||'pending']||'메일 상태 확인 필요'} · 승인 {job.approved_at}</p><canvas ref={canvas} className="h-auto w-full" aria-label="검수 후 전조한 코드 이미지"/><div className="flex flex-wrap gap-3"><Button variant="outline" onClick={()=>{const c=canvas.current;if(!c)return;const link=document.createElement('a');link.download='kimatchum-chords-only.png';link.href=c.toDataURL('image/png');link.click();}}>코드 이미지 저장</Button><Button onClick={()=>void play()} disabled={playing}>코드 확인용 재생</Button><Button variant="outline" onClick={stop} disabled={!playing}>멈추기</Button></div><p className="text-sm text-muted-foreground">코드당 한 마디로 재생하는 확인용 반주입니다. 멜로디와 반복기호 해석은 포함하지 않습니다.</p></CardContent></Card>}
     </>}
   </main>;
 }

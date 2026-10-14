@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import { SiteStructuredData } from '@/components/shared/SiteStructuredData';
 import { Toaster } from "@/components/ui/sonner";
 import { Noto_Sans_KR, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
@@ -80,30 +82,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* JSON-LD 구조화 데이터 */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "FlowSpot",
-              url: process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com",
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "FlowSpot",
-              url: process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com",
-              logo: `${process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com"}/og-image.png`,
-            }),
-          }}
-        />
+        <Suspense fallback={null}><SiteStructuredData siteUrl={process.env.NEXT_PUBLIC_APP_URL || 'https://your-domain.com'}/></Suspense>
         <ColorSchemeScript />
       </head>
       <body

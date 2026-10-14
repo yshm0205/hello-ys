@@ -54,7 +54,7 @@ async function request(method,segments,body){return route[method](new Request('h
 async function payload(){return {email,consent:true,title:'실제 경로 시험',idempotency_key:'a'.repeat(32),
   image:(await sharp({create:{width:40,height:40,channels:3,background:'white'}}).png().toBuffer()).toString('base64'),
   draft:[{id:'box1',text:'C',x0:.1,x1:.4,y0:.1,y1:.3,sys:0}]};}
-const result={version:2,review_confirmed:true,source_key:0,note_key:0,target_key:2,bpm:90,beats:4,notes:'확인',chords:[{id:'box1',text:'C'}]};
+const result={version:2,review_confirmed:true,limitations_acknowledged:true,source_key:0,note_key:0,target_key:2,bpm:90,beats:4,notes:'확인',chords:[{id:'box1',text:'C'}]};
 async function submitted(){const response=await request('POST','requests',await payload());assert.equal(response.status,200);return (await response.json()).id;}
 async function verified(id){const link=state.mails.get(id+':verify').envelope.body;const token=link.split('#km-verify=')[1];assert.equal((await request('POST',`requests/${id}/verify`,{token})).status,200);}
 
@@ -208,4 +208,15 @@ test('C#/E# and E# retain spelling, transpose and produce correct bass pitch',as
   assert.equal(core.transpose(chord,0,9,9),'C#/E#');assert.equal(core.transpose(bass,0,9,9),'E#');
   assert.equal(core.transpose(chord,3,0,9),'E/G#');assert.equal(core.transpose(bass,3,0,9),'G#');
   assert.equal(core.tones(chord).bass,5);assert.equal(core.tones(bass).root,5);
+});
+
+test('code-only completion requires explicit limits acknowledgement and records unverified scope in result and mail',async()=>{
+ const id=await splitScore();const missing={...mergedResult};delete missing.limitations_acknowledged;
+ assert.equal((await request('POST',`review/${id}/complete`,missing)).status,400);
+ assert.equal((await request('POST',`review/${id}/complete`,{...mergedResult,limitations_acknowledged:false})).status,400);
+ assert.equal((await request('POST',`review/${id}/complete`,mergedResult)).status,200);
+ assert.equal(state.jobs.get(id).result.review_scope,'chords_only_v1');
+ assert.deepEqual(state.jobs.get(id).result.unverified,['melody','staff_transposition','original_rhythm','singer_fit']);
+ const mail=state.mails.get(id+':result').envelope;assert.equal(mail.subject,'[키맞춤] 코드 변환 검수 완료');
+ assert.match(mail.body,/전체 악보 검수 완료가 아닙니다/);assert.match(mail.body,/싱어 적합성은 검증하지 않았습니다/);
 });

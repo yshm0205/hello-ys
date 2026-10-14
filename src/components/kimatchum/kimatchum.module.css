@@ -1,0 +1,34 @@
+.shell {
+  --background: #f5f4ef; --foreground: #233c38; --card: #fff; --card-foreground: #233c38;
+  --primary: #245e50; --primary-foreground: #fff; --secondary: #e9eee8; --secondary-foreground: #233c38;
+  --muted: #e9eee8; --muted-foreground: #546760; --accent: #e9eee8; --accent-foreground: #233c38;
+  --border: #d6dfd8; --input: #d6dfd8; --ring: #245e50; --destructive: #b42318;
+  min-height: 100dvh; color-scheme: light; background: var(--background); color: var(--foreground);
+  font-family: var(--font-noto-sans-kr), sans-serif; overflow-wrap: anywhere;
+}
+.shell button, .shell input, .shell select { min-height: 44px; }
+.shell input[type=checkbox] { min-height: auto; accent-color: var(--primary); }
+.shell :is(button,input,select,textarea):focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.shell input, .shell select, .shell textarea { background: var(--card); color: var(--foreground); }
+.header { max-width: 1120px; margin: auto; padding: 24px; display: flex; align-items: center; gap: 24px; border-bottom: 1px solid var(--border); }
+.brand { display: inline-flex; align-items: center; gap: 8px; color: var(--foreground); text-decoration: none; font-size: 24px; font-weight: 700; white-space: nowrap; }
+.brand:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
+.tag { color: var(--muted-foreground); font-size: 14px; }
+.badge { margin-left: auto; font-size: 14px; background: var(--muted); padding: 8px 12px; border-radius: 6px; white-space: nowrap; }
+.footer { max-width: 1120px; margin: auto; padding: 32px 24px; border-top: 1px solid var(--border); font-size: 14px; color: var(--muted-foreground); }
+.login { max-width: 480px; margin: auto; padding: 48px 24px; }
+.login h1 { font-size: 32px; line-height: 1.3; font-weight: 700; }
+.login form { display: grid; gap: 16px; margin-top: 24px; }
+.login label { display: grid; gap: 8px; font-size: 14px; }
+.login button { width: 100%; }
+.login p { margin-top: 16px; font-size: 14px; line-height: 1.7; color: var(--muted-foreground); }
+.login a { text-decoration: underline; text-underline-offset: 4px; }
+.login [role=alert] { color: var(--destructive); }
+.social { display: grid; gap: 12px; margin-top: 24px; }
+@media(max-width: 640px) {
+  .header { padding: 16px; gap: 12px; flex-wrap: wrap; }
+  .tag { order: 3; width: 100%; }
+  .login { padding: 32px 16px; }
+  .login h1 { font-size: 28px; }
+  .footer { padding: 24px 16px; }
+}

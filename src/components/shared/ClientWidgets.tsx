@@ -1,5 +1,8 @@
 "use client";
 
+import { Suspense } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { isKimatchumSurface } from '@/lib/kimatchum/branding';
 import dynamic from "next/dynamic";
 
 const CookieConsent = dynamic(
@@ -24,13 +27,17 @@ const ChannelTalkButton = dynamic(
   { ssr: false }
 );
 
-export function ClientWidgets() {
+export function ClientWidgets() {return <Suspense fallback={null}><RouteWidgets/></Suspense>;}
+
+function RouteWidgets() {
+  const pathname=usePathname(),params=useSearchParams();
+  const isKimatchum=isKimatchumSurface(pathname,params.get('redirect'));
   const hasChannelTalk = Boolean(process.env.NEXT_PUBLIC_CHANNEL_TALK_PLUGIN_KEY);
 
   return (
     <>
       <CookieConsent />
-      {hasChannelTalk ? <ChannelTalkButton /> : <KakaoChatButton />}
+      {!isKimatchum && (hasChannelTalk ? <ChannelTalkButton /> : <KakaoChatButton />)}
     </>
   );
 }

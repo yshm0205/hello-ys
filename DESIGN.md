@@ -85,3 +85,14 @@ Use mixed subtle borders and the shared card's light shadow. Status-tinted cards
 - Primary content must fit at 375px without horizontal overflow.
 
 Accepted debt: the existing admin pages contain a mix of raw zinc utilities and semantic tokens. New work follows the existing pattern; broader token consolidation is outside the current feature scope.
+
+## 키맞춤 전용 화면 (local implementation contract)
+
+- Identity: a score review desk, separate from the FlowSpot sales/product shell. Wordmark is 키맞춤; no sales navigation or support launcher. Existing authentication remains shared and is disclosed in the login explanation.
+- Palette scoped to `.shell`: paper #f5f4ef; card/score white #ffffff; ink #233c38; secondary ink #546760; action #245e50; muted #e9eee8; line #d6dfd8; error #b42318. Fixed light paper surfaces preserve score readability even under a dark system preference. Other routes keep existing tokens.
+- Typography: existing Noto Sans KR; brand 24px/700, heading 32px/700 (28px mobile), body 16px, secondary 14px. No new fonts.
+- Layout: document owns scrolling, 1120px content cap, 24px desktop / 16px mobile gutter, 24px section rhythm. Header wraps at 640px. Existing review grid remains one column below 1024px. Long email/status text wraps.
+- Primitives: reuse Button/Input/Card with scoped semantic tokens; reuse a KimatchumShell for workspace and contextual login. Controls >=44px, visible keyboard focus; loading/disabled/error states use existing handlers. Login uses an explicit form with email/password labels and existing social/magic-link actions.
+- Motion/depth: existing button transitions only; neutral thin borders and existing light card shadow. No animations, assets, external fonts or new packages added.
+- Accessibility: 4.5:1 body contrast target, 375px overflow check, semantic headings/nav/main, keyboard form submission, always-visible current product limitations. No promises of melody transposition or vocal-range playback.
+- Accepted scope: shared OAuth provider screens, legal documents and sender domain retain existing service identity. Auth permission/redirect validation, DB and music recognition are unchanged. The screen must explicitly state that notation remains in the original key and playback is for checking chords. Lighthouse metrics are not claimed without measurement.

@@ -1,5 +1,10 @@
 'use client';
 
+import { KimatchumShell } from '@/components/kimatchum/KimatchumShell';
+import styles from '@/components/kimatchum/kimatchum.module.css';
+import { Button as KmButton } from '@/components/ui/button';
+import { Input as KmInput } from '@/components/ui/input';
+import { isKimatchumDestination } from '@/lib/kimatchum/branding';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
@@ -139,6 +144,27 @@ export function LoginContent() {
     }
     setIsPasswordLoading(false);
   };
+
+  if(isKimatchumDestination(redirectTarget))return <KimatchumShell locale={locale}>
+    <main className={styles.login}>
+      <h1>키맞춤 로그인</h1>
+      <p>악보 접수와 검수를 이어서 진행하세요. 현재는 지정된 본인 계정으로만 시험할 수 있습니다.</p>
+      <p>기존 FlowSpot 계정으로 안전하게 인증합니다. 로그인 후 키맞춤으로 돌아옵니다.</p>
+      <div className={styles.social}>
+        <KmButton onClick={handleGoogleLogin} disabled={isGoogleLoading}>{isGoogleLoading?'연결 중…':googleButtonLabel}</KmButton>
+        <KmButton variant="outline" onClick={handleKakaoLogin} disabled={isKakaoLoading}>{isKakaoLoading?'연결 중…':kakaoButtonLabel}</KmButton>
+      </div>
+      <form onSubmit={handleEmailPasswordLogin}>
+        <label>이메일<KmInput type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label>
+        <label>비밀번호<KmInput type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
+        <KmButton type="submit" variant="outline" disabled={isPasswordLoading}>{isPasswordLoading?'로그인 중…':'이메일과 비밀번호로 로그인'}</KmButton>
+        <KmButton type="button" variant="ghost" onClick={handleMagicLink} disabled={isLoading}>{isLoading?'보내는 중…':magicLinkButtonLabel}</KmButton>
+      </form>
+      {message&&<p role={message.type==='error'?'alert':'status'}>{message.text}</p>}
+      <p><Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link></p>
+      <p><Link href={redirectTarget}>키맞춤으로 돌아가기</Link></p>
+    </main>
+  </KimatchumShell>;
 
   return (
     <Box

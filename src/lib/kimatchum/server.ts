@@ -20,7 +20,7 @@ const draftSchema=z.array(boxSchema).min(1).max(256).refine(rows=>new Set(rows.m
 const submitSchema=z.object({email:z.literal(EMAIL),consent:z.literal(true),title:z.string().max(120),
   idempotency_key:z.string().regex(/^[A-Za-z0-9_-]{32,100}$/),image:z.string().max(8_388_708),draft:draftSchema}).strict();
 const key=z.number().int().min(0).max(11);
-const completeSchema=z.object({version:z.number().int(),review_confirmed:z.literal(true),source_key:key,note_key:key,target_key:key,
+const completeSchema=z.object({version:z.number().int(),review_confirmed:z.literal(true),limitations_acknowledged:z.literal(true),source_key:key,note_key:key,target_key:key,
   bpm:z.number().int().min(30).max(220),beats:z.union([z.literal(3),z.literal(4)]),notes:z.string().max(2000).default(''),
   removed_ids:z.array(z.string()).max(256).default([]),
   chords:z.array(z.object({id:z.string(),text:z.string().max(32),source_ids:z.array(z.string()).min(1).max(256).optional()}).strict()).min(1).max(256)}).strict();
@@ -180,9 +180,9 @@ export async function handle(request:Request,segments:string[]):Promise<Response
           ...(ids.length>1?{source_ids:ids}:{})};
       });
       if(cursor!==remaining.length)throw new TrialError(400,'누락된 원본 영역은 명시적으로 삭제해야 합니다.');
-      const {version,review_confirmed,removed_ids,...result}=input;void review_confirmed;void removed_ids;
-      const response=await ctx.rpc('complete',job,{version,result:{...result,chords},
-        mail:envelope(job,'검수 완료',`검수한 코드 이미지와 반주를 확인하세요. 로그인이 필요합니다.\n${url(job)}`)});
+      const {version,review_confirmed,limitations_acknowledged,removed_ids,...result}=input;void review_confirmed;void limitations_acknowledged;void removed_ids;
+      const response=await ctx.rpc('complete',job,{version,result:{...result,chords,review_scope:'chords_only_v1',unverified:['melody','staff_transposition','original_rhythm','singer_fit']},
+        mail:envelope(job,'코드 변환 검수 완료',`코드명·영역·키에 따른 코드 변환 결과를 저장했습니다. 전체 악보 검수 완료가 아닙니다.\n오선 음표는 원키입니다. 멜로디·오선 전조·원곡 리듬·싱어 적합성은 검증하지 않았습니다. 재생은 코드 확인용입니다.\n로그인 후 검수 범위와 결과를 확인하세요.\n${url(job)}`)});
       return Response.json({...response,mail:await sendQueued(ctx)},{headers});
     }
     throw new TrialError(404,'요청을 찾을 수 없습니다.');
