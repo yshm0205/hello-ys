@@ -787,6 +787,16 @@ export function AllInOneCheckoutContent({
           cursor: pointer;
         }
 
+        .fs-select-signup-note {
+          margin: 12px 0 0;
+          color: #52525b;
+          font-size: 14px;
+          line-height: 1.6;
+          text-align: center;
+          word-break: keep-all;
+          overflow-wrap: anywhere;
+        }
+
         .fs-checkout-grid {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
@@ -1514,9 +1524,13 @@ export function AllInOneCheckoutContent({
                   data-cta-label="체크아웃 구매하기"
                   data-cta-target={buildCheckoutRedirectTarget()}
                   onClick={redirectToLogin}
+                  aria-describedby="checkout-signup-note"
                 >
-                  올인원 패스 신청하기
+                  로그인하고 신청하기
                 </button>
+                <p id="checkout-signup-note" className="fs-select-signup-note">
+                  처음이신 분은 회원가입 후 진행할 수 있어요.
+                </p>
               </div>
             </div>
           </>
