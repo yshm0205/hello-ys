@@ -96,6 +96,8 @@ function eventTypeLabel(eventType: string) {
       return { label: "CTA 클릭", color: "bg-violet-500/20 text-violet-300" };
     case "checkout_open":
       return { label: "결제창 열림", color: "bg-emerald-500/20 text-emerald-300" };
+    case "nav_click":
+      return { label: "섹션 이동 클릭", color: "bg-sky-500/15 text-sky-300" };
     case "heartbeat":
       return { label: "체류", color: "bg-zinc-500/15 text-zinc-400" };
     default:
@@ -339,7 +341,8 @@ export default async function AdminSessionDetailPage({
                           {event.page_path && <p>경로: {event.page_path}</p>}
                           {event.section && <p>본 섹션: {event.section}</p>}
                           {(event.event_type === "cta_click" ||
-                            event.event_type === "checkout_open") && (
+                            event.event_type === "checkout_open" ||
+                            event.event_type === "nav_click") && (
                             <>
                               {event.cta_target && (
                                 <p>CTA → {event.cta_target}</p>

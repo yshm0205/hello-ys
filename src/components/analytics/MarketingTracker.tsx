@@ -14,6 +14,17 @@ type MarketingTrackerProps = {
   pageType: "landing" | "pricing" | "checkout";
 };
 
+// crypto.randomUUID는 https·localhost에서만 있어서, http(사내망 IP)나 옛 브라우저에선 같은 형식(v4)으로 만든다
+function createUuid() {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 function getSessionKey() {
   const existing = window.localStorage.getItem(STORAGE_KEY);
   if (existing) {
@@ -28,7 +39,7 @@ function getSessionKey() {
     return cookieSession;
   }
 
-  const next = crypto.randomUUID();
+  const next = createUuid();
   window.localStorage.setItem(STORAGE_KEY, next);
   writeSessionCookie(next);
   return next;
@@ -49,7 +60,7 @@ function getMarketingToken() {
   const existing = readCookie(MARKETING_TOKEN_COOKIE);
   if (existing) return existing;
 
-  const token = crypto.randomUUID();
+  const token = createUuid();
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${MARKETING_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax${secure}`;
   return token;
@@ -241,6 +252,28 @@ export function MarketingTracker({ pageType }: MarketingTrackerProps) {
 
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
+
+      // 같은 페이지 안 섹션 이동 버튼 — 신청 클릭(cta_click) 집계와 섞이지 않게 nav_click으로 따로 남긴다
+      const navElement = target?.closest<HTMLElement>("[data-marketing-nav]");
+      if (navElement) {
+        void postEvent({
+          eventType: "nav_click",
+          sessionKey,
+          pagePath,
+          locale,
+          ctaId: navElement.dataset.marketingNav || navElement.id || null,
+          ctaLabel: navElement.textContent?.replace(/\s+/g, " ").trim() || null,
+          ctaSection: getNearestSectionName(navElement),
+          durationSeconds: Math.max(
+            lastDurationSent,
+            Math.floor((Date.now() - startedAt) / 1000),
+          ),
+          lastVisibleSection: lastVisibleSectionRef.current,
+          maxScrollPercent: maxScrollPercentRef.current,
+        });
+        return;
+      }
+
       const ctaElement = target?.closest<HTMLElement>(
         "a[href], button[data-marketing-cta], [role='button'][data-marketing-cta]",
       );

@@ -10,7 +10,7 @@ export const revalidate = 0;
 
 const FUNNEL_WEEKS = 8;
 const SECTION_LABELS: Record<string, string> = {
-  "lecture-intro": "강의 소개(맨 위)", "landing-hero": "첫 화면", earlybird: "얼리버드 혜택", "loop-pain": "문제 인식",
+  "lecture-intro": "강의 소개(맨 위)", "landing-hero": "다크 히어로(기존 첫 화면)", earlybird: "얼리버드 혜택", "loop-pain": "문제 인식",
   pain: "문제 공감", offer: "상품 소개", compare: "가치 비교", "how-it-works": "진행 방식", reviews: "구매자 리뷰",
   faq: "FAQ", cta: "마지막 신청",
 };

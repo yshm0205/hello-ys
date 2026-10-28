@@ -6,9 +6,9 @@ const test = require("node:test");
 const ts = require("typescript");
 const { randomUUID } = require("node:crypto");
 
-function mountTracker(pathname = "/ko", respond = () => ({ ok: true, status: 200 })) {
+function mountTracker(pathname = "/ko", respond = () => ({ ok: true, status: 200 }), initialSection = "landing-hero") {
   let cleanup;
-  let section = "landing-hero";
+  let section = initialSection;
   let frameId = 0;
   const frames = new Map();
   const requests = [];
@@ -63,6 +63,21 @@ test("saves the visible section before a tab can close without unload events", (
     const views = tracker.requests.filter((request) => request.kind === "view");
     assert.deepEqual(views.map((view) => view.section), ["landing-hero", "faq"]);
     assert.ok(views.every((view) => view.test && Number.isFinite(Date.parse(view.observedAt))));
+  } finally { tracker.cleanup(); }
+});
+
+test("saves the new intro before navigation and keeps section checkpoints without an unload event", () => {
+  // Given
+  const tracker = mountTracker("/ko", () => ({ ok: true, status: 200 }), "lecture-intro");
+  try {
+    assert.equal(tracker.requests.at(-1).section, "lecture-intro");
+    // When
+    tracker.scrollTo("offer", 4000);
+    tracker.flushFrame();
+    // Then
+    const views = tracker.requests.filter((request) => request.kind === "view");
+    assert.deepEqual(views.map((view) => view.section), ["lecture-intro", "offer"]);
+    assert.equal(tracker.requests.some((request) => request.kind === "purchase_click"), false);
   } finally { tracker.cleanup(); }
 });
 

@@ -60,16 +60,27 @@ const LAUNCH_CHANGES = [
     title: "구매하기 이후 흐름 추적 추가",
     watch: "구매 화면 클릭 / 결제하기 클릭 / 결제창 열림",
   },
+  {
+    happenedAt: "10/28",
+    title: "첫 화면 교체 — 강의 소개 섹션 추가, 다크 히어로 신청 버튼 제거, 제목 '쇼츠 최단거리 올인원 패스'",
+    watch: "새 첫 버튼(구성·가격 보기) 클릭 → 구매 화면 → 결제 완료 (히어로 신청 클릭은 하단 바·우측 카드로 옮겨 가니 버튼별 말고 전체로 비교)",
+  },
 ] as const;
 const SECTION_INFOS: Record<
   string,
   { label: string; exitLabel?: string; range: string; check: string }
 > = {
-  "landing-hero": {
-    label: "첫 화면",
+  "lecture-intro": {
+    label: "첫 화면(강의 소개)",
     exitLabel: "첫 화면 이탈",
-    range: "상단 혜택 문구부터 첫 신청 버튼까지",
-    check: "헤드라인, 첫 CTA, 아래로 더 보게 만드는 문구",
+    range: "'따라 만들기 전에' 헤드라인부터 실제 강의 화면·후기·구성·가격 보기 버튼까지",
+    check: "헤드라인과 강의 화면이 바로 이해되는지, 구성·가격 보기를 누르는지",
+  },
+  "landing-hero": {
+    label: "다크 히어로",
+    exitLabel: "다크 히어로 이탈",
+    range: "수강생 성과 이미지와 '쇼츠 최단거리 올인원 패스' 제목부터 리뷰 미리보기까지 (새 첫 화면 적용 전에는 첫 화면)",
+    check: "성과 증거와 리뷰 미리보기가 다음 섹션까지 이어서 보게 하는지",
   },
   earlybird: {
     label: "얼리버드 혜택",
@@ -139,6 +150,7 @@ const SECTION_INFOS: Record<
   },
 };
 const LANDING_SECTION_ORDER = [
+  "lecture-intro",
   "landing-hero",
   "earlybird",
   "loop-pain",

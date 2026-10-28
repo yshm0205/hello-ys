@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MARKETING_TOKEN_COOKIE } from "@/lib/marketing/tracking";
 import { createAdminClient } from "@/utils/supabase/admin";
 
-type MarketingEventType = "page_view" | "heartbeat" | "cta_click" | "checkout_open";
+type MarketingEventType = "page_view" | "heartbeat" | "cta_click" | "checkout_open" | "nav_click";
 
 type MarketingPayload = {
   eventType?: MarketingEventType;
@@ -46,6 +46,7 @@ const EVENT_THROTTLE_WINDOWS_MS: Record<MarketingEventType, number> = {
   heartbeat: 20000,
   cta_click: 2000,
   checkout_open: 2000,
+  nav_click: 2000,
 };
 const recentEventCache = new Map<string, number>();
 const BASE_SESSION_SELECT =
@@ -174,7 +175,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!["page_view", "heartbeat", "cta_click", "checkout_open"].includes(eventType)) {
+    if (!["page_view", "heartbeat", "cta_click", "checkout_open", "nav_click"].includes(eventType)) {
       return NextResponse.json(
         { success: false, error: "invalid eventType" },
         { status: 400 },

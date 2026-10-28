@@ -24,6 +24,7 @@ import { Link } from '@/i18n/routing';
 import { MarketingTracker } from '@/components/analytics/MarketingTracker';
 import { AuthAwareButton } from '@/components/landing/AuthAwareButton';
 import { LandingHeader } from '@/components/landing/LandingHeader';
+import { INTRO_REVIEW_ID, LectureIntroSection } from '@/components/landing/LectureIntroSection';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TOSSPAY_PLAN_CONFIG } from '@/lib/plans/config';
 import type { PublicMarketingReview, PublicMarketingReviewsSummary } from '@/lib/marketing/reviews';
@@ -394,7 +395,8 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
   const derivedAverage = getLandingAverageRating(reviewSummary);
   const ratingLabel = derivedAverage.toFixed(1);
   const reviewCountText = `${reviewCount}개`;
-  const landingReviews = getLandingReviewItems(reviewSummary);
+  // 새 첫 화면에 크게 보여준 후기는 미리보기에서만 뺀다 (아래 전체 후기 목록에는 그대로)
+  const landingReviews = getLandingReviewItems(reviewSummary).filter((review) => review.id !== INTRO_REVIEW_ID);
   const previewSourceReviews: LandingReview[] =
     reviewSummary.reviews.length > 0
       ? landingReviews
@@ -757,9 +759,6 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
           color: #fafafa;
           font-weight: 800;
         }
-        .fs-hero-cta-wrap {
-          width: 100%;
-        }
         .fs-reviews-preview {
           margin-top: 24px;
         }
@@ -1068,9 +1067,9 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
               </span>
             </Box>
 
-            <Title order={1} className="fs-hero-title">
-              <span className="fs-hero-title-sub">하루 30분 월 200만원</span>
-              <span className="fs-hero-title-accent">최단거리</span> 패키지
+            <Title order={2} className="fs-hero-title">
+              <span className="fs-hero-title-sub">소재 선정부터 영상 완성까지</span>
+              쇼츠 <span className="fs-hero-title-accent">최단거리</span> 올인원 패스
             </Title>
 
             <Box className="fs-trust-row">
@@ -1087,33 +1086,7 @@ function HeroSection({ reviewSummary }: { reviewSummary: PublicMarketingReviewsS
               <span className="fs-rank-signal">AI 스크립트 · 트렌드 데이터 · VOD · 전자책</span>
             </Box>
 
-            <Box className="fs-hero-cta-wrap">
-              <AuthAwareButton
-                id="hero-cta"
-                authenticatedHref="/dashboard/lectures"
-                unauthenticatedHref="/checkout/allinone?intent=pay"
-                unpaidAuthenticatedHref="/checkout/allinone?intent=pay"
-                activeAccessChildren="강의 보러가기"
-                size="xl"
-                radius="md"
-                rightSection={<ArrowRight size={18} strokeWidth={2.5} />}
-                style={{
-                  width: '100%',
-                  minHeight: 58,
-                  background: 'linear-gradient(180deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%)',
-                  color: '#fff',
-                  fontSize: '16px',
-                  fontWeight: 800,
-                  padding: '18px 28px',
-                  border: 'none',
-                  letterSpacing: 0,
-                  boxShadow:
-                    '0 0 0 1px rgba(167,139,250,0.6) inset, 0 1px 0 rgba(255,255,255,0.4) inset, 0 8px 24px rgba(139,92,246,0.4)',
-                }}
-              >
-                올인원 패스 신청하기
-              </AuthAwareButton>
-            </Box>
+            {/* 신청 버튼은 두지 않는다 — 바로 위 첫 화면의 '구성·가격 보기'와 연달아 겹치고, 하단 바·PC 우측 카드가 이미 떠 있다 */}
 
             <Box className="fs-reviews-preview">
               <Box className="fs-reviews-preview-header">
@@ -1636,10 +1609,11 @@ function PainSection() {
         {/* 성과 카드들 — 체크 + 수익 + 풀 스크린샷 */}
         <Stack gap={48} style={{ maxWidth: '560px', margin: 'clamp(56px, 10vw, 80px) auto 0' }}>
           {[
-            { label: '채널A 해외반응', amount: '2,957만원', views: '1.01억회', src: '/images/success-ch-a.png' },
-            { label: '채널B 게임', amount: '2,388만원', views: '4,036만회', src: '/images/success-ch-b.png' },
-            { label: '채널C 지식/정보', amount: '725만원', views: '4,048만회', src: '/images/success-ch-c.png' },
-            { label: '채널D 지식/정보', amount: '261만원', views: '65만회', src: '/images/success-ch-d.png' },
+            // w·h는 실제 파일 크기 — 다르면 이미지가 뜰 때 높이가 줄어 아래 앵커 이동이 FAQ까지 밀린다
+            { label: '채널A 해외반응', amount: '2,957만원', views: '1.01억회', src: '/images/success-ch-a.png', w: 902, h: 209 },
+            { label: '채널B 게임', amount: '2,388만원', views: '4,036만회', src: '/images/success-ch-b.png', w: 907, h: 205 },
+            { label: '채널C 지식/정보', amount: '725만원', views: '4,048만회', src: '/images/success-ch-c.png', w: 904, h: 208 },
+            { label: '채널D 지식/정보', amount: '261만원', views: '65만회', src: '/images/success-ch-d.png', w: 909, h: 222 },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -1687,8 +1661,8 @@ function PainSection() {
                 <Image
                   src={item.src}
                   alt={`${item.label} 수익 ${item.amount}`}
-                  width={350}
-                  height={270}
+                  width={item.w}
+                  height={item.h}
                   sizes="(max-width: 560px) 100vw, 560px"
                   style={{ width: '100%', height: 'auto', display: 'block' }}
                 />
@@ -3160,6 +3134,7 @@ function BuyerReviewSection({
       style={{
         background: '#ffffff',
         padding: 'clamp(64px, 10vw, 96px) 0 clamp(24px, 5vw, 48px)',
+        scrollMarginTop: '24px',
       }}
     >
       <Container size={820}>
@@ -4029,7 +4004,7 @@ function FloatingCTA() {
             fontSize: '13px', fontWeight: 700, color: '#18181b',
             lineHeight: 1.45, marginBottom: 12, wordBreak: 'keep-all',
           }}>
-            쇼츠 자동화 + AI 스크립트 도구 올인원 패키지
+            쇼츠 최단거리 올인원 패스
           </Text>
 
           {/* 메인 가격 — 12개월 할부 환산 */}
@@ -4896,6 +4871,7 @@ export default function LandingPage({
       <main style={{ background: '#ffffff' }}>
         <MarketingTracker pageType="landing" />
         <LandingHeader />
+        <LectureIntroSection reviewSummary={initialReviews} />
         <HeroSection reviewSummary={initialReviews} />
         <LoopPainSection />
         <PainSection />
