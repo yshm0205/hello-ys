@@ -5,8 +5,11 @@ export const attributionInput = z.object({
   id: z.uuid(),
   visitorId: z.uuid(),
   visitId: z.uuid(),
-  kind: z.enum(["page", "identity", "purchase_click", "login_click"]),
+  kind: z.enum(["page", "identity", "purchase_click", "login_click", "leave"]),
   path: z.string().max(200),
+  // leave 전용: 화면을 떠나거나 가릴 때 보고 있던 구간과 그 페이지에서 내려간 최대 스크롤
+  section: z.string().max(120).nullable().optional(),
+  scroll: z.number().int().min(0).max(100).nullable().optional(),
   source: z.object({
     source: z.string().max(120),
     medium: z.string().max(120),
@@ -69,6 +72,12 @@ export function pagePurpose(path: string) {
 }
 
 export function keySource(source: AttributionInput["source"]) {
-  if (!source || source.source !== "youtube" || source.medium !== "organic_video") return null;
-  return findKeyContent(source.content)?.id ?? null;
+  if (!source) return null;
+  if (source.source === "youtube" && source.medium === "organic_video") return findKeyContent(source.content)?.id ?? null;
+  // 비즈니스PT에서 만든 bit.ly는 utm_campaign에 키콘 영상 주소를 담아 보낸다 (예: https://youtu.be/2A095uwYkHs).
+  let campaign = source.campaign;
+  try { campaign = decodeURIComponent(campaign); }
+  catch (error) { if (!(error instanceof URIError)) throw error; }
+  const match = campaign.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/)([\w-]{11})(?![\w-])/);
+  return match ? findKeyContent(match[1])?.id ?? null : null;
 }

@@ -23,7 +23,8 @@ function load(relative) {
 }
 const { buildAttributionReport } = load("src/lib/marketing/attribution-report.ts");
 const { nextVisit } = load("src/lib/marketing/attribution-browser.ts");
-const { attributionInput } = load("src/lib/marketing/attribution-model.ts");
+const { attributionInput, keySource } = load("src/lib/marketing/attribution-model.ts");
+const { buildWeeklyFunnel, saturdayWeeks } = load("src/lib/marketing/attribution-funnel.ts");
 const { keyContentDestination } = load("src/lib/marketing/key-content-links.ts");
 const A = "2A095uwYkHs";
 const B = "-WxxxydhIuQ";
@@ -154,6 +155,62 @@ test("video links keep their source and placement and reject unknown redirects",
   const url = new URL(destination, "https://flowspot.kr");
   // Then
   assert.deepEqual([url.searchParams.get("utm_content"), url.searchParams.get("placement"), keyContentDestination("evil", "pin")], [B, "description", null]);
+});
+test("business PT bit.ly visits count as the key content named in utm_campaign", () => {
+  // Given: the bit.ly destinations made by business PT carry the video URL in utm_campaign.
+  const short = { source: "google", medium: "infeed", campaign: `https://youtu.be/${A}`, content: "", placement: "" };
+  const watch = { ...short, campaign: `https://www.youtube.com/watch%3Fv%3D${B}` };
+  const other = { ...short, campaign: "https://youtu.be/AAAAAAAAAAA" };
+  // When
+  const keys = [short, watch, other, { ...short, campaign: "brand_search" }].map(keySource);
+  // Then
+  assert.deepEqual(keys, [A, B, null, null]);
+});
+test("saturday weeks follow KST and end with the current week", () => {
+  // Given: Wednesday 2026-10-28 01:00 KST.
+  const now = Date.parse("2026-10-27T16:00:00.000Z");
+  // When
+  const weeks = saturdayWeeks(now, 2);
+  // Then: Saturday 10/17 and 10/24 00:00 KST.
+  assert.deepEqual(weeks.map((week) => week.start), ["2026-10-16T15:00:00.000Z", "2026-10-23T15:00:00.000Z"]);
+  assert.equal(weeks[1].end, "2026-10-30T15:00:00.000Z");
+});
+test("weekly funnel counts each stage once per browser and keeps key filters", () => {
+  // Given: a bit.ly visitor who goes all the way to payment, and an unattributed visitor who only reads.
+  const week = { start: "2026-10-03T15:00:00.000Z", end: "2026-10-10T15:00:00.000Z" };
+  const bitly = { source: "google", medium: "infeed", campaign: `https://youtu.be/${A}`, content: "", placement: "" };
+  const other = "44444444-4444-4444-8444-444444444444";
+  const events = [
+    event(4, { source: bitly }), event(4, { source: bitly }), event(4, { kind: "purchase_click" }),
+    event(4, { purpose: "checkout", path: "/ko/checkout/allinone" }),
+    event(5, { visitorId: other, visitId: "visit-other" }),
+    event(5, { visitorId: other, visitId: "visit-other", kind: "leave", section: "reviews", scroll: 70 }),
+  ];
+  const checkoutClicks = [
+    { session_key: visitor, created_at: "2026-10-04T10:01:00.000Z", cta_id: "checkout-select-purchase" },
+    { session_key: visitor, created_at: "2026-10-04T10:03:00.000Z", cta_id: "checkout-confirm-pay" },
+    { session_key: other, created_at: "2026-10-05T10:03:00.000Z", cta_id: "checkout-select-purchase" },
+  ];
+  const run = (filter) => buildWeeklyFunnel({ events, payments: [payment({ user_id: "buyer" })], internalUsers: new Set(),
+    checkoutClicks, weeks: [week], filter })[0];
+  // When
+  const all = run("all");
+  const key = run(A);
+  // Then: the reader's checkout button click without a checkout page visit is not counted.
+  assert.deepEqual(all.stages, { landing: 2, cta: 1, checkout: 1, select: 1, pay: 1, paid: 1 });
+  assert.deepEqual(key.stages, { landing: 1, cta: 1, checkout: 1, select: 1, pay: 1, paid: 1 });
+  assert.deepEqual([all.exits, all.stayedVisits, all.unrecorded], [[{ section: "reviews", count: 1 }], 1, 0]);
+  assert.deepEqual([key.exits, key.stayedVisits], [[], 0]);
+});
+test("weekly funnel leaves out customers and visits that moved on", () => {
+  // Given: a buyer returns after paying; another visit moves to login without a leave record.
+  const week = { start: "2026-10-03T15:00:00.000Z", end: "2026-10-10T15:00:00.000Z" };
+  const events = [event(5, { userId: uid }), event(6, { visitorId: "b2", visitId: "v2" }),
+    event(6, { visitorId: "b2", visitId: "v2", kind: "login_click" }), event(7, { visitorId: "b3", visitId: "v3" })];
+  // When
+  const result = buildWeeklyFunnel({ events, payments: [payment()], internalUsers: new Set(), checkoutClicks: [], weeks: [week], filter: "all" })[0];
+  // Then
+  assert.deepEqual([result.stages.landing, result.stayedVisits, result.unrecorded], [2, 1, 1]);
 });
 test("database timezone formatting preserves inclusive start and exclusive end", () => {
   // Given: PostgreSQL returns an offset while the report range uses Z.

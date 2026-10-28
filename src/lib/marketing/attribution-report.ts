@@ -3,14 +3,16 @@ import type { AttributionEvent, AttributionPayment } from "./attribution-model";
 
 export type ReportRange = Readonly<{ start: string; end: string }>;
 const LOOKBACK_MS = 30 * 86400000;
-const UNKNOWN = "unattributed";
+export const UNKNOWN = "unattributed";
 
-export function buildAttributionReport(input: Readonly<{
+export type AttributionSources = Readonly<{
   events: readonly AttributionEvent[];
   payments: readonly AttributionPayment[];
   internalUsers: ReadonlySet<string>;
-  range: ReportRange;
-}>) {
+}>;
+
+// 키콘별 표와 주차별 단계 표가 같은 제외·출처 규칙을 쓰도록 한곳에 둔다.
+export function attributionContext(input: AttributionSources) {
   const ordered = [...input.events].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
   const usersByVisit = new Map<string, Set<string>>();
   const usersByBrowser = new Map<string, Set<string>>();
@@ -32,6 +34,38 @@ export function buildAttributionReport(input: Readonly<{
   const payments = input.payments.filter((payment) => paymentNet(payment) > 0 && !input.internalUsers.has(payment.user_id));
   const paidBefore = (userId: string | null, time: string) => !!userId && payments.some((payment) =>
     payment.user_id === userId && Date.parse(paymentTime(payment)) <= Date.parse(time));
+  const isCustomer = (event: AttributionEvent) =>
+    event.payload.audience === "customer" || paidBefore(resolvedUser(event), event.created_at);
+  // 각 이벤트의 출처 = 같은 브라우저에서 30일 안에 마지막으로 관측된 유입 출처
+  const keyByEvent = new Map<AttributionEvent, string>();
+  const lastSourceByBrowser = new Map<string, { key: string; time: string }>();
+  for (const event of events) {
+    const p = event.payload;
+    if (p.source) lastSourceByBrowser.set(p.visitorId, { key: keySource(p.source) ?? UNKNOWN, time: event.created_at });
+    const last = lastSourceByBrowser.get(p.visitorId);
+    keyByEvent.set(event, last && Date.parse(event.created_at) - Date.parse(last.time) <= LOOKBACK_MS ? last.key : UNKNOWN);
+  }
+  const orderSources = (payment: AttributionPayment) => {
+    const time = paymentTime(payment);
+    const touches = events.filter((event) => {
+      const delta = Date.parse(time) - Date.parse(event.created_at);
+      if (delta < 0 || delta > LOOKBACK_MS || !event.payload.source) return false;
+      const userId = resolvedUser(event);
+      if (userId) return userId === payment.user_id;
+      const browserUsers = usersByBrowser.get(event.payload.visitorId);
+      return event.payload.visitorId === payment.session_key && (!browserUsers || browserUsers.size <= 1);
+    });
+    const first = touches[0];
+    const last = touches[touches.length - 1];
+    return { first: first ? keySource(first.payload.source) ?? UNKNOWN : UNKNOWN,
+      last: last ? keySource(last.payload.source) ?? UNKNOWN : UNKNOWN };
+  };
+  return { events, payments, resolvedUser, isCustomer, keyOf: (event: AttributionEvent) => keyByEvent.get(event) ?? UNKNOWN,
+    orderSources };
+}
+
+export function buildAttributionReport(input: AttributionSources & Readonly<{ range: ReportRange }>) {
+  const { events, payments, resolvedUser, isCustomer, keyOf, orderSources } = attributionContext(input);
   const inRange = (time: string) => Date.parse(time) >= Date.parse(input.range.start) && Date.parse(time) < Date.parse(input.range.end);
   const rows = new Map<string, {
     key: string; pageViews: number; browsers: Set<string>; visits: Set<string>; members: Set<string>;
@@ -56,14 +90,11 @@ export function buildAttributionReport(input: Readonly<{
   const periodBrowsers = new Set<string>();
   const periodVisits = new Set<string>();
   const periodMembers = new Set<string>();
-  const lastSourceByBrowser = new Map<string, { key: string; time: string }>();
   for (const event of events) {
     const p = event.payload;
     const userId = resolvedUser(event);
-    const customer = p.audience === "customer" || paidBefore(userId, event.created_at);
-    if (p.source) lastSourceByBrowser.set(p.visitorId, { key: keySource(p.source) ?? UNKNOWN, time: event.created_at });
-    const last = lastSourceByBrowser.get(p.visitorId);
-    const key = last && Date.parse(event.created_at) - Date.parse(last.time) <= LOOKBACK_MS ? last.key : UNKNOWN;
+    const customer = isCustomer(event);
+    const key = keyOf(event);
     if (!inRange(event.created_at)) continue;
     if (p.purpose === "course" && p.kind === "page") {
       courseViews += 1;
@@ -71,7 +102,7 @@ export function buildAttributionReport(input: Readonly<{
       continue;
     }
     if (p.kind === "login_click") { loginClicks += 1; continue; }
-    if (p.purpose === "login" || p.purpose === "course" || p.kind === "identity") continue;
+    if (p.purpose === "login" || p.purpose === "course" || p.kind === "identity" || p.kind === "leave") continue;
     const row = rowFor(key);
     if (customer) {
       if (p.purpose === "landing" && p.kind === "page") row.customerPageViews += 1;
@@ -89,24 +120,12 @@ export function buildAttributionReport(input: Readonly<{
   const countedOrders = new Set<string>();
   const periodBuyers = new Set<string>();
   for (const payment of payments) {
-    const time = paymentTime(payment);
     const order = payment.order_id || payment.id;
-    if (!inRange(time) || countedOrders.has(order)) continue;
+    if (!inRange(paymentTime(payment)) || countedOrders.has(order)) continue;
     countedOrders.add(order); periodBuyers.add(payment.user_id);
-    const touches = events.filter((event) => {
-      const delta = Date.parse(time) - Date.parse(event.created_at);
-      if (delta < 0 || delta > LOOKBACK_MS || !event.payload.source) return false;
-      const userId = resolvedUser(event);
-      if (userId) return userId === payment.user_id;
-      const browserUsers = usersByBrowser.get(event.payload.visitorId);
-      return event.payload.visitorId === payment.session_key && (!browserUsers || browserUsers.size <= 1);
-    });
-    const first = touches[0];
-    const last = touches[touches.length - 1];
-    const firstKey = first ? keySource(first.payload.source) ?? UNKNOWN : UNKNOWN;
-    const lastKey = last ? keySource(last.payload.source) ?? UNKNOWN : UNKNOWN;
-    rowFor(firstKey).firstTouchOrders.add(order);
-    const row = rowFor(lastKey);
+    const sources = orderSources(payment);
+    rowFor(sources.first).firstTouchOrders.add(order);
+    const row = rowFor(sources.last);
     row.orders.add(order); row.buyers.add(payment.user_id); row.revenue += paymentNet(payment);
   }
   return {

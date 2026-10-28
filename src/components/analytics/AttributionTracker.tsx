@@ -7,18 +7,41 @@ import { attributionIdentity, entrySource } from "@/lib/marketing/attribution-br
 import { pagePurpose } from "@/lib/marketing/attribution-model";
 import type { AttributionInput } from "@/lib/marketing/attribution-model";
 
+type LandingView = Readonly<{ section: string | null; scroll: number }>;
+
+// MarketingTracker와 같은 기준: 화면 높이 55% 지점에 걸린 구간
+function currentSection() {
+  const anchor = window.innerHeight * 0.55;
+  let closest: HTMLElement | null = null;
+  let distance = Number.POSITIVE_INFINITY;
+  for (const section of document.querySelectorAll<HTMLElement>("section[id], [data-marketing-section]")) {
+    const rect = section.getBoundingClientRect();
+    if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
+    if (rect.top <= anchor && rect.bottom >= anchor) { closest = section; break; }
+    const gap = Math.min(Math.abs(rect.top - anchor), Math.abs(rect.bottom - anchor));
+    if (gap < distance) { distance = gap; closest = section; }
+  }
+  return closest ? (closest.dataset.marketingSection || closest.id || null)?.slice(0, 120) ?? null : null;
+}
+
+function scrollPercent() {
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  return scrollable <= 1 ? 100 : Math.max(0, Math.min(100, Math.round((window.scrollY / scrollable) * 100)));
+}
+
 export function AttributionTracker() {
   const pathname = usePathname();
   const search = useSearchParams();
 
   useEffect(() => {
-    if (!pagePurpose(pathname)) return;
+    const purpose = pagePurpose(pathname);
+    if (!purpose) return;
     let lastIdentity = "";
     let active = true;
-    const send = async (kind: AttributionInput["kind"]) => {
+    const send = async (kind: AttributionInput["kind"], view?: LandingView) => {
       try {
         const payload = {
-          ...attributionIdentity(), id: crypto.randomUUID(), kind, path: pathname,
+          ...attributionIdentity(), id: crypto.randomUUID(), kind, path: pathname, ...view,
           source: kind === "page" ? entrySource() : null,
           referrerHost: document.referrer ? new URL(document.referrer).hostname : null,
           test: search.get("tracking_test") === "1" || sessionStorage.getItem("flowspot_tracking_test") === "1",
@@ -66,13 +89,35 @@ export function AttributionTracker() {
       try { attributionIdentity(); }
       catch (error) { if (!(error instanceof Error)) throw error; }
     };
+    // 랜딩에서는 화면을 가리거나 떠날 때마다 그때 보던 구간을 남긴다. 같은 위치면 다시 보내지 않는다.
+    let maxScroll = 0;
+    let scrollFrame = 0;
+    let lastLeave = "";
+    const trackScroll = () => {
+      if (scrollFrame) return;
+      scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; maxScroll = Math.max(maxScroll, scrollPercent()); });
+    };
+    const onLeave = () => {
+      if (purpose !== "landing") return;
+      const view = { section: currentSection(), scroll: Math.max(maxScroll, scrollPercent()) };
+      const key = `${view.section}:${view.scroll}`;
+      if (key === lastLeave) return;
+      lastLeave = key;
+      void send("leave", view);
+    };
+    const onVisibility = () => { if (document.visibilityState === "hidden") onLeave(); };
     window.addEventListener("scroll", touchVisit, { passive: true });
+    window.addEventListener("scroll", trackScroll, { passive: true });
     document.addEventListener("keydown", touchVisit);
     document.addEventListener("pointerdown", touchVisit);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onLeave);
     return () => {
       active = false; data.subscription.unsubscribe(); document.removeEventListener("click", onClick, true);
       window.removeEventListener("scroll", touchVisit); document.removeEventListener("keydown", touchVisit);
       document.removeEventListener("pointerdown", touchVisit);
+      window.removeEventListener("scroll", trackScroll); cancelAnimationFrame(scrollFrame);
+      document.removeEventListener("visibilitychange", onVisibility); window.removeEventListener("pagehide", onLeave);
     };
   }, [pathname, search]);
   return null;
