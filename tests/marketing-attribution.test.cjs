@@ -222,3 +222,50 @@ test("database timezone formatting preserves inclusive start and exclusive end",
   assert.equal(result.rows[0].pageViews, 1);
   assert.equal(result.recordedFrom, first.created_at);
 });
+
+test("visible section checkpoints are accepted without trusting client identity", () => {
+  // Given
+  const input = { id: uid, visitorId: visitor, visitId: visit, kind: "view", path: "/ko",
+    source: null, referrerHost: null, token: uid, section: "faq", scroll: 90,
+    observedAt: "2026-10-05T10:00:00.000Z" };
+  // When
+  const parsed = attributionInput.safeParse(input);
+  // Then
+  assert.equal(parsed.success, true);
+  assert.equal(attributionInput.safeParse({ ...input, observedAt: "invalid" }).success, false);
+  assert.equal(attributionInput.safeParse({ ...input, userId: uid }).success, false);
+});
+
+test("last observed section survives missing unload and out-of-order delivery", () => {
+  // Given: the older checkpoint arrives after FAQ and no unload event arrives.
+  const events = [event(4), event(5, { kind: "view", section: "faq", observedAt: "2026-10-05T10:00:00.000Z" }),
+    event(6, { kind: "view", section: "reviews", observedAt: "2026-10-05T09:59:00.000Z" })];
+  // When
+  const result = buildWeeklyFunnel({ events, payments: [], internalUsers: new Set(), checkoutClicks: [],
+    weeks: [range], filter: "all" })[0];
+  // Then
+  assert.deepEqual(result.exits, [{ section: "faq", count: 1 }]);
+  assert.equal(result.unrecorded, 0);
+  assert.equal(report(events).rows[0].pageViews, 1);
+});
+
+test("checkpoint visits that proceed or are test/internal never become exits", () => {
+  // Given
+  const events = [event(4), event(4, { kind: "view", section: "reviews" }), event(4, { kind: "login_click" }),
+    event(5, { kind: "view", section: "faq", test: true, visitorId: "test", visitId: "test" }),
+    event(5, { kind: "view", section: "faq", audience: "internal", visitorId: "admin", visitId: "admin" })];
+  // When
+  const result = buildWeeklyFunnel({ events, payments: [], internalUsers: new Set(), checkoutClicks: [],
+    weeks: [range], filter: "all" })[0];
+  // Then
+  assert.deepEqual(result.exits, []);
+  assert.equal(result.stayedVisits, 0);
+});
+
+test("an empty close observation cannot erase a known section and old leave events still work", () => {
+  const events = [event(4), event(5, { kind: "view", section: "reviews", observedAt: "2026-10-05T10:00:00.000Z" }),
+    event(6, { kind: "leave", section: null }), event(7, { kind: "leave", section: "faq" })];
+  const input = { events, payments: [], internalUsers: new Set(), checkoutClicks: [], weeks: [range], filter: "all" };
+  assert.deepEqual(buildWeeklyFunnel({ ...input, events: events.slice(0, 3) })[0].exits, [{ section: "reviews", count: 1 }]);
+  assert.deepEqual(buildWeeklyFunnel(input)[0].exits, [{ section: "faq", count: 1 }]);
+});

@@ -102,7 +102,7 @@ export function buildAttributionReport(input: AttributionSources & Readonly<{ ra
       continue;
     }
     if (p.kind === "login_click") { loginClicks += 1; continue; }
-    if (p.purpose === "login" || p.purpose === "course" || p.kind === "identity" || p.kind === "leave") continue;
+    if (p.purpose === "login" || p.purpose === "course" || p.kind === "identity" || p.kind === "leave" || p.kind === "view") continue;
     const row = rowFor(key);
     if (customer) {
       if (p.purpose === "landing" && p.kind === "page") row.customerPageViews += 1;

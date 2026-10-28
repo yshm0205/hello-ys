@@ -5,11 +5,12 @@ export const attributionInput = z.object({
   id: z.uuid(),
   visitorId: z.uuid(),
   visitId: z.uuid(),
-  kind: z.enum(["page", "identity", "purchase_click", "login_click", "leave"]),
+  kind: z.enum(["page", "identity", "purchase_click", "login_click", "view", "leave"]),
   path: z.string().max(200),
-  // leave 전용: 화면을 떠나거나 가릴 때 보고 있던 구간과 그 페이지에서 내려간 최대 스크롤
+  // view/leave: 마지막으로 관측한 구간과 최대 스크롤. 관측 시각은 재전송 때도 유지한다.
   section: z.string().max(120).nullable().optional(),
   scroll: z.number().int().min(0).max(100).nullable().optional(),
+  observedAt: z.iso.datetime().optional(),
   source: z.object({
     source: z.string().max(120),
     medium: z.string().max(120),

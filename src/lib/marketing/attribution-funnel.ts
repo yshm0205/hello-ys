@@ -35,11 +35,11 @@ export function buildWeeklyFunnel(input: AttributionSources & Readonly<{
     const landing = new Set<string>();
     const cta = new Set<string>();
     const checkout = new Set<string>();
-    // 랜딩 방문마다: 신청·구매 화면·로그인으로 넘어갔는지, 넘어가지 않았다면 떠날 때 보던 구간
-    const visits = new Map<string, { moved: boolean; section: string | null; left: boolean }>();
+    // 랜딩 방문마다: 다음 단계로 넘어갔는지, 넘어가지 않았다면 마지막 관측 구간
+    const visits = new Map<string, { moved: boolean; section: string | null; observedAt: number }>();
     const visitOf = (id: string) => {
       let visit = visits.get(id);
-      if (!visit) { visit = { moved: false, section: null, left: false }; visits.set(id, visit); }
+      if (!visit) { visit = { moved: false, section: null, observedAt: 0 }; visits.set(id, visit); }
       return visit;
     };
     for (const event of events) {
@@ -49,7 +49,11 @@ export function buildWeeklyFunnel(input: AttributionSources & Readonly<{
       else if (p.purpose === "landing" && p.kind === "purchase_click") { cta.add(p.visitorId); visitOf(p.visitId).moved = true; }
       else if (p.purpose === "checkout" && p.kind === "page") { checkout.add(p.visitorId); visitOf(p.visitId).moved = true; }
       else if (p.purpose === "login" || p.kind === "login_click") visitOf(p.visitId).moved = true;
-      else if (p.purpose === "landing" && p.kind === "leave") Object.assign(visitOf(p.visitId), { section: p.section ?? null, left: true });
+      else if (p.purpose === "landing" && (p.kind === "view" || p.kind === "leave") && p.section) {
+        const visit = visitOf(p.visitId);
+        const observedAt = Date.parse(p.observedAt ?? event.created_at);
+        if (observedAt >= visit.observedAt) Object.assign(visit, { section: p.section, observedAt });
+      }
     }
     // 구매 버튼·결제창은 이번 주 구매 선택 화면에 들어온 브라우저 안에서만 센다 (제외·출처 규칙을 그대로 물려받음).
     const clicked = (ids: readonly string[]) => new Set(input.checkoutClicks
@@ -66,7 +70,7 @@ export function buildWeeklyFunnel(input: AttributionSources & Readonly<{
     for (const visit of visits.values()) {
       if (visit.moved) continue;
       stayedVisits += 1;
-      if (!visit.left || !visit.section) { unrecorded += 1; continue; }
+      if (!visit.section) { unrecorded += 1; continue; }
       exits.set(visit.section, (exits.get(visit.section) ?? 0) + 1);
     }
     return {

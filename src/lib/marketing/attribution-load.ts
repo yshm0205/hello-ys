@@ -84,6 +84,6 @@ export async function loadWeeklyFunnel(weekCount: number, filter: FunnelFilter) 
   const [events, payments, checkoutClicks, internalUsers] = await Promise.all([
     loadEvents(admin, range), loadPayments(admin), loadCheckoutClicks(admin, range), internalUserIds()]);
   const firstRecord = events.find((event) => !event.payload.test)?.created_at ?? null;
-  const firstLeave = events.find((event) => event.payload.kind === "leave" && !event.payload.test)?.created_at ?? null;
+  const firstLeave = events.find((event) => ["view", "leave"].includes(event.payload.kind) && !event.payload.test)?.created_at ?? null;
   return { now, weeks: buildWeeklyFunnel({ events, payments, internalUsers, checkoutClicks, weeks, filter }), firstRecord, firstLeave };
 }

@@ -7,7 +7,7 @@ import { attributionIdentity, entrySource } from "@/lib/marketing/attribution-br
 import { pagePurpose } from "@/lib/marketing/attribution-model";
 import type { AttributionInput } from "@/lib/marketing/attribution-model";
 
-type LandingView = Readonly<{ section: string | null; scroll: number }>;
+type LandingView = Readonly<{ section: string | null; scroll: number; observedAt: string }>;
 
 // MarketingTracker와 같은 기준: 화면 높이 55% 지점에 걸린 구간
 function currentSection() {
@@ -54,7 +54,7 @@ export function AttributionTracker() {
               method: "POST", headers: { "Content-Type": "application/json" }, body,
               keepalive: true, signal: AbortSignal.timeout(8000),
             });
-            if (response.ok || response.status < 500) return;
+            if (response.ok || response.status < 500) return response.ok;
           } catch (error) {
             if (!(error instanceof Error)) throw error;
             if (attempt === 1) console.warn("[Attribution] event delivery failed", error.name);
@@ -64,6 +64,7 @@ export function AttributionTracker() {
         if (!(error instanceof Error)) throw error;
         console.warn("[Attribution] browser storage unavailable", error.name);
       }
+      return false;
     };
     if (search.get("tracking_test") === "1") sessionStorage.setItem("flowspot_tracking_test", "1");
     void send("page");
@@ -89,25 +90,41 @@ export function AttributionTracker() {
       try { attributionIdentity(); }
       catch (error) { if (!(error instanceof Error)) throw error; }
     };
-    // 랜딩에서는 화면을 가리거나 떠날 때마다 그때 보던 구간을 남긴다. 같은 위치면 다시 보내지 않는다.
+    // 구간을 볼 때 미리 저장한다. 탭 종료 시 마지막 전송이 생략되어도 위치가 남는다.
     let maxScroll = 0;
     let scrollFrame = 0;
     let lastLeave = "";
+    let lastView: LandingView | null = null;
+    const readView = (): LandingView => {
+      maxScroll = Math.max(maxScroll, scrollPercent());
+      return { section: currentSection(), scroll: maxScroll, observedAt: new Date().toISOString() };
+    };
+    const checkpoint = () => {
+      if (purpose !== "landing" || document.visibilityState !== "visible") return;
+      const view = readView();
+      if (!view.section || view.section === lastView?.section) return;
+      lastView = view;
+      void send("view", view).then((delivered) => {
+        if (!delivered && lastView === view) lastView = null;
+      });
+    };
     const trackScroll = () => {
-      if (scrollFrame) return;
-      scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; maxScroll = Math.max(maxScroll, scrollPercent()); });
+      if (purpose !== "landing" || scrollFrame) return;
+      scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; checkpoint(); });
     };
     const onLeave = () => {
       if (purpose !== "landing") return;
-      const view = { section: currentSection(), scroll: Math.max(maxScroll, scrollPercent()) };
+      const view = readView();
       const key = `${view.section}:${view.scroll}`;
       if (key === lastLeave) return;
       lastLeave = key;
       void send("leave", view);
     };
-    const onVisibility = () => { if (document.visibilityState === "hidden") onLeave(); };
+    const onVisibility = () => { if (document.visibilityState === "hidden") onLeave(); else checkpoint(); };
+    checkpoint();
     window.addEventListener("scroll", touchVisit, { passive: true });
     window.addEventListener("scroll", trackScroll, { passive: true });
+    window.addEventListener("resize", trackScroll);
     document.addEventListener("keydown", touchVisit);
     document.addEventListener("pointerdown", touchVisit);
     document.addEventListener("visibilitychange", onVisibility);
@@ -117,6 +134,7 @@ export function AttributionTracker() {
       window.removeEventListener("scroll", touchVisit); document.removeEventListener("keydown", touchVisit);
       document.removeEventListener("pointerdown", touchVisit);
       window.removeEventListener("scroll", trackScroll); cancelAnimationFrame(scrollFrame);
+      window.removeEventListener("resize", trackScroll);
       document.removeEventListener("visibilitychange", onVisibility); window.removeEventListener("pagehide", onLeave);
     };
   }, [pathname, search]);
