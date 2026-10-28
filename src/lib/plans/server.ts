@@ -6,6 +6,7 @@ import {
 } from "@/lib/plans/config";
 import { getAdminAccessLevel } from "@/lib/admin/access";
 import { getActiveChallengeEnrollment } from "@/lib/challenge/access";
+import { hasLectureOnlyAccess } from "@/lib/lectures/access";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export type EffectiveCreditInfo = {
@@ -217,6 +218,10 @@ export async function resolvePostLoginRedirectPath(
     hasFullAdminAccess = getAdminAccessLevel(user?.email, user?.user_metadata) === "full";
 
     if (!hasFullAdminAccess) {
+      if (hasLectureOnlyAccess(user?.app_metadata)) {
+        return "/dashboard/lectures";
+      }
+
       const challengeEnrollment = await getActiveChallengeEnrollment(userId);
       if (challengeEnrollment) {
         return "/dashboard/challenge";

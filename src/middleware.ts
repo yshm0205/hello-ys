@@ -90,5 +90,5 @@ export const config = {
   // - _next (static files)
   // - _vercel (Vercel internals)
   // - Static files (e.g. favicon.ico, sitemap.xml, robots.txt, etc.)
-  matcher: ["/((?!api|auth|_next|_vercel|.*\\..*).*)"],
+  matcher: ["/((?!api|auth|go/|_next|_vercel|.*\\..*).*)"],
 };

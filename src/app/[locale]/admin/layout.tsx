@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import Link from "next/link";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { getAdminAccessLevel } from "@/lib/admin/access";
 
@@ -32,6 +33,7 @@ export default async function AdminLayout({
       <AdminSidebar accessLevel={accessLevel} />
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto p-6 pt-16 md:p-8 max-w-7xl space-y-6">
+          {accessLevel === "full" && <Link href="/ko/admin/acquisition" className="inline-block rounded border bg-white px-3 py-2 text-sm font-semibold">키콘별 유입·구매 / 영상별 링크</Link>}
           {children}
         </div>
       </main>

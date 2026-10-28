@@ -17,6 +17,7 @@ import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { tossTheme } from '@/theme';
 
 import { ClientWidgets } from "@/components/shared/ClientWidgets";
+import { AttributionTracker } from "@/components/analytics/AttributionTracker";
 
 const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
@@ -99,6 +100,7 @@ export default async function LocaleLayout({
               {children}
               <Toaster />
               <ClientWidgets />
+              <Suspense fallback={null}><AttributionTracker /></Suspense>
             </ThemeProvider>
           </NextIntlClientProvider>
         </MantineProvider>

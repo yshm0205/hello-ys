@@ -1,5 +1,6 @@
 import "server-only";
 
+import { hasLectureOnlyAccess } from "@/lib/lectures/access";
 import { isActiveAccessPlan } from "@/lib/plans/config";
 import type { EffectiveCreditInfo } from "@/lib/plans/server";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -98,6 +99,14 @@ export async function getLectureAccessForUser(
   plan: EffectiveCreditInfo | null | undefined,
 ): Promise<LectureAccess> {
   if (isActiveAccessPlan(plan?.plan_type, plan?.expires_at)) {
+    return { mode: "full", allowedVodIds: null };
+  }
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.getUserById(userId);
+  if (error) {
+    console.error("[LectureAccess] Failed to load lecture-only grant:", error.message);
+  } else if (hasLectureOnlyAccess(data.user?.app_metadata)) {
     return { mode: "full", allowedVodIds: null };
   }
 
