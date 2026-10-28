@@ -1,11 +1,12 @@
 'use client';
 
-import { Fragment, useRef, useState, type MouseEvent } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Noto_Sans_KR } from 'next/font/google';
 import { MotionConfig, motion, useScroll, useTransform } from 'framer-motion';
 import { ChevronDown, ChevronRight, MessageSquareQuote, MonitorPlay, Star } from 'lucide-react';
 
+import { Link } from '@/i18n/routing';
 import type { PublicMarketingReview, PublicMarketingReviewsSummary } from '@/lib/marketing/reviews';
 
 // 헤드라인 전용 900 굵기 — 사이트 공통 Noto Sans KR은 400~700만 불러온다
@@ -96,15 +97,6 @@ export function LectureIntroSection({ reviewSummary }: { reviewSummary: PublicMa
   const highlightAt = review ? review.content.indexOf(REVIEW_HIGHLIGHT) : -1;
   const hasClosing = review ? review.content.includes(REVIEW_CLOSING.join(' ')) : false;
   const [reviewExpanded, setReviewExpanded] = useState(false);
-
-  // 같은 페이지 섹션으로 부드럽게 이동 (첫 버튼 → #offer 구성 섹션)
-  const handleSectionLink = (event: MouseEvent<HTMLAnchorElement>) => {
-    const id = event.currentTarget.hash.slice(1);
-    const target = id ? document.getElementById(id) : null;
-    if (!target) return;
-    event.preventDefault();
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
 
   return (
     <MotionConfig reducedMotion="user">
@@ -690,15 +682,14 @@ export function LectureIntroSection({ reviewSummary }: { reviewSummary: PublicMa
           )}
 
           <motion.div {...reveal}>
-            <a
-              href="#offer"
+            <Link
+              href="/checkout/allinone?intent=pay"
               className="fs-intro-cta"
-              data-marketing-nav="intro-offer"
-              onClick={handleSectionLink}
+              data-cta-id="intro-checkout"
             >
               올인원 패스 구성·가격 보기
               <ChevronRight size={20} strokeWidth={2.6} aria-hidden="true" />
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>

@@ -65,6 +65,11 @@ const LAUNCH_CHANGES = [
     title: "첫 화면 교체 — 강의 소개 섹션 추가, 다크 히어로 신청 버튼 제거, 제목 '쇼츠 최단거리 올인원 패스'",
     watch: "새 첫 버튼(구성·가격 보기) 클릭 → 구매 화면 → 결제 완료 (히어로 신청 클릭은 하단 바·우측 카드로 옮겨 가니 버튼별 말고 전체로 비교)",
   },
+  {
+    happenedAt: "10/28",
+    title: "첫 화면 구성·가격 보기 버튼을 신청 화면으로 직접 연결",
+    watch: "변경 전 섹션 이동(nav_click), 변경 후 신청 클릭(cta_click)으로 집계. 첫 화면 신청 클릭 → 구매 화면 → 결제 완료 확인",
+  },
 ] as const;
 const SECTION_INFOS: Record<
   string,
